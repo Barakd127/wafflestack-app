@@ -1,0 +1,2794 @@
+{
+  "fantasy-town": [
+    {
+      "id": "fantasy-town-0",
+      "name": "Balcony Wall Fence",
+      "path": "/models/fantasy-town/balcony-wall-fence.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-1",
+      "name": "Balcony Wall",
+      "path": "/models/fantasy-town/balcony-wall.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-2",
+      "name": "Banner Green",
+      "path": "/models/fantasy-town/banner-green.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-3",
+      "name": "Banner Red",
+      "path": "/models/fantasy-town/banner-red.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-4",
+      "name": "Blade",
+      "path": "/models/fantasy-town/blade.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-5",
+      "name": "Cart High",
+      "path": "/models/fantasy-town/cart-high.glb",
+      "category": "prop"
+    },
+    {
+      "id": "fantasy-town-6",
+      "name": "Cart",
+      "path": "/models/fantasy-town/cart.glb",
+      "category": "prop"
+    },
+    {
+      "id": "fantasy-town-7",
+      "name": "Chimney Base",
+      "path": "/models/fantasy-town/chimney-base.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-8",
+      "name": "Chimney Top",
+      "path": "/models/fantasy-town/chimney-top.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-9",
+      "name": "Chimney",
+      "path": "/models/fantasy-town/chimney.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-10",
+      "name": "Fence Broken",
+      "path": "/models/fantasy-town/fence-broken.glb",
+      "category": "fence"
+    },
+    {
+      "id": "fantasy-town-11",
+      "name": "Fence Curved",
+      "path": "/models/fantasy-town/fence-curved.glb",
+      "category": "fence"
+    },
+    {
+      "id": "fantasy-town-12",
+      "name": "Fence Gate",
+      "path": "/models/fantasy-town/fence-gate.glb",
+      "category": "door"
+    },
+    {
+      "id": "fantasy-town-13",
+      "name": "Fence",
+      "path": "/models/fantasy-town/fence.glb",
+      "category": "fence"
+    },
+    {
+      "id": "fantasy-town-14",
+      "name": "Fountain Center",
+      "path": "/models/fantasy-town/fountain-center.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-15",
+      "name": "Fountain Corner Inner Square",
+      "path": "/models/fantasy-town/fountain-corner-inner-square.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-16",
+      "name": "Fountain Corner Inner",
+      "path": "/models/fantasy-town/fountain-corner-inner.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-17",
+      "name": "Fountain Corner",
+      "path": "/models/fantasy-town/fountain-corner.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-18",
+      "name": "Fountain Curved",
+      "path": "/models/fantasy-town/fountain-curved.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-19",
+      "name": "Fountain Edge",
+      "path": "/models/fantasy-town/fountain-edge.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-20",
+      "name": "Fountain Round Detail",
+      "path": "/models/fantasy-town/fountain-round-detail.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-21",
+      "name": "Fountain Round",
+      "path": "/models/fantasy-town/fountain-round.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-22",
+      "name": "Fountain Square Detail",
+      "path": "/models/fantasy-town/fountain-square-detail.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-23",
+      "name": "Fountain Square",
+      "path": "/models/fantasy-town/fountain-square.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-24",
+      "name": "Hedge Curved",
+      "path": "/models/fantasy-town/hedge-curved.glb",
+      "category": "fence"
+    },
+    {
+      "id": "fantasy-town-25",
+      "name": "Hedge Gate",
+      "path": "/models/fantasy-town/hedge-gate.glb",
+      "category": "door"
+    },
+    {
+      "id": "fantasy-town-26",
+      "name": "Hedge Large Curved",
+      "path": "/models/fantasy-town/hedge-large-curved.glb",
+      "category": "fence"
+    },
+    {
+      "id": "fantasy-town-27",
+      "name": "Hedge Large Gate",
+      "path": "/models/fantasy-town/hedge-large-gate.glb",
+      "category": "door"
+    },
+    {
+      "id": "fantasy-town-28",
+      "name": "Hedge Large",
+      "path": "/models/fantasy-town/hedge-large.glb",
+      "category": "fence"
+    },
+    {
+      "id": "fantasy-town-29",
+      "name": "Hedge",
+      "path": "/models/fantasy-town/hedge.glb",
+      "category": "fence"
+    },
+    {
+      "id": "fantasy-town-30",
+      "name": "Lantern",
+      "path": "/models/fantasy-town/lantern.glb",
+      "category": "decoration"
+    },
+    {
+      "id": "fantasy-town-31",
+      "name": "Overhang",
+      "path": "/models/fantasy-town/overhang.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-32",
+      "name": "Pillar Stone",
+      "path": "/models/fantasy-town/pillar-stone.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-33",
+      "name": "Pillar Wood",
+      "path": "/models/fantasy-town/pillar-wood.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-34",
+      "name": "Planks Half",
+      "path": "/models/fantasy-town/planks-half.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-35",
+      "name": "Planks Opening",
+      "path": "/models/fantasy-town/planks-opening.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-36",
+      "name": "Planks",
+      "path": "/models/fantasy-town/planks.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-37",
+      "name": "Poles Horizontal",
+      "path": "/models/fantasy-town/poles-horizontal.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-38",
+      "name": "Poles",
+      "path": "/models/fantasy-town/poles.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-39",
+      "name": "Road Bend",
+      "path": "/models/fantasy-town/road-bend.glb",
+      "category": "road"
+    },
+    {
+      "id": "fantasy-town-40",
+      "name": "Road Corner Inner",
+      "path": "/models/fantasy-town/road-corner-inner.glb",
+      "category": "road"
+    },
+    {
+      "id": "fantasy-town-41",
+      "name": "Road Corner",
+      "path": "/models/fantasy-town/road-corner.glb",
+      "category": "road"
+    },
+    {
+      "id": "fantasy-town-42",
+      "name": "Road Curb End",
+      "path": "/models/fantasy-town/road-curb-end.glb",
+      "category": "road"
+    },
+    {
+      "id": "fantasy-town-43",
+      "name": "Road Curb",
+      "path": "/models/fantasy-town/road-curb.glb",
+      "category": "road"
+    },
+    {
+      "id": "fantasy-town-44",
+      "name": "Road Edge Slope",
+      "path": "/models/fantasy-town/road-edge-slope.glb",
+      "category": "road"
+    },
+    {
+      "id": "fantasy-town-45",
+      "name": "Road Edge",
+      "path": "/models/fantasy-town/road-edge.glb",
+      "category": "road"
+    },
+    {
+      "id": "fantasy-town-46",
+      "name": "Road Slope",
+      "path": "/models/fantasy-town/road-slope.glb",
+      "category": "road"
+    },
+    {
+      "id": "fantasy-town-47",
+      "name": "Road",
+      "path": "/models/fantasy-town/road.glb",
+      "category": "road"
+    },
+    {
+      "id": "fantasy-town-48",
+      "name": "Rock Large",
+      "path": "/models/fantasy-town/rock-large.glb",
+      "category": "nature"
+    },
+    {
+      "id": "fantasy-town-49",
+      "name": "Rock Small",
+      "path": "/models/fantasy-town/rock-small.glb",
+      "category": "nature"
+    },
+    {
+      "id": "fantasy-town-50",
+      "name": "Rock Wide",
+      "path": "/models/fantasy-town/rock-wide.glb",
+      "category": "nature"
+    },
+    {
+      "id": "fantasy-town-51",
+      "name": "Roof Corner Inner",
+      "path": "/models/fantasy-town/roof-corner-inner.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-52",
+      "name": "Roof Corner Round",
+      "path": "/models/fantasy-town/roof-corner-round.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-53",
+      "name": "Roof Corner",
+      "path": "/models/fantasy-town/roof-corner.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-54",
+      "name": "Roof Flat",
+      "path": "/models/fantasy-town/roof-flat.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-55",
+      "name": "Roof Gable Detail",
+      "path": "/models/fantasy-town/roof-gable-detail.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-56",
+      "name": "Roof Gable End",
+      "path": "/models/fantasy-town/roof-gable-end.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-57",
+      "name": "Roof Gable Top",
+      "path": "/models/fantasy-town/roof-gable-top.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-58",
+      "name": "Roof Gable",
+      "path": "/models/fantasy-town/roof-gable.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-59",
+      "name": "Roof High Corner Round",
+      "path": "/models/fantasy-town/roof-high-corner-round.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-60",
+      "name": "Roof High Corner",
+      "path": "/models/fantasy-town/roof-high-corner.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-61",
+      "name": "Roof High Cornerinner",
+      "path": "/models/fantasy-town/roof-high-cornerinner.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-62",
+      "name": "Roof High Flat",
+      "path": "/models/fantasy-town/roof-high-flat.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-63",
+      "name": "Roof High Gable Detail",
+      "path": "/models/fantasy-town/roof-high-gable-detail.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-64",
+      "name": "Roof High Gable End",
+      "path": "/models/fantasy-town/roof-high-gable-end.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-65",
+      "name": "Roof High Gable Top",
+      "path": "/models/fantasy-town/roof-high-gable-top.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-66",
+      "name": "Roof High Gable",
+      "path": "/models/fantasy-town/roof-high-gable.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-67",
+      "name": "Roof High Left",
+      "path": "/models/fantasy-town/roof-high-left.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-68",
+      "name": "Roof High Point",
+      "path": "/models/fantasy-town/roof-high-point.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-69",
+      "name": "Roof High Right",
+      "path": "/models/fantasy-town/roof-high-right.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-70",
+      "name": "Roof High Window",
+      "path": "/models/fantasy-town/roof-high-window.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-71",
+      "name": "Roof High",
+      "path": "/models/fantasy-town/roof-high.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-72",
+      "name": "Roof Left",
+      "path": "/models/fantasy-town/roof-left.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-73",
+      "name": "Roof Point",
+      "path": "/models/fantasy-town/roof-point.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-74",
+      "name": "Roof Right",
+      "path": "/models/fantasy-town/roof-right.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-75",
+      "name": "Roof Window",
+      "path": "/models/fantasy-town/roof-window.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-76",
+      "name": "Roof",
+      "path": "/models/fantasy-town/roof.glb",
+      "category": "roof"
+    },
+    {
+      "id": "fantasy-town-77",
+      "name": "Stairs Full Corner Inner",
+      "path": "/models/fantasy-town/stairs-full-corner-inner.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-78",
+      "name": "Stairs Full Corner Outer",
+      "path": "/models/fantasy-town/stairs-full-corner-outer.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-79",
+      "name": "Stairs Full",
+      "path": "/models/fantasy-town/stairs-full.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-80",
+      "name": "Stairs Stone Corner",
+      "path": "/models/fantasy-town/stairs-stone-corner.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-81",
+      "name": "Stairs Stone Handrail",
+      "path": "/models/fantasy-town/stairs-stone-handrail.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-82",
+      "name": "Stairs Stone Round",
+      "path": "/models/fantasy-town/stairs-stone-round.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-83",
+      "name": "Stairs Stone",
+      "path": "/models/fantasy-town/stairs-stone.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-84",
+      "name": "Stairs Wide Stone Handrail",
+      "path": "/models/fantasy-town/stairs-wide-stone-handrail.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-85",
+      "name": "Stairs Wide Stone",
+      "path": "/models/fantasy-town/stairs-wide-stone.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-86",
+      "name": "Stairs Wide Wood Handrail",
+      "path": "/models/fantasy-town/stairs-wide-wood-handrail.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-87",
+      "name": "Stairs Wide Wood",
+      "path": "/models/fantasy-town/stairs-wide-wood.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-88",
+      "name": "Stairs Wood Handrail",
+      "path": "/models/fantasy-town/stairs-wood-handrail.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-89",
+      "name": "Stairs Wood",
+      "path": "/models/fantasy-town/stairs-wood.glb",
+      "category": "stairs"
+    },
+    {
+      "id": "fantasy-town-90",
+      "name": "Stall Bench",
+      "path": "/models/fantasy-town/stall-bench.glb",
+      "category": "prop"
+    },
+    {
+      "id": "fantasy-town-91",
+      "name": "Stall Green",
+      "path": "/models/fantasy-town/stall-green.glb",
+      "category": "prop"
+    },
+    {
+      "id": "fantasy-town-92",
+      "name": "Stall Red",
+      "path": "/models/fantasy-town/stall-red.glb",
+      "category": "prop"
+    },
+    {
+      "id": "fantasy-town-93",
+      "name": "Stall Stool",
+      "path": "/models/fantasy-town/stall-stool.glb",
+      "category": "prop"
+    },
+    {
+      "id": "fantasy-town-94",
+      "name": "Stall",
+      "path": "/models/fantasy-town/stall.glb",
+      "category": "prop"
+    },
+    {
+      "id": "fantasy-town-95",
+      "name": "Tree Crooked",
+      "path": "/models/fantasy-town/tree-crooked.glb",
+      "category": "nature"
+    },
+    {
+      "id": "fantasy-town-96",
+      "name": "Tree High Crooked",
+      "path": "/models/fantasy-town/tree-high-crooked.glb",
+      "category": "nature"
+    },
+    {
+      "id": "fantasy-town-97",
+      "name": "Tree High Round",
+      "path": "/models/fantasy-town/tree-high-round.glb",
+      "category": "nature"
+    },
+    {
+      "id": "fantasy-town-98",
+      "name": "Tree High",
+      "path": "/models/fantasy-town/tree-high.glb",
+      "category": "nature"
+    },
+    {
+      "id": "fantasy-town-99",
+      "name": "Tree",
+      "path": "/models/fantasy-town/tree.glb",
+      "category": "nature"
+    },
+    {
+      "id": "fantasy-town-100",
+      "name": "Wall Arch Top Detail",
+      "path": "/models/fantasy-town/wall-arch-top-detail.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-101",
+      "name": "Wall Arch Top",
+      "path": "/models/fantasy-town/wall-arch-top.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-102",
+      "name": "Wall Arch",
+      "path": "/models/fantasy-town/wall-arch.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-103",
+      "name": "Wall Block Half",
+      "path": "/models/fantasy-town/wall-block-half.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-104",
+      "name": "Wall Block",
+      "path": "/models/fantasy-town/wall-block.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-105",
+      "name": "Wall Broken",
+      "path": "/models/fantasy-town/wall-broken.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-106",
+      "name": "Wall Corner Detail",
+      "path": "/models/fantasy-town/wall-corner-detail.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-107",
+      "name": "Wall Corner Diagonal Half",
+      "path": "/models/fantasy-town/wall-corner-diagonal-half.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-108",
+      "name": "Wall Corner Diagonal",
+      "path": "/models/fantasy-town/wall-corner-diagonal.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-109",
+      "name": "Wall Corner Edge",
+      "path": "/models/fantasy-town/wall-corner-edge.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-110",
+      "name": "Wall Corner",
+      "path": "/models/fantasy-town/wall-corner.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-111",
+      "name": "Wall Curved",
+      "path": "/models/fantasy-town/wall-curved.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-112",
+      "name": "Wall Detail Cross",
+      "path": "/models/fantasy-town/wall-detail-cross.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-113",
+      "name": "Wall Detail Diagonal",
+      "path": "/models/fantasy-town/wall-detail-diagonal.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-114",
+      "name": "Wall Detail Horizontal",
+      "path": "/models/fantasy-town/wall-detail-horizontal.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-115",
+      "name": "Wall Diagonal",
+      "path": "/models/fantasy-town/wall-diagonal.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-116",
+      "name": "Wall Door",
+      "path": "/models/fantasy-town/wall-door.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-117",
+      "name": "Wall Doorway Base",
+      "path": "/models/fantasy-town/wall-doorway-base.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-118",
+      "name": "Wall Doorway Round",
+      "path": "/models/fantasy-town/wall-doorway-round.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-119",
+      "name": "Wall Doorway Square Wide Curved",
+      "path": "/models/fantasy-town/wall-doorway-square-wide-curved.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-120",
+      "name": "Wall Doorway Square Wide",
+      "path": "/models/fantasy-town/wall-doorway-square-wide.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-121",
+      "name": "Wall Doorway Square",
+      "path": "/models/fantasy-town/wall-doorway-square.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-122",
+      "name": "Wall Half",
+      "path": "/models/fantasy-town/wall-half.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-123",
+      "name": "Wall Rounded",
+      "path": "/models/fantasy-town/wall-rounded.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-124",
+      "name": "Wall Side",
+      "path": "/models/fantasy-town/wall-side.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-125",
+      "name": "Wall Slope",
+      "path": "/models/fantasy-town/wall-slope.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-126",
+      "name": "Wall Window Glass",
+      "path": "/models/fantasy-town/wall-window-glass.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-127",
+      "name": "Wall Window Round",
+      "path": "/models/fantasy-town/wall-window-round.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-128",
+      "name": "Wall Window Shutters",
+      "path": "/models/fantasy-town/wall-window-shutters.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-129",
+      "name": "Wall Window Small",
+      "path": "/models/fantasy-town/wall-window-small.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-130",
+      "name": "Wall Window Stone",
+      "path": "/models/fantasy-town/wall-window-stone.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-131",
+      "name": "Wall Wood Arch Top Detail",
+      "path": "/models/fantasy-town/wall-wood-arch-top-detail.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-132",
+      "name": "Wall Wood Arch Top",
+      "path": "/models/fantasy-town/wall-wood-arch-top.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-133",
+      "name": "Wall Wood Arch",
+      "path": "/models/fantasy-town/wall-wood-arch.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-134",
+      "name": "Wall Wood Block Half",
+      "path": "/models/fantasy-town/wall-wood-block-half.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-135",
+      "name": "Wall Wood Block",
+      "path": "/models/fantasy-town/wall-wood-block.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-136",
+      "name": "Wall Wood Broken",
+      "path": "/models/fantasy-town/wall-wood-broken.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-137",
+      "name": "Wall Wood Corner Diagonal Half",
+      "path": "/models/fantasy-town/wall-wood-corner-diagonal-half.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-138",
+      "name": "Wall Wood Corner Diagonal",
+      "path": "/models/fantasy-town/wall-wood-corner-diagonal.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-139",
+      "name": "Wall Wood Corner Edge",
+      "path": "/models/fantasy-town/wall-wood-corner-edge.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-140",
+      "name": "Wall Wood Corner",
+      "path": "/models/fantasy-town/wall-wood-corner.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-141",
+      "name": "Wall Wood Curved",
+      "path": "/models/fantasy-town/wall-wood-curved.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-142",
+      "name": "Wall Wood Detail Cross",
+      "path": "/models/fantasy-town/wall-wood-detail-cross.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-143",
+      "name": "Wall Wood Detail Diagonal",
+      "path": "/models/fantasy-town/wall-wood-detail-diagonal.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-144",
+      "name": "Wall Wood Detail Horizontal",
+      "path": "/models/fantasy-town/wall-wood-detail-horizontal.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-145",
+      "name": "Wall Wood Diagonal",
+      "path": "/models/fantasy-town/wall-wood-diagonal.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-146",
+      "name": "Wall Wood Door",
+      "path": "/models/fantasy-town/wall-wood-door.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-147",
+      "name": "Wall Wood Doorway Base",
+      "path": "/models/fantasy-town/wall-wood-doorway-base.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-148",
+      "name": "Wall Wood Doorway Round",
+      "path": "/models/fantasy-town/wall-wood-doorway-round.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-149",
+      "name": "Wall Wood Doorway Square Wide Curved",
+      "path": "/models/fantasy-town/wall-wood-doorway-square-wide-curved.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-150",
+      "name": "Wall Wood Doorway Square Wide",
+      "path": "/models/fantasy-town/wall-wood-doorway-square-wide.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-151",
+      "name": "Wall Wood Doorway Square",
+      "path": "/models/fantasy-town/wall-wood-doorway-square.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-152",
+      "name": "Wall Wood Half",
+      "path": "/models/fantasy-town/wall-wood-half.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-153",
+      "name": "Wall Wood Rounded",
+      "path": "/models/fantasy-town/wall-wood-rounded.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-154",
+      "name": "Wall Wood Side",
+      "path": "/models/fantasy-town/wall-wood-side.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-155",
+      "name": "Wall Wood Slope",
+      "path": "/models/fantasy-town/wall-wood-slope.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-156",
+      "name": "Wall Wood Window Glass",
+      "path": "/models/fantasy-town/wall-wood-window-glass.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-157",
+      "name": "Wall Wood Window Round",
+      "path": "/models/fantasy-town/wall-wood-window-round.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-158",
+      "name": "Wall Wood Window Shutters",
+      "path": "/models/fantasy-town/wall-wood-window-shutters.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-159",
+      "name": "Wall Wood Window Small",
+      "path": "/models/fantasy-town/wall-wood-window-small.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-160",
+      "name": "Wall Wood Window Stone",
+      "path": "/models/fantasy-town/wall-wood-window-stone.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-161",
+      "name": "Wall Wood",
+      "path": "/models/fantasy-town/wall-wood.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-162",
+      "name": "Wall",
+      "path": "/models/fantasy-town/wall.glb",
+      "category": "wall"
+    },
+    {
+      "id": "fantasy-town-163",
+      "name": "Watermill Wide",
+      "path": "/models/fantasy-town/watermill-wide.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-164",
+      "name": "Watermill",
+      "path": "/models/fantasy-town/watermill.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-165",
+      "name": "Wheel",
+      "path": "/models/fantasy-town/wheel.glb",
+      "category": "structure"
+    },
+    {
+      "id": "fantasy-town-166",
+      "name": "Windmill",
+      "path": "/models/fantasy-town/windmill.glb",
+      "category": "structure"
+    }
+  ],
+  "food": [
+    {
+      "id": "food-0",
+      "name": "Advocado Half",
+      "path": "/models/food/advocado-half.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-1",
+      "name": "Apple Half",
+      "path": "/models/food/apple-half.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-2",
+      "name": "Apple",
+      "path": "/models/food/apple.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-3",
+      "name": "Avocado",
+      "path": "/models/food/avocado.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-4",
+      "name": "Bacon Raw",
+      "path": "/models/food/bacon-raw.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-5",
+      "name": "Bacon",
+      "path": "/models/food/bacon.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-6",
+      "name": "Bag Flat",
+      "path": "/models/food/bag-flat.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-7",
+      "name": "Bag",
+      "path": "/models/food/bag.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-8",
+      "name": "Banana",
+      "path": "/models/food/banana.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-9",
+      "name": "Barrel",
+      "path": "/models/food/barrel.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-10",
+      "name": "Beet",
+      "path": "/models/food/beet.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-11",
+      "name": "Bottle Ketchup",
+      "path": "/models/food/bottle-ketchup.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-12",
+      "name": "Bottle Musterd",
+      "path": "/models/food/bottle-musterd.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-13",
+      "name": "Bottle Oil",
+      "path": "/models/food/bottle-oil.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-14",
+      "name": "Bowl Broth",
+      "path": "/models/food/bowl-broth.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-15",
+      "name": "Bowl Cereal",
+      "path": "/models/food/bowl-cereal.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-16",
+      "name": "Bowl Soup",
+      "path": "/models/food/bowl-soup.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-17",
+      "name": "Bowl",
+      "path": "/models/food/bowl.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-18",
+      "name": "Bread",
+      "path": "/models/food/bread.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-19",
+      "name": "Broccoli",
+      "path": "/models/food/broccoli.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-20",
+      "name": "Burger Cheese Double",
+      "path": "/models/food/burger-cheese-double.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-21",
+      "name": "Burger Cheese",
+      "path": "/models/food/burger-cheese.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-22",
+      "name": "Burger Double",
+      "path": "/models/food/burger-double.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-23",
+      "name": "Burger",
+      "path": "/models/food/burger.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-24",
+      "name": "Cabbage",
+      "path": "/models/food/cabbage.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-25",
+      "name": "Cake Birthday",
+      "path": "/models/food/cake-birthday.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-26",
+      "name": "Cake Slicer",
+      "path": "/models/food/cake-slicer.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-27",
+      "name": "Cake",
+      "path": "/models/food/cake.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-28",
+      "name": "Can Open",
+      "path": "/models/food/can-open.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-29",
+      "name": "Can Small",
+      "path": "/models/food/can-small.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-30",
+      "name": "Can",
+      "path": "/models/food/can.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-31",
+      "name": "Candy Bar Wrapper",
+      "path": "/models/food/candy-bar-wrapper.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-32",
+      "name": "Candy Bar",
+      "path": "/models/food/candy-bar.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-33",
+      "name": "Carrot",
+      "path": "/models/food/carrot.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-34",
+      "name": "Carton Small",
+      "path": "/models/food/carton-small.glb",
+      "category": "prop"
+    },
+    {
+      "id": "food-35",
+      "name": "Carton",
+      "path": "/models/food/carton.glb",
+      "category": "prop"
+    },
+    {
+      "id": "food-36",
+      "name": "Cauliflower",
+      "path": "/models/food/cauliflower.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-37",
+      "name": "Celery Stick",
+      "path": "/models/food/celery-stick.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-38",
+      "name": "Cheese Cut",
+      "path": "/models/food/cheese-cut.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-39",
+      "name": "Cheese Slicer",
+      "path": "/models/food/cheese-slicer.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-40",
+      "name": "Cheese",
+      "path": "/models/food/cheese.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-41",
+      "name": "Cherries",
+      "path": "/models/food/cherries.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-42",
+      "name": "Chinese",
+      "path": "/models/food/chinese.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-43",
+      "name": "Chocolate Wrapper",
+      "path": "/models/food/chocolate-wrapper.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-44",
+      "name": "Chocolate",
+      "path": "/models/food/chocolate.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-45",
+      "name": "Chopstic Decorative",
+      "path": "/models/food/chopstic-decorative.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-46",
+      "name": "Chopstick",
+      "path": "/models/food/chopstick.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-47",
+      "name": "Cocktail",
+      "path": "/models/food/cocktail.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-48",
+      "name": "Coconut Half",
+      "path": "/models/food/coconut-half.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-49",
+      "name": "Coconut",
+      "path": "/models/food/coconut.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-50",
+      "name": "Cookie Chocolate",
+      "path": "/models/food/cookie-chocolate.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-51",
+      "name": "Cookie",
+      "path": "/models/food/cookie.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-52",
+      "name": "Cooking Fork",
+      "path": "/models/food/cooking-fork.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-53",
+      "name": "Cooking Knife Chopping",
+      "path": "/models/food/cooking-knife-chopping.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-54",
+      "name": "Cooking Knife",
+      "path": "/models/food/cooking-knife.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-55",
+      "name": "Cooking Spatula",
+      "path": "/models/food/cooking-spatula.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-56",
+      "name": "Cooking Spoon",
+      "path": "/models/food/cooking-spoon.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-57",
+      "name": "Corn Dog",
+      "path": "/models/food/corn-dog.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-58",
+      "name": "Corn",
+      "path": "/models/food/corn.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-59",
+      "name": "Croissant",
+      "path": "/models/food/croissant.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-60",
+      "name": "Cup Coffee",
+      "path": "/models/food/cup-coffee.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-61",
+      "name": "Cup Saucer",
+      "path": "/models/food/cup-saucer.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-62",
+      "name": "Cup Tea",
+      "path": "/models/food/cup-tea.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-63",
+      "name": "Cup",
+      "path": "/models/food/cup.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-64",
+      "name": "Cupcake",
+      "path": "/models/food/cupcake.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-65",
+      "name": "Cutting Board Japanese",
+      "path": "/models/food/cutting-board-japanese.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-66",
+      "name": "Cutting Board Round",
+      "path": "/models/food/cutting-board-round.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-67",
+      "name": "Cutting Board",
+      "path": "/models/food/cutting-board.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-68",
+      "name": "Dim Sum",
+      "path": "/models/food/dim-sum.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-69",
+      "name": "Donut Chocolate",
+      "path": "/models/food/donut-chocolate.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-70",
+      "name": "Donut Sprinkles",
+      "path": "/models/food/donut-sprinkles.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-71",
+      "name": "Donut",
+      "path": "/models/food/donut.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-72",
+      "name": "Egg Cooked",
+      "path": "/models/food/egg-cooked.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-73",
+      "name": "Egg Cup",
+      "path": "/models/food/egg-cup.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-74",
+      "name": "Egg Half",
+      "path": "/models/food/egg-half.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-75",
+      "name": "Egg",
+      "path": "/models/food/egg.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-76",
+      "name": "Eggplant",
+      "path": "/models/food/eggplant.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-77",
+      "name": "Fish Bones",
+      "path": "/models/food/fish-bones.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-78",
+      "name": "Fish",
+      "path": "/models/food/fish.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-79",
+      "name": "Frappe",
+      "path": "/models/food/frappe.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-80",
+      "name": "Fries Empty",
+      "path": "/models/food/fries-empty.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-81",
+      "name": "Fries",
+      "path": "/models/food/fries.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-82",
+      "name": "Frikandel Speciaal",
+      "path": "/models/food/frikandel-speciaal.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-83",
+      "name": "Frying Pan Lid",
+      "path": "/models/food/frying-pan-lid.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-84",
+      "name": "Frying Pan",
+      "path": "/models/food/frying-pan.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-85",
+      "name": "Ginger Bread Cutter",
+      "path": "/models/food/ginger-bread-cutter.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-86",
+      "name": "Ginger Bread",
+      "path": "/models/food/ginger-bread.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-87",
+      "name": "Glass Wine",
+      "path": "/models/food/glass-wine.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-88",
+      "name": "Glass",
+      "path": "/models/food/glass.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-89",
+      "name": "Grapes",
+      "path": "/models/food/grapes.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-90",
+      "name": "Honey",
+      "path": "/models/food/honey.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-91",
+      "name": "Hot Dog Raw",
+      "path": "/models/food/hot-dog-raw.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-92",
+      "name": "Hot Dog",
+      "path": "/models/food/hot-dog.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-93",
+      "name": "Ice Cream Cne",
+      "path": "/models/food/ice-cream-cne.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-94",
+      "name": "Ice Cream Cup",
+      "path": "/models/food/ice-cream-cup.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-95",
+      "name": "Ice Cream Scoop Chocolate",
+      "path": "/models/food/ice-cream-scoop-chocolate.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-96",
+      "name": "Ice Cream Scoop Mint",
+      "path": "/models/food/ice-cream-scoop-mint.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-97",
+      "name": "Ice Cream",
+      "path": "/models/food/ice-cream.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-98",
+      "name": "Knife Block",
+      "path": "/models/food/knife-block.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-99",
+      "name": "Leek",
+      "path": "/models/food/leek.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-100",
+      "name": "Lemon Half",
+      "path": "/models/food/lemon-half.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-101",
+      "name": "Lemon",
+      "path": "/models/food/lemon.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-102",
+      "name": "Loaf Baguette",
+      "path": "/models/food/loaf-baguette.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-103",
+      "name": "Loaf Round",
+      "path": "/models/food/loaf-round.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-104",
+      "name": "Loaf",
+      "path": "/models/food/loaf.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-105",
+      "name": "Lollypop",
+      "path": "/models/food/lollypop.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-106",
+      "name": "Maki Roe",
+      "path": "/models/food/maki-roe.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-107",
+      "name": "Maki Salmon",
+      "path": "/models/food/maki-salmon.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-108",
+      "name": "Maki Vegetable",
+      "path": "/models/food/maki-vegetable.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-109",
+      "name": "Meat Cooked",
+      "path": "/models/food/meat-cooked.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-110",
+      "name": "Meat Patty",
+      "path": "/models/food/meat-patty.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-111",
+      "name": "Meat Raw",
+      "path": "/models/food/meat-raw.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-112",
+      "name": "Meat Ribs",
+      "path": "/models/food/meat-ribs.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-113",
+      "name": "Meat Sausage",
+      "path": "/models/food/meat-sausage.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-114",
+      "name": "Meat Tenderizer",
+      "path": "/models/food/meat-tenderizer.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-115",
+      "name": "Mincemeat Pie",
+      "path": "/models/food/mincemeat-pie.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-116",
+      "name": "Mortar Pestle",
+      "path": "/models/food/mortar-pestle.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-117",
+      "name": "Mortar",
+      "path": "/models/food/mortar.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-118",
+      "name": "Muffin",
+      "path": "/models/food/muffin.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-119",
+      "name": "Mug",
+      "path": "/models/food/mug.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-120",
+      "name": "Mushroom Half",
+      "path": "/models/food/mushroom-half.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-121",
+      "name": "Mushroom",
+      "path": "/models/food/mushroom.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-122",
+      "name": "Mussel Open",
+      "path": "/models/food/mussel-open.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-123",
+      "name": "Mussel",
+      "path": "/models/food/mussel.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-124",
+      "name": "Onion Half",
+      "path": "/models/food/onion-half.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-125",
+      "name": "Onion",
+      "path": "/models/food/onion.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-126",
+      "name": "Orange",
+      "path": "/models/food/orange.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-127",
+      "name": "Pan Stew",
+      "path": "/models/food/pan-stew.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-128",
+      "name": "Pan",
+      "path": "/models/food/pan.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-129",
+      "name": "Pancakes",
+      "path": "/models/food/pancakes.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-130",
+      "name": "Paprika Slice",
+      "path": "/models/food/paprika-slice.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-131",
+      "name": "Paprika",
+      "path": "/models/food/paprika.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-132",
+      "name": "Peanut Butter",
+      "path": "/models/food/peanut-butter.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-133",
+      "name": "Pear Half",
+      "path": "/models/food/pear-half.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-134",
+      "name": "Pear",
+      "path": "/models/food/pear.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-135",
+      "name": "Pepper Mill",
+      "path": "/models/food/pepper-mill.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-136",
+      "name": "Pepper",
+      "path": "/models/food/pepper.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-137",
+      "name": "Pie",
+      "path": "/models/food/pie.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-138",
+      "name": "Pineapple",
+      "path": "/models/food/pineapple.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-139",
+      "name": "Pizza Box",
+      "path": "/models/food/pizza-box.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-140",
+      "name": "Pizza Cutter",
+      "path": "/models/food/pizza-cutter.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-141",
+      "name": "Pizza",
+      "path": "/models/food/pizza.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-142",
+      "name": "Plate Broken",
+      "path": "/models/food/plate-broken.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-143",
+      "name": "Plate Deep",
+      "path": "/models/food/plate-deep.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-144",
+      "name": "Plate Dinner",
+      "path": "/models/food/plate-dinner.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-145",
+      "name": "Plate Rectangle",
+      "path": "/models/food/plate-rectangle.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-146",
+      "name": "Plate Sauerkraut",
+      "path": "/models/food/plate-sauerkraut.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-147",
+      "name": "Plate",
+      "path": "/models/food/plate.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-148",
+      "name": "Popsicle Chocolate",
+      "path": "/models/food/popsicle-chocolate.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-149",
+      "name": "Popsicle Stick",
+      "path": "/models/food/popsicle-stick.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-150",
+      "name": "Popsicle",
+      "path": "/models/food/popsicle.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-151",
+      "name": "Pot Lid",
+      "path": "/models/food/pot-lid.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-152",
+      "name": "Pot Stew Lid",
+      "path": "/models/food/pot-stew-lid.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-153",
+      "name": "Pot Stew",
+      "path": "/models/food/pot-stew.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-154",
+      "name": "Pot",
+      "path": "/models/food/pot.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-155",
+      "name": "Pudding",
+      "path": "/models/food/pudding.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-156",
+      "name": "Pumpkin Basic",
+      "path": "/models/food/pumpkin-basic.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-157",
+      "name": "Pumpkin",
+      "path": "/models/food/pumpkin.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-158",
+      "name": "Radish",
+      "path": "/models/food/radish.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-159",
+      "name": "Rice Ball",
+      "path": "/models/food/rice-ball.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-160",
+      "name": "RollingPin",
+      "path": "/models/food/rollingPin.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-161",
+      "name": "Salad",
+      "path": "/models/food/salad.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-162",
+      "name": "Sandwich",
+      "path": "/models/food/sandwich.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-163",
+      "name": "Sausage Half",
+      "path": "/models/food/sausage-half.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-164",
+      "name": "Sausage",
+      "path": "/models/food/sausage.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-165",
+      "name": "Shaker Pepper",
+      "path": "/models/food/shaker-pepper.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-166",
+      "name": "Shaker Salt",
+      "path": "/models/food/shaker-salt.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-167",
+      "name": "Skewer Vegetables",
+      "path": "/models/food/skewer-vegetables.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-168",
+      "name": "Skewer",
+      "path": "/models/food/skewer.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-169",
+      "name": "Soda Bottle",
+      "path": "/models/food/soda-bottle.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-170",
+      "name": "Soda Can Crushed",
+      "path": "/models/food/soda-can-crushed.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-171",
+      "name": "Soda Can",
+      "path": "/models/food/soda-can.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-172",
+      "name": "Soda Glass",
+      "path": "/models/food/soda-glass.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-173",
+      "name": "Soda",
+      "path": "/models/food/soda.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-174",
+      "name": "Soy",
+      "path": "/models/food/soy.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-175",
+      "name": "Steamer",
+      "path": "/models/food/steamer.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-176",
+      "name": "Strawberry",
+      "path": "/models/food/strawberry.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-177",
+      "name": "Styrofoam Dinner",
+      "path": "/models/food/styrofoam-dinner.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-178",
+      "name": "Styrofoam",
+      "path": "/models/food/styrofoam.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-179",
+      "name": "Sub",
+      "path": "/models/food/sub.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-180",
+      "name": "Sundae",
+      "path": "/models/food/sundae.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-181",
+      "name": "Sushi Egg",
+      "path": "/models/food/sushi-egg.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-182",
+      "name": "Sushi Salmon",
+      "path": "/models/food/sushi-salmon.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-183",
+      "name": "Taco",
+      "path": "/models/food/taco.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-184",
+      "name": "Tajine Lid",
+      "path": "/models/food/tajine-lid.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-185",
+      "name": "Tajine",
+      "path": "/models/food/tajine.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-186",
+      "name": "Tomato Slice",
+      "path": "/models/food/tomato-slice.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-187",
+      "name": "Tomato",
+      "path": "/models/food/tomato.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-188",
+      "name": "Turkey",
+      "path": "/models/food/turkey.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-189",
+      "name": "Utensil Fork",
+      "path": "/models/food/utensil-fork.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-190",
+      "name": "Utensil Knife",
+      "path": "/models/food/utensil-knife.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-191",
+      "name": "Utensil Spoon",
+      "path": "/models/food/utensil-spoon.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-192",
+      "name": "Waffle",
+      "path": "/models/food/waffle.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-193",
+      "name": "Watermelon",
+      "path": "/models/food/watermelon.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-194",
+      "name": "Whipped Cream",
+      "path": "/models/food/whipped-cream.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-195",
+      "name": "Whisk",
+      "path": "/models/food/whisk.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-196",
+      "name": "Whole Ham",
+      "path": "/models/food/whole-ham.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-197",
+      "name": "Wholer Ham",
+      "path": "/models/food/wholer-ham.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-198",
+      "name": "Wine Red",
+      "path": "/models/food/wine-red.glb",
+      "category": "structure"
+    },
+    {
+      "id": "food-199",
+      "name": "Wine White",
+      "path": "/models/food/wine-white.glb",
+      "category": "structure"
+    }
+  ],
+  "industrial": [
+    {
+      "id": "industrial-0",
+      "name": "Building A",
+      "path": "/models/industrial/building-a.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-1",
+      "name": "Building B",
+      "path": "/models/industrial/building-b.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-2",
+      "name": "Building C",
+      "path": "/models/industrial/building-c.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-3",
+      "name": "Building D",
+      "path": "/models/industrial/building-d.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-4",
+      "name": "Building E",
+      "path": "/models/industrial/building-e.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-5",
+      "name": "Building F",
+      "path": "/models/industrial/building-f.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-6",
+      "name": "Building G",
+      "path": "/models/industrial/building-g.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-7",
+      "name": "Building H",
+      "path": "/models/industrial/building-h.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-8",
+      "name": "Building I",
+      "path": "/models/industrial/building-i.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-9",
+      "name": "Building J",
+      "path": "/models/industrial/building-j.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-10",
+      "name": "Building K",
+      "path": "/models/industrial/building-k.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-11",
+      "name": "Building L",
+      "path": "/models/industrial/building-l.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-12",
+      "name": "Building M",
+      "path": "/models/industrial/building-m.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-13",
+      "name": "Building N",
+      "path": "/models/industrial/building-n.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-14",
+      "name": "Building O",
+      "path": "/models/industrial/building-o.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-15",
+      "name": "Building P",
+      "path": "/models/industrial/building-p.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-16",
+      "name": "Building Q",
+      "path": "/models/industrial/building-q.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-17",
+      "name": "Building R",
+      "path": "/models/industrial/building-r.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-18",
+      "name": "Building S",
+      "path": "/models/industrial/building-s.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-19",
+      "name": "Building T",
+      "path": "/models/industrial/building-t.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-20",
+      "name": "Chimney Basic",
+      "path": "/models/industrial/chimney-basic.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-21",
+      "name": "Chimney Large",
+      "path": "/models/industrial/chimney-large.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-22",
+      "name": "Chimney Medium",
+      "path": "/models/industrial/chimney-medium.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-23",
+      "name": "Chimney Small",
+      "path": "/models/industrial/chimney-small.glb",
+      "category": "structure"
+    },
+    {
+      "id": "industrial-24",
+      "name": "Detail Tank",
+      "path": "/models/industrial/detail-tank.glb",
+      "category": "structure"
+    }
+  ],
+  "roads": [
+    {
+      "id": "roads-0",
+      "name": "Bridge Pillar Wide",
+      "path": "/models/roads/bridge-pillar-wide.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-1",
+      "name": "Bridge Pillar",
+      "path": "/models/roads/bridge-pillar.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-2",
+      "name": "Construction Barrier",
+      "path": "/models/roads/construction-barrier.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-3",
+      "name": "Construction Cone",
+      "path": "/models/roads/construction-cone.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-4",
+      "name": "Construction Light",
+      "path": "/models/roads/construction-light.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-5",
+      "name": "Light Curved Cross",
+      "path": "/models/roads/light-curved-cross.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-6",
+      "name": "Light Curved Double",
+      "path": "/models/roads/light-curved-double.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-7",
+      "name": "Light Curved",
+      "path": "/models/roads/light-curved.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-8",
+      "name": "Light Square Cross",
+      "path": "/models/roads/light-square-cross.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-9",
+      "name": "Light Square Double",
+      "path": "/models/roads/light-square-double.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-10",
+      "name": "Light Square",
+      "path": "/models/roads/light-square.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-11",
+      "name": "Road Bend Barrier",
+      "path": "/models/roads/road-bend-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-12",
+      "name": "Road Bend Sidewalk",
+      "path": "/models/roads/road-bend-sidewalk.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-13",
+      "name": "Road Bend Square Barrier",
+      "path": "/models/roads/road-bend-square-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-14",
+      "name": "Road Bend Square",
+      "path": "/models/roads/road-bend-square.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-15",
+      "name": "Road Bend",
+      "path": "/models/roads/road-bend.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-16",
+      "name": "Road Bridge",
+      "path": "/models/roads/road-bridge.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-17",
+      "name": "Road Crossing",
+      "path": "/models/roads/road-crossing.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-18",
+      "name": "Road Crossroad Barrier",
+      "path": "/models/roads/road-crossroad-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-19",
+      "name": "Road Crossroad Line",
+      "path": "/models/roads/road-crossroad-line.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-20",
+      "name": "Road Crossroad Path",
+      "path": "/models/roads/road-crossroad-path.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-21",
+      "name": "Road Crossroad",
+      "path": "/models/roads/road-crossroad.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-22",
+      "name": "Road Curve Barrier",
+      "path": "/models/roads/road-curve-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-23",
+      "name": "Road Curve Intersection Barrier",
+      "path": "/models/roads/road-curve-intersection-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-24",
+      "name": "Road Curve Intersection",
+      "path": "/models/roads/road-curve-intersection.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-25",
+      "name": "Road Curve Pavement",
+      "path": "/models/roads/road-curve-pavement.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-26",
+      "name": "Road Curve",
+      "path": "/models/roads/road-curve.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-27",
+      "name": "Road Driveway Double Barrier",
+      "path": "/models/roads/road-driveway-double-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-28",
+      "name": "Road Driveway Double",
+      "path": "/models/roads/road-driveway-double.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-29",
+      "name": "Road Driveway Single Barrier",
+      "path": "/models/roads/road-driveway-single-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-30",
+      "name": "Road Driveway Single",
+      "path": "/models/roads/road-driveway-single.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-31",
+      "name": "Road End Barrier",
+      "path": "/models/roads/road-end-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-32",
+      "name": "Road End Round Barrier",
+      "path": "/models/roads/road-end-round-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-33",
+      "name": "Road End Round",
+      "path": "/models/roads/road-end-round.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-34",
+      "name": "Road End",
+      "path": "/models/roads/road-end.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-35",
+      "name": "Road Intersection Barrier",
+      "path": "/models/roads/road-intersection-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-36",
+      "name": "Road Intersection Line",
+      "path": "/models/roads/road-intersection-line.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-37",
+      "name": "Road Intersection Path",
+      "path": "/models/roads/road-intersection-path.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-38",
+      "name": "Road Intersection",
+      "path": "/models/roads/road-intersection.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-39",
+      "name": "Road Roundabout Barrier",
+      "path": "/models/roads/road-roundabout-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-40",
+      "name": "Road Roundabout",
+      "path": "/models/roads/road-roundabout.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-41",
+      "name": "Road Side Barrier",
+      "path": "/models/roads/road-side-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-42",
+      "name": "Road Side Entry Barrier",
+      "path": "/models/roads/road-side-entry-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-43",
+      "name": "Road Side Entry",
+      "path": "/models/roads/road-side-entry.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-44",
+      "name": "Road Side Exit Barrier",
+      "path": "/models/roads/road-side-exit-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-45",
+      "name": "Road Side Exit",
+      "path": "/models/roads/road-side-exit.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-46",
+      "name": "Road Side",
+      "path": "/models/roads/road-side.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-47",
+      "name": "Road Slant Barrier",
+      "path": "/models/roads/road-slant-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-48",
+      "name": "Road Slant Curve Barrier",
+      "path": "/models/roads/road-slant-curve-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-49",
+      "name": "Road Slant Curve",
+      "path": "/models/roads/road-slant-curve.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-50",
+      "name": "Road Slant Flat Curve",
+      "path": "/models/roads/road-slant-flat-curve.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-51",
+      "name": "Road Slant Flat High",
+      "path": "/models/roads/road-slant-flat-high.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-52",
+      "name": "Road Slant Flat",
+      "path": "/models/roads/road-slant-flat.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-53",
+      "name": "Road Slant High Barrier",
+      "path": "/models/roads/road-slant-high-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-54",
+      "name": "Road Slant High",
+      "path": "/models/roads/road-slant-high.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-55",
+      "name": "Road Slant",
+      "path": "/models/roads/road-slant.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-56",
+      "name": "Road Split Barrier",
+      "path": "/models/roads/road-split-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-57",
+      "name": "Road Split",
+      "path": "/models/roads/road-split.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-58",
+      "name": "Road Square Barrier",
+      "path": "/models/roads/road-square-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-59",
+      "name": "Road Square",
+      "path": "/models/roads/road-square.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-60",
+      "name": "Road Straight Barrier End",
+      "path": "/models/roads/road-straight-barrier-end.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-61",
+      "name": "Road Straight Barrier Half",
+      "path": "/models/roads/road-straight-barrier-half.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-62",
+      "name": "Road Straight Barrier",
+      "path": "/models/roads/road-straight-barrier.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-63",
+      "name": "Road Straight Half",
+      "path": "/models/roads/road-straight-half.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-64",
+      "name": "Road Straight",
+      "path": "/models/roads/road-straight.glb",
+      "category": "road"
+    },
+    {
+      "id": "roads-65",
+      "name": "Sign Highway Detailed",
+      "path": "/models/roads/sign-highway-detailed.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-66",
+      "name": "Sign Highway Wide",
+      "path": "/models/roads/sign-highway-wide.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-67",
+      "name": "Sign Highway",
+      "path": "/models/roads/sign-highway.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-68",
+      "name": "Tile High",
+      "path": "/models/roads/tile-high.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-69",
+      "name": "Tile Low",
+      "path": "/models/roads/tile-low.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-70",
+      "name": "Tile Slant",
+      "path": "/models/roads/tile-slant.glb",
+      "category": "structure"
+    },
+    {
+      "id": "roads-71",
+      "name": "Tile SlantHigh",
+      "path": "/models/roads/tile-slantHigh.glb",
+      "category": "structure"
+    }
+  ]
+}
