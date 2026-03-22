@@ -229,8 +229,8 @@ const TownscaperScene = () => {
           <Outline 
             edgeStrength={2.5}
             pulseSpeed={0}
-            visibleEdgeColor="black"
-            hiddenEdgeColor="black"
+            visibleEdgeColor={0x000000}
+            hiddenEdgeColor={0x000000}
             blur
           />
           {/* Soft ambient occlusion (shadows in corners) */}

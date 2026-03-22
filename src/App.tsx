@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Moon, Sun } from 'lucide-react'
 import StudyHub from './components/StudyHub'
 import MindMapCanvas from './components/MindMapCanvas'
 import GameScene from './components/GameScene'
@@ -8,15 +9,35 @@ import TerrainDemo from './components/TerrainDemo'
 import HighEndCity from './components/HighEndCity'
 import TownscaperScene from './components/TownscaperScene'
 import CityModeScene from './components/CityModeScene'
-import { useGameStore } from './store/gameStore'
 import ModelColorTest from './components/ModelColorTest'
 
 function App() {
   const [activeView, setActiveView] = useState<'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest'>('townscaper')
-  
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem('wafflestack-dark-mode') === 'true'
+  })
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    localStorage.setItem('wafflestack-dark-mode', String(darkMode))
+  }, [darkMode])
+
   return (
-    <div className="relative w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Main Content - Switches between views */}
+    <div className="relative w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
+      {/* Dark mode toggle — always visible, fixed */}
+      <button
+        onClick={() => setDarkMode(d => !d)}
+        className="fixed top-4 left-4 z-[200] p-2.5 rounded-xl backdrop-blur-xl bg-white/10 border border-white/20 text-white hover:bg-white/25 transition-all shadow-lg"
+        title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+      >
+        {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+      </button>
+
+      {/* Main Content */}
       <div className="relative z-10 w-full h-full">
         {activeView === 'study' && (
           <>
@@ -24,23 +45,23 @@ function App() {
             <div className="absolute inset-0 opacity-20 pointer-events-none">
               <GameScene />
             </div>
-            <StudyHub onViewChange={setActiveView} />
+            <StudyHub onViewChange={setActiveView} darkMode={darkMode} />
           </>
         )}
-        
-        {activeView === 'mindmap' && <MindMapCanvas onViewChange={setActiveView} />}
-        
+
+        {activeView === 'mindmap' && <MindMapCanvas onViewChange={setActiveView} darkMode={darkMode} />}
+
         {activeView === '3d' && (
           <div className="w-full h-full relative">
             {/* Full 3D Scene */}
             <GameScene />
-            
+
             {/* UI Overlay - Top navigation and side panels */}
             <UIOverlay />
-            
+
             {/* Bottom Dock - Block selection tools */}
             <BottomDock />
-            
+
             {/* Navigation Buttons */}
             <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
               <button
@@ -64,7 +85,7 @@ function App() {
             </div>
           </div>
         )}
-        
+
         {activeView === 'terrain' && (
           <div className="w-full h-full relative">
             <TerrainDemo />
