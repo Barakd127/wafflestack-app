@@ -6,6 +6,26 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+
+  /* Mind map canvas CSS variables (light mode) */
+  --mm-canvas-bg-start: #f5f7fa;
+  --mm-canvas-bg-end: #c3cfe2;
+  --mm-glass-bg: rgba(255, 255, 255, 0.9);
+  --mm-glass-border: rgba(255, 255, 255, 0.5);
+  --mm-text-primary: #1f2937;
+  --mm-text-secondary: #4b5563;
+  --mm-divider: #e5e7eb;
+}
+
+html.dark {
+  /* Mind map canvas CSS variables (dark mode) */
+  --mm-canvas-bg-start: #0f0f14;
+  --mm-canvas-bg-end: #1a1a2e;
+  --mm-glass-bg: rgba(15, 15, 30, 0.95);
+  --mm-glass-border: rgba(255, 255, 255, 0.1);
+  --mm-text-primary: #e2e8f0;
+  --mm-text-secondary: #94a3b8;
+  --mm-divider: rgba(255, 255, 255, 0.1);
 }
 
 * {
