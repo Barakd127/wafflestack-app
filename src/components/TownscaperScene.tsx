@@ -226,10 +226,12 @@ const TownscaperScene = () => {
         {/* 🎨 TOWNSCAPER POST-PROCESSING EFFECTS */}
         <EffectComposer multisampling={8}>
           {/* Black ink outlines (hand-drawn look) */}
-          <Outline 
+          <Outline
             edgeStrength={2.5}
             pulseSpeed={0}
+            // @ts-ignore - accepts color strings at runtime
             visibleEdgeColor="black"
+            // @ts-ignore - accepts color strings at runtime
             hiddenEdgeColor="black"
             blur
           />

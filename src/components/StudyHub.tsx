@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Home, Map, BookOpen, Trophy, Settings, Bell, User, TrendingUp } from 'lucide-react'
+import { Home, Map, BookOpen, Trophy, Settings, Bell, User } from 'lucide-react'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void

@@ -41,6 +41,7 @@ const AssetLoader = ({ modelUrl, position = [0, 0, 0] }: AssetLoaderProps) => {
     <animated.group
       // @ts-ignore - react-spring types
       scale={springs.scale}
+      // @ts-ignore - react-spring types
       position={springs.position}
     >
       <primitive object={scene} castShadow receiveShadow />
