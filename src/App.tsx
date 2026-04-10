@@ -10,9 +10,10 @@ import HighEndCity from './components/HighEndCity'
 import TownscaperScene from './components/TownscaperScene'
 import CityModeScene from './components/CityModeScene'
 import ModelColorTest from './components/ModelColorTest'
+import WaffleStackCity from './components/WaffleStackCity'
 
 function App() {
-  const [activeView, setActiveView] = useState<'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest'>('townscaper')
+  const [activeView, setActiveView] = useState<'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest' | 'wafflecity'>('wafflecity')
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('wafflestack-dark-mode') === 'true'
   })
@@ -199,10 +200,30 @@ function App() {
             <ModelColorTest />
             <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
               <button
+                onClick={() => setActiveView('wafflecity')}
+                className="px-4 py-2 backdrop-blur-xl bg-green-500/80 border border-green-400/50 rounded-xl text-white hover:bg-green-600/80 transition-all"
+              >
+                🏙️ WaffleStack City
+              </button>
+            </div>
+          </div>
+        )}
+
+        {activeView === 'wafflecity' && (
+          <div className="w-full h-full relative">
+            <WaffleStackCity />
+            <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
+              <button
                 onClick={() => setActiveView('townscaper')}
                 className="px-4 py-2 backdrop-blur-xl bg-pink-500/80 border border-pink-400/50 rounded-xl text-white hover:bg-pink-600/80 transition-all"
               >
-                ← Back to Townscaper
+                🏘️ Townscaper
+              </button>
+              <button
+                onClick={() => setActiveView('study')}
+                className="px-4 py-2 backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all"
+              >
+                📚 לימוד
               </button>
             </div>
           </div>

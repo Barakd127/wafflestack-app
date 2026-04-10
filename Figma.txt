@@ -1,0 +1,7815 @@
+/* 1- Dashboard Responsive  */
+
+position: relative;
+width: 1440px;
+height: 1024px;
+
+background: linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 49.05%, #3351CA 136%);
+
+
+/* Frame */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-end;
+padding: 37px 82px 18px 0px;
+
+position: absolute;
+width: 509px;
+height: 294px;
+left: 43px;
+top: 684px;
+
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 54.33%, rgba(255, 255, 255, 0.15) 100%);
+box-shadow: 0px 15px 30px rgba(31, 41, 55, 0.25);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 24px;
+
+
+/* line-02 */
+
+width: 506.21px;
+height: 241.89px;
+
+background: linear-gradient(180.55deg, rgba(255, 255, 255, 0.6) -71.34%, rgba(255, 255, 255, 0.2) -22.15%);
+transform: rotate(0.14deg);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Vector */
+
+position: absolute;
+left: 15.02%;
+right: 9.98%;
+top: 84.24%;
+bottom: 15.76%;
+
+border: 1px solid #DBDEE4;
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 15.04%;
+right: 9.96%;
+top: 67.24%;
+bottom: 32.76%;
+
+border: 1px solid #DBDEE4;
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 15.06%;
+right: 9.94%;
+top: 50.24%;
+bottom: 49.76%;
+
+border: 1px solid #DBDEE4;
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 15.08%;
+right: 9.92%;
+top: 33.24%;
+bottom: 66.76%;
+
+border: 1px solid #DBDEE4;
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 15.1%;
+right: 9.9%;
+top: 16.24%;
+bottom: 83.76%;
+
+border: 1px solid #DBDEE4;
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 15.02%;
+right: 9.98%;
+top: 84.24%;
+bottom: 15.76%;
+
+border: 1px solid #54555A;
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 15.14%;
+right: 84.86%;
+top: 84.08%;
+bottom: 14.26%;
+
+border: 1px solid #54555A;
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 27.64%;
+right: 72.36%;
+top: 84.14%;
+bottom: 14.19%;
+
+border: 1px solid #54555A;
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 40.14%;
+right: 59.86%;
+top: 84.2%;
+bottom: 14.13%;
+
+border: 1px solid #54555A;
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 52.64%;
+right: 47.36%;
+top: 84.27%;
+bottom: 14.06%;
+
+border: 1px solid #54555A;
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 65.14%;
+right: 34.86%;
+top: 84.33%;
+bottom: 14%;
+
+border: 1px solid #54555A;
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 77.64%;
+right: 22.36%;
+top: 84.4%;
+bottom: 13.94%;
+
+border: 1px solid #54555A;
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 90.14%;
+right: 9.86%;
+top: 84.46%;
+bottom: 13.87%;
+
+border: 1px solid #54555A;
+transform: rotate(0.14deg);
+
+
+/* 0 */
+
+position: absolute;
+left: 11.02%;
+right: 86.98%;
+top: 81.72%;
+bottom: 13.28%;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 15px;
+text-align: right;
+
+color: #54555A;
+
+transform: rotate(0.14deg);
+
+
+/* 100 */
+
+position: absolute;
+left: 7.79%;
+right: 86.96%;
+top: 64.71%;
+bottom: 30.29%;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 15px;
+text-align: right;
+
+color: #54555A;
+
+transform: rotate(0.14deg);
+
+
+/* 200 */
+
+position: absolute;
+left: 7.31%;
+right: 86.94%;
+top: 47.7%;
+bottom: 47.3%;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 15px;
+text-align: right;
+
+color: #54555A;
+
+transform: rotate(0.14deg);
+
+
+/* 300 */
+
+position: absolute;
+left: 7.32%;
+right: 86.93%;
+top: 30.7%;
+bottom: 64.3%;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 15px;
+text-align: right;
+
+color: #54555A;
+
+transform: rotate(0.14deg);
+
+
+/* 400 */
+
+position: absolute;
+left: 7.34%;
+right: 86.91%;
+top: 13.7%;
+bottom: 81.3%;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 15px;
+text-align: right;
+
+color: #54555A;
+
+transform: rotate(0.14deg);
+
+
+/* שני */
+
+position: absolute;
+left: 11.89%;
+right: 81.86%;
+top: 86.06%;
+bottom: 8.94%;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 14px;
+text-align: center;
+
+color: #54555A;
+
+transform: rotate(0.14deg);
+
+
+/* שלישי */
+
+position: absolute;
+left: 23.72%;
+right: 68.16%;
+top: 86.13%;
+bottom: 8.87%;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 14px;
+text-align: center;
+
+color: #54555A;
+
+transform: rotate(0.14deg);
+
+
+/* רביעי */
+
+position: absolute;
+left: 36.76%;
+right: 56.74%;
+top: 86.19%;
+bottom: 8.81%;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 14px;
+text-align: center;
+
+color: #54555A;
+
+transform: rotate(0.14deg);
+
+
+/* חמישי */
+
+position: absolute;
+left: 48.83%;
+right: 43.42%;
+top: 86.25%;
+bottom: 8.75%;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 14px;
+text-align: center;
+
+color: #54555A;
+
+transform: rotate(0.14deg);
+
+
+/* שישי */
+
+position: absolute;
+left: 61.74%;
+right: 31.34%;
+top: 86.32%;
+bottom: 8.68%;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 14px;
+text-align: center;
+
+color: #54555A;
+
+transform: rotate(0.14deg);
+
+
+/* שבת */
+
+position: absolute;
+left: 73.97%;
+right: 17.69%;
+top: 86.38%;
+bottom: 8.62%;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 14px;
+text-align: center;
+
+color: #54555A;
+
+transform: rotate(0.14deg);
+
+
+/* ראשון */
+
+position: absolute;
+left: 85.17%;
+right: 4.62%;
+top: 86.44%;
+bottom: 8.56%;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 14px;
+text-align: center;
+
+color: #54555A;
+
+transform: rotate(0.14deg);
+
+
+/* Clip path group */
+
+position: absolute;
+left: 14.77%;
+right: 9.73%;
+top: 15.74%;
+bottom: 15.59%;
+
+transform: rotate(0.14deg);
+
+
+/* zr23-c0 */
+
+position: absolute;
+left: 14.77%;
+right: 9.73%;
+top: 15.74%;
+bottom: 15.59%;
+
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 14.77%;
+right: 9.73%;
+top: 15.74%;
+bottom: 15.59%;
+
+background: #000000;
+transform: rotate(0.14deg);
+
+
+/* Group */
+
+position: absolute;
+left: 15.02%;
+right: 9.98%;
+top: 32.23%;
+bottom: 15.92%;
+
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 15.02%;
+right: 9.98%;
+top: 32.23%;
+bottom: 15.92%;
+
+background: linear-gradient(180deg, rgba(255, 217, 121, 0.35) 5%, rgba(247, 237, 197, 0.05) 95%);
+transform: rotate(0.14deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 15.03%;
+right: 9.97%;
+top: 32.23%;
+bottom: 28.33%;
+
+background: linear-gradient(180deg, rgba(255, 217, 121, 0.35) 5%, rgba(247, 237, 197, 0.05) 95%);
+border: 2px solid #FFD979;
+transform: rotate(0.14deg);
+
+
+/* רקע- בר עליון */
+
+position: absolute;
+width: 1440px;
+height: 74px;
+left: 0px;
+top: 0px;
+
+background: linear-gradient(142.72deg, rgba(255, 255, 255, 0.85) -62.75%, rgba(255, 255, 255, 0.5) 163.18%);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 3px;
+
+
+/* settings icon */
+
+position: absolute;
+width: 33px;
+height: 33px;
+left: 295px;
+top: 18px;
+
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 11%;
+right: 10.99%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* Hi, Bdakar */
+
+position: absolute;
+width: 211px;
+height: 1px;
+left: -19px;
+top: 22px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 18px;
+line-height: 22px;
+text-align: center;
+
+color: #1F3E6C;
+
+
+
+/* Vector 7 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 1063px;
+top: 820px;
+
+border: 2px solid #34A853;
+
+
+/* המשך של שאלות */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-end;
+padding: 25px 5px 24px 29px;
+isolation: isolate;
+
+position: absolute;
+width: 509px;
+height: 283px;
+left: 43px;
+top: 105px;
+
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 54.33%, rgba(255, 255, 255, 0.15) 100%);
+box-shadow: 0px 15px 30px rgba(31, 41, 55, 0.25);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 24px;
+
+
+/* Asset */
+
+position: absolute;
+width: 195px;
+height: 125px;
+left: 8px;
+top: 91px;
+
+background: url();
+filter: drop-shadow(3px 8px 12px rgba(0, 0, 0, 0.25));
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+z-index: 0;
+
+
+/* Frame 4 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 0px 45px 10px 10px;
+gap: 10px;
+
+position: absolute;
+width: 231px;
+height: 71px;
+left: calc(50% - 231px/2 + 127px);
+top: 37px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+z-index: 1;
+
+
+/* כמעט שם! 
+נשארו לך רק עוד 2 שאלות
+בקורס סטטיסטיקה תיאורטית */
+
+width: 224px;
+height: 97px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 18px;
+line-height: 34px;
+/* or 189% */
+text-align: right;
+
+color: #1F3E6C;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Frame 5 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 36px 10px 10px;
+gap: 10px;
+
+position: absolute;
+width: 231px;
+height: 28px;
+left: calc(50% - 231px/2 + 124px);
+top: 164px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+z-index: 2;
+
+
+/* המבנה הבא בעיר שלך */
+
+width: 198px;
+height: 2px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 52px;
+/* or 371% */
+text-align: right;
+
+color: #465CA5;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Frame 3 */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 10px;
+
+width: 448px;
+height: 9px;
+
+background: #FFFFFF;
+border-radius: 10px;
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+z-index: 3;
+
+
+/* אפור */
+
+width: 209px;
+height: 9px;
+
+background: rgba(242, 185, 0, 0.82);
+border-radius: 10px;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Rectangle 38 */
+
+position: absolute;
+width: 94px;
+height: 36px;
+left: 382px;
+top: 133px;
+
+background: linear-gradient(114.95deg, rgba(255, 194, 0, 0.5) -10.77%, #9A6A04 135.72%);
+box-shadow: 0px 3px 5.8px rgba(142, 122, 59, 0.5);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 24px;
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+z-index: 4;
+
+
+/* המשך */
+
+position: absolute;
+width: 37px;
+height: 18px;
+left: 424px;
+top: 142px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 600;
+font-size: 14px;
+line-height: 18px;
+/* identical to box height, or 129% */
+text-align: right;
+
+color: #FFFFFF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 5;
+flex-grow: 0;
+z-index: 5;
+
+
+/* lucide:move-right */
+
+position: absolute;
+width: 24px;
+height: 24px;
+left: 391px;
+top: 140px;
+
+transform: rotate(-180deg);
+
+/* Inside auto layout */
+flex: none;
+order: 6;
+flex-grow: 0;
+z-index: 6;
+
+
+/* Vector */
+
+position: absolute;
+left: 37.5%;
+right: 12.5%;
+top: 33.33%;
+bottom: 33.33%;
+
+border: 2px solid #FFFFFF;
+transform: rotate(-180deg);
+
+
+/* עולם */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-end;
+padding: 35px 27px 56px 24px;
+isolation: isolate;
+
+position: absolute;
+width: 549px;
+height: 294px;
+left: 594px;
+top: 684px;
+
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 54.33%, rgba(255, 255, 255, 0.15) 100%);
+box-shadow: 0px 15px 30px rgba(31, 41, 55, 0.25);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 24px;
+
+
+/* העולם שלי */
+
+width: 498px;
+height: 45px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 700;
+font-size: 24px;
+line-height: 28px;
+text-align: right;
+
+color: #254A9F;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+z-index: 0;
+
+
+/* Rectangle 38 */
+
+position: absolute;
+width: 94px;
+height: 36px;
+left: 41px;
+top: 226px;
+
+background: linear-gradient(114.95deg, rgba(255, 194, 0, 0.5) -10.77%, #9A6A04 135.72%);
+box-shadow: 0px 3px 5.8px rgba(142, 122, 59, 0.5);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 24px;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+z-index: 1;
+
+
+/* כניסה לעולם */
+
+position: absolute;
+width: 75px;
+height: 18px;
+left: 51px;
+top: 235px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 600;
+font-size: 14px;
+line-height: 18px;
+/* identical to box height, or 129% */
+text-align: right;
+
+color: #FFFFFF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+z-index: 2;
+
+
+/* בר עליון-דף הבית */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 10px 274px 10px 0px;
+gap: 10px;
+
+position: absolute;
+width: 428px;
+height: 58px;
+left: 1011px;
+top: 12px;
+
+
+
+/* דף הבית */
+
+width: 137px;
+height: 38px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 700;
+font-size: 32px;
+line-height: 38px;
+/* identical to box height */
+text-align: center;
+
+color: #7F9BD9;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* מצב נוכחי של הכל */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-end;
+padding: 84px 0px 22px 41px;
+gap: 75px;
+isolation: isolate;
+
+position: absolute;
+width: 509px;
+height: 227px;
+left: 43px;
+top: 423px;
+
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 54.33%, rgba(255, 255, 255, 0.1) 100%);
+box-shadow: 0px 15px 30px rgba(31, 41, 55, 0.25);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 24px;
+
+
+/* סטיית תקן (בקרוב) */
+
+width: 96px;
+height: 83px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 16px;
+line-height: 25px;
+/* or 156% */
+text-align: center;
+
+color: #1F3E6C;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+z-index: 0;
+
+
+/* חציון ושכיח (עכשיו) */
+
+width: 96px;
+height: 83px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 30px;
+/* or 150% */
+text-align: center;
+
+color: #1F3E6C;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+z-index: 1;
+
+
+/* ממוצע (הושלם) */
+
+width: 96px;
+height: 83px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 16px;
+line-height: 25px;
+/* or 156% */
+text-align: center;
+
+color: #1F3E6C;
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+z-index: 2;
+
+
+/* Ellipse 19 */
+
+position: absolute;
+width: 35px;
+height: 35px;
+left: 243px;
+top: 71px;
+
+background: linear-gradient(115.34deg, rgba(255, 194, 0, 0.35) -8.31%, rgba(154, 106, 4, 0.5) 168.93%);
+box-shadow: 0px 3px 5.8px rgba(142, 122, 59, 0.5);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 24px;
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+z-index: 3;
+
+
+/* Ellipse 16 */
+
+position: absolute;
+width: 27px;
+height: 27px;
+left: 418px;
+top: 79px;
+
+background: linear-gradient(34.36deg, #E6C55D -10.48%, #806E34 267.01%);
+box-shadow: 0px 3px 5.8px rgba(142, 122, 59, 0.5);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 24px;
+transform: matrix(1, 0, 0, -1, 0, 0);
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+z-index: 4;
+
+
+/* Ellipse 20 */
+
+position: absolute;
+width: 27px;
+height: 27px;
+left: 76px;
+top: 79px;
+
+background: rgba(22, 41, 70, 0.4);
+box-shadow: 0px 3px 5.8px rgba(31, 41, 55, 0.25);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 24px;
+transform: matrix(1, 0, 0, -1, 0, 0);
+
+/* Inside auto layout */
+flex: none;
+order: 5;
+flex-grow: 0;
+z-index: 5;
+
+
+/* Line 1 */
+
+position: absolute;
+width: 138px;
+height: 0px;
+left: 279px;
+top: 92px;
+
+border: 1px solid #F4C52E;
+transform: rotate(180deg);
+
+/* Inside auto layout */
+flex: none;
+order: 6;
+flex-grow: 0;
+z-index: 6;
+
+
+/* Cube bg */
+
+position: absolute;
+width: 237.14px;
+height: 220.17px;
+left: 582px;
+top: 74px;
+
+background: url(11.png);
+transform: rotate(22.48deg);
+
+
+/* 122 1 */
+
+position: absolute;
+width: 210.22px;
+height: 186.01px;
+left: 927.2px;
+top: 473px;
+
+background: url(122.png);
+transform: rotate(-89.11deg);
+
+
+/* לוח דיגיטלי */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-end;
+padding: 35px 27px 34px 24px;
+isolation: isolate;
+
+position: absolute;
+width: 549px;
+height: 545px;
+left: 594px;
+top: 105px;
+
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 54.33%, rgba(255, 255, 255, 0.15) 100%);
+box-shadow: 0px 15px 30px rgba(31, 41, 55, 0.25);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 24px;
+
+
+/* לוח לבן דיגיטלי */
+
+width: 498px;
+height: 45px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 700;
+font-size: 24px;
+line-height: 28px;
+text-align: right;
+
+color: #254A9F;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+z-index: 0;
+
+
+/* white board */
+
+width: 496px;
+height: 431px;
+
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.51) 54.33%, rgba(255, 255, 255, 0.17) 100%);
+box-shadow: 0px 15px 30px rgba(31, 41, 55, 0.25);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 24px;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+z-index: 1;
+
+
+/* היי ברק, היום אנחנו הולכים לכבוש את 
+'סטיית התקן' ולפתוח את מגדל השעון 
+בעיר שלך! */
+
+position: absolute;
+width: 473px;
+height: 174px;
+left: 27px;
+top: 177px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 53px;
+/* or 221% */
+text-align: right;
+
+color: #1F3E6C;
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+z-index: 2;
+
+
+/* טיפ */
+
+position: absolute;
+width: 103px;
+height: 35px;
+left: 397px;
+top: 136px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 24px;
+text-align: right;
+
+color: #465CA5;
+
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+z-index: 3;
+
+
+/* si:chevron R */
+
+position: absolute;
+width: 57px;
+height: 56px;
+left: 1131px;
+top: 531px;
+
+transform: rotate(-180deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 40.68%;
+right: -8.47%;
+top: 12.5%;
+bottom: 19.7%;
+
+border: 4px solid #000000;
+transform: rotate(-180deg);
+
+
+/* Side bar */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+
+position: absolute;
+width: 247px;
+height: 1091px;
+left: 1193px;
+top: -9px;
+overflow-x: scroll;
+
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.5) 100%);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 3px;
+
+
+/* Side bar group */
+
+width: 247px;
+height: 1091px;
+
+background: linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Clicked color */
+
+position: absolute;
+width: 223px;
+height: 76px;
+left: 12px;
+top: 109px;
+
+background: #254A9F;
+border-radius: 32px;
+
+
+/* דף הבית */
+
+position: absolute;
+width: 179px;
+height: 46px;
+left: 36px;
+top: 127px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 600;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* מפת לימוד */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 35px;
+top: 209px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* אזור למידה */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 31px;
+top: 292px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* העולם שלי */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 35px;
+top: 374px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* map icon */
+
+position: absolute;
+width: 28px;
+height: 28px;
+left: 191px;
+top: 215px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.5%;
+bottom: 12.5%;
+
+border: 1.4px solid #FFFFFF;
+
+
+/* home icon */
+
+position: absolute;
+width: 35px;
+height: 35px;
+left: 188px;
+top: 127px;
+
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 19.52%;
+right: 17.62%;
+top: 21.79%;
+bottom: 12.5%;
+
+border: 1.4px solid #FFFFFF;
+
+
+/* basil icon */
+
+position: absolute;
+width: 29px;
+height: 29px;
+left: 191px;
+top: 380px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 11.95%;
+right: 11.96%;
+top: 11.93%;
+bottom: 11.93%;
+
+background: #FFFFFF;
+
+
+/* image 38 */
+
+position: absolute;
+width: 64px;
+height: 68px;
+left: 92px;
+top: 20px;
+
+background: url(image);
+
+
+/* famicons:notifications-outline */
+
+position: absolute;
+width: 31px;
+height: 31px;
+left: 229px;
+top: 19px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 15.59%;
+right: 15.6%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* iconamoon:profile-circle-light */
+
+position: absolute;
+width: 35px;
+height: 35px;
+left: 141px;
+top: 16px;
+
+
+
+/* Group */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 9.38%;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 12.5%;
+
+border: 1.8px solid #1F3E6C;
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 18.04%;
+right: 18.04%;
+top: 26.04%;
+bottom: 9.38%;
+
+border: 2px solid #1F3E6C;
+
+
+/* map icon */
+
+position: absolute;
+width: 29px;
+height: 29px;
+left: 1385px;
+top: 292px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 8.01%;
+right: 14.91%;
+top: 11.25%;
+bottom: 25.04%;
+
+border: 1.5px solid #FFFFFF;
+
+
+/* 11 1 */
+
+position: absolute;
+width: 45.77px;
+height: 41.02px;
+left: 366.72px;
+top: 443px;
+
+background: url(11.png);
+transform: rotate(-38.54deg);
+
+
+/* material-symbols:done-rounded */
+
+position: absolute;
+width: 24px;
+height: 24px;
+left: 692px;
+top: 638px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 32.43%;
+right: 66.5%;
+top: 49.9%;
+bottom: 49%;
+
+background: #FFFFFF;
+
+
+/* Vector */
+
+position: absolute;
+left: 8.89%;
+right: 90.56%;
+top: 49.71%;
+bottom: 49.22%;
+
+border: 1.2px solid #FFFFFF;
+
+
+/* Learning area */
+
+position: relative;
+width: 1440px;
+height: 1024px;
+
+background: #FFFFFF;
+
+
+/* רקע- בר עליון */
+
+position: absolute;
+width: 1440px;
+height: 74px;
+left: 3px;
+top: 0px;
+
+background: #FFFFFF;
+box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+
+
+/* בר עליון-דף הבית */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 10px 274px 10px 0px;
+gap: 10px;
+
+position: absolute;
+width: 466px;
+height: 62px;
+left: 974px;
+top: 12px;
+
+
+
+/* אזור למידה */
+
+width: 193px;
+height: 42px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 700;
+font-size: 32px;
+line-height: 42px;
+/* identical to box height */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* אזור שאלות */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px;
+isolation: isolate;
+
+position: absolute;
+width: 1100px;
+height: 836px;
+left: 43px;
+top: 104px;
+
+background: #FFFFFF;
+
+
+/* white board */
+
+width: 1100px;
+height: 870px;
+
+background: #FAFAFF;
+box-shadow: 1px 0px 4px rgba(0, 0, 0, 0.25);
+border-radius: 20px;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+z-index: 0;
+
+
+/* Vector 7 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 1020px;
+top: 716px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+z-index: 1;
+
+
+/* Vector 14 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 1020px;
+top: 820px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+z-index: 2;
+
+
+/* שאלה 5 */
+
+position: absolute;
+width: 387px;
+height: 64px;
+left: 823px;
+top: 125px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 24px;
+line-height: 51px;
+/* or 212% */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+z-index: 3;
+
+
+/* סטטיסטיקה תיאורית | ממוצע */
+
+position: absolute;
+width: 553px;
+height: 64px;
+left: 668px;
+top: 20px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 51px;
+/* or 255% */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+z-index: 4;
+
+
+/* בכיתה יש 10 תלמידים. ציוני המבחן שלהם הם:
+ 65, 70, 70, 75, 80, 85, 85, 90, 95, 100 א.חשב/י את הממוצע של הציונים.
+ ב.מצא/י את החציון.
+ ג.קבע/י מהו השכיח.
+ ד.חשב/י את טווח הציונים. */
+
+position: absolute;
+width: 870px;
+height: 297px;
+left: 195px;
+top: 175px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 53px;
+/* or 221% */
+text-align: right;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 5;
+flex-grow: 0;
+z-index: 5;
+
+
+/* Firefly_please take only the white marbel building in the upper left side 286980 */
+
+position: absolute;
+width: 43px;
+height: 31px;
+left: 39px;
+top: 23px;
+
+background: url(Firefly_please take only the white marbel building in the upper left side 286979);
+
+/* Inside auto layout */
+flex: none;
+order: 6;
+flex-grow: 0;
+z-index: 6;
+
+
+/* Group 6 */
+
+position: absolute;
+width: 157px;
+height: 7px;
+left: 97px;
+top: 46px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 7;
+flex-grow: 0;
+z-index: 7;
+
+
+/* Rectangle 14 */
+
+position: absolute;
+width: 154px;
+height: 7px;
+left: 100px;
+top: 46px;
+
+background: #E4E4E4;
+border-radius: 10px;
+
+
+/* Rectangle 15 */
+
+position: absolute;
+width: 98.18px;
+height: 7px;
+left: 97px;
+top: 46px;
+
+background: rgba(212, 175, 55, 0.5);
+border-radius: 10px;
+
+
+/* Vector 13 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 752px;
+top: 836px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 8;
+flex-grow: 0;
+z-index: 8;
+
+
+/* שאלה 5 מתוך 8 */
+
+position: absolute;
+width: 189px;
+height: 42px;
+left: 716px;
+top: 771px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 9;
+flex-grow: 0;
+z-index: 9;
+
+
+/* דלג */
+
+position: absolute;
+width: 342px;
+height: 42px;
+left: 100px;
+top: 772px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #122460;
+
+
+/* Inside auto layout */
+flex: none;
+order: 10;
+flex-grow: 0;
+z-index: 10;
+
+
+/* Rectangle 20 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 1027px;
+height: 181px;
+left: 38px;
+top: 527px;
+
+border: 2px solid #B4B4B4;
+border-radius: 12px;
+
+/* Inside auto layout */
+flex: none;
+order: 11;
+flex-grow: 0;
+z-index: 11;
+
+
+/* הכנס את תשובתך כאן... */
+
+position: absolute;
+width: 699px;
+height: 53px;
+left: 549px;
+top: 598px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 53px;
+/* identical to box height, or 221% */
+text-align: center;
+
+color: #B0B0B0;
+
+
+/* Inside auto layout */
+flex: none;
+order: 12;
+flex-grow: 0;
+z-index: 12;
+
+
+/* Rectangle 21 */
+
+position: absolute;
+width: 171px;
+height: 53px;
+left: 38px;
+top: 761px;
+
+background: #122460;
+box-shadow: 0px 2px 6px #8DA7FF;
+border-radius: 24px;
+
+/* Inside auto layout */
+flex: none;
+order: 13;
+flex-grow: 0;
+z-index: 13;
+
+
+/* בדיקת תשובה */
+
+position: absolute;
+width: 269px;
+height: 50px;
+left: -11px;
+top: 774px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 14;
+flex-grow: 0;
+z-index: 14;
+
+
+/* Edit */
+
+position: absolute;
+width: 20px;
+height: 20px;
+left: calc(50% - 20px/2 + 378px);
+top: 875px;
+
+
+
+/* Edit icon */
+
+position: absolute;
+left: -30.27%;
+right: -31.5%;
+top: -31.5%;
+bottom: -30.27%;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 11.11%;
+right: 16.67%;
+top: 16.67%;
+bottom: 11.11%;
+
+background: #122460;
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 36.19%;
+right: 5.55%;
+top: 5.55%;
+bottom: 36.08%;
+
+border: 1.7px solid #122460;
+
+
+/* Vector */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+
+
+/* Group 7 */
+
+position: absolute;
+width: 276.7px;
+height: 144px;
+left: 465px;
+top: 852px;
+
+
+
+/* Group 2 */
+
+position: absolute;
+width: 276.7px;
+height: 144px;
+left: 465px;
+top: 852px;
+
+
+
+/* Ellipse 1 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 465px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 2 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 492.36px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 3 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 519.72px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 9 */
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 550.51px;
+top: 877.92px;
+
+background: #AFAFAF;
+
+
+/* Frame 1 */
+
+position: absolute;
+width: 144px;
+height: 144px;
+left: 597.7px;
+top: 852px;
+
+
+
+/* Frame 2 */
+
+position: absolute;
+width: 100px;
+height: 100px;
+left: -18.8px;
+top: 46px;
+
+
+
+/* Ellipse 8 */
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 670.92px;
+top: 877.92px;
+
+background: #AFAFAF;
+
+
+/* image 19 */
+
+position: absolute;
+width: 20px;
+height: 20px;
+left: 640px;
+top: 877px;
+
+background: url(image.png);
+
+
+/* image 20 */
+
+position: absolute;
+width: 20px;
+height: 19px;
+left: 611px;
+top: 879px;
+
+background: url(image.png);
+
+
+/* image 21 */
+
+position: absolute;
+width: 16px;
+height: 15px;
+left: 582px;
+top: 881px;
+
+background: url(image.png);
+
+
+/* map icon */
+
+position: absolute;
+width: 29px;
+height: 29px;
+left: 1385px;
+top: 344px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 8.01%;
+right: 14.91%;
+top: 11.25%;
+bottom: 25.04%;
+
+border: 1.5px solid #FFFFFF;
+
+
+/* si:chevron R */
+
+position: absolute;
+width: 57px;
+height: 56px;
+left: 1132px;
+top: 494px;
+
+transform: rotate(-180deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 40.68%;
+right: -8.47%;
+top: 12.5%;
+bottom: 19.7%;
+
+border: 4px solid #000000;
+transform: rotate(-180deg);
+
+
+/* Side bar */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+
+position: absolute;
+width: 247px;
+height: 1091px;
+left: 1193px;
+top: -9px;
+overflow-x: scroll;
+
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.5) 100%);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 3px;
+
+
+/* Side bar group */
+
+width: 247px;
+height: 1091px;
+
+background: linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Clicked color */
+
+position: absolute;
+width: 223px;
+height: 76px;
+left: 12px;
+top: 109px;
+
+background: #254A9F;
+border-radius: 32px;
+
+
+/* דף הבית */
+
+position: absolute;
+width: 179px;
+height: 46px;
+left: 36px;
+top: 127px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 600;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* מפת לימוד */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 35px;
+top: 209px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* אזור למידה */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 31px;
+top: 292px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* העולם שלי */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 35px;
+top: 374px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* map icon */
+
+position: absolute;
+width: 28px;
+height: 28px;
+left: 191px;
+top: 215px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.5%;
+bottom: 12.5%;
+
+border: 1.4px solid #FFFFFF;
+
+
+/* home icon */
+
+position: absolute;
+width: 35px;
+height: 35px;
+left: 188px;
+top: 127px;
+
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 19.52%;
+right: 17.62%;
+top: 21.79%;
+bottom: 12.5%;
+
+border: 1.4px solid #FFFFFF;
+
+
+/* basil icon */
+
+position: absolute;
+width: 29px;
+height: 29px;
+left: 191px;
+top: 380px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 11.95%;
+right: 11.96%;
+top: 11.93%;
+bottom: 11.93%;
+
+background: #FFFFFF;
+
+
+/* image 38 */
+
+position: absolute;
+width: 64px;
+height: 68px;
+left: 92px;
+top: 20px;
+
+background: url(image);
+
+
+/* settings icon */
+
+position: absolute;
+width: 33px;
+height: 33px;
+left: 295px;
+top: 18px;
+
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 11%;
+right: 10.99%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* Hi, Bdakar */
+
+position: absolute;
+width: 211px;
+height: 1px;
+left: -19px;
+top: 22px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 18px;
+line-height: 22px;
+text-align: center;
+
+color: #000000;
+
+
+
+/* famicons:notifications-outline */
+
+position: absolute;
+width: 31px;
+height: 31px;
+left: 229px;
+top: 19px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 15.59%;
+right: 15.6%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* iconamoon:profile-circle-light */
+
+position: absolute;
+width: 35px;
+height: 35px;
+left: 141px;
+top: 16px;
+
+
+
+/* Group */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 9.38%;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 12.5%;
+
+border: 1.8px solid #1F3E6C;
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 18.04%;
+right: 18.04%;
+top: 26.04%;
+bottom: 9.38%;
+
+border: 2px solid #1F3E6C;
+
+
+/* Questions  */
+
+position: relative;
+width: 1440px;
+height: 1024px;
+
+background: #FFFFFF;
+
+
+/* רקע- בר עליון */
+
+position: absolute;
+width: 1440px;
+height: 74px;
+left: 3px;
+top: 0px;
+
+background: #FFFFFF;
+box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+
+
+/* בר עליון-דף הבית */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 10px 274px 10px 0px;
+gap: 10px;
+
+position: absolute;
+width: 466px;
+height: 62px;
+left: 974px;
+top: 12px;
+
+
+
+/* אזור למידה */
+
+width: 193px;
+height: 42px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 700;
+font-size: 32px;
+line-height: 42px;
+/* identical to box height */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* אזור שאלות */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px;
+isolation: isolate;
+
+position: absolute;
+width: 1100px;
+height: 836px;
+left: 43px;
+top: 104px;
+
+background: #FFFFFF;
+
+
+/* white board */
+
+width: 1100px;
+height: 870px;
+
+background: #FAFAFF;
+box-shadow: 1px 0px 4px rgba(0, 0, 0, 0.25);
+border-radius: 20px;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+z-index: 0;
+
+
+/* Vector 7 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 1020px;
+top: 716px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+z-index: 1;
+
+
+/* Vector 14 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 1020px;
+top: 820px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+z-index: 2;
+
+
+/* שאלה 5 */
+
+position: absolute;
+width: 387px;
+height: 64px;
+left: 823px;
+top: 125px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 24px;
+line-height: 51px;
+/* or 212% */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+z-index: 3;
+
+
+/* סטטיסטיקה תיאורית | ממוצע */
+
+position: absolute;
+width: 553px;
+height: 64px;
+left: 668px;
+top: 20px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 51px;
+/* or 255% */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+z-index: 4;
+
+
+/* בכיתה יש 10 תלמידים. ציוני המבחן שלהם הם:
+ 65, 70, 70, 75, 80, 85, 85, 90, 95, 100 א.חשב/י את הממוצע של הציונים.
+ ב.מצא/י את החציון.
+ ג.קבע/י מהו השכיח.
+ ד.חשב/י את טווח הציונים. */
+
+position: absolute;
+width: 870px;
+height: 297px;
+left: 195px;
+top: 175px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 53px;
+/* or 221% */
+text-align: right;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 5;
+flex-grow: 0;
+z-index: 5;
+
+
+/* Firefly_please take only the white marbel building in the upper left side 286980 */
+
+position: absolute;
+width: 43px;
+height: 31px;
+left: 39px;
+top: 23px;
+
+background: url(Firefly_please take only the white marbel building in the upper left side 286979);
+
+/* Inside auto layout */
+flex: none;
+order: 6;
+flex-grow: 0;
+z-index: 6;
+
+
+/* Group 6 */
+
+position: absolute;
+width: 154px;
+height: 7px;
+left: 100px;
+top: 46px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 7;
+flex-grow: 0;
+z-index: 7;
+
+
+/* Rectangle 14 */
+
+position: absolute;
+width: 154px;
+height: 7px;
+left: 100px;
+top: 46px;
+
+background: #F0F0F0;
+border-radius: 10px;
+
+
+/* Rectangle 15 */
+
+position: absolute;
+width: 98.18px;
+height: 7px;
+left: 155.83px;
+top: 46px;
+
+background: #838383;
+border-radius: 10px;
+
+
+/* Vector 13 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 752px;
+top: 836px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 8;
+flex-grow: 0;
+z-index: 8;
+
+
+/* שאלה 5 מתוך 8 */
+
+position: absolute;
+width: 189px;
+height: 42px;
+left: 716px;
+top: 771px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 9;
+flex-grow: 0;
+z-index: 9;
+
+
+/* דלג */
+
+position: absolute;
+width: 342px;
+height: 42px;
+left: 100px;
+top: 772px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #9A9A9A;
+
+
+/* Inside auto layout */
+flex: none;
+order: 10;
+flex-grow: 0;
+z-index: 10;
+
+
+/* image 18 */
+
+position: absolute;
+width: 49px;
+height: 37px;
+left: 880px;
+top: 764px;
+
+background: url(image.png);
+
+/* Inside auto layout */
+flex: none;
+order: 11;
+flex-grow: 0;
+z-index: 11;
+
+
+/* Rectangle 20 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 1027px;
+height: 181px;
+left: 38px;
+top: 527px;
+
+border: 2px solid #B4B4B4;
+border-radius: 12px;
+
+/* Inside auto layout */
+flex: none;
+order: 12;
+flex-grow: 0;
+z-index: 12;
+
+
+/* הכנס את תשובתך כאן... */
+
+position: absolute;
+width: 699px;
+height: 53px;
+left: 549px;
+top: 598px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 53px;
+/* identical to box height, or 221% */
+text-align: center;
+
+color: #B0B0B0;
+
+
+/* Inside auto layout */
+flex: none;
+order: 13;
+flex-grow: 0;
+z-index: 13;
+
+
+/* Rectangle 21 */
+
+position: absolute;
+width: 171px;
+height: 53px;
+left: 38px;
+top: 761px;
+
+background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), #D9D9D9;
+border-radius: 15px;
+
+/* Inside auto layout */
+flex: none;
+order: 14;
+flex-grow: 0;
+z-index: 14;
+
+
+/* בדיקת תשובה */
+
+position: absolute;
+width: 269px;
+height: 50px;
+left: -15px;
+top: 771px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 15;
+flex-grow: 0;
+z-index: 15;
+
+
+/* Edit */
+
+position: absolute;
+width: 20px;
+height: 20px;
+left: calc(50% - 20px/2 + 378px);
+top: 875px;
+
+
+
+/* Edit icon */
+
+position: absolute;
+left: -30.27%;
+right: -31.5%;
+top: -31.5%;
+bottom: -30.27%;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 11.11%;
+right: 16.67%;
+top: 16.67%;
+bottom: 11.11%;
+
+background: #122460;
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 36.19%;
+right: 5.55%;
+top: 5.55%;
+bottom: 36.08%;
+
+border: 1.7px solid #122460;
+
+
+/* Vector */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+
+
+/* Group 7 */
+
+position: absolute;
+width: 276.7px;
+height: 144px;
+left: 465px;
+top: 852px;
+
+
+
+/* Group 2 */
+
+position: absolute;
+width: 276.7px;
+height: 144px;
+left: 465px;
+top: 852px;
+
+
+
+/* Ellipse 1 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 465px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 2 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 492.36px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 3 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 519.72px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 9 */
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 550.51px;
+top: 877.92px;
+
+background: #AFAFAF;
+
+
+/* Frame 1 */
+
+position: absolute;
+width: 144px;
+height: 144px;
+left: 597.7px;
+top: 852px;
+
+
+
+/* Frame 2 */
+
+position: absolute;
+width: 100px;
+height: 100px;
+left: -18.8px;
+top: 46px;
+
+
+
+/* Ellipse 8 */
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 670.92px;
+top: 877.92px;
+
+background: #AFAFAF;
+
+
+/* image 19 */
+
+position: absolute;
+width: 20px;
+height: 20px;
+left: 640px;
+top: 877px;
+
+background: url(image.png);
+
+
+/* image 20 */
+
+position: absolute;
+width: 20px;
+height: 19px;
+left: 611px;
+top: 879px;
+
+background: url(image.png);
+
+
+/* image 21 */
+
+position: absolute;
+width: 16px;
+height: 15px;
+left: 582px;
+top: 881px;
+
+background: url(image.png);
+
+
+/* map icon */
+
+position: absolute;
+width: 29px;
+height: 29px;
+left: 1385px;
+top: 344px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 8.01%;
+right: 14.91%;
+top: 11.25%;
+bottom: 25.04%;
+
+border: 1.5px solid #FFFFFF;
+
+
+/* si:chevron R */
+
+position: absolute;
+width: 57px;
+height: 56px;
+left: 1132px;
+top: 494px;
+
+transform: rotate(-180deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 40.68%;
+right: -8.47%;
+top: 12.5%;
+bottom: 19.7%;
+
+border: 4px solid #000000;
+transform: rotate(-180deg);
+
+
+/* Side bar */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+
+position: absolute;
+width: 247px;
+height: 1091px;
+left: 1193px;
+top: -9px;
+overflow-x: scroll;
+
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.5) 100%);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 3px;
+
+
+/* Side bar group */
+
+width: 247px;
+height: 1091px;
+
+background: linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Clicked color */
+
+position: absolute;
+width: 223px;
+height: 76px;
+left: 12px;
+top: 109px;
+
+background: #254A9F;
+border-radius: 32px;
+
+
+/* דף הבית */
+
+position: absolute;
+width: 179px;
+height: 46px;
+left: 36px;
+top: 127px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 600;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* מפת לימוד */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 35px;
+top: 209px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* אזור למידה */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 31px;
+top: 292px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* העולם שלי */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 35px;
+top: 374px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* map icon */
+
+position: absolute;
+width: 28px;
+height: 28px;
+left: 191px;
+top: 215px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.5%;
+bottom: 12.5%;
+
+border: 1.4px solid #FFFFFF;
+
+
+/* home icon */
+
+position: absolute;
+width: 35px;
+height: 35px;
+left: 188px;
+top: 127px;
+
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 19.52%;
+right: 17.62%;
+top: 21.79%;
+bottom: 12.5%;
+
+border: 1.4px solid #FFFFFF;
+
+
+/* basil icon */
+
+position: absolute;
+width: 29px;
+height: 29px;
+left: 191px;
+top: 380px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 11.95%;
+right: 11.96%;
+top: 11.93%;
+bottom: 11.93%;
+
+background: #FFFFFF;
+
+
+/* image 38 */
+
+position: absolute;
+width: 64px;
+height: 68px;
+left: 92px;
+top: 20px;
+
+background: url(image);
+
+
+/* settings icon */
+
+position: absolute;
+width: 33px;
+height: 33px;
+left: 295px;
+top: 18px;
+
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 11%;
+right: 10.99%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* Hi, Bdakar */
+
+position: absolute;
+width: 211px;
+height: 1px;
+left: -19px;
+top: 22px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 18px;
+line-height: 22px;
+text-align: center;
+
+color: #000000;
+
+
+
+/* famicons:notifications-outline */
+
+position: absolute;
+width: 31px;
+height: 31px;
+left: 229px;
+top: 19px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 15.59%;
+right: 15.6%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* iconamoon:profile-circle-light */
+
+position: absolute;
+width: 35px;
+height: 35px;
+left: 141px;
+top: 16px;
+
+
+
+/* Group */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 9.38%;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 12.5%;
+
+border: 1.8px solid #1F3E6C;
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 18.04%;
+right: 18.04%;
+top: 26.04%;
+bottom: 9.38%;
+
+border: 2px solid #1F3E6C;
+
+
+/* Learning whiteboard  */
+
+position: relative;
+width: 1440px;
+height: 1024px;
+
+background: #FFFFFF;
+
+
+/* רקע- בר עליון */
+
+position: absolute;
+width: 1440px;
+height: 74px;
+left: 0px;
+top: 0px;
+
+background: #FFFFFF;
+box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+
+
+/* בר עליון-דף הבית */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 10px 274px 10px 0px;
+gap: 10px;
+
+position: absolute;
+width: 465px;
+height: 62px;
+left: 975px;
+top: 12px;
+
+
+
+/* אזור למידה */
+
+width: 180px;
+height: 42px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 700;
+font-size: 32px;
+line-height: 42px;
+/* identical to box height */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* אזור שאלות */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px;
+isolation: isolate;
+
+position: absolute;
+width: 1100px;
+height: 836px;
+left: 43px;
+top: 104px;
+
+
+
+/* learning board */
+
+width: 1100px;
+height: 870px;
+
+background: #FFFFFF;
+box-shadow: 1px 0px 4px rgba(0, 0, 0, 0.25);
+border-radius: 20px;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+z-index: 0;
+
+
+/* Vector 7 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 1020px;
+top: 716px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+z-index: 1;
+
+
+/* Vector 14 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 1020px;
+top: 820px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+z-index: 2;
+
+
+/* שאלה 5 */
+
+position: absolute;
+width: 387px;
+height: 64px;
+left: 823px;
+top: 125px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 24px;
+line-height: 51px;
+/* or 212% */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+z-index: 3;
+
+
+/* סטטיסטיקה תיאורית | ממוצע */
+
+position: absolute;
+width: 553px;
+height: 64px;
+left: 668px;
+top: 20px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 51px;
+/* or 255% */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+z-index: 4;
+
+
+/* בכיתה יש 10 תלמידים. ציוני המבחן שלהם הם:
+ 65, 70, 70, 75, 80, 85, 85, 90, 95, 100 א.חשב/י את הממוצע של הציונים.
+ ב.מצא/י את החציון.
+ ג.קבע/י מהו השכיח.
+ ד.חשב/י את טווח הציונים. */
+
+position: absolute;
+width: 870px;
+height: 297px;
+left: 195px;
+top: 175px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 53px;
+/* or 221% */
+text-align: right;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 5;
+flex-grow: 0;
+z-index: 5;
+
+
+/* Firefly_please take only the white marbel building in the upper left side 286980 */
+
+position: absolute;
+width: 43px;
+height: 31px;
+left: 39px;
+top: 23px;
+
+background: url(Firefly_please take only the white marbel building in the upper left side 286979);
+
+/* Inside auto layout */
+flex: none;
+order: 6;
+flex-grow: 0;
+z-index: 6;
+
+
+/* Group 6 */
+
+position: absolute;
+width: 154px;
+height: 7px;
+left: 100px;
+top: 46px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 7;
+flex-grow: 0;
+z-index: 7;
+
+
+/* Rectangle 14 */
+
+position: absolute;
+width: 154px;
+height: 7px;
+left: 100px;
+top: 46px;
+
+background: #F0F0F0;
+border-radius: 10px;
+
+
+/* Rectangle 15 */
+
+position: absolute;
+width: 98.18px;
+height: 7px;
+left: 155.82px;
+top: 46px;
+
+background: #838383;
+border-radius: 10px;
+
+
+/* Vector 13 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 752px;
+top: 836px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 8;
+flex-grow: 0;
+z-index: 8;
+
+
+/* שאלה 5 מתוך 8 */
+
+position: absolute;
+width: 189px;
+height: 42px;
+left: 716px;
+top: 771px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 9;
+flex-grow: 0;
+z-index: 9;
+
+
+/* דלג */
+
+position: absolute;
+width: 342px;
+height: 42px;
+left: 100px;
+top: 772px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #9A9A9A;
+
+
+/* Inside auto layout */
+flex: none;
+order: 10;
+flex-grow: 0;
+z-index: 10;
+
+
+/* image 18 */
+
+position: absolute;
+width: 49px;
+height: 37px;
+left: 880px;
+top: 764px;
+
+background: url(image.png);
+
+/* Inside auto layout */
+flex: none;
+order: 11;
+flex-grow: 0;
+z-index: 11;
+
+
+/* image 23 */
+
+position: absolute;
+width: 28px;
+height: 28px;
+left: 1037px;
+top: 785px;
+
+background: url(image.png);
+
+/* Inside auto layout */
+flex: none;
+order: 12;
+flex-grow: 0;
+z-index: 12;
+
+
+/* Rectangle 20 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 1027px;
+height: 181px;
+left: 38px;
+top: 527px;
+
+border: 2px solid #B4B4B4;
+border-radius: 12px;
+
+/* Inside auto layout */
+flex: none;
+order: 13;
+flex-grow: 0;
+z-index: 13;
+
+
+/* הכנס את תשובתך כאן... */
+
+position: absolute;
+width: 699px;
+height: 53px;
+left: 549px;
+top: 598px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 53px;
+/* identical to box height, or 221% */
+text-align: center;
+
+color: #B0B0B0;
+
+
+/* Inside auto layout */
+flex: none;
+order: 14;
+flex-grow: 0;
+z-index: 14;
+
+
+/* Rectangle 21 */
+
+position: absolute;
+width: 171px;
+height: 53px;
+left: 38px;
+top: 761px;
+
+background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), #D9D9D9;
+border-radius: 15px;
+
+/* Inside auto layout */
+flex: none;
+order: 15;
+flex-grow: 0;
+z-index: 15;
+
+
+/* בדיקת תשובה */
+
+position: absolute;
+width: 269px;
+height: 50px;
+left: -15px;
+top: 771px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 16;
+flex-grow: 0;
+z-index: 16;
+
+
+/* Group 7 */
+
+position: absolute;
+width: 276.7px;
+height: 144px;
+left: 465px;
+top: 852px;
+
+
+
+/* Group 2 */
+
+position: absolute;
+width: 276.7px;
+height: 144px;
+left: 465px;
+top: 852px;
+
+
+
+/* Ellipse 1 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 465px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 2 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 492.36px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 3 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 519.72px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 9 */
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 550.51px;
+top: 877.92px;
+
+background: #AFAFAF;
+
+
+/* Frame 1 */
+
+position: absolute;
+width: 144px;
+height: 144px;
+left: 597.7px;
+top: 852px;
+
+
+
+/* Frame 2 */
+
+position: absolute;
+width: 100px;
+height: 100px;
+left: -18.8px;
+top: 46px;
+
+
+
+/* Ellipse 8 */
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 670.92px;
+top: 877.92px;
+
+background: #AFAFAF;
+
+
+/* image 19 */
+
+position: absolute;
+width: 20px;
+height: 20px;
+left: 640px;
+top: 877px;
+
+background: url(image.png);
+
+
+/* image 20 */
+
+position: absolute;
+width: 20px;
+height: 19px;
+left: 611px;
+top: 879px;
+
+background: url(image.png);
+
+
+/* image 21 */
+
+position: absolute;
+width: 16px;
+height: 15px;
+left: 582px;
+top: 881px;
+
+background: url(image.png);
+
+
+/* Whiteboard whole */
+
+position: absolute;
+width: 1100px;
+height: 984px;
+left: 42px;
+top: 103px;
+
+
+
+/* white board */
+
+position: absolute;
+width: 1100px;
+height: 873px;
+left: 42px;
+top: 103px;
+
+/* Gradient whiteboard */
+background: linear-gradient(178.82deg, rgba(255, 255, 255, 0.77) 17.91%, rgba(192, 216, 255, 0.77) 199.73%);
+opacity: 0.77;
+backdrop-filter: blur(42.5px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 20px;
+
+
+/* Whiteboard */
+
+position: absolute;
+width: 1037.03px;
+height: 962.89px;
+left: 75.97px;
+top: 124.11px;
+
+
+
+/* לוח לבן דיגיטלי */
+
+position: absolute;
+width: 268px;
+height: 57.2px;
+left: 845px;
+top: 136.11px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 24px;
+line-height: 29px;
+text-align: right;
+
+color: #000000;
+
+
+
+/* edit options */
+
+position: absolute;
+width: 223px;
+height: 76.26px;
+left: 890px;
+top: 871.64px;
+
+background: #FFFFFF;
+box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.25);
+border-radius: 9px;
+
+
+/* Vector */
+
+position: absolute;
+left: 47.71%;
+right: 50.56%;
+top: 103.42%;
+bottom: -6.15%;
+
+border: 1.7px solid #000000;
+
+
+/* image 36 */
+
+position: absolute;
+width: 40.07px;
+height: 40.07px;
+left: 75.97px;
+top: 124.11px;
+
+background: url(image.png);
+
+
+/* si:chevron R */
+
+position: absolute;
+width: 57px;
+height: 56px;
+left: 1132px;
+top: 494px;
+
+transform: rotate(-180deg);
+
+
+/* Vector */
+
+position: absolute;
+left: 40.68%;
+right: -8.47%;
+top: 12.5%;
+bottom: 19.7%;
+
+border: 4px solid #000000;
+transform: rotate(-180deg);
+
+
+/* Side bar */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+
+position: absolute;
+width: 247px;
+height: 1091px;
+left: 1193px;
+top: -9px;
+overflow-x: scroll;
+
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.5) 100%);
+backdrop-filter: blur(20px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 3px;
+
+
+/* Side bar group */
+
+width: 247px;
+height: 1091px;
+
+background: linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%);
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Clicked color */
+
+position: absolute;
+width: 223px;
+height: 76px;
+left: 12px;
+top: 109px;
+
+background: #254A9F;
+border-radius: 32px;
+
+
+/* דף הבית */
+
+position: absolute;
+width: 179px;
+height: 46px;
+left: 36px;
+top: 127px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 600;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* מפת לימוד */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 35px;
+top: 209px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* אזור למידה */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 31px;
+top: 292px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* העולם שלי */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 35px;
+top: 374px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+
+/* map icon */
+
+position: absolute;
+width: 28px;
+height: 28px;
+left: 191px;
+top: 215px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.5%;
+bottom: 12.5%;
+
+border: 1.4px solid #FFFFFF;
+
+
+/* home icon */
+
+position: absolute;
+width: 35px;
+height: 35px;
+left: 188px;
+top: 127px;
+
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 19.52%;
+right: 17.62%;
+top: 21.79%;
+bottom: 12.5%;
+
+border: 1.4px solid #FFFFFF;
+
+
+/* basil icon */
+
+position: absolute;
+width: 29px;
+height: 29px;
+left: 191px;
+top: 380px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 11.95%;
+right: 11.96%;
+top: 11.93%;
+bottom: 11.93%;
+
+background: #FFFFFF;
+
+
+/* image 38 */
+
+position: absolute;
+width: 64px;
+height: 68px;
+left: 92px;
+top: 20px;
+
+background: url(image);
+
+
+/* settings icon */
+
+position: absolute;
+width: 33px;
+height: 33px;
+left: 295px;
+top: 18px;
+
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 11%;
+right: 10.98%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* Hi, Bdakar */
+
+position: absolute;
+width: 211px;
+height: 1px;
+left: -19px;
+top: 22px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 18px;
+line-height: 22px;
+text-align: center;
+
+color: #000000;
+
+
+
+/* famicons:notifications-outline */
+
+position: absolute;
+width: 31px;
+height: 31px;
+left: 229px;
+top: 19px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 15.59%;
+right: 15.6%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* iconamoon:profile-circle-light */
+
+position: absolute;
+width: 35px;
+height: 35px;
+left: 141px;
+top: 16px;
+
+
+
+/* Group */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 9.38%;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 12.5%;
+
+border: 1.8px solid #1F3E6C;
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 18.04%;
+right: 18.04%;
+top: 26.04%;
+bottom: 9.38%;
+
+border: 2px solid #1F3E6C;
+
+
+/* Pencil icon/Active5 */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: 923px;
+top: 1065px;
+
+
+
+/* Group 8 */
+
+position: absolute;
+width: 52px;
+height: 52px;
+left: -11px;
+top: -9px;
+
+
+
+/* Ellipse 14 */
+
+position: absolute;
+left: -32.35%;
+right: -20.59%;
+top: -26.47%;
+bottom: -26.47%;
+
+background: #DDE7FF;
+
+
+/* Vector */
+
+position: absolute;
+left: 4.36%;
+right: 3.13%;
+top: 3.13%;
+bottom: 4.36%;
+
+background: #122460;
+
+
+/* Pencil icon/Active4 */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: 923px;
+top: 1236px;
+
+
+
+/* Ellipse 14 */
+
+position: absolute;
+left: -32.35%;
+right: -20.59%;
+top: -26.47%;
+bottom: -26.47%;
+
+background: #122460;
+
+
+/* Vector */
+
+position: absolute;
+left: 4.36%;
+right: 3.13%;
+top: 3.13%;
+bottom: 4.36%;
+
+background: rgba(212, 175, 55, 0.5);
+
+
+/* Pencil icon */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: 914px;
+top: 892px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 4.36%;
+right: 3.13%;
+top: 3.13%;
+bottom: 4.36%;
+
+background: #BCBCBC;
+
+
+/* Eraser */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2 + 282px);
+top: 893px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: -2.03%;
+right: -3.27%;
+top: 2.15%;
+bottom: 3.38%;
+
+background: #BCBCBC;
+
+
+/* Delete */
+
+position: absolute;
+width: 31px;
+height: 31px;
+left: calc(50% - 31px/2 + 348.5px);
+top: 894px;
+
+
+
+/* Delete icon */
+
+position: absolute;
+visibility: hidden;
+left: 0.61%;
+right: -0.61%;
+top: -0.61%;
+bottom: 0.61%;
+
+
+
+/* Delete */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2 + 350px);
+top: calc(50% - 34px/2 + 398px);
+
+
+
+/* Vector */
+
+position: absolute;
+left: 15.97%;
+right: 10.5%;
+top: 16.83%;
+bottom: 6.7%;
+
+border: 2px solid #BCBCBC;
+
+
+/* Pencil icon */
+
+box-sizing: border-box;
+
+position: relative;
+width: 74px;
+height: 433px;
+
+border: 1px dashed #9747FF;
+border-radius: 5px;
+
+
+/* Active=Active */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2);
+top: 362px;
+
+
+
+/* Rectangle 39 */
+
+position: absolute;
+width: 68px;
+height: 68px;
+left: -17px;
+top: -16.5px;
+
+background: #122460;
+border-radius: 17px;
+
+
+/* Vector */
+
+position: absolute;
+left: 4.36%;
+right: 3.13%;
+top: 3.13%;
+bottom: 4.36%;
+
+background: #FFFFFF;
+
+
+/* Active=Hover */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2);
+top: 191px;
+
+
+
+/* Rectangle 39 */
+
+position: absolute;
+left: -50%;
+right: -50%;
+top: -48.53%;
+bottom: -51.47%;
+
+background: rgba(211, 217, 255, 0.58);
+border-radius: 17px;
+
+
+/* Vector */
+
+position: absolute;
+left: 4.36%;
+right: 3.13%;
+top: 3.13%;
+bottom: 4.36%;
+
+background: #636C8F;
+
+
+/* Active=Default  */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2);
+top: 20px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 4.36%;
+right: 3.13%;
+top: 3.13%;
+bottom: 4.36%;
+
+background: #BCBCBC;
+
+
+/* Edit */
+
+box-sizing: border-box;
+
+position: relative;
+width: 74px;
+height: 433px;
+
+border: 1px dashed #9747FF;
+border-radius: 5px;
+
+
+/* Active=Active */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2);
+top: 362px;
+
+
+
+/* Edit icon */
+
+position: absolute;
+left: -30.27%;
+right: -31.5%;
+top: -31.5%;
+bottom: -30.27%;
+
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 11.11%;
+right: 16.67%;
+top: 16.67%;
+bottom: 11.11%;
+
+background: #626C8F;
+border: 0.5px solid #626C8F;
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 36.19%;
+right: 5.55%;
+top: 5.55%;
+bottom: 36.08%;
+
+background: #626C8F;
+border: 1.7px solid #626C8F;
+
+
+/* Vector */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+
+
+/* Active=Hover */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2);
+top: 191px;
+
+
+
+/* Rectangle 39 */
+
+position: absolute;
+left: -50%;
+right: -50%;
+top: -48.53%;
+bottom: -51.47%;
+
+background: rgba(211, 217, 255, 0.58);
+border-radius: 17px;
+
+
+/* Edit icon */
+
+position: absolute;
+left: -30.27%;
+right: -31.5%;
+top: -31.5%;
+bottom: -30.27%;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 11.11%;
+right: 16.67%;
+top: 16.67%;
+bottom: 11.11%;
+
+background: #626C8F;
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 36.19%;
+right: 5.55%;
+top: 5.55%;
+bottom: 36.08%;
+
+border: 1.7px solid #626C8F;
+
+
+/* Vector */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+
+
+/* Active=Default  */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2);
+top: 20px;
+
+
+
+/* Edit icon */
+
+position: absolute;
+left: -30.27%;
+right: -31.5%;
+top: -31.5%;
+bottom: -30.27%;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 11.11%;
+right: 16.67%;
+top: 16.67%;
+bottom: 11.11%;
+
+background: #122460;
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 36.19%;
+right: 5.55%;
+top: 5.55%;
+bottom: 36.08%;
+
+border: 1.7px solid #122460;
+
+
+/* Vector */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+
+
+/* Delete */
+
+box-sizing: border-box;
+
+position: relative;
+width: 74px;
+height: 433px;
+
+border: 1px dashed #9747FF;
+border-radius: 5px;
+
+
+/* Active=Active */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2);
+top: 362px;
+
+
+
+/* Rectangle 39 */
+
+position: absolute;
+width: 68px;
+height: 68px;
+left: -17px;
+top: -16.5px;
+
+background: #122460;
+border-radius: 17px;
+
+
+/* Vector */
+
+position: absolute;
+left: 15.97%;
+right: 10.5%;
+top: 16.83%;
+bottom: 6.7%;
+
+border: 2px solid #FFFFFF;
+
+
+/* Active=Hover */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2);
+top: 191px;
+
+
+
+/* Rectangle 39 */
+
+position: absolute;
+left: -50%;
+right: -50%;
+top: -48.53%;
+bottom: -51.47%;
+
+background: rgba(211, 217, 255, 0.58);
+border-radius: 17px;
+
+
+/* Vector */
+
+position: absolute;
+left: 15.97%;
+right: 10.5%;
+top: 16.83%;
+bottom: 6.7%;
+
+border: 2px solid #626C8F;
+
+
+/* Active=Default  */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2);
+top: 20px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 15.97%;
+right: 10.5%;
+top: 16.83%;
+bottom: 6.7%;
+
+border: 2px solid #BCBCBC;
+
+
+/* Eraser */
+
+box-sizing: border-box;
+
+position: relative;
+width: 74px;
+height: 433px;
+
+border: 1px dashed #9747FF;
+border-radius: 5px;
+
+
+/* Active=Active */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2);
+top: 362px;
+
+
+
+/* Rectangle 39 */
+
+position: absolute;
+width: 68px;
+height: 68px;
+left: -17px;
+top: -16.5px;
+
+background: #122460;
+border-radius: 17px;
+
+
+/* Vector */
+
+position: absolute;
+left: -2.03%;
+right: -3.27%;
+top: 2.15%;
+bottom: 3.38%;
+
+background: #FFFFFF;
+
+
+/* Active=Hover */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2);
+top: 191px;
+
+
+
+/* Rectangle 39 */
+
+position: absolute;
+left: -50%;
+right: -50%;
+top: -48.53%;
+bottom: -51.47%;
+
+background: rgba(211, 217, 255, 0.58);
+border-radius: 17px;
+
+
+/* Vector */
+
+position: absolute;
+left: -2.03%;
+right: -3.27%;
+top: 2.15%;
+bottom: 3.38%;
+
+background: #626C8F;
+
+
+/* Active=Default  */
+
+position: absolute;
+width: 34px;
+height: 34px;
+left: calc(50% - 34px/2);
+top: 20px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: -2.03%;
+right: -3.27%;
+top: 2.15%;
+bottom: 3.38%;
+
+background: #BCBCBC;
+
+
+/* Learning whiteboard  X sidebar */
+
+position: relative;
+width: 1440px;
+height: 1024px;
+
+background: #FFFFFF;
+
+
+/* רקע- בר עליון */
+
+position: absolute;
+width: 1440px;
+height: 74px;
+left: 0px;
+top: 0px;
+
+background: #FFFFFF;
+box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+
+
+/* בר עליון-דף הבית */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 10px 274px 10px 0px;
+gap: 10px;
+
+position: absolute;
+width: 465px;
+height: 62px;
+left: 1217px;
+top: 12px;
+
+
+
+/* אזור למידה */
+
+width: 189px;
+height: 42px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 700;
+font-size: 32px;
+line-height: 42px;
+/* identical to box height */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* אזור שאלות */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px;
+isolation: isolate;
+
+position: absolute;
+width: 1343px;
+height: 836px;
+left: 43px;
+top: 104px;
+
+
+
+/* white board */
+
+width: 1343px;
+height: 870px;
+
+/* Gradient whiteboard */
+background: linear-gradient(178.82deg, rgba(255, 255, 255, 0.77) 17.91%, rgba(192, 216, 255, 0.77) 199.73%);
+border-radius: 20px;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+z-index: 0;
+
+
+/* Vector 7 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 1020px;
+top: 716px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+z-index: 1;
+
+
+/* Vector 14 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 1020px;
+top: 820px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+z-index: 2;
+
+
+/* שאלה 5 */
+
+position: absolute;
+width: 387px;
+height: 64px;
+left: 1054px;
+top: 125px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 24px;
+line-height: 51px;
+/* or 212% */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+z-index: 3;
+
+
+/* סטטיסטיקה תיאורית | ממוצע */
+
+position: absolute;
+width: 553px;
+height: 64px;
+left: 891px;
+top: 20px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 51px;
+/* or 255% */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+z-index: 4;
+
+
+/* בכיתה יש 10 תלמידים. ציוני המבחן שלהם הם:
+ 65, 70, 70, 75, 80, 85, 85, 90, 95, 100 א.חשב/י את הממוצע של הציונים.
+ ב.מצא/י את החציון.
+ ג.קבע/י מהו השכיח.
+ ד.חשב/י את טווח הציונים. */
+
+position: absolute;
+width: 870px;
+height: 297px;
+left: 426px;
+top: 175px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 53px;
+/* or 221% */
+text-align: right;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 5;
+flex-grow: 0;
+z-index: 5;
+
+
+/* Firefly_please take only the white marbel building in the upper left side 286980 */
+
+position: absolute;
+width: 43px;
+height: 31px;
+left: 39px;
+top: 23px;
+
+background: url(Firefly_please take only the white marbel building in the upper left side 286979);
+
+/* Inside auto layout */
+flex: none;
+order: 6;
+flex-grow: 0;
+z-index: 6;
+
+
+/* Group 6 */
+
+position: absolute;
+width: 154px;
+height: 7px;
+left: 100px;
+top: 46px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 7;
+flex-grow: 0;
+z-index: 7;
+
+
+/* Rectangle 14 */
+
+position: absolute;
+width: 154px;
+height: 7px;
+left: 100px;
+top: 46px;
+
+background: #F0F0F0;
+border-radius: 10px;
+
+
+/* Rectangle 15 */
+
+position: absolute;
+width: 98.18px;
+height: 7px;
+left: 155.83px;
+top: 46px;
+
+background: #838383;
+border-radius: 10px;
+
+
+/* Vector 13 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 752px;
+top: 836px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 8;
+flex-grow: 0;
+z-index: 8;
+
+
+/* שאלה 5 מתוך 8 */
+
+position: absolute;
+width: 189px;
+height: 42px;
+left: 947px;
+top: 771px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 9;
+flex-grow: 0;
+z-index: 9;
+
+
+/* דלג */
+
+position: absolute;
+width: 342px;
+height: 42px;
+left: 100px;
+top: 772px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #9A9A9A;
+
+
+/* Inside auto layout */
+flex: none;
+order: 10;
+flex-grow: 0;
+z-index: 10;
+
+
+/* image 18 */
+
+position: absolute;
+width: 49px;
+height: 37px;
+left: 1111px;
+top: 764px;
+
+background: url(image.png);
+
+/* Inside auto layout */
+flex: none;
+order: 11;
+flex-grow: 0;
+z-index: 11;
+
+
+/* image 23 */
+
+position: absolute;
+width: 28px;
+height: 28px;
+left: 1268px;
+top: 785px;
+
+background: url(image.png);
+
+/* Inside auto layout */
+flex: none;
+order: 12;
+flex-grow: 0;
+z-index: 12;
+
+
+/* Rectangle 20 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 1253px;
+height: 181px;
+left: 38px;
+top: 527px;
+
+border: 2px solid #B4B4B4;
+border-radius: 12px;
+
+/* Inside auto layout */
+flex: none;
+order: 13;
+flex-grow: 0;
+z-index: 13;
+
+
+/* הכנס את תשובתך כאן... */
+
+position: absolute;
+width: 699px;
+height: 53px;
+left: 792px;
+top: 598px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 53px;
+/* identical to box height, or 221% */
+text-align: center;
+
+color: #B0B0B0;
+
+
+/* Inside auto layout */
+flex: none;
+order: 14;
+flex-grow: 0;
+z-index: 14;
+
+
+/* Rectangle 21 */
+
+position: absolute;
+width: 171px;
+height: 53px;
+left: 38px;
+top: 761px;
+
+background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), #D9D9D9;
+border-radius: 15px;
+
+/* Inside auto layout */
+flex: none;
+order: 15;
+flex-grow: 0;
+z-index: 15;
+
+
+/* בדיקת תשובה */
+
+position: absolute;
+width: 269px;
+height: 50px;
+left: -15px;
+top: 771px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 16;
+flex-grow: 0;
+z-index: 16;
+
+
+/* Group 7 */
+
+position: absolute;
+width: 276.7px;
+height: 144px;
+left: 591px;
+top: 852px;
+
+
+
+/* Group 2 */
+
+position: absolute;
+width: 276.7px;
+height: 144px;
+left: 591px;
+top: 852px;
+
+
+
+/* Ellipse 1 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 591px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 2 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 618.36px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 3 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 645.72px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 9 */
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 676.51px;
+top: 877.92px;
+
+background: #AFAFAF;
+
+
+/* Frame 1 */
+
+position: absolute;
+width: 144px;
+height: 144px;
+left: 723.7px;
+top: 852px;
+
+
+
+/* Frame 2 */
+
+position: absolute;
+width: 100px;
+height: 100px;
+left: -18.8px;
+top: 46px;
+
+
+
+/* Ellipse 8 */
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 796.92px;
+top: 877.92px;
+
+background: #AFAFAF;
+
+
+/* image 19 */
+
+position: absolute;
+width: 20px;
+height: 20px;
+left: 766px;
+top: 877px;
+
+background: url(image.png);
+
+
+/* image 20 */
+
+position: absolute;
+width: 20px;
+height: 19px;
+left: 737px;
+top: 879px;
+
+background: url(image.png);
+
+
+/* image 21 */
+
+position: absolute;
+width: 16px;
+height: 15px;
+left: 708px;
+top: 881px;
+
+background: url(image.png);
+
+
+/* Whiteboard whole */
+
+position: absolute;
+width: 1342.78px;
+height: 873px;
+left: 42px;
+top: 103px;
+
+opacity: 0.75;
+backdrop-filter: blur(42.5px);
+/* Note: backdrop-filter has minimal browser support */
+
+
+/* white board */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 1342.78px;
+height: 873px;
+left: 42px;
+top: 103px;
+
+background: #F0F8FF;
+border: 1px solid rgba(255, 255, 255, 0.5);
+backdrop-filter: blur(42.5px);
+/* Note: backdrop-filter has minimal browser support */
+border-radius: 20px;
+
+
+/* Whiteboard */
+
+position: absolute;
+width: 1265.92px;
+height: 823.8px;
+left: 83.46px;
+top: 124.11px;
+
+
+
+/* לוח לבן דיגיטלי */
+
+position: absolute;
+width: 327.15px;
+height: 57.2px;
+left: 1022.23px;
+top: 136.11px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 24px;
+line-height: 29px;
+text-align: right;
+
+color: #000000;
+
+border: 1px solid rgba(255, 255, 255, 0.77);
+
+
+/* Rectangle 22 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 272.22px;
+height: 76.26px;
+left: 1077.16px;
+top: 871.64px;
+
+background: #FFFFFF;
+border: 1px solid rgba(255, 255, 255, 0.77);
+box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.25);
+border-radius: 9px;
+
+
+/* image 33 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 37.63px;
+height: 37.63px;
+left: 1109.62px;
+top: 887.95px;
+
+background: url(image.png);
+border: 1px solid rgba(255, 255, 255, 0.77);
+
+
+/* image 34 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 44.27px;
+height: 44.27px;
+left: 1191.74px;
+top: 885.63px;
+
+background: url(image.png);
+border: 1px solid rgba(255, 255, 255, 0.77);
+
+
+/* image 35 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 48.7px;
+height: 48.7px;
+left: 1281.08px;
+top: 884.42px;
+
+background: url(image.png);
+border: 1px solid rgba(255, 255, 255, 0.77);
+
+
+/* image 36 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 44.27px;
+height: 44.27px;
+left: 83.46px;
+top: 124.11px;
+
+background: url(image.png);
+border: 1px solid rgba(255, 255, 255, 0.77);
+
+
+/* Whiteboard whole */
+
+position: absolute;
+width: 1265.18px;
+height: 823.8px;
+left: 83.44px;
+top: 124.11px;
+
+
+
+/* Whiteboard */
+
+position: absolute;
+width: 1265.18px;
+height: 823.8px;
+left: 83.44px;
+top: 124.11px;
+
+
+
+/* לוח לבן דיגיטלי */
+
+position: absolute;
+width: 326.96px;
+height: 57.2px;
+left: 1021.66px;
+top: 136.11px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 24px;
+line-height: 29px;
+text-align: right;
+
+color: #000000;
+
+
+
+/* Rectangle 22 */
+
+position: absolute;
+width: 272.06px;
+height: 76.26px;
+left: 1076.56px;
+top: 871.64px;
+
+background: #FFFFFF;
+box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.25);
+border-radius: 9px;
+
+
+/* image 33 */
+
+position: absolute;
+width: 37.62px;
+height: 37.62px;
+left: 1108.99px;
+top: 887.95px;
+
+background: url(image.png);
+
+
+/* image 34 */
+
+position: absolute;
+width: 44.26px;
+height: 44.26px;
+left: 1191.07px;
+top: 885.64px;
+
+background: url(image.png);
+
+
+/* image 35 */
+
+position: absolute;
+width: 48.68px;
+height: 48.68px;
+left: 1280.36px;
+top: 884.43px;
+
+background: url(image.png);
+
+
+/* image 36 */
+
+position: absolute;
+width: 44.26px;
+height: 44.26px;
+left: 83.44px;
+top: 124.11px;
+
+background: url(image.png);
+
+
+/* si:chevron R */
+
+position: absolute;
+width: 57px;
+height: 56px;
+left: 1408px;
+top: 491px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: -8.47%;
+right: 40.68%;
+top: 19.7%;
+bottom: 12.5%;
+
+border: 4px solid #000000;
+
+
+/* settings icon */
+
+position: absolute;
+width: 33px;
+height: 33px;
+left: 295px;
+top: 18px;
+
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 11%;
+right: 10.98%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* Hi, Bdakar */
+
+position: absolute;
+width: 211px;
+height: 1px;
+left: -19px;
+top: 22px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 18px;
+line-height: 22px;
+text-align: center;
+
+color: #000000;
+
+
+
+/* famicons:notifications-outline */
+
+position: absolute;
+width: 31px;
+height: 31px;
+left: 229px;
+top: 19px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 15.59%;
+right: 15.6%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* iconamoon:profile-circle-light */
+
+position: absolute;
+width: 35px;
+height: 35px;
+left: 141px;
+top: 16px;
+
+
+
+/* Group */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 9.38%;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 12.5%;
+
+border: 1.8px solid #1F3E6C;
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 18.04%;
+right: 18.04%;
+top: 26.04%;
+bottom: 9.38%;
+
+border: 2px solid #1F3E6C;
+
+
+/* Learning X sidebar */
+
+position: relative;
+width: 1440px;
+height: 1024px;
+
+background: #FFFFFF;
+
+
+/* רקע- בר עליון */
+
+position: absolute;
+width: 1440px;
+height: 74px;
+left: 0px;
+top: 0px;
+
+background: #FFFFFF;
+box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+
+
+/* בר עליון-דף הבית */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 10px 274px 10px 0px;
+gap: 10px;
+
+position: absolute;
+width: 470px;
+height: 62px;
+left: 1212px;
+top: 12px;
+
+
+
+/* אזור למידה */
+
+width: 206px;
+height: 42px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 700;
+font-size: 32px;
+line-height: 42px;
+/* identical to box height */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* אזור שאלות */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px;
+isolation: isolate;
+
+position: absolute;
+width: 1343px;
+height: 836px;
+left: 43px;
+top: 104px;
+
+
+
+/* white board */
+
+width: 1343px;
+height: 870px;
+
+/* Gradient whiteboard */
+background: linear-gradient(178.82deg, rgba(255, 255, 255, 0.77) 17.91%, rgba(192, 216, 255, 0.77) 199.73%);
+box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.25);
+border-radius: 20px;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+z-index: 0;
+
+
+/* Vector 7 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 1020px;
+top: 716px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+z-index: 1;
+
+
+/* Vector 14 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 1020px;
+top: 820px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+z-index: 2;
+
+
+/* שאלה 5 */
+
+position: absolute;
+width: 387px;
+height: 64px;
+left: 1054px;
+top: 125px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 24px;
+line-height: 51px;
+/* or 212% */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+z-index: 3;
+
+
+/* סטטיסטיקה תיאורית | ממוצע */
+
+position: absolute;
+width: 553px;
+height: 64px;
+left: 891px;
+top: 20px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 51px;
+/* or 255% */
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+z-index: 4;
+
+
+/* בכיתה יש 10 תלמידים. ציוני המבחן שלהם הם:
+ 65, 70, 70, 75, 80, 85, 85, 90, 95, 100 א.חשב/י את הממוצע של הציונים.
+ ב.מצא/י את החציון.
+ ג.קבע/י מהו השכיח.
+ ד.חשב/י את טווח הציונים. */
+
+position: absolute;
+width: 870px;
+height: 297px;
+left: 426px;
+top: 175px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 53px;
+/* or 221% */
+text-align: right;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 5;
+flex-grow: 0;
+z-index: 5;
+
+
+/* Firefly_please take only the white marbel building in the upper left side 286980 */
+
+position: absolute;
+width: 43px;
+height: 31px;
+left: 39px;
+top: 23px;
+
+background: url(Firefly_please take only the white marbel building in the upper left side 286979);
+
+/* Inside auto layout */
+flex: none;
+order: 6;
+flex-grow: 0;
+z-index: 6;
+
+
+/* Group 6 */
+
+position: absolute;
+width: 154px;
+height: 7px;
+left: 100px;
+top: 46px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 7;
+flex-grow: 0;
+z-index: 7;
+
+
+/* Rectangle 14 */
+
+position: absolute;
+width: 154px;
+height: 7px;
+left: 100px;
+top: 46px;
+
+background: #F0F0F0;
+border-radius: 10px;
+
+
+/* Rectangle 15 */
+
+position: absolute;
+width: 98.18px;
+height: 7px;
+left: 155.82px;
+top: 46px;
+
+background: #838383;
+border-radius: 10px;
+
+
+/* Vector 13 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 752px;
+top: 836px;
+
+border: 2px solid #34A853;
+
+/* Inside auto layout */
+flex: none;
+order: 8;
+flex-grow: 0;
+z-index: 8;
+
+
+/* שאלה 5 מתוך 8 */
+
+position: absolute;
+width: 189px;
+height: 42px;
+left: 947px;
+top: 771px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 9;
+flex-grow: 0;
+z-index: 9;
+
+
+/* דלג */
+
+position: absolute;
+width: 342px;
+height: 42px;
+left: 100px;
+top: 772px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #9A9A9A;
+
+
+/* Inside auto layout */
+flex: none;
+order: 10;
+flex-grow: 0;
+z-index: 10;
+
+
+/* image 18 */
+
+position: absolute;
+width: 49px;
+height: 37px;
+left: 1111px;
+top: 764px;
+
+background: url(image.png);
+
+/* Inside auto layout */
+flex: none;
+order: 11;
+flex-grow: 0;
+z-index: 11;
+
+
+/* image 23 */
+
+position: absolute;
+width: 28px;
+height: 28px;
+left: 1268px;
+top: 785px;
+
+background: url(image.png);
+
+/* Inside auto layout */
+flex: none;
+order: 12;
+flex-grow: 0;
+z-index: 12;
+
+
+/* Rectangle 20 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 1253px;
+height: 181px;
+left: 38px;
+top: 527px;
+
+border: 2px solid #B4B4B4;
+border-radius: 12px;
+
+/* Inside auto layout */
+flex: none;
+order: 13;
+flex-grow: 0;
+z-index: 13;
+
+
+/* הכנס את תשובתך כאן... */
+
+position: absolute;
+width: 699px;
+height: 53px;
+left: 792px;
+top: 598px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 53px;
+/* identical to box height, or 221% */
+text-align: center;
+
+color: #B0B0B0;
+
+
+/* Inside auto layout */
+flex: none;
+order: 14;
+flex-grow: 0;
+z-index: 14;
+
+
+/* Rectangle 21 */
+
+position: absolute;
+width: 171px;
+height: 53px;
+left: 38px;
+top: 761px;
+
+background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), #D9D9D9;
+border-radius: 15px;
+
+/* Inside auto layout */
+flex: none;
+order: 15;
+flex-grow: 0;
+z-index: 15;
+
+
+/* בדיקת תשובה */
+
+position: absolute;
+width: 269px;
+height: 50px;
+left: -15px;
+top: 771px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 26px;
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 16;
+flex-grow: 0;
+z-index: 16;
+
+
+/* Group 7 */
+
+position: absolute;
+width: 276.7px;
+height: 144px;
+left: 591px;
+top: 852px;
+
+
+
+/* Group 2 */
+
+position: absolute;
+width: 276.7px;
+height: 144px;
+left: 591px;
+top: 852px;
+
+
+
+/* Ellipse 1 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 591px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 2 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 618.36px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 3 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 645.72px;
+top: 877.92px;
+
+border: 2px solid #6F6F6F;
+
+
+/* Ellipse 9 */
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 676.51px;
+top: 877.92px;
+
+background: #AFAFAF;
+
+
+/* Frame 1 */
+
+position: absolute;
+width: 144px;
+height: 144px;
+left: 723.7px;
+top: 852px;
+
+
+
+/* Frame 2 */
+
+position: absolute;
+width: 100px;
+height: 100px;
+left: -18.8px;
+top: 46px;
+
+
+
+/* Ellipse 8 */
+
+position: absolute;
+width: 18.72px;
+height: 18.72px;
+left: 796.92px;
+top: 877.92px;
+
+background: #AFAFAF;
+
+
+/* image 19 */
+
+position: absolute;
+width: 20px;
+height: 20px;
+left: 766px;
+top: 877px;
+
+background: url(image.png);
+
+
+/* image 20 */
+
+position: absolute;
+width: 20px;
+height: 19px;
+left: 737px;
+top: 879px;
+
+background: url(image.png);
+
+
+/* image 21 */
+
+position: absolute;
+width: 16px;
+height: 15px;
+left: 708px;
+top: 881px;
+
+background: url(image.png);
+
+
+/* si:chevron R */
+
+position: absolute;
+width: 57px;
+height: 56px;
+left: 1408px;
+top: 491px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: -8.47%;
+right: 40.68%;
+top: 19.7%;
+bottom: 12.5%;
+
+border: 4px solid #000000;
+
+
+/* settings icon */
+
+position: absolute;
+width: 33px;
+height: 33px;
+left: 295px;
+top: 18px;
+
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 11%;
+right: 10.99%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* Hi, Bdakar */
+
+position: absolute;
+width: 211px;
+height: 1px;
+left: -19px;
+top: 22px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 18px;
+line-height: 22px;
+text-align: center;
+
+color: #000000;
+
+
+
+/* famicons:notifications-outline */
+
+position: absolute;
+width: 31px;
+height: 31px;
+left: 229px;
+top: 19px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 15.59%;
+right: 15.6%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* iconamoon:profile-circle-light */
+
+position: absolute;
+width: 35px;
+height: 35px;
+left: 141px;
+top: 16px;
+
+
+
+/* Group */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 9.38%;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 12.5%;
+
+border: 1.8px solid #1F3E6C;
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 18.04%;
+right: 18.04%;
+top: 26.04%;
+bottom: 9.38%;
+
+border: 2px solid #1F3E6C;
+
+
+/* Dashboard Responsive 3  */
+
+position: relative;
+width: 1440px;
+height: 1024px;
+
+background: #FFFFFF;
+
+
+/* רקע- בר עליון */
+
+position: absolute;
+width: 1440px;
+height: 74px;
+left: 0px;
+top: 0px;
+
+background: #FFFFFF;
+box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+
+
+/* Vector 12 */
+
+position: absolute;
+width: 1572px;
+height: 1px;
+left: -57px;
+top: 74px;
+
+border: 1px solid #000000;
+
+
+/* Vector 7 */
+
+position: absolute;
+width: 0px;
+height: 1px;
+left: 1063px;
+top: 820px;
+
+border: 2px solid #34A853;
+
+
+/* עולם */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 52px 35px;
+gap: 10px;
+
+position: absolute;
+width: 675px;
+height: 316px;
+left: 714px;
+top: 655px;
+
+background: #FAFAFF;
+box-shadow: 1px 0px 4px rgba(0, 0, 0, 0.25);
+border-radius: 20px;
+
+
+/* unnamed (7) 1 */
+
+width: 315px;
+height: 210.1px;
+
+background: url(unnamed (7));
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* בר עליון-דף הבית */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 10px 224px 10px 243px;
+gap: 10px;
+
+position: absolute;
+width: 621px;
+height: 62px;
+left: 1012px;
+top: 3px;
+
+
+
+/* דף הבית */
+
+width: 154px;
+height: 42px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 700;
+font-size: 32px;
+line-height: 38px;
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* גרף */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 26px 39px 26px 144px;
+gap: 85px;
+
+position: absolute;
+width: 616px;
+height: 263px;
+left: 43px;
+top: 708px;
+
+background: #FAFAFF;
+box-shadow: 1px 0px 4px rgba(0, 0, 0, 0.25);
+border-radius: 20px;
+
+
+/* Vector 14 */
+
+width: 177px;
+height: 137px;
+
+border: 2px solid #000000;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Group 5 */
+
+width: 157px;
+height: 157px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Ellipse 11 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 157px;
+height: 157px;
+left: 406px;
+top: 53px;
+
+border: 8px solid #F0F0F0;
+
+
+/* Ellipse 12 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 149.9px;
+height: 149.9px;
+left: 409.55px;
+top: 56.55px;
+
+border: 8px solid #838383;
+
+
+/* 35% */
+
+position: absolute;
+width: 112.65px;
+height: 67.41px;
+left: 423.74px;
+top: 103.56px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 600;
+font-size: 48px;
+line-height: 58px;
+text-align: right;
+
+color: #000000;
+
+
+
+/* מצב נוכחי של הכל */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 31px 0px 31px 266px;
+gap: 10px;
+
+position: absolute;
+width: 616px;
+height: 263px;
+left: 43px;
+top: 392px;
+
+background: #FAFAFF;
+box-shadow: 1px 0px 4px rgba(0, 0, 0, 0.25);
+border-radius: 20px;
+
+
+/* [V] ממוצע (הושלם) חציון ושכיח (עכשיו) [->] סטיית תקן (בקרוב) */
+
+width: 231px;
+height: 175px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 35px;
+/* or 146% */
+text-align: right;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* לוח דיגיטלי */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-end;
+padding: 29px 36px 29px 0px;
+isolation: isolate;
+
+position: absolute;
+width: 675px;
+height: 497px;
+left: 714px;
+top: 105px;
+
+background: #FAFAFF;
+box-shadow: 1px 0px 4px rgba(0, 0, 0, 0.25);
+border-radius: 20px;
+
+
+/* לוח לבן דיגיטלי */
+
+width: 226px;
+height: 48px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 700;
+font-size: 24px;
+line-height: 28px;
+text-align: right;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+z-index: 0;
+
+
+/* white board */
+
+width: 599px;
+height: 345px;
+
+/* Gradient whiteboard */
+background: linear-gradient(178.82deg, rgba(255, 255, 255, 0.77) 17.91%, rgba(192, 216, 255, 0.77) 199.73%);
+border-radius: 20px;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+z-index: 1;
+
+
+/* היי, היום אנחנו הולכים לכבוש את 'סטיית התקן' ולפתוח את מגדל השעון של האולפן! */
+
+position: absolute;
+width: 478px;
+height: 98px;
+left: 113px;
+top: 177px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 53px;
+/* or 221% */
+text-align: right;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+z-index: 2;
+
+
+/* טיפ */
+
+position: absolute;
+width: 194px;
+height: 35px;
+left: 397px;
+top: 136px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+line-height: 24px;
+text-align: right;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+z-index: 3;
+
+
+/* בר צידי */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+isolation: isolate;
+
+position: absolute;
+width: 406px;
+height: 1023px;
+left: 1440px;
+top: 1px;
+
+
+
+/* Upper bar */
+
+width: 406px;
+height: 1023px;
+
+background: #ECECEC;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+z-index: 0;
+
+
+/* Rectangle 1 */
+
+position: absolute;
+width: 124px;
+height: 48px;
+left: 128px;
+top: 26px;
+
+background: #000000;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+z-index: 1;
+
+
+/* לוגו */
+
+position: absolute;
+width: 180px;
+height: 40px;
+left: 100px;
+top: 23px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 40px;
+line-height: 48px;
+text-align: center;
+
+color: #FFFFFF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+z-index: 2;
+
+
+/* Rectangle 16 */
+
+position: absolute;
+width: 218px;
+height: 76px;
+left: 50px;
+top: 104px;
+
+background: #D9D9D9;
+border-radius: 20px;
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+flex-grow: 0;
+z-index: 3;
+
+
+/* Rectangle 17 */
+
+position: absolute;
+width: 218px;
+height: 75px;
+left: 50px;
+top: 210px;
+
+background: #D9D9D9;
+border-radius: 20px;
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+flex-grow: 0;
+z-index: 4;
+
+
+/* Rectangle 18 */
+
+position: absolute;
+width: 218px;
+height: 76px;
+left: 50px;
+top: 315px;
+
+background: #D9D9D9;
+border-radius: 20px;
+
+/* Inside auto layout */
+flex: none;
+order: 5;
+flex-grow: 0;
+z-index: 5;
+
+
+/* Rectangle 19 */
+
+position: absolute;
+width: 218px;
+height: 75px;
+left: 50px;
+top: 421px;
+
+background: #D9D9D9;
+border-radius: 20px;
+
+/* Inside auto layout */
+flex: none;
+order: 6;
+flex-grow: 0;
+z-index: 6;
+
+
+/* דף הבית */
+
+position: absolute;
+width: 179px;
+height: 46px;
+left: 75px;
+top: 124px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 42px;
+text-align: center;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 7;
+flex-grow: 0;
+z-index: 7;
+
+
+/* מפת לימוד */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 73px;
+top: 230px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 42px;
+text-align: center;
+
+color: #989898;
+
+
+/* Inside auto layout */
+flex: none;
+order: 8;
+flex-grow: 0;
+z-index: 8;
+
+
+/* אזור למידה */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 68px;
+top: 336px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 42px;
+text-align: center;
+
+color: #989898;
+
+
+/* Inside auto layout */
+flex: none;
+order: 9;
+flex-grow: 0;
+z-index: 9;
+
+
+/* העולם שלי */
+
+position: absolute;
+width: 156px;
+height: 40px;
+left: 76px;
+top: 441px;
+
+font-family: 'Assistant';
+font-style: normal;
+font-weight: 400;
+font-size: 32px;
+line-height: 42px;
+text-align: center;
+
+color: #989898;
+
+
+/* Inside auto layout */
+flex: none;
+order: 10;
+flex-grow: 0;
+z-index: 10;
+
+
+/* image 28 */
+
+position: absolute;
+width: 26px;
+height: 26px;
+left: 225px;
+top: 241px;
+
+background: url(image.png);
+
+/* Inside auto layout */
+flex: none;
+order: 11;
+flex-grow: 0;
+z-index: 11;
+
+
+/* image 24 */
+
+position: absolute;
+width: 25px;
+height: 25px;
+left: 225px;
+top: 133px;
+
+background: url(image.png);
+
+/* Inside auto layout */
+flex: none;
+order: 12;
+flex-grow: 0;
+z-index: 12;
+
+
+/* המשך של שאלות */
+
+position: absolute;
+width: 616px;
+height: 235px;
+left: 43px;
+top: 105px;
+
+background: #FAFAFF;
+box-shadow: 1px 0px 4px rgba(0, 0, 0, 0.25);
+border-radius: 20px;
+
+
+/* Frame 4 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 0px 0px 10px 10px;
+gap: 10px;
+
+position: absolute;
+width: 318px;
+height: 71px;
+left: calc(50% - 318px/2 + 167px);
+top: 60px;
+
+
+
+/* המשך שאלה 5 בקורס
+סטטיסטיקה תיאורית */
+
+width: 212px;
+height: 104px;
+
+font-family: 'Rubik';
+font-style: normal;
+font-weight: 400;
+font-size: 24px;
+line-height: 52px;
+/* or 217% */
+text-align: right;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Frame 5 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 36px 10px 10px;
+gap: 10px;
+
+position: absolute;
+width: 275px;
+height: 71px;
+left: calc(50% - 275px/2 + 145.5px);
+top: 112px;
+
+
+
+/* האסט הבא */
+
+width: 255px;
+height: 25px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 52px;
+/* or 371% */
+text-align: right;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 1;
+
+
+/* Frame 3 */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 10px;
+
+position: absolute;
+width: 552px;
+height: 13px;
+left: 29px;
+top: 192.75px;
+
+background: #E4E4E4;
+border-radius: 10px;
+
+
+/* אפור */
+
+width: 221px;
+height: 13px;
+
+background: #090067;
+border-radius: 10px;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Firefly_please take only the white marbel building in the upper left side 286981 */
+
+position: absolute;
+width: 141px;
+height: 103px;
+left: 29px;
+top: 74.5px;
+
+background: url(Firefly_please take only the white marbel building in the upper left side 286979);
+
+
+/* si:chevron L */
+
+position: absolute;
+width: 57px;
+height: 56px;
+left: 1407px;
+top: 483px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: -8.47%;
+right: 40.68%;
+top: 19.7%;
+bottom: 12.5%;
+
+border: 4px solid #000000;
+
+
+/* settings icon */
+
+position: absolute;
+width: 33px;
+height: 33px;
+left: 295px;
+top: 18px;
+
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 11%;
+right: 10.98%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* Hi, Bdakar */
+
+position: absolute;
+width: 211px;
+height: 1px;
+left: -19px;
+top: 22px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 18px;
+line-height: 22px;
+text-align: center;
+
+color: #000000;
+
+
+
+/* famicons:notifications-outline */
+
+position: absolute;
+width: 31px;
+height: 31px;
+left: 229px;
+top: 19px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 15.59%;
+right: 15.6%;
+top: 9.38%;
+bottom: 9.38%;
+
+border: 1.7px solid #1F3E6C;
+
+
+/* iconamoon:profile-circle-light */
+
+position: absolute;
+width: 35px;
+height: 35px;
+left: 141px;
+top: 16px;
+
+
+
+/* Group */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 9.38%;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 12.5%;
+right: 12.5%;
+top: 12.51%;
+bottom: 12.5%;
+
+border: 1.8px solid #1F3E6C;
+
+
+/* Vector */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 18.04%;
+right: 18.04%;
+top: 26.04%;
+bottom: 9.38%;
+
+border: 2px solid #1F3E6C;
+
+
+/* pajamas:repeat */
+
+position: relative;
+width: 18px;
+height: 18px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+background: #122460;
+border: 0.3px solid #122460;

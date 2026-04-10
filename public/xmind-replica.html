@@ -1,0 +1,2084 @@
+<!DOCTYPE html>
+<html lang="he-IL">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mind Map</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      height: 100dvh;
+      background: #1a1a1a;
+    }
+
+    #topbar {
+      height: 52px;
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      color: white;
+      gap: 16px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .tb-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .tb-menu {
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .tb-breadcrumb {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .tb-sep {
+      color: rgba(255,255,255,0.3);
+    }
+
+    .tb-title {
+      color: white;
+      font-weight: 500;
+    }
+
+    .tb-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tb-btn {
+      height: 32px;
+      min-width: 32px;
+      padding: 0 12px;
+      background: rgba(255,255,255,0.08);
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      transition: background 0.15s;
+      white-space: nowrap;
+      touch-action: manipulation;
+    }
+
+    .tb-btn:hover {
+      background: rgba(255,255,255,0.16);
+    }
+
+    .tb-btn:active {
+      background: rgba(255,255,255,0.24);
+    }
+
+    .tb-divider {
+      width: 1px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .tb-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .share-btn {
+      background: white;
+      color: #1a1a1a;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      min-height: 32px;
+      touch-action: manipulation;
+    }
+
+    .share-btn:hover {
+      background: rgba(255,255,255,0.9);
+    }
+
+    .share-btn:active {
+      background: rgba(255,255,255,0.8);
+    }
+
+    #app {
+      height: calc(100vh - 52px - 40px);
+      height: calc(100dvh - 52px - 40px);
+      position: relative;
+    }
+
+    #canvas-area {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #f8f7f4;
+      cursor: grab;
+      position: relative;
+      touch-action: none;
+    }
+
+    #canvas-area:active {
+      cursor: grabbing;
+    }
+
+    #viewport {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+      width: 10000px;
+      height: 10000px;
+      touch-action: none;
+    }
+
+    #svg-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 10000px;
+      height: 10000px;
+      pointer-events: none;
+      z-index: 0;
+      overflow: visible;
+    }
+
+    .node-div {
+      position: absolute;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: normal;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      z-index: 1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: box-shadow 0.15s, transform 0.1s;
+      min-width: 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      touch-action: manipulation;
+    }
+
+    .node-div:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+
+    .node-div:active {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+
+    .node-div.selected {
+      outline: 2.5px solid #3B82F6;
+      outline-offset: 3px;
+    }
+
+    .node-div.node-root {
+      background: white !important;
+      color: #1a1a1a !important;
+      border: 2.5px solid #1a1a1a;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 14px 24px;
+      border-radius: 10px;
+    }
+
+    .node-image-wrap {
+      position: relative;
+      margin-bottom: 4px;
+    }
+
+    .node-img {
+      max-width: 120px;
+      max-height: 80px;
+      border-radius: 6px;
+      display: block;
+    }
+
+    .remove-img-btn {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .node-image-wrap:hover .remove-img-btn {
+      display: flex;
+    }
+
+    .node-text {
+      flex: 1;
+      outline: none;
+      unicode-bidi: plaintext;
+      text-align: start;
+      direction: auto;
+      word-break: break-word;
+    }
+
+    .node-eq {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .node-labels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .label-pill {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .note-icon {
+      font-size: 12px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+
+    .note-icon:hover {
+      opacity: 1;
+    }
+
+    .collapse-btn {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.2);
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-weight: 700;
+      touch-action: manipulation;
+    }
+
+    .node-div:hover .collapse-btn {
+      display: flex;
+    }
+
+    #bottom-bar {
+      height: 40px;
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      gap: 16px;
+    }
+
+    #sheet-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sheet-tab {
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.15s;
+      touch-action: manipulation;
+      min-height: 32px;
+    }
+
+    .sheet-tab:hover {
+      background: rgba(255,255,255,0.12);
+    }
+
+    .sheet-tab:active {
+      background: rgba(255,255,255,0.24);
+    }
+
+    .sheet-tab.active {
+      background: rgba(255,255,255,0.2);
+    }
+
+    #add-sheet-btn {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.15s;
+      touch-action: manipulation;
+      min-height: 32px;
+    }
+
+    #add-sheet-btn:hover {
+      background: rgba(255,255,255,0.16);
+    }
+
+    #add-sheet-btn:active {
+      background: rgba(255,255,255,0.24);
+    }
+
+    .zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .zoom-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.15s;
+      touch-action: manipulation;
+      min-height: 32px;
+    }
+
+    .zoom-btn:hover {
+      background: rgba(255,255,255,0.16);
+    }
+
+    .zoom-btn:active {
+      background: rgba(255,255,255,0.24);
+    }
+
+    #zoom-display {
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    #ctx-menu {
+      display: none;
+      position: fixed;
+      background: #1e1e2e;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 6px;
+      z-index: 9999;
+      min-width: 180px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .ctx-item {
+      padding: 8px 12px;
+      color: white;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: background 0.15s;
+      touch-action: manipulation;
+      min-height: 44px;
+    }
+
+    .ctx-item:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .ctx-item:active {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .ctx-item.ctx-danger:hover {
+      background: rgba(255, 107, 107, 0.3);
+    }
+
+    .ctx-item.ctx-danger:active {
+      background: rgba(255, 107, 107, 0.5);
+    }
+
+    .ctx-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: 4px 0;
+    }
+
+    .ctx-key {
+      font-size: 10px;
+      color: rgba(255,255,255,0.4);
+      font-family: monospace;
+    }
+
+    .panel-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+    }
+
+    .panel {
+      display: none;
+      position: fixed;
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      z-index: 500;
+      font-family: 'Inter', sans-serif;
+    }
+
+    #note-panel { width: 320px; }
+    #eq-panel { width: 360px; }
+    #label-panel { width: 280px; }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #1a1a1a;
+    }
+
+    .panel-close-btn {
+      background: none;
+      border: none;
+      color: #1a1a1a;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 0;
+    }
+
+    #note-text {
+      width: 100%;
+      height: 120px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      resize: vertical;
+      color: #1a1a1a;
+    }
+
+    #eq-preview {
+      min-height: 40px;
+      margin: 12px 0;
+      padding: 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      text-align: center;
+      color: white;
+      overflow-x: auto;
+    }
+
+    .eq-snippet {
+      padding: 3px 8px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: 'Inter', sans-serif;
+    }
+    .eq-snippet:hover { background: rgba(255,255,255,0.2); }
+
+    .preset-label {
+      padding: 6px 10px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      border: 1px solid #e0e0e0;
+      transition: background 0.15s;
+      color: #1a1a1a;
+    }
+
+    .preset-label:hover {
+      background: rgba(0,0,0,0.1);
+    }
+
+    #preset-labels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    #custom-label-text {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #1a1a1a;
+    }
+
+    #custom-label-color {
+      width: 36px;
+      height: 32px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .panel button {
+      padding: 8px 12px;
+      background: #3B82F6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.15s;
+    }
+
+    .panel button:hover {
+      background: #2563EB;
+    }
+
+    .panel button:active {
+      background: #1D4ED8;
+    }
+
+    .panel-secondary-btn {
+      background: #f0f0f0;
+      color: #1a1a1a;
+    }
+
+    .panel-secondary-btn:hover {
+      background: #e0e0e0;
+    }
+
+    #submap-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: #f8f7f4;
+      flex-direction: column;
+    }
+
+    #submap-topbar {
+      height: 48px;
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+      color: white;
+    }
+
+    .submap-back-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .submap-back-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    #submap-canvas {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #submap-viewport {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+      width: 10000px;
+      height: 10000px;
+    }
+
+    #submap-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 10000px;
+      height: 10000px;
+      pointer-events: none;
+      z-index: 0;
+      overflow: visible;
+    }
+
+    /* Whiteboard canvas lives INSIDE the viewport so it pans/zooms with the map */
+    #wb-canvas {
+      position: absolute;
+      left: -4000px;
+      top: -4000px;
+      width: 8000px;
+      height: 8000px;
+      pointer-events: none;
+      z-index: 0;
+      touch-action: none;
+    }
+
+    #wb-canvas.drawing-mode {
+      pointer-events: all;
+      cursor: crosshair;
+      z-index: 2;
+    }
+
+    /* The overlay only contains the toolbar now */
+    #whiteboard-overlay {
+      display: none;
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+    }
+
+    #wb-toolbar {
+      background: #1e1e2e;
+      border-radius: 50px;
+      padding: 8px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+
+    .wb-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.15s;
+      touch-action: manipulation;
+    }
+
+    .wb-color:hover {
+      border-color: rgba(255,255,255,0.5);
+    }
+
+    #wb-size {
+      width: 80px;
+      cursor: pointer;
+    }
+
+    #fab {
+      display: none;
+      position: fixed;
+      bottom: 60px;
+      right: 16px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #3B82F6;
+      color: white;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      touch-action: manipulation;
+      flex-direction: column;
+    }
+
+    #fab:hover {
+      background: #2563EB;
+      box-shadow: 0 6px 20px rgba(59,130,246,0.6);
+    }
+
+    #fab:active {
+      background: #1D4ED8;
+    }
+
+    @media (max-width: 768px) {
+      #topbar {
+        height: 48px;
+        padding: 0 8px;
+        gap: 6px;
+      }
+
+      .tb-breadcrumb, .tb-sep {
+        display: none;
+      }
+
+      .tb-left {
+        flex-shrink: 0;
+      }
+
+      .tb-center {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-shrink: 1;
+        min-width: 0;
+        gap: 5px;
+      }
+
+      .tb-center::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tb-divider {
+        display: none;
+      }
+
+      .tb-right {
+        flex-shrink: 0;
+      }
+
+      .tb-btn {
+        height: 40px;
+        min-width: 40px;
+        padding: 0 10px;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+
+      .share-btn {
+        display: none;
+      }
+
+      .user-avatar {
+        display: none;
+      }
+
+      .node-div {
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+
+      #app {
+        height: calc(100dvh - 48px - calc(48px + env(safe-area-inset-bottom, 0px)));
+      }
+
+      #bottom-bar {
+        height: calc(48px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+
+      /* Panels as full-width bottom sheets on mobile */
+      .panel {
+        bottom: 0 !important;
+        top: auto !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-height: 80dvh;
+        overflow-y: auto;
+        border-radius: 20px 20px 0 0 !important;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      }
+
+      /* Pull handle indicator on bottom sheets */
+      .panel::before {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 4px;
+        background: #ccc;
+        border-radius: 2px;
+        margin: 0 auto 12px auto;
+      }
+
+      #note-panel { width: 100% !important; }
+      #eq-panel { width: 100% !important; }
+      #label-panel { width: 100% !important; }
+
+      /* Whiteboard toolbar: scrollable pill on mobile */
+      #whiteboard-overlay {
+        bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+        left: 8px;
+        right: 8px;
+        transform: none;
+        width: auto;
+      }
+
+      #wb-toolbar {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        border-radius: 16px;
+        padding: 10px 14px;
+        gap: 10px;
+      }
+
+      #wb-toolbar::-webkit-scrollbar { display: none; }
+
+      #wb-size { min-width: 70px; }
+
+      /* FAB bigger + safe area aware */
+      #fab {
+        display: flex;
+        bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+      }
+
+      /* Context menu: wider on mobile */
+      #ctx-menu {
+        min-width: 220px;
+      }
+
+      .ctx-item {
+        min-height: 48px;
+        font-size: 13px;
+      }
+    }
+
+    @media (min-width: 769px) {
+      #fab {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="topbar">
+    <div class="tb-left">
+      <div class="tb-menu">☰</div>
+      <span class="tb-breadcrumb">My Works</span>
+      <span class="tb-sep">›</span>
+      <span class="tb-title">Mind Map</span>
+    </div>
+    <div class="tb-center">
+      <button class="tb-btn" onclick="undo()" title="Undo (Ctrl+Z)">↩</button>
+      <button class="tb-btn" onclick="redo()" title="Redo (Ctrl+Y)">↪</button>
+      <div class="tb-divider"></div>
+      <button class="tb-btn" onclick="addTopicFromToolbar()" title="Add Topic">➕ Topic</button>
+      <button class="tb-btn" onclick="fitToScreen()" title="Fit to screen">🎯</button>
+      <button class="tb-btn" onclick="openEquationForSelected()" title="Add LaTeX Equation to selected node">∑ Eq</button>
+      <button class="tb-btn" id="whiteboard-btn" onclick="toggleWhiteboard()" title="Whiteboard">✏️</button>
+    </div>
+    <div class="tb-right">
+      <div class="user-avatar">B</div>
+      <button class="share-btn">Share</button>
+    </div>
+  </div>
+
+  <div id="app">
+    <div id="canvas-area">
+      <div id="viewport">
+        <canvas id="wb-canvas" width="8000" height="8000"></canvas>
+        <svg id="svg-layer"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div id="bottom-bar">
+    <div id="sheet-tabs">
+      <div class="sheet-tab active" data-sheet="s1">Sheet 1</div>
+      <button id="add-sheet-btn" onclick="addSheet()">+</button>
+    </div>
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="adjustZoom(0.9)">−</button>
+      <span id="zoom-display">100%</span>
+      <button class="zoom-btn" onclick="adjustZoom(1.1)">+</button>
+      <button class="zoom-btn" onclick="fitToScreen()">⊡</button>
+    </div>
+  </div>
+
+  <div id="ctx-menu"></div>
+  <button id="fab" onclick="addChildNode(state.selectedId||'root')">+</button>
+
+  <div id="panel-overlay" class="panel-overlay" onclick="if(event.target===this) closePanels()"></div>
+
+  <div id="note-panel" class="panel">
+    <div class="panel-header">
+      <span>📝 Note</span>
+      <button class="panel-close-btn" onclick="closePanels()">✕</button>
+    </div>
+    <textarea id="note-text" placeholder="Add a note..."></textarea>
+    <button onclick="saveNote()" style="margin-top:8px; width:100%;">Save</button>
+  </div>
+
+  <div id="eq-panel" class="panel">
+    <div class="panel-header">
+      <span>∑ LaTeX Equation</span>
+      <button class="panel-close-btn" onclick="closePanels()">✕</button>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;">
+      <button class="eq-snippet" onclick="insertLatex('\\\\frac{a}{b}')">a/b</button>
+      <button class="eq-snippet" onclick="insertLatex('\\\\sqrt{x}')">√x</button>
+      <button class="eq-snippet" onclick="insertLatex('x^{2}')">x²</button>
+      <button class="eq-snippet" onclick="insertLatex('\\\\sum_{i=0}^{n}')">Σ</button>
+      <button class="eq-snippet" onclick="insertLatex('\\\\int_{a}^{b}')">∫</button>
+      <button class="eq-snippet" onclick="insertLatex('\\\\alpha')">α</button>
+      <button class="eq-snippet" onclick="insertLatex('\\\\beta')">β</button>
+      <button class="eq-snippet" onclick="insertLatex('\\\\pi')">π</button>
+      <button class="eq-snippet" onclick="insertLatex('\\\\infty')">∞</button>
+      <button class="eq-snippet" onclick="insertLatex('\\\\pm')">±</button>
+    </div>
+    <textarea id="eq-input" rows="3" placeholder="E = mc^2&#10;\frac{a}{b}&#10;\sum_{i=0}^{n} x_i" style="width:100%; resize:vertical; font-family:monospace; font-size:13px; padding:8px; background:#2a2a2a; color:white; border:1px solid rgba(255,255,255,0.15); border-radius:6px; outline:none;"></textarea>
+    <div id="eq-preview" style="min-height:50px;"></div>
+    <div style="display:flex; gap:8px;">
+      <button onclick="saveEquation()" style="flex:1;">Add</button>
+      <button onclick="closePanels()" class="panel-secondary-btn" style="flex:1;">Cancel</button>
+    </div>
+  </div>
+
+  <div id="label-panel" class="panel">
+    <div class="panel-header">
+      <span>🏷️ Add Label</span>
+      <button class="panel-close-btn" onclick="closePanels()">✕</button>
+    </div>
+    <div id="preset-labels">
+      <span class="preset-label" data-text="Urgent" data-color="#EF4444" onclick="addPresetLabel(this)">🔴 Urgent</span>
+      <span class="preset-label" data-text="In Progress" data-color="#F59E0B" onclick="addPresetLabel(this)">🟡 In Progress</span>
+      <span class="preset-label" data-text="Done" data-color="#10B981" onclick="addPresetLabel(this)">🟢 Done</span>
+      <span class="preset-label" data-text="Research" data-color="#3B82F6" onclick="addPresetLabel(this)">🔵 Research</span>
+      <span class="preset-label" data-text="Idea" data-color="#8B5CF6" onclick="addPresetLabel(this)">🟣 Idea</span>
+    </div>
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <input id="custom-label-text" placeholder="Custom label...">
+      <input type="color" id="custom-label-color" value="#6B7280">
+      <button onclick="addCustomLabel()">Add</button>
+    </div>
+    <button onclick="closePanels()" class="panel-secondary-btn" style="width:100%;">Close</button>
+  </div>
+
+  <div id="submap-overlay">
+    <div id="submap-topbar">
+      <button class="submap-back-btn" onclick="closeSubmap()">← Back</button>
+      <span id="submap-title" style="font-size:14px; opacity:0.8;"></span>
+      <span style="opacity:0.4; font-size:12px;">— Canvas</span>
+    </div>
+    <div id="submap-canvas">
+      <div id="submap-viewport">
+        <svg id="submap-svg"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div id="whiteboard-overlay">
+    <div id="wb-toolbar">
+      <div class="wb-color" style="background:#000000" data-color="#000000" onclick="setWbColor(this)"></div>
+      <div class="wb-color" style="background:#e74c3c" data-color="#e74c3c" onclick="setWbColor(this)"></div>
+      <div class="wb-color" style="background:#3498db" data-color="#3498db" onclick="setWbColor(this)"></div>
+      <div class="wb-color" style="background:#2ecc71" data-color="#2ecc71" onclick="setWbColor(this)"></div>
+      <div class="wb-color" style="background:#f39c12" data-color="#f39c12" onclick="setWbColor(this)"></div>
+      <div class="wb-color" style="background:#9b59b6" data-color="#9b59b6" onclick="setWbColor(this)"></div>
+      <div style="width:1px; height:24px; background:rgba(255,255,255,0.2);"></div>
+      <input type="range" id="wb-size" min="1" max="20" value="3" style="width:80px;">
+      <button class="tb-btn" id="wb-eraser-btn" onclick="toggleEraser()" title="Eraser">⬜ Eraser</button>
+      <button class="tb-btn" onclick="fitToDrawing()" title="Fit to drawing">⊡ Fit</button>
+      <button class="tb-btn" onclick="clearWhiteboard()">🗑️ Clear</button>
+      <button class="tb-btn" onclick="toggleWhiteboard()">✕ Exit</button>
+    </div>
+  </div>
+
+  <input type="file" id="img-picker" accept="image/*" style="display:none">
+
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script>
+    const state = {
+      nodes: {},
+      selectedId: null,
+      pan: { x: 0, y: 0 },
+      zoom: 1.0,
+      history: [],
+      histIndex: -1,
+      whiteboardMode: false,
+      sheets: [{ id: 's1', name: 'Sheet 1' }],
+      activeSheet: 's1'
+    };
+
+    let dragState = null, touchState = null, nextId = 100;
+    let wbCtx, wbDrawing = false, wbLastX = 0, wbLastY = 0, wbColor = '#000000', wbEraser = false;
+    let longPressTimer = null, lastTapTime = 0, lastTapId = null;
+    let ctxNodeId = null, currentPanelNodeId = null;
+    let submapNodeId = null, submapPan = { x: 0, y: 0 }, submapZoom = 1;
+
+    function initDefaultMap() {
+      state.nodes = {
+        'root': { id: 'root', text: 'My Project', x: -70, y: -22, parentId: null, color: '#ffffff', textColor: '#1a1a1a', level: 0, collapsed: false, labels: [], note: '', image: null, equation: '', submapNodes: null },
+        '1': { id: '1', text: 'Planning', x: -300, y: -100, parentId: 'root', color: '#FFD700', textColor: '#1a1a1a', level: 1, collapsed: false, labels: [], note: '', image: null, equation: '', submapNodes: null },
+        '2': { id: '2', text: 'Execution', x: 100, y: -100, parentId: 'root', color: '#87CEEB', textColor: '#1a1a1a', level: 1, collapsed: false, labels: [], note: '', image: null, equation: '', submapNodes: null },
+        '3': { id: '3', text: 'Review', x: -100, y: 100, parentId: 'root', color: '#90EE90', textColor: '#1a1a1a', level: 1, collapsed: false, labels: [], note: '', image: null, equation: '', submapNodes: null }
+      };
+    }
+
+    function addChildNode(parentId) {
+      const parent = state.nodes[parentId];
+      if (!parent) return;
+      const id = '' + (nextId++);
+      const level = (parent.level || 0) + 1;
+      const colors = ['#FFE5B4', '#E0F0FF', '#E0F5E9', '#FFF3E0', '#F3E5F5', '#FCE4EC'];
+      state.nodes[id] = { id, text: 'New Topic', x: parent.x + (level % 2 ? 170 : -170), y: parent.y + 90 + Math.random() * 20, parentId, color: colors[level % colors.length], textColor: '#1a1a1a', level, collapsed: false, labels: [], note: '', image: null, equation: '', submapNodes: null };
+      saveHistory();
+      selectNode(id);
+      // Defer overlap resolution until DOM is updated
+      requestAnimationFrame(() => { resolveOverlap(id); render(); startEditing(id); });
+    }
+
+    function addSiblingNode(nodeId) {
+      const node = state.nodes[nodeId];
+      if (!node || !node.parentId) return;
+      addChildNode(node.parentId);
+    }
+
+    function deleteNode(nodeId) {
+      if (nodeId === 'root') return;
+      const nodesToDelete = [nodeId];
+      const findChildren = (pId) => {
+        Object.values(state.nodes).forEach(n => {
+          if (n.parentId === pId) {
+            nodesToDelete.push(n.id);
+            findChildren(n.id);
+          }
+        });
+      };
+      findChildren(nodeId);
+      nodesToDelete.forEach(id => delete state.nodes[id]);
+      if (state.selectedId === nodeId) state.selectedId = state.nodes[state.nodes[nodeId]?.parentId] ? state.nodes[nodeId].parentId : 'root';
+      saveHistory();
+      render();
+    }
+
+    function duplicateNode(nodeId) {
+      const orig = state.nodes[nodeId];
+      if (!orig) return;
+      const newId = '' + (nextId++);
+      state.nodes[newId] = JSON.parse(JSON.stringify(orig));
+      state.nodes[newId].id = newId;
+      state.nodes[newId].x = orig.x + 50;
+      state.nodes[newId].y = orig.y + 50;
+      saveHistory();
+      selectNode(newId);
+    }
+
+    function selectNode(id) {
+      state.selectedId = id;
+      render();
+    }
+
+    function openEquationForSelected() {
+      const id = state.selectedId;
+      if (!id) {
+        const ids = Object.keys(state.nodes);
+        if (ids.length) openEquationPanel(ids[0]);
+        return;
+      }
+      openEquationPanel(id);
+    }
+
+    // Prevent node overlap: push the moved node away from all others
+    function resolveOverlap(movedId) {
+      const moved = state.nodes[movedId];
+      if (!moved) return;
+      const PAD = 14;
+      for (let iter = 0; iter < 15; iter++) {
+        let changed = false;
+        Object.values(state.nodes).forEach(other => {
+          if (other.id === movedId) return;
+          const mEl = document.getElementById('node-' + movedId);
+          const oEl = document.getElementById('node-' + other.id);
+          if (!mEl || !oEl || oEl.style.display === 'none') return;
+          const mW = mEl.offsetWidth + PAD, mH = mEl.offsetHeight + PAD;
+          const oW = oEl.offsetWidth + PAD, oH = oEl.offsetHeight + PAD;
+          const overlapX = (moved.x + mW) - other.x;
+          const overlapXr = (other.x + oW) - moved.x;
+          const overlapY = (moved.y + mH) - other.y;
+          const overlapYr = (other.y + oH) - moved.y;
+          if (overlapX > 0 && overlapXr > 0 && overlapY > 0 && overlapYr > 0) {
+            const m = Math.min(overlapX, overlapXr, overlapY, overlapYr);
+            if (m === overlapY) { moved.y -= overlapY; }
+            else if (m === overlapYr) { moved.y += overlapYr; }
+            else if (m === overlapX) { moved.x -= overlapX; }
+            else { moved.x += overlapXr; }
+            changed = true;
+          }
+        });
+        if (!changed) break;
+      }
+    }
+
+    function startEditing(id) {
+      const el = document.getElementById('node-' + id);
+      if (!el) return;
+      const textEl = el.querySelector('.node-text');
+      if (!textEl) return;
+      textEl.contentEditable = 'true';
+      textEl.setAttribute('dir', 'auto');
+      textEl.focus();
+      document.execCommand('selectAll', false, null);
+      textEl.onblur = () => {
+        state.nodes[id].text = textEl.textContent || 'New Topic';
+        textEl.contentEditable = 'false';
+        saveHistory();
+        render();
+      };
+      textEl.onkeydown = (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); textEl.blur(); } else if (e.key === 'Escape') { textEl.blur(); }
+      };
+    }
+
+    function addTopicFromToolbar() {
+      if (!state.selectedId) state.selectedId = 'root';
+      addChildNode(state.selectedId);
+    }
+
+    function getNodeWidth(node) {
+      const el = document.getElementById('node-' + node.id);
+      return el ? el.offsetWidth : 100;
+    }
+
+    function updateNodeElement(id) {
+      const node = state.nodes[id];
+      if (!node) return;
+      let el = document.getElementById('node-' + id);
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'node-' + id;
+        el.className = 'node-div';
+        el.dataset.id = id;
+        document.getElementById('viewport').appendChild(el);
+      }
+      el.style.left = node.x + 'px';
+      el.style.top = node.y + 'px';
+      el.style.backgroundColor = node.color;
+      el.style.color = node.textColor;
+      el.classList.toggle('node-root', node.id === 'root');
+      el.classList.toggle('selected', state.selectedId === id);
+      el.innerHTML = '';
+
+      if (node.image) {
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'node-image-wrap';
+        const img = document.createElement('img');
+        img.className = 'node-img';
+        img.src = node.image;
+        imgWrap.appendChild(img);
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-img-btn';
+        removeBtn.innerHTML = '✕';
+        removeBtn.onclick = (e) => { e.stopPropagation(); node.image = null; saveHistory(); render(); };
+        imgWrap.appendChild(removeBtn);
+        el.appendChild(imgWrap);
+      }
+
+      const textEl = document.createElement('div');
+      textEl.className = 'node-text';
+      textEl.setAttribute('dir', 'auto');
+      textEl.textContent = node.text;
+      el.appendChild(textEl);
+
+      if (node.equation) {
+        const eqEl = document.createElement('div');
+        eqEl.className = 'node-eq';
+        try {
+          if (typeof katex !== 'undefined') { katex.render(node.equation, eqEl, { throwOnError: false, displayMode: false }); } else { eqEl.textContent = node.equation; }
+        } catch (e) { eqEl.textContent = node.equation; }
+        el.appendChild(eqEl);
+      }
+
+      if (node.labels && node.labels.length > 0) {
+        const labelsEl = document.createElement('div');
+        labelsEl.className = 'node-labels';
+        node.labels.forEach(label => {
+          const pill = document.createElement('span');
+          pill.className = 'label-pill';
+          pill.style.backgroundColor = label.color;
+          pill.textContent = label.text;
+          labelsEl.appendChild(pill);
+        });
+        el.appendChild(labelsEl);
+      }
+
+      if (node.note) {
+        const noteIcon = document.createElement('span');
+        noteIcon.className = 'note-icon';
+        noteIcon.innerHTML = '📝';
+        noteIcon.onclick = (e) => { e.stopPropagation(); openNotePanel(id); };
+        el.appendChild(noteIcon);
+      }
+
+      const children = Object.values(state.nodes).filter(n => n.parentId === id);
+      if (children.length > 0) {
+        const collapseBtn = document.createElement('button');
+        collapseBtn.className = 'collapse-btn';
+        collapseBtn.textContent = node.collapsed ? '+' : '−';
+        collapseBtn.onclick = (e) => { e.stopPropagation(); node.collapsed = !node.collapsed; saveHistory(); render(); };
+        el.appendChild(collapseBtn);
+      }
+
+      el.onmousedown = (e) => {
+        if (e.target.closest('.collapse-btn') || e.target.closest('.note-icon')) return;
+        if (e.button === 0) startNodeDrag(e, id);
+      };
+      el.onmouseup = (e) => {
+        if (e.button === 2 || e.target.closest('.collapse-btn') || e.target.closest('.note-icon')) return;
+        selectNode(id);
+      };
+      el.oncontextmenu = (e) => {
+        e.preventDefault();
+        selectNode(id);
+        showContextMenu(e.clientX, e.clientY, id);
+      };
+    }
+
+    function drawConnections() {
+      const svg = document.getElementById('svg-layer');
+      svg.innerHTML = '';
+      Object.values(state.nodes).forEach(node => {
+        if (!node.parentId || node.collapsed) return;
+        const parent = state.nodes[node.parentId];
+        if (!parent) return;
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', parent.x + 50);
+        line.setAttribute('y1', parent.y + 22);
+        line.setAttribute('x2', node.x + 50);
+        line.setAttribute('y2', node.y + 22);
+        line.setAttribute('stroke', '#999');
+        line.setAttribute('stroke-width', '1.5');
+        line.setAttribute('stroke-dasharray', '5,3');
+        svg.appendChild(line);
+      });
+    }
+
+    function render() {
+      const sheetData = state.nodes;
+      Object.keys(sheetData).forEach(id => {
+        const node = sheetData[id];
+        if (!node.parentId || !state.nodes[node.parentId]?.collapsed) {
+          updateNodeElement(id);
+        } else {
+          const el = document.getElementById('node-' + id);
+          if (el) el.style.display = 'none';
+        }
+      });
+      Object.values(sheetData).forEach(node => {
+        if (node.collapsed) {
+          const findChildren = (pId) => {
+            Object.values(sheetData).forEach(child => {
+              if (child.parentId === pId) {
+                const el = document.getElementById('node-' + child.id);
+                if (el) el.style.display = 'none';
+                findChildren(child.id);
+              }
+            });
+          };
+          findChildren(node.id);
+        }
+      });
+      drawConnections();
+      updateSheetTabs();
+    }
+
+    function showContextMenu(x, y, nodeId) {
+      ctxNodeId = nodeId;
+      const menu = document.getElementById('ctx-menu');
+      menu.innerHTML = `
+        <div class="ctx-item" onclick="addChildNode('${nodeId}'); hideCtx()">➕ Add Child <span class="ctx-key">Tab</span></div>
+        <div class="ctx-item" onclick="addSiblingNode('${nodeId}'); hideCtx()">↕ Add Sibling <span class="ctx-key">Enter</span></div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item" onclick="startEditing('${nodeId}'); hideCtx()">✏️ Edit Text <span class="ctx-key">F2</span></div>
+        <div class="ctx-item" onclick="openNotePanel('${nodeId}'); hideCtx()">📝 Edit Note</div>
+        <div class="ctx-item" onclick="addImageToNode('${nodeId}'); hideCtx()">🖼️ Add Image</div>
+        <div class="ctx-item" onclick="openEquationPanel('${nodeId}'); hideCtx()">∑ Add Equation</div>
+        <div class="ctx-item" onclick="openLabelPanel('${nodeId}'); hideCtx()">🏷️ Add Label</div>
+        <div class="ctx-item" onclick="openSubmap('${nodeId}'); hideCtx()">🗺️ Open Canvas</div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item" onclick="duplicateNode('${nodeId}'); hideCtx()">📋 Duplicate</div>
+        ${nodeId !== 'root' ? `<div class="ctx-divider"></div><div class="ctx-item ctx-danger" onclick="deleteNode('${nodeId}'); hideCtx()">🗑️ Delete <span class="ctx-key">Del</span></div>` : ''}
+      `;
+      menu.style.display = 'block';
+      menu.style.left = Math.min(x, window.innerWidth - 200) + 'px';
+      menu.style.top = Math.min(y, window.innerHeight - 300) + 'px';
+    }
+
+    function hideCtx() {
+      document.getElementById('ctx-menu').style.display = 'none';
+    }
+
+    function closePanels() {
+      document.getElementById('panel-overlay').style.display = 'none';
+      document.getElementById('note-panel').style.display = 'none';
+      document.getElementById('eq-panel').style.display = 'none';
+      document.getElementById('label-panel').style.display = 'none';
+      currentPanelNodeId = null;
+    }
+
+    function openPanelWithOverlay(panelId) {
+      document.getElementById('panel-overlay').style.display = 'block';
+      document.getElementById(panelId).style.display = 'block';
+    }
+
+    function isMobile() { return window.innerWidth <= 768; }
+
+    function positionPanel(panel, anchorRect) {
+      if (isMobile()) {
+        panel.style.left = '0';
+        panel.style.right = '0';
+        panel.style.bottom = '0';
+        panel.style.top = 'auto';
+        panel.style.width = '100%';
+        panel.style.borderRadius = '20px 20px 0 0';
+      } else {
+        const rect = anchorRect || {};
+        panel.style.bottom = '';
+        panel.style.right = '';
+        panel.style.width = '';
+        panel.style.borderRadius = '';
+        panel.style.left = Math.min(rect.right || 100, window.innerWidth - parseInt(panel.style.width || 320) - 20) + 'px';
+        panel.style.top = Math.min(rect.bottom || 100, window.innerHeight - 280) + 'px';
+      }
+    }
+
+    function openNotePanel(nodeId) {
+      currentPanelNodeId = nodeId;
+      const node = state.nodes[nodeId];
+      const textarea = document.getElementById('note-text');
+      textarea.value = node.note || '';
+      const panel = document.getElementById('note-panel');
+      const rect = document.getElementById('node-' + nodeId)?.getBoundingClientRect() || {};
+      if (!isMobile()) {
+        panel.style.left = Math.min(rect.right || 100, window.innerWidth - 340) + 'px';
+        panel.style.top = Math.min(rect.bottom || 100, window.innerHeight - 260) + 'px';
+      }
+      positionPanel(panel, rect);
+      openPanelWithOverlay('note-panel');
+      textarea.focus();
+    }
+
+    function saveNote() {
+      if (!currentPanelNodeId) return;
+      state.nodes[currentPanelNodeId].note = document.getElementById('note-text').value;
+      saveHistory();
+      render();
+      closePanels();
+    }
+
+    function openEquationPanel(nodeId) {
+      currentPanelNodeId = nodeId;
+      const node = state.nodes[nodeId];
+      const input = document.getElementById('eq-input');
+      input.value = node.equation || '';
+      const panel = document.getElementById('eq-panel');
+      const rect = document.getElementById('node-' + nodeId)?.getBoundingClientRect() || {};
+      if (!isMobile()) {
+        panel.style.left = Math.min(rect.right || 100, window.innerWidth - 380) + 'px';
+        panel.style.top = Math.min(rect.bottom || 100, window.innerHeight - 280) + 'px';
+      }
+      positionPanel(panel, rect);
+      openPanelWithOverlay('eq-panel');
+      input.focus();
+      updateEquationPreview();
+    }
+
+    function insertLatex(snippet) {
+      const input = document.getElementById('eq-input');
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      input.value = input.value.slice(0, start) + snippet + input.value.slice(end);
+      input.selectionStart = input.selectionEnd = start + snippet.length;
+      input.focus();
+      updateEquationPreview();
+    }
+
+    function updateEquationPreview() {
+      const input = document.getElementById('eq-input');
+      const preview = document.getElementById('eq-preview');
+      try {
+        if (input.value.trim() && typeof katex !== 'undefined') {
+          katex.render(input.value.trim(), preview, { throwOnError: false, displayMode: true });
+        } else {
+          preview.textContent = input.value || '';
+        }
+      } catch (err) { preview.textContent = '⚠️ ' + err.message; }
+    }
+
+    document.getElementById('eq-input')?.addEventListener('input', updateEquationPreview);
+
+    function saveEquation() {
+      if (!currentPanelNodeId) return;
+      state.nodes[currentPanelNodeId].equation = document.getElementById('eq-input').value;
+      saveHistory();
+      render();
+      closePanels();
+    }
+
+    function openLabelPanel(nodeId) {
+      currentPanelNodeId = nodeId;
+      const panel = document.getElementById('label-panel');
+      const rect = document.getElementById('node-' + nodeId)?.getBoundingClientRect() || {};
+      if (!isMobile()) {
+        panel.style.left = Math.min(rect.right || 100, window.innerWidth - 300) + 'px';
+        panel.style.top = Math.min(rect.bottom || 100, window.innerHeight - 280) + 'px';
+      }
+      positionPanel(panel, rect);
+      openPanelWithOverlay('label-panel');
+    }
+
+    function addPresetLabel(el) {
+      addLabelToNode(el.dataset.text, el.dataset.color);
+    }
+
+    function addCustomLabel() {
+      const text = document.getElementById('custom-label-text').value.trim();
+      const color = document.getElementById('custom-label-color').value;
+      if (!text) return;
+      addLabelToNode(text, color);
+      document.getElementById('custom-label-text').value = '';
+    }
+
+    function addLabelToNode(text, color) {
+      if (!currentPanelNodeId) return;
+      const node = state.nodes[currentPanelNodeId];
+      if (!node.labels) node.labels = [];
+      node.labels.push({ text, color });
+      saveHistory();
+      render();
+      closePanels();
+    }
+
+    function addImageToNode(nodeId) {
+      currentPanelNodeId = nodeId;
+      const input = document.getElementById('img-picker');
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          state.nodes[nodeId].image = ev.target.result;
+          saveHistory();
+          render();
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    }
+
+    function openSubmap(nodeId) {
+      submapNodeId = nodeId;
+      const node = state.nodes[nodeId];
+      if (!node.submapNodes) {
+        node.submapNodes = {
+          'root': { id: 'root', text: node.text + ' Canvas', x: -70, y: -22, parentId: null, color: '#ffffff', textColor: '#1a1a1a', level: 0, collapsed: false, labels: [], note: '', image: null, equation: '', submapNodes: null }
+        };
+      }
+      document.getElementById('submap-title').textContent = node.text;
+      document.getElementById('submap-overlay').style.display = 'flex';
+      submapPan = { x: 0, y: 0 };
+      submapZoom = 1;
+      applySubmapViewport();
+      renderSubmap();
+    }
+
+    function closeSubmap() {
+      document.getElementById('submap-overlay').style.display = 'none';
+      submapNodeId = null;
+      render();
+    }
+
+    function renderSubmap() {
+      if (!submapNodeId) return;
+      const node = state.nodes[submapNodeId];
+      if (!node.submapNodes) return;
+      Object.keys(node.submapNodes).forEach(id => updateSubmapNodeElement(id));
+      drawSubmapConnections();
+    }
+
+    function updateSubmapNodeElement(id) {
+      const node = state.nodes[submapNodeId];
+      if (!node.submapNodes) return;
+      const submapNode = node.submapNodes[id];
+      if (!submapNode) return;
+      let el = document.getElementById('submap-node-' + id);
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'submap-node-' + id;
+        el.className = 'node-div';
+        el.dataset.id = id;
+        document.getElementById('submap-viewport').appendChild(el);
+      }
+      el.style.left = submapNode.x + 'px';
+      el.style.top = submapNode.y + 'px';
+      el.style.backgroundColor = submapNode.color;
+      el.style.color = submapNode.textColor;
+      el.classList.toggle('node-root', submapNode.id === 'root');
+      el.textContent = submapNode.text;
+      el.onmousedown = (e) => { if (e.button === 0) startSubmapNodeDrag(e, id); };
+      el.oncontextmenu = (e) => { e.preventDefault(); showSubmapContextMenu(e.clientX, e.clientY, id); };
+    }
+
+    function drawSubmapConnections() {
+      const node = state.nodes[submapNodeId];
+      if (!node.submapNodes) return;
+      const svg = document.getElementById('submap-svg');
+      svg.innerHTML = '';
+      Object.values(node.submapNodes).forEach(submapNode => {
+        if (!submapNode.parentId) return;
+        const parent = node.submapNodes[submapNode.parentId];
+        if (!parent) return;
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', parent.x + 50);
+        line.setAttribute('y1', parent.y + 22);
+        line.setAttribute('x2', submapNode.x + 50);
+        line.setAttribute('y2', submapNode.y + 22);
+        line.setAttribute('stroke', '#999');
+        line.setAttribute('stroke-width', '1.5');
+        line.setAttribute('stroke-dasharray', '5,3');
+        svg.appendChild(line);
+      });
+    }
+
+    function startSubmapNodeDrag(e, id) {
+      const node = state.nodes[submapNodeId];
+      if (!node.submapNodes) return;
+      const submapNode = node.submapNodes[id];
+      dragState = { type: 'node', id: id, startClientX: e.clientX, startClientY: e.clientY, origX: submapNode.x, origY: submapNode.y, isSubmap: true };
+    }
+
+    function showSubmapContextMenu(x, y, nodeId) {
+      const node = state.nodes[submapNodeId];
+      if (!node.submapNodes) return;
+      const menu = document.getElementById('ctx-menu');
+      menu.innerHTML = `
+        <div class="ctx-item" onclick="addSubmapChild('${nodeId}'); hideCtx()">➕ Add Child</div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item ctx-danger" onclick="deleteSubmapNode('${nodeId}'); hideCtx()">🗑️ Delete</div>
+      `;
+      menu.style.display = 'block';
+      menu.style.left = Math.min(x, window.innerWidth - 200) + 'px';
+      menu.style.top = Math.min(y, window.innerHeight - 300) + 'px';
+    }
+
+    function addSubmapChild(parentId) {
+      const node = state.nodes[submapNodeId];
+      if (!node.submapNodes) return;
+      const id = 's' + (nextId++);
+      const parent = node.submapNodes[parentId];
+      node.submapNodes[id] = { id, text: 'New Topic', x: parent.x + 150, y: parent.y + 80, parentId, color: '#FFE5B4', textColor: '#1a1a1a', level: (parent.level || 0) + 1, collapsed: false, labels: [], note: '', image: null, equation: '', submapNodes: null };
+      saveHistory();
+      renderSubmap();
+    }
+
+    function deleteSubmapNode(nodeId) {
+      const node = state.nodes[submapNodeId];
+      if (!node.submapNodes) return;
+      const nodesToDelete = [nodeId];
+      const findChildren = (pId) => {
+        Object.values(node.submapNodes).forEach(n => {
+          if (n.parentId === pId) { nodesToDelete.push(n.id); findChildren(n.id); }
+        });
+      };
+      findChildren(nodeId);
+      nodesToDelete.forEach(id => delete node.submapNodes[id]);
+      saveHistory();
+      renderSubmap();
+    }
+
+    function applySubmapViewport() {
+      const viewport = document.getElementById('submap-viewport');
+      viewport.style.transform = `translate(${submapPan.x}px, ${submapPan.y}px) scale(${submapZoom})`;
+    }
+
+    document.getElementById('submap-canvas')?.addEventListener('wheel', (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      const newZoom = Math.max(0.2, Math.min(3, submapZoom * delta));
+      const rect = document.getElementById('submap-canvas').getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      submapPan.x = mx - (mx - submapPan.x) * (newZoom / submapZoom);
+      submapPan.y = my - (my - submapPan.y) * (newZoom / submapZoom);
+      submapZoom = newZoom;
+      applySubmapViewport();
+    }, { passive: false });
+
+    document.getElementById('submap-canvas')?.addEventListener('mousedown', (e) => {
+      if (e.button !== 0 || e.target.closest('.node-div')) return;
+      dragState = { type: 'pan', lastX: e.clientX, lastY: e.clientY, isSubmap: true };
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!dragState) return;
+      if (dragState.isSubmap) {
+        if (dragState.type === 'pan') {
+          submapPan.x += e.clientX - dragState.lastX;
+          submapPan.y += e.clientY - dragState.lastY;
+          dragState.lastX = e.clientX;
+          dragState.lastY = e.clientY;
+          applySubmapViewport();
+        } else if (dragState.type === 'node') {
+          const node = state.nodes[submapNodeId];
+          if (node.submapNodes) {
+            const dx = (e.clientX - dragState.startClientX) / submapZoom;
+            const dy = (e.clientY - dragState.startClientY) / submapZoom;
+            node.submapNodes[dragState.id].x = dragState.origX + dx;
+            node.submapNodes[dragState.id].y = dragState.origY + dy;
+            renderSubmap();
+          }
+        }
+      } else {
+        if (dragState.type === 'pan') {
+          state.pan.x += e.clientX - dragState.lastX;
+          state.pan.y += e.clientY - dragState.lastY;
+          dragState.lastX = e.clientX;
+          dragState.lastY = e.clientY;
+          applyViewport();
+        } else if (dragState.type === 'node') {
+          const dx = (e.clientX - dragState.startClientX) / state.zoom;
+          const dy = (e.clientY - dragState.startClientY) / state.zoom;
+          state.nodes[dragState.id].x = dragState.origX + dx;
+          state.nodes[dragState.id].y = dragState.origY + dy;
+          render();
+        }
+      }
+    });
+
+    document.addEventListener('mouseup', (e) => {
+      if (dragState?.type === 'node') {
+        resolveOverlap(dragState.id);
+        render();
+        saveHistory();
+      }
+      dragState = null;
+    });
+
+    function startNodeDrag(e, id) {
+      const node = state.nodes[id];
+      dragState = { type: 'node', id: id, startClientX: e.clientX, startClientY: e.clientY, origX: node.x, origY: node.y };
+    }
+
+    function applyViewport() {
+      document.getElementById('viewport').style.transform = `translate(${state.pan.x}px, ${state.pan.y}px) scale(${state.zoom})`;
+    }
+
+    document.getElementById('canvas-area').addEventListener('wheel', (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      const newZoom = Math.max(0.2, Math.min(3, state.zoom * delta));
+      const rect = document.getElementById('canvas-area').getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      state.pan.x = mx - (mx - state.pan.x) * (newZoom / state.zoom);
+      state.pan.y = my - (my - state.pan.y) * (newZoom / state.zoom);
+      state.zoom = newZoom;
+      applyViewport();
+      updateZoomDisplay();
+    }, { passive: false });
+
+    document.getElementById('canvas-area').addEventListener('mousedown', (e) => {
+      if (e.button !== 0 || e.target.closest('.node-div')) return;
+      dragState = { type: 'pan', lastX: e.clientX, lastY: e.clientY };
+    });
+
+    function adjustZoom(factor) {
+      const canvasEl = document.getElementById('canvas-area');
+      const mx = canvasEl.clientWidth / 2;
+      const my = canvasEl.clientHeight / 2;
+      const newZoom = Math.max(0.2, Math.min(3, state.zoom * factor));
+      state.pan.x = mx - (mx - state.pan.x) * (newZoom / state.zoom);
+      state.pan.y = my - (my - state.pan.y) * (newZoom / state.zoom);
+      state.zoom = newZoom;
+      applyViewport();
+      updateZoomDisplay();
+    }
+
+    function fitToScreen() {
+      const nodes = Object.values(state.nodes);
+      if (nodes.length === 0) return;
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      nodes.forEach(n => {
+        const w = getNodeWidth(n);
+        minX = Math.min(minX, n.x);
+        maxX = Math.max(maxX, n.x + w);
+        minY = Math.min(minY, n.y);
+        maxY = Math.max(maxY, n.y + 44);
+      });
+      const canvasEl = document.getElementById('canvas-area');
+      const padding = 60;
+      const width = canvasEl.clientWidth - padding * 2;
+      const height = canvasEl.clientHeight - padding * 2;
+      const boundWidth = maxX - minX;
+      const boundHeight = maxY - minY;
+      const zoomX = width / boundWidth;
+      const zoomY = height / boundHeight;
+      state.zoom = Math.min(zoomX, zoomY, 1);
+      state.pan.x = padding - minX * state.zoom + (canvasEl.clientWidth - padding * 2 - boundWidth * state.zoom) / 2;
+      state.pan.y = padding - minY * state.zoom + (canvasEl.clientHeight - padding * 2 - boundHeight * state.zoom) / 2;
+      applyViewport();
+      updateZoomDisplay();
+    }
+
+    function updateZoomDisplay() {
+      document.getElementById('zoom-display').textContent = Math.round(state.zoom * 100) + '%';
+    }
+
+    function addSheet() {
+      const id = 's' + (state.sheets.length + 1);
+      const name = 'Sheet ' + (state.sheets.length + 1);
+      state.sheets.push({ id, name });
+      switchSheet(id);
+    }
+
+    function switchSheet(id) {
+      state.activeSheet = id;
+      render();
+    }
+
+    function updateSheetTabs() {
+      const container = document.getElementById('sheet-tabs');
+      const existing = container.querySelectorAll('.sheet-tab');
+      existing.forEach(el => { if (el.dataset.sheet !== 's1') el.remove(); });
+      state.sheets.forEach(sheet => {
+        let tab = container.querySelector(`[data-sheet="${sheet.id}"]`);
+        if (!tab) {
+          tab = document.createElement('div');
+          tab.className = 'sheet-tab';
+          tab.dataset.sheet = sheet.id;
+          tab.textContent = sheet.name;
+          tab.onclick = () => switchSheet(sheet.id);
+          container.insertBefore(tab, document.getElementById('add-sheet-btn'));
+        }
+        tab.classList.toggle('active', state.activeSheet === sheet.id);
+      });
+    }
+
+    function toggleWhiteboard() {
+      state.whiteboardMode = !state.whiteboardMode;
+      const overlay = document.getElementById('whiteboard-overlay');
+      const canvas = document.getElementById('wb-canvas');
+      const btn = document.getElementById('whiteboard-btn');
+      if (state.whiteboardMode) {
+        overlay.style.display = 'block';
+        canvas.classList.add('drawing-mode');
+        btn.style.background = 'rgba(255,255,255,0.3)';
+      } else {
+        overlay.style.display = 'none';
+        canvas.classList.remove('drawing-mode');
+        btn.style.background = '';
+      }
+    }
+
+    // Convert screen coordinates to canvas pixel coordinates
+    function screenToCanvas(clientX, clientY) {
+      const canvasArea = document.getElementById('canvas-area');
+      const rect = canvasArea.getBoundingClientRect();
+      // world position (viewport local)
+      const worldX = (clientX - rect.left - state.pan.x) / state.zoom;
+      const worldY = (clientY - rect.top - state.pan.y) / state.zoom;
+      // canvas is at (-4000, -4000) in world space, so add 4000 offset
+      return { x: worldX + 4000, y: worldY + 4000 };
+    }
+
+    function initWhiteboard() {
+      const canvas = document.getElementById('wb-canvas');
+      // canvas width/height already set as attributes (8000x8000)
+      wbCtx = canvas.getContext('2d');
+      wbCtx.lineCap = 'round';
+      wbCtx.lineJoin = 'round';
+
+      canvas.addEventListener('mousedown', (e) => {
+        if (!state.whiteboardMode) return;
+        e.stopPropagation();
+        const pos = screenToCanvas(e.clientX, e.clientY);
+        wbDrawing = true; wbLastX = pos.x; wbLastY = pos.y;
+        wbCtx.beginPath(); wbCtx.moveTo(wbLastX, wbLastY);
+      });
+      canvas.addEventListener('mousemove', (e) => {
+        if (!wbDrawing || !state.whiteboardMode) return;
+        const pos = screenToCanvas(e.clientX, e.clientY);
+        wbCtx.globalCompositeOperation = wbEraser ? 'destination-out' : 'source-over';
+        wbCtx.strokeStyle = wbColor;
+        wbCtx.lineWidth = parseInt(document.getElementById('wb-size').value) / state.zoom;
+        wbCtx.quadraticCurveTo(wbLastX, wbLastY, (pos.x + wbLastX) / 2, (pos.y + wbLastY) / 2);
+        wbCtx.stroke();
+        wbCtx.beginPath();
+        wbCtx.moveTo((pos.x + wbLastX) / 2, (pos.y + wbLastY) / 2);
+        wbLastX = pos.x; wbLastY = pos.y;
+      });
+      canvas.addEventListener('mouseup', () => { wbDrawing = false; });
+      canvas.addEventListener('mouseleave', () => { wbDrawing = false; });
+
+      canvas.addEventListener('touchstart', (e) => {
+        if (!state.whiteboardMode) return;
+        e.preventDefault(); e.stopPropagation();
+        const touch = e.touches[0];
+        const pos = screenToCanvas(touch.clientX, touch.clientY);
+        wbDrawing = true; wbLastX = pos.x; wbLastY = pos.y;
+        wbCtx.beginPath(); wbCtx.moveTo(wbLastX, wbLastY);
+      }, { passive: false });
+      canvas.addEventListener('touchmove', (e) => {
+        if (!wbDrawing || !state.whiteboardMode) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const pos = screenToCanvas(touch.clientX, touch.clientY);
+        wbCtx.globalCompositeOperation = wbEraser ? 'destination-out' : 'source-over';
+        wbCtx.strokeStyle = wbColor;
+        wbCtx.lineWidth = parseInt(document.getElementById('wb-size').value) / state.zoom;
+        wbCtx.quadraticCurveTo(wbLastX, wbLastY, (pos.x + wbLastX) / 2, (pos.y + wbLastY) / 2);
+        wbCtx.stroke();
+        wbCtx.beginPath();
+        wbCtx.moveTo((pos.x + wbLastX) / 2, (pos.y + wbLastY) / 2);
+        wbLastX = pos.x; wbLastY = pos.y;
+      }, { passive: false });
+      canvas.addEventListener('touchend', (e) => { e.preventDefault(); wbDrawing = false; }, { passive: false });
+    }
+
+    function fitToDrawing() {
+      const canvas = document.getElementById('wb-canvas');
+      if (!wbCtx) return;
+      const imageData = wbCtx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          const alpha = data[(y * canvas.width + x) * 4 + 3];
+          if (alpha > 0) {
+            if (x < minX) minX = x; if (x > maxX) maxX = x;
+            if (y < minY) minY = y; if (y > maxY) maxY = y;
+          }
+        }
+      }
+      if (minX > maxX || minY > maxY) return; // nothing drawn
+      // convert canvas pixel coords to world coords
+      const worldMinX = minX - 4000, worldMinY = minY - 4000;
+      const worldMaxX = maxX - 4000, worldMaxY = maxY - 4000;
+      const boundW = worldMaxX - worldMinX + 80;
+      const boundH = worldMaxY - worldMinY + 80;
+      const canvasEl = document.getElementById('canvas-area');
+      const newZoom = Math.min(canvasEl.clientWidth / boundW, canvasEl.clientHeight / boundH, 2);
+      state.zoom = newZoom;
+      state.pan.x = -worldMinX * newZoom + 40;
+      state.pan.y = -worldMinY * newZoom + 40;
+      applyViewport();
+    }
+
+    function setWbColor(el) {
+      wbColor = el.dataset.color;
+      wbEraser = false;
+      document.getElementById('wb-eraser-btn').style.background = '';
+      document.querySelectorAll('.wb-color').forEach(c => c.style.outline = '');
+      el.style.outline = '2px solid white';
+    }
+
+    function toggleEraser() {
+      wbEraser = !wbEraser;
+      const btn = document.getElementById('wb-eraser-btn');
+      btn.style.background = wbEraser ? 'rgba(255,255,255,0.3)' : '';
+    }
+
+    function clearWhiteboard() {
+      if (!wbCtx) return;
+      wbCtx.clearRect(0, 0, document.getElementById('wb-canvas').width, document.getElementById('wb-canvas').height);
+    }
+
+    function saveHistory() {
+      state.history = state.history.slice(0, state.histIndex + 1);
+      state.history.push(JSON.parse(JSON.stringify(state.nodes)));
+      state.histIndex = state.history.length - 1;
+      if (state.history.length > 100) {
+        state.history.shift();
+        state.histIndex--;
+      }
+    }
+
+    function undo() {
+      if (state.histIndex <= 0) return;
+      state.histIndex--;
+      state.nodes = JSON.parse(JSON.stringify(state.history[state.histIndex]));
+      render();
+    }
+
+    function redo() {
+      if (state.histIndex >= state.history.length - 1) return;
+      state.histIndex++;
+      state.nodes = JSON.parse(JSON.stringify(state.history[state.histIndex]));
+      render();
+    }
+
+    const canvasArea = document.getElementById('canvas-area');
+    canvasArea.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+        const nodeEl = target?.closest('.node-div');
+        if (nodeEl) {
+          touchState = { type: 'node', id: nodeEl.dataset.id, startX: touch.clientX, startY: touch.clientY, origX: state.nodes[nodeEl.dataset.id].x, origY: state.nodes[nodeEl.dataset.id].y, moved: false, startTime: Date.now() };
+          longPressTimer = setTimeout(() => {
+            if (touchState && touchState.type === 'node' && !touchState.moved) {
+              showContextMenu(touch.clientX, touch.clientY, touchState.id);
+              touchState = null;
+            }
+          }, 500);
+        } else {
+          touchState = { type: 'pan', lastX: touch.clientX, lastY: touch.clientY };
+        }
+      } else if (e.touches.length === 2) {
+        clearTimeout(longPressTimer);
+        const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        touchState = { type: 'pinch', startDist: dist, startZoom: state.zoom, midX: (e.touches[0].clientX + e.touches[1].clientX) / 2, midY: (e.touches[0].clientY + e.touches[1].clientY) / 2 };
+      }
+    }, { passive: false });
+
+    canvasArea.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!touchState) return;
+      if (touchState.type === 'pan' && e.touches.length === 1) {
+        state.pan.x += e.touches[0].clientX - touchState.lastX;
+        state.pan.y += e.touches[0].clientY - touchState.lastY;
+        touchState.lastX = e.touches[0].clientX;
+        touchState.lastY = e.touches[0].clientY;
+        applyViewport();
+      } else if (touchState.type === 'node' && e.touches.length === 1) {
+        const dx = (e.touches[0].clientX - touchState.startX) / state.zoom;
+        const dy = (e.touches[0].clientY - touchState.startY) / state.zoom;
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+          touchState.moved = true;
+          clearTimeout(longPressTimer);
+        }
+        if (touchState.moved) {
+          state.nodes[touchState.id].x = touchState.origX + dx;
+          state.nodes[touchState.id].y = touchState.origY + dy;
+          render();
+        }
+      } else if (touchState.type === 'pinch' && e.touches.length === 2) {
+        const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        const newZoom = Math.max(0.2, Math.min(3, touchState.startZoom * (dist / touchState.startDist)));
+        const rect = canvasArea.getBoundingClientRect();
+        const mx = touchState.midX - rect.left;
+        const my = touchState.midY - rect.top;
+        state.pan.x = mx - (mx - state.pan.x) * (newZoom / state.zoom);
+        state.pan.y = my - (my - state.pan.y) * (newZoom / state.zoom);
+        state.zoom = newZoom;
+        applyViewport();
+        updateZoomDisplay();
+      }
+    }, { passive: false });
+
+    canvasArea.addEventListener('touchend', (e) => {
+      clearTimeout(longPressTimer);
+      if (touchState?.type === 'node' && !touchState.moved) {
+        const now = Date.now();
+        if (now - lastTapTime < 300 && lastTapId === touchState.id) {
+          startEditing(touchState.id);
+        } else {
+          selectNode(touchState.id);
+          lastTapTime = now;
+          lastTapId = touchState.id;
+        }
+      }
+      if (touchState?.type === 'node' && touchState.moved) saveHistory();
+      touchState = null;
+    }, { passive: false });
+
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('note-panel').style.display === 'block' ||
+          document.getElementById('eq-panel').style.display === 'block' ||
+          document.getElementById('label-panel').style.display === 'block') {
+        if (e.key === 'Escape') { e.preventDefault(); closePanels(); }
+        return;
+      }
+      const editing = document.querySelector('[contenteditable="true"]');
+      if (editing) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+      switch (e.key) {
+        case 'Tab': e.preventDefault(); if (state.selectedId) addChildNode(state.selectedId); break;
+        case 'Enter': e.preventDefault(); if (state.selectedId) addSiblingNode(state.selectedId); break;
+        case 'Delete':
+        case 'Backspace': e.preventDefault(); if (state.selectedId && state.selectedId !== 'root') deleteNode(state.selectedId); break;
+        case 'F2': e.preventDefault(); if (state.selectedId) startEditing(state.selectedId); break;
+        case 'Escape': state.selectedId = null; render(); break;
+        case 'z': if (e.ctrlKey || e.metaKey) { e.preventDefault(); undo(); } break;
+        case 'y': if (e.ctrlKey || e.metaKey) { e.preventDefault(); redo(); } break;
+      }
+    });
+
+    window.addEventListener('load', () => {
+      initDefaultMap();
+      saveHistory();
+      const canvasEl = document.getElementById('canvas-area');
+      state.pan.x = canvasEl.clientWidth / 2 - 70;
+      state.pan.y = canvasEl.clientHeight / 2;
+      state.zoom = 1;
+      applyViewport();
+      updateZoomDisplay();
+      render();
+      initWhiteboard(); // Set up drawing canvas on load
+
+      // Handle virtual keyboard resize on mobile (shrink canvas, don't pan)
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+          const app = document.getElementById('app');
+          const topbarH = document.getElementById('topbar').offsetHeight;
+          const bottomBarH = document.getElementById('bottom-bar').offsetHeight;
+          const vvH = window.visualViewport.height;
+          app.style.height = Math.max(200, vvH - topbarH - bottomBarH) + 'px';
+        });
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#ctx-menu')) hideCtx();
+    });
+  </script>
+</body>
+</html>

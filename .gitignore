@@ -30,3 +30,19 @@ dist-ssr
 
 # Build outputs
 build
+
+# Large reference files (PDFs, images — keep locally, not in git)
+references/
+WaffleStack Vault/
+Theoretical/
+
+# Claude Code internal files
+.claude/
+.planning/
+gsd-log.json
+gsd-state.json
+GSD_MISSION.md
+build_err.txt
+build_log.txt
+build_output.txt
+bot.py

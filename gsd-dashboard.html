@@ -1,0 +1,280 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WaffleStack GSD Monitor</title>
+  <style>
+    :root {
+      --bg: #07070f;
+      --surface: rgba(255,255,255,0.035);
+      --surface2: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.07);
+      --text: #ddddf0;
+      --muted: #7777a0;
+      --accent: #7c3aed;
+      --accent2: #a78bfa;
+      --research: #3b82f6;
+      --plan: #f59e0b;
+      --execute: #10b981;
+      --verify: #f43f5e;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --fail: #f43f5e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124,58,237,0.18), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(59,130,246,0.08), transparent);
+      min-height: 100vh;
+    }
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(20px);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: #fff; }
+    .logo span { color: var(--accent2); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+    .status-dot.running { background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: pulse 2s infinite; }
+    .status-dot.idle { background: var(--muted); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .header-meta { font-size: 11px; color: var(--muted); }
+    .main { display: grid; grid-template-columns: 260px 1fr 300px; gap: 0; height: calc(100vh - 53px); overflow: hidden; }
+    .panel { border-right: 1px solid var(--border); overflow-y: auto; padding: 16px; }
+    .panel:last-child { border-right: none; border-left: 1px solid var(--border); }
+    .panel-title { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+    .card-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+    .card-value { font-size: 20px; font-weight: 700; color: #fff; }
+    .card-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .phase-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .phase-research { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+    .phase-plan     { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+    .phase-execute  { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+    .phase-verify   { background: rgba(244,63,94,0.15);  color: #fda4af; border: 1px solid rgba(244,63,94,0.3); }
+    .phase-idle     { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+    .timeline { position: relative; }
+    .timeline-item { display: flex; gap: 12px; padding-bottom: 18px; position: relative; }
+    .timeline-item::before { content: ''; position: absolute; left: 15px; top: 26px; bottom: 0; width: 1px; background: var(--border); }
+    .timeline-item:last-child::before { display: none; }
+    .timeline-dot { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1px solid var(--border); }
+    .tl-research { background: rgba(59,130,246,0.2); }
+    .tl-plan     { background: rgba(245,158,11,0.2); }
+    .tl-execute  { background: rgba(16,185,129,0.2); }
+    .tl-verify   { background: rgba(244,63,94,0.2); }
+    .timeline-content { flex: 1; min-width: 0; }
+    .timeline-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .timeline-time { font-size: 10px; color: var(--muted); }
+    .timeline-summary { font-size: 12px; color: var(--text); line-height: 1.4; }
+    .timeline-files { margin-top: 6px; }
+    .file-chip { display: inline-block; padding: 1px 7px; border-radius: 4px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); font-size: 10px; color: var(--muted); margin: 2px 2px 0 0; font-family: 'Menlo', 'Fira Code', monospace; }
+    .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .score-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+    .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .score-bar { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; }
+    .score-fill { height: 100%; border-radius: 3px; }
+    .score-fill.good   { background: var(--ok); }
+    .score-fill.medium { background: var(--warn); }
+    .score-fill.bad    { background: var(--fail); }
+    .score-num { font-size: 11px; font-weight: 600; width: 20px; text-align: right; }
+    .plan-task { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+    .plan-task.done   { border-color: rgba(16,185,129,0.3); }
+    .plan-task.active { border-color: rgba(124,58,237,0.5); background: rgba(124,58,237,0.08); }
+    .plan-task-header { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+    .task-status { flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; margin-top: 1px; border: 1.5px solid var(--border); }
+    .task-status.done   { background: var(--ok); border-color: var(--ok); }
+    .task-status.active { background: var(--accent); border-color: var(--accent); animation: pulse 2s infinite; }
+    .plan-task-name { font-size: 12px; font-weight: 600; color: #fff; line-height: 1.3; }
+    .plan-task-files { font-size: 10px; color: var(--muted); font-family: monospace; margin: 4px 0 6px; }
+    .plan-task-criteria { font-size: 11px; color: var(--muted); border-left: 2px solid var(--border); padding-left: 8px; }
+    .vision-item { margin-bottom: 10px; }
+    .vision-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .vision-name { font-size: 11px; }
+    .vision-pct  { font-size: 10px; color: var(--muted); }
+    .vision-bar  { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.06); overflow: hidden; }
+    .vision-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; }
+    .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .empty-icon { font-size: 32px; margin-bottom: 12px; }
+    .empty-title { font-size: 13px; color: var(--text); margin-bottom: 6px; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .refresh-btn { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); font-size: 11px; cursor: pointer; transition: all 0.15s; }
+    .refresh-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">Waffle<span>Stack</span> GSD</div>
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText" style="font-size:11px; color:var(--muted)">Loading...</span>
+  </div>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span class="header-meta" id="lastRunMeta"></span>
+    <button class="refresh-btn" onclick="location.reload()">â†» Refresh</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="panel">
+    <div class="panel-title">Mission Control</div>
+    <div class="card">
+      <div class="card-label">Current Phase</div>
+      <div id="currentPhase">â€”</div>
+      <div class="card-sub" id="phaseReason"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Sessions Run</div>
+      <div class="card-value" id="sessionCount">0</div>
+      <div class="card-sub">since tracking started</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Active Milestone</div>
+      <div style="font-size:14px; font-weight:600; color:#fff; margin:4px 0" id="milestone">â€”</div>
+    </div>
+    <div style="margin-top:18px;">
+      <div class="panel-title">Vision Progress</div>
+      <div class="vision-item">
+        <div class="vision-label"><span class="vision-name">Study Hub (Quiz Loop)</span><span class="vision-pct" id="pct-quiz">0%</span></div>
+        <div class="vision-bar"><div class="vision-fill" id="bar-quiz" style="width:0%"></div></div>
+      </div>
+      <div class="vision-item">
+        <div class="vision-label"><span class="vision-name">3D Knowledge City</span><span class="vision-pct" id="pct-3d">0%</span></div>
+        <div class="vision-bar"><div class="vision-fill" id="bar-3d" style="width:0%"></div></div>
+      </div>
+      <div class="vision-item">
+        <div class="vision-label"><span class="vision-name">Gamification Layer</span><span class="vision-pct" id="pct-game">0%</span></div>
+        <div class="vision-bar"><div class="vision-fill" id="bar-game" style="width:0%"></div></div>
+      </div>
+      <div class="vision-item">
+        <div class="vision-label"><span class="vision-name">Mind-Map Canvas</span><span class="vision-pct" id="pct-mindmap">0%</span></div>
+        <div class="vision-bar"><div class="vision-fill" id="bar-mindmap" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="border-right:1px solid var(--border);">
+    <div class="panel-title">Activity Timeline</div>
+    <div class="timeline" id="timeline">
+      <div class="empty">
+        <div class="empty-icon">ðŸ¤–</div>
+        <div class="empty-title">No sessions yet</div>
+        <div>The GSD agent runs every 2 hours.<br>First session populates this timeline.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Active Plan</div>
+    <div id="activePlan">
+      <div class="empty">
+        <div class="empty-icon">ðŸ“‹</div>
+        <div class="empty-title">No plan yet</div>
+        <div>Created during the Plan phase</div>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <div class="panel-title">Last Critique</div>
+      <div id="critiqueSection">
+        <div style="color:var(--muted); font-size:12px;">No critique yet â€” runs after Execute phase</div>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+      <div class="panel-title">Recent Files Changed</div>
+      <div id="recentFiles" style="color:var(--muted); font-size:12px;">None yet</div>
+    </div>
+  </div>
+</div>
+
+<script>
+window.GSD_STATE = {
+  "version": "1.0",
+  "milestone": "v1-foundation",
+  "currentPhase": "research",
+  "currentTaskIndex": 0,
+  "sessionCount": 0,
+  "lastRun": null,
+  "activePlan": null,
+  "activeResearch": null,
+  "completedTasks": [],
+  "blockers": [],
+  "nextPhaseReason": "Starting fresh â€” first GSD cycle begins with research"
+}
+;
+window.GSD_LOG = []
+;
+</script>
+
+<script>
+const PHASE_ICONS  = { research:'ðŸ”', plan:'ðŸ“', execute:'âš¡', verify:'ðŸ”¬', idle:'â¸' };
+const PHASE_LABELS = { research:'Research', plan:'Plan', execute:'Execute', verify:'Verify', idle:'Idle' };
+function phaseClass(p) { return ({research:'phase-research',plan:'phase-plan',execute:'phase-execute',verify:'phase-verify'})[p]||'phase-idle'; }
+function tlClass(p)    { return ({research:'tl-research',plan:'tl-plan',execute:'tl-execute',verify:'tl-verify'})[p]||''; }
+function timeAgo(iso) {
+  if (!iso) return 'Never';
+  const m = Math.floor((Date.now()-new Date(iso))/60000);
+  if (m<1) return 'Just now'; if (m<60) return m+'m ago';
+  const h=Math.floor(m/60); if (h<24) return h+'h ago'; return Math.floor(h/24)+'d ago';
+}
+function scoreClass(n) { return n>=8?'good':n>=6?'medium':'bad'; }
+
+function renderDashboard() {
+  const state = window.GSD_STATE||{}, log = window.GSD_LOG||[];
+  const dot = document.getElementById('statusDot');
+  const isRecent = state.lastRun && (Date.now()-new Date(state.lastRun))<130*60*1000;
+  dot.className = 'status-dot '+(log.length===0?'idle':isRecent?'running':'idle');
+  document.getElementById('statusText').textContent = log.length===0?'Waiting for first run':isRecent?'Active â€” last run recent':'Idle â€” next run scheduled';
+  document.getElementById('lastRunMeta').textContent = state.lastRun?'Last run: '+timeAgo(state.lastRun):'';
+  const phase = state.currentPhase||'idle';
+  document.getElementById('currentPhase').innerHTML = `<span class="phase-badge ${phaseClass(phase)}">${PHASE_ICONS[phase]||'â¸'} ${PHASE_LABELS[phase]||phase}</span>`;
+  document.getElementById('phaseReason').textContent = state.nextPhaseReason||'';
+  document.getElementById('sessionCount').textContent = state.sessionCount||0;
+  document.getElementById('milestone').textContent = state.milestone||'â€”';
+  const setProgress = (id,pct) => { document.getElementById('pct-'+id).textContent=pct+'%'; document.getElementById('bar-'+id).style.width=pct+'%'; };
+  const lastWithVision = [...log].reverse().find(e=>e.visionProgress);
+  if (lastWithVision) { const vp=lastWithVision.visionProgress; setProgress('quiz',vp.quiz||0); setProgress('3d',vp.city||0); setProgress('game',vp.gamification||0); setProgress('mindmap',vp.mindmap||0); }
+  const tl = document.getElementById('timeline');
+  if (log.length===0) {
+    tl.innerHTML = '<div class="empty"><div class="empty-icon">ðŸ¤–</div><div class="empty-title">No sessions yet</div><div>The GSD agent runs every 2 hours.<br>First session populates this timeline.</div></div>';
+  } else {
+    tl.innerHTML = [...log].reverse().map(e => {
+      const files = (e.filesChanged||[]).map(f=>`<span class="file-chip">${f}</span>`).join('');
+      return `<div class="timeline-item"><div class="timeline-dot ${tlClass(e.phase)}">${PHASE_ICONS[e.phase]||'â€¢'}</div><div class="timeline-content"><div class="timeline-header"><span class="phase-badge ${phaseClass(e.phase)}" style="font-size:10px;padding:2px 7px">${PHASE_LABELS[e.phase]||e.phase}</span><span class="timeline-time">${timeAgo(e.timestamp)}</span>${e.sessionNum?`<span style="font-size:10px;color:var(--muted)">Session #${e.sessionNum}</span>`:''}</div><div class="timeline-summary">${e.summary||''}</div>${files?`<div class="timeline-files">${files}</div>`:''}${e.scores?`<div style="margin-top:6px;font-size:10px;color:var(--muted)">Critique avg: <strong style="color:${e.scores.avg>=7?'var(--ok)':e.scores.avg>=5?'var(--warn)':'var(--fail)'}">${e.scores.avg}/10</strong></div>`:''}</div></div>`;
+    }).join('');
+  }
+  const planEl = document.getElementById('activePlan');
+  if (state.activePlan&&state.activePlan.tasks&&state.activePlan.tasks.length) {
+    planEl.innerHTML = state.activePlan.tasks.map((task,i)=>{
+      const isDone=(state.completedTasks||[]).includes(task.name), isActive=!isDone&&i===(state.currentTaskIndex||0);
+      return `<div class="plan-task ${isDone?'done':isActive?'active':''}"><div class="plan-task-header"><div class="task-status ${isDone?'done':isActive?'active':'pending'}"></div><div class="plan-task-name">${task.name}</div></div>${task.files?`<div class="plan-task-files">${task.files}</div>`:''}${task.done?`<div class="plan-task-criteria">${task.done}</div>`:''}</div>`;
+    }).join('');
+  } else {
+    planEl.innerHTML = '<div class="empty" style="padding:20px"><div class="empty-icon">ðŸ“‹</div><div class="empty-title">No plan yet</div><div>Created during the Plan phase</div></div>';
+  }
+  const lastCritique = [...log].reverse().find(e=>e.scores&&e.scores.breakdown);
+  if (lastCritique) {
+    const bd=lastCritique.scores.breakdown;
+    document.getElementById('critiqueSection').innerHTML = `<div class="score-grid">${Object.entries(bd).map(([lbl,sc])=>`<div class="score-item"><div class="score-label">${lbl}</div><div class="score-bar-wrap"><div class="score-bar"><div class="score-fill ${scoreClass(sc)}" style="width:${sc*10}%"></div></div><span class="score-num" style="color:${sc>=7?'var(--ok)':sc>=5?'var(--warn)':'var(--fail)'}">${sc}</span></div></div>`).join('')}</div>`;
+  }
+  const allFiles=[...new Set(log.flatMap(e=>e.filesChanged||[]))].slice(-10).reverse();
+  document.getElementById('recentFiles').innerHTML = allFiles.length ? allFiles.map(f=>`<div class="file-chip" style="display:block;margin:3px 0">${f}</div>`).join('') : '<span style="color:var(--muted);font-size:12px">None yet</span>';
+}
+renderDashboard();
+</script>
+</body>
+</html>
+
