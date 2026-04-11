@@ -11,9 +11,10 @@ import TownscaperScene from './components/TownscaperScene'
 import CityModeScene from './components/CityModeScene'
 import ModelColorTest from './components/ModelColorTest'
 import WaffleStackCity from './components/WaffleStackCity'
+import MissionControl from './components/MissionControl'
 
 function App() {
-  const [activeView, setActiveView] = useState<'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest' | 'wafflecity'>('wafflecity')
+  const [activeView, setActiveView] = useState<'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest' | 'wafflecity' | 'mission'>('mission')
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('wafflestack-dark-mode') === 'true'
   })
@@ -214,18 +215,24 @@ function App() {
             <WaffleStackCity />
             <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
               <button
+                onClick={() => setActiveView('mission')}
+                className="px-4 py-2 backdrop-blur-xl bg-teal-500/80 border border-teal-400/50 rounded-xl text-white hover:bg-teal-600/80 transition-all"
+              >
+                🎯 Mission Control
+              </button>
+              <button
                 onClick={() => setActiveView('townscaper')}
                 className="px-4 py-2 backdrop-blur-xl bg-pink-500/80 border border-pink-400/50 rounded-xl text-white hover:bg-pink-600/80 transition-all"
               >
                 🏘️ Townscaper
               </button>
-              <button
-                onClick={() => setActiveView('study')}
-                className="px-4 py-2 backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all"
-              >
-                📚 לימוד
-              </button>
             </div>
+          </div>
+        )}
+
+        {activeView === 'mission' && (
+          <div className="w-full h-full">
+            <MissionControl onViewChange={setActiveView} />
           </div>
         )}
       </div>
