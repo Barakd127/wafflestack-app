@@ -72,6 +72,18 @@ const CHALLENGES: Record<string, ChallengeContent> = {
         correct: 3,
         explanation: 'ממוצע = סכום / מספר ← סכום = 10 × 4 = 40. ✓',
       },
+      {
+        q: 'מה הממוצע של: 2, 4, 4, 4, 5, 5, 7, 9?',
+        options: ['4', '5', '6', '7'],
+        correct: 1,
+        explanation: 'סכום = 40, חלקי 8 = 5. ✓',
+      },
+      {
+        q: 'ערך קיצוני גדול מאוד מוסף לנתונים. מה קורה לממוצע?',
+        options: ['יורד', 'לא משתנה', 'עולה', 'הופך לחציון'],
+        correct: 2,
+        explanation: 'הממוצע רגיש לערכים קיצוניים — ערך גדול מאוד מעלה אותו. ✓',
+      },
     ],
   },
 
@@ -93,6 +105,18 @@ const CHALLENGES: Record<string, ChallengeContent> = {
         correct: 1,
         explanation: 'מסודר: 2, 3, 4, 7, 9 → האמצעי הוא 4. ✓',
       },
+      {
+        q: 'מה החציון של: 1, 3, 5, 7?',
+        options: ['3', '4', '5', '3.5'],
+        correct: 1,
+        explanation: 'זוגי מספרים → ממוצע שני האמצעיים: (3+5)/2 = 4. ✓',
+      },
+      {
+        q: 'למה לעיתים עדיף להשתמש בחציון ולא בממוצע?',
+        options: ['חציון תמיד גדול יותר', 'חציון פחות רגיש לערכים קיצוניים', 'חציון קל יותר לחישוב', 'ממוצע לא מדויק'],
+        correct: 1,
+        explanation: 'ערכים קיצוניים (כמו משכורת מיליארדר) מעוותים את הממוצע אך לא את החציון. ✓',
+      },
     ],
   },
 
@@ -113,6 +137,18 @@ const CHALLENGES: Record<string, ChallengeContent> = {
         options: ['34%', '68%', '95%', '99.7%'],
         correct: 1,
         explanation: '85=μ-σ, 115=μ+σ. כלל 68-95-99.7: 68% מהנתונים בטווח μ±σ. ✓',
+      },
+      {
+        q: 'σ=2 לעומת σ=5 — מה ההבדל בעקומת הפעמון?',
+        options: ['σ=2 רחבה יותר', 'σ=5 רחבה יותר', 'שתיהן זהות', 'σ=2 גבוהה ורחבה יותר'],
+        correct: 1,
+        explanation: 'סטיית תקן גדולה = נתונים פרושים יותר = עקומה רחבה ונמוכה יותר. ✓',
+      },
+      {
+        q: 'מה הסבירות לקבל ערך בין μ-2σ ל-μ+2σ?',
+        options: ['68%', '75%', '95%', '99.7%'],
+        correct: 2,
+        explanation: 'כלל 68-95-99.7: כ-95% מהנתונים נמצאים בטווח 2σ מהממוצע. ✓',
       },
     ],
   },
@@ -322,9 +358,10 @@ function SliderRow({ def, value, onChange, color }: SliderRowProps) {
 interface Props {
   building: BuildingInfo
   onClose: () => void
+  onComplete?: (buildingId: string) => void
 }
 
-export default function StatChallenge({ building, onClose }: Props) {
+export default function StatChallenge({ building, onClose, onComplete }: Props) {
   const content = CHALLENGES[building.id] ?? CHALLENGES['hospital']
   const color = building.color ?? content.color
 
@@ -352,6 +389,7 @@ export default function StatChallenge({ building, onClose }: Props) {
   const nextQuestion = () => {
     if (quizIndex + 1 >= content.quiz.length) {
       setQuizDone(true)
+      onComplete?.(building.id)
     } else {
       setQuizIndex(i => i + 1)
       setSelected(null)

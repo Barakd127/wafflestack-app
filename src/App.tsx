@@ -12,9 +12,10 @@ import CityModeScene from './components/CityModeScene'
 import ModelColorTest from './components/ModelColorTest'
 import WaffleStackCity from './components/WaffleStackCity'
 import MissionControl from './components/MissionControl'
+import LandingPage from './components/LandingPage'
 
 function App() {
-  const [activeView, setActiveView] = useState<'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest' | 'wafflecity' | 'mission'>('wafflecity')
+  const [activeView, setActiveView] = useState<'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest' | 'wafflecity' | 'mission' | 'landing'>('landing')
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('wafflestack-dark-mode') === 'true'
   })
@@ -233,6 +234,12 @@ function App() {
         {activeView === 'mission' && (
           <div className="w-full h-full">
             <MissionControl onViewChange={(v) => setActiveView(v as Parameters<typeof setActiveView>[0])} />
+          </div>
+        )}
+
+        {activeView === 'landing' && (
+          <div className="w-full h-full">
+            <LandingPage onEnterCity={() => setActiveView('wafflecity')} />
           </div>
         )}
       </div>
