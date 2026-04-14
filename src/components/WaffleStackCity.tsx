@@ -197,6 +197,7 @@ export default function WaffleStackCity() {
   const { playing: soundPlaying, toggle: toggleSound } = useCitySound()
   const [showHelp, setShowHelp] = useState(false)
   const [milestone, setMilestone] = useState<5 | 10 | null>(null)
+  const [showTopicsList, setShowTopicsList] = useState(false)
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -218,6 +219,8 @@ export default function WaffleStackCity() {
             setSelectedBuilding(null)
           } else if (showScoreBoard) {
             setShowScoreBoard(false)
+          } else if (showTopicsList) {
+            setShowTopicsList(false)
           } else {
             setShowHelp(false)
           }
@@ -235,7 +238,7 @@ export default function WaffleStackCity() {
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [challengeBuilding, selectedBuilding, showScoreBoard, toggleSound])
+  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, toggleSound])
 
   const openChallenge = useCallback((building: BuildingDef) => {
     setChallengeBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
@@ -320,6 +323,21 @@ export default function WaffleStackCity() {
           title={soundPlaying ? 'Mute city sound' : 'Unmute city sound'}
         >
           {soundPlaying ? '🔊' : '🔇'}
+        </button>
+        <button
+          onClick={() => setShowTopicsList(t => !t)}
+          style={{
+            background: showTopicsList ? 'rgba(170,150,218,0.25)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showTopicsList ? 'rgba(170,150,218,0.6)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showTopicsList ? '#AA96DA' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="All topics list"
+        >
+          📚 Topics
         </button>
         <button
           onClick={() => setShowScoreBoard(s => !s)}
@@ -548,6 +566,94 @@ export default function WaffleStackCity() {
           onClose={() => setShowScoreBoard(false)}
           onReset={handleReset}
         />
+      )}
+
+      {/* Topics List modal */}
+      {showTopicsList && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 450, backdropFilter: 'blur(10px)', padding: 20,
+        }} onClick={() => setShowTopicsList(false)}>
+          <div style={{
+            background: 'linear-gradient(160deg, #0a0a18 0%, #0f1525 100%)',
+            border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
+            width: '100%', maxWidth: 560, maxHeight: '80vh',
+            display: 'flex', flexDirection: 'column', overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+          }} onClick={e => e.stopPropagation()}>
+
+            {/* Header */}
+            <div style={{
+              padding: '20px 24px 16px',
+              borderBottom: '1px solid rgba(255,255,255,0.07)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>📚 All Topics</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+                  {mastered.size}/10 mastered · Click to open challenge
+                </div>
+              </div>
+              <button onClick={() => setShowTopicsList(false)} style={{
+                background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: 8, width: 32, height: 32, color: 'rgba(255,255,255,0.5)',
+                cursor: 'pointer', fontSize: 14,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>✕</button>
+            </div>
+
+            {/* Building list */}
+            <div style={{ overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {BUILDINGS.map(b => {
+                const isMastered = mastered.has(b.id)
+                return (
+                  <button
+                    key={b.id}
+                    onClick={() => {
+                      setShowTopicsList(false)
+                      openChallenge(b)
+                    }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 14,
+                      padding: '12px 16px', borderRadius: 12, cursor: 'pointer', width: '100%',
+                      background: isMastered ? `linear-gradient(90deg, ${b.color ?? '#fff'}12 0%, transparent 100%)` : 'rgba(255,255,255,0.03)',
+                      border: isMastered ? `1px solid ${b.color ?? '#fff'}30` : '1px solid rgba(255,255,255,0.06)',
+                      textAlign: 'left', transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = isMastered ? `linear-gradient(90deg, ${b.color ?? '#fff'}22 0%, transparent 100%)` : 'rgba(255,255,255,0.07)' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = isMastered ? `linear-gradient(90deg, ${b.color ?? '#fff'}12 0%, transparent 100%)` : 'rgba(255,255,255,0.03)' }}
+                  >
+                    <div style={{
+                      width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                      background: `${b.color ?? '#fff'}18`, border: `1px solid ${b.color ?? '#fff'}30`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+                    }}>
+                      {b.label.split(' ')[0]}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontSize: 14, fontWeight: 600, color: isMastered ? '#fff' : 'rgba(255,255,255,0.7)',
+                        direction: 'rtl', textAlign: 'right',
+                      }}>
+                        {b.label}
+                      </div>
+                      <div style={{ fontSize: 12, color: b.color ?? '#4ECDC4', marginTop: 2 }}>
+                        {b.statsConcept}
+                      </div>
+                    </div>
+                    <div style={{
+                      flexShrink: 0, fontSize: 12, fontWeight: 700,
+                      color: isMastered ? '#4ECDC4' : 'rgba(255,255,255,0.25)',
+                    }}>
+                      {isMastered ? '✓' : '→'}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Help button — bottom-right */}

@@ -647,33 +647,77 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
             </div>
 
             {quizDone ? (
-              /* Score screen */
               <div style={{
-                flex: 1, display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center', gap: 16, textAlign: 'center',
+                height: '100%', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center', padding: '32px 24px',
+                textAlign: 'center',
               }}>
-                <div style={{ fontSize: 64 }}>
-                  {score === content.quiz.length ? '🏆' : score > 0 ? '⭐' : '💪'}
+                {/* Grade badge */}
+                <div style={{
+                  fontSize: 72, marginBottom: 8,
+                  filter: `drop-shadow(0 0 20px ${color}66)`,
+                }}>
+                  {score === content.quiz.length ? '🏆' : score >= content.quiz.length * 0.75 ? '⭐' : score >= content.quiz.length * 0.5 ? '👍' : '📖'}
                 </div>
-                <div style={{ fontSize: 28, fontWeight: 800, color: '#fff' }}>
-                  {score}/{content.quiz.length}
+
+                <div style={{ fontSize: 24, fontWeight: 900, color, marginBottom: 4 }}>
+                  {score === content.quiz.length ? 'Perfect Score!' : score >= content.quiz.length * 0.75 ? 'Great Job!' : score >= content.quiz.length * 0.5 ? 'Good Effort!' : 'Keep Practicing!'}
                 </div>
-                <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)' }}>
-                  {score === content.quiz.length
-                    ? 'מושלם! הבניין שלך שודרג! 🏙️'
-                    : 'טוב! נסה שוב לשדרג את הבניין.'}
+
+                {/* Score fraction */}
+                <div style={{
+                  fontSize: 48, fontWeight: 900, color: '#fff',
+                  marginBottom: 4, letterSpacing: -2,
+                }}>
+                  {score}<span style={{ fontSize: 28, color: 'rgba(255,255,255,0.35)', fontWeight: 400 }}>/{content.quiz.length}</span>
                 </div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <button onClick={resetQuiz} style={{
-                    padding: '10px 24px', background: `${color}22`,
-                    border: `1px solid ${color}44`, borderRadius: 10,
-                    color, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                  }}>🔄 שחק שוב</button>
-                  <button onClick={onClose} style={{
-                    padding: '10px 24px', background: color,
-                    border: 'none', borderRadius: 10,
-                    color: '#000', cursor: 'pointer', fontSize: 13, fontWeight: 700,
-                  }}>🏙️ חזור לעיר</button>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 24 }}>
+                  {Math.round((score / content.quiz.length) * 100)}% correct
+                </div>
+
+                {/* Score bar */}
+                <div style={{ width: '100%', maxWidth: 240, height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3, marginBottom: 28, overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%', borderRadius: 3,
+                    background: score === content.quiz.length ? '#4ECDC4' : score >= content.quiz.length * 0.75 ? '#FFD700' : score >= content.quiz.length * 0.5 ? '#FF9F43' : '#FF6B6B',
+                    width: `${(score / content.quiz.length) * 100}%`,
+                    transition: 'width 0.6s ease',
+                  }} />
+                </div>
+
+                {/* XP earned */}
+                {score === content.quiz.length && (
+                  <div style={{
+                    background: 'rgba(255,215,0,0.12)', border: '1px solid rgba(255,215,0,0.3)',
+                    borderRadius: 12, padding: '8px 20px', marginBottom: 20,
+                    fontSize: 14, color: '#FFD700', fontWeight: 700,
+                  }}>
+                    ⭐ +50 XP Earned!
+                  </div>
+                )}
+
+                {/* Action buttons */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 280 }}>
+                  <button
+                    onClick={resetQuiz}
+                    style={{
+                      padding: '12px', background: `${color}22`,
+                      border: `1px solid ${color}44`, borderRadius: 10,
+                      color, fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                    }}
+                  >
+                    🔄 Try Again
+                  </button>
+                  <button
+                    onClick={onClose}
+                    style={{
+                      padding: '12px', background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
+                      color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                    }}
+                  >
+                    🏙️ Back to City
+                  </button>
                 </div>
               </div>
             ) : (
