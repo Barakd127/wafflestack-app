@@ -3,6 +3,7 @@ import { OrbitControls, useGLTF, Sky, ContactShadows, Html, useProgress } from '
 import { Suspense, useState, useRef, useCallback } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo } from './StatChallenge'
+import ScoreBoard from './ScoreBoard'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -173,6 +174,7 @@ export default function WaffleStackCity() {
   const [xp, setXp] = useState(loadXP)
   const [xpPopup, setXpPopup] = useState(false)
   const [glowBuilding, setGlowBuilding] = useState<string | null>(null)
+  const [showScoreBoard, setShowScoreBoard] = useState(false)
 
   const openChallenge = useCallback((building: BuildingDef) => {
     setChallengeBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
@@ -207,16 +209,35 @@ export default function WaffleStackCity() {
       {/* Inject CSS animations */}
       <style>{ANIM_STYLE}</style>
 
-      {/* XP Counter — top right */}
+      {/* Top-right controls: XP + ScoreBoard toggle */}
       <div style={{
         position: 'absolute', top: 16, right: 16, zIndex: 50,
-        display: 'flex', alignItems: 'center', gap: 8,
-        background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255,215,0,0.4)', borderRadius: 20,
-        padding: '6px 14px', fontFamily: 'system-ui',
+        display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'system-ui',
       }}>
-        <span style={{ fontSize: 16 }}>⭐</span>
-        <span style={{ color: '#FFD700', fontWeight: 700, fontSize: 16 }}>{xp} XP</span>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255,215,0,0.4)', borderRadius: 20,
+          padding: '6px 14px',
+        }}>
+          <span style={{ fontSize: 16 }}>⭐</span>
+          <span style={{ color: '#FFD700', fontWeight: 700, fontSize: 16 }}>{xp} XP</span>
+        </div>
+        <button
+          onClick={() => setShowScoreBoard(s => !s)}
+          style={{
+            background: showScoreBoard ? 'rgba(78,205,196,0.25)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showScoreBoard ? 'rgba(78,205,196,0.6)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showScoreBoard ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Toggle Score Board"
+        >
+          📊 Scores
+        </button>
       </div>
 
       {/* Progress bar — top left */}
@@ -347,6 +368,15 @@ export default function WaffleStackCity() {
           building={challengeBuilding}
           onClose={() => setChallengeBuilding(null)}
           onComplete={handleComplete}
+        />
+      )}
+
+      {/* Score Board panel */}
+      {showScoreBoard && (
+        <ScoreBoard
+          mastered={mastered}
+          xp={xp}
+          onClose={() => setShowScoreBoard(false)}
         />
       )}
     </div>
