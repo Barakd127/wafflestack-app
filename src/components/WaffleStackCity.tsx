@@ -66,6 +66,34 @@ const CONCEPT_PREVIEW: Record<string, string> = {
   'news':      'A confidence interval gives a range where the true population parameter likely falls (e.g. 95% CI).',
 }
 
+// ─── Onboarding steps ────────────────────────────────────────────────────────
+const ONBOARDING_STEPS = [
+  {
+    id: 'welcome',
+    title: '👋 Welcome to WaffleStack!',
+    body: 'This is a 3D statistics city. Each building is a stats concept waiting to be learned.',
+    position: 'center' as const,
+  },
+  {
+    id: 'buildings',
+    title: '🏙️ Click Any Building',
+    body: 'Click on a building to learn about its statistics concept and take a quiz.',
+    position: 'center' as const,
+  },
+  {
+    id: 'topics',
+    title: '📚 Quick Access',
+    body: 'Use the Topics button to jump directly to any concept. Use ⭐ and 📊 to track your progress.',
+    position: 'center' as const,
+  },
+  {
+    id: 'keyboard',
+    title: '⌨️ Keyboard Shortcuts',
+    body: 'Press ? for keyboard shortcuts, Esc to close panels, M to toggle sound.',
+    position: 'center' as const,
+  },
+]
+
 // ─── CSS for animations ──────────────────────────────────────────────────────
 const ANIM_STYLE = `
 @keyframes xpfloat {
@@ -198,6 +226,23 @@ export default function WaffleStackCity() {
   const [showHelp, setShowHelp] = useState(false)
   const [milestone, setMilestone] = useState<5 | 10 | null>(null)
   const [showTopicsList, setShowTopicsList] = useState(false)
+  const [onboardingStep, setOnboardingStep] = useState<number>(() =>
+    localStorage.getItem('wafflestack-onboarded') ? -1 : 0
+  )
+
+  const advanceOnboarding = () => {
+    if (onboardingStep + 1 >= ONBOARDING_STEPS.length) {
+      setOnboardingStep(-1)
+      localStorage.setItem('wafflestack-onboarded', '1')
+    } else {
+      setOnboardingStep(s => s + 1)
+    }
+  }
+
+  const skipOnboarding = () => {
+    setOnboardingStep(-1)
+    localStorage.setItem('wafflestack-onboarded', '1')
+  }
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -470,6 +515,67 @@ export default function WaffleStackCity() {
             >
               {milestone === 10 ? '🏙️ View My City' : '🚀 Keep Building'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Onboarding overlay */}
+      {onboardingStep >= 0 && onboardingStep < ONBOARDING_STEPS.length && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 650,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)',
+          pointerEvents: 'all',
+        }}>
+          <div style={{
+            background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
+            border: '1px solid rgba(78,205,196,0.3)', borderRadius: 20,
+            padding: '32px 36px', maxWidth: 440, width: '90%',
+            fontFamily: 'system-ui', color: 'white', textAlign: 'center',
+            boxShadow: '0 0 60px rgba(78,205,196,0.15)',
+          }}>
+            {/* Step indicator dots */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 24 }}>
+              {ONBOARDING_STEPS.map((_, i) => (
+                <div key={i} style={{
+                  width: i === onboardingStep ? 20 : 6,
+                  height: 6, borderRadius: 3,
+                  background: i === onboardingStep ? '#4ECDC4' : 'rgba(255,255,255,0.2)',
+                  transition: 'all 0.3s',
+                }} />
+              ))}
+            </div>
+
+            <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 12 }}>
+              {ONBOARDING_STEPS[onboardingStep].title}
+            </div>
+            <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.65)', lineHeight: 1.7, marginBottom: 28 }}>
+              {ONBOARDING_STEPS[onboardingStep].body}
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button
+                onClick={skipOnboarding}
+                style={{
+                  padding: '10px 20px', background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
+                  color: 'rgba(255,255,255,0.45)', fontSize: 13, cursor: 'pointer',
+                }}
+              >
+                Skip
+              </button>
+              <button
+                onClick={advanceOnboarding}
+                style={{
+                  padding: '10px 24px',
+                  background: 'linear-gradient(90deg, #4ECDC4, #44b8b0)',
+                  border: 'none', borderRadius: 10,
+                  color: '#000', fontWeight: 800, fontSize: 14, cursor: 'pointer',
+                }}
+              >
+                {onboardingStep + 1 >= ONBOARDING_STEPS.length ? '🚀 Let\'s Go!' : 'Next →'}
+              </button>
+            </div>
           </div>
         </div>
       )}

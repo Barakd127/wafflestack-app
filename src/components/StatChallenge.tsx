@@ -4,8 +4,20 @@
  * Features: concept explanation, live distribution chart, parameter sliders, quiz.
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import DistributionChart, { DistributionType, DistributionParams } from './DistributionChart'
+
+// ─── Responsive helper ────────────────────────────────────────────────────────
+
+function useWindowWidth() {
+  const [w, setW] = useState(window.innerWidth)
+  useEffect(() => {
+    const handler = () => setW(window.innerWidth)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+  return w
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -473,6 +485,11 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
   const content = CHALLENGES[building.id] ?? CHALLENGES['hospital']
   const color = building.color ?? content.color
 
+  // Responsive
+  const windowWidth = useWindowWidth()
+  const isMobile = windowWidth < 720
+  const [mobileTab, setMobileTab] = useState<'learn' | 'quiz'>('learn')
+
   // Distribution params state
   const [params, setParams] = useState<DistributionParams>(content.defaultParams)
 
@@ -517,7 +534,7 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
         position: 'fixed', inset: 0, zIndex: 300,
         background: 'rgba(5, 5, 15, 0.88)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 20,
+        padding: isMobile ? 8 : 20,
         backdropFilter: 'blur(6px)',
       }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
@@ -572,13 +589,41 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
 
         {/* Body — two columns */}
         <div style={{
-          flex: 1, overflow: 'auto', display: 'flex', gap: 0,
+          flex: 1, overflow: 'hidden', display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row', gap: 0,
         }}>
 
+          {/* Mobile tab switcher */}
+          {isMobile && (
+            <div style={{
+              display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)',
+              flexShrink: 0,
+            }}>
+              {(['learn', 'quiz'] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setMobileTab(tab)}
+                  style={{
+                    flex: 1, padding: '12px', background: 'none',
+                    border: 'none', borderBottom: `2px solid ${mobileTab === tab ? color : 'transparent'}`,
+                    color: mobileTab === tab ? color : 'rgba(255,255,255,0.4)',
+                    fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                    transition: 'all 0.2s', letterSpacing: 0.5,
+                  }}
+                >
+                  {tab === 'learn' ? '📖 Learn' : '🎯 Quiz'}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Left — concept + chart + sliders */}
+          {(!isMobile || mobileTab === 'learn') && (
           <div style={{
-            flex: '1 1 400px', padding: '22px 24px',
-            borderRight: '1px solid rgba(255,255,255,0.06)',
+            flex: isMobile ? 'unset' : '1 1 400px',
+            overflow: 'auto',
+            padding: '22px 24px',
+            borderRight: isMobile ? 'none' : '1px solid rgba(255,255,255,0.06)',
           }}>
 
             {/* Explanation */}
@@ -636,10 +681,14 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
               ))}
             </div>
           </div>
+          )}
 
           {/* Right — quiz */}
+          {(!isMobile || mobileTab === 'quiz') && (
           <div style={{
-            flex: '1 1 340px', padding: '22px 24px',
+            flex: isMobile ? 'unset' : '1 1 380px',
+            overflow: 'auto',
+            padding: '22px 24px',
             display: 'flex', flexDirection: 'column',
           }}>
             <div style={{ fontSize: 11, letterSpacing: 2, color, marginBottom: 16, fontWeight: 600 }}>
@@ -811,6 +860,7 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
               </div>
             )}
           </div>
+          )}
         </div>
       </div>
     </div>
