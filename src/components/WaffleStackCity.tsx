@@ -242,6 +242,14 @@ export default function WaffleStackCity() {
     setSelectedBuilding(null)
   }, [])
 
+  const handleReset = useCallback(() => {
+    localStorage.removeItem('wafflestack-mastered')
+    localStorage.removeItem('wafflestack-xp')
+    setMastered(new Set())
+    setXp(0)
+    setShowScoreBoard(false)
+  }, [])
+
   const handleComplete = useCallback((buildingId: string) => {
     // Mark mastered
     setMastered(prev => {
@@ -258,6 +266,18 @@ export default function WaffleStackCity() {
       localStorage.setItem('wafflestack-xp', String(next))
       return next
     })
+    // Update streak
+    const todayStr = new Date().toISOString().slice(0, 10)
+    const lastStudy = localStorage.getItem('wafflestack-last-study') || ''
+    const currentStreak = parseInt(localStorage.getItem('wafflestack-streak') || '0')
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+    let newStreak = currentStreak
+    if (lastStudy !== todayStr) {
+      // First completion today
+      newStreak = lastStudy === yesterday ? currentStreak + 1 : 1
+      localStorage.setItem('wafflestack-streak', String(newStreak))
+      localStorage.setItem('wafflestack-last-study', todayStr)
+    }
     // Glow + popup
     setGlowBuilding(buildingId)
     setXpPopup(true)
@@ -526,6 +546,7 @@ export default function WaffleStackCity() {
           mastered={mastered}
           xp={xp}
           onClose={() => setShowScoreBoard(false)}
+          onReset={handleReset}
         />
       )}
 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 const BUILDINGS_META = [
   { id: 'power',     label: '⚡ תחנת כוח',   concept: 'ממוצע',              color: '#FFD700' },
@@ -17,11 +17,22 @@ interface Props {
   mastered: Set<string>
   xp: number
   onClose: () => void
+  onReset: () => void
 }
 
-export default function ScoreBoard({ mastered, xp, onClose }: Props) {
+export default function ScoreBoard({ mastered, xp, onClose, onReset }: Props) {
+  const [confirmReset, setConfirmReset] = useState(false)
   const masteredCount = mastered.size
   const total = BUILDINGS_META.length
+
+  // Streak calculation
+  const todayStr = new Date().toISOString().slice(0, 10) // "2026-04-14"
+  const lastStudy = localStorage.getItem('wafflestack-last-study') || ''
+  const streak = (() => {
+    const stored = parseInt(localStorage.getItem('wafflestack-streak') || '0')
+    return stored
+  })()
+  const isStudiedToday = lastStudy === todayStr
 
   return (
     <div
@@ -168,6 +179,34 @@ export default function ScoreBoard({ mastered, xp, onClose }: Props) {
         </div>
       </div>
 
+      {/* Streak Row */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 22 }}>🔥</span>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: streak > 0 ? '#FF6B35' : 'rgba(255,255,255,0.2)', lineHeight: 1 }}>
+              {streak} day{streak !== 1 ? 's' : ''}
+            </div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Study Streak
+            </div>
+          </div>
+        </div>
+        <div style={{
+          fontSize: 11, padding: '4px 10px', borderRadius: 20,
+          background: isStudiedToday ? 'rgba(78,205,196,0.15)' : 'rgba(255,255,255,0.05)',
+          border: `1px solid ${isStudiedToday ? 'rgba(78,205,196,0.4)' : 'rgba(255,255,255,0.08)'}`,
+          color: isStudiedToday ? '#4ECDC4' : 'rgba(255,255,255,0.3)',
+          fontWeight: 600,
+        }}>
+          {isStudiedToday ? '✓ Studied today' : 'Not yet today'}
+        </div>
+      </div>
+
       {/* Building List */}
       <div
         style={{
@@ -241,6 +280,60 @@ export default function ScoreBoard({ mastered, xp, onClose }: Props) {
             </div>
           )
         })}
+      </div>
+
+      {/* Reset section */}
+      <div style={{
+        padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.07)',
+        flexShrink: 0,
+      }}>
+        {!confirmReset ? (
+          <button
+            onClick={() => setConfirmReset(true)}
+            style={{
+              width: '100%', padding: '10px', background: 'rgba(255,80,80,0.08)',
+              border: '1px solid rgba(255,80,80,0.2)', borderRadius: 10,
+              color: 'rgba(255,120,120,0.7)', fontSize: 13, fontWeight: 600,
+              cursor: 'pointer', transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,80,80,0.15)'; e.currentTarget.style.color = 'rgba(255,120,120,1)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,80,80,0.08)'; e.currentTarget.style.color = 'rgba(255,120,120,0.7)' }}
+          >
+            🗑️ Reset Progress
+          </button>
+        ) : (
+          <div style={{
+            background: 'rgba(255,80,80,0.1)', border: '1px solid rgba(255,80,80,0.3)',
+            borderRadius: 10, padding: '14px',
+          }}>
+            <div style={{ fontSize: 13, color: 'rgba(255,200,200,0.9)', marginBottom: 12, textAlign: 'center', lineHeight: 1.5 }}>
+              Reset all progress?<br />
+              <span style={{ fontSize: 11, color: 'rgba(255,150,150,0.6)' }}>This will clear your XP and mastered buildings.</span>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => setConfirmReset(false)}
+                style={{
+                  flex: 1, padding: '8px', background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8,
+                  color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { onReset(); setConfirmReset(false) }}
+                style={{
+                  flex: 1, padding: '8px', background: 'rgba(255,60,60,0.3)',
+                  border: '1px solid rgba(255,80,80,0.4)', borderRadius: 8,
+                  color: '#ff8888', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                Yes, Reset
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
