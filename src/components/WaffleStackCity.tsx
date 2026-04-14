@@ -2,6 +2,7 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Sky, ContactShadows, Html } from '@react-three/drei'
 import { Suspense, useState, useRef } from 'react'
 import * as THREE from 'three'
+import StatChallenge, { BuildingInfo } from './StatChallenge'
 
 // --- Types ---
 interface BuildingDef {
@@ -161,6 +162,21 @@ function InfoPanel({ building, onClose }: { building: BuildingDef | null, onClos
 // --- Main Scene ---
 export default function WaffleStackCity() {
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingDef | null>(null)
+  const [challengeBuilding, setChallengeBuilding] = useState<BuildingInfo | null>(null)
+
+  const handleBuildingClick = (def: BuildingDef) => {
+    setSelectedBuilding(def)
+  }
+
+  const openChallenge = (building: BuildingDef) => {
+    setChallengeBuilding({
+      id: building.id,
+      label: building.label,
+      statsConcept: building.statsConcept,
+      color: building.color,
+    })
+    setSelectedBuilding(null)
+  }
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -173,6 +189,18 @@ export default function WaffleStackCity() {
         backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)'
       }}>
         🏙️ WaffleStack — עיר הסטטיסטיקה
+      </div>
+
+      {/* Hint */}
+      <div style={{
+        position: 'absolute', bottom: 140, left: '50%', transform: 'translateX(-50%)',
+        color: 'rgba(255,255,255,0.5)', fontSize: 12,
+        fontFamily: 'system-ui', zIndex: 50,
+        background: 'rgba(0,0,0,0.4)', padding: '5px 14px', borderRadius: 20,
+        backdropFilter: 'blur(6px)', pointerEvents: 'none',
+        display: selectedBuilding ? 'none' : 'block',
+      }}>
+        👆 לחץ על בניין כדי ללמוד ולשחק
       </div>
 
       <Canvas
@@ -215,7 +243,7 @@ export default function WaffleStackCity() {
             <Building
               key={b.id}
               def={b}
-              onClick={setSelectedBuilding}
+              onClick={handleBuildingClick}
               isSelected={selectedBuilding?.id === b.id}
             />
           ))}
@@ -224,7 +252,43 @@ export default function WaffleStackCity() {
         </Suspense>
       </Canvas>
 
-      <InfoPanel building={selectedBuilding} onClose={() => setSelectedBuilding(null)} />
+      {/* Info Panel — updated with "Start Challenge" wired up */}
+      {selectedBuilding && (
+        <div style={{
+          position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+          background: 'rgba(10,10,20,0.92)',
+          border: `2px solid ${selectedBuilding.color ?? '#fff'}`,
+          borderRadius: 16, padding: '20px 28px', color: 'white',
+          fontFamily: 'system-ui', direction: 'rtl', textAlign: 'right',
+          minWidth: 300, zIndex: 100, backdropFilter: 'blur(12px)',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontSize: 20, fontWeight: 'bold' }}>{selectedBuilding.label}</div>
+            <button onClick={() => setSelectedBuilding(null)} style={{ background: 'none', border: 'none', color: '#888', fontSize: 18, cursor: 'pointer' }}>✕</button>
+          </div>
+          <div style={{ marginTop: 8, color: selectedBuilding.color, fontSize: 15 }}>📊 {selectedBuilding.statsConcept}</div>
+          <div style={{ marginTop: 10, fontSize: 13, color: '#aaa', lineHeight: 1.6 }}>
+            לחץ "התחל אתגר" כדי ללמוד את הנושא, לראות גרף אינטראקטיבי ולענות על שאלות!
+          </div>
+          <button
+            onClick={() => openChallenge(selectedBuilding)}
+            style={{
+              marginTop: 14, width: '100%', padding: '11px',
+              background: selectedBuilding.color ?? '#4ECDC4', border: 'none', borderRadius: 8,
+              color: '#000', fontWeight: 'bold', fontSize: 14, cursor: 'pointer'
+            }}>
+            🎯 התחל אתגר
+          </button>
+        </div>
+      )}
+
+      {/* Stat Challenge Modal */}
+      {challengeBuilding && (
+        <StatChallenge
+          building={challengeBuilding}
+          onClose={() => setChallengeBuilding(null)}
+        />
+      )}
     </div>
   )
 }
