@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, useGLTF, Sky, ContactShadows, Html } from '@react-three/drei'
-import { Suspense, useState, useRef, useEffect, useCallback } from 'react'
+import { OrbitControls, useGLTF, Sky, ContactShadows, Html, useProgress } from '@react-three/drei'
+import { Suspense, useState, useRef, useCallback } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo } from './StatChallenge'
 
@@ -69,24 +69,27 @@ const ANIM_STYLE = `
 }
 `
 
-// ─── Loading spinner (shown while 3D assets load) ────────────────────────────
+// ─── Loading overlay — lives OUTSIDE Canvas (valid HTML) ─────────────────────
 function CityLoader() {
+  const { progress, active } = useProgress()
+  if (!active) return null
   return (
     <div style={{
       position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
       background: 'linear-gradient(180deg, #87CEEB 0%, #b0e0f5 100%)',
-      fontFamily: 'system-ui', zIndex: 10,
+      fontFamily: 'system-ui', zIndex: 10, pointerEvents: 'none',
     }}>
-      <div style={{ fontSize: 56, marginBottom: 16, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.2))' }}>🏙️</div>
-      <div style={{ fontSize: 18, fontWeight: 700, color: '#1a2a3a', marginBottom: 20 }}>Loading WaffleStack City...</div>
+      <div style={{ fontSize: 56, marginBottom: 16 }}>🏙️</div>
+      <div style={{ fontSize: 18, fontWeight: 700, color: '#1a2a3a', marginBottom: 20 }}>
+        Loading WaffleStack City... {Math.round(progress)}%
+      </div>
       <div style={{ width: 220, height: 6, background: 'rgba(0,0,0,0.12)', borderRadius: 3, overflow: 'hidden' }}>
         <div style={{
-          height: '100%', width: '45%', background: '#4ECDC4', borderRadius: 3,
-          animation: 'cityload 1.4s ease-in-out infinite',
+          height: '100%', background: '#4ECDC4', borderRadius: 3,
+          width: `${progress}%`, transition: 'width 0.3s ease',
         }} />
       </div>
-      <div style={{ marginTop: 12, fontSize: 12, color: '#4a6a8a' }}>Loading 3D models...</div>
     </div>
   )
 }
@@ -274,6 +277,9 @@ export default function WaffleStackCity() {
         </div>
       )}
 
+      {/* Loading overlay — HTML div, lives outside Canvas */}
+      <CityLoader />
+
       {/* 3D Canvas */}
       <Canvas shadows camera={{ position: [20, 18, 20], fov: 55 }} style={{ background: '#87CEEB' }}>
         <Sky sunPosition={[100, 50, 100]} />
@@ -286,7 +292,7 @@ export default function WaffleStackCity() {
         />
         <OrbitControls enablePan maxPolarAngle={Math.PI / 2.1} minDistance={8} maxDistance={60} target={[0, 0, -3]} />
 
-        <Suspense fallback={<CityLoader />}>
+        <Suspense fallback={null}>
           <Ground />
           {ROAD_MODELS.map((r, i) => <Prop key={i} model={r.model} pos={r.pos} rot={r.rot} />)}
           {BUILDINGS.map((b) => (
