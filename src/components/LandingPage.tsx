@@ -106,12 +106,47 @@ export default function LandingPage({ onEnterCity }: Props) {
             '📈 Live Distribution Charts',
             '⭐ XP & Progress Tracking',
             '🏙️ 3D City That Grows',
+            '🔊 Ambient City Sound',
+            '🏆 Milestone Celebrations',
           ].map(f => (
             <span key={f} style={{
               background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: 20, padding: '6px 14px', fontSize: 13, color: 'rgba(255,255,255,0.65)',
             }}>{f}</span>
           ))}
+        </div>
+
+        {/* How It Works */}
+        <div style={{ width: '100%', marginBottom: 60 }}>
+          <div style={{
+            fontSize: 11, letterSpacing: 2, color: 'rgba(255,255,255,0.4)',
+            marginBottom: 32, fontWeight: 600, textAlign: 'center',
+          }}>
+            HOW IT WORKS
+          </div>
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {[
+              { step: '01', icon: '🏙️', title: 'Enter the City', desc: 'Navigate a 3D city where each building represents a statistics concept.' },
+              { step: '02', icon: '📖', title: 'Learn the Concept', desc: 'Read the explanation, tweak interactive sliders, and see live distribution charts.' },
+              { step: '03', icon: '🎯', title: 'Answer Questions', desc: 'Test your understanding with 4 quiz questions per concept.' },
+              { step: '04', icon: '⭐', title: 'Earn XP & Grow', desc: 'Each mastered concept adds 50 XP and lights up your building in the city.' },
+            ].map(({ step, icon, title, desc }) => (
+              <div key={step} style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 16, padding: '24px 20px', width: 200,
+                textAlign: 'center', flexShrink: 0,
+              }}>
+                <div style={{
+                  fontSize: 11, fontWeight: 700, letterSpacing: 2,
+                  color: '#4ECDC4', marginBottom: 12,
+                }}>{step}</div>
+                <div style={{ fontSize: 32, marginBottom: 10 }}>{icon}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'white', marginBottom: 8 }}>{title}</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>{desc}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Divider */}

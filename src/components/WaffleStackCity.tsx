@@ -82,6 +82,11 @@ const ANIM_STYLE = `
   0%,100% { box-shadow: 0 0 0 0 rgba(78,205,196,0); }
   50%     { box-shadow: 0 0 16px 4px rgba(78,205,196,0.6); }
 }
+@keyframes milestonein {
+  0%   { opacity: 0; transform: scale(0.85); }
+  60%  { transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
 `
 
 // ─── Loading overlay — lives OUTSIDE Canvas (valid HTML) ─────────────────────
@@ -191,6 +196,7 @@ export default function WaffleStackCity() {
   const [showScoreBoard, setShowScoreBoard] = useState(false)
   const { playing: soundPlaying, toggle: toggleSound } = useCitySound()
   const [showHelp, setShowHelp] = useState(false)
+  const [milestone, setMilestone] = useState<5 | 10 | null>(null)
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -242,6 +248,8 @@ export default function WaffleStackCity() {
       const next = new Set(prev)
       next.add(buildingId)
       localStorage.setItem('wafflestack-mastered', JSON.stringify([...next]))
+      if (next.size === 5) setTimeout(() => setMilestone(5), 500)
+      if (next.size === 10) setTimeout(() => setMilestone(10), 500)
       return next
     })
     // Add XP
@@ -365,6 +373,66 @@ export default function WaffleStackCity() {
           letterSpacing: 2,
         }}>
           +50 XP ⭐
+        </div>
+      )}
+
+      {/* Milestone celebration overlay */}
+      {milestone !== null && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 700, backdropFilter: 'blur(12px)',
+          }}
+          onClick={() => setMilestone(null)}
+        >
+          <div style={{
+            background: milestone === 10
+              ? 'linear-gradient(135deg, #1a0a30 0%, #2d1a50 100%)'
+              : 'linear-gradient(135deg, #0a1a20 0%, #0f2535 100%)',
+            border: `2px solid ${milestone === 10 ? '#FFD700' : '#4ECDC4'}`,
+            borderRadius: 24, padding: '40px 48px', textAlign: 'center',
+            fontFamily: 'system-ui', color: 'white', maxWidth: 460,
+            boxShadow: `0 0 60px ${milestone === 10 ? 'rgba(255,215,0,0.3)' : 'rgba(78,205,196,0.3)'}`,
+            animation: 'milestonein 0.4s ease forwards',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 64, marginBottom: 12 }}>
+              {milestone === 10 ? '🏆' : '🌟'}
+            </div>
+            <div style={{
+              fontSize: 28, fontWeight: 900, marginBottom: 8,
+              color: milestone === 10 ? '#FFD700' : '#4ECDC4',
+            }}>
+              {milestone === 10 ? 'City Complete!' : 'Halfway There!'}
+            </div>
+            <div style={{
+              fontSize: 16, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, marginBottom: 24,
+            }}>
+              {milestone === 10
+                ? 'You mastered ALL 10 statistics concepts!\nWaffleStack City is fully built. 🏙️'
+                : 'You mastered 5 out of 10 concepts!\nKeep going to complete the city!'}
+            </div>
+            <div style={{
+              fontSize: 22, fontWeight: 800,
+              color: milestone === 10 ? '#FFD700' : '#4ECDC4',
+              marginBottom: 24,
+            }}>
+              {milestone === 10 ? '🎓 Statistics Master' : '⭐ Great Progress!'}
+            </div>
+            <button
+              onClick={() => setMilestone(null)}
+              style={{
+                background: milestone === 10
+                  ? 'linear-gradient(90deg, #FFD700, #FFA500)'
+                  : 'linear-gradient(90deg, #4ECDC4, #44b8b0)',
+                border: 'none', borderRadius: 12,
+                padding: '12px 32px', color: '#000',
+                fontWeight: 800, fontSize: 15, cursor: 'pointer',
+              }}
+            >
+              {milestone === 10 ? '🏙️ View My City' : '🚀 Keep Building'}
+            </button>
+          </div>
         </div>
       )}
 
