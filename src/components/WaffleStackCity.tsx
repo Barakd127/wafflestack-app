@@ -4,6 +4,7 @@ import { Suspense, useState, useRef, useCallback } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo } from './StatChallenge'
 import ScoreBoard from './ScoreBoard'
+import { useCitySound } from './SoundManager'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -175,6 +176,7 @@ export default function WaffleStackCity() {
   const [xpPopup, setXpPopup] = useState(false)
   const [glowBuilding, setGlowBuilding] = useState<string | null>(null)
   const [showScoreBoard, setShowScoreBoard] = useState(false)
+  const { playing: soundPlaying, toggle: toggleSound } = useCitySound()
 
   const openChallenge = useCallback((building: BuildingDef) => {
     setChallengeBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
@@ -223,6 +225,21 @@ export default function WaffleStackCity() {
           <span style={{ fontSize: 16 }}>⭐</span>
           <span style={{ color: '#FFD700', fontWeight: 700, fontSize: 16 }}>{xp} XP</span>
         </div>
+        <button
+          onClick={toggleSound}
+          style={{
+            background: 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: 20, padding: '6px 14px',
+            color: 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title={soundPlaying ? 'Mute city sound' : 'Unmute city sound'}
+        >
+          {soundPlaying ? '🔊' : '🔇'}
+        </button>
         <button
           onClick={() => setShowScoreBoard(s => !s)}
           style={{
