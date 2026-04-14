@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Sky, ContactShadows, Html, useProgress } from '@react-three/drei'
-import { Suspense, useState, useRef, useCallback } from 'react'
+import { Suspense, useState, useRef, useCallback, useEffect } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo } from './StatChallenge'
 import ScoreBoard from './ScoreBoard'
@@ -52,6 +52,19 @@ const ROAD_MODELS = [
   { model: 'tree-small', pos: [-6, 0, 3]  as [number,number,number], rot: 0 },
   { model: 'tree-small', pos: [6, 0, 3]   as [number,number,number], rot: 0 },
 ]
+
+const CONCEPT_PREVIEW: Record<string, string> = {
+  'power':     'The average (mean) is the sum of all values divided by the count. It represents the "center" of your data.',
+  'housing':   'The median is the middle value when data is sorted. Less sensitive to extreme outliers than the mean.',
+  'traffic':   'Standard deviation measures how spread out values are from the mean. Higher = more variability.',
+  'hospital':  'The normal distribution (bell curve) describes many natural phenomena — heights, test scores, errors.',
+  'school':    'Sampling is how we study a population without measuring everyone. Sample size affects accuracy.',
+  'bank':      'Regression finds the line that best fits data points, letting us predict one variable from another.',
+  'market':    'Correlation measures the strength and direction of the relationship between two variables (−1 to +1).',
+  'city-hall': 'The binomial distribution counts successes in a fixed number of yes/no trials (coin flips, votes).',
+  'research':  'Hypothesis testing decides if data provides enough evidence to reject the null hypothesis.',
+  'news':      'A confidence interval gives a range where the true population parameter likely falls (e.g. 95% CI).',
+}
 
 // ─── CSS for animations ──────────────────────────────────────────────────────
 const ANIM_STYLE = `
@@ -177,6 +190,46 @@ export default function WaffleStackCity() {
   const [glowBuilding, setGlowBuilding] = useState<string | null>(null)
   const [showScoreBoard, setShowScoreBoard] = useState(false)
   const { playing: soundPlaying, toggle: toggleSound } = useCitySound()
+  const [showHelp, setShowHelp] = useState(false)
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      // Don't fire when typing in an input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+
+      switch (e.key) {
+        case '?':
+        case '/':
+          e.preventDefault()
+          setShowHelp(h => !h)
+          break
+        case 'Escape':
+          // Priority: challenge > info panel > scoreboard > help
+          if (challengeBuilding !== null) {
+            setChallengeBuilding(null)
+          } else if (selectedBuilding !== null) {
+            setSelectedBuilding(null)
+          } else if (showScoreBoard) {
+            setShowScoreBoard(false)
+          } else {
+            setShowHelp(false)
+          }
+          break
+        case 'm':
+        case 'M':
+          toggleSound()
+          break
+        case 's':
+        case 'S':
+          setShowScoreBoard(s => !s)
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [challengeBuilding, selectedBuilding, showScoreBoard, toggleSound])
 
   const openChallenge = useCallback((building: BuildingDef) => {
     setChallengeBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
@@ -364,6 +417,17 @@ export default function WaffleStackCity() {
           {mastered.has(selectedBuilding.id) && (
             <div style={{ marginTop: 6, fontSize: 12, color: '#4ECDC4' }}>✓ כבר למדת את זה — +50 XP הרווחת!</div>
           )}
+          {CONCEPT_PREVIEW[selectedBuilding.id] && (
+            <div style={{
+              marginTop: 10, padding: '10px 12px',
+              background: 'rgba(255,255,255,0.05)',
+              borderRadius: 8, borderLeft: `3px solid ${selectedBuilding.color ?? '#4ECDC4'}`,
+              fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6,
+              direction: 'ltr', textAlign: 'left',
+            }}>
+              {CONCEPT_PREVIEW[selectedBuilding.id]}
+            </div>
+          )}
           <div style={{ marginTop: 10, fontSize: 13, color: '#aaa', lineHeight: 1.6 }}>
             לחץ "התחל אתגר" ללמוד, לראות גרף אינטראקטיבי ולענות על שאלות!
           </div>
@@ -395,6 +459,59 @@ export default function WaffleStackCity() {
           xp={xp}
           onClose={() => setShowScoreBoard(false)}
         />
+      )}
+
+      {/* Help button — bottom-right */}
+      <button
+        onClick={() => setShowHelp(h => !h)}
+        style={{
+          position: 'absolute', bottom: 24, right: 24, zIndex: 50,
+          background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%',
+          width: 36, height: 36, color: 'rgba(255,255,255,0.6)',
+          fontWeight: 700, fontSize: 16, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+        title="Keyboard shortcuts"
+      >
+        ?
+      </button>
+
+      {/* Help overlay */}
+      {showHelp && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 500, backdropFilter: 'blur(8px)',
+        }} onClick={() => setShowHelp(false)}>
+          <div style={{
+            background: 'linear-gradient(180deg, #0a0a18 0%, #0f1525 100%)',
+            border: '1px solid rgba(255,255,255,0.12)', borderRadius: 20,
+            padding: '28px 36px', minWidth: 340, maxWidth: 460,
+            fontFamily: 'system-ui', color: 'white',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 20 }}>⌨️ Keyboard Shortcuts</div>
+            {[
+              { key: '?', desc: 'Toggle this help overlay' },
+              { key: 'Esc', desc: 'Close any open panel' },
+              { key: 'M', desc: 'Toggle city sound' },
+              { key: 'S', desc: 'Toggle score board' },
+            ].map(({ key, desc }) => (
+              <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
+                <span style={{
+                  background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: 6, padding: '3px 10px', fontFamily: 'monospace',
+                  fontSize: 13, fontWeight: 700, minWidth: 40, textAlign: 'center',
+                  color: '#4ECDC4',
+                }}>{key}</span>
+                <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>{desc}</span>
+              </div>
+            ))}
+            <div style={{ marginTop: 20, fontSize: 12, color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>
+              Click anywhere outside to close
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
