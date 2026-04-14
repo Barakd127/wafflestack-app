@@ -232,7 +232,7 @@ function App() {
 
         {activeView === 'mission' && (
           <div className="w-full h-full">
-            <MissionControl onViewChange={setActiveView} />
+            <MissionControl onViewChange={(v) => setActiveView(v as Parameters<typeof setActiveView>[0])} />
           </div>
         )}
       </div>

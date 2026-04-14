@@ -189,7 +189,7 @@ function parseBoard(md: string): Board {
       })
     }
   }
-  return sections as Board
+  return sections as unknown as Board
 }
 
 function statusColor(s: string) {
