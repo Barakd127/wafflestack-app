@@ -775,6 +775,18 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
             ) : (
               /* Question */
               <div style={{ flex: 1 }}>
+                {/* Question counter pill */}
+                <div style={{
+                  display: 'flex', justifyContent: 'flex-end', marginBottom: 8,
+                }}>
+                  <span style={{
+                    background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: 20, padding: '4px 12px', fontSize: 12,
+                    color: 'rgba(255,255,255,0.45)', fontFamily: 'monospace',
+                  }}>
+                    Q {quizIndex + 1} / {content.quiz.length}
+                  </span>
+                </div>
                 {/* Progress */}
                 <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
                   {content.quiz.map((_, i) => (
@@ -807,7 +819,7 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
                     let border = '1px solid rgba(255,255,255,0.1)'
                     let textColor = 'rgba(255,255,255,0.75)'
                     if (selected !== null) {
-                      if (isCorrect) { bg = '#4ECDC422'; border = '1px solid #4ECDC4'; textColor = '#4ECDC4' }
+                      if (isCorrect) { bg = 'rgba(78,205,196,0.15)'; border = '2px solid #4ECDC4'; textColor = '#4ECDC4' }
                       else if (isSelected) { bg = '#FF6B6B22'; border = '1px solid #FF6B6B'; textColor = '#FF6B6B' }
                     }
                     return (
