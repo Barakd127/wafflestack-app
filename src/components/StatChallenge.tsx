@@ -498,6 +498,7 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
   const [selected, setSelected] = useState<number | null>(null)
   const [score, setScore] = useState(0)
   const [quizDone, setQuizDone] = useState(false)
+  const [hintShown, setHintShown] = useState(false)
 
   const currentQ = content.quiz[quizIndex]
 
@@ -518,6 +519,7 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
     } else {
       setQuizIndex(i => i + 1)
       setSelected(null)
+      setHintShown(false)
     }
   }
 
@@ -526,6 +528,7 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
     setSelected(null)
     setScore(0)
     setQuizDone(false)
+    setHintShown(false)
   }
 
   return (
@@ -834,6 +837,38 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
                     )
                   })}
                 </div>
+
+                {/* Hint button — shown after wrong answer, before explanation */}
+                {selected !== null && selected !== currentQ.correct && !hintShown && (
+                  <div style={{ marginTop: 10 }}>
+                    <button
+                      onClick={() => setHintShown(true)}
+                      style={{
+                        width: '100%', padding: '9px 14px',
+                        background: 'rgba(255,180,0,0.08)',
+                        border: '1px solid rgba(255,180,0,0.25)',
+                        borderRadius: 10, cursor: 'pointer',
+                        color: '#FFB347', fontSize: 13, fontWeight: 600,
+                      }}
+                    >
+                      💡 הצג רמז
+                    </button>
+                  </div>
+                )}
+
+                {/* Hint text */}
+                {hintShown && selected !== null && selected !== currentQ.correct && (
+                  <div style={{
+                    marginTop: 10,
+                    background: 'rgba(255,180,0,0.1)',
+                    border: '1px solid rgba(255,180,0,0.3)',
+                    borderRadius: 8, padding: '10px 14px',
+                    fontSize: 13, color: '#FFB347',
+                    direction: 'rtl', textAlign: 'right', lineHeight: 1.5,
+                  }}>
+                    💡 {currentQ.explanation.split('.')[0]}.
+                  </div>
+                )}
 
                 {/* Explanation + Next */}
                 {selected !== null && (
