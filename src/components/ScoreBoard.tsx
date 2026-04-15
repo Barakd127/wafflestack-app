@@ -22,6 +22,7 @@ interface Props {
 
 export default function ScoreBoard({ mastered, xp, onClose, onReset }: Props) {
   const [confirmReset, setConfirmReset] = useState(false)
+  const [copied, setCopied] = useState(false)
   const masteredCount = mastered.size
   const total = BUILDINGS_META.length
 
@@ -177,6 +178,28 @@ export default function ScoreBoard({ mastered, xp, onClose, onReset }: Props) {
             Mastered
           </span>
         </div>
+      </div>
+
+      {/* Share Row */}
+      <div style={{ padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+        <button
+          onClick={() => {
+            const text = `I mastered ${masteredCount}/${total} statistics concepts on WaffleStack! 🏙️\nTotal XP: ${xp.toLocaleString()} ⭐\nhttps://barakd127.github.io/wafflestack-app/`
+            navigator.clipboard.writeText(text).then(() => {
+              setCopied(true)
+              setTimeout(() => setCopied(false), 2000)
+            })
+          }}
+          style={{
+            width: '100%', padding: '9px',
+            background: copied ? 'rgba(78,205,196,0.15)' : 'rgba(255,255,255,0.05)',
+            border: `1px solid ${copied ? 'rgba(78,205,196,0.4)' : 'rgba(255,255,255,0.1)'}`,
+            borderRadius: 10, color: copied ? '#4ECDC4' : 'rgba(255,255,255,0.5)',
+            fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+          }}
+        >
+          {copied ? '✓ Copied to clipboard!' : '📤 Share Progress'}
+        </button>
       </div>
 
       {/* Streak Row */}
