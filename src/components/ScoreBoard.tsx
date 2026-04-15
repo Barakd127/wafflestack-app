@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const BUILDINGS_META = [
   { id: 'power',     label: '⚡ תחנת כוח',   concept: 'ממוצע',              color: '#FFD700' },
@@ -16,13 +16,22 @@ const BUILDINGS_META = [
 interface Props {
   mastered: Set<string>
   xp: number
+  sessionStart: number
   onClose: () => void
   onReset: () => void
 }
 
-export default function ScoreBoard({ mastered, xp, onClose, onReset }: Props) {
+export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onReset }: Props) {
   const [confirmReset, setConfirmReset] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [elapsed, setElapsed] = useState(() => Math.floor((Date.now() - sessionStart) / 60000))
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - sessionStart) / 60000))
+    }, 10000)
+    return () => clearInterval(timer)
+  }, [sessionStart])
   const masteredCount = mastered.size
   const total = BUILDINGS_META.length
 
@@ -227,6 +236,25 @@ export default function ScoreBoard({ mastered, xp, onClose, onReset }: Props) {
           fontWeight: 600,
         }}>
           {isStudiedToday ? '✓ Studied today' : 'Not yet today'}
+        </div>
+      </div>
+
+      {/* Session Timer Row */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 18 }}>⏱️</span>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.8)', lineHeight: 1 }}>
+              {elapsed} min
+            </div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              This Session
+            </div>
+          </div>
         </div>
       </div>
 

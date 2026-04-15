@@ -222,6 +222,7 @@ export default function WaffleStackCity() {
   const [xpPopup, setXpPopup] = useState(false)
   const [glowBuilding, setGlowBuilding] = useState<string | null>(null)
   const [showScoreBoard, setShowScoreBoard] = useState(false)
+  const [sessionStart] = useState(() => Date.now())
   const { playing: soundPlaying, toggle: toggleSound } = useCitySound()
   const [showHelp, setShowHelp] = useState(false)
   const [milestone, setMilestone] = useState<5 | 10 | null>(null)
@@ -669,6 +670,7 @@ export default function WaffleStackCity() {
         <ScoreBoard
           mastered={mastered}
           xp={xp}
+          sessionStart={sessionStart}
           onClose={() => setShowScoreBoard(false)}
           onReset={handleReset}
         />
