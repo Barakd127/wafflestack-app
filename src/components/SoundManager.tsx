@@ -151,3 +151,49 @@ export function useCitySound(): CitySoundResult {
 
   return { playing, toggle }
 }
+
+// ─── Quiz answer tones ────────────────────────────────────────────────────────
+
+export function playCorrectTone(): void {
+  try {
+    const ctx = new AudioContext()
+    const notes = [523.25, 659.25, 783.99] // C5, E5, G5 ascending
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.value = freq
+      const t = ctx.currentTime + i * 0.21
+      gain.gain.setValueAtTime(0, t)
+      gain.gain.linearRampToValueAtTime(0.15, t + 0.02)
+      gain.gain.linearRampToValueAtTime(0, t + 0.18)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(t)
+      osc.stop(t + 0.2)
+    })
+    setTimeout(() => ctx.close(), 900)
+  } catch { /* Web Audio not available */ }
+}
+
+export function playWrongTone(): void {
+  try {
+    const ctx = new AudioContext()
+    const notes = [392.00, 311.13, 261.63] // G4, Eb4, C4 descending
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'triangle'
+      osc.frequency.value = freq
+      const t = ctx.currentTime + i * 0.22
+      gain.gain.setValueAtTime(0, t)
+      gain.gain.linearRampToValueAtTime(0.12, t + 0.02)
+      gain.gain.linearRampToValueAtTime(0, t + 0.18)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(t)
+      osc.stop(t + 0.2)
+    })
+    setTimeout(() => ctx.close(), 1000)
+  } catch { /* Web Audio not available */ }
+}

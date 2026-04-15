@@ -115,6 +115,19 @@ const ANIM_STYLE = `
   60%  { transform: scale(1.04); }
   100% { opacity: 1; transform: scale(1); }
 }
+@keyframes xpmilestone-in {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  60%  { transform: translate(-50%, -50%) scale(1.04); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes xpmilestone-out {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+}
+@keyframes confetti-fall {
+  0%   { opacity: 1; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(60px) rotate(360deg); }
+}
 `
 
 // ─── Loading overlay — lives OUTSIDE Canvas (valid HTML) ─────────────────────
@@ -143,18 +156,21 @@ function CityLoader() {
 }
 
 // ─── Building component ──────────────────────────────────────────────────────
-function Building({ def, onClick, isSelected, isMastered, isGlowing }: {
+function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, onHoverStart, onHoverEnd }: {
   def: BuildingDef
   onClick: (def: BuildingDef) => void
   isSelected: boolean
   isMastered: boolean
   isGlowing: boolean
+  isHovered: boolean
+  onHoverStart: (id: string) => void
+  onHoverEnd: () => void
 }) {
   const { scene } = useGLTF(`/models/kenney-suburban/${def.model}.glb`)
   const meshRef = useRef<THREE.Group>(null)
   const clonedScene = scene.clone()
 
-  const emissiveIntensity = isGlowing ? 0.9 : isMastered ? 0.25 : isSelected ? 0.35 : 0
+  const emissiveIntensity = isGlowing ? 0.9 : isMastered ? 0.25 : isSelected ? 0.35 : isHovered ? 0.15 : 0
   const emissiveColor = isGlowing ? '#ffffff' : isMastered ? (def.color ?? '#4ECDC4') : '#ffffff'
 
   clonedScene.traverse((child) => {
@@ -177,8 +193,25 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing }: {
       rotation={[0, def.rotation ?? 0, 0]}
       scale={def.scale ?? 1.4}
       onClick={(e) => { e.stopPropagation(); onClick(def) }}
+      onPointerEnter={(e) => { e.stopPropagation(); onHoverStart(def.id) }}
+      onPointerLeave={() => onHoverEnd()}
     >
       <primitive object={clonedScene} />
+      {isHovered && !isSelected && (
+        <Html center distanceFactor={15} position={[0, 3.5, 0]}>
+          <div style={{
+            background: 'rgba(0,0,0,0.82)', color: 'white',
+            padding: '6px 12px', borderRadius: 8, fontSize: 12,
+            fontFamily: 'system-ui', textAlign: 'center',
+            direction: 'rtl', whiteSpace: 'nowrap',
+            border: `1px solid ${def.color ?? '#fff'}88`,
+            pointerEvents: 'none',
+          }}>
+            <div style={{ fontWeight: 700, marginBottom: 2 }}>{def.label}</div>
+            <div style={{ opacity: 0.75, fontSize: 11 }}>{isMastered ? '✓ נלמד' : '○ לחץ ללמוד'}</div>
+          </div>
+        </Html>
+      )}
       {isSelected && (
         <Html center distanceFactor={15} position={[0, 3, 0]}>
           <div style={{
@@ -229,6 +262,12 @@ export default function WaffleStackCity() {
   const [showTopicsList, setShowTopicsList] = useState(false)
   const [onboardingStep, setOnboardingStep] = useState<number>(() =>
     localStorage.getItem('wafflestack-onboarded') ? -1 : 0
+  )
+  const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
+  const [xpMilestone, setXpMilestone] = useState<number | null>(null)
+  const [xpMilestoneFading, setXpMilestoneFading] = useState(false)
+  const [quizSoundEnabled, setQuizSoundEnabled] = useState(() =>
+    localStorage.getItem('wafflestack-quiz-sound') === 'true'
   )
 
   const advanceOnboarding = () => {
@@ -309,10 +348,25 @@ export default function WaffleStackCity() {
       if (next.size === 10) setTimeout(() => setMilestone(10), 500)
       return next
     })
-    // Add XP
+    // Add XP + check milestones
     setXp(prev => {
       const next = prev + 50
       localStorage.setItem('wafflestack-xp', String(next))
+      const shown = JSON.parse(localStorage.getItem('wafflestack-xp-milestones') || '[]') as number[]
+      for (const threshold of [250, 500, 750, 1000]) {
+        if (prev < threshold && next >= threshold && !shown.includes(threshold)) {
+          shown.push(threshold)
+          localStorage.setItem('wafflestack-xp-milestones', JSON.stringify(shown))
+          setTimeout(() => {
+            setXpMilestone(threshold)
+            setTimeout(() => {
+              setXpMilestoneFading(true)
+              setTimeout(() => { setXpMilestone(null); setXpMilestoneFading(false) }, 600)
+            }, 3000)
+          }, 400)
+          break
+        }
+      }
       return next
     })
     // Update streak
@@ -369,6 +423,25 @@ export default function WaffleStackCity() {
           title={soundPlaying ? 'Mute city sound' : 'Unmute city sound'}
         >
           {soundPlaying ? '🔊' : '🔇'}
+        </button>
+        <button
+          onClick={() => {
+            const next = !quizSoundEnabled
+            setQuizSoundEnabled(next)
+            localStorage.setItem('wafflestack-quiz-sound', String(next))
+          }}
+          style={{
+            background: quizSoundEnabled ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${quizSoundEnabled ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: quizSoundEnabled ? '#4ECDC4' : 'rgba(255,255,255,0.5)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title={quizSoundEnabled ? 'Mute quiz sounds' : 'Enable quiz sounds'}
+        >
+          🎵
         </button>
         <button
           onClick={() => setShowTopicsList(t => !t)}
@@ -443,6 +516,33 @@ export default function WaffleStackCity() {
           backdropFilter: 'blur(6px)', pointerEvents: 'none', whiteSpace: 'nowrap',
         }}>
           👆 לחץ על בניין כדי ללמוד ולשחק
+        </div>
+      )}
+
+      {/* XP milestone celebration overlay */}
+      {xpMilestone !== null && (
+        <div style={{
+          position: 'fixed', top: '50%', left: '50%',
+          animation: xpMilestoneFading ? 'xpmilestone-out 0.6s forwards' : 'xpmilestone-in 0.5s forwards',
+          zIndex: 800, pointerEvents: 'none',
+          background: 'linear-gradient(135deg, #0a0a18 0%, #161628 100%)',
+          border: '2px solid #FFD700',
+          borderRadius: 24, padding: '32px 48px',
+          textAlign: 'center', fontFamily: 'system-ui',
+          boxShadow: '0 0 60px rgba(255,215,0,0.3)',
+          minWidth: 280,
+        }}>
+          <div style={{ fontSize: 36, marginBottom: 8 }}>
+            {['🎊','⭐','🎉','✨','🎊','⭐'].map((e, i) => (
+              <span key={i} style={{
+                display: 'inline-block', margin: '0 4px',
+                animation: `confetti-fall ${0.8 + i * 0.07}s ${i * 0.12}s forwards`,
+              }}>{e}</span>
+            ))}
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 900, color: '#FFD700', marginBottom: 8 }}>Level Up!</div>
+          <div style={{ fontSize: 20, color: '#ffffff', fontWeight: 700 }}>{xpMilestone} XP ⭐</div>
+          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginTop: 8 }}>🏙️ City grows stronger</div>
         </div>
       )}
 
@@ -607,6 +707,9 @@ export default function WaffleStackCity() {
               isSelected={selectedBuilding?.id === b.id}
               isMastered={mastered.has(b.id)}
               isGlowing={glowBuilding === b.id}
+              isHovered={hoveredBuilding === b.id}
+              onHoverStart={setHoveredBuilding}
+              onHoverEnd={() => setHoveredBuilding(null)}
             />
           ))}
           <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={40} blur={2} />
@@ -662,6 +765,7 @@ export default function WaffleStackCity() {
           building={challengeBuilding}
           onClose={() => setChallengeBuilding(null)}
           onComplete={handleComplete}
+          soundEnabled={quizSoundEnabled}
         />
       )}
 

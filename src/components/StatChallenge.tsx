@@ -6,6 +6,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import DistributionChart, { DistributionType, DistributionParams } from './DistributionChart'
+import { playCorrectTone, playWrongTone } from './SoundManager'
 
 // ─── Responsive helper ────────────────────────────────────────────────────────
 
@@ -479,9 +480,10 @@ interface Props {
   building: BuildingInfo
   onClose: () => void
   onComplete?: (buildingId: string) => void
+  soundEnabled?: boolean
 }
 
-export default function StatChallenge({ building, onClose, onComplete }: Props) {
+export default function StatChallenge({ building, onClose, onComplete, soundEnabled = false }: Props) {
   const content = CHALLENGES[building.id] ?? CHALLENGES['hospital']
   const color = building.color ?? content.color
 
@@ -509,7 +511,12 @@ export default function StatChallenge({ building, onClose, onComplete }: Props) 
   const handleAnswer = (idx: number) => {
     if (selected !== null) return
     setSelected(idx)
-    if (idx === currentQ.correct) setScore(s => s + 1)
+    if (idx === currentQ.correct) {
+      setScore(s => s + 1)
+      if (soundEnabled) playCorrectTone()
+    } else {
+      if (soundEnabled) playWrongTone()
+    }
   }
 
   const nextQuestion = () => {
