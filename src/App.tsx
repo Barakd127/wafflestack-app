@@ -13,9 +13,14 @@ import ModelColorTest from './components/ModelColorTest'
 import WaffleStackCity from './components/WaffleStackCity'
 import MissionControl from './components/MissionControl'
 import LandingPage from './components/LandingPage'
+import OnboardingFlow from './components/OnboardingFlow'
+import { useLearningStore } from './store/learningStore'
 
 function App() {
-  const [activeView, setActiveView] = useState<'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest' | 'wafflecity' | 'mission' | 'landing'>('landing')
+  const onboardingCompleted = useLearningStore(s => s.onboardingCompleted)
+  const [activeView, setActiveView] = useState<'onboarding' | 'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest' | 'wafflecity' | 'mission' | 'landing'>(() =>
+    onboardingCompleted ? 'landing' : 'onboarding'
+  )
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('wafflestack-dark-mode') === 'true'
   })
@@ -243,6 +248,11 @@ function App() {
           </div>
         )}
       </div>
+
+      {/* Onboarding overlay — rendered on top of everything */}
+      {activeView === 'onboarding' && (
+        <OnboardingFlow onComplete={() => setActiveView('study')} />
+      )}
     </div>
   )
 }

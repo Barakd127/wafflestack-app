@@ -14,6 +14,9 @@ function loadMastered(): Set<string> {
 function loadXP(): number {
   return parseInt(localStorage.getItem('wafflestack-xp') || '0')
 }
+function loadQuizSound(): boolean {
+  return localStorage.getItem('wafflestack-quiz-sound') === 'true'
+}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface BuildingDef {
@@ -115,18 +118,18 @@ const ANIM_STYLE = `
   60%  { transform: scale(1.04); }
   100% { opacity: 1; transform: scale(1); }
 }
+@keyframes confetti-fall {
+  0%   { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translateY(80px) rotate(360deg) scale(0.5); }
+}
 @keyframes xpmilestone-in {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-  60%  { transform: translate(-50%, -50%) scale(1.04); }
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+  60%  { transform: translate(-50%, -50%) scale(1.06); }
   100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 @keyframes xpmilestone-out {
   0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-}
-@keyframes confetti-fall {
-  0%   { opacity: 1; transform: translateY(0) rotate(0deg); }
-  100% { opacity: 0; transform: translateY(60px) rotate(360deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
 }
 `
 
@@ -197,18 +200,21 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
       onPointerLeave={() => onHoverEnd()}
     >
       <primitive object={clonedScene} />
+      {/* Hover tooltip — lightweight, shows when hovered but not selected */}
       {isHovered && !isSelected && (
-        <Html center distanceFactor={15} position={[0, 3.5, 0]}>
+        <Html center distanceFactor={15} position={[0, 2.8, 0]}>
           <div style={{
-            background: 'rgba(0,0,0,0.82)', color: 'white',
-            padding: '6px 12px', borderRadius: 8, fontSize: 12,
+            background: 'rgba(0,0,0,0.78)', color: 'white',
+            padding: '5px 11px', borderRadius: 8, fontSize: 12,
             fontFamily: 'system-ui', textAlign: 'center',
             direction: 'rtl', whiteSpace: 'nowrap',
-            border: `1px solid ${def.color ?? '#fff'}88`,
+            border: `1px solid ${def.color ?? 'rgba(255,255,255,0.3)'}`,
             pointerEvents: 'none',
           }}>
-            <div style={{ fontWeight: 700, marginBottom: 2 }}>{def.label}</div>
-            <div style={{ opacity: 0.75, fontSize: 11 }}>{isMastered ? '✓ נלמד' : '○ לחץ ללמוד'}</div>
+            <div style={{ fontWeight: 600 }}>{def.label}</div>
+            <div style={{ color: def.color ?? '#aaa', fontSize: 11, marginTop: 2 }}>
+              {def.statsConcept} {isMastered ? '✓' : '○'}
+            </div>
           </div>
         </Html>
       )}
@@ -257,17 +263,15 @@ export default function WaffleStackCity() {
   const [showScoreBoard, setShowScoreBoard] = useState(false)
   const [sessionStart] = useState(() => Date.now())
   const { playing: soundPlaying, toggle: toggleSound } = useCitySound()
+  const [quizSoundEnabled, setQuizSoundEnabled] = useState(loadQuizSound)
   const [showHelp, setShowHelp] = useState(false)
   const [milestone, setMilestone] = useState<5 | 10 | null>(null)
-  const [showTopicsList, setShowTopicsList] = useState(false)
-  const [onboardingStep, setOnboardingStep] = useState<number>(() =>
-    localStorage.getItem('wafflestack-onboarded') ? -1 : 0
-  )
-  const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
   const [xpMilestone, setXpMilestone] = useState<number | null>(null)
   const [xpMilestoneFading, setXpMilestoneFading] = useState(false)
-  const [quizSoundEnabled, setQuizSoundEnabled] = useState(() =>
-    localStorage.getItem('wafflestack-quiz-sound') === 'true'
+  const [showTopicsList, setShowTopicsList] = useState(false)
+  const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
+  const [onboardingStep, setOnboardingStep] = useState<number>(() =>
+    localStorage.getItem('wafflestack-onboarded') ? -1 : 0
   )
 
   const advanceOnboarding = () => {
@@ -348,21 +352,20 @@ export default function WaffleStackCity() {
       if (next.size === 10) setTimeout(() => setMilestone(10), 500)
       return next
     })
-    // Add XP + check milestones
+    // Add XP + check XP milestones
     setXp(prev => {
       const next = prev + 50
       localStorage.setItem('wafflestack-xp', String(next))
-      const shown = JSON.parse(localStorage.getItem('wafflestack-xp-milestones') || '[]') as number[]
+      const shown: number[] = JSON.parse(localStorage.getItem('wafflestack-xp-milestones') || '[]')
       for (const threshold of [250, 500, 750, 1000]) {
         if (prev < threshold && next >= threshold && !shown.includes(threshold)) {
           shown.push(threshold)
           localStorage.setItem('wafflestack-xp-milestones', JSON.stringify(shown))
           setTimeout(() => {
             setXpMilestone(threshold)
-            setTimeout(() => {
-              setXpMilestoneFading(true)
-              setTimeout(() => { setXpMilestone(null); setXpMilestoneFading(false) }, 600)
-            }, 3000)
+            setXpMilestoneFading(false)
+            setTimeout(() => setXpMilestoneFading(true), 2600)
+            setTimeout(() => setXpMilestone(null), 3200)
           }, 400)
           break
         }
@@ -431,7 +434,7 @@ export default function WaffleStackCity() {
             localStorage.setItem('wafflestack-quiz-sound', String(next))
           }}
           style={{
-            background: quizSoundEnabled ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
+            background: quizSoundEnabled ? 'rgba(78,205,196,0.15)' : 'rgba(10,10,20,0.75)',
             backdropFilter: 'blur(10px)',
             border: `1px solid ${quizSoundEnabled ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
             borderRadius: 20, padding: '6px 14px',
@@ -519,33 +522,6 @@ export default function WaffleStackCity() {
         </div>
       )}
 
-      {/* XP milestone celebration overlay */}
-      {xpMilestone !== null && (
-        <div style={{
-          position: 'fixed', top: '50%', left: '50%',
-          animation: xpMilestoneFading ? 'xpmilestone-out 0.6s forwards' : 'xpmilestone-in 0.5s forwards',
-          zIndex: 800, pointerEvents: 'none',
-          background: 'linear-gradient(135deg, #0a0a18 0%, #161628 100%)',
-          border: '2px solid #FFD700',
-          borderRadius: 24, padding: '32px 48px',
-          textAlign: 'center', fontFamily: 'system-ui',
-          boxShadow: '0 0 60px rgba(255,215,0,0.3)',
-          minWidth: 280,
-        }}>
-          <div style={{ fontSize: 36, marginBottom: 8 }}>
-            {['🎊','⭐','🎉','✨','🎊','⭐'].map((e, i) => (
-              <span key={i} style={{
-                display: 'inline-block', margin: '0 4px',
-                animation: `confetti-fall ${0.8 + i * 0.07}s ${i * 0.12}s forwards`,
-              }}>{e}</span>
-            ))}
-          </div>
-          <div style={{ fontSize: 28, fontWeight: 900, color: '#FFD700', marginBottom: 8 }}>Level Up!</div>
-          <div style={{ fontSize: 20, color: '#ffffff', fontWeight: 700 }}>{xpMilestone} XP ⭐</div>
-          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginTop: 8 }}>🏙️ City grows stronger</div>
-        </div>
-      )}
-
       {/* XP popup animation */}
       {xpPopup && (
         <div style={{
@@ -557,6 +533,49 @@ export default function WaffleStackCity() {
           letterSpacing: 2,
         }}>
           +50 XP ⭐
+        </div>
+      )}
+
+      {/* XP milestone overlay — auto-dismisses after 3s */}
+      {xpMilestone !== null && (
+        <div style={{
+          position: 'fixed', top: '50%', left: '50%',
+          zIndex: 650, pointerEvents: 'none',
+          animation: xpMilestoneFading
+            ? 'xpmilestone-out 0.6s ease forwards'
+            : 'xpmilestone-in 0.4s ease forwards',
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #0a1a30 0%, #0f2540 100%)',
+            border: '2px solid rgba(255,215,0,0.6)',
+            borderRadius: 20, padding: '28px 40px', textAlign: 'center',
+            fontFamily: 'system-ui', color: 'white',
+            boxShadow: '0 0 60px rgba(255,215,0,0.25)',
+            position: 'relative', overflow: 'hidden',
+            minWidth: 280,
+          }}>
+            {/* Confetti emoji elements */}
+            {['🎊', '⭐', '🎉', '✨', '🎊', '⭐'].map((emoji, i) => (
+              <span key={i} style={{
+                position: 'absolute',
+                top: `${10 + (i % 3) * 15}%`,
+                left: `${5 + i * 15}%`,
+                fontSize: 18,
+                animation: `confetti-fall ${0.8 + i * 0.15}s ease ${i * 0.1}s both`,
+                pointerEvents: 'none',
+              }}>{emoji}</span>
+            ))}
+            <div style={{ fontSize: 44, marginBottom: 8 }}>🎉</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: '#FFD700', marginBottom: 6 }}>
+              Level Up!
+            </div>
+            <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.75)', marginBottom: 4 }}>
+              {xpMilestone} XP reached
+            </div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
+              🏙️ City grows stronger
+            </div>
+          </div>
         </div>
       )}
 

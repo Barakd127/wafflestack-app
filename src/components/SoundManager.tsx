@@ -152,48 +152,54 @@ export function useCitySound(): CitySoundResult {
   return { playing, toggle }
 }
 
-// ─── Quiz answer tones ────────────────────────────────────────────────────────
+// ─── Quiz sound effects ───────────────────────────────────────────────────────
 
 export function playCorrectTone(): void {
   try {
     const ctx = new AudioContext()
-    const notes = [523.25, 659.25, 783.99] // C5, E5, G5 ascending
-    notes.forEach((freq, i) => {
+    // Ascending arpeggio: C5 → E5 → G5
+    const notes: [number, number][] = [[523.25, 0], [659.25, 0.1], [783.99, 0.2]]
+    for (const [freq, delay] of notes) {
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
       osc.type = 'sine'
       osc.frequency.value = freq
-      const t = ctx.currentTime + i * 0.21
-      gain.gain.setValueAtTime(0, t)
-      gain.gain.linearRampToValueAtTime(0.15, t + 0.02)
-      gain.gain.linearRampToValueAtTime(0, t + 0.18)
       osc.connect(gain)
       gain.connect(ctx.destination)
+      const t = ctx.currentTime + delay
+      gain.gain.setValueAtTime(0, t)
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.02)
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18)
       osc.start(t)
       osc.stop(t + 0.2)
-    })
-    setTimeout(() => ctx.close(), 900)
-  } catch { /* Web Audio not available */ }
+    }
+    setTimeout(() => ctx.close().catch(() => undefined), 800)
+  } catch {
+    // ignore — audio not supported or blocked
+  }
 }
 
 export function playWrongTone(): void {
   try {
     const ctx = new AudioContext()
-    const notes = [392.00, 311.13, 261.63] // G4, Eb4, C4 descending
-    notes.forEach((freq, i) => {
+    // Descending: G4 → Eb4 → C4, triangle wave for slight buzz
+    const notes: [number, number][] = [[392, 0], [311.13, 0.12], [261.63, 0.24]]
+    for (const [freq, delay] of notes) {
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
       osc.type = 'triangle'
       osc.frequency.value = freq
-      const t = ctx.currentTime + i * 0.22
-      gain.gain.setValueAtTime(0, t)
-      gain.gain.linearRampToValueAtTime(0.12, t + 0.02)
-      gain.gain.linearRampToValueAtTime(0, t + 0.18)
       osc.connect(gain)
       gain.connect(ctx.destination)
+      const t = ctx.currentTime + delay
+      gain.gain.setValueAtTime(0, t)
+      gain.gain.linearRampToValueAtTime(0.14, t + 0.02)
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22)
       osc.start(t)
-      osc.stop(t + 0.2)
-    })
-    setTimeout(() => ctx.close(), 1000)
-  } catch { /* Web Audio not available */ }
+      osc.stop(t + 0.25)
+    }
+    setTimeout(() => ctx.close().catch(() => undefined), 900)
+  } catch {
+    // ignore
+  }
 }

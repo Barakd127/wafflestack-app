@@ -253,10 +253,15 @@ interface LearningState {
   achievements: Achievement[]
   newAchievements: Achievement[]  // just-unlocked, for animations
 
+  // Onboarding
+  userName: string
+  onboardingCompleted: boolean
+
   // Actions
   recordAnswer: (questionId: string, correct: boolean, xpReward: number) => void
   clearNewAchievements: () => void
   resetProgress: () => void
+  completeOnboarding: (name: string) => void
 }
 
 export const useLearningStore = create<LearningState>()(
@@ -272,6 +277,8 @@ export const useLearningStore = create<LearningState>()(
       answeredIds: [],
       achievements: ACHIEVEMENTS,
       newAchievements: [],
+      userName: '',
+      onboardingCompleted: false,
 
       recordAnswer: (questionId, correct, xpReward) => {
         const state = get()
@@ -321,6 +328,7 @@ export const useLearningStore = create<LearningState>()(
 
       clearNewAchievements: () => set({ newAchievements: [] }),
       resetProgress: () => set({ xp: 0, streak: 0, bestStreak: 0, totalAnswered: 0, totalCorrect: 0, answeredIds: [], achievements: ACHIEVEMENTS, newAchievements: [] }),
+      completeOnboarding: (name: string) => set({ userName: name, onboardingCompleted: true }),
     }),
     {
       name: 'wafflestack-learning',
