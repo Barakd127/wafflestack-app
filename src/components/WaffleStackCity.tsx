@@ -322,6 +322,10 @@ export default function WaffleStackCity() {
         case 'S':
           setShowScoreBoard(s => !s)
           break
+        case 't':
+        case 'T':
+          setShowTopicsList(t => !t)
+          break
       }
     }
 
@@ -922,6 +926,7 @@ export default function WaffleStackCity() {
               { key: 'Esc', desc: 'Close any open panel' },
               { key: 'M', desc: 'Toggle city sound' },
               { key: 'S', desc: 'Toggle score board' },
+              { key: 'T', desc: 'Toggle topics list' },
             ].map(({ key, desc }) => (
               <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
                 <span style={{
