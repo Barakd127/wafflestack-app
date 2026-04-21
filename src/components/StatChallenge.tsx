@@ -490,6 +490,15 @@ function SliderRow({ def, value, onChange, color }: SliderRowProps) {
   )
 }
 
+// ─── Confetti animation ──────────────────────────────────────────────────────
+
+const CONFETTI_STYLE = `
+@keyframes confetti-fly {
+  0%   { opacity: 1; transform: translate(0, 0) scale(1.2) rotate(0deg); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.3) rotate(540deg); }
+}
+`
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 interface Props {
@@ -523,6 +532,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   const [score, setScore] = useState(0)
   const [quizDone, setQuizDone] = useState(false)
   const [hintShown, setHintShown] = useState(false)
+  const [confettiBurst, setConfettiBurst] = useState(false)
   const [wrongAnswers, setWrongAnswers] = useState<{ qIndex: number; chosen: number }[]>([])
   const [showMistakes, setShowMistakes] = useState(false)
 
@@ -537,6 +547,8 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     setSelected(idx)
     if (idx === currentQ.correct) {
       setScore(s => s + 1)
+      setConfettiBurst(true)
+      setTimeout(() => setConfettiBurst(false), 900)
       if (soundEnabled) playCorrectTone()
     } else {
       setWrongAnswers(prev => [...prev, { qIndex: quizIndex, chosen: idx }])
@@ -581,6 +593,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
       }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
+      <style>{CONFETTI_STYLE}</style>
       <div style={{
         background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
         border: `1px solid ${color}44`,
@@ -978,6 +991,34 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     )
                   })}
                 </div>
+
+                {/* Confetti burst on correct answer */}
+                {confettiBurst && (
+                  <div style={{ position: 'relative', height: 0, overflow: 'visible', pointerEvents: 'none' }}>
+                    {([
+                      { dx: '-70px', dy: '-90px', emoji: '⭐', delay: '0ms' },
+                      { dx: '70px',  dy: '-90px', emoji: '✨', delay: '40ms' },
+                      { dx: '95px',  dy: '-35px', emoji: '🎉', delay: '20ms' },
+                      { dx: '-95px', dy: '-35px', emoji: '🌟', delay: '60ms' },
+                      { dx: '10px',  dy: '-110px', emoji: '⭐', delay: '10ms' },
+                      { dx: '-40px', dy: '-60px', emoji: '✨', delay: '50ms' },
+                      { dx: '50px',  dy: '-55px', emoji: '🎊', delay: '30ms' },
+                    ] as { dx: string; dy: string; emoji: string; delay: string }[]).map(({ dx, dy, emoji, delay }, i) => (
+                      <div key={i} style={{
+                        position: 'absolute',
+                        top: -20, left: '50%',
+                        fontSize: 18,
+                        animation: `confetti-fly 0.8s ease-out ${delay} both`,
+                        ['--dx' as string]: dx,
+                        ['--dy' as string]: dy,
+                        pointerEvents: 'none',
+                        userSelect: 'none',
+                      } as React.CSSProperties}>
+                        {emoji}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Hint button — shown after wrong answer, before explanation */}
                 {selected !== null && selected !== currentQ.correct && !hintShown && (
