@@ -433,6 +433,21 @@ const CHALLENGES: Record<string, ChallengeContent> = {
   },
 }
 
+// ─── Related concept links ───────────────────────────────────────────────────
+
+const RELATED_CONCEPTS: Record<string, string[]> = {
+  power:       ['housing', 'traffic', 'hospital'],
+  housing:     ['power', 'traffic'],
+  traffic:     ['power', 'hospital'],
+  hospital:    ['traffic', 'research', 'news'],
+  school:      ['research', 'news'],
+  bank:        ['market', 'hospital'],
+  market:      ['bank', 'power'],
+  'city-hall': ['hospital', 'school'],
+  research:    ['hospital', 'news', 'school'],
+  news:        ['research', 'school', 'hospital'],
+}
+
 // ─── Real-world fact cards ───────────────────────────────────────────────────
 
 const DID_YOU_KNOW: Record<string, string> = {
@@ -508,9 +523,10 @@ interface Props {
   soundEnabled?: boolean
   nextBuilding?: BuildingInfo
   onNext?: () => void
+  onNavigateTo?: (buildingId: string) => void
 }
 
-export default function StatChallenge({ building, onClose, onComplete, soundEnabled = false, nextBuilding, onNext }: Props) {
+export default function StatChallenge({ building, onClose, onComplete, soundEnabled = false, nextBuilding, onNext, onNavigateTo }: Props) {
   const content = CHALLENGES[building.id] ?? CHALLENGES['hospital']
   const color = building.color ?? content.color
 
@@ -913,6 +929,42 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     </div>
                     <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
                       {DID_YOU_KNOW[building.id]}
+                    </div>
+                  </div>
+                )}
+
+                {/* Related Concepts */}
+                {(RELATED_CONCEPTS[building.id] ?? []).length > 0 && (
+                  <div style={{ width: '100%', maxWidth: 320, marginBottom: 16 }}>
+                    <div style={{
+                      fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 1,
+                      marginBottom: 8, textTransform: 'uppercase' as const,
+                      textAlign: 'right', direction: 'rtl',
+                    }}>
+                      🔗 מושגים קשורים
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const, justifyContent: 'flex-end' }}>
+                      {(RELATED_CONCEPTS[building.id] ?? []).map(relId => {
+                        const rel = CHALLENGES[relId]
+                        if (!rel) return null
+                        return (
+                          <button
+                            key={relId}
+                            onClick={() => { onNavigateTo?.(relId); onClose() }}
+                            disabled={!onNavigateTo}
+                            style={{
+                              background: `${rel.color}18`,
+                              border: `1px solid ${rel.color}44`,
+                              borderRadius: 20, padding: '5px 12px',
+                              color: rel.color, fontSize: 12,
+                              cursor: onNavigateTo ? 'pointer' : 'default',
+                              fontWeight: 600, transition: 'all 0.15s',
+                            }}
+                          >
+                            {rel.emoji} {rel.conceptHe}
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}

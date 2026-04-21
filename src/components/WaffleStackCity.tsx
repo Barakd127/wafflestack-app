@@ -1039,6 +1039,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             soundEnabled={quizSoundEnabled}
             nextBuilding={nextUnmastered ? { id: nextUnmastered.id, label: nextUnmastered.label, statsConcept: nextUnmastered.statsConcept, color: nextUnmastered.color } : undefined}
             onNext={nextUnmastered ? () => openChallenge(nextUnmastered) : undefined}
+            onNavigateTo={(id) => { const b = BUILDINGS.find(building => building.id === id); if (b) openChallenge(b) }}
           />
         )
       })()}
