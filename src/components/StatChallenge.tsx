@@ -448,6 +448,21 @@ const RELATED_CONCEPTS: Record<string, string[]> = {
   news:        ['research', 'school', 'hospital'],
 }
 
+// ─── Simple analogies for quiz warm-up ──────────────────────────────────────
+
+const SIMPLE_ANALOGIES: Record<string, string> = {
+  power:       'חשוב על ממוצע כמו חלוקת חשבון במסעדה בין חברים — כמה כל אחד משלם?',
+  housing:     'כמו למצוא את ה"שכן האמצעי" בבניין — לא הכי עשיר, לא הכי עני.',
+  traffic:     'בפקק: האם כולם נוסעים במהירות דומה, או שיש כזה שנוסע 20 וכזה שנוסע 120?',
+  hospital:    'ציוני הפסיכומטרי, גבהים, לחץ דם — בטבע כולם מתפזרים כמו פעמון סביב הממוצע.',
+  school:      'כמו לשאול 1,000 אנשים ברחוב כדי לנחש מה 6 מיליון ישראלים חושבים.',
+  bank:        'כמו לנחש את מחיר הדירה לפי מספר חדרים — מצא את הקו הישר שמסביר הכי טוב.',
+  market:      'מעשנים יותר → סרטן ריאות יותר. קשר חזק = r קרוב ל-1. אבל קשר ≠ סיבה!',
+  'city-hall': 'כמו לנחש כמה "עץ" יצאו אם הטלת 10 מטבעות הוגנים.',
+  research:    'כמו חוקר תרופות: "האם ההשפעה אמיתית — או שנחשבנו פשוט?"',
+  news:        'כמו מד דיוק: "±3% ב-95% מהסקרים" — כמה בטוחים אנחנו בממצאים?',
+}
+
 // ─── Real-world fact cards ───────────────────────────────────────────────────
 
 const DID_YOU_KNOW: Record<string, string> = {
@@ -1042,6 +1057,21 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
             ) : (
               /* Question */
               <div style={{ flex: 1 }}>
+                {/* Analogy warm-up card */}
+                {SIMPLE_ANALOGIES[building.id] && (
+                  <div style={{
+                    background: 'rgba(255,179,71,0.07)',
+                    border: '1px solid rgba(255,179,71,0.22)',
+                    borderRadius: 10, padding: '10px 14px',
+                    marginBottom: 14,
+                    fontSize: 12, color: 'rgba(255,255,255,0.65)',
+                    direction: 'rtl', textAlign: 'right',
+                    lineHeight: 1.6,
+                  }}>
+                    <span style={{ color: '#FFB347', fontWeight: 700, marginLeft: 6 }}>💡 חשוב על זה כך:</span>
+                    {SIMPLE_ANALOGIES[building.id]}
+                  </div>
+                )}
                 {/* Question counter pill */}
                 <div style={{
                   display: 'flex', justifyContent: 'flex-end', marginBottom: 8,
