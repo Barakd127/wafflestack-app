@@ -105,6 +105,17 @@ const CONCEPT_PREVIEW: Record<string, string> = {
   'news':      'A confidence interval gives a range where the true population parameter likely falls (e.g. 95% CI).',
 }
 
+// ─── Flash card data ─────────────────────────────────────────────────────────
+const FLASH_CARDS = BUILDINGS.map(b => ({
+  id: b.id,
+  emoji: b.label.split(' ')[0],
+  labelHe: b.statsConcept.split(' (')[0],
+  labelEn: GLOSSARY_DATA[b.id]?.conceptEn ?? '',
+  formula: GLOSSARY_DATA[b.id]?.formula ?? '',
+  preview: CONCEPT_PREVIEW[b.id] ?? '',
+  color: b.color ?? '#4ECDC4',
+}))
+
 // ─── Daily challenge helpers ──────────────────────────────────────────────────
 function getDailyBuildingId(): string {
   const d = new Date()
@@ -381,6 +392,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [xpMilestoneFading, setXpMilestoneFading] = useState(false)
   const [showTopicsList, setShowTopicsList] = useState(false)
   const [showGlossary, setShowGlossary] = useState(false)
+  const [showFlashCards, setShowFlashCards] = useState(false)
+  const [flashCardIndex, setFlashCardIndex] = useState(0)
+  const [flashCardFlipped, setFlashCardFlipped] = useState(false)
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
   const [ghostCell, setGhostCell] = useState<[number, number] | null>(null)
   const [onboardingStep, setOnboardingStep] = useState<number>(() =>
@@ -425,6 +439,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             setShowGlossary(false)
           } else if (showTopicsList) {
             setShowTopicsList(false)
+          } else if (showFlashCards) {
+            setShowFlashCards(false)
           } else {
             setShowHelp(false)
           }
@@ -445,12 +461,17 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         case 'G':
           setShowGlossary(g => !g)
           break
+        case 'f':
+        case 'F':
+          setShowFlashCards(f => !f)
+          setFlashCardFlipped(false)
+          break
       }
     }
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, toggleSound])
+  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, toggleSound])
 
   // Handle deep-link hash on mount
   useEffect(() => {
@@ -599,6 +620,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           title={quizSoundEnabled ? 'Mute quiz sounds' : 'Enable quiz sounds'}
         >
           🎵
+        </button>
+        <button
+          onClick={() => { setShowFlashCards(f => !f); setFlashCardFlipped(false) }}
+          style={{
+            background: showFlashCards ? 'rgba(255,199,0,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showFlashCards ? 'rgba(255,199,0,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showFlashCards ? '#FFC700' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Flash Cards — review all concepts (F)"
+        >
+          📇 Flash
         </button>
         <button
           onClick={() => setShowTopicsList(t => !t)}
@@ -1204,6 +1240,138 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         </div>
       )}
 
+      {/* Flash Cards modal */}
+      {showFlashCards && (() => {
+        const card = FLASH_CARDS[flashCardIndex]
+        const isMastered = mastered.has(card.id)
+        return (
+          <div style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 480, backdropFilter: 'blur(10px)', padding: 20,
+          }} onClick={() => setShowFlashCards(false)}>
+            <div style={{
+              background: 'linear-gradient(160deg, #0a0a18 0%, #0f1525 100%)',
+              border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24,
+              padding: '28px 32px', width: '100%', maxWidth: 480,
+              fontFamily: 'system-ui', color: '#fff',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+            }} onClick={e => e.stopPropagation()}>
+
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 800 }}>📇 Flash Cards</div>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+                    {mastered.size}/10 mastered · כרטיס {flashCardIndex + 1} מתוך {FLASH_CARDS.length}
+                  </div>
+                </div>
+                <button onClick={() => setShowFlashCards(false)} style={{
+                  background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: 8, width: 32, height: 32, color: 'rgba(255,255,255,0.5)',
+                  cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>✕</button>
+              </div>
+
+              {/* Card */}
+              <div
+                onClick={() => setFlashCardFlipped(f => !f)}
+                style={{
+                  background: flashCardFlipped ? `linear-gradient(135deg, ${card.color}18 0%, transparent 100%)` : 'rgba(255,255,255,0.04)',
+                  border: `2px solid ${flashCardFlipped ? card.color + '55' : 'rgba(255,255,255,0.12)'}`,
+                  borderRadius: 20, padding: '32px 28px', cursor: 'pointer',
+                  minHeight: 200, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+                  transition: 'all 0.3s ease', marginBottom: 20,
+                  position: 'relative',
+                }}
+              >
+                {isMastered && (
+                  <div style={{
+                    position: 'absolute', top: 12, right: 12,
+                    fontSize: 10, color: '#4ECDC4', fontWeight: 700,
+                    background: 'rgba(78,205,196,0.12)', border: '1px solid rgba(78,205,196,0.25)',
+                    borderRadius: 10, padding: '2px 8px',
+                  }}>✓ נלמד</div>
+                )}
+                {!flashCardFlipped ? (
+                  <>
+                    <div style={{ fontSize: 56, marginBottom: 12 }}>{card.emoji}</div>
+                    <div style={{ fontSize: 26, fontWeight: 900, marginBottom: 6, direction: 'rtl' }}>
+                      {card.labelHe}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 8 }}>
+                      👆 לחץ לגילוי
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 14, color: card.color, fontWeight: 700, marginBottom: 10, letterSpacing: 1 }}>
+                      {card.labelEn}
+                    </div>
+                    <div style={{
+                      fontSize: 14, fontFamily: 'monospace', color: card.color,
+                      background: `${card.color}18`, border: `1px solid ${card.color}33`,
+                      borderRadius: 8, padding: '8px 16px', marginBottom: 14,
+                    }}>
+                      {card.formula}
+                    </div>
+                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, maxWidth: 340 }}>
+                      {card.preview}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Navigation */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <button
+                  onClick={() => { setFlashCardIndex(i => (i - 1 + FLASH_CARDS.length) % FLASH_CARDS.length); setFlashCardFlipped(false) }}
+                  style={{
+                    flex: 1, padding: '10px', background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
+                    color: 'rgba(255,255,255,0.7)', fontSize: 13, cursor: 'pointer', fontWeight: 600,
+                  }}
+                >← הקודם</button>
+                <button
+                  onClick={() => setFlashCardFlipped(f => !f)}
+                  style={{
+                    flex: 2, padding: '10px',
+                    background: card.color + '22', border: `1px solid ${card.color}44`,
+                    borderRadius: 10, color: card.color, fontSize: 13, cursor: 'pointer', fontWeight: 700,
+                  }}
+                >
+                  {flashCardFlipped ? '↩ הצג שאלה' : '💡 הצג תשובה'}
+                </button>
+                <button
+                  onClick={() => { setFlashCardIndex(i => (i + 1) % FLASH_CARDS.length); setFlashCardFlipped(false) }}
+                  style={{
+                    flex: 1, padding: '10px', background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
+                    color: 'rgba(255,255,255,0.7)', fontSize: 13, cursor: 'pointer', fontWeight: 600,
+                  }}
+                >הבא →</button>
+              </div>
+
+              {/* Dot indicators */}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 16 }}>
+                {FLASH_CARDS.map((fc, i) => (
+                  <div
+                    key={i}
+                    onClick={() => { setFlashCardIndex(i); setFlashCardFlipped(false) }}
+                    style={{
+                      width: flashCardIndex === i ? 20 : 7, height: 7, borderRadius: 4,
+                      background: flashCardIndex === i ? FLASH_CARDS[flashCardIndex].color : mastered.has(fc.id) ? 'rgba(78,205,196,0.4)' : 'rgba(255,255,255,0.2)',
+                      cursor: 'pointer', transition: 'all 0.2s',
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Help overlay */}
       {showHelp && (
         <div style={{
@@ -1225,6 +1393,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               { key: 'S', desc: 'Toggle score board' },
               { key: 'T', desc: 'Toggle topics list' },
               { key: 'G', desc: 'Toggle concept glossary' },
+              { key: 'F', desc: 'Toggle flash cards' },
             ].map(({ key, desc }) => (
               <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
                 <span style={{
