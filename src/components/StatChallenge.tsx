@@ -506,9 +506,11 @@ interface Props {
   onClose: () => void
   onComplete?: (buildingId: string) => void
   soundEnabled?: boolean
+  nextBuilding?: BuildingInfo
+  onNext?: () => void
 }
 
-export default function StatChallenge({ building, onClose, onComplete, soundEnabled = false }: Props) {
+export default function StatChallenge({ building, onClose, onComplete, soundEnabled = false, nextBuilding, onNext }: Props) {
   const content = CHALLENGES[building.id] ?? CHALLENGES['hospital']
   const color = building.color ?? content.color
 
@@ -949,6 +951,20 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
 
                 {/* Action buttons */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 280 }}>
+                  {nextBuilding && onNext && score / questions.length >= 0.7 && (
+                    <button
+                      onClick={onNext}
+                      style={{
+                        padding: '13px', background: 'linear-gradient(90deg, #4ECDC4, #44b8b0)',
+                        border: 'none', borderRadius: 10,
+                        color: '#000', fontWeight: 800, fontSize: 14, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                      }}
+                    >
+                      <span>🚀 Next: {nextBuilding.statsConcept.split(' (')[0]}</span>
+                      <span style={{ opacity: 0.7 }}>→</span>
+                    </button>
+                  )}
                   <button
                     onClick={resetQuiz}
                     style={{

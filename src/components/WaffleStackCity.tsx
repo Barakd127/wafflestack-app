@@ -1029,14 +1029,19 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       )}
 
       {/* Challenge Modal */}
-      {challengeBuilding && (
-        <StatChallenge
-          building={challengeBuilding}
-          onClose={() => setChallengeBuilding(null)}
-          onComplete={handleComplete}
-          soundEnabled={quizSoundEnabled}
-        />
-      )}
+      {challengeBuilding && (() => {
+        const nextUnmastered = BUILDINGS.find(b => !mastered.has(b.id) && b.id !== challengeBuilding.id)
+        return (
+          <StatChallenge
+            building={challengeBuilding}
+            onClose={() => setChallengeBuilding(null)}
+            onComplete={handleComplete}
+            soundEnabled={quizSoundEnabled}
+            nextBuilding={nextUnmastered ? { id: nextUnmastered.id, label: nextUnmastered.label, statsConcept: nextUnmastered.statsConcept, color: nextUnmastered.color } : undefined}
+            onNext={nextUnmastered ? () => openChallenge(nextUnmastered) : undefined}
+          />
+        )
+      })()}
 
       {/* Score Board panel */}
       {showScoreBoard && (
