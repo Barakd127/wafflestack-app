@@ -433,6 +433,21 @@ const CHALLENGES: Record<string, ChallengeContent> = {
   },
 }
 
+// ─── Real-world fact cards ───────────────────────────────────────────────────
+
+const DID_YOU_KNOW: Record<string, string> = {
+  power:       'הממוצע משמש בישראל לחישוב ממוצע הבגרות — הבסיס לקבלה לאוניברסיטאות.',
+  housing:     'הלמ"ס מדווח על חציון השכר, לא הממוצע, כי מיליארדרים מעוותים את הממוצע.',
+  traffic:     'חברות ביטוח מחשבות סטיית תקן של נזקי שיטפון כדי לתמחר פוליסות ביטוח.',
+  hospital:    'ציוני הפסיכומטרי בישראל מתוכנן לפי התפלגות נורמלית — ממוצע 500, סטיית תקן 100.',
+  school:      'כל סקר בחירות בישראל הוא מדגם — בדרך כלל ~1,000 איש מתוך 6 מיליון מצביעים.',
+  bank:        'הבנקים בישראל משתמשים ברגרסיה לינארית לחיזוי סיכון אשראי של לווים.',
+  market:      'הקורלציה בין מדד ת"א 35 לשוק האמריקאי עומדת על ~0.7 — ישראל גלובלית מאוד.',
+  'city-hall': 'הסיכוי שנולד בן הוא ~51%. ב-10 לידות, הממוצע הבינומי הוא 5.1 בנים.',
+  research:    'במחקרי תרופות בישראל, נדרש p<0.05 לפני אישור תרופה חדשה לשוק.',
+  news:        'סקרי שביעות רצון ממשלתיים מדווחים עם רווח סמך של ±3% ברמת ביטחון 95%.',
+}
+
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
 interface SliderRowProps {
@@ -777,6 +792,23 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     <span style={{ fontWeight: 400, color: 'rgba(255,107,107,0.8)' }}>
                       Try again to earn your building reward!
                     </span>
+                  </div>
+                )}
+
+                {/* Did You Know fact card */}
+                {DID_YOU_KNOW[building.id] && (
+                  <div style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: 12, padding: '12px 16px', marginBottom: 20,
+                    maxWidth: 320, textAlign: 'right', direction: 'rtl',
+                  }}>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 6, letterSpacing: 1 }}>
+                      🌍 ידעת?
+                    </div>
+                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+                      {DID_YOU_KNOW[building.id]}
+                    </div>
                   </div>
                 )}
 
