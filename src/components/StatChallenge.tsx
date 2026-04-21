@@ -536,6 +536,15 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   const [wrongAnswers, setWrongAnswers] = useState<{ qIndex: number; chosen: number }[]>([])
   const [showMistakes, setShowMistakes] = useState(false)
 
+  // Reflection state — persisted per building
+  const [reflection, setReflection] = useState(
+    () => localStorage.getItem(`wafflestack-reflection-${building.id}`) ?? ''
+  )
+  const handleReflectionChange = (text: string) => {
+    setReflection(text)
+    localStorage.setItem(`wafflestack-reflection-${building.id}`, text)
+  }
+
   const currentQ = questions[quizIndex]
 
   const handleSlider = useCallback((key: keyof DistributionParams, val: number) => {
@@ -680,6 +689,22 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
             padding: '22px 24px',
             borderRight: isMobile ? 'none' : '1px solid rgba(255,255,255,0.06)',
           }}>
+
+            {/* Previous reflection — shown if student has already written one */}
+            {reflection.length > 10 && (
+              <div style={{
+                background: 'rgba(78,205,196,0.07)', border: '1px solid rgba(78,205,196,0.2)',
+                borderRadius: 12, padding: '12px 14px', marginBottom: 14,
+                direction: 'rtl', textAlign: 'right',
+              }}>
+                <div style={{ fontSize: 10, color: 'rgba(78,205,196,0.6)', letterSpacing: 1, marginBottom: 6, textTransform: 'uppercase' as const }}>
+                  ✍️ הגדרה שלך מהפעם הקודמת
+                </div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+                  {reflection}
+                </div>
+              </div>
+            )}
 
             {/* Explanation */}
             <div style={{
@@ -889,6 +914,38 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     </div>
                   </div>
                 )}
+
+                {/* "In My Own Words" reflection box */}
+                <div style={{ width: '100%', maxWidth: 320, marginBottom: 16 }}>
+                  <div style={{
+                    fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 1,
+                    marginBottom: 8, textTransform: 'uppercase' as const,
+                    textAlign: 'right', direction: 'rtl',
+                  }}>
+                    ✍️ בלשוני שלי — הסבר את המושג במילים שלך
+                  </div>
+                  <textarea
+                    value={reflection}
+                    onChange={e => handleReflectionChange(e.target.value)}
+                    placeholder={`${content.conceptHe} הוא...`}
+                    rows={3}
+                    style={{
+                      width: '100%', boxSizing: 'border-box',
+                      background: 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${reflection.length > 10 ? color + '55' : 'rgba(255,255,255,0.12)'}`,
+                      borderRadius: 10, padding: '10px 12px',
+                      color: '#fff', fontSize: 13, lineHeight: 1.6,
+                      outline: 'none', resize: 'vertical' as const,
+                      fontFamily: 'system-ui', direction: 'rtl',
+                      transition: 'border-color 0.2s',
+                    }}
+                  />
+                  {reflection.length > 10 && (
+                    <div style={{ fontSize: 11, color: '#4ECDC4', marginTop: 4, textAlign: 'right' }}>
+                      ✓ נשמר
+                    </div>
+                  )}
+                </div>
 
                 {/* Action buttons */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 280 }}>
