@@ -21,6 +21,14 @@ function loadColorVariations(): Record<string, 'A' | 'B' | 'C'> {
   try { return JSON.parse(localStorage.getItem('wafflestack-color-variations') || '{}') }
   catch { return {} }
 }
+function loadMasteryDates(): Record<string, string> {
+  try { return JSON.parse(localStorage.getItem('wafflestack-mastery-dates') || '{}') }
+  catch { return {} }
+}
+function daysSince(dateStr: string): number {
+  const today = new Date().toISOString().slice(0, 10)
+  return Math.round((new Date(today).getTime() - new Date(dateStr).getTime()) / 86400000)
+}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface BuildingDef {
@@ -388,6 +396,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const { playing: soundPlaying, toggle: toggleSound } = useCitySound()
   const [quizSoundEnabled, setQuizSoundEnabled] = useState(loadQuizSound)
   const [colorVariations, setColorVariations] = useState<Record<string, 'A' | 'B' | 'C'>>(loadColorVariations)
+  const [masteryDates, setMasteryDates] = useState<Record<string, string>>(loadMasteryDates)
   const [dailyDone, setDailyDone] = useState<boolean>(loadDailyChallengeDone)
   const dailyChallengeId = getDailyBuildingId()
   const [showHelp, setShowHelp] = useState(false)
@@ -552,6 +561,13 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       localStorage.setItem('wafflestack-streak', String(newStreak))
       localStorage.setItem('wafflestack-last-study', todayStr)
     }
+    // Record mastery date (first time only)
+    setMasteryDates(prev => {
+      if (prev[buildingId]) return prev
+      const next = { ...prev, [buildingId]: new Date().toISOString().slice(0, 10) }
+      localStorage.setItem('wafflestack-mastery-dates', JSON.stringify(next))
+      return next
+    })
     // Daily challenge bonus XP
     if (buildingId === dailyChallengeId && !dailyDone) {
       setDailyDone(true)
@@ -970,9 +986,17 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             <button onClick={() => setSelectedBuilding(null)} style={{ background: 'none', border: 'none', color: '#888', fontSize: 18, cursor: 'pointer' }}>✕</button>
           </div>
           <div style={{ marginTop: 8, color: selectedBuilding.color, fontSize: 15 }}>📊 {selectedBuilding.statsConcept}</div>
-          {mastered.has(selectedBuilding.id) && (
-            <div style={{ marginTop: 6, fontSize: 12, color: '#4ECDC4' }}>✓ כבר למדת את זה — +50 XP הרווחת!</div>
-          )}
+          {mastered.has(selectedBuilding.id) && (() => {
+            const dateStr = masteryDates[selectedBuilding.id]
+            const days = dateStr ? daysSince(dateStr) : null
+            const needsReview = days !== null && days >= 5
+            return (
+              <div style={{ marginTop: 6, fontSize: 12, color: needsReview ? '#FFB347' : '#4ECDC4' }}>
+                {needsReview ? '📅 כדאי לחזור — ' : '✓ כבר למדת — '}
+                {days === 0 ? 'היום!' : days === 1 ? 'אתמול' : days !== null ? `לפני ${days} ימים` : '+50 XP הרווחת!'}
+              </div>
+            )
+          })()}
           {/* Kenney color variation selector */}
           <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 6, direction: 'ltr' }}>
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>Color:</span>
@@ -1134,6 +1158,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                         {b.statsConcept}
                       </div>
                     </div>
+                    {isMastered && masteryDates[b.id] && (() => {
+                      const days = daysSince(masteryDates[b.id])
+                      const needsReview = days >= 5
+                      return (
+                        <div style={{
+                          fontSize: 10, fontWeight: 700,
+                          color: needsReview ? '#FFB347' : '#4ECDC4',
+                          background: needsReview ? 'rgba(255,179,71,0.12)' : 'rgba(78,205,196,0.1)',
+                          border: `1px solid ${needsReview ? 'rgba(255,179,71,0.35)' : 'rgba(78,205,196,0.3)'}`,
+                          borderRadius: 10, padding: '2px 7px', flexShrink: 0,
+                        }}>
+                          {needsReview ? '📅 חזור' : days === 0 ? '✓ היום' : `✓ ${days}d`}
+                        </div>
+                      )
+                    })()}
                     {b.id === dailyChallengeId && !dailyDone && (
                       <div style={{
                         fontSize: 10, fontWeight: 700, color: '#FFD700',
