@@ -154,8 +154,11 @@ export default function LandingPage({ onEnterCity }: Props) {
 
         {/* Waitlist */}
         <div style={{ width: '100%', maxWidth: 440 }}>
-          <div style={{ fontSize: 11, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', marginBottom: 12, fontWeight: 600 }}>
-            GET NOTIFIED WHEN WE LAUNCH
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div style={{ fontSize: 11, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+              GET NOTIFIED WHEN WE LAUNCH
+            </div>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' }}>optional</span>
           </div>
           {submitted ? (
             <div style={{
@@ -190,6 +193,52 @@ export default function LandingPage({ onEnterCity }: Props) {
               </button>
             </div>
           )}
+          {/* Skip button */}
+          <div style={{ textAlign: 'center', marginTop: 16 }}>
+            <button
+              onClick={onEnterCity}
+              style={{
+                background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
+                fontSize: 13, cursor: 'pointer', textDecoration: 'underline',
+                padding: '4px 8px',
+              }}
+            >
+              Skip and go straight to the city →
+            </button>
+          </div>
+        </div>
+
+        {/* Scratch Canvas */}
+        <div style={{ width: '100%', marginTop: 60 }}>
+          <div style={{
+            fontSize: 11, letterSpacing: 2, color: 'rgba(255,255,255,0.4)',
+            marginBottom: 16, fontWeight: 600, textAlign: 'center',
+          }}>
+            🧠 SCRATCH CANVAS — WORK OUT YOUR THOUGHTS BELOW
+          </div>
+          <div style={{
+            border: '1px solid rgba(78,205,196,0.2)',
+            borderRadius: 16,
+            overflow: 'hidden',
+            background: 'rgba(255,255,255,0.02)',
+          }}>
+            <iframe
+              src="mindmap.html"
+              title="Scratch Canvas"
+              style={{
+                width: '100%',
+                height: 520,
+                border: 'none',
+                display: 'block',
+              }}
+            />
+          </div>
+          <div style={{
+            textAlign: 'center', marginTop: 10,
+            fontSize: 12, color: 'rgba(255,255,255,0.25)',
+          }}>
+            Use Tab / Enter to add nodes · Drag to rearrange · Your work saves automatically
+          </div>
         </div>
       </div>
     </div>
