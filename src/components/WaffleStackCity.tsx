@@ -407,6 +407,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             setSelectedBuilding(null)
           } else if (showScoreBoard) {
             setShowScoreBoard(false)
+          } else if (showGlossary) {
+            setShowGlossary(false)
           } else if (showTopicsList) {
             setShowTopicsList(false)
           } else {
@@ -425,12 +427,16 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         case 'T':
           setShowTopicsList(t => !t)
           break
+        case 'g':
+        case 'G':
+          setShowGlossary(g => !g)
+          break
       }
     }
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, toggleSound])
+  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, toggleSound])
 
   // Handle deep-link hash on mount
   useEffect(() => {
@@ -1088,6 +1094,85 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         ?
       </button>
 
+      {/* Concept Glossary overlay */}
+      {showGlossary && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 490, backdropFilter: 'blur(10px)', padding: 20,
+        }} onClick={() => setShowGlossary(false)}>
+          <div style={{
+            background: 'linear-gradient(160deg, #0a0a18 0%, #0f1525 100%)',
+            border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
+            padding: '24px 28px', width: '100%', maxWidth: 580,
+            maxHeight: '85vh', overflowY: 'auto',
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>📚 Concept Glossary</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+                  {mastered.size}/10 mastered · all formulas in one place
+                </div>
+              </div>
+              <button onClick={() => setShowGlossary(false)} style={{
+                background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: 8, width: 32, height: 32, color: 'rgba(255,255,255,0.5)',
+                cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>✕</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {BUILDINGS.map(b => {
+                const isMastered = mastered.has(b.id)
+                const glossary = GLOSSARY_DATA[b.id]
+                return (
+                  <div key={b.id} style={{
+                    background: isMastered ? `${b.color}10` : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${isMastered ? `${b.color}30` : 'rgba(255,255,255,0.07)'}`,
+                    borderRadius: 12, padding: '12px 14px',
+                    display: 'flex', alignItems: 'flex-start', gap: 12,
+                  }}>
+                    <div style={{
+                      width: 36, height: 36, borderRadius: 8, flexShrink: 0,
+                      background: `${b.color}20`, border: `1px solid ${b.color}40`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+                    }}>
+                      {b.label.split(' ')[0]}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: isMastered ? b.color : '#fff', direction: 'rtl' }}>
+                          {b.statsConcept.split(' (')[0]}
+                        </span>
+                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>·</span>
+                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{glossary?.conceptEn}</span>
+                        {isMastered && (
+                          <span style={{
+                            marginLeft: 'auto', fontSize: 10, fontWeight: 700, color: '#4ECDC4',
+                            background: 'rgba(78,205,196,0.12)', border: '1px solid rgba(78,205,196,0.25)',
+                            borderRadius: 10, padding: '2px 8px',
+                          }}>✓ mastered</span>
+                        )}
+                      </div>
+                      <div style={{
+                        fontSize: 12, fontFamily: 'monospace', color: isMastered ? b.color : 'rgba(255,255,255,0.45)',
+                        background: 'rgba(0,0,0,0.2)', borderRadius: 6,
+                        padding: '4px 8px', display: 'inline-block',
+                      }}>
+                        {glossary?.formula}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div style={{ marginTop: 16, fontSize: 12, color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
+              Press G or click outside to close
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Help overlay */}
       {showHelp && (
         <div style={{
@@ -1108,6 +1193,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               { key: 'M', desc: 'Toggle city sound' },
               { key: 'S', desc: 'Toggle score board' },
               { key: 'T', desc: 'Toggle topics list' },
+              { key: 'G', desc: 'Toggle concept glossary' },
             ].map(({ key, desc }) => (
               <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
                 <span style={{
