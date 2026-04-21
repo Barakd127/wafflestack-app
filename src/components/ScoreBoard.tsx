@@ -21,10 +21,33 @@ interface Props {
   onReset: () => void
 }
 
+interface BuildingScore {
+  id: string
+  label: string
+  concept: string
+  color: string
+  score: number
+  total: number
+  percentage: number
+}
+
+function loadWeakSpots(): BuildingScore[] {
+  return BUILDINGS_META.map(b => {
+    const scoreRaw = localStorage.getItem(`wafflestack-score-${b.id}`)
+    const totalRaw = localStorage.getItem(`wafflestack-total-${b.id}`)
+    if (!scoreRaw || !totalRaw) return null
+    const score = parseInt(scoreRaw)
+    const total = parseInt(totalRaw)
+    const percentage = total > 0 ? Math.round((score / total) * 100) : 0
+    return { ...b, score, total, percentage }
+  }).filter((x): x is BuildingScore => x !== null && x.percentage < 70)
+}
+
 export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onReset }: Props) {
   const [confirmReset, setConfirmReset] = useState(false)
   const [copied, setCopied] = useState(false)
   const [elapsed, setElapsed] = useState(() => Math.floor((Date.now() - sessionStart) / 60000))
+  const weakSpots = loadWeakSpots()
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -257,6 +280,41 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
           </div>
         </div>
       </div>
+
+      {/* Needs Review Section */}
+      {weakSpots.length > 0 && (
+        <div style={{
+          padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+          flexShrink: 0,
+        }}>
+          <div style={{
+            fontSize: 11, color: '#FF6B6B', fontWeight: 700,
+            letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: 10,
+          }}>
+            📝 Needs Review ({weakSpots.length})
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {weakSpots.map(b => (
+              <div key={b.id} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '7px 10px', borderRadius: 8,
+                background: 'rgba(255,107,107,0.08)', border: '1px solid rgba(255,107,107,0.22)',
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', direction: 'rtl' as const }}>{b.label}</span>
+                  <span style={{ fontSize: 10, color: b.color }}>{b.concept}</span>
+                </div>
+                <span style={{
+                  fontSize: 11, color: '#FF6B6B', fontWeight: 700,
+                  background: 'rgba(255,107,107,0.12)', padding: '2px 8px', borderRadius: 6, whiteSpace: 'nowrap' as const,
+                }}>
+                  {b.percentage}% · retry
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Building List */}
       <div

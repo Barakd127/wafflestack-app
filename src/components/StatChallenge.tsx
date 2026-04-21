@@ -548,6 +548,8 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     if (quizIndex + 1 >= questions.length) {
       setQuizDone(true)
       const finalScore = score + (selected === currentQ.correct ? 1 : 0)
+      localStorage.setItem(`wafflestack-score-${building.id}`, String(finalScore))
+      localStorage.setItem(`wafflestack-total-${building.id}`, String(questions.length))
       if (finalScore / questions.length >= 0.7) {
         onComplete?.(building.id)
       }
