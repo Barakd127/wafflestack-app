@@ -1,5 +1,6 @@
 import { Home, Map, BookOpen, Trophy, Settings, Bell, User } from 'lucide-react'
 import { LessonTopicId } from './LessonPage'
+import { useLearningStore } from '../store/learningStore'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
@@ -16,6 +17,13 @@ const TOPIC_CARDS: { id: LessonTopicId; hebrewTitle: string; emoji: string; colo
 ]
 
 const StudyHub = ({ onViewChange, darkMode: _darkMode, onOpenLesson }: StudyHubProps) => {
+  const { currentStreak, longestStreak, dailyChallengeDate, dailyChallengeProgress, getDailyChallenge, recordDailyChallengeAnswer } = useLearningStore()
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const isChallengeDay = dailyChallengeDate === todayStr
+  const challengeProgress = isChallengeDay ? dailyChallengeProgress : 0
+  const dailyQuestions = getDailyChallenge()
+  const challengeDone = challengeProgress >= 3
+
   const sidebarItems = [
     { id: 'home', icon: Home, label: 'דף הבית', color: 'text-cyan-400' },
     { id: 'study', icon: BookOpen, label: 'מפת לימוד', onClick: () => onViewChange('mindmap') },
@@ -83,7 +91,14 @@ const StudyHub = ({ onViewChange, darkMode: _darkMode, onOpenLesson }: StudyHubP
           {/* Top Bar */}
           <div className="mb-8 flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">דף הבית</h1>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              {currentStreak > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-100 dark:bg-orange-900/30 rounded-full" title={`שיא אישי: ${longestStreak} ימים`}>
+                  <span className="text-lg">🔥</span>
+                  <span className="text-sm font-bold text-orange-600 dark:text-orange-400">{currentStreak}</span>
+                  <span className="text-xs text-orange-500 dark:text-orange-500">יום</span>
+                </div>
+              )}
               <span className="text-sm text-gray-600 dark:text-gray-400">Hi, Bdakar</span>
               <button className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-lg transition-all text-gray-700 dark:text-gray-300"><User size={20} /></button>
               <button className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-lg transition-all text-gray-700 dark:text-gray-300"><Bell size={20} /></button>
@@ -189,6 +204,62 @@ const StudyHub = ({ onViewChange, darkMode: _darkMode, onOpenLesson }: StudyHubP
                   <div className="text-sm opacity-80 mt-1">חקור את כל הנושאים</div>
                 </div>
               </div>
+            </div>
+
+            {/* Daily Challenge */}
+            <div className="col-span-12 backdrop-blur-2xl bg-gradient-to-br from-amber-500/90 to-orange-600/90 border border-white/20 rounded-3xl p-6 shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-white">🏆 אתגר יומי</h3>
+                  <p className="text-sm text-white/80 mt-0.5">3 שאלות × 2× XP — מתאפס בחצות</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-white">{challengeProgress}/3</div>
+                  {challengeDone && <div className="text-xs text-white/80 mt-0.5">✓ הושלם היום!</div>}
+                </div>
+              </div>
+              {/* Progress bar */}
+              <div className="h-2 bg-white/20 rounded-full overflow-hidden mb-4">
+                <div
+                  className="h-full bg-white rounded-full transition-all duration-500"
+                  style={{ width: `${(challengeProgress / 3) * 100}%` }}
+                />
+              </div>
+              {/* Questions */}
+              {!challengeDone ? (
+                <div className="space-y-2">
+                  {dailyQuestions.map((q, idx) => {
+                    const done = idx < challengeProgress
+                    const isCurrent = idx === challengeProgress
+                    return (
+                      <div key={q.id} className={`flex items-center gap-3 p-3 rounded-xl transition-all ${done ? 'bg-white/10 opacity-60' : isCurrent ? 'bg-white/20 ring-2 ring-white/50' : 'bg-white/10 opacity-40'}`}>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${done ? 'bg-green-400 text-white' : 'bg-white/30 text-white'}`}>
+                          {done ? '✓' : idx + 1}
+                        </div>
+                        <span className="text-white text-sm flex-1 text-right line-clamp-1">{q.text}</span>
+                        {isCurrent && (
+                          <div className="flex gap-2 flex-shrink-0">
+                            <button
+                              onClick={() => recordDailyChallengeAnswer(q.id, 5)}
+                              className="px-2 py-1 bg-green-500 hover:bg-green-400 text-white text-xs rounded-lg transition-all"
+                            >✓</button>
+                            <button
+                              onClick={() => recordDailyChallengeAnswer(q.id, 1)}
+                              className="px-2 py-1 bg-red-500 hover:bg-red-400 text-white text-xs rounded-lg transition-all"
+                            >✗</button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-2">
+                  <div className="text-4xl mb-2">🎉</div>
+                  <div className="text-white font-bold">השלמת את האתגר היומי!</div>
+                  <div className="text-white/70 text-sm mt-1">חזור מחר לאתגר חדש</div>
+                </div>
+              )}
             </div>
 
             {/* Learning Area — 5 lesson topic cards */}

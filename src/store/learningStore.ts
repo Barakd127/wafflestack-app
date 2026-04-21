@@ -311,10 +311,21 @@ interface LearningState {
   userName: string
   onboardingCompleted: boolean
 
+  // Daily session streak (separate from answer streak)
+  lastSessionDate: string | null  // YYYY-MM-DD
+  currentStreak: number           // consecutive days studied
+  longestStreak: number           // all-time best daily streak
+
+  // Daily challenge
+  dailyChallengeDate: string | null  // YYYY-MM-DD
+  dailyChallengeProgress: number     // 0–3 questions completed today
+
   // Actions
   recordAnswer: (questionId: string, correct: boolean, xpReward: number) => void
   recordSM2Answer: (questionId: string, quality: number, xpReward: number) => void
   getNextQuestion: (topic?: string) => Question | null
+  getDailyChallenge: () => Question[]
+  recordDailyChallengeAnswer: (questionId: string, quality: number) => void
   clearNewAchievements: () => void
   resetProgress: () => void
   completeOnboarding: (name: string) => void
@@ -336,16 +347,33 @@ export const useLearningStore = create<LearningState>()(
       cards: {},
       userName: '',
       onboardingCompleted: false,
+      lastSessionDate: null,
+      currentStreak: 0,
+      longestStreak: 0,
+      dailyChallengeDate: null,
+      dailyChallengeProgress: 0,
 
       recordAnswer: (questionId, correct, xpReward) => {
         const state = get()
         const now = Date.now()
+        const todayStr = new Date().toISOString().slice(0, 10)
 
         const newStreak = correct ? state.streak + 1 : 0
         const newXp = correct ? state.xp + xpReward : state.xp
         const newAnsweredIds = correct && !state.answeredIds.includes(questionId)
           ? [...state.answeredIds, questionId]
           : state.answeredIds
+
+        // Update daily session streak
+        let newCurrentStreak = state.currentStreak
+        let newLongestStreak = state.longestStreak
+        let newLastSessionDate = state.lastSessionDate
+        if (todayStr !== state.lastSessionDate) {
+          const yesterday = new Date(now - 86400000).toISOString().slice(0, 10)
+          newCurrentStreak = state.lastSessionDate === yesterday ? state.currentStreak + 1 : 1
+          newLongestStreak = Math.max(newCurrentStreak, state.longestStreak)
+          newLastSessionDate = todayStr
+        }
 
         // Check achievements
         const newlyUnlocked: Achievement[] = []
@@ -380,6 +408,9 @@ export const useLearningStore = create<LearningState>()(
           answeredIds: newAnsweredIds,
           achievements: updatedAchievements,
           newAchievements: newlyUnlocked,
+          lastSessionDate: newLastSessionDate,
+          currentStreak: newCurrentStreak,
+          longestStreak: newLongestStreak,
         })
       },
 
@@ -422,8 +453,37 @@ export const useLearningStore = create<LearningState>()(
         return upcoming[0] ?? null
       },
 
+      getDailyChallenge: () => {
+        const todayStr = new Date().toISOString().slice(0, 10)
+        // Deterministic daily seed from date string
+        const seed = todayStr.split('-').reduce((acc, n) => acc * 100 + parseInt(n), 0)
+        const seededRand = (i: number) => {
+          const x = Math.sin(seed + i) * 10000
+          return x - Math.floor(x)
+        }
+        const shuffled = [...QUESTION_BANK]
+          .map((q, i) => ({ q, r: seededRand(i) }))
+          .sort((a, b) => a.r - b.r)
+          .map(x => x.q)
+        return shuffled.slice(0, 3)
+      },
+
+      recordDailyChallengeAnswer: (questionId, quality) => {
+        const state = get()
+        const todayStr = new Date().toISOString().slice(0, 10)
+        const isNewDay = state.dailyChallengeDate !== todayStr
+        const currentProgress = isNewDay ? 0 : state.dailyChallengeProgress
+        if (currentProgress >= 3) return
+        const xpReward = 20 // base XP doubled to 40 via 2× multiplier below
+        get().recordSM2Answer(questionId, quality, xpReward * 2)
+        set({
+          dailyChallengeDate: todayStr,
+          dailyChallengeProgress: currentProgress + 1,
+        })
+      },
+
       clearNewAchievements: () => set({ newAchievements: [] }),
-      resetProgress: () => set({ xp: 0, streak: 0, bestStreak: 0, totalAnswered: 0, totalCorrect: 0, answeredIds: [], achievements: ACHIEVEMENTS, newAchievements: [], cards: {} }),
+      resetProgress: () => set({ xp: 0, streak: 0, bestStreak: 0, totalAnswered: 0, totalCorrect: 0, answeredIds: [], achievements: ACHIEVEMENTS, newAchievements: [], cards: {}, dailyChallengeDate: null, dailyChallengeProgress: 0 }),
       completeOnboarding: (name: string) => set({ userName: name, onboardingCompleted: true }),
     }),
     {

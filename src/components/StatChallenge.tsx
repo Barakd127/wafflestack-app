@@ -523,6 +523,8 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   const [score, setScore] = useState(0)
   const [quizDone, setQuizDone] = useState(false)
   const [hintShown, setHintShown] = useState(false)
+  const [wrongAnswers, setWrongAnswers] = useState<{ qIndex: number; chosen: number }[]>([])
+  const [showMistakes, setShowMistakes] = useState(false)
 
   const currentQ = questions[quizIndex]
 
@@ -537,6 +539,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
       setScore(s => s + 1)
       if (soundEnabled) playCorrectTone()
     } else {
+      setWrongAnswers(prev => [...prev, { qIndex: quizIndex, chosen: idx }])
       if (soundEnabled) playWrongTone()
     }
   }
@@ -561,6 +564,8 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     setScore(0)
     setQuizDone(false)
     setHintShown(false)
+    setWrongAnswers([])
+    setShowMistakes(false)
   }
 
   return (
@@ -768,6 +773,64 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     transition: 'width 0.6s ease',
                   }} />
                 </div>
+
+                {/* Mistakes review — shown when any answers were wrong */}
+                {wrongAnswers.length > 0 && (
+                  <div style={{ width: '100%', maxWidth: 320, marginBottom: 16 }}>
+                    <button
+                      onClick={() => setShowMistakes(m => !m)}
+                      style={{
+                        width: '100%', padding: '9px 14px',
+                        background: showMistakes ? 'rgba(255,107,107,0.12)' : 'rgba(255,107,107,0.07)',
+                        border: '1px solid rgba(255,107,107,0.3)', borderRadius: 10,
+                        color: '#FF6B6B', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      }}
+                    >
+                      <span>📝 {wrongAnswers.length} שגיאה לחזרה</span>
+                      <span style={{ fontSize: 10 }}>{showMistakes ? '▲ סגור' : '▼ הצג'}</span>
+                    </button>
+                    {showMistakes && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                        {wrongAnswers.map(({ qIndex, chosen }) => {
+                          const q = questions[qIndex]
+                          return (
+                            <div key={qIndex} style={{
+                              background: 'rgba(255,255,255,0.03)',
+                              border: '1px solid rgba(255,107,107,0.2)',
+                              borderRadius: 10, padding: '10px 12px',
+                            }}>
+                              <div style={{
+                                fontSize: 12, color: 'rgba(255,255,255,0.75)',
+                                direction: 'rtl', textAlign: 'right', marginBottom: 8, lineHeight: 1.5,
+                              }}>
+                                {q.q}
+                              </div>
+                              <div style={{
+                                fontSize: 11, color: '#FF6B6B', direction: 'rtl',
+                                textAlign: 'right', marginBottom: 4,
+                              }}>
+                                ✗ {q.options[chosen]}
+                              </div>
+                              <div style={{
+                                fontSize: 11, color: '#4ECDC4', direction: 'rtl',
+                                textAlign: 'right', marginBottom: 6,
+                              }}>
+                                ✓ {q.options[q.correct]}
+                              </div>
+                              <div style={{
+                                fontSize: 10, color: 'rgba(255,255,255,0.4)',
+                                direction: 'rtl', textAlign: 'right', lineHeight: 1.5,
+                              }}>
+                                {q.explanation}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* XP earned — only on perfect score */}
                 {score === questions.length && (

@@ -105,6 +105,18 @@ const CONCEPT_PREVIEW: Record<string, string> = {
   'news':      'A confidence interval gives a range where the true population parameter likely falls (e.g. 95% CI).',
 }
 
+// ─── Daily challenge helpers ──────────────────────────────────────────────────
+function getDailyBuildingId(): string {
+  const d = new Date()
+  const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
+  return BUILDINGS[seed % BUILDINGS.length].id
+}
+
+function loadDailyChallengeDone(): boolean {
+  const today = new Date().toISOString().slice(0, 10)
+  return localStorage.getItem('wafflestack-daily-done') === today
+}
+
 // ─── Onboarding steps ────────────────────────────────────────────────────────
 const ONBOARDING_STEPS = [
   {
@@ -214,7 +226,7 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
   onHoverEnd: () => void
   colorOverride?: string
 }) {
-  const { scene } = useGLTF(`/models/kenney-suburban/${def.model}.glb`)
+  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/kenney-suburban/${def.model}.glb`)
   const meshRef = useRef<THREE.Group>(null)
   const clonedScene = scene.clone()
 
@@ -292,7 +304,7 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
 
 // ─── Road/Prop ───────────────────────────────────────────────────────────────
 function Prop({ model, pos, rot }: { model: string, pos: [number,number,number], rot: number }) {
-  const { scene } = useGLTF(`/models/kenney-suburban/${model}.glb`)
+  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/kenney-suburban/${model}.glb`)
   return <primitive object={scene.clone()} position={pos} rotation={[0, rot, 0]} scale={1.4} />
 }
 
@@ -361,6 +373,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const { playing: soundPlaying, toggle: toggleSound } = useCitySound()
   const [quizSoundEnabled, setQuizSoundEnabled] = useState(loadQuizSound)
   const [colorVariations, setColorVariations] = useState<Record<string, 'A' | 'B' | 'C'>>(loadColorVariations)
+  const [dailyDone, setDailyDone] = useState<boolean>(loadDailyChallengeDone)
+  const dailyChallengeId = getDailyBuildingId()
   const [showHelp, setShowHelp] = useState(false)
   const [milestone, setMilestone] = useState<5 | 10 | null>(null)
   const [xpMilestone, setXpMilestone] = useState<number | null>(null)
@@ -513,13 +527,23 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       localStorage.setItem('wafflestack-streak', String(newStreak))
       localStorage.setItem('wafflestack-last-study', todayStr)
     }
+    // Daily challenge bonus XP
+    if (buildingId === dailyChallengeId && !dailyDone) {
+      setDailyDone(true)
+      localStorage.setItem('wafflestack-daily-done', new Date().toISOString().slice(0, 10))
+      setXp(prev => {
+        const next = prev + 50
+        localStorage.setItem('wafflestack-xp', String(next))
+        return next
+      })
+    }
     // Glow + popup + placement sound
     setGlowBuilding(buildingId)
     setXpPopup(true)
     if (quizSoundEnabled) playBuildingPlacedTone()
     setTimeout(() => setGlowBuilding(null), 2200)
     setTimeout(() => setXpPopup(false), 2000)
-  }, [quizSoundEnabled])
+  }, [quizSoundEnabled, dailyChallengeId, dailyDone])
 
   const masteredCount = mastered.size
 
@@ -1064,6 +1088,13 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                         {b.statsConcept}
                       </div>
                     </div>
+                    {b.id === dailyChallengeId && !dailyDone && (
+                      <div style={{
+                        fontSize: 10, fontWeight: 700, color: '#FFD700',
+                        background: 'rgba(255,215,0,0.12)', border: '1px solid rgba(255,215,0,0.35)',
+                        borderRadius: 10, padding: '2px 7px', flexShrink: 0,
+                      }}>🌟 Daily</div>
+                    )}
                     <div style={{
                       flexShrink: 0, fontSize: 12, fontWeight: 700,
                       color: isMastered ? '#4ECDC4' : 'rgba(255,255,255,0.25)',
@@ -1216,5 +1247,5 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 }
 
 // Preload models
-BUILDINGS.forEach(b => useGLTF.preload(`/models/kenney-suburban/${b.model}.glb`))
-ROAD_MODELS.forEach(r => useGLTF.preload(`/models/kenney-suburban/${r.model}.glb`))
+BUILDINGS.forEach(b => useGLTF.preload(`${import.meta.env.BASE_URL}models/kenney-suburban/${b.model}.glb`))
+ROAD_MODELS.forEach(r => useGLTF.preload(`${import.meta.env.BASE_URL}models/kenney-suburban/${r.model}.glb`))
