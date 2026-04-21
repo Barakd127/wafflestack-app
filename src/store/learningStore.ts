@@ -1,6 +1,57 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+// ── SM-2 Spaced Repetition ────────────────────────────────────────────────────
+
+export interface CardData {
+  interval: number        // days until next review
+  repetitions: number     // consecutive correct answers
+  easeFactor: number      // SM-2 multiplier (min 1.3, default 2.5)
+  nextReview: number      // ms timestamp; 0 = new card (never seen)
+  lastSeen: number | null
+  difficulty: number      // 0-5 quality rating from last answer
+}
+
+function sm2Update(card: CardData, quality: number): CardData {
+  const EF_MIN = 1.3
+  const EF_DEFAULT = 2.5
+  const ef = card.easeFactor || EF_DEFAULT
+
+  if (quality >= 3) {
+    let interval: number
+    if (card.repetitions === 0) interval = 1
+    else if (card.repetitions === 1) interval = 6
+    else interval = Math.round(card.interval * ef)
+
+    const newEF = Math.max(EF_MIN, ef + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)))
+    return {
+      interval,
+      repetitions: card.repetitions + 1,
+      easeFactor: newEF,
+      nextReview: Date.now() + interval * 86400000,
+      lastSeen: Date.now(),
+      difficulty: quality,
+    }
+  } else {
+    return {
+      interval: 1,
+      repetitions: 0,
+      easeFactor: Math.max(EF_MIN, ef - 0.2),
+      nextReview: Date.now() + 86400000,
+      lastSeen: Date.now(),
+      difficulty: quality,
+    }
+  }
+}
+
+function getXpMultiplier(interval: number, quality: number): number {
+  if (quality < 3) return 0
+  if (interval >= 16 && interval <= 30) return 3.5
+  if (interval >= 45) return 2.5
+  if (interval >= 6) return 2.0
+  return 1.0
+}
+
 // ── Question Bank ────────────────────────────────────────────────────────────
 
 export interface Question {
@@ -253,12 +304,17 @@ interface LearningState {
   achievements: Achievement[]
   newAchievements: Achievement[]  // just-unlocked, for animations
 
+  // SM-2 spaced repetition
+  cards: Record<string, CardData>
+
   // Onboarding
   userName: string
   onboardingCompleted: boolean
 
   // Actions
   recordAnswer: (questionId: string, correct: boolean, xpReward: number) => void
+  recordSM2Answer: (questionId: string, quality: number, xpReward: number) => void
+  getNextQuestion: (topic?: string) => Question | null
   clearNewAchievements: () => void
   resetProgress: () => void
   completeOnboarding: (name: string) => void
@@ -277,6 +333,7 @@ export const useLearningStore = create<LearningState>()(
       answeredIds: [],
       achievements: ACHIEVEMENTS,
       newAchievements: [],
+      cards: {},
       userName: '',
       onboardingCompleted: false,
 
@@ -326,8 +383,47 @@ export const useLearningStore = create<LearningState>()(
         })
       },
 
+      recordSM2Answer: (questionId, quality, xpReward) => {
+        const state = get()
+        const existing: CardData = state.cards[questionId] ?? {
+          interval: 0, repetitions: 0, easeFactor: 2.5,
+          nextReview: 0, lastSeen: null, difficulty: 0,
+        }
+        const multiplier = getXpMultiplier(existing.interval, quality)
+        const adjustedXp = Math.round(xpReward * multiplier)
+        const updated = sm2Update(existing, quality)
+        set({ cards: { ...state.cards, [questionId]: updated } })
+        get().recordAnswer(questionId, quality >= 3, adjustedXp)
+      },
+
+      getNextQuestion: (topic?) => {
+        const { cards } = get()
+        const now = Date.now()
+        const pool = topic
+          ? QUESTION_BANK.filter(q => q.topic === topic)
+          : QUESTION_BANK
+
+        // 1. New cards (never seen)
+        const newCards = pool.filter(q => !cards[q.id] || cards[q.id].nextReview === 0)
+        if (newCards.length > 0) {
+          return newCards[Math.floor(Math.random() * newCards.length)]
+        }
+
+        // 2. Due cards (overdue first)
+        const due = pool
+          .filter(q => cards[q.id] && cards[q.id].nextReview <= now)
+          .sort((a, b) => (cards[a.id]?.nextReview ?? 0) - (cards[b.id]?.nextReview ?? 0))
+        if (due.length > 0) return due[0]
+
+        // 3. Soonest upcoming
+        const upcoming = pool
+          .filter(q => cards[q.id] && cards[q.id].nextReview > now)
+          .sort((a, b) => (cards[a.id]?.nextReview ?? 0) - (cards[b.id]?.nextReview ?? 0))
+        return upcoming[0] ?? null
+      },
+
       clearNewAchievements: () => set({ newAchievements: [] }),
-      resetProgress: () => set({ xp: 0, streak: 0, bestStreak: 0, totalAnswered: 0, totalCorrect: 0, answeredIds: [], achievements: ACHIEVEMENTS, newAchievements: [] }),
+      resetProgress: () => set({ xp: 0, streak: 0, bestStreak: 0, totalAnswered: 0, totalCorrect: 0, answeredIds: [], achievements: ACHIEVEMENTS, newAchievements: [], cards: {} }),
       completeOnboarding: (name: string) => set({ userName: name, onboardingCompleted: true }),
     }),
     {

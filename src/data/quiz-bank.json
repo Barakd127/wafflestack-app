@@ -1,0 +1,866 @@
+{
+  "version": "1.3",
+  "generated": "2026-04-18",
+  "topics": {
+    "mean": {
+      "building": "city-market",
+      "concept": "Mean (Average)",
+      "questions": [
+        {
+          "id": "mean_001",
+          "difficulty": "easy",
+          "question": "The City Market sold 3, 5, 7, and 9 apples on four days. What is the mean number of apples sold per day?",
+          "options": ["4", "5", "6", "7"],
+          "correct_answer": "6",
+          "explanation": "Mean = (3+5+7+9) ÷ 4 = 24 ÷ 4 = 6"
+        },
+        {
+          "id": "mean_002",
+          "difficulty": "easy",
+          "question": "Five market stalls earned 10, 20, 30, 40, and 50 coins today. What is the mean earnings per stall?",
+          "options": ["25", "30", "35", "40"],
+          "correct_answer": "30",
+          "explanation": "Mean = (10+20+30+40+50) ÷ 5 = 150 ÷ 5 = 30"
+        },
+        {
+          "id": "mean_003",
+          "difficulty": "easy",
+          "question": "What does the mean represent in a data set?",
+          "options": ["The most common value", "The middle value", "The sum divided by the count", "The largest minus the smallest"],
+          "correct_answer": "The sum divided by the count",
+          "explanation": "Mean = Σx ÷ n. It spreads the total equally across all values."
+        },
+        {
+          "id": "mean_004",
+          "difficulty": "medium",
+          "question": "The market recorded daily visitors: 120, 95, 110, 130, and 145. What is the mean number of visitors?",
+          "options": ["110", "118", "120", "130"],
+          "correct_answer": "120",
+          "explanation": "Mean = (120+95+110+130+145) ÷ 5 = 600 ÷ 5 = 120"
+        },
+        {
+          "id": "mean_005",
+          "difficulty": "medium",
+          "question": "A city market stall had sales of 8, 12, 15, and x coins. If the mean is 12, what is x?",
+          "options": ["10", "11", "13", "14"],
+          "correct_answer": "13",
+          "explanation": "12 = (8+12+15+x) ÷ 4 → 48 = 35+x → x = 13"
+        },
+        {
+          "id": "mean_006",
+          "difficulty": "medium",
+          "question": "If you add a new value equal to the current mean to a data set, how does the mean change?",
+          "options": ["It increases", "It decreases", "It stays the same", "It doubles"],
+          "correct_answer": "It stays the same",
+          "explanation": "Adding a value equal to the mean does not change the mean, because it pulls neither up nor down."
+        },
+        {
+          "id": "mean_007",
+          "difficulty": "medium",
+          "question": "A baker at the City Market baked 14, 18, 22, 10, and 16 loaves over 5 days. What is the daily mean?",
+          "options": ["14", "16", "18", "20"],
+          "correct_answer": "16",
+          "explanation": "Mean = (14+18+22+10+16) ÷ 5 = 80 ÷ 5 = 16"
+        },
+        {
+          "id": "mean_008",
+          "difficulty": "hard",
+          "question": "Three market stalls have a mean revenue of 50 coins. Two more stalls join with revenues of 80 and 20 coins. What is the new mean?",
+          "options": ["46", "50", "54", "60"],
+          "correct_answer": "50",
+          "explanation": "Original 3 stalls total = 150. New total = 150+80+20 = 250. New mean = 250÷5 = 50. The two new values average to 50 (the same as the original mean), so no change."
+        },
+        {
+          "id": "mean_009",
+          "difficulty": "hard",
+          "question": "The City Market's weekly revenue had a mean of 200 coins over 4 weeks. In week 5, revenue was 300 coins. What is the new 5-week mean?",
+          "options": ["210", "220", "225", "240"],
+          "correct_answer": "220",
+          "explanation": "Total for 4 weeks = 4×200 = 800. New total = 800+300 = 1100. Mean = 1100÷5 = 220"
+        },
+        {
+          "id": "mean_010",
+          "difficulty": "hard",
+          "question": "An outlier value of 500 is added to a small data set {10, 12, 11}. What effect does it most likely have on the mean?",
+          "options": ["Little effect", "Pulls the mean up significantly", "Pulls the mean down", "No effect"],
+          "correct_answer": "Pulls the mean up significantly",
+          "explanation": "The mean is sensitive to outliers. New mean = (10+12+11+500) ÷ 4 = 533÷4 ≈ 133, far above the original ~11."
+        }
+      ]
+    },
+    "median": {
+      "building": "city-library",
+      "concept": "Median",
+      "questions": [
+        {
+          "id": "median_001",
+          "difficulty": "easy",
+          "question": "The City Library has shelves with 3, 7, 2, 9, and 5 books. What is the median number of books?",
+          "options": ["3", "5", "7", "9"],
+          "correct_answer": "5",
+          "explanation": "Sort: 2, 3, 5, 7, 9. The middle value (3rd of 5) is 5."
+        },
+        {
+          "id": "median_002",
+          "difficulty": "easy",
+          "question": "What is the first step to finding the median of a data set?",
+          "options": ["Add all values", "Find the largest value", "Sort the values in order", "Divide by the count"],
+          "correct_answer": "Sort the values in order",
+          "explanation": "The median is the middle value, so values must be ordered first."
+        },
+        {
+          "id": "median_003",
+          "difficulty": "easy",
+          "question": "Library visitors on 5 days: 10, 40, 20, 30, 50. What is the median?",
+          "options": ["20", "25", "30", "40"],
+          "correct_answer": "30",
+          "explanation": "Sorted: 10, 20, 30, 40, 50. Middle value = 30."
+        },
+        {
+          "id": "median_004",
+          "difficulty": "medium",
+          "question": "A library has 6 sections with 4, 8, 2, 6, 10, and 14 books. What is the median?",
+          "options": ["6", "7", "8", "9"],
+          "correct_answer": "7",
+          "explanation": "Sorted: 2, 4, 6, 8, 10, 14. Even count → median = (6+8)÷2 = 7."
+        },
+        {
+          "id": "median_005",
+          "difficulty": "medium",
+          "question": "Which measure is better for representing a typical house price in a city where most homes cost 300K but a few sell for 10M?",
+          "options": ["Mean", "Median", "Mode", "Range"],
+          "correct_answer": "Median",
+          "explanation": "Extreme values (outliers) pull the mean far from typical. The median is resistant to outliers."
+        },
+        {
+          "id": "median_006",
+          "difficulty": "medium",
+          "question": "City Library checkout times in minutes: 2, 5, 3, 8, 1, 4. What is the median?",
+          "options": ["3", "3.5", "4", "4.5"],
+          "correct_answer": "3.5",
+          "explanation": "Sorted: 1, 2, 3, 4, 5, 8. Median = (3+4)÷2 = 3.5"
+        },
+        {
+          "id": "median_007",
+          "difficulty": "medium",
+          "question": "If a new value is added that is larger than the current median, how does the median change?",
+          "options": ["Always increases", "Always decreases", "Stays the same or increases slightly", "Cannot be determined"],
+          "correct_answer": "Cannot be determined",
+          "explanation": "Adding a large value shifts positions, and the new median depends on the full distribution and whether n is now odd or even."
+        },
+        {
+          "id": "median_008",
+          "difficulty": "hard",
+          "question": "Scores of 7 students: 45, 72, 88, 91, 55, 63, 77. What is the median score?",
+          "options": ["63", "72", "77", "88"],
+          "correct_answer": "72",
+          "explanation": "Sorted: 45, 55, 63, 72, 77, 88, 91. The 4th of 7 values = 72."
+        },
+        {
+          "id": "median_009",
+          "difficulty": "hard",
+          "question": "The library has 8 rooms with areas: 12, 20, 8, 35, 15, 28, 10, 22 m². What is the median area?",
+          "options": ["15", "17.5", "18", "20"],
+          "correct_answer": "17.5",
+          "explanation": "Sorted: 8, 10, 12, 15, 20, 22, 28, 35. Median = (15+20)÷2 = 17.5"
+        },
+        {
+          "id": "median_010",
+          "difficulty": "hard",
+          "question": "A dataset has a mean of 50 and a median of 30. What does this suggest about the distribution?",
+          "options": ["Symmetric distribution", "Right-skewed (positively skewed)", "Left-skewed (negatively skewed)", "Uniform distribution"],
+          "correct_answer": "Right-skewed (positively skewed)",
+          "explanation": "When mean > median, large outliers pull the mean right. The distribution has a long right tail."
+        }
+      ]
+    },
+    "std-dev": {
+      "building": "weather-tower",
+      "concept": "Standard Deviation",
+      "questions": [
+        {
+          "id": "stddev_001",
+          "difficulty": "easy",
+          "question": "What does standard deviation measure?",
+          "options": ["The average value", "The middle value", "How spread out values are from the mean", "The total of all values"],
+          "correct_answer": "How spread out values are from the mean",
+          "explanation": "Standard deviation quantifies variability — how much individual values differ from the mean."
+        },
+        {
+          "id": "stddev_002",
+          "difficulty": "easy",
+          "question": "Weather Tower recorded daily temperatures: 20, 20, 20, 20°C all week. What is the standard deviation?",
+          "options": ["0", "1", "4", "20"],
+          "correct_answer": "0",
+          "explanation": "All values are identical, so there is no spread. Standard deviation = 0."
+        },
+        {
+          "id": "stddev_003",
+          "difficulty": "easy",
+          "question": "Which data set has a higher standard deviation?",
+          "options": ["10, 10, 10, 10", "8, 10, 12, 10", "9, 10, 11, 10", "10, 10, 10, 11"],
+          "correct_answer": "8, 10, 12, 10",
+          "explanation": "The values 8 and 12 are farther from the mean (10) than in the other sets, so this set has greater spread."
+        },
+        {
+          "id": "stddev_004",
+          "difficulty": "medium",
+          "question": "Temperatures recorded at the Weather Tower: 15, 17, 19, 21, 23°C. The mean is 19°C. Which value contributes most to the standard deviation?",
+          "options": ["15°C", "17°C", "19°C", "21°C"],
+          "correct_answer": "15°C",
+          "explanation": "15 is farthest from the mean (19), with deviation = 4. All other deviations are ≤ 2."
+        },
+        {
+          "id": "stddev_005",
+          "difficulty": "medium",
+          "question": "A weather forecast has low standard deviation. This means the predictions are:",
+          "options": ["Often wrong", "Consistent and close to the mean", "Highly variable", "Always zero"],
+          "correct_answer": "Consistent and close to the mean",
+          "explanation": "Low standard deviation → values cluster tightly around the mean → more consistent and predictable."
+        },
+        {
+          "id": "stddev_006",
+          "difficulty": "medium",
+          "question": "If every temperature in a data set is increased by 5°C, what happens to the standard deviation?",
+          "options": ["Increases by 5", "Decreases by 5", "Stays the same", "Doubles"],
+          "correct_answer": "Stays the same",
+          "explanation": "Shifting all values by a constant doesn't change the spread between them. Standard deviation measures relative spread."
+        },
+        {
+          "id": "stddev_007",
+          "difficulty": "medium",
+          "question": "City A has rainfall standard deviation of 2mm; City B has 8mm. Which city has more predictable rainfall?",
+          "options": ["City A", "City B", "Both the same", "Cannot tell"],
+          "correct_answer": "City A",
+          "explanation": "Lower standard deviation = less variability = more predictable. City A's rainfall varies less from its mean."
+        },
+        {
+          "id": "stddev_008",
+          "difficulty": "hard",
+          "question": "A data set has values {2, 4, 4, 4, 5, 5, 7, 9}. The mean is 5. What is the variance?",
+          "options": ["2", "3", "4", "5"],
+          "correct_answer": "4",
+          "explanation": "Deviations from mean: -3,-1,-1,-1,0,0,2,4. Squared: 9,1,1,1,0,0,4,16. Sum=32. Variance=32÷8=4."
+        },
+        {
+          "id": "stddev_009",
+          "difficulty": "hard",
+          "question": "If a data set has variance of 25, what is the standard deviation?",
+          "options": ["5", "12.5", "25", "625"],
+          "correct_answer": "5",
+          "explanation": "Standard deviation = √variance = √25 = 5."
+        },
+        {
+          "id": "stddev_010",
+          "difficulty": "hard",
+          "question": "In a normal distribution, approximately what percentage of data falls within 1 standard deviation of the mean?",
+          "options": ["50%", "68%", "95%", "99.7%"],
+          "correct_answer": "68%",
+          "explanation": "The 68-95-99.7 rule: ~68% within 1σ, ~95% within 2σ, ~99.7% within 3σ."
+        }
+      ]
+    },
+    "probability": {
+      "building": "casino-event-hall",
+      "concept": "Probability",
+      "questions": [
+        {
+          "id": "prob_001",
+          "difficulty": "easy",
+          "question": "At the Casino & Event Hall, a spinner has 4 equal sections: red, blue, green, yellow. What is the probability of landing on blue?",
+          "options": ["1/4", "1/2", "1/3", "3/4"],
+          "correct_answer": "1/4",
+          "explanation": "Probability = favorable outcomes ÷ total outcomes = 1÷4 = 0.25"
+        },
+        {
+          "id": "prob_002",
+          "difficulty": "easy",
+          "question": "What is the probability of a certain event (something that must happen)?",
+          "options": ["0", "0.5", "1", "2"],
+          "correct_answer": "1",
+          "explanation": "A certain event has probability 1 — it always occurs. Probability ranges from 0 (impossible) to 1 (certain)."
+        },
+        {
+          "id": "prob_003",
+          "difficulty": "easy",
+          "question": "A bag has 3 red balls and 7 blue balls. What is the probability of picking a red ball?",
+          "options": ["0.3", "0.5", "0.7", "3"],
+          "correct_answer": "0.3",
+          "explanation": "P(red) = 3 ÷ (3+7) = 3/10 = 0.3"
+        },
+        {
+          "id": "prob_004",
+          "difficulty": "medium",
+          "question": "At the event hall, a fair die is rolled. What is the probability of getting a number greater than 4?",
+          "options": ["1/6", "1/3", "1/2", "2/3"],
+          "correct_answer": "1/3",
+          "explanation": "Numbers greater than 4 on a die: {5, 6} = 2 outcomes. P = 2/6 = 1/3."
+        },
+        {
+          "id": "prob_005",
+          "difficulty": "medium",
+          "question": "Two fair coins are flipped. What is the probability of getting exactly one head?",
+          "options": ["1/4", "1/2", "3/4", "1"],
+          "correct_answer": "1/2",
+          "explanation": "Sample space: HH, HT, TH, TT. Exactly one head: HT, TH = 2 outcomes. P = 2/4 = 1/2."
+        },
+        {
+          "id": "prob_006",
+          "difficulty": "medium",
+          "question": "If P(A) = 0.4 and A and B are complementary events, what is P(B)?",
+          "options": ["0.4", "0.5", "0.6", "1.4"],
+          "correct_answer": "0.6",
+          "explanation": "Complementary events sum to 1: P(B) = 1 - P(A) = 1 - 0.4 = 0.6."
+        },
+        {
+          "id": "prob_007",
+          "difficulty": "medium",
+          "question": "The casino has a game where P(win) = 0.2. If you play 10 times, how many wins do you expect?",
+          "options": ["1", "2", "3", "5"],
+          "correct_answer": "2",
+          "explanation": "Expected value = n × P = 10 × 0.2 = 2 expected wins."
+        },
+        {
+          "id": "prob_008",
+          "difficulty": "hard",
+          "question": "From a deck of 52 cards, what is the probability of drawing an ace or a heart?",
+          "options": ["4/13", "16/52", "17/52", "1/4"],
+          "correct_answer": "16/52",
+          "explanation": "P(A∪B) = P(A)+P(B)-P(A∩B) = 4/52 + 13/52 - 1/52 = 16/52 (the ace of hearts counted twice)."
+        },
+        {
+          "id": "prob_009",
+          "difficulty": "hard",
+          "question": "Two events are independent: P(A) = 0.3 and P(B) = 0.5. What is P(A and B)?",
+          "options": ["0.10", "0.15", "0.20", "0.80"],
+          "correct_answer": "0.15",
+          "explanation": "For independent events: P(A∩B) = P(A) × P(B) = 0.3 × 0.5 = 0.15."
+        },
+        {
+          "id": "prob_010",
+          "difficulty": "hard",
+          "question": "In a city of 1000, 200 own a bicycle and 150 own a scooter; 50 own both. What is the probability a random resident owns at least one?",
+          "options": ["0.25", "0.30", "0.35", "0.40"],
+          "correct_answer": "0.30",
+          "explanation": "P(B∪S) = 200/1000 + 150/1000 - 50/1000 = 300/1000 = 0.30."
+        }
+      ]
+    },
+    "regression": {
+      "building": "bank",
+      "concept": "Regression",
+      "questions": [
+        {
+          "id": "regression_001",
+          "difficulty": "easy",
+          "question": "The City Bank uses regression to predict loan amounts from salary data. What does a linear regression line do?",
+          "options": ["Finds the middle value", "Fits the best straight line through data points", "Counts how many data points exist", "Calculates the range"],
+          "correct_answer": "Fits the best straight line through data points",
+          "explanation": "Linear regression finds the line that minimizes the total squared distance between the line and all data points."
+        },
+        {
+          "id": "regression_002",
+          "difficulty": "easy",
+          "question": "In the regression equation ŷ = a + bx, what does b represent?",
+          "options": ["The y-intercept", "The slope (rate of change)", "The mean of x", "The predicted value"],
+          "correct_answer": "The slope (rate of change)",
+          "explanation": "b is the slope: for every 1-unit increase in x, y changes by b units. a is the y-intercept."
+        },
+        {
+          "id": "regression_003",
+          "difficulty": "easy",
+          "question": "A bank's regression line shows that as loan size increases, repayment time also increases. This is called:",
+          "options": ["Negative relationship", "No relationship", "Positive relationship", "Perfect relationship"],
+          "correct_answer": "Positive relationship",
+          "explanation": "When both variables increase together, the slope is positive — a positive relationship."
+        },
+        {
+          "id": "regression_004",
+          "difficulty": "medium",
+          "question": "The City Bank regression model: ŷ = 5000 + 200x, where x is years of employment. Predict the loan amount for 8 years of employment.",
+          "options": ["6400", "6600", "6800", "7000"],
+          "correct_answer": "6600",
+          "explanation": "ŷ = 5000 + 200×8 = 5000 + 1600 = 6600 coins."
+        },
+        {
+          "id": "regression_005",
+          "difficulty": "medium",
+          "question": "A bank analyst finds r² = 0.64 for a salary-to-savings regression. What does this mean?",
+          "options": ["64% of the variation in savings is explained by salary", "64 customers were sampled", "The correlation is 0.64", "64% of predictions are correct"],
+          "correct_answer": "64% of the variation in savings is explained by salary",
+          "explanation": "r² (coefficient of determination) tells us what percentage of variation in y is explained by x. Here, salary explains 64% of savings variation."
+        },
+        {
+          "id": "regression_006",
+          "difficulty": "medium",
+          "question": "A customer's actual savings are 800 coins but the regression predicts 750. What is the residual?",
+          "options": ["-50", "50", "750", "800"],
+          "correct_answer": "50",
+          "explanation": "Residual = actual − predicted = 800 − 750 = 50. Positive residual means the actual value is above the line."
+        },
+        {
+          "id": "regression_007",
+          "difficulty": "medium",
+          "question": "The regression line always passes through which point?",
+          "options": ["The origin (0, 0)", "The point (x̄, ȳ) — the means of x and y", "The maximum data point", "The minimum data point"],
+          "correct_answer": "The point (x̄, ȳ) — the means of x and y",
+          "explanation": "A key property of least-squares regression: the line always passes through (x̄, ȳ), the intersection of the two means."
+        },
+        {
+          "id": "regression_008",
+          "difficulty": "hard",
+          "question": "Bank data: mean salary = 50K, mean savings = 10K, r = 0.8, SD(salary) = 10K, SD(savings) = 2K. What is the regression slope b?",
+          "options": ["0.08", "0.16", "0.40", "4.00"],
+          "correct_answer": "0.16",
+          "explanation": "b = r × (SD_y / SD_x) = 0.8 × (2/10) = 0.8 × 0.2 = 0.16. Each extra 1K salary corresponds to 0.16K more in savings."
+        },
+        {
+          "id": "regression_009",
+          "difficulty": "hard",
+          "question": "A bank uses a regression model trained on data from 20–50 year-olds to predict savings for 80-year-olds. Why is this risky?",
+          "options": ["The sample is too large", "This is extrapolation beyond the data range", "Regression only works for younger people", "The slope will be negative"],
+          "correct_answer": "This is extrapolation beyond the data range",
+          "explanation": "Extrapolation applies the model outside the range of x values it was built on. Patterns may change, making predictions unreliable."
+        },
+        {
+          "id": "regression_010",
+          "difficulty": "hard",
+          "question": "A regression model has r² = 0.09. What does this tell a bank analyst?",
+          "options": ["The model explains 91% of variation", "The predictor explains only 9% of variation — a weak model", "9% of customers are outliers", "The correlation coefficient is 0.9"],
+          "correct_answer": "The predictor explains only 9% of variation — a weak model",
+          "explanation": "r² = 0.09 means the independent variable explains only 9% of variance in the outcome. Other factors drive most of the variation."
+        }
+      ]
+    },
+    "correlation": {
+      "building": "market",
+      "concept": "Correlation",
+      "questions": [
+        {
+          "id": "correlation_001",
+          "difficulty": "easy",
+          "question": "The WaffleStack Market analyzes prices and sales. What does correlation measure?",
+          "options": ["The average price", "The strength and direction of the linear relationship between two variables", "The total sales revenue", "The number of products sold"],
+          "correct_answer": "The strength and direction of the linear relationship between two variables",
+          "explanation": "Correlation (Pearson r) ranges from −1 to +1 and measures how strongly two variables are linearly related."
+        },
+        {
+          "id": "correlation_002",
+          "difficulty": "easy",
+          "question": "A market study finds r = 1 between advertising spend and sales. What does this mean?",
+          "options": ["No relationship", "A perfect positive linear relationship", "A perfect negative relationship", "A moderate relationship"],
+          "correct_answer": "A perfect positive linear relationship",
+          "explanation": "r = 1 means every data point falls exactly on a line with positive slope — a perfect positive correlation."
+        },
+        {
+          "id": "correlation_003",
+          "difficulty": "easy",
+          "question": "A market analyst finds r ≈ 0 between shoe size and test scores. What does this mean?",
+          "options": ["Strong positive relationship", "Strong negative relationship", "Little to no linear relationship", "Perfect relationship"],
+          "correct_answer": "Little to no linear relationship",
+          "explanation": "r ≈ 0 indicates no meaningful linear relationship between the two variables."
+        },
+        {
+          "id": "correlation_004",
+          "difficulty": "medium",
+          "question": "The market finds r = −0.85 between item price and units sold. What does this indicate?",
+          "options": ["Higher price → more units sold (strong positive)", "Higher price → fewer units sold (strong negative)", "No relationship between price and sales", "A perfect negative correlation"],
+          "correct_answer": "Higher price → fewer units sold (strong negative)",
+          "explanation": "r = −0.85 is a strong negative correlation: as price increases, units sold decreases. Not perfect (not −1) but strong."
+        },
+        {
+          "id": "correlation_005",
+          "difficulty": "medium",
+          "question": "A market study shows that ice cream sales and drowning rates are both high in summer (r = 0.9). Does ice cream cause drowning?",
+          "options": ["Yes, ice cream increases drowning risk", "No — correlation does not imply causation; a third factor (hot weather) explains both", "Yes — a correlation above 0.8 always implies causation", "No — r must equal 1 before causation applies"],
+          "correct_answer": "No — correlation does not imply causation; a third factor (hot weather) explains both",
+          "explanation": "Correlation shows association, not cause. Here hot weather drives both variables — a classic example of a confounding variable."
+        },
+        {
+          "id": "correlation_006",
+          "difficulty": "medium",
+          "question": "Which correlation shows a stronger linear relationship: r = 0.3 or r = −0.8?",
+          "options": ["r = 0.3, because it is positive", "r = −0.8, because its absolute value is larger", "They are equally strong", "Cannot compare positive and negative correlations"],
+          "correct_answer": "r = −0.8, because its absolute value is larger",
+          "explanation": "Strength is measured by |r|. |−0.8| = 0.8 > 0.3, so r = −0.8 indicates a stronger (though negative) relationship."
+        },
+        {
+          "id": "correlation_007",
+          "difficulty": "medium",
+          "question": "A market scatter plot shows points tightly clustered around a downward-sloping line. The correlation r is most likely:",
+          "options": ["Close to +1", "Close to 0", "Close to −1", "Exactly 0.5"],
+          "correct_answer": "Close to −1",
+          "explanation": "Tight clustering around a downward line means a strong negative linear relationship → r close to −1."
+        },
+        {
+          "id": "correlation_008",
+          "difficulty": "hard",
+          "question": "Market data has r = 0.6. What percentage of variance in sales is explained by the price variable?",
+          "options": ["6%", "36%", "60%", "64%"],
+          "correct_answer": "36%",
+          "explanation": "r² = 0.6² = 0.36 = 36%. The coefficient of determination r² tells the proportion of variance explained."
+        },
+        {
+          "id": "correlation_009",
+          "difficulty": "hard",
+          "question": "A researcher adds a confounding variable to the analysis and finds the r between advertising and sales drops from 0.8 to 0.2. What most likely happened?",
+          "options": ["The data was wrong", "The confounding variable was driving most of the relationship", "Correlation cannot decrease when variables are added", "The sample size was too small"],
+          "correct_answer": "The confounding variable was driving most of the relationship",
+          "explanation": "When controlling for a confounder reduces r, it shows the confounder was responsible for much of the apparent correlation."
+        },
+        {
+          "id": "correlation_010",
+          "difficulty": "hard",
+          "question": "A market researcher notes that the relationship between study hours and exam scores looks curved (not linear) on a scatter plot. Why might Pearson r be misleading here?",
+          "options": ["Pearson r requires at least 100 data points", "Pearson r only measures linear relationships; a curved pattern can show r ≈ 0 even with a strong association", "Pearson r cannot handle exam score data", "Curved relationships always have r = −1"],
+          "correct_answer": "Pearson r only measures linear relationships; a curved pattern can show r ≈ 0 even with a strong association",
+          "explanation": "Pearson r detects linear association only. A strong non-linear (curved) relationship can yield r near 0, hiding the true pattern."
+        }
+      ]
+    },
+    "binomial": {
+      "building": "city-hall",
+      "concept": "Binomial Distribution",
+      "questions": [
+        {
+          "id": "binomial_001",
+          "difficulty": "easy",
+          "question": "City Hall runs elections where each voter votes YES or NO. Which condition makes this a binomial experiment?",
+          "options": ["Each trial has more than 2 outcomes", "Each trial has exactly 2 outcomes (success/failure), trials are independent, and p is fixed", "The outcomes must be equally likely", "There must be at least 100 trials"],
+          "correct_answer": "Each trial has exactly 2 outcomes (success/failure), trials are independent, and p is fixed",
+          "explanation": "A binomial experiment requires: exactly 2 outcomes per trial, fixed number of trials (n), constant probability (p), and independent trials."
+        },
+        {
+          "id": "binomial_002",
+          "difficulty": "easy",
+          "question": "City Hall surveys n = 10 residents; each has p = 0.5 chance of supporting the new park. What is the expected (mean) number of supporters?",
+          "options": ["2.5", "5", "7.5", "10"],
+          "correct_answer": "5",
+          "explanation": "Mean of binomial = n × p = 10 × 0.5 = 5 expected supporters."
+        },
+        {
+          "id": "binomial_003",
+          "difficulty": "easy",
+          "question": "In a binomial experiment, 'success' means:",
+          "options": ["Always a positive outcome in real life", "The specific outcome we are counting", "Getting a value above the mean", "Winning a competition"],
+          "correct_answer": "The specific outcome we are counting",
+          "explanation": "'Success' is just a label for the outcome we're tracking — it can be any defined event (e.g., voting YES, a defective product, heads on a coin)."
+        },
+        {
+          "id": "binomial_004",
+          "difficulty": "medium",
+          "question": "City Hall polls n = 5 residents; p = 0.4 that each supports a new bus route. Using B(5, 0.4), what is P(X = 2)?",
+          "options": ["0.230", "0.346", "0.400", "0.160"],
+          "correct_answer": "0.346",
+          "explanation": "P(X=2) = C(5,2) × 0.4² × 0.6³ = 10 × 0.16 × 0.216 = 0.3456 ≈ 0.346."
+        },
+        {
+          "id": "binomial_005",
+          "difficulty": "medium",
+          "question": "For a binomial distribution B(n, p), what is the standard deviation?",
+          "options": ["np", "√(np)", "√(np(1−p))", "np(1−p)"],
+          "correct_answer": "√(np(1−p))",
+          "explanation": "Variance = np(1−p). Standard deviation = √(np(1−p))."
+        },
+        {
+          "id": "binomial_006",
+          "difficulty": "medium",
+          "question": "Which scenario is NOT a binomial experiment?",
+          "options": ["Flipping a coin 20 times and counting heads", "Rolling a die 10 times and counting sixes", "Measuring the heights of 50 residents", "Testing 100 voters: support vs. oppose a policy"],
+          "correct_answer": "Measuring the heights of 50 residents",
+          "explanation": "Height is a continuous variable with many outcomes — not binary (success/failure). The other scenarios all have exactly two outcomes per trial."
+        },
+        {
+          "id": "binomial_007",
+          "difficulty": "medium",
+          "question": "City Hall finds that 10% of building permits have errors. Out of 20 permits, what is the expected number with errors?",
+          "options": ["0.1", "1", "2", "10"],
+          "correct_answer": "2",
+          "explanation": "E(X) = np = 20 × 0.10 = 2 permits with errors expected."
+        },
+        {
+          "id": "binomial_008",
+          "difficulty": "hard",
+          "question": "City Hall finds that 30% of residents recycle. In a sample of 4 residents, what is P(at least 1 recycles)?",
+          "options": ["0.240", "0.300", "0.760", "0.999"],
+          "correct_answer": "0.760",
+          "explanation": "P(X≥1) = 1 − P(X=0) = 1 − 0.7⁴ = 1 − 0.2401 = 0.7599 ≈ 0.760."
+        },
+        {
+          "id": "binomial_009",
+          "difficulty": "hard",
+          "question": "In B(3, 0.6), what is P(X = 3) — all 3 residents support the motion?",
+          "options": ["0.064", "0.216", "0.288", "0.6"],
+          "correct_answer": "0.216",
+          "explanation": "P(X=3) = C(3,3) × 0.6³ × 0.4⁰ = 1 × 0.216 × 1 = 0.216."
+        },
+        {
+          "id": "binomial_010",
+          "difficulty": "hard",
+          "question": "When can a binomial distribution be approximated by a normal distribution?",
+          "options": ["Only when p = 0.5", "When n is very small", "When np ≥ 10 and n(1−p) ≥ 10", "When n = 30 exactly"],
+          "correct_answer": "When np ≥ 10 and n(1−p) ≥ 10",
+          "explanation": "The normal approximation to the binomial is valid when both np ≥ 10 and nq ≥ 10 (sufficient expected successes and failures)."
+        }
+      ]
+    },
+    "hypothesis-testing": {
+      "building": "research",
+      "concept": "Hypothesis Testing",
+      "questions": [
+        {
+          "id": "hyp_001",
+          "difficulty": "easy",
+          "question": "The Research Institute tests whether a new study method improves scores. What is the null hypothesis (H₀) in this case?",
+          "options": ["The new method improves scores", "The new method worsens scores", "The new method has no effect on scores", "The new method is the best method"],
+          "correct_answer": "The new method has no effect on scores",
+          "explanation": "The null hypothesis (H₀) always states no effect or no difference. We test whether the data gives enough evidence to reject it."
+        },
+        {
+          "id": "hyp_002",
+          "difficulty": "easy",
+          "question": "The Research Institute gets a p-value of 0.03. What does this mean?",
+          "options": ["There is a 3% chance the null hypothesis is true", "If H₀ is true, there is a 3% chance of observing results this extreme or more", "The experiment has a 3% error rate", "3% of the data is incorrect"],
+          "correct_answer": "If H₀ is true, there is a 3% chance of observing results this extreme or more",
+          "explanation": "The p-value is the probability of getting results at least as extreme as observed, assuming H₀ is true. It is NOT the probability that H₀ is true."
+        },
+        {
+          "id": "hyp_003",
+          "difficulty": "easy",
+          "question": "Researchers set significance level α = 0.05. This means they are willing to accept a ___% chance of a false positive.",
+          "options": ["0.05%", "5%", "50%", "95%"],
+          "correct_answer": "5%",
+          "explanation": "α = 0.05 means the researchers accept a 5% chance of incorrectly rejecting a true null hypothesis (Type I error)."
+        },
+        {
+          "id": "hyp_004",
+          "difficulty": "medium",
+          "question": "The Research Institute obtains p = 0.03 and set α = 0.05. What should they conclude?",
+          "options": ["Fail to reject H₀ (not significant)", "Reject H₀ (statistically significant)", "Accept H₀ as definitely true", "Run the experiment again"],
+          "correct_answer": "Reject H₀ (statistically significant)",
+          "explanation": "When p < α (0.03 < 0.05), the result is statistically significant and we reject the null hypothesis."
+        },
+        {
+          "id": "hyp_005",
+          "difficulty": "medium",
+          "question": "A researcher rejects H₀ when it is actually true. This is called:",
+          "options": ["Type II error", "Type I error (false positive)", "A correct decision", "Statistical power"],
+          "correct_answer": "Type I error (false positive)",
+          "explanation": "Type I error = rejecting a true H₀. Its probability equals α. Also called a false positive."
+        },
+        {
+          "id": "hyp_006",
+          "difficulty": "medium",
+          "question": "Researchers fail to reject H₀ even though the new study method actually works. This is called:",
+          "options": ["Type I error", "Type II error (false negative)", "A significant result", "Confirmation bias"],
+          "correct_answer": "Type II error (false negative)",
+          "explanation": "Type II error = failing to reject a false H₀. Its probability is called β. Also called a false negative."
+        },
+        {
+          "id": "hyp_007",
+          "difficulty": "medium",
+          "question": "The Research Institute tests whether a drug changes blood pressure (could increase or decrease). What type of test is appropriate?",
+          "options": ["One-tailed test", "Two-tailed test", "No test needed", "Chi-squared test only"],
+          "correct_answer": "Two-tailed test",
+          "explanation": "A two-tailed test checks for any difference (increase or decrease). Use it when the direction of the effect is not specified in advance."
+        },
+        {
+          "id": "hyp_008",
+          "difficulty": "hard",
+          "question": "A sample of 36 students has mean score 72, SD = 12. H₀: μ = 75. Calculate the z test statistic.",
+          "options": ["-1.5", "-1.0", "1.0", "1.5"],
+          "correct_answer": "-1.5",
+          "explanation": "z = (x̄ − μ₀) / (σ/√n) = (72 − 75) / (12/√36) = −3 / 2 = −1.5."
+        },
+        {
+          "id": "hyp_009",
+          "difficulty": "hard",
+          "question": "A research lab runs 20 independent tests at α = 0.05. Even if all null hypotheses are true, how many false positives are expected?",
+          "options": ["0", "1", "5", "20"],
+          "correct_answer": "1",
+          "explanation": "Expected false positives = 20 × 0.05 = 1. This is the multiple testing problem — running many tests inflates false discovery rates."
+        },
+        {
+          "id": "hyp_010",
+          "difficulty": "hard",
+          "question": "A study has statistical power of 0.80. What does this mean?",
+          "options": ["There is an 80% chance H₀ is true", "There is an 80% chance of correctly rejecting a false H₀", "α = 0.80", "The effect size is 0.80"],
+          "correct_answer": "There is an 80% chance of correctly rejecting a false H₀",
+          "explanation": "Power = 1 − β = probability of correctly detecting a real effect. Power of 0.80 is generally considered acceptable in research design."
+        }
+      ]
+    },
+    "sampling": {
+      "building": "city-survey-center",
+      "concept": "Sampling",
+      "questions": [
+        {
+          "id": "sampling_001",
+          "difficulty": "easy",
+          "question": "The City Survey Center wants to know what all 10,000 residents think. They ask 500 people. What are those 500 people called?",
+          "options": ["Population", "Sample", "Parameter", "Census"],
+          "correct_answer": "Sample",
+          "explanation": "A sample is a subset of the population selected for study. The full group of 10,000 is the population."
+        },
+        {
+          "id": "sampling_002",
+          "difficulty": "easy",
+          "question": "Which sampling method gives every member of the population an equal chance of being selected?",
+          "options": ["Convenience sampling", "Random sampling", "Voluntary sampling", "Cluster sampling"],
+          "correct_answer": "Random sampling",
+          "explanation": "Random (or simple random) sampling ensures each member has an equal probability of selection, reducing bias."
+        },
+        {
+          "id": "sampling_003",
+          "difficulty": "easy",
+          "question": "The City Survey Center only surveys people in one specific neighborhood. This is an example of:",
+          "options": ["Random sampling", "Stratified sampling", "Biased sampling", "Cluster sampling"],
+          "correct_answer": "Biased sampling",
+          "explanation": "Surveying only one neighborhood excludes other residents, making the sample unrepresentative of the whole city."
+        },
+        {
+          "id": "sampling_004",
+          "difficulty": "medium",
+          "question": "A city has 60% adults and 40% youth. A stratified sample of 100 should have how many adults?",
+          "options": ["40", "50", "60", "70"],
+          "correct_answer": "60",
+          "explanation": "Stratified sampling preserves population proportions: 60% of 100 = 60 adults."
+        },
+        {
+          "id": "sampling_005",
+          "difficulty": "medium",
+          "question": "A survey finds that 42% of 400 sampled residents prefer the new park design. What is 42% called in this context?",
+          "options": ["Parameter", "Population", "Statistic", "Census"],
+          "correct_answer": "Statistic",
+          "explanation": "A statistic describes the sample. A parameter describes the full population. Since 42% comes from 400 people (sample), it's a statistic."
+        },
+        {
+          "id": "sampling_006",
+          "difficulty": "medium",
+          "question": "As sample size increases, what generally happens to the accuracy of estimates?",
+          "options": ["Decreases", "Stays the same", "Increases", "Becomes unpredictable"],
+          "correct_answer": "Increases",
+          "explanation": "Larger samples reduce sampling error and produce estimates closer to the true population parameter."
+        },
+        {
+          "id": "sampling_007",
+          "difficulty": "medium",
+          "question": "Surveyors number all 500 residents 1–500, then select every 10th person. This is called:",
+          "options": ["Random sampling", "Systematic sampling", "Cluster sampling", "Convenience sampling"],
+          "correct_answer": "Systematic sampling",
+          "explanation": "Selecting every kth element from an ordered list is systematic sampling."
+        },
+        {
+          "id": "sampling_008",
+          "difficulty": "hard",
+          "question": "A sample of 100 gives a mean of 75 with standard error of 5. What is the 95% confidence interval (using z=2)?",
+          "options": ["[65, 85]", "[70, 80]", "[73, 77]", "[72.5, 77.5]"],
+          "correct_answer": "[65, 85]",
+          "explanation": "CI = mean ± z×SE = 75 ± 2×5 = 75 ± 10 = [65, 85]."
+        },
+        {
+          "id": "sampling_009",
+          "difficulty": "hard",
+          "question": "A survey of 1,000 finds 55% prefer option A. What is the margin of error at 95% confidence (SE = √(p(1-p)/n))?",
+          "options": ["≈ 1.6%", "≈ 3.1%", "≈ 5.0%", "≈ 6.2%"],
+          "correct_answer": "≈ 3.1%",
+          "explanation": "SE = √(0.55×0.45/1000) ≈ 0.0157. Margin = 1.96×0.0157 ≈ 0.031 = 3.1%."
+        },
+        {
+          "id": "sampling_010",
+          "difficulty": "hard",
+          "question": "A city survey has selection bias because only online respondents were included. The city has 30% non-internet users. This will most likely:",
+          "options": ["Have no effect on results", "Underrepresent non-internet users", "Overrepresent non-internet users", "Make the sample larger"],
+          "correct_answer": "Underrepresent non-internet users",
+          "explanation": "Online surveys systematically exclude non-internet users, making the sample biased toward connected residents."
+        }
+      ]
+    },
+    "confidence-intervals": {
+      "building": "news",
+      "concept": "Confidence Intervals",
+      "questions": [
+        {
+          "id": "ci_001",
+          "difficulty": "easy",
+          "question": "The WaffleStack News Station reports a 95% confidence interval for average daily readership. What is a confidence interval?",
+          "options": ["The exact true population value", "A range of plausible values for a population parameter", "The margin of error only", "The sample size needed"],
+          "correct_answer": "A range of plausible values for a population parameter",
+          "explanation": "A confidence interval gives a range of values that is likely to contain the true population parameter, based on sample data."
+        },
+        {
+          "id": "ci_002",
+          "difficulty": "easy",
+          "question": "A news poll reports: '95% CI = [42%, 48%] for voter support.' What does '95%' mean?",
+          "options": ["95% of voters support the candidate", "If we repeated this process many times, 95% of such intervals would contain the true proportion", "We are 95% certain this specific interval is correct", "The poll has a 95% response rate"],
+          "correct_answer": "If we repeated this process many times, 95% of such intervals would contain the true proportion",
+          "explanation": "95% confidence means the procedure produces intervals that capture the true parameter 95% of the time — not that this specific interval has 95% probability of being correct."
+        },
+        {
+          "id": "ci_003",
+          "difficulty": "easy",
+          "question": "A news station increases from 90% to 99% confidence level (same data). What happens to the interval?",
+          "options": ["It gets narrower", "It gets wider", "It stays the same", "It shifts left"],
+          "correct_answer": "It gets wider",
+          "explanation": "Higher confidence requires capturing more possible values → a wider interval. There is a direct trade-off between confidence level and precision."
+        },
+        {
+          "id": "ci_004",
+          "difficulty": "medium",
+          "question": "A news survey finds mean readership = 500, SE = 25. Using z = 2 for 95% confidence, what is the 95% CI?",
+          "options": ["[450, 550]", "[475, 525]", "[490, 510]", "[400, 600]"],
+          "correct_answer": "[450, 550]",
+          "explanation": "CI = mean ± z × SE = 500 ± 2 × 25 = 500 ± 50 = [450, 550]."
+        },
+        {
+          "id": "ci_005",
+          "difficulty": "medium",
+          "question": "The news station doubles its sample size (same population). What happens to the confidence interval width?",
+          "options": ["Doubles", "Stays the same", "Halves", "Decreases by factor √2"],
+          "correct_answer": "Decreases by factor √2",
+          "explanation": "SE = σ/√n. Doubling n multiplies √n by √2, so SE decreases by √2 → CI width decreases by factor √2 ≈ 1.41."
+        },
+        {
+          "id": "ci_006",
+          "difficulty": "medium",
+          "question": "A 95% CI for a new policy effect is [−0.5, 3.2] points. Can the station conclude the policy significantly increased scores?",
+          "options": ["Yes — the upper bound is positive", "No — the interval includes 0, so no effect is plausible", "Yes — most of the interval is positive", "No — the interval is too wide"],
+          "correct_answer": "No — the interval includes 0, so no effect is plausible",
+          "explanation": "When a CI includes 0 (no effect), we cannot conclude significance at that confidence level — 0 is a plausible value for the true effect."
+        },
+        {
+          "id": "ci_007",
+          "difficulty": "medium",
+          "question": "A news poll reports ±3% margin of error. What is the margin of error part of the confidence interval formula?",
+          "options": ["The sample mean", "z × SE (the half-width of the CI)", "The sample size", "The population size"],
+          "correct_answer": "z × SE (the half-width of the CI)",
+          "explanation": "Margin of error = z × SE. It is the half-width added and subtracted from the sample statistic to form the CI."
+        },
+        {
+          "id": "ci_008",
+          "difficulty": "hard",
+          "question": "A survey of 400 residents finds 52% support a policy. Calculate the 95% CI for the true proportion (z = 1.96).",
+          "options": ["[47.1%, 56.9%]", "[49.0%, 55.0%]", "[50.0%, 54.0%]", "[45.0%, 59.0%]"],
+          "correct_answer": "[47.1%, 56.9%]",
+          "explanation": "SE = √(0.52×0.48/400) ≈ 0.025. ME = 1.96 × 0.025 ≈ 0.049. CI = [0.52−0.049, 0.52+0.049] = [47.1%, 56.9%]."
+        },
+        {
+          "id": "ci_009",
+          "difficulty": "hard",
+          "question": "A 99% CI is [48, 62] and a 95% CI from the same data is [50, 60]. Which is wider and why?",
+          "options": ["The 95% CI is wider — higher confidence requires more precision", "The 99% CI is wider — higher confidence requires a wider range to be more sure", "They are the same width", "Width depends only on sample size"],
+          "correct_answer": "The 99% CI is wider — higher confidence requires a wider range to be more sure",
+          "explanation": "99% CI uses z = 2.576 vs z = 1.96 for 95%. A higher confidence level always produces a wider interval."
+        },
+        {
+          "id": "ci_010",
+          "difficulty": "hard",
+          "question": "A 95% CI test and a two-sided hypothesis test at α = 0.05 are run on the same data. If the CI excludes the null value, what can you conclude about the p-value?",
+          "options": ["p > 0.05 (fail to reject H₀)", "p < 0.05 (reject H₀)", "p = 0.05 exactly", "Nothing — CI and hypothesis tests are unrelated"],
+          "correct_answer": "p < 0.05 (reject H₀)",
+          "explanation": "There is an exact duality: a 95% CI excludes the null value if and only if a two-sided test at α = 0.05 rejects H₀ (p < 0.05)."
+        }
+      ]
+    }
+  }
+}

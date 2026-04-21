@@ -4,9 +4,10 @@
  * Features: concept explanation, live distribution chart, parameter sliders, quiz.
  */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import DistributionChart, { DistributionType, DistributionParams } from './DistributionChart'
 import { playCorrectTone, playWrongTone } from './SoundManager'
+import { getQuestionsForBuilding } from '../hooks/useQuiz'
 
 // ─── Responsive helper ────────────────────────────────────────────────────────
 
@@ -495,6 +496,12 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   // Distribution params state
   const [params, setParams] = useState<DistributionParams>(content.defaultParams)
 
+  // Load questions from quiz-bank; fall back to CHALLENGES hardcoded quiz
+  const questions = useMemo(() => {
+    const bankQuestions = getQuestionsForBuilding(building.id)
+    return bankQuestions.length > 0 ? bankQuestions : content.quiz
+  }, [building.id, content.quiz])
+
   // Quiz state
   const [quizIndex, setQuizIndex] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
@@ -502,7 +509,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   const [quizDone, setQuizDone] = useState(false)
   const [hintShown, setHintShown] = useState(false)
 
-  const currentQ = content.quiz[quizIndex]
+  const currentQ = questions[quizIndex]
 
   const handleSlider = useCallback((key: keyof DistributionParams, val: number) => {
     setParams(prev => ({ ...prev, [key]: val }))
@@ -520,9 +527,12 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   }
 
   const nextQuestion = () => {
-    if (quizIndex + 1 >= content.quiz.length) {
+    if (quizIndex + 1 >= questions.length) {
       setQuizDone(true)
-      onComplete?.(building.id)
+      const finalScore = score + (selected === currentQ.correct ? 1 : 0)
+      if (finalScore / questions.length >= 0.7) {
+        onComplete?.(building.id)
+      }
     } else {
       setQuizIndex(i => i + 1)
       setSelected(null)
@@ -716,11 +726,11 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   fontSize: 72, marginBottom: 8,
                   filter: `drop-shadow(0 0 20px ${color}66)`,
                 }}>
-                  {score === content.quiz.length ? '🏆' : score >= content.quiz.length * 0.75 ? '⭐' : score >= content.quiz.length * 0.5 ? '👍' : '📖'}
+                  {score === questions.length ? '🏆' : score >= questions.length * 0.75 ? '⭐' : score >= questions.length * 0.5 ? '👍' : '📖'}
                 </div>
 
                 <div style={{ fontSize: 24, fontWeight: 900, color, marginBottom: 4 }}>
-                  {score === content.quiz.length ? 'Perfect Score!' : score >= content.quiz.length * 0.75 ? 'Great Job!' : score >= content.quiz.length * 0.5 ? 'Good Effort!' : 'Keep Practicing!'}
+                  {score === questions.length ? 'Perfect Score!' : score >= questions.length * 0.75 ? 'Great Job!' : score >= questions.length * 0.5 ? 'Good Effort!' : 'Keep Practicing!'}
                 </div>
 
                 {/* Score fraction */}
@@ -728,30 +738,45 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   fontSize: 48, fontWeight: 900, color: '#fff',
                   marginBottom: 4, letterSpacing: -2,
                 }}>
-                  {score}<span style={{ fontSize: 28, color: 'rgba(255,255,255,0.35)', fontWeight: 400 }}>/{content.quiz.length}</span>
+                  {score}<span style={{ fontSize: 28, color: 'rgba(255,255,255,0.35)', fontWeight: 400 }}>/{questions.length}</span>
                 </div>
                 <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 24 }}>
-                  {Math.round((score / content.quiz.length) * 100)}% correct
+                  {Math.round((score / questions.length) * 100)}% correct
                 </div>
 
                 {/* Score bar */}
                 <div style={{ width: '100%', maxWidth: 240, height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3, marginBottom: 28, overflow: 'hidden' }}>
                   <div style={{
                     height: '100%', borderRadius: 3,
-                    background: score === content.quiz.length ? '#4ECDC4' : score >= content.quiz.length * 0.75 ? '#FFD700' : score >= content.quiz.length * 0.5 ? '#FF9F43' : '#FF6B6B',
-                    width: `${(score / content.quiz.length) * 100}%`,
+                    background: score === questions.length ? '#4ECDC4' : score >= questions.length * 0.75 ? '#FFD700' : score >= questions.length * 0.5 ? '#FF9F43' : '#FF6B6B',
+                    width: `${(score / questions.length) * 100}%`,
                     transition: 'width 0.6s ease',
                   }} />
                 </div>
 
-                {/* XP earned */}
-                {score === content.quiz.length && (
+                {/* XP earned — only on perfect score */}
+                {score === questions.length && (
                   <div style={{
                     background: 'rgba(255,215,0,0.12)', border: '1px solid rgba(255,215,0,0.3)',
                     borderRadius: 12, padding: '8px 20px', marginBottom: 20,
                     fontSize: 14, color: '#FFD700', fontWeight: 700,
                   }}>
                     ⭐ +50 XP Earned!
+                  </div>
+                )}
+
+                {/* Try-again prompt — shown when score < 70% (building reward not granted) */}
+                {score / questions.length < 0.7 && (
+                  <div style={{
+                    background: 'rgba(255,107,107,0.12)', border: '1px solid rgba(255,107,107,0.35)',
+                    borderRadius: 12, padding: '12px 20px', marginBottom: 20,
+                    fontSize: 13, color: '#FF6B6B', fontWeight: 600,
+                    textAlign: 'center', lineHeight: 1.5,
+                  }}>
+                    נדרשים 70% לפחות כדי לקבל את הבניין.<br />
+                    <span style={{ fontWeight: 400, color: 'rgba(255,107,107,0.8)' }}>
+                      Try again to earn your building reward!
+                    </span>
                   </div>
                 )}
 
@@ -791,12 +816,12 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     borderRadius: 20, padding: '4px 12px', fontSize: 12,
                     color: 'rgba(255,255,255,0.45)', fontFamily: 'monospace',
                   }}>
-                    Q {quizIndex + 1} / {content.quiz.length}
+                    Q {quizIndex + 1} / {questions.length}
                   </span>
                 </div>
                 {/* Progress */}
                 <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
-                  {content.quiz.map((_, i) => (
+                  {questions.map((_, i) => (
                     <div key={i} style={{
                       height: 3, flex: 1, borderRadius: 2,
                       background: i < quizIndex ? color : i === quizIndex ? `${color}88` : 'rgba(255,255,255,0.12)',
@@ -907,7 +932,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                       background: color, border: 'none', borderRadius: 10,
                       color: '#000', fontWeight: 700, fontSize: 14, cursor: 'pointer',
                     }}>
-                      {quizIndex + 1 >= content.quiz.length ? '🏆 סיים' : 'שאלה הבאה →'}
+                      {quizIndex + 1 >= questions.length ? '🏆 סיים' : 'שאלה הבאה →'}
                     </button>
                   </div>
                 )}

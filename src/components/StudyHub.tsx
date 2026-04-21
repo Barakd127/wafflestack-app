@@ -1,11 +1,21 @@
 import { Home, Map, BookOpen, Trophy, Settings, Bell, User } from 'lucide-react'
+import { LessonTopicId } from './LessonPage'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
   darkMode: boolean
+  onOpenLesson: (id: LessonTopicId) => void
 }
 
-const StudyHub = ({ onViewChange, darkMode: _darkMode }: StudyHubProps) => {
+const TOPIC_CARDS: { id: LessonTopicId; hebrewTitle: string; emoji: string; color: string; building: string }[] = [
+  { id: 'mean', hebrewTitle: 'ממוצע', emoji: '🏪', color: 'from-amber-500 to-yellow-600', building: 'שוק העיר' },
+  { id: 'median', hebrewTitle: 'חציון', emoji: '📚', color: 'from-teal-500 to-cyan-600', building: 'ספריית העיר' },
+  { id: 'standard-deviation', hebrewTitle: 'סטיית תקן', emoji: '🌤️', color: 'from-blue-500 to-indigo-600', building: 'מגדל מזג האוויר' },
+  { id: 'probability', hebrewTitle: 'הסתברות', emoji: '🎰', color: 'from-purple-500 to-pink-600', building: 'קזינו ואולם אירועים' },
+  { id: 'sampling', hebrewTitle: 'דגימה', emoji: '📊', color: 'from-green-500 to-emerald-600', building: 'מרכז הסקרים' },
+]
+
+const StudyHub = ({ onViewChange, darkMode: _darkMode, onOpenLesson }: StudyHubProps) => {
   const sidebarItems = [
     { id: 'home', icon: Home, label: 'דף הבית', color: 'text-cyan-400' },
     { id: 'study', icon: BookOpen, label: 'מפת לימוד', onClick: () => onViewChange('mindmap') },
@@ -178,6 +188,27 @@ const StudyHub = ({ onViewChange, darkMode: _darkMode }: StudyHubProps) => {
                   <div className="font-bold text-lg">מפת מושגים</div>
                   <div className="text-sm opacity-80 mt-1">חקור את כל הנושאים</div>
                 </div>
+              </div>
+            </div>
+
+            {/* Learning Area — 5 lesson topic cards */}
+            <div className="col-span-12 backdrop-blur-2xl bg-white/90 dark:bg-slate-800/90 border border-white/50 dark:border-white/10 rounded-3xl p-6 shadow-xl">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-1">אזור למידה</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">לחצו על נושא כדי לפתוח את שיעור הלמידה</p>
+              <div className="grid grid-cols-5 gap-3">
+                {TOPIC_CARDS.map(topic => (
+                  <button
+                    key={topic.id}
+                    onClick={() => onOpenLesson(topic.id)}
+                    className={`relative flex flex-col items-center gap-3 p-4 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer overflow-hidden bg-gradient-to-br ${topic.color}`}
+                  >
+                    <span className="text-3xl">{topic.emoji}</span>
+                    <div className="text-center">
+                      <div className="font-bold text-white text-sm">{topic.hebrewTitle}</div>
+                      <div className="text-white/70 text-xs mt-0.5">{topic.building}</div>
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
           </div>

@@ -16,12 +16,15 @@ export function PaintableAsset({ url, color, ...props }: PaintableAssetProps) {
 
   useLayoutEffect(() => {
     // 2. Traverse and Paint
+    const DEBUG_ASSET = false
     clonedScene.traverse((node) => {
       if ((node as THREE.Mesh).isMesh) {
         const mesh = node as THREE.Mesh;
-        
-        // DEBUG: Uncomment this to see internal names in Console F12
-        console.log("Found mesh:", mesh.name, "Material:", (mesh.material as THREE.Material).name);
+
+        // DEBUG: Set DEBUG_ASSET = true to see internal names in Console F12
+        if (DEBUG_ASSET) {
+          console.log("Found mesh:", mesh.name, "Material:", (mesh.material as THREE.Material).name);
+        }
 
         // 3. CRITICAL: Clone material to detach from global cache
         if (Array.isArray(mesh.material)) {

@@ -22,7 +22,7 @@ const ColorableModel = ({ modelPath, position, color, scale = 1, onClick }: Colo
     const selectedColor = new THREE.Color(color)
     
     // Debug flag - shows Kenney's internal structure
-    const DEBUG_MATERIALS = true
+    const DEBUG_MATERIALS = false
     
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {

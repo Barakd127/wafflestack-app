@@ -179,6 +179,28 @@ export function playCorrectTone(): void {
   }
 }
 
+export function playBuildingPlacedTone(): void {
+  try {
+    const ctx = new AudioContext()
+    // Short "pop": A5 sine burst with fast gain ramp
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'sine'
+    osc.frequency.value = 880
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    const t = ctx.currentTime
+    gain.gain.setValueAtTime(0, t)
+    gain.gain.linearRampToValueAtTime(0.22, t + 0.01)
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18)
+    osc.start(t)
+    osc.stop(t + 0.2)
+    setTimeout(() => ctx.close().catch(() => undefined), 500)
+  } catch {
+    // ignore
+  }
+}
+
 export function playWrongTone(): void {
   try {
     const ctx = new AudioContext()

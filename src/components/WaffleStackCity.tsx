@@ -4,7 +4,7 @@ import { Suspense, useState, useRef, useCallback, useEffect } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo } from './StatChallenge'
 import ScoreBoard from './ScoreBoard'
-import { useCitySound } from './SoundManager'
+import { useCitySound, playBuildingPlacedTone } from './SoundManager'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -16,6 +16,10 @@ function loadXP(): number {
 }
 function loadQuizSound(): boolean {
   return localStorage.getItem('wafflestack-quiz-sound') === 'true'
+}
+function loadColorVariations(): Record<string, 'A' | 'B' | 'C'> {
+  try { return JSON.parse(localStorage.getItem('wafflestack-color-variations') || '{}') }
+  catch { return {} }
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -44,6 +48,25 @@ const BUILDINGS: BuildingDef[] = [
   { id: 'news',      model: 'building-type-j', label: '📰 תחנת חדשות', statsConcept: 'רווח סמך (CI)',       position: [3,  0, 3],  color: '#FFB347' },
 ]
 
+// ─── Kenney color variation palettes ─────────────────────────────────────────
+const COLOR_VARIATIONS: Record<'A' | 'B' | 'C', Record<string, string>> = {
+  A: { // Original warm tones (Kenney Variation A — orange/red/teal)
+    power: '#FFD700', housing: '#4ECDC4', traffic: '#FF6B6B', hospital: '#95E1D3',
+    school: '#AA96DA', bank: '#FCBAD3', market: '#A8E6CF', 'city-hall': '#F38181',
+    research: '#C3A6FF', news: '#FFB347',
+  },
+  B: { // Cool tones (Kenney Variation B — blue/purple)
+    power: '#5B8CFF', housing: '#7B5EA7', traffic: '#4A90D9', hospital: '#6C9DC9',
+    school: '#8B77DB', bank: '#A78BFA', market: '#60A5FA', 'city-hall': '#818CF8',
+    research: '#A855F7', news: '#6366F1',
+  },
+  C: { // Neutral tones (Kenney Variation C — gray/white)
+    power: '#D4D4D4', housing: '#E8E8E8', traffic: '#B8B8B8', hospital: '#F0F0F0',
+    school: '#D0D0D0', bank: '#E8DCDC', market: '#DCDCDC', 'city-hall': '#C8C8C8',
+    research: '#DEDEDE', news: '#E8E4DC',
+  },
+}
+
 const ROAD_MODELS = [
   { model: 'path-long',  pos: [-6, 0, -9] as [number,number,number], rot: 0 },
   { model: 'path-long',  pos: [0,  0, -9] as [number,number,number], rot: 0 },
@@ -55,6 +78,19 @@ const ROAD_MODELS = [
   { model: 'tree-small', pos: [-6, 0, 3]  as [number,number,number], rot: 0 },
   { model: 'tree-small', pos: [6, 0, 3]   as [number,number,number], rot: 0 },
 ]
+
+const GLOSSARY_DATA: Record<string, { conceptEn: string; formula: string }> = {
+  power:      { conceptEn: 'Mean',                  formula: 'μ = Σxᵢ / n' },
+  housing:    { conceptEn: 'Median',                formula: 'Sort data → middle value' },
+  traffic:    { conceptEn: 'Standard Deviation',    formula: 'σ = √[Σ(xᵢ-μ)²/n]' },
+  hospital:   { conceptEn: 'Normal Distribution',   formula: 'f(x) = (1/σ√2π)·e^(-(x-μ)²/2σ²)' },
+  school:     { conceptEn: 'Sampling',              formula: 'SE = σ / √n' },
+  bank:       { conceptEn: 'Regression',            formula: 'y = β₀ + β₁x + ε' },
+  market:     { conceptEn: 'Correlation',           formula: 'r = Σ[(xᵢ-x̄)(yᵢ-ȳ)] / (n·σₓ·σᵧ)' },
+  'city-hall':{ conceptEn: 'Binomial Distribution', formula: 'P(X=k) = C(n,k)·pᵏ·(1-p)^(n-k)' },
+  research:   { conceptEn: 'Hypothesis Testing',    formula: 'z = (x̄-μ₀) / (σ/√n)' },
+  news:       { conceptEn: 'Confidence Interval',   formula: 'CI = x̄ ± z·(σ/√n)' },
+}
 
 const CONCEPT_PREVIEW: Record<string, string> = {
   'power':     'The average (mean) is the sum of all values divided by the count. It represents the "center" of your data.',
@@ -113,6 +149,14 @@ const ANIM_STYLE = `
   0%,100% { box-shadow: 0 0 0 0 rgba(78,205,196,0); }
   50%     { box-shadow: 0 0 16px 4px rgba(78,205,196,0.6); }
 }
+.building-thumb {
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.55));
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+.building-thumb:hover {
+  transform: scale(1.06);
+  filter: drop-shadow(0 4px 14px rgba(0,0,0,0.7));
+}
 @keyframes milestonein {
   0%   { opacity: 0; transform: scale(0.85); }
   60%  { transform: scale(1.04); }
@@ -159,7 +203,7 @@ function CityLoader() {
 }
 
 // ─── Building component ──────────────────────────────────────────────────────
-function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, onHoverStart, onHoverEnd }: {
+function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, onHoverStart, onHoverEnd, colorOverride }: {
   def: BuildingDef
   onClick: (def: BuildingDef) => void
   isSelected: boolean
@@ -168,19 +212,28 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
   isHovered: boolean
   onHoverStart: (id: string) => void
   onHoverEnd: () => void
+  colorOverride?: string
 }) {
   const { scene } = useGLTF(`/models/kenney-suburban/${def.model}.glb`)
   const meshRef = useRef<THREE.Group>(null)
   const clonedScene = scene.clone()
 
+  const activeColor = colorOverride ?? def.color
   const emissiveIntensity = isGlowing ? 0.9 : isMastered ? 0.25 : isSelected ? 0.35 : isHovered ? 0.15 : 0
-  const emissiveColor = isGlowing ? '#ffffff' : isMastered ? (def.color ?? '#4ECDC4') : '#ffffff'
+  const emissiveColor = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : '#ffffff'
 
   clonedScene.traverse((child) => {
     if ((child as THREE.Mesh).isMesh) {
       const mesh = child as THREE.Mesh
       const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
-      if (def.color) mat.color.multiply(new THREE.Color(def.color))
+      if (activeColor) {
+        // Use set() for variation B/C (clean palette swap); multiply for A (preserves model texture detail)
+        if (colorOverride && colorOverride !== def.color) {
+          mat.color.set(activeColor)
+        } else if (def.color) {
+          mat.color.multiply(new THREE.Color(def.color))
+        }
+      }
       if (emissiveIntensity > 0) {
         mat.emissive = new THREE.Color(emissiveColor)
         mat.emissiveIntensity = emissiveIntensity
@@ -208,11 +261,11 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
             padding: '5px 11px', borderRadius: 8, fontSize: 12,
             fontFamily: 'system-ui', textAlign: 'center',
             direction: 'rtl', whiteSpace: 'nowrap',
-            border: `1px solid ${def.color ?? 'rgba(255,255,255,0.3)'}`,
+            border: `1px solid ${activeColor ?? 'rgba(255,255,255,0.3)'}`,
             pointerEvents: 'none',
           }}>
             <div style={{ fontWeight: 600 }}>{def.label}</div>
-            <div style={{ color: def.color ?? '#aaa', fontSize: 11, marginTop: 2 }}>
+            <div style={{ color: activeColor ?? '#aaa', fontSize: 11, marginTop: 2 }}>
               {def.statsConcept} {isMastered ? '✓' : '○'}
             </div>
           </div>
@@ -225,7 +278,7 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
             padding: '8px 14px', borderRadius: 10, fontSize: 13,
             fontFamily: 'system-ui', textAlign: 'center',
             direction: 'rtl', whiteSpace: 'nowrap',
-            border: `2px solid ${def.color ?? '#fff'}`,
+            border: `2px solid ${activeColor ?? '#fff'}`,
           }}>
             <div style={{ fontSize: 16, marginBottom: 4 }}>{def.label}</div>
             <div style={{ opacity: 0.8 }}>📊 {def.statsConcept}</div>
@@ -243,9 +296,52 @@ function Prop({ model, pos, rot }: { model: string, pos: [number,number,number],
   return <primitive object={scene.clone()} position={pos} rotation={[0, rot, 0]} scale={1.4} />
 }
 
-function Ground() {
+// ─── Grid helpers ─────────────────────────────────────────────────────────────
+const GRID_X = [-9, -3, 3, 9]
+const GRID_Z = [-9, -3, 3]
+const OCCUPIED_CELLS = new Set(BUILDINGS.map(b => `${b.position[0]},${b.position[2]}`))
+
+function snapToCell(x: number, z: number): [number, number] {
+  const sx = GRID_X.reduce((a, b) => Math.abs(b - x) < Math.abs(a - x) ? b : a)
+  const sz = GRID_Z.reduce((a, b) => Math.abs(b - z) < Math.abs(a - z) ? b : a)
+  return [sx, sz]
+}
+
+// ─── Ghost building preview ───────────────────────────────────────────────────
+function GhostBuilding({ x, z, valid }: { x: number; z: number; valid: boolean }) {
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]} receiveShadow>
+    <group position={[x, 0, z]}>
+      <mesh position={[0, 2, 0]}>
+        <boxGeometry args={[3.2, 4, 3.2]} />
+        <meshStandardMaterial
+          color={valid ? '#00ff88' : '#ff4444'}
+          transparent
+          opacity={0.32}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[5.5, 5.5]} />
+        <meshStandardMaterial
+          color={valid ? '#00ff88' : '#ff4444'}
+          transparent
+          opacity={0.18}
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
+  )
+}
+
+function Ground({ onMove, onLeave }: { onMove?: (x: number, z: number) => void; onLeave?: () => void }) {
+  return (
+    <mesh
+      rotation={[-Math.PI / 2, 0, 0]}
+      position={[0, -0.05, 0]}
+      receiveShadow
+      onPointerMove={(e) => onMove?.(e.point.x, e.point.z)}
+      onPointerLeave={() => onLeave?.()}
+    >
       <planeGeometry args={[60, 60]} />
       <meshStandardMaterial color="#7ec850" roughness={0.9} />
     </mesh>
@@ -253,7 +349,7 @@ function Ground() {
 }
 
 // ─── Main Scene ───────────────────────────────────────────────────────────────
-export default function WaffleStackCity() {
+export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingDef | null>(null)
   const [challengeBuilding, setChallengeBuilding] = useState<BuildingInfo | null>(null)
   const [mastered, setMastered] = useState<Set<string>>(loadMastered)
@@ -264,12 +360,15 @@ export default function WaffleStackCity() {
   const [sessionStart] = useState(() => Date.now())
   const { playing: soundPlaying, toggle: toggleSound } = useCitySound()
   const [quizSoundEnabled, setQuizSoundEnabled] = useState(loadQuizSound)
+  const [colorVariations, setColorVariations] = useState<Record<string, 'A' | 'B' | 'C'>>(loadColorVariations)
   const [showHelp, setShowHelp] = useState(false)
   const [milestone, setMilestone] = useState<5 | 10 | null>(null)
   const [xpMilestone, setXpMilestone] = useState<number | null>(null)
   const [xpMilestoneFading, setXpMilestoneFading] = useState(false)
   const [showTopicsList, setShowTopicsList] = useState(false)
+  const [showGlossary, setShowGlossary] = useState(false)
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
+  const [ghostCell, setGhostCell] = useState<[number, number] | null>(null)
   const [onboardingStep, setOnboardingStep] = useState<number>(() =>
     localStorage.getItem('wafflestack-onboarded') ? -1 : 0
   )
@@ -333,6 +432,26 @@ export default function WaffleStackCity() {
     return () => window.removeEventListener('keydown', handleKey)
   }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, toggleSound])
 
+  // Handle deep-link hash on mount
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash === '#topics') setShowTopicsList(true)
+    else if (hash === '#score') setShowScoreBoard(true)
+    else if (hash.startsWith('#challenge/')) {
+      const buildingId = hash.slice('#challenge/'.length)
+      const building = BUILDINGS.find(b => b.id === buildingId)
+      if (building) setChallengeBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
+    }
+  }, [])
+
+  // Keep hash in sync with current UI state
+  useEffect(() => {
+    if (challengeBuilding) window.location.hash = `#challenge/${challengeBuilding.id}`
+    else if (showTopicsList) window.location.hash = '#topics'
+    else if (showScoreBoard) window.location.hash = '#score'
+    else window.location.hash = '#city'
+  }, [challengeBuilding, showTopicsList, showScoreBoard])
+
   const openChallenge = useCallback((building: BuildingDef) => {
     setChallengeBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
     setSelectedBuilding(null)
@@ -388,12 +507,13 @@ export default function WaffleStackCity() {
       localStorage.setItem('wafflestack-streak', String(newStreak))
       localStorage.setItem('wafflestack-last-study', todayStr)
     }
-    // Glow + popup
+    // Glow + popup + placement sound
     setGlowBuilding(buildingId)
     setXpPopup(true)
+    if (quizSoundEnabled) playBuildingPlacedTone()
     setTimeout(() => setGlowBuilding(null), 2200)
     setTimeout(() => setXpPopup(false), 2000)
-  }, [])
+  }, [quizSoundEnabled])
 
   const masteredCount = mastered.size
 
@@ -524,6 +644,22 @@ export default function WaffleStackCity() {
         }}>
           👆 לחץ על בניין כדי ללמוד ולשחק
         </div>
+      )}
+
+      {/* Back to landing */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          style={{
+            position: 'absolute', bottom: 24, left: 24, zIndex: 50,
+            background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)', borderRadius: 20,
+            padding: '5px 14px', color: 'rgba(255,255,255,0.7)', fontSize: 12,
+            fontFamily: 'system-ui', cursor: 'pointer',
+          }}
+        >
+          ← Home
+        </button>
       )}
 
       {/* XP popup animation */}
@@ -720,7 +856,17 @@ export default function WaffleStackCity() {
         <OrbitControls enablePan maxPolarAngle={Math.PI / 2.1} minDistance={8} maxDistance={60} target={[0, 0, -3]} />
 
         <Suspense fallback={null}>
-          <Ground />
+          <Ground
+            onMove={(x, z) => { const [sx, sz] = snapToCell(x, z); setGhostCell([sx, sz]) }}
+            onLeave={() => setGhostCell(null)}
+          />
+          {ghostCell && !selectedBuilding && !challengeBuilding && (
+            <GhostBuilding
+              x={ghostCell[0]}
+              z={ghostCell[1]}
+              valid={!OCCUPIED_CELLS.has(`${ghostCell[0]},${ghostCell[1]}`)}
+            />
+          )}
           {ROAD_MODELS.map((r, i) => <Prop key={i} model={r.model} pos={r.pos} rot={r.rot} />)}
           {BUILDINGS.map((b) => (
             <Building
@@ -733,6 +879,7 @@ export default function WaffleStackCity() {
               isHovered={hoveredBuilding === b.id}
               onHoverStart={setHoveredBuilding}
               onHoverEnd={() => setHoveredBuilding(null)}
+              colorOverride={COLOR_VARIATIONS[colorVariations[b.id] ?? 'A'][b.id]}
             />
           ))}
           <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={40} blur={2} />
@@ -756,6 +903,35 @@ export default function WaffleStackCity() {
           {mastered.has(selectedBuilding.id) && (
             <div style={{ marginTop: 6, fontSize: 12, color: '#4ECDC4' }}>✓ כבר למדת את זה — +50 XP הרווחת!</div>
           )}
+          {/* Kenney color variation selector */}
+          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 6, direction: 'ltr' }}>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>Color:</span>
+            {(['A', 'B', 'C'] as const).map(v => {
+              const label = v === 'A' ? '🟠' : v === 'B' ? '🔵' : '⬜'
+              const isActive = (colorVariations[selectedBuilding.id] ?? 'A') === v
+              return (
+                <button
+                  key={v}
+                  onClick={() => {
+                    const next = { ...colorVariations, [selectedBuilding.id]: v }
+                    setColorVariations(next)
+                    localStorage.setItem('wafflestack-color-variations', JSON.stringify(next))
+                  }}
+                  style={{
+                    padding: '3px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer',
+                    background: isActive ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.04)',
+                    border: isActive ? '1px solid rgba(255,255,255,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                    color: isActive ? '#fff' : 'rgba(255,255,255,0.35)',
+                    fontWeight: isActive ? 700 : 400,
+                    transition: 'all 0.15s',
+                  }}
+                  title={v === 'A' ? 'Variation A — warm/orange' : v === 'B' ? 'Variation B — cool/blue' : 'Variation C — neutral/gray'}
+                >
+                  {label} {v}
+                </button>
+              )
+            })}
+          </div>
           {CONCEPT_PREVIEW[selectedBuilding.id] && (
             <div style={{
               marginTop: 10, padding: '10px 12px',
@@ -859,11 +1035,16 @@ export default function WaffleStackCity() {
                     onMouseEnter={e => { e.currentTarget.style.background = isMastered ? `linear-gradient(90deg, ${b.color ?? '#fff'}22 0%, transparent 100%)` : 'rgba(255,255,255,0.07)' }}
                     onMouseLeave={e => { e.currentTarget.style.background = isMastered ? `linear-gradient(90deg, ${b.color ?? '#fff'}12 0%, transparent 100%)` : 'rgba(255,255,255,0.03)' }}
                   >
-                    <div style={{
-                      width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-                      background: `${b.color ?? '#fff'}18`, border: `1px solid ${b.color ?? '#fff'}30`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
-                    }}>
+                    <div
+                      className="building-thumb"
+                      style={{
+                        width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                        background: `linear-gradient(135deg, ${b.color ?? '#fff'}28 0%, ${b.color ?? '#fff'}0e 100%)`,
+                        border: `2px solid ${b.color ?? '#fff'}55`,
+                        boxShadow: `0 4px 14px rgba(0,0,0,0.45), inset 0 1px 0 ${b.color ?? '#fff'}22`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
+                      }}
+                    >
                       {b.label.split(' ')[0]}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>

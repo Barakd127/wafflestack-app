@@ -14,13 +14,15 @@ import WaffleStackCity from './components/WaffleStackCity'
 import MissionControl from './components/MissionControl'
 import LandingPage from './components/LandingPage'
 import OnboardingFlow from './components/OnboardingFlow'
+import LessonPage, { LessonTopicId } from './components/LessonPage'
 import { useLearningStore } from './store/learningStore'
 
 function App() {
   const onboardingCompleted = useLearningStore(s => s.onboardingCompleted)
-  const [activeView, setActiveView] = useState<'onboarding' | 'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest' | 'wafflecity' | 'mission' | 'landing'>(() =>
+  const [activeView, setActiveView] = useState<'onboarding' | 'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest' | 'wafflecity' | 'mission' | 'landing' | 'lesson'>(() =>
     onboardingCompleted ? 'landing' : 'onboarding'
   )
+  const [lessonTopic, setLessonTopic] = useState<LessonTopicId>('mean')
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('wafflestack-dark-mode') === 'true'
   })
@@ -33,6 +35,23 @@ function App() {
     }
     localStorage.setItem('wafflestack-dark-mode', String(darkMode))
   }, [darkMode])
+
+  // Hash-based deep linking: navigate to correct view on load
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash === '#city' || hash === '#topics' || hash === '#score' || hash.startsWith('#challenge/')) {
+      setActiveView('wafflecity')
+    } else if (hash === '#landing') {
+      setActiveView('landing')
+    }
+  }, [])
+
+  // Update hash when top-level view changes (WaffleStackCity manages its own sub-hashes)
+  useEffect(() => {
+    if (activeView === 'landing') window.location.hash = '#landing'
+    else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
+    else if (activeView === 'study') window.location.hash = '#study'
+  }, [activeView])
 
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
@@ -53,8 +72,20 @@ function App() {
             <div className="absolute inset-0 opacity-20 pointer-events-none">
               <GameScene />
             </div>
-            <StudyHub onViewChange={setActiveView} darkMode={darkMode} />
+            <StudyHub
+              onViewChange={setActiveView}
+              darkMode={darkMode}
+              onOpenLesson={(id) => { setLessonTopic(id); setActiveView('lesson') }}
+            />
           </>
+        )}
+
+        {activeView === 'lesson' && (
+          <LessonPage
+            topicId={lessonTopic}
+            onBack={() => setActiveView('study')}
+            onStartQuiz={() => setActiveView('wafflecity')}
+          />
         )}
 
         {activeView === 'mindmap' && <MindMapCanvas onViewChange={setActiveView} darkMode={darkMode} />}
@@ -218,7 +249,7 @@ function App() {
 
         {activeView === 'wafflecity' && (
           <div className="w-full h-full relative">
-            <WaffleStackCity />
+            <WaffleStackCity onBack={() => setActiveView('landing')} />
             <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
               <button
                 onClick={() => setActiveView('mission')}
