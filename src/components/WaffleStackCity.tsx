@@ -6,6 +6,7 @@ import StatChallenge, { BuildingInfo, getQuizForBuilding } from './StatChallenge
 import ScoreBoard from './ScoreBoard'
 import ExamMode from './ExamMode'
 import { useCitySound, playBuildingPlacedTone } from './SoundManager'
+import LearningMap from './LearningMap'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -446,6 +447,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [showFlashCards, setShowFlashCards] = useState(false)
   const [showExamMode, setShowExamMode] = useState(false)
   const [showConceptMap, setShowConceptMap] = useState(false)
+  const [showLearningMap, setShowLearningMap] = useState(false)
   const [flashCardIndex, setFlashCardIndex] = useState(0)
   const [flashCardFlipped, setFlashCardFlipped] = useState(false)
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
@@ -817,6 +819,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           title="Concept Map (C)"
         >
           🗺️ Map
+        </button>
+        <button
+          onClick={() => setShowLearningMap(m => !m)}
+          style={{
+            background: showLearningMap ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showLearningMap ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showLearningMap ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Learning Path — 5 core topics"
+        >
+          📍 Path
         </button>
         <button
           onClick={() => setShowTopicsList(t => !t)}
@@ -2082,6 +2099,18 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Learning Map overlay */}
+      {showLearningMap && (
+        <LearningMap
+          mastered={mastered}
+          onClose={() => setShowLearningMap(false)}
+          onOpenChallenge={(id) => {
+            const b = BUILDINGS.find(bld => bld.id === id)
+            if (b) openChallenge(b)
+          }}
+        />
       )}
 
       {/* Help overlay */}
