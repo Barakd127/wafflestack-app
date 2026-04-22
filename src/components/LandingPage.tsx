@@ -2,9 +2,10 @@ import { useState } from 'react'
 
 interface Props {
   onEnterCity: () => void
+  onOpenStudy?: () => void
 }
 
-export default function LandingPage({ onEnterCity }: Props) {
+export default function LandingPage({ onEnterCity, onOpenStudy }: Props) {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
 
@@ -33,16 +34,30 @@ export default function LandingPage({ onEnterCity }: Props) {
           <span style={{ fontSize: 28 }}>🏙️</span>
           <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: 0.5, color: '#4ECDC4' }}>WaffleStack</span>
         </div>
-        <button
-          onClick={onEnterCity}
-          style={{
-            background: 'rgba(78,205,196,0.12)', border: '1px solid rgba(78,205,196,0.35)',
-            borderRadius: 10, padding: '8px 18px', color: '#4ECDC4',
-            cursor: 'pointer', fontSize: 13, fontWeight: 600,
-          }}
-        >
-          Open City →
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          {onOpenStudy && (
+            <button
+              onClick={onOpenStudy}
+              style={{
+                background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.4)',
+                borderRadius: 10, padding: '8px 18px', color: '#a5b4fc',
+                cursor: 'pointer', fontSize: 13, fontWeight: 600,
+              }}
+            >
+              📚 Study Hub
+            </button>
+          )}
+          <button
+            onClick={onEnterCity}
+            style={{
+              background: 'rgba(78,205,196,0.12)', border: '1px solid rgba(78,205,196,0.35)',
+              borderRadius: 10, padding: '8px 18px', color: '#4ECDC4',
+              cursor: 'pointer', fontSize: 13, fontWeight: 600,
+            }}
+          >
+            Open City →
+          </button>
+        </div>
       </nav>
 
       {/* Hero */}

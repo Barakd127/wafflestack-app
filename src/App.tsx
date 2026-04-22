@@ -52,6 +52,8 @@ function App() {
       setActiveView('wafflecity')
     } else if (hash === '#landing') {
       setActiveView('landing')
+    } else if (hash === '#study') {
+      setActiveView('study')
     }
   }, [])
 
@@ -60,6 +62,7 @@ function App() {
     if (activeView === 'landing') window.location.hash = '#landing'
     else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
     else if (activeView === 'study') window.location.hash = '#study'
+    else if (activeView === 'mindmap') window.location.hash = '#mindmap'
   }, [activeView])
 
   return (
@@ -286,7 +289,10 @@ function App() {
 
         {activeView === 'landing' && (
           <div className="w-full h-full">
-            <LandingPage onEnterCity={() => setActiveView('wafflecity')} />
+            <LandingPage
+              onEnterCity={() => setActiveView('wafflecity')}
+              onOpenStudy={() => setActiveView('study')}
+            />
           </div>
         )}
       </div>
