@@ -541,6 +541,10 @@ interface Props {
   onNavigateTo?: (buildingId: string) => void
 }
 
+export function getQuizForBuilding(id: string): { q: string; options: string[]; correct: number; explanation: string }[] {
+  return CHALLENGES[id]?.quiz ?? []
+}
+
 export default function StatChallenge({ building, onClose, onComplete, soundEnabled = false, nextBuilding, onNext, onNavigateTo }: Props) {
   const content = CHALLENGES[building.id] ?? CHALLENGES['hospital']
   const color = building.color ?? content.color

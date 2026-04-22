@@ -2,7 +2,7 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Sky, ContactShadows, Html, useProgress } from '@react-three/drei'
 import { Suspense, useState, useRef, useCallback, useEffect } from 'react'
 import * as THREE from 'three'
-import StatChallenge, { BuildingInfo } from './StatChallenge'
+import StatChallenge, { BuildingInfo, getQuizForBuilding } from './StatChallenge'
 import ScoreBoard from './ScoreBoard'
 import { useCitySound, playBuildingPlacedTone } from './SoundManager'
 
@@ -414,6 +414,15 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
     localStorage.getItem('wafflestack-onboarded') ? -1 : 0
   )
 
+  // Weak spots practice quiz state
+  interface WQQuestion { buildingId: string; buildingLabel: string; color: string; q: string; options: string[]; correct: number; explanation: string }
+  const [showWeakSpotsQuiz, setShowWeakSpotsQuiz] = useState(false)
+  const [wqQuestions, setWqQuestions] = useState<WQQuestion[]>([])
+  const [wqIndex, setWqIndex] = useState(0)
+  const [wqSelected, setWqSelected] = useState<number | null>(null)
+  const [wqScore, setWqScore] = useState(0)
+  const [wqDone, setWqDone] = useState(false)
+
   const advanceOnboarding = () => {
     if (onboardingStep + 1 >= ONBOARDING_STEPS.length) {
       setOnboardingStep(-1)
@@ -585,6 +594,26 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
     setTimeout(() => setGlowBuilding(null), 2200)
     setTimeout(() => setXpPopup(false), 2000)
   }, [quizSoundEnabled, dailyChallengeId, dailyDone])
+
+  const handlePracticeWeakSpots = useCallback(() => {
+    const qs: WQQuestion[] = BUILDINGS
+      .filter(b => {
+        const s = localStorage.getItem(`wafflestack-score-${b.id}`)
+        const t = localStorage.getItem(`wafflestack-total-${b.id}`)
+        return s && t && parseInt(s) / parseInt(t) < 0.7
+      })
+      .flatMap(b => getQuizForBuilding(b.id).slice(0, 2).map(q => ({
+        buildingId: b.id, buildingLabel: b.label, color: b.color ?? '#4ECDC4', ...q,
+      })))
+    if (qs.length === 0) return
+    setWqQuestions(qs)
+    setWqIndex(0)
+    setWqSelected(null)
+    setWqScore(0)
+    setWqDone(false)
+    setShowWeakSpotsQuiz(true)
+    setShowScoreBoard(false)
+  }, [])
 
   const masteredCount = mastered.size
 
@@ -1076,8 +1105,198 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           sessionStart={sessionStart}
           onClose={() => setShowScoreBoard(false)}
           onReset={handleReset}
+          onPracticeWeakSpots={handlePracticeWeakSpots}
         />
       )}
+
+      {/* Weak Spots Practice Quiz */}
+      {showWeakSpotsQuiz && wqQuestions.length > 0 && (() => {
+        const q = wqQuestions[wqIndex]
+        if (wqDone) {
+          return (
+            <div style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              zIndex: 450, backdropFilter: 'blur(10px)', padding: 20,
+            }}>
+              <div style={{
+                background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
+                border: '1px solid rgba(78,205,196,0.3)',
+                borderRadius: 20, padding: '36px 32px', maxWidth: 440, width: '100%',
+                fontFamily: 'system-ui', textAlign: 'center',
+                boxShadow: '0 0 60px rgba(78,205,196,0.1)',
+              }}>
+                <div style={{ fontSize: 56, marginBottom: 12 }}>
+                  {wqScore === wqQuestions.length ? '🏆' : wqScore >= wqQuestions.length * 0.7 ? '⭐' : '📖'}
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 900, color: '#4ECDC4', marginBottom: 8 }}>
+                  Practice Complete!
+                </div>
+                <div style={{ fontSize: 48, fontWeight: 900, color: '#fff', marginBottom: 4, letterSpacing: -2 }}>
+                  {wqScore}<span style={{ fontSize: 28, color: 'rgba(255,255,255,0.35)', fontWeight: 400 }}>/{wqQuestions.length}</span>
+                </div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 28 }}>
+                  {Math.round((wqScore / wqQuestions.length) * 100)}% correct
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 260, margin: '0 auto' }}>
+                  {wqScore < wqQuestions.length && (
+                    <button
+                      onClick={() => { setWqIndex(0); setWqSelected(null); setWqScore(0); setWqDone(false) }}
+                      style={{
+                        padding: '12px', background: 'rgba(78,205,196,0.15)',
+                        border: '1px solid rgba(78,205,196,0.4)', borderRadius: 10,
+                        color: '#4ECDC4', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                      }}
+                    >🔄 Try Again</button>
+                  )}
+                  <button
+                    onClick={() => setShowWeakSpotsQuiz(false)}
+                    style={{
+                      padding: '12px', background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
+                      color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                    }}
+                  >🏙️ Back to City</button>
+                </div>
+              </div>
+            </div>
+          )
+        }
+        return (
+          <div style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 450, backdropFilter: 'blur(10px)', padding: 20,
+          }}>
+            <div style={{
+              background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
+              border: `1px solid ${q.color}44`,
+              borderRadius: 20, padding: '24px 28px', maxWidth: 520, width: '100%',
+              fontFamily: 'system-ui', maxHeight: '90vh', overflowY: 'auto',
+              boxShadow: `0 0 60px ${q.color}18`,
+            }}>
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <div>
+                  <div style={{ fontSize: 11, letterSpacing: 2, color: '#4ECDC4', fontWeight: 600, marginBottom: 4 }}>
+                    🎯 PRACTICE WEAK SPOTS
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, color: q.color,
+                      background: `${q.color}18`, border: `1px solid ${q.color}44`,
+                      borderRadius: 10, padding: '2px 8px',
+                    }}>{q.buildingLabel}</span>
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+                      {wqIndex + 1} / {wqQuestions.length}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowWeakSpotsQuiz(false)}
+                  style={{
+                    background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: 10, width: 32, height: 32,
+                    color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 14,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >✕</button>
+              </div>
+              {/* Progress bar */}
+              <div style={{ height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 2, marginBottom: 20, overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: 2, background: q.color,
+                  width: `${(wqIndex / wqQuestions.length) * 100}%`,
+                  transition: 'width 0.3s ease',
+                }} />
+              </div>
+              {/* Question */}
+              <div style={{
+                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 12, padding: '16px 18px', marginBottom: 16,
+                fontSize: 14, color: 'rgba(255,255,255,0.9)',
+                direction: 'rtl', textAlign: 'right', lineHeight: 1.6,
+              }}>
+                {q.q}
+              </div>
+              {/* Options */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+                {q.options.map((opt, idx) => {
+                  const isCorrect = idx === q.correct
+                  const isSelected = idx === wqSelected
+                  let bg = 'rgba(255,255,255,0.04)'
+                  let border = '1px solid rgba(255,255,255,0.08)'
+                  let textColor = 'rgba(255,255,255,0.75)'
+                  if (wqSelected !== null) {
+                    if (isCorrect) { bg = 'rgba(78,205,196,0.15)'; border = '2px solid #4ECDC4'; textColor = '#4ECDC4' }
+                    else if (isSelected) { bg = '#FF6B6B22'; border = '1px solid #FF6B6B'; textColor = '#FF6B6B' }
+                  }
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        if (wqSelected !== null) return
+                        setWqSelected(idx)
+                        if (idx === q.correct) setWqScore(s => s + 1)
+                      }}
+                      disabled={wqSelected !== null}
+                      style={{
+                        background: bg, border, borderRadius: 10,
+                        padding: '12px 16px', cursor: wqSelected !== null ? 'default' : 'pointer',
+                        color: textColor, fontSize: 13, textAlign: 'right',
+                        direction: 'rtl', transition: 'all 0.2s',
+                        display: 'flex', gap: 10, alignItems: 'center',
+                      }}
+                    >
+                      <span style={{
+                        width: 22, height: 22, borderRadius: '50%',
+                        background: wqSelected !== null && isCorrect ? '#4ECDC4' : 'rgba(255,255,255,0.1)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 11, fontWeight: 700, flexShrink: 0,
+                        color: wqSelected !== null && isCorrect ? '#000' : 'inherit',
+                      }}>
+                        {wqSelected !== null && isCorrect ? '✓' : String.fromCharCode(65 + idx)}
+                      </span>
+                      {opt}
+                    </button>
+                  )
+                })}
+              </div>
+              {/* Explanation + Next */}
+              {wqSelected !== null && (
+                <div>
+                  <div style={{
+                    background: wqSelected === q.correct ? '#4ECDC411' : '#FF6B6B11',
+                    border: `1px solid ${wqSelected === q.correct ? '#4ECDC444' : '#FF6B6B44'}`,
+                    borderRadius: 10, padding: '10px 14px',
+                    fontSize: 12, color: 'rgba(255,255,255,0.7)',
+                    direction: 'rtl', textAlign: 'right', lineHeight: 1.6, marginBottom: 10,
+                  }}>
+                    {wqSelected === q.correct ? '✅ ' : '❌ '}{q.explanation}
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (wqIndex + 1 >= wqQuestions.length) {
+                        setWqDone(true)
+                      } else {
+                        setWqIndex(i => i + 1)
+                        setWqSelected(null)
+                      }
+                    }}
+                    style={{
+                      width: '100%', padding: '11px',
+                      background: q.color, border: 'none', borderRadius: 10,
+                      color: '#000', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                    }}
+                  >
+                    {wqIndex + 1 >= wqQuestions.length ? '🏆 סיים' : 'שאלה הבאה →'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Topics List modal */}
       {showTopicsList && (

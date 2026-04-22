@@ -19,6 +19,7 @@ interface Props {
   sessionStart: number
   onClose: () => void
   onReset: () => void
+  onPracticeWeakSpots?: () => void
 }
 
 interface BuildingScore {
@@ -43,7 +44,7 @@ function loadWeakSpots(): BuildingScore[] {
   }).filter((x): x is BuildingScore => x !== null && x.percentage < 70)
 }
 
-export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onReset }: Props) {
+export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onReset, onPracticeWeakSpots }: Props) {
   const [confirmReset, setConfirmReset] = useState(false)
   const [copied, setCopied] = useState(false)
   const [elapsed, setElapsed] = useState(() => Math.floor((Date.now() - sessionStart) / 60000))
@@ -313,6 +314,21 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
               </div>
             ))}
           </div>
+          {onPracticeWeakSpots && (
+            <button
+              onClick={onPracticeWeakSpots}
+              style={{
+                marginTop: 10, width: '100%', padding: '9px 14px',
+                background: 'rgba(78,205,196,0.1)', border: '1px solid rgba(78,205,196,0.3)',
+                borderRadius: 10, color: '#4ECDC4', fontSize: 12, fontWeight: 700,
+                cursor: 'pointer', transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(78,205,196,0.2)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(78,205,196,0.1)' }}
+            >
+              🎯 Practice Weak Spots
+            </button>
+          )}
         </div>
       )}
 
