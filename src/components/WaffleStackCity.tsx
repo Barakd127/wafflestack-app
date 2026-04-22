@@ -126,6 +126,38 @@ const FLASH_CARDS = BUILDINGS.map(b => ({
   color: b.color ?? '#4ECDC4',
 }))
 
+// ─── Concept map layout ──────────────────────────────────────────────────────
+const CONCEPT_MAP_POS: Record<string, [number, number]> = {
+  power:        [140, 80],
+  housing:      [290, 55],
+  'city-hall':  [500, 80],
+  traffic:      [65, 205],
+  hospital:     [305, 205],
+  school:       [510, 195],
+  bank:         [100, 340],
+  market:       [210, 260],
+  research:     [425, 320],
+  news:         [565, 310],
+}
+
+const CONCEPT_MAP_EDGES: [string, string][] = [
+  ['power',     'housing'],
+  ['power',     'traffic'],
+  ['power',     'hospital'],
+  ['housing',   'traffic'],
+  ['traffic',   'hospital'],
+  ['hospital',  'research'],
+  ['hospital',  'news'],
+  ['hospital',  'city-hall'],
+  ['school',    'research'],
+  ['school',    'news'],
+  ['city-hall', 'school'],
+  ['bank',      'market'],
+  ['bank',      'hospital'],
+  ['market',    'power'],
+  ['research',  'news'],
+]
+
 // ─── Daily challenge helpers ──────────────────────────────────────────────────
 function getDailyBuildingId(): string {
   const d = new Date()
@@ -413,6 +445,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [showGlossary, setShowGlossary] = useState(false)
   const [showFlashCards, setShowFlashCards] = useState(false)
   const [showExamMode, setShowExamMode] = useState(false)
+  const [showConceptMap, setShowConceptMap] = useState(false)
   const [flashCardIndex, setFlashCardIndex] = useState(0)
   const [flashCardFlipped, setFlashCardFlipped] = useState(false)
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
@@ -508,12 +541,16 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         case 'E':
           setShowExamMode(m => !m)
           break
+        case 'c':
+        case 'C':
+          setShowConceptMap(m => !m)
+          break
       }
     }
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, toggleSound])
+  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, toggleSound])
 
   // Handle deep-link hash on mount
   useEffect(() => {
@@ -765,6 +802,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           title="Exam Mode — 10 questions, timed (E)"
         >
           📝 Exam
+        </button>
+        <button
+          onClick={() => setShowConceptMap(m => !m)}
+          style={{
+            background: showConceptMap ? 'rgba(255,107,107,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showConceptMap ? 'rgba(255,107,107,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showConceptMap ? '#FF6B6B' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Concept Map (C)"
+        >
+          🗺️ Map
         </button>
         <button
           onClick={() => setShowTopicsList(t => !t)}
@@ -1912,6 +1964,126 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         )
       })()}
 
+      {/* Concept Map overlay */}
+      {showConceptMap && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(5,5,15,0.92)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 460, backdropFilter: 'blur(8px)', padding: 20,
+          }}
+          onClick={() => setShowConceptMap(false)}
+        >
+          <div
+            style={{
+              background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
+              border: '1px solid rgba(78,205,196,0.25)',
+              borderRadius: 20, padding: '22px 24px',
+              maxWidth: 700, width: '100%',
+              fontFamily: 'system-ui', color: 'white',
+              boxShadow: '0 0 60px rgba(78,205,196,0.12)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 800 }}>🗺️ מפת המושגים</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 3 }}>
+                  לחץ על מושג לפתיחת האתגר · קווים = מושגים קשורים
+                </div>
+              </div>
+              <button
+                onClick={() => setShowConceptMap(false)}
+                style={{
+                  background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: 10, width: 36, height: 36,
+                  color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: 16,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >✕</button>
+            </div>
+            <svg viewBox="0 0 640 380" style={{ width: '100%', height: 'auto', display: 'block' }}>
+              {/* Edges */}
+              {CONCEPT_MAP_EDGES.map(([from, to]) => {
+                const fp = CONCEPT_MAP_POS[from]
+                const tp = CONCEPT_MAP_POS[to]
+                const bothMastered = mastered.has(from) && mastered.has(to)
+                return (
+                  <line
+                    key={`${from}-${to}`}
+                    x1={fp[0]} y1={fp[1]} x2={tp[0]} y2={tp[1]}
+                    stroke={bothMastered ? 'rgba(78,205,196,0.35)' : 'rgba(255,255,255,0.1)'}
+                    strokeWidth={bothMastered ? 2 : 1.5}
+                  />
+                )
+              })}
+              {/* Nodes */}
+              {BUILDINGS.map(b => {
+                const pos = CONCEPT_MAP_POS[b.id]
+                if (!pos) return null
+                const isMastered = mastered.has(b.id)
+                const emoji = b.label.split(' ')[0]
+                const hebrewName = b.statsConcept.split(' (')[0]
+                const nodeColor = b.color ?? '#4ECDC4'
+                return (
+                  <g
+                    key={b.id}
+                    transform={`translate(${pos[0]}, ${pos[1]})`}
+                    onClick={() => { openChallenge(b); setShowConceptMap(false) }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <circle r={32} fill="transparent" />
+                    <circle
+                      r={26}
+                      fill={isMastered ? `${nodeColor}28` : 'rgba(15,15,35,0.95)'}
+                      stroke={isMastered ? nodeColor : 'rgba(255,255,255,0.18)'}
+                      strokeWidth={isMastered ? 2 : 1}
+                    />
+                    <text textAnchor="middle" dominantBaseline="central" y={-7} fontSize={18} style={{ userSelect: 'none' }}>
+                      {emoji}
+                    </text>
+                    <text
+                      textAnchor="middle" dominantBaseline="central" y={9} fontSize={7.5}
+                      fill={isMastered ? nodeColor : 'rgba(255,255,255,0.4)'}
+                      style={{ userSelect: 'none' }}
+                    >
+                      {GLOSSARY_DATA[b.id]?.conceptEn ?? ''}
+                    </text>
+                    <text
+                      textAnchor="middle" y={42} fontSize={9}
+                      fill={isMastered ? nodeColor : 'rgba(255,255,255,0.55)'}
+                      style={{ userSelect: 'none' }}
+                    >
+                      {hebrewName}
+                    </text>
+                    {isMastered && (
+                      <>
+                        <circle cx={18} cy={-18} r={8} fill="#4ECDC4" />
+                        <text x={18} y={-18} textAnchor="middle" dominantBaseline="central" fontSize={8} fill="#000" fontWeight="bold">✓</text>
+                      </>
+                    )}
+                  </g>
+                )
+              })}
+            </svg>
+            <div style={{ marginTop: 12, display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(78,205,196,0.25)', border: '2px solid #4ECDC4' }} />
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>נלמד</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(15,15,35,0.95)', border: '1px solid rgba(255,255,255,0.18)' }} />
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>טרם נלמד</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 24, height: 2, background: 'rgba(78,205,196,0.35)' }} />
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>קשר בין מושגים</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Help overlay */}
       {showHelp && (
         <div style={{
@@ -1934,6 +2106,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               { key: 'T', desc: 'Toggle topics list' },
               { key: 'G', desc: 'Toggle concept glossary' },
               { key: 'F', desc: 'Toggle flash cards' },
+              { key: 'C', desc: 'Toggle concept map' },
             ].map(({ key, desc }) => (
               <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
                 <span style={{
