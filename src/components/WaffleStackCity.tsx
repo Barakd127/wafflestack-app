@@ -422,6 +422,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [wqSelected, setWqSelected] = useState<number | null>(null)
   const [wqScore, setWqScore] = useState(0)
   const [wqDone, setWqDone] = useState(false)
+  const [wqMode, setWqMode] = useState<'weak-spots' | 'quick-mix'>('weak-spots')
 
   const advanceOnboarding = () => {
     if (onboardingStep + 1 >= ONBOARDING_STEPS.length) {
@@ -606,6 +607,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         buildingId: b.id, buildingLabel: b.label, color: b.color ?? '#4ECDC4', ...q,
       })))
     if (qs.length === 0) return
+    setWqMode('weak-spots')
     setWqQuestions(qs)
     setWqIndex(0)
     setWqSelected(null)
@@ -613,6 +615,25 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
     setWqDone(false)
     setShowWeakSpotsQuiz(true)
     setShowScoreBoard(false)
+  }, [])
+
+  const handleStartQuickMix = useCallback(() => {
+    const shuffled = [...BUILDINGS].sort(() => Math.random() - 0.5).slice(0, 5)
+    const qs: WQQuestion[] = shuffled.flatMap(b => {
+      const questions = getQuizForBuilding(b.id)
+      if (questions.length === 0) return []
+      const q = questions[Math.floor(Math.random() * questions.length)]
+      return [{ buildingId: b.id, buildingLabel: b.label, color: b.color ?? '#4ECDC4', ...q }]
+    })
+    if (qs.length === 0) return
+    setWqMode('quick-mix')
+    setWqQuestions(qs)
+    setWqIndex(0)
+    setWqSelected(null)
+    setWqScore(0)
+    setWqDone(false)
+    setShowWeakSpotsQuiz(true)
+    setShowTopicsList(false)
   }, [])
 
   const masteredCount = mastered.size
@@ -1178,8 +1199,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               {/* Header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                 <div>
-                  <div style={{ fontSize: 11, letterSpacing: 2, color: '#4ECDC4', fontWeight: 600, marginBottom: 4 }}>
-                    🎯 PRACTICE WEAK SPOTS
+                  <div style={{ fontSize: 11, letterSpacing: 2, color: wqMode === 'quick-mix' ? '#FFD700' : '#4ECDC4', fontWeight: 600, marginBottom: 4 }}>
+                    {wqMode === 'quick-mix' ? '🎲 QUICK MIX — חמש שאלות אקראיות' : '🎯 PRACTICE WEAK SPOTS'}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{
@@ -1325,12 +1346,27 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                   {mastered.size}/10 mastered · Click to open challenge
                 </div>
               </div>
-              <button onClick={() => setShowTopicsList(false)} style={{
-                background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 8, width: 32, height: 32, color: 'rgba(255,255,255,0.5)',
-                cursor: 'pointer', fontSize: 14,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>✕</button>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <button
+                  onClick={handleStartQuickMix}
+                  style={{
+                    background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.35)',
+                    borderRadius: 8, padding: '6px 12px', color: '#FFD700',
+                    cursor: 'pointer', fontSize: 12, fontWeight: 700,
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    whiteSpace: 'nowrap',
+                  }}
+                  title="5 random questions from across all topics"
+                >
+                  🎲 מיקס
+                </button>
+                <button onClick={() => setShowTopicsList(false)} style={{
+                  background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: 8, width: 32, height: 32, color: 'rgba(255,255,255,0.5)',
+                  cursor: 'pointer', fontSize: 14,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>✕</button>
+              </div>
             </div>
 
             {/* Building list */}
