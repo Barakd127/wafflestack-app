@@ -1173,6 +1173,22 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                         </div>
                       )
                     })()}
+                    {(() => {
+                      const stored = localStorage.getItem(`wafflestack-difficulty-${b.id}`)
+                      const diffRating = stored ? parseInt(stored) : null
+                      if (diffRating === null) return null
+                      return (
+                        <div style={{
+                          fontSize: 10, fontWeight: 700,
+                          color: diffRating <= 2 ? '#4ECDC4' : diffRating === 3 ? '#FFD700' : '#FF6B6B',
+                          background: diffRating <= 2 ? 'rgba(78,205,196,0.1)' : diffRating === 3 ? 'rgba(255,215,0,0.1)' : 'rgba(255,107,107,0.1)',
+                          border: `1px solid ${diffRating <= 2 ? 'rgba(78,205,196,0.3)' : diffRating === 3 ? 'rgba(255,215,0,0.3)' : 'rgba(255,107,107,0.3)'}`,
+                          borderRadius: 10, padding: '2px 7px', flexShrink: 0,
+                        }}>
+                          {'★'.repeat(diffRating)}
+                        </div>
+                      )
+                    })()}
                     {b.id === dailyChallengeId && !dailyDone && (
                       <div style={{
                         fontSize: 10, fontWeight: 700, color: '#FFD700',

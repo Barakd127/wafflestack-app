@@ -578,6 +578,16 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     localStorage.setItem(`wafflestack-reflection-${building.id}`, text)
   }
 
+  // Difficulty rating — persisted per building
+  const [difficultyRating, setDifficultyRating] = useState<number | null>(() => {
+    const stored = localStorage.getItem(`wafflestack-difficulty-${building.id}`)
+    return stored ? parseInt(stored) : null
+  })
+  const handleDifficultyRating = (rating: number) => {
+    setDifficultyRating(rating)
+    localStorage.setItem(`wafflestack-difficulty-${building.id}`, String(rating))
+  }
+
   const currentQ = questions[quizIndex]
 
   const handleSlider = useCallback((key: keyof DistributionParams, val: number) => {
@@ -983,6 +993,38 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     </div>
                   </div>
                 )}
+
+                {/* Difficulty rating */}
+                <div style={{ width: '100%', maxWidth: 320, marginBottom: 16 }}>
+                  <div style={{
+                    fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 1,
+                    marginBottom: 8, textAlign: 'right', direction: 'rtl',
+                  }}>
+                    ⭐ כמה קשה היה המושג הזה?
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                    {[1, 2, 3, 4, 5].map(rating => (
+                      <button
+                        key={rating}
+                        onClick={() => handleDifficultyRating(rating)}
+                        style={{
+                          background: difficultyRating !== null && rating <= difficultyRating
+                            ? `${color}33` : 'rgba(255,255,255,0.05)',
+                          border: `1px solid ${difficultyRating !== null && rating <= difficultyRating ? color + '66' : 'rgba(255,255,255,0.1)'}`,
+                          borderRadius: 8, padding: '6px 10px', cursor: 'pointer',
+                          fontSize: 16, transition: 'all 0.15s', color: '#fff',
+                        }}
+                      >
+                        {difficultyRating !== null && rating <= difficultyRating ? '★' : '☆'}
+                      </button>
+                    ))}
+                  </div>
+                  {difficultyRating !== null && (
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 6, textAlign: 'right' }}>
+                      {difficultyRating <= 2 ? '😊 קל — ' : difficultyRating === 3 ? '😐 בינוני — ' : '😤 קשה — '}נשמר
+                    </div>
+                  )}
+                </div>
 
                 {/* "In My Own Words" reflection box */}
                 <div style={{ width: '100%', maxWidth: 320, marginBottom: 16 }}>
