@@ -1,6 +1,8 @@
-import { Home, Map, BookOpen, Trophy, Settings, Bell, User } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Home, Map, BookOpen, Trophy, Settings, Bell, User, Network } from 'lucide-react'
 import { LessonTopicId } from './LessonPage'
 import { useLearningStore } from '../store/learningStore'
+import type { Achievement } from '../store/learningStore'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
@@ -17,16 +19,29 @@ const TOPIC_CARDS: { id: LessonTopicId; hebrewTitle: string; emoji: string; colo
 ]
 
 const StudyHub = ({ onViewChange, darkMode: _darkMode, onOpenLesson }: StudyHubProps) => {
-  const { currentStreak, longestStreak, dailyChallengeDate, dailyChallengeProgress, getDailyChallenge, recordDailyChallengeAnswer } = useLearningStore()
+  const { currentStreak, longestStreak, dailyChallengeDate, dailyChallengeProgress, getDailyChallenge, recordDailyChallengeAnswer, newAchievements, clearNewAchievements } = useLearningStore()
   const todayStr = new Date().toISOString().slice(0, 10)
   const isChallengeDay = dailyChallengeDate === todayStr
   const challengeProgress = isChallengeDay ? dailyChallengeProgress : 0
   const dailyQuestions = getDailyChallenge()
   const challengeDone = challengeProgress >= 3
 
+  const [toastAchievement, setToastAchievement] = useState<Achievement | null>(null)
+
+  useEffect(() => {
+    if (newAchievements.length > 0) {
+      setToastAchievement(newAchievements[0])
+      const t = setTimeout(() => {
+        setToastAchievement(null)
+        clearNewAchievements()
+      }, 3500)
+      return () => clearTimeout(t)
+    }
+  }, [newAchievements])
+
   const sidebarItems = [
     { id: 'home', icon: Home, label: 'דף הבית', color: 'text-cyan-400' },
-    { id: 'study', icon: BookOpen, label: 'מפת לימוד', onClick: () => onViewChange('mindmap') },
+    { id: 'mindmap', icon: Network, label: 'מפת חשיבה', onClick: () => onViewChange('mindmap') },
     { id: 'progress', icon: Map, label: 'אזור למידה' },
     { id: 'achievements', icon: Trophy, label: 'העולם שלי', onClick: () => onViewChange('3d') },
   ]
@@ -285,6 +300,17 @@ const StudyHub = ({ onViewChange, darkMode: _darkMode, onOpenLesson }: StudyHubP
           </div>
         </div>
       </div>
+      {/* Achievement badge toast */}
+      {toastAchievement && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-2xl border border-white/20 text-white">
+          <span className="text-2xl">{toastAchievement.icon}</span>
+          <div>
+            <div className="text-xs font-semibold text-white/70">🎉 הישג חדש!</div>
+            <div className="font-bold text-sm">{toastAchievement.title}</div>
+            <div className="text-xs text-white/70">{toastAchievement.description}</div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

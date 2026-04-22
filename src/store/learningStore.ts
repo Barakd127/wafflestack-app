@@ -290,6 +290,9 @@ const ACHIEVEMENTS: Achievement[] = [
   { id: 'topic_correlation', title: 'Correlation Detective', description: 'Complete all Correlation questions', icon: '🕵️', unlockedAt: null },
   { id: 'xp_100', title: 'Century', description: 'Earn 100 XP', icon: '💯', unlockedAt: null },
   { id: 'xp_500', title: 'Scholar', description: 'Earn 500 XP', icon: '🎓', unlockedAt: null },
+  { id: 'first_ttest', title: 'First T-Test', description: 'Answer your first hypothesis testing question correctly', icon: '🔬', unlockedAt: null },
+  { id: 'distribution_master', title: 'Distribution Master', description: 'Complete all questions across every topic', icon: '🏆', unlockedAt: null },
+  { id: 'daily_streak_5', title: '5-Day Streak', description: 'Study for 5 consecutive days', icon: '📅', unlockedAt: null },
 ]
 
 interface LearningState {
@@ -389,6 +392,13 @@ export const useLearningStore = create<LearningState>()(
             case 'topic_correlation': unlock = QUESTION_BANK.filter(q => q.topic === 'correlation').every(q => newAnsweredIds.includes(q.id)); break
             case 'xp_100': unlock = newXp >= 100; break
             case 'xp_500': unlock = newXp >= 500; break
+            case 'first_ttest':
+              unlock = correct &&
+                QUESTION_BANK.find(q2 => q2.id === questionId)?.topic === 'hypothesis' &&
+                !state.answeredIds.some(id => QUESTION_BANK.find(q2 => q2.id === id)?.topic === 'hypothesis')
+              break
+            case 'distribution_master': unlock = QUESTION_BANK.every(q => newAnsweredIds.includes(q.id)); break
+            case 'daily_streak_5': unlock = newCurrentStreak >= 5; break
           }
           if (unlock) {
             const unlocked = { ...a, unlockedAt: now }

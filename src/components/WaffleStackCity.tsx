@@ -400,6 +400,11 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [masteryDates, setMasteryDates] = useState<Record<string, string>>(loadMasteryDates)
   const [dailyDone, setDailyDone] = useState<boolean>(loadDailyChallengeDone)
   const dailyChallengeId = getDailyBuildingId()
+  const dailyBuilding = BUILDINGS.find(b => b.id === dailyChallengeId) ?? null
+  const [dailyGoalDismissed, setDailyGoalDismissed] = useState<boolean>(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    return localStorage.getItem('wafflestack-daily-dismissed') === today
+  })
   const [showHelp, setShowHelp] = useState(false)
   const [milestone, setMilestone] = useState<5 | 10 | null>(null)
   const [xpMilestone, setXpMilestone] = useState<number | null>(null)
@@ -778,6 +783,44 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           }} />
         </div>
       </div>
+
+      {/* Daily goal chip */}
+      {!dailyGoalDismissed && dailyBuilding && (
+        <div
+          onClick={() => {
+            if (!dailyDone) setChallengeBuilding({ id: dailyBuilding.id, label: dailyBuilding.label, statsConcept: dailyBuilding.statsConcept, color: dailyBuilding.color })
+          }}
+          style={{
+            position: 'absolute', top: 58, left: 60, zIndex: 50,
+            background: dailyDone ? 'rgba(78,205,196,0.12)' : 'rgba(255,215,0,0.1)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${dailyDone ? 'rgba(78,205,196,0.35)' : 'rgba(255,215,0,0.3)'}`,
+            borderRadius: 20, padding: '4px 10px 4px 13px',
+            fontFamily: 'system-ui',
+            display: 'flex', alignItems: 'center', gap: 8,
+            cursor: dailyDone ? 'default' : 'pointer',
+            transition: 'all 0.2s',
+          }}
+        >
+          <span style={{ fontSize: 11, color: dailyDone ? '#4ECDC4' : '#FFD700', fontWeight: 700, whiteSpace: 'nowrap' }}>
+            {dailyDone
+              ? '✓ Daily done! +50 XP'
+              : `🎯 היום: ${dailyBuilding.statsConcept.split(' (')[0]}`}
+          </span>
+          <button
+            onClick={e => {
+              e.stopPropagation()
+              setDailyGoalDismissed(true)
+              localStorage.setItem('wafflestack-daily-dismissed', new Date().toISOString().slice(0, 10))
+            }}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'rgba(255,255,255,0.35)', fontSize: 10, padding: 0,
+              lineHeight: 1, flexShrink: 0,
+            }}
+          >✕</button>
+        </div>
+      )}
 
       {/* Title */}
       <div style={{
