@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import ShareCard from './ShareCard'
 
 const BUILDINGS_META = [
   { id: 'power',     label: '⚡ תחנת כוח',   concept: 'ממוצע',              color: '#FFD700' },
@@ -47,6 +48,7 @@ function loadWeakSpots(): BuildingScore[] {
 export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onReset, onPracticeWeakSpots }: Props) {
   const [confirmReset, setConfirmReset] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [showShareCard, setShowShareCard] = useState(false)
   const [elapsed, setElapsed] = useState(() => Math.floor((Date.now() - sessionStart) / 60000))
   const weakSpots = loadWeakSpots()
 
@@ -216,24 +218,26 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
       {/* Share Row */}
       <div style={{ padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
         <button
-          onClick={() => {
-            const text = `I mastered ${masteredCount}/${total} statistics concepts on WaffleStack! 🏙️\nTotal XP: ${xp.toLocaleString()} ⭐\nhttps://barakd127.github.io/wafflestack-app/`
-            navigator.clipboard.writeText(text).then(() => {
-              setCopied(true)
-              setTimeout(() => setCopied(false), 2000)
-            })
-          }}
+          onClick={() => setShowShareCard(true)}
           style={{
             width: '100%', padding: '9px',
-            background: copied ? 'rgba(78,205,196,0.15)' : 'rgba(255,255,255,0.05)',
-            border: `1px solid ${copied ? 'rgba(78,205,196,0.4)' : 'rgba(255,255,255,0.1)'}`,
-            borderRadius: 10, color: copied ? '#4ECDC4' : 'rgba(255,255,255,0.5)',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 10, color: 'rgba(255,255,255,0.5)',
             fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
           }}
         >
-          {copied ? '✓ Copied to clipboard!' : '📤 Share Progress'}
+          📤 Share Progress
         </button>
       </div>
+      {showShareCard && (
+        <ShareCard
+          xp={xp}
+          masteredCount={masteredCount}
+          total={total}
+          onClose={() => setShowShareCard(false)}
+        />
+      )}
 
       {/* Streak Row */}
       <div style={{
