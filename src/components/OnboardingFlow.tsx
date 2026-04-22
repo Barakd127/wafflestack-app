@@ -65,7 +65,9 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   }
 
   const handleSkipConfirmed = () => {
-    completeOnboarding(name || 'סטודנט')
+    const finalName = name || 'סטודנט'
+    localStorage.setItem('userName', finalName)
+    completeOnboarding(finalName)
     onComplete()
   }
 
@@ -94,6 +96,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     if (navTourStep < 2) {
       setNavTourStep(n => n + 1)
     } else {
+      localStorage.setItem('userName', name)
       completeOnboarding(name)
       onComplete()
     }

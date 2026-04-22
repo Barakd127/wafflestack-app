@@ -19,8 +19,10 @@ import { useLearningStore } from './store/learningStore'
 
 function App() {
   const onboardingCompleted = useLearningStore(s => s.onboardingCompleted)
+  // Per spec: skip onboarding if userName already set (either via localStorage key or Zustand store)
+  const hasUserName = Boolean(localStorage.getItem('userName') || onboardingCompleted)
   const [activeView, setActiveView] = useState<'onboarding' | 'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest' | 'wafflecity' | 'mission' | 'landing' | 'lesson'>(() =>
-    onboardingCompleted ? 'landing' : 'onboarding'
+    hasUserName ? 'landing' : 'onboarding'
   )
   const [lessonTopic, setLessonTopic] = useState<LessonTopicId>('mean')
   const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -282,7 +284,7 @@ function App() {
 
       {/* Onboarding overlay — rendered on top of everything */}
       {activeView === 'onboarding' && (
-        <OnboardingFlow onComplete={() => setActiveView('study')} />
+        <OnboardingFlow onComplete={() => setActiveView('wafflecity')} />
       )}
     </div>
   )
