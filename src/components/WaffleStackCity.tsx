@@ -431,6 +431,14 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [wqDone, setWqDone] = useState(false)
   const [wqMode, setWqMode] = useState<'weak-spots' | 'quick-mix'>('weak-spots')
 
+  // Formula Drill state
+  const [formulaDrillActive, setFormulaDrillActive] = useState(false)
+  const [fdIndex, setFdIndex] = useState(0)
+  const [fdSelected, setFdSelected] = useState<number | null>(null)
+  const [fdScore, setFdScore] = useState(0)
+  const [fdDone, setFdDone] = useState(false)
+  const [fdItems, setFdItems] = useState<{ buildingId: string; formula: string; emoji: string; options: string[]; correctIdx: number }[]>([])
+
   const advanceOnboarding = () => {
     if (onboardingStep + 1 >= ONBOARDING_STEPS.length) {
       setOnboardingStep(-1)
@@ -645,6 +653,32 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
     setWqDone(false)
     setShowWeakSpotsQuiz(true)
     setShowTopicsList(false)
+  }, [])
+
+  const startFormulaDrill = useCallback(() => {
+    const shuffled = [...BUILDINGS].sort(() => Math.random() - 0.5)
+    const items = shuffled.map(b => {
+      const correctName = b.statsConcept.split(' (')[0]
+      const otherNames = BUILDINGS
+        .filter(ob => ob.id !== b.id)
+        .map(ob => ob.statsConcept.split(' (')[0])
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3)
+      const options = [...otherNames, correctName].sort(() => Math.random() - 0.5)
+      return {
+        buildingId: b.id,
+        formula: GLOSSARY_DATA[b.id]?.formula ?? '?',
+        emoji: b.label.split(' ')[0],
+        options,
+        correctIdx: options.indexOf(correctName),
+      }
+    })
+    setFdItems(items)
+    setFdIndex(0)
+    setFdSelected(null)
+    setFdScore(0)
+    setFdDone(false)
+    setFormulaDrillActive(true)
   }, [])
 
   const masteredCount = mastered.size
@@ -1392,7 +1426,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 450, backdropFilter: 'blur(10px)', padding: 20,
-        }} onClick={() => setShowTopicsList(false)}>
+        }} onClick={() => { setShowTopicsList(false); setFormulaDrillActive(false) }}>
           <div style={{
             background: 'linear-gradient(160deg, #0a0a18 0%, #0f1525 100%)',
             border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
@@ -1427,7 +1461,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                 >
                   🎲 מיקס
                 </button>
-                <button onClick={() => setShowTopicsList(false)} style={{
+                <button
+                  onClick={startFormulaDrill}
+                  style={{
+                    background: formulaDrillActive ? 'rgba(195,166,255,0.2)' : 'rgba(195,166,255,0.08)',
+                    border: `1px solid ${formulaDrillActive ? 'rgba(195,166,255,0.6)' : 'rgba(195,166,255,0.3)'}`,
+                    borderRadius: 8, padding: '6px 12px', color: '#C3A6FF',
+                    cursor: 'pointer', fontSize: 12, fontWeight: 700,
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    whiteSpace: 'nowrap',
+                  }}
+                  title="Formula matching drill — identify each formula"
+                >
+                  🧮 נוסחאות
+                </button>
+                <button onClick={() => { setShowTopicsList(false); setFormulaDrillActive(false) }} style={{
                   background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
                   borderRadius: 8, width: 32, height: 32, color: 'rgba(255,255,255,0.5)',
                   cursor: 'pointer', fontSize: 14,
@@ -1436,7 +1484,111 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               </div>
             </div>
 
-            {/* Building list */}
+            {/* Building list / Formula Drill */}
+            {formulaDrillActive ? (
+              <div style={{ overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {fdDone ? (
+                  <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                    <div style={{ fontSize: 56, marginBottom: 8 }}>
+                      {fdScore === fdItems.length ? '🏆' : fdScore >= fdItems.length * 0.7 ? '⭐' : '📖'}
+                    </div>
+                    <div style={{ fontSize: 20, fontWeight: 900, color: '#C3A6FF', marginBottom: 8 }}>
+                      {fdScore === fdItems.length ? 'Formula Master!' : fdScore >= fdItems.length * 0.7 ? 'Great Job!' : 'Keep Practicing!'}
+                    </div>
+                    <div style={{ fontSize: 42, fontWeight: 900, color: '#fff', marginBottom: 4, letterSpacing: -2 }}>
+                      {fdScore}<span style={{ fontSize: 24, color: 'rgba(255,255,255,0.35)', fontWeight: 400 }}>/{fdItems.length}</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 24 }}>
+                      {Math.round((fdScore / fdItems.length) * 100)}% correct
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 240, margin: '0 auto' }}>
+                      <button onClick={startFormulaDrill} style={{
+                        padding: '11px', background: 'rgba(195,166,255,0.15)',
+                        border: '1px solid rgba(195,166,255,0.4)', borderRadius: 10,
+                        color: '#C3A6FF', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                      }}>🔄 Try Again</button>
+                      <button onClick={() => setFormulaDrillActive(false)} style={{
+                        padding: '11px', background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
+                        color: 'rgba(255,255,255,0.5)', fontWeight: 600, fontSize: 13, cursor: 'pointer',
+                      }}>📚 Back to Topics</button>
+                    </div>
+                  </div>
+                ) : fdItems.length > 0 ? (() => {
+                  const item = fdItems[fdIndex]
+                  return (
+                    <>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        {fdItems.map((_, i) => (
+                          <div key={i} style={{
+                            height: 4, flex: 1, borderRadius: 2,
+                            background: i < fdIndex ? '#C3A6FF' : i === fdIndex ? 'rgba(195,166,255,0.55)' : 'rgba(255,255,255,0.12)',
+                            transition: 'background 0.3s',
+                          }} />
+                        ))}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textAlign: 'center', letterSpacing: 1 }}>
+                        🧮 זהה את הנוסחה — {fdIndex + 1} / {fdItems.length}
+                      </div>
+                      <div style={{
+                        background: 'rgba(195,166,255,0.08)', border: '1px solid rgba(195,166,255,0.25)',
+                        borderRadius: 14, padding: '20px 24px', textAlign: 'center',
+                        fontFamily: 'monospace', fontSize: 15, color: '#C3A6FF',
+                        letterSpacing: 0.5, lineHeight: 1.7, direction: 'ltr',
+                      }}>
+                        <div style={{ fontSize: 28, marginBottom: 10, fontFamily: 'system-ui' }}>{item.emoji}</div>
+                        {item.formula}
+                      </div>
+                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', textAlign: 'center', direction: 'rtl' }}>
+                        לאיזה מושג שייכת הנוסחה הזו?
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {item.options.map((opt, idx) => {
+                          const isCorrect = idx === item.correctIdx
+                          const isSelected = idx === fdSelected
+                          let bg = 'rgba(255,255,255,0.04)'
+                          let border = '1px solid rgba(255,255,255,0.1)'
+                          let color = 'rgba(255,255,255,0.75)'
+                          if (fdSelected !== null) {
+                            if (isCorrect) { bg = 'rgba(78,205,196,0.15)'; border = '2px solid #4ECDC4'; color = '#4ECDC4' }
+                            else if (isSelected) { bg = 'rgba(255,107,107,0.12)'; border = '1px solid #FF6B6B'; color = '#FF6B6B' }
+                          }
+                          return (
+                            <button key={idx} onClick={() => {
+                              if (fdSelected !== null) return
+                              setFdSelected(idx)
+                              if (isCorrect) setFdScore(s => s + 1)
+                            }} disabled={fdSelected !== null} style={{
+                              padding: '11px 16px', borderRadius: 10,
+                              cursor: fdSelected !== null ? 'default' : 'pointer',
+                              background: bg, border, color, fontSize: 13, fontWeight: 600,
+                              textAlign: 'center', direction: 'rtl', transition: 'all 0.2s',
+                            }}>
+                              {opt}
+                            </button>
+                          )
+                        })}
+                      </div>
+                      {fdSelected !== null && (
+                        <button onClick={() => {
+                          if (fdIndex + 1 >= fdItems.length) {
+                            setFdDone(true)
+                          } else {
+                            setFdIndex(i => i + 1)
+                            setFdSelected(null)
+                          }
+                        }} style={{
+                          padding: '12px', background: '#C3A6FF', border: 'none', borderRadius: 10,
+                          color: '#000', fontWeight: 800, fontSize: 14, cursor: 'pointer',
+                        }}>
+                          {fdIndex + 1 >= fdItems.length ? '🏆 סיים' : 'הבא →'}
+                        </button>
+                      )}
+                    </>
+                  )
+                })() : null}
+              </div>
+            ) : (
             <div style={{ overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
               {BUILDINGS.map(b => {
                 const isMastered = mastered.has(b.id)
@@ -1528,6 +1680,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                 )
               })}
             </div>
+            )}
           </div>
         </div>
       )}
