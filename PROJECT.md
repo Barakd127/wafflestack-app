@@ -53,17 +53,17 @@ For concept mapping and relationship visualization:
 ## Success Criteria — v1
 
 ### Must Have (MVP)
-- [ ] Student can complete a full quiz session (5 questions) end-to-end
-- [ ] XP is awarded and persists between sessions (localStorage)
-- [ ] At least 3 statistics topics with 5 questions each (15 total)
-- [ ] 3D city shows at least 3 different building types based on mastery
-- [ ] The default view when opening the app is the Study Hub (not 3D scene)
+- [x] Student can complete a full quiz session (5 questions) end-to-end — useQuiz.ts + StatChallenge.tsx wired 2026-04-18
+- [x] XP is awarded and persists between sessions (localStorage) — learningStore.ts Zustand persist 2026-04-15
+- [x] At least 3 statistics topics with 5 questions each (15 total) — quiz-bank.json v1.3: 10 topics × 10 questions (100 total) 2026-04-18
+- [x] 3D city shows at least 3 different building types based on mastery — 5 Kenney building types unlock at XP milestones 2026-04-15
+- [x] The default view when opening the app is the Study Hub (not 3D scene) — App.tsx default changed to 'study' 2026-04-15
 
 ### Should Have
-- [ ] Spaced repetition algorithm (even simple version)
-- [ ] Achievement unlock animation
-- [ ] Mind-map canvas accessible from Study Hub
-- [ ] Streak tracking (consecutive days)
+- [x] Spaced repetition algorithm (even simple version) — SM-2 (CardData + sm2Update + recordSM2Answer + getNextQuestion) in learningStore.ts 2026-04-18
+- [ ] Achievement unlock animation — XP milestone celebration overlay added 2026-04-15 (partial; per-achievement badges not yet implemented)
+- [ ] Mind-map canvas accessible from Study Hub — Canvas mode exists; Study Hub nav link TBD
+- [x] Streak tracking (consecutive days) — lastSessionDate/currentStreak/longestStreak in learningStore.ts + 🔥 pill in StudyHub header 2026-04-21
 
 ### Won't Have in v1
 - User accounts / server-side persistence

@@ -43,31 +43,31 @@ Reference: https://kenney.nl/knowledge-base/game-assets-3d/importing-3d-models-i
 
 ## Implementation Plan
 
-### Phase 1: Hover Preview System
-- [ ] Add `HoverPreview` component
-- [ ] Detect mouse position over grid
-- [ ] Show semi-transparent ghost building
-- [ ] Implement collision detection
-- [ ] Green material for valid
-- [ ] Red material for invalid
+### Phase 1: Hover Preview System ✅ (completed 2026-04-19)
+- [x] Add `HoverPreview` component
+- [x] Detect mouse position over grid
+- [x] Show semi-transparent ghost building
+- [x] Implement collision detection
+- [x] Green material for valid
+- [x] Red material for invalid
 
-### Phase 2: Sound System
-- [ ] Find/create satisfying placement sound
-- [ ] Add Web Audio API integration
-- [ ] Play sound on building placement
-- [ ] Add volume control
+### Phase 2: Sound System ✅ (completed 2026-04-19)
+- [x] Find/create satisfying placement sound
+- [x] Add Web Audio API integration
+- [x] Play sound on building placement
+- [x] Add volume control
 
-### Phase 3: Thumbnail Polish
-- [ ] Add drop shadow to thumbnails in CSS
-- [ ] Ensure consistent sizing
-- [ ] Add subtle border/outline
-- [ ] Test across all kits
+### Phase 3: Thumbnail Polish ✅ (completed 2026-04-19)
+- [x] Add drop shadow to thumbnails in CSS
+- [x] Ensure consistent sizing
+- [x] Add subtle border/outline
+- [x] Test across all kits
 
-### Phase 4: Color Variations (Kenney System)
-- [ ] Study Kenney's vertex color system
-- [ ] Add color variation selector to UI
-- [ ] Apply variations to models
-- [ ] Save preferences per building
+### Phase 4: Color Variations (Kenney System) ✅ (completed 2026-04-19)
+- [x] Study Kenney's vertex color system
+- [x] Add color variation selector to UI
+- [x] Apply variations to models
+- [x] Save preferences per building
 
 ---
 

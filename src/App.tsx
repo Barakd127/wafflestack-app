@@ -28,6 +28,13 @@ function App() {
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('wafflestack-dark-mode') === 'true'
   })
+  // Track which view opened the mind map, so the close button returns correctly
+  const [mindmapFrom, setMindmapFrom] = useState<string>('study')
+
+  const openMindMap = (from: string) => {
+    setMindmapFrom(from)
+    setActiveView('mindmap')
+  }
 
   useEffect(() => {
     if (darkMode) {
@@ -75,7 +82,10 @@ function App() {
               <GameScene />
             </div>
             <StudyHub
-              onViewChange={setActiveView}
+              onViewChange={(v) => {
+                if (v === 'mindmap') openMindMap('study')
+                else setActiveView(v)
+              }}
               darkMode={darkMode}
               onOpenLesson={(id) => { setLessonTopic(id); setActiveView('lesson') }}
             />
@@ -90,7 +100,12 @@ function App() {
           />
         )}
 
-        {activeView === 'mindmap' && <MindMapCanvas onViewChange={setActiveView} darkMode={darkMode} />}
+        {activeView === 'mindmap' && (
+          <MindMapCanvas
+            onViewChange={(v) => setActiveView(v === 'study' ? (mindmapFrom as Parameters<typeof setActiveView>[0]) : v)}
+            darkMode={darkMode}
+          />
+        )}
 
         {activeView === '3d' && (
           <div className="w-full h-full relative">
@@ -254,16 +269,10 @@ function App() {
             <WaffleStackCity onBack={() => setActiveView('landing')} />
             <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
               <button
-                onClick={() => setActiveView('mission')}
-                className="px-4 py-2 backdrop-blur-xl bg-teal-500/80 border border-teal-400/50 rounded-xl text-white hover:bg-teal-600/80 transition-all"
+                onClick={() => openMindMap('wafflecity')}
+                className="px-4 py-2 backdrop-blur-xl bg-violet-600/80 border border-violet-400/50 rounded-xl text-white hover:bg-violet-700/80 transition-all font-semibold shadow-lg"
               >
-                🎯 Mission Control
-              </button>
-              <button
-                onClick={() => setActiveView('townscaper')}
-                className="px-4 py-2 backdrop-blur-xl bg-pink-500/80 border border-pink-400/50 rounded-xl text-white hover:bg-pink-600/80 transition-all"
-              >
-                🏘️ Townscaper
+                🧠 Mind Map
               </button>
             </div>
           </div>
