@@ -252,7 +252,7 @@ function CityLoader() {
       position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
       background: 'linear-gradient(180deg, #87CEEB 0%, #b0e0f5 100%)',
-      fontFamily: 'system-ui', zIndex: 10, pointerEvents: 'none',
+      fontFamily: "'Heebo', system-ui, sans-serif", zIndex: 10, pointerEvents: 'none',
     }}>
       <div style={{ fontSize: 56, marginBottom: 16 }}>🏙️</div>
       <div style={{ fontSize: 18, fontWeight: 700, color: '#1a2a3a', marginBottom: 20 }}>
@@ -328,7 +328,7 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
           <div style={{
             background: 'rgba(0,0,0,0.78)', color: 'white',
             padding: '5px 11px', borderRadius: 8, fontSize: 12,
-            fontFamily: 'system-ui', textAlign: 'center',
+            fontFamily: "'Heebo', system-ui, sans-serif", textAlign: 'center',
             direction: 'rtl', whiteSpace: 'nowrap',
             border: `1px solid ${activeColor ?? 'rgba(255,255,255,0.3)'}`,
             pointerEvents: 'none',
@@ -345,7 +345,7 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
           <div style={{
             background: 'rgba(0,0,0,0.88)', color: 'white',
             padding: '8px 14px', borderRadius: 10, fontSize: 13,
-            fontFamily: 'system-ui', textAlign: 'center',
+            fontFamily: "'Heebo', system-ui, sans-serif", textAlign: 'center',
             direction: 'rtl', whiteSpace: 'nowrap',
             border: `2px solid ${activeColor ?? '#fff'}`,
           }}>
@@ -730,7 +730,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       {/* Top-right controls: XP + ScoreBoard toggle */}
       <div style={{
         position: 'absolute', top: 16, right: 16, zIndex: 50,
-        display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'system-ui',
+        display: 'flex', alignItems: 'center', gap: 8, fontFamily: "'Heebo', system-ui, sans-serif",
       }}>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 8,
@@ -872,7 +872,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         position: 'absolute', top: 16, left: 60, zIndex: 50,
         background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
         border: '1px solid rgba(78,205,196,0.3)', borderRadius: 20,
-        padding: '6px 14px', fontFamily: 'system-ui', color: 'white',
+        padding: '6px 14px', fontFamily: "'Heebo', system-ui, sans-serif", color: 'white',
         display: 'flex', alignItems: 'center', gap: 10,
       }}>
         <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
@@ -899,7 +899,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             backdropFilter: 'blur(10px)',
             border: `1px solid ${dailyDone ? 'rgba(78,205,196,0.35)' : 'rgba(255,215,0,0.3)'}`,
             borderRadius: 20, padding: '4px 10px 4px 13px',
-            fontFamily: 'system-ui',
+            fontFamily: "'Heebo', system-ui, sans-serif",
             display: 'flex', alignItems: 'center', gap: 8,
             cursor: dailyDone ? 'default' : 'pointer',
             transition: 'all 0.2s',
@@ -929,7 +929,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       <div style={{
         position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)',
         color: 'white', fontSize: 20, fontWeight: 'bold',
-        fontFamily: 'system-ui', zIndex: 50, direction: 'rtl',
+        fontFamily: "'Heebo', system-ui, sans-serif", zIndex: 50, direction: 'rtl',
         background: 'rgba(0,0,0,0.5)', padding: '7px 18px', borderRadius: 12,
         backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)',
         whiteSpace: 'nowrap',
@@ -941,7 +941,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       {!selectedBuilding && (
         <div style={{
           position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-          color: 'rgba(255,255,255,0.5)', fontSize: 12, fontFamily: 'system-ui', zIndex: 50,
+          color: 'rgba(255,255,255,0.5)', fontSize: 12, fontFamily: "'Heebo', system-ui, sans-serif", zIndex: 50,
           background: 'rgba(0,0,0,0.4)', padding: '5px 14px', borderRadius: 20,
           backdropFilter: 'blur(6px)', pointerEvents: 'none', whiteSpace: 'nowrap',
         }}>
@@ -958,7 +958,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255,255,255,0.2)', borderRadius: 20,
             padding: '5px 14px', color: 'rgba(255,255,255,0.7)', fontSize: 12,
-            fontFamily: 'system-ui', cursor: 'pointer',
+            fontFamily: "'Heebo', system-ui, sans-serif", cursor: 'pointer',
           }}
         >
           ← Home
@@ -992,7 +992,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             background: 'linear-gradient(135deg, #0a1a30 0%, #0f2540 100%)',
             border: '2px solid rgba(255,215,0,0.6)',
             borderRadius: 20, padding: '28px 40px', textAlign: 'center',
-            fontFamily: 'system-ui', color: 'white',
+            fontFamily: "'Heebo', system-ui, sans-serif", color: 'white',
             boxShadow: '0 0 60px rgba(255,215,0,0.25)',
             position: 'relative', overflow: 'hidden',
             minWidth: 280,
@@ -1038,7 +1038,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               : 'linear-gradient(135deg, #0a1a20 0%, #0f2535 100%)',
             border: `2px solid ${milestone === 10 ? '#FFD700' : '#4ECDC4'}`,
             borderRadius: 24, padding: '40px 48px', textAlign: 'center',
-            fontFamily: 'system-ui', color: 'white', maxWidth: 460,
+            fontFamily: "'Heebo', system-ui, sans-serif", color: 'white', maxWidth: 460,
             boxShadow: `0 0 60px ${milestone === 10 ? 'rgba(255,215,0,0.3)' : 'rgba(78,205,196,0.3)'}`,
             animation: 'milestonein 0.4s ease forwards',
           }} onClick={e => e.stopPropagation()}>
@@ -1094,7 +1094,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
             border: '1px solid rgba(78,205,196,0.3)', borderRadius: 20,
             padding: '32px 36px', maxWidth: 440, width: '90%',
-            fontFamily: 'system-ui', color: 'white', textAlign: 'center',
+            fontFamily: "'Heebo', system-ui, sans-serif", color: 'white', textAlign: 'center',
             boxShadow: '0 0 60px rgba(78,205,196,0.15)',
           }}>
             {/* Step indicator dots */}
@@ -1195,7 +1195,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)',
           background: 'rgba(10,10,20,0.92)', border: `2px solid ${selectedBuilding.color ?? '#fff'}`,
           borderRadius: 16, padding: '20px 28px', color: 'white',
-          fontFamily: 'system-ui', direction: 'rtl', textAlign: 'right',
+          fontFamily: "'Heebo', system-ui, sans-serif", direction: 'rtl', textAlign: 'right',
           minWidth: 300, zIndex: 100, backdropFilter: 'blur(12px)',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1314,7 +1314,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                 background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
                 border: '1px solid rgba(78,205,196,0.3)',
                 borderRadius: 20, padding: '36px 32px', maxWidth: 440, width: '100%',
-                fontFamily: 'system-ui', textAlign: 'center',
+                fontFamily: "'Heebo', system-ui, sans-serif", textAlign: 'center',
                 boxShadow: '0 0 60px rgba(78,205,196,0.1)',
               }}>
                 <div style={{ fontSize: 56, marginBottom: 12 }}>
@@ -1363,7 +1363,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
               border: `1px solid ${q.color}44`,
               borderRadius: 20, padding: '24px 28px', maxWidth: 520, width: '100%',
-              fontFamily: 'system-ui', maxHeight: '90vh', overflowY: 'auto',
+              fontFamily: "'Heebo', system-ui, sans-serif", maxHeight: '90vh', overflowY: 'auto',
               boxShadow: `0 0 60px ${q.color}18`,
             }}>
               {/* Header */}
@@ -1605,7 +1605,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                         fontFamily: 'monospace', fontSize: 15, color: '#C3A6FF',
                         letterSpacing: 0.5, lineHeight: 1.7, direction: 'ltr',
                       }}>
-                        <div style={{ fontSize: 28, marginBottom: 10, fontFamily: 'system-ui' }}>{item.emoji}</div>
+                        <div style={{ fontSize: 28, marginBottom: 10, fontFamily: "'Heebo', system-ui, sans-serif" }}>{item.emoji}</div>
                         {item.formula}
                       </div>
                       <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', textAlign: 'center', direction: 'rtl' }}>
@@ -1782,7 +1782,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
             padding: '24px 28px', width: '100%', maxWidth: 580,
             maxHeight: '85vh', overflowY: 'auto',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontFamily: "'Heebo', system-ui, sans-serif",
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <div>
@@ -1863,7 +1863,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               background: 'linear-gradient(160deg, #0a0a18 0%, #0f1525 100%)',
               border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24,
               padding: '28px 32px', width: '100%', maxWidth: 480,
-              fontFamily: 'system-ui', color: '#fff',
+              fontFamily: "'Heebo', system-ui, sans-serif", color: '#fff',
               boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
             }} onClick={e => e.stopPropagation()}>
 
@@ -1997,7 +1997,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               border: '1px solid rgba(78,205,196,0.25)',
               borderRadius: 20, padding: '22px 24px',
               maxWidth: 700, width: '100%',
-              fontFamily: 'system-ui', color: 'white',
+              fontFamily: "'Heebo', system-ui, sans-serif", color: 'white',
               boxShadow: '0 0 60px rgba(78,205,196,0.12)',
             }}
             onClick={e => e.stopPropagation()}
@@ -2124,7 +2124,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             background: 'linear-gradient(180deg, #0a0a18 0%, #0f1525 100%)',
             border: '1px solid rgba(255,255,255,0.12)', borderRadius: 20,
             padding: '28px 36px', minWidth: 340, maxWidth: 460,
-            fontFamily: 'system-ui', color: 'white',
+            fontFamily: "'Heebo', system-ui, sans-serif", color: 'white',
           }} onClick={e => e.stopPropagation()}>
             <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 20 }}>⌨️ Keyboard Shortcuts</div>
             {[

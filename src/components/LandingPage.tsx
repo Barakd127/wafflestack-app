@@ -19,7 +19,7 @@ export default function LandingPage({ onEnterCity }: Props) {
     <div style={{
       width: '100%', height: '100%', overflow: 'auto',
       background: 'linear-gradient(160deg, #050510 0%, #0a0a20 40%, #0d1525 100%)',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
+      fontFamily: "'Heebo', system-ui, sans-serif",
       color: '#fff',
       display: 'flex', flexDirection: 'column', alignItems: 'center',
     }}>

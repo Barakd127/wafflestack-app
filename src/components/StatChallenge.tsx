@@ -658,7 +658,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
         maxHeight: '90vh', overflow: 'hidden',
         display: 'flex', flexDirection: 'column',
         boxShadow: `0 0 60px ${color}22`,
-        fontFamily: 'system-ui, -apple-system, sans-serif',
+        fontFamily: "'Heebo', system-ui, sans-serif",
       }}>
 
         {/* Header */}
