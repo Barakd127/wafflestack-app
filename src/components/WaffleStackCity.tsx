@@ -4,6 +4,7 @@ import { Suspense, useState, useRef, useCallback, useEffect } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo, getQuizForBuilding } from './StatChallenge'
 import ScoreBoard from './ScoreBoard'
+import ExamMode from './ExamMode'
 import { useCitySound, playBuildingPlacedTone } from './SoundManager'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
@@ -406,6 +407,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [showTopicsList, setShowTopicsList] = useState(false)
   const [showGlossary, setShowGlossary] = useState(false)
   const [showFlashCards, setShowFlashCards] = useState(false)
+  const [showExamMode, setShowExamMode] = useState(false)
   const [flashCardIndex, setFlashCardIndex] = useState(0)
   const [flashCardFlipped, setFlashCardFlipped] = useState(false)
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
@@ -489,12 +491,16 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           setShowFlashCards(f => !f)
           setFlashCardFlipped(false)
           break
+        case 'e':
+        case 'E':
+          setShowExamMode(m => !m)
+          break
       }
     }
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, toggleSound])
+  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, toggleSound])
 
   // Handle deep-link hash on mount
   useEffect(() => {
@@ -705,6 +711,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           title="Flash Cards — review all concepts (F)"
         >
           📇 Flash
+        </button>
+        <button
+          onClick={() => setShowExamMode(m => !m)}
+          style={{
+            background: showExamMode ? 'rgba(243,129,129,0.25)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showExamMode ? 'rgba(243,129,129,0.6)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showExamMode ? '#F38181' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Exam Mode — 10 questions, timed (E)"
+        >
+          📝 Exam
         </button>
         <button
           onClick={() => setShowTopicsList(t => !t)}
@@ -1101,6 +1122,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           </button>
         </div>
       )}
+
+      {/* Exam Mode */}
+      {showExamMode && <ExamMode onClose={() => setShowExamMode(false)} />}
 
       {/* Challenge Modal */}
       {challengeBuilding && (() => {
