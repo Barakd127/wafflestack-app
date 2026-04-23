@@ -6,6 +6,7 @@ import StatChallenge, { BuildingInfo, getQuizForBuilding } from './StatChallenge
 import ScoreBoard from './ScoreBoard'
 import ExamMode from './ExamMode'
 import { useCitySound, playBuildingPlacedTone } from './SoundManager'
+import { useLearningStore, BUILDING_UNLOCK_CHAIN } from '../store/learningStore'
 import LearningMap from './LearningMap'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
@@ -2165,3 +2166,9 @@ BUILDINGS.forEach(b => {
   useGLTF.preload(url)
 })
 ROAD_MODELS.forEach(r => useGLTF.preload(`${import.meta.env.BASE_URL}models/kenney-suburban/${r.model}.glb`))
+
+
+
+
+
+
