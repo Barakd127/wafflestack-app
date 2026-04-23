@@ -61,8 +61,8 @@ For concept mapping and relationship visualization:
 
 ### Should Have
 - [x] Spaced repetition algorithm (even simple version) — SM-2 (CardData + sm2Update + recordSM2Answer + getNextQuestion) in learningStore.ts 2026-04-18
-- [ ] Achievement unlock animation — XP milestone celebration overlay added 2026-04-15 (partial; per-achievement badges not yet implemented)
-- [ ] Mind-map canvas accessible from Study Hub — Canvas mode exists; Study Hub nav link TBD
+- [x] Achievement unlock animation — per-achievement badges shipped 2026-04-22; badge toast wired in StudyHub.tsx (3 achievements: First T-Test, Distribution Master, 5-Day Streak)
+- [x] Mind-map canvas accessible from Study Hub — sidebar nav item + bento card wired 2026-04-22 (id: mindmap, icon: Network)
 - [x] Streak tracking (consecutive days) — lastSessionDate/currentStreak/longestStreak in learningStore.ts + 🔥 pill in StudyHub header 2026-04-21
 
 ### Won't Have in v1
@@ -102,5 +102,4 @@ The 3D engine is impressive but overbuilt for v1. The default view opens to Town
 4. Achievement system
 5. Spaced repetition
 6. Polish and animations
-GITHUB_BRIDGE=https://github.com/Barakd127/wafflestack-ops 
-GITHUB_BRIDGE=https://github.com/Barakd127/wafflestack-ops 
+GITHUB_BRIDGE=https://github.com/Barakd127/wafflestack-ops

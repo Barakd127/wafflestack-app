@@ -2,10 +2,6 @@ import { useState, useEffect } from 'react'
 import { Moon, Sun } from 'lucide-react'
 import StudyHub from './components/StudyHub'
 import MindMapCanvas from './components/MindMapCanvas'
-import GameScene from './components/GameScene'
-import UIOverlay from './components/UIOverlay'
-import BottomDock from './components/BottomDock'
-import TerrainDemo from './components/TerrainDemo'
 import HighEndCity from './components/HighEndCity'
 import TownscaperScene from './components/TownscaperScene'
 import CityModeScene from './components/CityModeScene'
@@ -21,9 +17,16 @@ function App() {
   const onboardingCompleted = useLearningStore(s => s.onboardingCompleted)
   // Per spec: skip onboarding if userName already set (either via localStorage key or Zustand store)
   const hasUserName = Boolean(localStorage.getItem('userName') || onboardingCompleted)
-  const [activeView, setActiveView] = useState<'onboarding' | 'study' | 'mindmap' | '3d' | 'terrain' | 'city' | 'townscaper' | 'citymode' | 'colortest' | 'wafflecity' | 'mission' | 'landing' | 'lesson'>(() =>
-    hasUserName ? 'landing' : 'onboarding'
-  )
+  const [activeView, setActiveView] = useState<'onboarding' | 'study' | 'mindmap' | 'city' | 'townscaper' | 'citymode' | 'colortest' | 'wafflecity' | 'mission' | 'landing' | 'lesson'>(() => {
+    const h = typeof window !== 'undefined' ? window.location.hash : ''
+    if (h === '#view-highcity') return 'city'
+    if (h === '#view-townscaper') return 'townscaper'
+    if (h === '#view-citymode') return 'citymode'
+    if (h === '#view-wafflecity' || h === '#city') return 'wafflecity'
+    if (h === '#study') return 'study'
+    if (h === '#landing') return 'landing'
+    return hasUserName ? 'landing' : 'onboarding'
+  })
   const [lessonTopic, setLessonTopic] = useState<LessonTopicId>('mean')
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('wafflestack-dark-mode') === 'true'
@@ -50,11 +53,12 @@ function App() {
     const hash = window.location.hash
     if (hash === '#city' || hash === '#topics' || hash === '#score' || hash.startsWith('#challenge/')) {
       setActiveView('wafflecity')
-    } else if (hash === '#landing') {
-      setActiveView('landing')
-    } else if (hash === '#study') {
-      setActiveView('study')
-    }
+    } else if (hash === '#landing') setActiveView('landing')
+    else if (hash === '#study') setActiveView('study')
+    else if (hash === '#view-highcity') setActiveView('city')
+    else if (hash === '#view-townscaper') setActiveView('townscaper')
+    else if (hash === '#view-citymode') setActiveView('citymode')
+    else if (hash === '#view-wafflecity') setActiveView('wafflecity')
   }, [])
 
   // Update hash when top-level view changes (WaffleStackCity manages its own sub-hashes)
@@ -82,6 +86,7 @@ function App() {
           <StudyHub
             onViewChange={(v) => {
               if (v === 'mindmap') openMindMap('study')
+              else if (v === '3d') setActiveView('wafflecity')
               else setActiveView(v)
             }}
             darkMode={darkMode}
@@ -99,71 +104,13 @@ function App() {
 
         {activeView === 'mindmap' && (
           <MindMapCanvas
-            onViewChange={(v) => setActiveView(v === 'study' ? (mindmapFrom as Parameters<typeof setActiveView>[0]) : v)}
+            onViewChange={(v) => {
+              if (v === 'study') setActiveView(mindmapFrom as Parameters<typeof setActiveView>[0])
+              else if (v === '3d') setActiveView('wafflecity')
+              else setActiveView(v)
+            }}
             darkMode={darkMode}
           />
-        )}
-
-        {activeView === '3d' && (
-          <div className="w-full h-full relative">
-            {/* Full 3D Scene */}
-            <GameScene />
-
-            {/* UI Overlay - Top navigation and side panels */}
-            <UIOverlay />
-
-            {/* Bottom Dock - Block selection tools */}
-            <BottomDock />
-
-            {/* Navigation Buttons */}
-            <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
-              <button
-                onClick={() => setActiveView('city')}
-                className="px-4 py-2 backdrop-blur-xl bg-amber-500/80 border border-amber-400/50 rounded-xl text-white hover:bg-amber-600/80 transition-all"
-              >
-                🏛️ Learning City
-              </button>
-              <button
-                onClick={() => setActiveView('terrain')}
-                className="px-4 py-2 backdrop-blur-xl bg-purple-500/80 border border-purple-400/50 rounded-xl text-white hover:bg-purple-600/80 transition-all"
-              >
-                🏔️ Terrain Demo
-              </button>
-              <button
-                onClick={() => setActiveView('study')}
-                className="px-4 py-2 backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all"
-              >
-                Study Mode →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeView === 'terrain' && (
-          <div className="w-full h-full relative">
-            <TerrainDemo />
-            {/* Navigation */}
-            <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
-              <button
-                onClick={() => setActiveView('city')}
-                className="px-4 py-2 backdrop-blur-xl bg-amber-500/80 border border-amber-400/50 rounded-xl text-white hover:bg-amber-600/80 transition-all"
-              >
-                🏛️ Learning City
-              </button>
-              <button
-                onClick={() => setActiveView('3d')}
-                className="px-4 py-2 backdrop-blur-xl bg-cyan-500/80 border border-cyan-400/50 rounded-xl text-white hover:bg-cyan-600/80 transition-all"
-              >
-                🎮 City Builder
-              </button>
-              <button
-                onClick={() => setActiveView('study')}
-                className="px-4 py-2 backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all"
-              >
-                Study Mode →
-              </button>
-            </div>
-          </div>
         )}
 
         {activeView === 'city' && (
@@ -176,18 +123,6 @@ function App() {
                 className="px-4 py-2 backdrop-blur-xl bg-pink-500/80 border border-pink-400/50 rounded-xl text-white hover:bg-pink-600/80 transition-all"
               >
                 🏘️ Townscaper
-              </button>
-              <button
-                onClick={() => setActiveView('terrain')}
-                className="px-4 py-2 backdrop-blur-xl bg-purple-500/80 border border-purple-400/50 rounded-xl text-white hover:bg-purple-600/80 transition-all"
-              >
-                🏔️ Terrain
-              </button>
-              <button
-                onClick={() => setActiveView('3d')}
-                className="px-4 py-2 backdrop-blur-xl bg-cyan-500/80 border border-cyan-400/50 rounded-xl text-white hover:bg-cyan-600/80 transition-all"
-              >
-                🎮 Voxel
               </button>
             </div>
           </div>
@@ -209,12 +144,6 @@ function App() {
                 className="px-4 py-2 backdrop-blur-xl bg-amber-500/80 border border-amber-400/50 rounded-xl text-white hover:bg-amber-600/80 transition-all"
               >
                 🏛️ 3D City
-              </button>
-              <button
-                onClick={() => setActiveView('terrain')}
-                className="px-4 py-2 backdrop-blur-xl bg-purple-500/80 border border-purple-400/50 rounded-xl text-white hover:bg-purple-600/80 transition-all"
-              >
-                🏔️ Terrain
               </button>
             </div>
           </div>
