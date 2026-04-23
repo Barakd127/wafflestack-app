@@ -79,20 +79,14 @@ function App() {
       {/* Main Content */}
       <div className="relative z-10 w-full h-full">
         {activeView === 'study' && (
-          <>
-            {/* Background 3D Scene - Ambient background for study view */}
-            <div className="absolute inset-0 opacity-20 pointer-events-none">
-              <GameScene />
-            </div>
-            <StudyHub
-              onViewChange={(v) => {
-                if (v === 'mindmap') openMindMap('study')
-                else setActiveView(v)
-              }}
-              darkMode={darkMode}
-              onOpenLesson={(id) => { setLessonTopic(id); setActiveView('lesson') }}
-            />
-          </>
+          <StudyHub
+            onViewChange={(v) => {
+              if (v === 'mindmap') openMindMap('study')
+              else setActiveView(v)
+            }}
+            darkMode={darkMode}
+            onOpenLesson={(id) => { setLessonTopic(id); setActiveView('lesson') }}
+          />
         )}
 
         {activeView === 'lesson' && (
