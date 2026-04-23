@@ -232,7 +232,7 @@ function HomeScreen({ onGoLearning, onGoWorld }: {
             {/* Building photo */}
             <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 16, minHeight: 120 }}>
               <img
-                src="/building-figma.png"
+                src={`${import.meta.env.BASE_URL}building-figma.png`}
                 alt="building"
                 style={{ maxHeight: 120, maxWidth: '100%', objectFit: 'contain', borderRadius: 12, filter: 'drop-shadow(0 4px 12px rgba(31,41,55,0.2))' }}
                 onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
@@ -446,7 +446,7 @@ function LearningScreen() {
       <div style={{ background: '#FFFFFF', boxShadow: '2px 2px 6px rgba(0,0,0,0.25)', height: 74, display: 'flex', alignItems: 'center', padding: '0 32px', flexShrink: 0 }}>
         {/* Breadcrumb with building thumb + progress bar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1 }}>
-          <img src="/building-figma.png" alt="" style={{ width: 43, height: 31, objectFit: 'cover', borderRadius: 6 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+          <img src={`${import.meta.env.BASE_URL}building-figma.png`} alt="" style={{ width: 43, height: 31, objectFit: 'cover', borderRadius: 6 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
           <div style={{ flex: 1 }}>
             <div style={{ height: 7, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
               <div style={{ width: `${((currentQ+1)/total)*100}%`, height: '100%', background: 'rgba(212,175,55,0.7)', borderRadius: 10, transition: 'width 0.3s' }} />
