@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { LessonTopicId } from './LessonPage'
+import { useLearningStore } from '../store/learningStore'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
@@ -7,7 +8,7 @@ interface StudyHubProps {
   onOpenLesson?: (id: LessonTopicId) => void
 }
 
-type InternalView = 'home' | 'learning'
+type InternalView = 'home' | 'learning' | 'complete'
 
 // ── Exact Figma design tokens ──────────────────────────────────────────────────
 const PAGE_BG       = 'linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 49.05%, #3351CA 136%)'
@@ -83,10 +84,11 @@ function ActivityChart() {
 }
 
 // ── Sidebar ────────────────────────────────────────────────────────────────────
-function Sidebar({ active, onNav, onGoWorld }: {
+function Sidebar({ active, onNav, onGoWorld, onGoMindmap }: {
   active: InternalView
   onNav: (v: InternalView) => void
   onGoWorld: () => void
+  onGoMindmap: () => void
 }) {
   const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string }> = [
     { id: 'home',     label: 'דף הבית',    icon: '⌂' },
@@ -133,6 +135,7 @@ function Sidebar({ active, onNav, onGoWorld }: {
             <button key={i}
               onClick={() => {
                 if (item.action === 'world') { onGoWorld(); return }
+                if (item.action === 'mindmap') { onGoMindmap(); return }
                 if (item.id !== null) onNav(item.id)
               }}
               style={{
@@ -168,6 +171,7 @@ function Sidebar({ active, onNav, onGoWorld }: {
 // ── Top bar ────────────────────────────────────────────────────────────────────
 function TopBar({ title }: { title: string }) {
   const userName = localStorage.getItem('userName') || 'Bdakar'
+  const xp = useLearningStore(state => state.xp)
   return (
     <div style={{
       background: 'rgba(255,255,255,0.55)',
@@ -182,6 +186,18 @@ function TopBar({ title }: { title: string }) {
     }} dir="rtl">
       <h1 style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 32, color: TEXT_LIGHT, margin: 0 }}>{title}</h1>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }} dir="ltr">
+        {/* XP pill */}
+        <span style={{
+          background: 'rgba(212,175,55,0.15)',
+          border: '1px solid rgba(212,175,55,0.4)',
+          borderRadius: 999,
+          padding: '3px 10px',
+          color: '#D4AF37',
+          fontSize: 13,
+          fontFamily: "'Rubik', sans-serif",
+        }}>
+          ⭐ {xp} XP
+        </span>
         <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_DARK }}>Hi, {userName}</span>
         {/* Profile icon */}
         <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, display: 'flex', alignItems: 'center' }}>
@@ -204,9 +220,10 @@ function TopBar({ title }: { title: string }) {
 }
 
 // ── Home screen ────────────────────────────────────────────────────────────────
-function HomeScreen({ onGoLearning, onGoWorld }: {
+function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
   onGoLearning: () => void
   onGoWorld: () => void
+  onGoMindmap: () => void
 }) {
   return (
     <div style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
@@ -295,6 +312,10 @@ function HomeScreen({ onGoLearning, onGoWorld }: {
                 בעיר שלך!
               </div>
             </div>
+            {/* CTA button */}
+            <button onClick={onGoMindmap} style={{ marginTop: 12, background: 'linear-gradient(90deg,#254A9F,#3351CA)', color:'#fff', border:'none', borderRadius:24, padding:'10px 0', fontWeight:600, fontSize:15, cursor:'pointer', fontFamily:"'Rubik',sans-serif", width:'100%', boxShadow:'0px 2px 6px rgba(51,81,202,0.4)' }}>
+              🗺 פתח מפת מושגים
+            </button>
           </div>
         </div>
 
@@ -414,7 +435,7 @@ function HomeScreen({ onGoLearning, onGoWorld }: {
 }
 
 // ── Learning area screen ───────────────────────────────────────────────────────
-function LearningScreen() {
+function LearningScreen({ onBack }: { onBack: () => void }) {
   const [currentQ, setCurrentQ] = useState(4)
   const [answer, setAnswer] = useState('')
   const [checked, setChecked] = useState(false)
@@ -422,6 +443,9 @@ function LearningScreen() {
 
   const q = QUESTIONS[currentQ] || QUESTIONS[0]
   const total = QUESTIONS.length
+
+  // Completion check: all dots are 'correct' or 'future'
+  const isComplete = dotStates.every(s => s === 'correct' || s === 'future')
 
   const handleCheck = () => {
     if (!answer.trim()) return
@@ -438,6 +462,13 @@ function LearningScreen() {
     const next = [...dotStates]
     if (next[ni] === 'future' || next[ni] === 'empty') next[ni] = 'current'
     setDotStates(next)
+  }
+
+  const handleReset = () => {
+    setCurrentQ(0)
+    setAnswer('')
+    setChecked(false)
+    setDotStates([...DOT_STATES])
   }
 
   return (
@@ -467,73 +498,102 @@ function LearningScreen() {
           padding: '32px 40px 28px',
           position: 'relative',
         }}>
-          {/* Question number */}
-          <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 24, color: TEXT_DARK, marginBottom: 16, textAlign: 'right' }}>שאלה {currentQ + 1}</div>
+          {isComplete ? (
+            /* ── Completion panel ── */
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: 16 }}>
+              <div style={{ fontSize: 64 }}>✅</div>
+              <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 28, color: TEXT_DARK, textAlign: 'center' }}>
+                סיימת את הסשן!
+              </div>
+              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 18, color: TEXT_TIP, textAlign: 'center' }}>
+                ענית על כל 8 השאלות 🎉
+              </div>
+              <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
+                <button
+                  onClick={onBack}
+                  style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '12px 28px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}
+                >
+                  חזור לדף הבית
+                </button>
+                <button
+                  onClick={handleReset}
+                  style={{ background: '#fff', color: BUTTON_COLOR, border: `2px solid ${BUTTON_COLOR}`, borderRadius: 24, padding: '12px 28px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
+                >
+                  עוד סשן
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Question number */}
+              <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 24, color: TEXT_DARK, marginBottom: 16, textAlign: 'right' }}>שאלה {currentQ + 1}</div>
 
-          {/* Question text */}
-          <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 20, color: '#000', lineHeight: 2, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: 24 }}>
-            {q.text}
-          </div>
+              {/* Question text */}
+              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 20, color: '#000', lineHeight: 2, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: 24 }}>
+                {q.text}
+              </div>
 
-          {/* Textarea */}
-          <div style={{ border: '2px solid #B4B4B4', borderRadius: 12, overflow: 'hidden', marginBottom: 20 }}>
-            <textarea
-              value={answer}
-              onChange={e => setAnswer(e.target.value)}
-              placeholder="הכנס את תשובתך כאן..."
-              dir="rtl"
-              style={{
-                width: '100%', minHeight: 120,
-                border: 'none', outline: 'none',
-                padding: '16px 20px',
-                fontSize: 20, color: '#B0B0B0',
-                background: 'transparent',
-                fontFamily: "'Inter', sans-serif",
-                resize: 'vertical',
-                direction: 'rtl', textAlign: 'center',
-                boxSizing: 'border-box',
-              }}
-              onFocus={e => { e.target.style.color = TEXT_DARK }}
-              onBlur={e => { if (!e.target.value) e.target.style.color = '#B0B0B0' }}
-            />
-          </div>
+              {/* Textarea */}
+              <div style={{ border: '2px solid #B4B4B4', borderRadius: 12, overflow: 'hidden', marginBottom: 20 }}>
+                <textarea
+                  value={answer}
+                  onChange={e => setAnswer(e.target.value)}
+                  placeholder="הכנס את תשובתך כאן..."
+                  dir="rtl"
+                  style={{
+                    width: '100%', minHeight: 120,
+                    border: 'none', outline: 'none',
+                    padding: '16px 20px',
+                    fontSize: 20, color: '#B0B0B0',
+                    background: 'transparent',
+                    fontFamily: "'Inter', sans-serif",
+                    resize: 'vertical',
+                    direction: 'rtl', textAlign: 'center',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={e => { e.target.style.color = TEXT_DARK }}
+                  onBlur={e => { if (!e.target.value) e.target.style.color = '#B0B0B0' }}
+                />
+              </div>
 
-          {/* Next arrow button (right edge) */}
-          <button onClick={goNext}
-            style={{ position: 'absolute', left: -20, top: '40%', background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(18,36,96,0.3)', fontSize: 20 }}>
-            ›
-          </button>
-
-          {/* Action bar */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            {/* Left: check + skip */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <button onClick={handleCheck}
-                style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '10px 28px', fontFamily: "'Assistant', sans-serif", fontSize: 18, fontWeight: 700, cursor: 'pointer', opacity: answer.trim() ? 1 : 0.5, boxShadow: '0px 2px 6px #8DA7FF' }}>
-                בדיקת תשובה
+              {/* Next arrow button (right edge) */}
+              <button onClick={goNext}
+                style={{ position: 'absolute', left: -20, top: '40%', background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(18,36,96,0.3)', fontSize: 20 }}>
+                ›
               </button>
-              <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 18, color: BUTTON_COLOR, cursor: 'pointer' }} onClick={handleSkip}>דלג</span>
-            </div>
 
-            {/* Center: progress dots */}
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              {dotStates.map((state, i) => {
-                const bg = state === 'correct' ? '#34A853' : state === 'wrong' ? '#EA4335' : state === 'current' ? BUTTON_COLOR : state === 'empty' ? '#E0E0E0' : '#F5F5F5'
-                const inner = state === 'correct' ? '✓' : state === 'wrong' ? '✗' : ''
-                return (
-                  <div key={i} onClick={() => setCurrentQ(i)}
-                    style={{ width: state === 'current' ? 14 : 11, height: state === 'current' ? 14 : 11, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 7, color: '#fff', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}>
-                    {inner}
-                  </div>
-                )
-              })}
-            </div>
+              {/* Action bar */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                {/* Left: check + skip */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <button onClick={handleCheck}
+                    style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '10px 28px', fontFamily: "'Assistant', sans-serif", fontSize: 18, fontWeight: 700, cursor: 'pointer', opacity: answer.trim() ? 1 : 0.5, boxShadow: '0px 2px 6px #8DA7FF' }}>
+                    בדיקת תשובה
+                  </button>
+                  <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 18, color: BUTTON_COLOR, cursor: 'pointer' }} onClick={handleSkip}>דלג</span>
+                </div>
 
-            {/* Right: counter */}
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 18, color: '#000' }}>
-              שאלה {currentQ + 1} מתוך {total}
-            </div>
-          </div>
+                {/* Center: progress dots */}
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  {dotStates.map((state, i) => {
+                    const bg = state === 'correct' ? '#34A853' : state === 'wrong' ? '#EA4335' : state === 'current' ? BUTTON_COLOR : state === 'empty' ? '#E0E0E0' : '#F5F5F5'
+                    const inner = state === 'correct' ? '✓' : state === 'wrong' ? '✗' : ''
+                    return (
+                      <div key={i} onClick={() => setCurrentQ(i)}
+                        style={{ width: state === 'current' ? 14 : 11, height: state === 'current' ? 14 : 11, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 7, color: '#fff', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}>
+                        {inner}
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Right: counter */}
+                <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 18, color: '#000' }}>
+                  שאלה {currentQ + 1} מתוך {total}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -548,15 +608,26 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', overflow: 'hidden', direction: 'rtl', background: PAGE_BG, fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
       {/* Sidebar — right side (RTL) */}
-      <Sidebar active={internalView} onNav={setInternalView} onGoWorld={() => onViewChange('3d')} />
+      <Sidebar
+        active={internalView}
+        onNav={setInternalView}
+        onGoWorld={() => onViewChange('3d')}
+        onGoMindmap={() => onViewChange('mindmap')}
+      />
 
       {/* Main */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <TopBar title={title} />
         {internalView === 'home' && (
-          <HomeScreen onGoLearning={() => setInternalView('learning')} onGoWorld={() => onViewChange('3d')} />
+          <HomeScreen
+            onGoLearning={() => setInternalView('learning')}
+            onGoWorld={() => onViewChange('3d')}
+            onGoMindmap={() => onViewChange('mindmap')}
+          />
         )}
-        {internalView === 'learning' && <LearningScreen />}
+        {internalView === 'learning' && (
+          <LearningScreen onBack={() => setInternalView('home')} />
+        )}
       </div>
     </div>
   )
