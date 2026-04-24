@@ -24,8 +24,8 @@ function App() {
     if (h === '#view-citymode') return 'citymode'
     if (h === '#view-wafflecity') return 'wafflecity'
     if (h === '#study') return 'study'
-    // Always land on landing page (not mid-city hashes like #city/#topics)
-    return hasUserName ? 'landing' : 'onboarding'
+    // StudyHub is the entry point — skip landing page entirely
+    return hasUserName ? 'study' : 'onboarding'
   })
   const [lessonTopic, setLessonTopic] = useState<LessonTopicId>('mean')
   const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -63,7 +63,8 @@ function App() {
 
   // Update hash when top-level view changes (WaffleStackCity manages its own sub-hashes)
   useEffect(() => {
-    if (activeView === 'landing') window.location.hash = ''  // clear city sub-hashes on landing
+    if (activeView === 'study') window.location.hash = ''    // clear hash on StudyHub (entry point)
+    else if (activeView === 'landing') window.location.hash = ''
     else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
     else if (activeView === 'study') window.location.hash = '#study'
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
@@ -192,7 +193,7 @@ function App() {
 
         {activeView === 'wafflecity' && (
           <div className="w-full h-full relative">
-            <WaffleStackCity onBack={() => setActiveView('landing')} />
+            <WaffleStackCity onBack={() => setActiveView('study')} />
             {/* Mind Map button — bottom-right, away from WaffleStackCity's top HUD */}
             <div className="absolute bottom-6 right-6 z-50 pointer-events-auto">
               <button
@@ -237,7 +238,7 @@ function App() {
 
       {/* Onboarding overlay — rendered on top of everything */}
       {activeView === 'onboarding' && (
-        <OnboardingFlow onComplete={() => setActiveView('landing')} />
+        <OnboardingFlow onComplete={() => setActiveView('study')} />
       )}
     </div>
   )

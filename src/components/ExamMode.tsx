@@ -47,6 +47,11 @@ function formatTime(secs: number): string {
   return `${m}:${String(s).padStart(2, '0')}`
 }
 
+/** מזהה אם מחרוזת כוללת עברית ומחזיר direction מתאים */
+function textDir(text: string): 'rtl' | 'ltr' {
+  return /[\u0590-\u05FF]/.test(text) ? 'rtl' : 'ltr'
+}
+
 export default function ExamMode({ onClose }: Props) {
   const [questions] = useState<ExamQuestion[]>(() => buildExam())
   const [index, setIndex] = useState(0)
@@ -260,7 +265,7 @@ export default function ExamMode({ onClose }: Props) {
           {/* Question text — bold headline with accent border (Sirup P1) */}
           <div style={{
             fontSize: 17, fontWeight: 700, color: '#FFFFFF',
-            lineHeight: 1.55, direction: 'rtl', textAlign: 'right',
+            lineHeight: 1.55, direction: textDir(current.q), textAlign: textDir(current.q) === 'rtl' ? 'right' : 'left',
             marginBottom: 14, padding: '16px 18px',
             background: 'rgba(255,255,255,0.07)',
             borderRadius: 12,
@@ -290,8 +295,9 @@ export default function ExamMode({ onClose }: Props) {
                   style={{
                     background: bg, border, borderRadius: 10,
                     padding: '11px 14px', cursor: selected !== null ? 'default' : 'pointer',
-                    color: textColor, fontSize: 13, textAlign: 'right',
-                    direction: 'rtl', transition: 'all 0.2s',
+                    color: textColor, fontSize: 13,
+                    textAlign: textDir(opt) === 'rtl' ? 'right' : 'left',
+                    direction: textDir(opt), transition: 'all 0.2s',
                     display: 'flex', gap: 10, alignItems: 'center',
                   }}
                 >

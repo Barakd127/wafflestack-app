@@ -955,18 +955,6 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         </div>
       )}
 
-      {/* Title */}
-      <div style={{
-        position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)',
-        color: 'white', fontSize: 20, fontWeight: 'bold',
-        fontFamily: "'Heebo', system-ui, sans-serif", zIndex: 50, direction: 'rtl',
-        background: 'rgba(0,0,0,0.5)', padding: '7px 18px', borderRadius: 12,
-        backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)',
-        whiteSpace: 'nowrap',
-      }}>
-        🏙️ WaffleStack — עיר הסטטיסטיקה
-      </div>
-
       {/* Hint */}
       {!selectedBuilding && (
         <div style={{
