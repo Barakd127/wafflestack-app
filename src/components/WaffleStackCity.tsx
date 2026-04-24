@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Sky, ContactShadows, Html, useProgress } from '@react-three/drei'
-import { Suspense, useState, useRef, useCallback, useEffect } from 'react'
+import { Suspense, useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo, getQuizForBuilding } from './StatChallenge'
 import ScoreBoard from './ScoreBoard'
@@ -287,31 +287,34 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
     : `${import.meta.env.BASE_URL}models/kenney-suburban/${def.model}.glb`
   const { scene } = useGLTF(modelUrl)
   const meshRef = useRef<THREE.Group>(null)
-  const clonedScene = scene.clone()
 
   const activeColor = colorOverride ?? def.color
   const emissiveIntensity = isGlowing ? 0.9 : isMastered ? 0.25 : isSelected ? 0.35 : isHovered ? 0.15 : 0
   const emissiveColor = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : '#ffffff'
 
-  clonedScene.traverse((child) => {
-    if ((child as THREE.Mesh).isMesh) {
-      const mesh = child as THREE.Mesh
-      const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
-      if (activeColor) {
-        // Use set() for variation B/C (clean palette swap); multiply for A (preserves model texture detail)
-        if (colorOverride && colorOverride !== def.color) {
-          mat.color.set(activeColor)
-        } else if (def.color) {
-          mat.color.multiply(new THREE.Color(def.color))
+  const clonedScene = useMemo(() => {
+    const clone = scene.clone()
+    clone.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh
+        const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
+        if (activeColor) {
+          // Use set() for variation B/C (clean palette swap); multiply for A (preserves model texture detail)
+          if (colorOverride && colorOverride !== def.color) {
+            mat.color.set(activeColor)
+          } else if (def.color) {
+            mat.color.multiply(new THREE.Color(def.color))
+          }
         }
+        if (emissiveIntensity > 0) {
+          mat.emissive = new THREE.Color(emissiveColor)
+          mat.emissiveIntensity = emissiveIntensity
+        }
+        mesh.material = mat
       }
-      if (emissiveIntensity > 0) {
-        mat.emissive = new THREE.Color(emissiveColor)
-        mat.emissiveIntensity = emissiveIntensity
-      }
-      mesh.material = mat
-    }
-  })
+    })
+    return clone
+  }, [scene, activeColor, colorOverride, def.color, emissiveIntensity, emissiveColor])
 
   return (
     <group
@@ -364,7 +367,8 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
 // ─── Road/Prop ───────────────────────────────────────────────────────────────
 function Prop({ model, pos, rot }: { model: string, pos: [number,number,number], rot: number }) {
   const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/kenney-suburban/${model}.glb`)
-  return <primitive object={scene.clone()} position={pos} rotation={[0, rot, 0]} scale={1.4} />
+  const cloned = useMemo(() => scene.clone(), [scene])
+  return <primitive object={cloned} position={pos} rotation={[0, rot, 0]} scale={1.4} />
 }
 
 // ─── Grid helpers ─────────────────────────────────────────────────────────────
@@ -1177,7 +1181,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         <ambientLight intensity={0.6} />
         <directionalLight
           position={[30, 40, 20]} intensity={1.5} castShadow
-          shadow-mapSize={[2048, 2048]}
+          shadow-mapSize={[512, 512]}
           shadow-camera-far={100} shadow-camera-left={-30}
           shadow-camera-right={30} shadow-camera-top={30} shadow-camera-bottom={-30}
         />
@@ -1210,7 +1214,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               colorOverride={COLOR_VARIATIONS[colorVariations[b.id] ?? 'A'][b.id]}
             />
           ))}
-          <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={40} blur={2} />
+          <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={40} blur={2} resolution={256} />
         </Suspense>
       </Canvas>
 
