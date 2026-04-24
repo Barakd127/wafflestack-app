@@ -15,6 +15,25 @@
   --mm-text-primary: #1f2937;
   --mm-text-secondary: #4b5563;
   --mm-divider: #e5e7eb;
+
+  /* StudyHub theme tokens (light mode) */
+  --sh-page-bg: linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 49.05%, #3351CA 136%);
+  --sh-sidebar-bg: linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%);
+  --sh-sidebar-active: #254A9F;
+  --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%);
+  --sh-glass-card-sm: linear-gradient(180deg, rgba(255,255,255,0.30) 54.33%, rgba(255,255,255,0.10) 100%);
+  --sh-card-shadow: 0px 15px 30px rgba(31,41,55,0.25);
+  --sh-btn-color: #122460;
+  --sh-text-dark: #1F3E6C;
+  --sh-text-med: #254A9F;
+  --sh-text-light: #7F9BD9;
+  --sh-text-tip: #465CA5;
+  --sh-topbar-bg: rgba(255,255,255,0.55);
+  --sh-topbar-border: rgba(255,255,255,0.4);
+  --sh-q-card-bg: linear-gradient(178.82deg, rgba(255,255,255,0.82) 17.91%, rgba(192,216,255,0.77) 199.73%);
+  --sh-answer-bg: rgba(255,255,255,0.7);
+  --sh-answer-border: rgba(51,81,202,0.2);
+  --sh-q-text-color: #111;
 }
 
 html.dark {
@@ -26,6 +45,25 @@ html.dark {
   --mm-text-primary: #e2e8f0;
   --mm-text-secondary: #94a3b8;
   --mm-divider: rgba(255, 255, 255, 0.1);
+
+  /* StudyHub theme tokens (dark mode) */
+  --sh-page-bg: linear-gradient(35.22deg, #0a0a16 -9.85%, #111128 49.05%, #181840 136%);
+  --sh-sidebar-bg: linear-gradient(265.4deg, #1a2080 -108.21%, #0f1245 169.33%);
+  --sh-sidebar-active: #2a3aaa;
+  --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.07) 54.33%, rgba(255,255,255,0.03) 100%);
+  --sh-glass-card-sm: linear-gradient(180deg, rgba(255,255,255,0.05) 54.33%, rgba(255,255,255,0.02) 100%);
+  --sh-card-shadow: 0px 15px 30px rgba(0,0,0,0.5);
+  --sh-btn-color: #4ECDC4;
+  --sh-text-dark: #e2e8f0;
+  --sh-text-med: #a5b4fc;
+  --sh-text-light: #94a3b8;
+  --sh-text-tip: #64748b;
+  --sh-topbar-bg: rgba(10,10,20,0.9);
+  --sh-topbar-border: rgba(255,255,255,0.08);
+  --sh-q-card-bg: linear-gradient(178.82deg, rgba(20,20,60,0.9) 17.91%, rgba(15,20,55,0.85) 199.73%);
+  --sh-answer-bg: rgba(20,20,50,0.8);
+  --sh-answer-border: rgba(78,205,196,0.25);
+  --sh-q-text-color: #e2e8f0;
 }
 
 * {

@@ -10,19 +10,19 @@ interface StudyHubProps {
 
 type InternalView = 'home' | 'learning' | 'complete'
 
-// ── Exact Figma design tokens ──────────────────────────────────────────────────
-const PAGE_BG       = 'linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 49.05%, #3351CA 136%)'
-const SIDEBAR_BG    = 'linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%)'
-const SIDEBAR_ACTIVE = '#254A9F'
-const GLASS_CARD    = 'linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%)'
-const GLASS_CARD_SM = 'linear-gradient(180deg, rgba(255,255,255,0.30) 54.33%, rgba(255,255,255,0.10) 100%)'
-const CARD_SHADOW   = '0px 15px 30px rgba(31,41,55,0.25)'
+// ── Design tokens — driven by CSS custom properties for dark/light mode ────────
+const PAGE_BG       = 'var(--sh-page-bg)'
+const SIDEBAR_BG    = 'var(--sh-sidebar-bg)'
+const SIDEBAR_ACTIVE = 'var(--sh-sidebar-active)'
+const GLASS_CARD    = 'var(--sh-glass-card)'
+const GLASS_CARD_SM = 'var(--sh-glass-card-sm)'
+const CARD_SHADOW   = 'var(--sh-card-shadow)'
 const CARD_RADIUS   = 24
-const BUTTON_COLOR  = '#122460'
-const TEXT_DARK     = '#1F3E6C'
-const TEXT_MED      = '#254A9F'
-const TEXT_LIGHT    = '#7F9BD9'
-const TEXT_TIP      = '#465CA5'
+const BUTTON_COLOR  = 'var(--sh-btn-color)'
+const TEXT_DARK     = 'var(--sh-text-dark)'
+const TEXT_MED      = 'var(--sh-text-med)'
+const TEXT_LIGHT    = 'var(--sh-text-light)'
+const TEXT_TIP      = 'var(--sh-text-tip)'
 
 // ── Questions with model answers ──────────────────────────────────────────────
 const QUESTIONS = [
@@ -211,9 +211,9 @@ function TopBar({ title }: { title: string }) {
   const xp = useLearningStore(state => state.xp)
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.55)',
+      background: 'var(--sh-topbar-bg)',
       backdropFilter: 'blur(12px)',
-      borderBottom: '1px solid rgba(255,255,255,0.4)',
+      borderBottom: '1px solid var(--sh-topbar-border)',
       height: 70,
       display: 'flex',
       alignItems: 'center',
@@ -627,7 +627,7 @@ function LearningScreen({ onBack }: { onBack: () => void }) {
       {/* Main content */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '28px 40px' }}>
         <div style={{
-          background: 'linear-gradient(178.82deg, rgba(255,255,255,0.82) 17.91%, rgba(192,216,255,0.77) 199.73%)',
+          background: 'var(--sh-q-card-bg)',
           borderRadius: 20, width: '100%', maxWidth: 900,
           padding: '32px 40px 28px', position: 'relative',
           boxShadow: '0 8px 32px rgba(51,81,202,0.12)',
@@ -680,7 +680,7 @@ function LearningScreen({ onBack }: { onBack: () => void }) {
                 </div>
               </div>
 
-              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 19, color: '#111', lineHeight: 2.1, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: 22 }}>
+              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 19, color: 'var(--sh-q-text-color)', lineHeight: 2.1, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: 22 }}>
                 {q.text}
               </div>
 
@@ -736,7 +736,7 @@ function LearningScreen({ onBack }: { onBack: () => void }) {
               {/* User's answer */}
               <div style={{ marginBottom: 16 }}>
                 <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT, marginBottom: 6, textAlign: 'right' }}>התשובה שלך:</div>
-                <div style={{ background: 'rgba(255,255,255,0.7)', borderRadius: 10, padding: '12px 16px', border: '1.5px solid rgba(51,81,202,0.2)', fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK, lineHeight: 1.7, whiteSpace: 'pre-wrap', textAlign: 'right' }}>
+                <div style={{ background: 'var(--sh-answer-bg)', borderRadius: 10, padding: '12px 16px', border: '1.5px solid var(--sh-answer-border)', fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK, lineHeight: 1.7, whiteSpace: 'pre-wrap', textAlign: 'right' }}>
                   {answer}
                 </div>
               </div>

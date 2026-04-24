@@ -29,7 +29,8 @@ function App() {
   })
   const [lessonTopic, setLessonTopic] = useState<LessonTopicId>('mean')
   const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('wafflestack-dark-mode') === 'true'
+    const stored = localStorage.getItem('wafflestack-dark-mode')
+    return stored !== null ? stored === 'true' : true
   })
   // Track which view opened the mind map, so the close button returns correctly
   const [mindmapFrom, setMindmapFrom] = useState<string>('study')
@@ -63,15 +64,14 @@ function App() {
 
   // Update hash when top-level view changes (WaffleStackCity manages its own sub-hashes)
   useEffect(() => {
-    if (activeView === 'study') window.location.hash = ''    // clear hash on StudyHub (entry point)
+    if (activeView === 'study') window.location.hash = ''
     else if (activeView === 'landing') window.location.hash = ''
     else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
-    else if (activeView === 'study') window.location.hash = '#study'
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
   }, [activeView])
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
+    <div className="relative w-full h-full bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
       {/* Dark mode toggle — always visible, fixed */}
       <button
         onClick={() => setDarkMode(d => !d)}
