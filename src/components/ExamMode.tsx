@@ -233,6 +233,16 @@ export default function ExamMode({ onClose }: Props) {
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace' }}>
               {index + 1}/{questions.length}
             </span>
+            <button
+              onClick={onClose}
+              title="Exit exam"
+              style={{
+                background: 'none', border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: 8, width: 30, height: 30, color: 'rgba(255,255,255,0.45)',
+                cursor: 'pointer', fontSize: 14, display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >✕</button>
           </div>
         </div>
 
@@ -247,12 +257,15 @@ export default function ExamMode({ onClose }: Props) {
 
         {/* Body */}
         <div style={{ padding: '22px 22px' }}>
-          {/* Question text */}
+          {/* Question text — bold headline with accent border (Sirup P1) */}
           <div style={{
-            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 12, padding: '14px 16px', marginBottom: 14,
-            fontSize: 14, color: 'rgba(255,255,255,0.9)',
-            direction: 'rtl', textAlign: 'right', lineHeight: 1.6,
+            fontSize: 17, fontWeight: 700, color: '#FFFFFF',
+            lineHeight: 1.55, direction: 'rtl', textAlign: 'right',
+            marginBottom: 14, padding: '16px 18px',
+            background: 'rgba(255,255,255,0.07)',
+            borderRadius: 12,
+            borderRight: `3px solid ${current.color}`,
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.10)',
           }}>
             {current.q}
           </div>

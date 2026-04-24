@@ -22,9 +22,9 @@ function App() {
     if (h === '#view-highcity') return 'city'
     if (h === '#view-townscaper') return 'townscaper'
     if (h === '#view-citymode') return 'citymode'
-    if (h === '#view-wafflecity' || h === '#city') return 'wafflecity'
+    if (h === '#view-wafflecity') return 'wafflecity'
     if (h === '#study') return 'study'
-    if (h === '#landing') return 'landing'
+    // Always land on landing page (not mid-city hashes like #city/#topics)
     return hasUserName ? 'landing' : 'onboarding'
   })
   const [lessonTopic, setLessonTopic] = useState<LessonTopicId>('mean')
@@ -63,7 +63,7 @@ function App() {
 
   // Update hash when top-level view changes (WaffleStackCity manages its own sub-hashes)
   useEffect(() => {
-    if (activeView === 'landing') window.location.hash = '#landing'
+    if (activeView === 'landing') window.location.hash = ''  // clear city sub-hashes on landing
     else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
     else if (activeView === 'study') window.location.hash = '#study'
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
@@ -193,10 +193,25 @@ function App() {
         {activeView === 'wafflecity' && (
           <div className="w-full h-full relative">
             <WaffleStackCity onBack={() => setActiveView('landing')} />
-            <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
+            {/* Mind Map button — bottom-right, away from WaffleStackCity's top HUD */}
+            <div className="absolute bottom-6 right-6 z-50 pointer-events-auto">
               <button
                 onClick={() => openMindMap('wafflecity')}
-                className="px-4 py-2 backdrop-blur-xl bg-violet-600/80 border border-violet-400/50 rounded-xl text-white hover:bg-violet-700/80 transition-all font-semibold shadow-lg"
+                style={{
+                  background: 'rgba(109,40,217,0.85)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(167,139,250,0.5)',
+                  borderRadius: 20,
+                  padding: '8px 18px',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(109,40,217,0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
               >
                 🧠 Mind Map
               </button>
@@ -222,7 +237,7 @@ function App() {
 
       {/* Onboarding overlay — rendered on top of everything */}
       {activeView === 'onboarding' && (
-        <OnboardingFlow onComplete={() => setActiveView('wafflecity')} />
+        <OnboardingFlow onComplete={() => setActiveView('landing')} />
       )}
     </div>
   )
