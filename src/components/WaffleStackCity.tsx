@@ -8,6 +8,7 @@ import ExamMode from './ExamMode'
 import { useCitySound, playBuildingPlacedTone } from './SoundManager'
 import { useLearningStore, BUILDING_UNLOCK_CHAIN } from '../store/learningStore'
 import LearningMap from './LearningMap'
+import LocalLeaderboard, { saveSessionScore } from './LocalLeaderboard'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -449,6 +450,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [showExamMode, setShowExamMode] = useState(false)
   const [showConceptMap, setShowConceptMap] = useState(false)
   const [showLearningMap, setShowLearningMap] = useState(false)
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [flashCardIndex, setFlashCardIndex] = useState(0)
   const [flashCardFlipped, setFlashCardFlipped] = useState(false)
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
@@ -574,6 +576,13 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
     else if (showScoreBoard) window.location.hash = '#score'
     else window.location.hash = '#city'
   }, [challengeBuilding, showTopicsList, showScoreBoard])
+
+  // Save session score to leaderboard on page unload
+  useEffect(() => {
+    const save = () => saveSessionScore(xp, mastered.size)
+    window.addEventListener('beforeunload', save)
+    return () => window.removeEventListener('beforeunload', save)
+  }, [xp, mastered])
 
   const openChallenge = useCallback((building: BuildingDef) => {
     setChallengeBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
@@ -865,6 +874,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           title="Toggle Score Board"
         >
           📊 Scores
+        </button>
+        <button
+          onClick={() => setShowLeaderboard(l => !l)}
+          style={{
+            background: showLeaderboard ? 'rgba(255,215,0,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showLeaderboard ? 'rgba(255,215,0,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showLeaderboard ? '#FFD700' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Local Leaderboard — top 5 scores on this device"
+        >
+          🏆 Top
         </button>
       </div>
 
@@ -1272,6 +1296,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
       {/* Exam Mode */}
       {showExamMode && <ExamMode onClose={() => setShowExamMode(false)} />}
+
+      {/* Local Leaderboard */}
+      {showLeaderboard && <LocalLeaderboard onClose={() => setShowLeaderboard(false)} />}
 
       {/* Challenge Modal */}
       {challengeBuilding && (() => {
