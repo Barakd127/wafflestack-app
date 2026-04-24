@@ -818,8 +818,8 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
             padding: '22px 24px',
             display: 'flex', flexDirection: 'column',
           }}>
-            <div style={{ fontSize: 11, letterSpacing: 2, color, marginBottom: 16, fontWeight: 600 }}>
-              🎯 QUIZ — בחן את עצמך
+            <div style={{ fontSize: 10, letterSpacing: 3, color: 'rgba(255,255,255,0.38)', marginBottom: 8, fontWeight: 700, textTransform: 'uppercase' as const }}>
+              🎯 בחן את עצמך
             </div>
 
             {quizDone ? (
@@ -1140,15 +1140,20 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   ))}
                 </div>
 
-                {/* Question text */}
+                {/* Question text — P1: full visual weight, accent border as color-hierarchy anchor */}
                 <div style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 12, padding: '16px 18px',
-                  marginBottom: 16, fontSize: 14,
-                  color: 'rgba(255,255,255,0.9)',
-                  direction: 'rtl', textAlign: 'right',
-                  lineHeight: 1.6,
+                  fontSize: 17,
+                  fontWeight: 700,
+                  color: '#FFFFFF',
+                  lineHeight: 1.55,
+                  direction: 'rtl',
+                  textAlign: 'right',
+                  marginBottom: 16,
+                  padding: '16px 18px',
+                  background: 'rgba(255,255,255,0.07)',
+                  borderRadius: 12,
+                  borderRight: `3px solid ${color}`,
+                  boxShadow: '0 0 0 1px rgba(255,255,255,0.10)',
                 }}>
                   {currentQ.q}
                 </div>
