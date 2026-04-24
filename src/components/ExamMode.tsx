@@ -106,7 +106,7 @@ export default function ExamMode({ onClose }: Props) {
         position: 'fixed', inset: 0, zIndex: 500,
         background: 'rgba(5,5,15,0.95)', backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: 'system-ui', padding: 16,
+        fontFamily: "'Heebo', system-ui, sans-serif", padding: 16,
       }}>
         <div style={{
           background: 'linear-gradient(160deg, #0f0f20, #161628)',
@@ -204,7 +204,7 @@ export default function ExamMode({ onClose }: Props) {
       position: 'fixed', inset: 0, zIndex: 500,
       background: 'rgba(5,5,15,0.92)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: 16, fontFamily: 'system-ui',
+      padding: 16, fontFamily: "'Heebo', system-ui, sans-serif",
     }}>
       <div style={{
         background: 'linear-gradient(160deg, #0f0f20, #161628)',

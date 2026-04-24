@@ -1051,7 +1051,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                       borderRadius: 10, padding: '10px 12px',
                       color: '#fff', fontSize: 13, lineHeight: 1.6,
                       outline: 'none', resize: 'vertical' as const,
-                      fontFamily: 'system-ui', direction: 'rtl',
+                      fontFamily: "'Heebo', system-ui, sans-serif", direction: 'rtl',
                       transition: 'border-color 0.2s',
                     }}
                   />

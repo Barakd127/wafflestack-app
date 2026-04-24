@@ -41,7 +41,7 @@ export default function LearningMap({ mastered, onClose, onOpenChallenge }: Lear
           border: '1px solid rgba(78,205,196,0.25)',
           borderRadius: 20, padding: '24px 28px',
           maxWidth: 680, width: '100%',
-          fontFamily: 'system-ui', color: 'white',
+          fontFamily: "'Heebo', system-ui, sans-serif", color: 'white',
           boxShadow: '0 0 60px rgba(78,205,196,0.12)',
         }}
         onClick={e => e.stopPropagation()}
