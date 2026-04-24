@@ -9,6 +9,7 @@ import { useCitySound, playBuildingPlacedTone } from './SoundManager'
 import { useLearningStore, BUILDING_UNLOCK_CHAIN } from '../store/learningStore'
 import LearningMap from './LearningMap'
 import LocalLeaderboard, { saveSessionScore } from './LocalLeaderboard'
+import ConceptMapViewer from './ConceptMapViewer'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -2013,8 +2014,14 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         )
       })()}
 
-      {/* Concept Map overlay */}
+      {/* Concept Map overlay — 3 Sirup-designed versions */}
       {showConceptMap && (
+        <ConceptMapViewer
+          onClose={() => setShowConceptMap(false)}
+          onOpenChallenge={(id) => { const b = BUILDINGS.find(bld => bld.id === id); if (b) { openChallenge(b); setShowConceptMap(false) } }}
+        />
+      )}
+      {false && showConceptMap && (
         <div
           style={{
             position: 'fixed', inset: 0, background: 'rgba(5,5,15,0.92)',
@@ -2131,7 +2138,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             </div>
           </div>
         </div>
-      )}
+      )}{/* end legacy concept map */}
 
       {/* Learning Map overlay */}
       {showLearningMap && (
