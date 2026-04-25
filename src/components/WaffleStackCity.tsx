@@ -4,6 +4,10 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import SkyGradient from '../three/SkyGradient'
 import CityLighting from '../three/CityLighting'
 import { useQualityTier, BLOOM_ENABLED, DPR_MAX, type QualityTier } from '../three/QualityTier'
+import Clouds from '../three/Aliveness/Clouds'
+import Smoke from '../three/Aliveness/Smoke'
+import CameraDrift from '../three/Aliveness/CameraDrift'
+import SwayingTrees from '../three/Aliveness/SwayingTrees'
 import { Suspense, useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo, getQuizForBuilding } from './StatChallenge'
@@ -1211,7 +1215,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         {/* Shared 3-light cozy setup + ContactShadows */}
         <CityLighting sunPosition={[25, 28, 18]} contactShadowScale={42} />
 
-        <OrbitControls enablePan maxPolarAngle={Math.PI / 2.1} minDistance={8} maxDistance={60} target={[0, 0, -3]} />
+        <OrbitControls makeDefault enablePan maxPolarAngle={Math.PI / 2.1} minDistance={8} maxDistance={60} target={[0, 0, -3]} />
+        <CameraDrift amplitude={0.18} speed={0.13} />
 
         <Suspense fallback={null}>
           <Ground
@@ -1226,6 +1231,13 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             />
           )}
           {ROAD_MODELS.map((r, i) => <Prop key={i} model={r.model} pos={r.pos} rot={r.rot} />)}
+
+          {/* Aliveness layer — small sway/drift effects, all tier-gated */}
+          <SwayingTrees swayAmount={0.07} />
+          <Clouds count={6} altitude={24} range={70} speed={0.55} />
+          <Smoke position={[-9, 2.4, -9]}  count={10} riseSpeed={0.45} color="#f0e6d6" />
+          <Smoke position={[-3, 2.0,  3]}  count={8}  riseSpeed={0.35} color="#e8e0d0" drift={0.2} />
+
           {BUILDINGS.map((b) => (
             <Building
               key={b.id}
