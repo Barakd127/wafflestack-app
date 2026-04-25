@@ -1,25 +1,23 @@
 import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { useQualityTier, INSTANCE_DENSITY } from '../QualityTier'
 
 /**
- * SwayingTrees — a small grove of low-poly stylized trees at fixed positions,
+ * SwayingTrees — a grove of stylized low-poly trees at fixed positions,
  * gently swaying with a sin-driven Z rotation. One InstancedMesh for the
  * trunks, one for the canopies — only 2 draw calls total.
  *
- * The list of positions is tuned to fill the corners/borders of the city
- * (z ∈ [0, 9], around the perimeter) without overlapping building footprints.
+ * Tree count is intentionally FIXED (no tier-based culling) because:
+ *  - Changing InstancedMesh count between frames causes visual pop-in/pop-out
+ *  - 17 trees at 2 draw calls is negligible cost on every tier
+ *
+ * Canopy uses a 7-sided cone — recognizable, stylized, very low-poly.
  */
 interface SwayingTreesProps {
-  /** Override default positions */
   positions?: Array<[number, number, number]>
-  /** Trunk + canopy color */
   trunkColor?: string
   canopyColor?: string
-  /** Sway intensity (default 0.06 rad) */
   swayAmount?: number
-  /** Sway speed (default 0.9) */
   swaySpeed?: number
 }
 
@@ -30,91 +28,98 @@ const DEFAULT_POSITIONS: Array<[number, number, number]> = [
   [-14, 0, -5], [13, 0, -6], [-13.5, 0, 1], [13.5, 0, 0],
   // Front (along path edges, avoiding building cells)
   [-12, 0, 5], [-7, 0, 7], [0, 0, 8], [7, 0, 7], [12, 0, 6],
-  // Park area at z=3 (already has tree-large/small, add more)
+  // Park area at z=3
   [-4, 0, 6.5], [4, 0, 6.5], [9, 0, 5],
 ]
 
+// Per-tree data computed once, never changes with tier
+const TREE_DATA = DEFAULT_POSITIONS.map((pos, i) => ({
+  pos,
+  phase: i * 1.31,
+  heightJitter: 0.85 + (i * 0.137) % 0.4, // 0.85-1.25
+}))
+
 export default function SwayingTrees({
   positions   = DEFAULT_POSITIONS,
-  trunkColor  = '#6b4226',
-  canopyColor = '#5fa05a',
-  swayAmount  = 0.06,
-  swaySpeed   = 0.9,
+  trunkColor  = '#7a5c3a',
+  canopyColor = '#4e9e52',
+  swayAmount  = 0.055,
+  swaySpeed   = 0.75,
 }: SwayingTreesProps) {
-  const tier = useQualityTier(s => s.tier)
   const trunkRef  = useRef<THREE.InstancedMesh>(null)
   const canopyRef = useRef<THREE.InstancedMesh>(null)
 
-  // Cull instances on lower tiers
-  const trees = useMemo(() => {
-    const density = INSTANCE_DENSITY[tier]
-    const target = Math.max(4, Math.round(positions.length * density))
-    // Take first N (deterministic), each with a random sway phase
-    return positions.slice(0, target).map((p, i) => ({
-      pos: p,
-      phase: i * 1.31, // pseudo-random spread
-      heightJitter: 0.85 + (i * 0.137) % 0.4, // 0.85-1.25
+  // Use treeData derived from positions (not tier — stable count!)
+  const treeData = useMemo(() => {
+    return positions.map((pos, i) => ({
+      pos,
+      phase: i * 1.31,
+      heightJitter: 0.85 + (i * 0.137) % 0.4,
     }))
-  }, [positions, tier])
+  }, [positions])
+
+  const COUNT = treeData.length
 
   const tmp = useMemo(() => new THREE.Object3D(), [])
-  const baseMat = useMemo(() => ({
+
+  const materials = useMemo(() => ({
     trunk: new THREE.MeshStandardMaterial({ color: trunkColor, roughness: 0.95 }),
-    canopy: new THREE.MeshStandardMaterial({ color: canopyColor, roughness: 0.85 }),
+    canopy: new THREE.MeshStandardMaterial({ color: canopyColor, roughness: 0.82, flatShading: true }),
   }), [trunkColor, canopyColor])
 
-  // Static trunk transforms (don't sway)
   useFrame((state) => {
     if (!trunkRef.current || !canopyRef.current) return
     const t = state.clock.elapsedTime
 
-    for (let i = 0; i < trees.length; i++) {
-      const tree = trees[i]
+    for (let i = 0; i < treeData.length; i++) {
+      const tree = treeData[i]
       const [x, y, z] = tree.pos
 
-      // Trunk — static
+      // Trunk — static cylinder
       tmp.position.set(x, y + 0.6 * tree.heightJitter, z)
       tmp.rotation.set(0, 0, 0)
       tmp.scale.set(1, tree.heightJitter, 1)
       tmp.updateMatrix()
       trunkRef.current.setMatrixAt(i, tmp.matrix)
 
-      // Canopy — sways from base, sin-driven Z + slight X
+      // Canopy cone — sways from pivot at its base
       const swayZ = Math.sin(t * swaySpeed + tree.phase) * swayAmount
-      const swayX = Math.cos(t * swaySpeed * 0.7 + tree.phase) * swayAmount * 0.5
-      tmp.position.set(x, y + 1.4 * tree.heightJitter, z)
+      const swayX = Math.cos(t * swaySpeed * 0.65 + tree.phase) * swayAmount * 0.4
+      // Cone origin is at center, so shift up by half-height (0.9) to pivot from base
+      const coneHalfH = 0.9 * tree.heightJitter
+      tmp.position.set(x, y + 1.2 * tree.heightJitter + coneHalfH, z)
       tmp.rotation.set(swayX, 0, swayZ)
-      tmp.scale.set(0.95 * tree.heightJitter, 0.95 * tree.heightJitter, 0.95 * tree.heightJitter)
+      tmp.scale.set(tree.heightJitter, tree.heightJitter, tree.heightJitter)
       tmp.updateMatrix()
       canopyRef.current.setMatrixAt(i, tmp.matrix)
     }
+
     trunkRef.current.instanceMatrix.needsUpdate = true
     canopyRef.current.instanceMatrix.needsUpdate = true
   })
 
-  if (trees.length === 0) return null
-
   return (
     <group>
-      {/* Trunks: thin cylinders */}
+      {/* Trunks: hexagonal cylinders */}
       <instancedMesh
         ref={trunkRef}
-        args={[undefined, undefined, trees.length]}
+        args={[undefined, undefined, COUNT]}
         castShadow
         receiveShadow
-        material={baseMat.trunk}
+        material={materials.trunk}
       >
-        <cylinderGeometry args={[0.15, 0.22, 1.2, 6]} />
+        <cylinderGeometry args={[0.13, 0.20, 1.2, 6]} />
       </instancedMesh>
 
-      {/* Canopies: low-poly icospheres / cones */}
+      {/* Canopies: 7-sided cones — recognizable stylized tree silhouette */}
       <instancedMesh
         ref={canopyRef}
-        args={[undefined, undefined, trees.length]}
+        args={[undefined, undefined, COUNT]}
         castShadow
-        material={baseMat.canopy}
+        material={materials.canopy}
       >
-        <icosahedronGeometry args={[1.0, 0]} />
+        {/* radiusTop=0 (pointy), radiusBottom=0.85, height=1.8, radialSegments=7 */}
+        <coneGeometry args={[0.85, 1.8, 7]} />
       </instancedMesh>
     </group>
   )

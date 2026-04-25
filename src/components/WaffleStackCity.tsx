@@ -1,4 +1,4 @@
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Html, useProgress, PerformanceMonitor } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import SkyGradient from '../three/SkyGradient'
@@ -9,6 +9,7 @@ import Smoke from '../three/Aliveness/Smoke'
 import CameraDrift from '../three/Aliveness/CameraDrift'
 import SwayingTrees from '../three/Aliveness/SwayingTrees'
 import CameraRig from '../three/UI/CameraRig'
+import { generateIrregularGrid } from '../utils/irregularGrid'
 import { Suspense, useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo, getQuizForBuilding } from './StatChallenge'
@@ -296,12 +297,14 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
     ? `${import.meta.env.BASE_URL}${def.customModel.replace(/ /g, '%20')}`
     : `${import.meta.env.BASE_URL}models/kenney-suburban/${def.model}.glb`
   const { scene } = useGLTF(modelUrl)
-  const meshRef = useRef<THREE.Group>(null)
+  const groupRef = useRef<THREE.Group>(null)
+  const scaleCurrent = useRef(def.scale ?? 1.4)
+  const hoverEmissive = useRef(0)
 
   const activeColor = colorOverride ?? def.color
-  const emissiveIntensity = isGlowing ? 0.9 : isMastered ? 0.25 : isSelected ? 0.35 : isHovered ? 0.15 : 0
-  const emissiveColor = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : '#ffffff'
 
+  // Clone scene + apply color tinting ONLY — no hover emissive in deps.
+  // This means hovering never triggers a re-clone.
   const clonedScene = useMemo(() => {
     const clone = scene.clone()
     clone.traverse((child) => {
@@ -309,48 +312,96 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
         const mesh = child as THREE.Mesh
         const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
         if (activeColor) {
-          // Use set() for variation B/C (clean palette swap); multiply for A (preserves model texture detail)
           if (colorOverride && colorOverride !== def.color) {
             mat.color.set(activeColor)
           } else if (def.color) {
             mat.color.multiply(new THREE.Color(def.color))
           }
         }
-        if (emissiveIntensity > 0) {
-          mat.emissive = new THREE.Color(emissiveColor)
-          mat.emissiveIntensity = emissiveIntensity
-        }
         mesh.material = mat
       }
     })
     return clone
-  }, [scene, activeColor, colorOverride, def.color, emissiveIntensity, emissiveColor])
+  }, [scene, activeColor, colorOverride, def.color])
+
+  // Apply "slow-changing" states (mastered / selected / glow) via effect.
+  // These only fire when the boolean props actually change — not every frame.
+  useEffect(() => {
+    if (!clonedScene) return
+    const intensity = isGlowing ? 0.9 : isMastered ? 0.22 : isSelected ? 0.30 : 0
+    const color = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : '#ffffff'
+    clonedScene.traverse((child) => {
+      const mesh = child as THREE.Mesh
+      if (!mesh.isMesh || !mesh.material) return
+      const apply = (mat: THREE.Material) => {
+        const m = mat as THREE.MeshStandardMaterial
+        if ('emissive' in m) {
+          m.emissive.set(color)
+          m.emissiveIntensity = intensity
+        }
+      }
+      Array.isArray(mesh.material) ? mesh.material.forEach(apply) : apply(mesh.material)
+    })
+  }, [isGlowing, isMastered, isSelected, clonedScene, activeColor])
+
+  // Per-frame: smooth scale-lift on hover + warm-gold shimmer — zero React re-renders
+  useFrame(() => {
+    if (!groupRef.current) return
+    const base = def.scale ?? 1.4
+    const targetScale = isGlowing ? base * 1.15 : isSelected ? base * 1.07 : isHovered ? base * 1.05 : base
+    scaleCurrent.current += (targetScale - scaleCurrent.current) * 0.10
+    groupRef.current.scale.setScalar(scaleCurrent.current)
+
+    // Hover emissive shimmer (warm gold), only when not in a mastered/selected/glow state
+    if (!isGlowing && !isMastered && !isSelected) {
+      const targetEm = isHovered ? 0.20 : 0
+      const prev = hoverEmissive.current
+      hoverEmissive.current += (targetEm - prev) * 0.12
+      const em = hoverEmissive.current
+      if (Math.abs(em - prev) > 0.002) {
+        clonedScene.traverse((child) => {
+          const mesh = child as THREE.Mesh
+          if (!mesh.isMesh || !mesh.material) return
+          const apply = (mat: THREE.Material) => {
+            const m = mat as THREE.MeshStandardMaterial
+            if ('emissive' in m) {
+              m.emissive.set('#ffc96b')
+              m.emissiveIntensity = em
+            }
+          }
+          Array.isArray(mesh.material) ? mesh.material.forEach(apply) : apply(mesh.material)
+        })
+      }
+    } else {
+      hoverEmissive.current = 0
+    }
+  })
 
   return (
     <group
-      ref={meshRef}
+      ref={groupRef}
       position={def.position}
       rotation={[0, def.rotation ?? 0, 0]}
-      scale={def.scale ?? 1.4}
       onClick={(e) => { e.stopPropagation(); onClick(def) }}
       onPointerEnter={(e) => { e.stopPropagation(); onHoverStart(def.id) }}
       onPointerLeave={() => onHoverEnd()}
     >
       <primitive object={clonedScene} />
-      {/* Hover tooltip — lightweight, shows when hovered but not selected */}
+      {/* Hover tooltip — shows when hovered but not selected */}
       {isHovered && !isSelected && (
         <Html center distanceFactor={15} position={[0, 2.8, 0]}>
           <div style={{
-            background: 'rgba(0,0,0,0.78)', color: 'white',
-            padding: '5px 11px', borderRadius: 8, fontSize: 12,
+            background: 'rgba(0,0,0,0.80)', color: 'white',
+            padding: '5px 12px', borderRadius: 9, fontSize: 12,
             fontFamily: "'Heebo', system-ui, sans-serif", textAlign: 'center',
             direction: 'rtl', whiteSpace: 'nowrap',
             border: `1px solid ${activeColor ?? 'rgba(255,255,255,0.3)'}`,
             pointerEvents: 'none',
+            boxShadow: `0 0 12px ${activeColor ?? 'rgba(255,200,100,0.4)'}44`,
           }}>
-            <div style={{ fontWeight: 600 }}>{def.label}</div>
+            <div style={{ fontWeight: 700 }}>{def.label}</div>
             <div style={{ color: activeColor ?? '#aaa', fontSize: 11, marginTop: 2 }}>
-              {def.statsConcept} {isMastered ? '✓' : '○'}
+              {def.statsConcept} {isMastered ? '✓' : '↗ לחץ ללמוד'}
             </div>
           </div>
         </Html>
@@ -358,11 +409,12 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
       {isSelected && (
         <Html center distanceFactor={15} position={[0, 3, 0]}>
           <div style={{
-            background: 'rgba(0,0,0,0.88)', color: 'white',
-            padding: '8px 14px', borderRadius: 10, fontSize: 13,
+            background: 'rgba(0,0,0,0.90)', color: 'white',
+            padding: '8px 16px', borderRadius: 10, fontSize: 13,
             fontFamily: "'Heebo', system-ui, sans-serif", textAlign: 'center',
             direction: 'rtl', whiteSpace: 'nowrap',
             border: `2px solid ${activeColor ?? '#fff'}`,
+            boxShadow: `0 0 20px ${activeColor ?? '#fff'}44`,
           }}>
             <div style={{ fontSize: 16, marginBottom: 4 }}>{def.label}</div>
             <div style={{ opacity: 0.8 }}>📊 {def.statsConcept}</div>
@@ -381,55 +433,50 @@ function Prop({ model, pos, rot }: { model: string, pos: [number,number,number],
   return <primitive object={cloned} position={pos} rotation={[0, rot, 0]} scale={1.4} />
 }
 
-// ─── Grid helpers ─────────────────────────────────────────────────────────────
-const GRID_X = [-9, -3, 3, 9]
-const GRID_Z = [-9, -3, 3]
-const OCCUPIED_CELLS = new Set(BUILDINGS.map(b => `${b.position[0]},${b.position[2]}`))
+// ─── Townscaper-style irregular grid ground ───────────────────────────────────
+// Replaces the flat green plane. Generates the blue marble + irregular wireframe
+// aesthetic from TownscaperScene. Grid is seeded by useMemo([]) so stable per session.
+function TownscaperGround() {
+  const gridGeometry = useMemo(() => {
+    // 20 cols × 16 rows, 2.8 unit cells, 24% irregularity — covers city + margin
+    const grid = generateIrregularGrid(16, 20, 2.8, 0.24)
+    const positions: number[] = []
+    const Y = 0.012
 
-function snapToCell(x: number, z: number): [number, number] {
-  const sx = GRID_X.reduce((a, b) => Math.abs(b - x) < Math.abs(a - x) ? b : a)
-  const sz = GRID_Z.reduce((a, b) => Math.abs(b - z) < Math.abs(a - z) ? b : a)
-  return [sx, sz]
-}
+    grid.forEach(cell => {
+      const { a, b, c, d } = cell.corners
+      // Offset so the grid is centred over the building area (x≈0, z≈-3)
+      const ox = -8, oz = -11
+      positions.push(a.x + ox, Y, a.z + oz,  b.x + ox, Y, b.z + oz)
+      positions.push(b.x + ox, Y, b.z + oz,  c.x + ox, Y, c.z + oz)
+      positions.push(c.x + ox, Y, c.z + oz,  d.x + ox, Y, d.z + oz)
+      positions.push(d.x + ox, Y, d.z + oz,  a.x + ox, Y, a.z + oz)
+    })
 
-// ─── Ghost building preview ───────────────────────────────────────────────────
-function GhostBuilding({ x, z, valid }: { x: number; z: number; valid: boolean }) {
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+    return geo
+  }, [])  // stable — computed once per mount
+
   return (
-    <group position={[x, 0, z]}>
-      <mesh position={[0, 2, 0]}>
-        <boxGeometry args={[3.2, 4, 3.2]} />
-        <meshStandardMaterial
-          color={valid ? '#00ff88' : '#ff4444'}
-          transparent
-          opacity={0.32}
-          depthWrite={false}
-        />
+    <group>
+      {/* Deep water / marble base — full world coverage */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.08, 0]} receiveShadow>
+        <planeGeometry args={[120, 120]} />
+        <meshStandardMaterial color="#3a7d9e" roughness={0.12} metalness={0.28} />
       </mesh>
-      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[5.5, 5.5]} />
-        <meshStandardMaterial
-          color={valid ? '#00ff88' : '#ff4444'}
-          transparent
-          opacity={0.18}
-          depthWrite={false}
-        />
+
+      {/* Central grass "island" under the building grid */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, -3]} receiveShadow>
+        <planeGeometry args={[30, 22]} />
+        <meshStandardMaterial color="#5e9e58" roughness={0.88} />
       </mesh>
+
+      {/* Irregular grid wireframe overlay */}
+      <lineSegments geometry={gridGeometry}>
+        <lineBasicMaterial color="#8fd8ee" transparent opacity={0.50} />
+      </lineSegments>
     </group>
-  )
-}
-
-function Ground({ onMove, onLeave }: { onMove?: (x: number, z: number) => void; onLeave?: () => void }) {
-  return (
-    <mesh
-      rotation={[-Math.PI / 2, 0, 0]}
-      position={[0, -0.05, 0]}
-      receiveShadow
-      onPointerMove={(e) => onMove?.(e.point.x, e.point.z)}
-      onPointerLeave={() => onLeave?.()}
-    >
-      <planeGeometry args={[60, 60]} />
-      <meshStandardMaterial color="#7ec850" roughness={0.9} />
-    </mesh>
   )
 }
 
@@ -484,7 +531,6 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [flashCardIndex, setFlashCardIndex] = useState(0)
   const [flashCardFlipped, setFlashCardFlipped] = useState(false)
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
-  const [ghostCell, setGhostCell] = useState<[number, number] | null>(null)
   const [onboardingStep, setOnboardingStep] = useState<number>(() =>
     localStorage.getItem('wafflestack-onboarded') ? -1 : 0
   )
@@ -1226,17 +1272,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         />
 
         <Suspense fallback={null}>
-          <Ground
-            onMove={(x, z) => { const [sx, sz] = snapToCell(x, z); setGhostCell([sx, sz]) }}
-            onLeave={() => setGhostCell(null)}
-          />
-          {ghostCell && !selectedBuilding && !challengeBuilding && (
-            <GhostBuilding
-              x={ghostCell[0]}
-              z={ghostCell[1]}
-              valid={!OCCUPIED_CELLS.has(`${ghostCell[0]},${ghostCell[1]}`)}
-            />
-          )}
+          <TownscaperGround />
           {ROAD_MODELS.map((r, i) => <Prop key={i} model={r.model} pos={r.pos} rot={r.rot} />)}
 
           {/* Aliveness layer — small sway/drift effects, all tier-gated */}
