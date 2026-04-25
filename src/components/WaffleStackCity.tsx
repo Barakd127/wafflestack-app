@@ -19,6 +19,7 @@ import { useCitySound, playBuildingPlacedTone } from './SoundManager'
 import { useLearningStore, BUILDING_UNLOCK_CHAIN } from '../store/learningStore'
 import LearningMap from './LearningMap'
 import LocalLeaderboard, { saveSessionScore } from './LocalLeaderboard'
+import FlashcardMode from './FlashcardMode'
 import ConceptMapViewer from './ConceptMapViewer'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
@@ -528,8 +529,6 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [showConceptMap, setShowConceptMap] = useState(false)
   const [showLearningMap, setShowLearningMap] = useState(false)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
-  const [flashCardIndex, setFlashCardIndex] = useState(0)
-  const [flashCardFlipped, setFlashCardFlipped] = useState(false)
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
   const [onboardingStep, setOnboardingStep] = useState<number>(() =>
     localStorage.getItem('wafflestack-onboarded') ? -1 : 0
@@ -616,7 +615,6 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         case 'f':
         case 'F':
           setShowFlashCards(f => !f)
-          setFlashCardFlipped(false)
           break
         case 'e':
         case 'E':
@@ -862,7 +860,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           🎵
         </button>
         <button
-          onClick={() => { setShowFlashCards(f => !f); setFlashCardFlipped(false) }}
+          onClick={() => setShowFlashCards(f => !f)}
           style={{
             background: showFlashCards ? 'rgba(255,199,0,0.2)' : 'rgba(10,10,20,0.75)',
             backdropFilter: 'blur(10px)',
@@ -1964,137 +1962,14 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         </div>
       )}
 
-      {/* Flash Cards modal */}
-      {showFlashCards && (() => {
-        const card = FLASH_CARDS[flashCardIndex]
-        const isMastered = mastered.has(card.id)
-        return (
-          <div style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 480, backdropFilter: 'blur(10px)', padding: 20,
-          }} onClick={() => setShowFlashCards(false)}>
-            <div style={{
-              background: 'linear-gradient(160deg, #0a0a18 0%, #0f1525 100%)',
-              border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24,
-              padding: '28px 32px', width: '100%', maxWidth: 480,
-              fontFamily: "'Heebo', system-ui, sans-serif", color: '#fff',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-            }} onClick={e => e.stopPropagation()}>
-
-              {/* Header */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div>
-                  <div style={{ fontSize: 16, fontWeight: 800 }}>📇 Flash Cards</div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
-                    {mastered.size}/10 mastered · כרטיס {flashCardIndex + 1} מתוך {FLASH_CARDS.length}
-                  </div>
-                </div>
-                <button onClick={() => setShowFlashCards(false)} style={{
-                  background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: 8, width: 32, height: 32, color: 'rgba(255,255,255,0.5)',
-                  cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>✕</button>
-              </div>
-
-              {/* Card */}
-              <div
-                onClick={() => setFlashCardFlipped(f => !f)}
-                style={{
-                  background: flashCardFlipped ? `linear-gradient(135deg, ${card.color}18 0%, transparent 100%)` : 'rgba(255,255,255,0.04)',
-                  border: `2px solid ${flashCardFlipped ? card.color + '55' : 'rgba(255,255,255,0.12)'}`,
-                  borderRadius: 20, padding: '32px 28px', cursor: 'pointer',
-                  minHeight: 200, display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', justifyContent: 'center', textAlign: 'center',
-                  transition: 'all 0.3s ease', marginBottom: 20,
-                  position: 'relative',
-                }}
-              >
-                {isMastered && (
-                  <div style={{
-                    position: 'absolute', top: 12, right: 12,
-                    fontSize: 10, color: '#4ECDC4', fontWeight: 700,
-                    background: 'rgba(78,205,196,0.12)', border: '1px solid rgba(78,205,196,0.25)',
-                    borderRadius: 10, padding: '2px 8px',
-                  }}>✓ נלמד</div>
-                )}
-                {!flashCardFlipped ? (
-                  <>
-                    <div style={{ fontSize: 56, marginBottom: 12 }}>{card.emoji}</div>
-                    <div style={{ fontSize: 26, fontWeight: 900, marginBottom: 6, direction: 'rtl' }}>
-                      {card.labelHe}
-                    </div>
-                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 8 }}>
-                      👆 לחץ לגילוי
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ fontSize: 14, color: card.color, fontWeight: 700, marginBottom: 10, letterSpacing: 1 }}>
-                      {card.labelEn}
-                    </div>
-                    <div style={{
-                      fontSize: 14, fontFamily: 'monospace', color: card.color,
-                      background: `${card.color}18`, border: `1px solid ${card.color}33`,
-                      borderRadius: 8, padding: '8px 16px', marginBottom: 14,
-                    }}>
-                      {card.formula}
-                    </div>
-                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, maxWidth: 340 }}>
-                      {card.preview}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Navigation */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <button
-                  onClick={() => { setFlashCardIndex(i => (i - 1 + FLASH_CARDS.length) % FLASH_CARDS.length); setFlashCardFlipped(false) }}
-                  style={{
-                    flex: 1, padding: '10px', background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
-                    color: 'rgba(255,255,255,0.7)', fontSize: 13, cursor: 'pointer', fontWeight: 600,
-                  }}
-                >← הקודם</button>
-                <button
-                  onClick={() => setFlashCardFlipped(f => !f)}
-                  style={{
-                    flex: 2, padding: '10px',
-                    background: card.color + '22', border: `1px solid ${card.color}44`,
-                    borderRadius: 10, color: card.color, fontSize: 13, cursor: 'pointer', fontWeight: 700,
-                  }}
-                >
-                  {flashCardFlipped ? '↩ הצג שאלה' : '💡 הצג תשובה'}
-                </button>
-                <button
-                  onClick={() => { setFlashCardIndex(i => (i + 1) % FLASH_CARDS.length); setFlashCardFlipped(false) }}
-                  style={{
-                    flex: 1, padding: '10px', background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
-                    color: 'rgba(255,255,255,0.7)', fontSize: 13, cursor: 'pointer', fontWeight: 600,
-                  }}
-                >הבא →</button>
-              </div>
-
-              {/* Dot indicators */}
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 16 }}>
-                {FLASH_CARDS.map((fc, i) => (
-                  <div
-                    key={i}
-                    onClick={() => { setFlashCardIndex(i); setFlashCardFlipped(false) }}
-                    style={{
-                      width: flashCardIndex === i ? 20 : 7, height: 7, borderRadius: 4,
-                      background: flashCardIndex === i ? FLASH_CARDS[flashCardIndex].color : mastered.has(fc.id) ? 'rgba(78,205,196,0.4)' : 'rgba(255,255,255,0.2)',
-                      cursor: 'pointer', transition: 'all 0.2s',
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        )
-      })()}
+      {/* Flash Cards modal — extracted to FlashcardMode component */}
+      {showFlashCards && (
+        <FlashcardMode
+          cards={FLASH_CARDS}
+          mastered={mastered}
+          onClose={() => setShowFlashCards(false)}
+        />
+      )}
 
       {/* Concept Map overlay — 3 Sirup-designed versions */}
       {showConceptMap && (
