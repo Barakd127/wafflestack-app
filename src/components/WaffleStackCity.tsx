@@ -8,6 +8,7 @@ import Clouds from '../three/Aliveness/Clouds'
 import Smoke from '../three/Aliveness/Smoke'
 import CameraDrift from '../three/Aliveness/CameraDrift'
 import SwayingTrees from '../three/Aliveness/SwayingTrees'
+import CameraRig from '../three/UI/CameraRig'
 import { Suspense, useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo, getQuizForBuilding } from './StatChallenge'
@@ -1217,6 +1218,12 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
         <OrbitControls makeDefault enablePan maxPolarAngle={Math.PI / 2.1} minDistance={8} maxDistance={60} target={[0, 0, -3]} />
         <CameraDrift amplitude={0.18} speed={0.13} />
+        <CameraRig
+          focusOn={selectedBuilding?.position ?? null}
+          focusOffset={[5, 4, 7]}
+          homePosition={[20, 18, 20]}
+          homeTarget={[0, 0, -3]}
+        />
 
         <Suspense fallback={null}>
           <Ground
