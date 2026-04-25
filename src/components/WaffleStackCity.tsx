@@ -1,5 +1,9 @@
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, useGLTF, Sky, ContactShadows, Html, useProgress } from '@react-three/drei'
+import { OrbitControls, useGLTF, Html, useProgress, PerformanceMonitor } from '@react-three/drei'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import SkyGradient from '../three/SkyGradient'
+import CityLighting from '../three/CityLighting'
+import { useQualityTier, BLOOM_ENABLED, DPR_MAX, type QualityTier } from '../three/QualityTier'
 import { Suspense, useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo, getQuizForBuilding } from './StatChallenge'
@@ -421,6 +425,22 @@ function Ground({ onMove, onLeave }: { onMove?: (x: number, z: number) => void; 
       <planeGeometry args={[60, 60]} />
       <meshStandardMaterial color="#7ec850" roughness={0.9} />
     </mesh>
+  )
+}
+
+// ─── Post-processing — gated by adaptive quality tier ────────────────────────
+function CityPostFX() {
+  const tier = useQualityTier(s => s.tier)
+  if (!BLOOM_ENABLED[tier]) return null
+  return (
+    <EffectComposer multisampling={tier === 'high' ? 4 : 0} enableNormalPass={false}>
+      <Bloom
+        intensity={tier === 'high' ? 0.45 : 0.3}
+        luminanceThreshold={0.85}
+        luminanceSmoothing={0.2}
+        mipmapBlur
+      />
+    </EffectComposer>
   )
 }
 
@@ -1164,16 +1184,33 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       {/* Loading overlay — HTML div, lives outside Canvas */}
       <CityLoader />
 
-      {/* 3D Canvas */}
-      <Canvas shadows camera={{ position: [20, 18, 20], fov: 55 }} style={{ background: '#87CEEB' }}>
-        <Sky sunPosition={[100, 50, 100]} />
-        <ambientLight intensity={0.6} />
-        <directionalLight
-          position={[30, 40, 20]} intensity={1.5} castShadow
-          shadow-mapSize={[512, 512]}
-          shadow-camera-far={100} shadow-camera-left={-30}
-          shadow-camera-right={30} shadow-camera-top={30} shadow-camera-bottom={-30}
+      {/* 3D Canvas — adaptive quality, cozy stylized lighting */}
+      <Canvas
+        shadows
+        camera={{ position: [20, 18, 20], fov: 55 }}
+        gl={{ antialias: true, powerPreference: 'high-performance' }}
+        dpr={[1, DPR_MAX[useQualityTier.getState().tier]]}
+      >
+        {/* Performance monitor: drops to 'mid'/'low' if FPS sags, climbs back when stable */}
+        <PerformanceMonitor
+          onIncline={() => {
+            const t = useQualityTier.getState().tier
+            const next: QualityTier = t === 'low' ? 'mid' : 'high'
+            useQualityTier.getState().setTier(next)
+          }}
+          onDecline={() => {
+            const t = useQualityTier.getState().tier
+            const next: QualityTier = t === 'high' ? 'mid' : 'low'
+            useQualityTier.getState().setTier(next)
+          }}
         />
+
+        {/* Cozy golden-hour gradient sky (cheap shader, no HDRI) */}
+        <SkyGradient />
+
+        {/* Shared 3-light cozy setup + ContactShadows */}
+        <CityLighting sunPosition={[25, 28, 18]} contactShadowScale={42} />
+
         <OrbitControls enablePan maxPolarAngle={Math.PI / 2.1} minDistance={8} maxDistance={60} target={[0, 0, -3]} />
 
         <Suspense fallback={null}>
@@ -1203,8 +1240,10 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               colorOverride={COLOR_VARIATIONS[colorVariations[b.id] ?? 'A'][b.id]}
             />
           ))}
-          <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={40} blur={2} resolution={256} />
         </Suspense>
+
+        {/* Soft warm bloom for emissive accents — gated by quality tier */}
+        <CityPostFX />
       </Canvas>
 
       {/* Info Panel */}
