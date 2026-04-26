@@ -55,6 +55,73 @@ function loadAccuracy(buildingId: string): { score: number; total: number; perce
   return { score, total, percentage: Math.round((score / total) * 100) }
 }
 
+// XP history: cumulative total snapshot per day. Daily delta = today - yesterday.
+const XP_HISTORY_KEY = 'wafflestack-xp-history'
+
+function dateKey(d: Date): string {
+  return d.toISOString().slice(0, 10)
+}
+
+function loadXpHistory(): Record<string, number> {
+  try {
+    const raw = localStorage.getItem(XP_HISTORY_KEY)
+    if (!raw) return {}
+    const parsed = JSON.parse(raw)
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
+function saveTodayXp(xp: number): Record<string, number> {
+  const history = loadXpHistory()
+  const today = dateKey(new Date())
+  // Keep highest seen value per day so resets/reload don't clobber today's earned total
+  if ((history[today] ?? 0) < xp) {
+    history[today] = xp
+    try {
+      localStorage.setItem(XP_HISTORY_KEY, JSON.stringify(history))
+    } catch { /* quota exceeded - ignore */ }
+  } else if (history[today] === undefined) {
+    history[today] = xp
+    try {
+      localStorage.setItem(XP_HISTORY_KEY, JSON.stringify(history))
+    } catch { /* ignore */ }
+  }
+  return history
+}
+
+interface DayBar {
+  key: string
+  label: string
+  delta: number
+  isToday: boolean
+}
+
+function buildWeeklyBars(history: Record<string, number>): DayBar[] {
+  const today = new Date()
+  const todayKey = dateKey(today)
+
+  // Find the latest known XP snapshot from before the 7-day window for the baseline.
+  const windowStart = new Date(today); windowStart.setDate(windowStart.getDate() - 6)
+  const windowStartKey = dateKey(windowStart)
+  const earlierKeys = Object.keys(history).filter(k => k < windowStartKey).sort()
+  let prevXp = earlierKeys.length > 0 ? history[earlierKeys[earlierKeys.length - 1]] : 0
+
+  const bars: DayBar[] = []
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i)
+    const key = dateKey(d)
+    const recorded = history[key]
+    const xpEnd = recorded !== undefined ? recorded : prevXp
+    const delta = Math.max(0, xpEnd - prevXp)
+    bars.push({ key, label: dayNames[d.getDay()], delta, isToday: key === todayKey })
+    prevXp = xpEnd
+  }
+  return bars
+}
+
 function accuracyTone(percentage: number): { color: string; bg: string; border: string } {
   if (percentage >= 80) return { color: '#4ECDC4', bg: 'rgba(78,205,196,0.12)', border: 'rgba(78,205,196,0.35)' }
   if (percentage >= 50) return { color: '#FFC700', bg: 'rgba(255,199,0,0.12)', border: 'rgba(255,199,0,0.35)' }
@@ -68,7 +135,18 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
   const [copied, setCopied] = useState(false)
   const [showShareCard, setShowShareCard] = useState(false)
   const [elapsed, setElapsed] = useState(() => Math.floor((Date.now() - sessionStart) / 60000))
+  const [xpHistory, setXpHistory] = useState<Record<string, number>>(() => loadXpHistory())
   const weakSpots = loadWeakSpots()
+
+  // Snapshot today's XP whenever it changes so the weekly chart stays current.
+  useEffect(() => {
+    const updated = saveTodayXp(xp)
+    setXpHistory(updated)
+  }, [xp])
+
+  const weeklyBars = buildWeeklyBars(xpHistory)
+  const weeklyTotal = weeklyBars.reduce((sum, b) => sum + b.delta, 0)
+  const weeklyMax = weeklyBars.reduce((m, b) => Math.max(m, b.delta), 0)
 
   const nextMilestone = XP_MILESTONES.find(m => xp < m) ?? null
   const prevMilestone = nextMilestone
@@ -371,6 +449,69 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
               This Session
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Weekly XP Sparkline */}
+      <div style={{
+        padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+        flexShrink: 0,
+      }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: 10,
+        }}>
+          <span style={{
+            fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.55)',
+            letterSpacing: '0.08em', textTransform: 'uppercase',
+          }}>
+            📈 Past 7 Days
+          </span>
+          <span style={{
+            fontSize: 12, fontWeight: 700, color: weeklyTotal > 0 ? '#FFD700' : 'rgba(255,255,255,0.3)',
+            fontVariantNumeric: 'tabular-nums',
+          }}>
+            +{weeklyTotal.toLocaleString()} XP
+          </span>
+        </div>
+        <div style={{
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+          gap: 4, height: 52, padding: '0 2px',
+        }}>
+          {weeklyBars.map(bar => {
+            const heightPct = weeklyMax > 0 ? Math.max(6, (bar.delta / weeklyMax) * 100) : 6
+            const hasXp = bar.delta > 0
+            const fillColor = bar.isToday
+              ? (hasXp ? '#FFD700' : 'rgba(255,215,0,0.25)')
+              : (hasXp ? '#4ECDC4' : 'rgba(255,255,255,0.08)')
+            const glow = bar.isToday && hasXp ? '0 0 8px rgba(255,215,0,0.4)' : 'none'
+            return (
+              <div
+                key={bar.key}
+                title={`${bar.key}: +${bar.delta} XP`}
+                style={{
+                  flex: 1, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: 4, minWidth: 0,
+                }}
+              >
+                <div style={{
+                  width: '100%',
+                  height: `${heightPct}%`,
+                  background: fillColor,
+                  borderRadius: '4px 4px 2px 2px',
+                  boxShadow: glow,
+                  transition: 'height 0.4s ease, background 0.2s',
+                }} />
+                <span style={{
+                  fontSize: 9, color: bar.isToday ? '#FFD700' : 'rgba(255,255,255,0.35)',
+                  fontWeight: bar.isToday ? 700 : 500, letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                }}>
+                  {bar.label}
+                </span>
+              </div>
+            )
+          })}
         </div>
       </div>
 
