@@ -408,6 +408,11 @@ const CONFETTI_STYLE = `
   0%   { opacity: 1; transform: translate(0, 0) scale(1.2) rotate(0deg); }
   100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.3) rotate(540deg); }
 }
+@keyframes streak-pulse {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.35); filter: drop-shadow(0 0 14px #FF6B35); }
+  100% { transform: scale(1); }
+}
 `
 
 // ─── Main Component ──────────────────────────────────────────────────────────
@@ -449,6 +454,17 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   const [wrongAnswers, setWrongAnswers] = useState<{ qIndex: number; chosen: number }[]>([])
   const [showMistakes, setShowMistakes] = useState(false)
 
+  // In-quiz streak (correct answers in a row this attempt)
+  const [streak, setStreak] = useState(0)
+  const [peakStreak, setPeakStreak] = useState(0)
+  const [streakPulse, setStreakPulse] = useState(false)
+  const [bestEverStreak, setBestEverStreak] = useState(() => {
+    const stored = localStorage.getItem(`wafflestack-best-streak-${building.id}`)
+    const n = stored ? parseInt(stored) : 0
+    return Number.isFinite(n) ? n : 0
+  })
+  const [newRecord, setNewRecord] = useState(false)
+
   // Reflection state — persisted per building
   const [reflection, setReflection] = useState(
     () => localStorage.getItem(`wafflestack-reflection-${building.id}`) ?? ''
@@ -478,9 +494,19 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
       setConfettiBurst(true)
       setTimeout(() => setConfettiBurst(false), 900)
       if (soundEnabled) playCorrectTone()
+      setStreak(s => {
+        const next = s + 1
+        setPeakStreak(p => Math.max(p, next))
+        if (next === 3 || next === 5 || next === 7 || next === 10) {
+          setStreakPulse(true)
+          setTimeout(() => setStreakPulse(false), 700)
+        }
+        return next
+      })
     } else {
       setWrongAnswers(prev => [...prev, { qIndex: quizIndex, chosen: idx }])
       if (soundEnabled) playWrongTone()
+      setStreak(0)
     }
   }
 
@@ -492,6 +518,12 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
       localStorage.setItem(`wafflestack-total-${building.id}`, String(questions.length))
       if (finalScore / questions.length >= 0.7) {
         onComplete?.(building.id)
+      }
+      // Persist best-ever streak per building
+      if (peakStreak > bestEverStreak) {
+        localStorage.setItem(`wafflestack-best-streak-${building.id}`, String(peakStreak))
+        setBestEverStreak(peakStreak)
+        setNewRecord(true)
       }
     } else {
       setQuizIndex(i => i + 1)
@@ -508,6 +540,9 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     setHintShown(false)
     setWrongAnswers([])
     setShowMistakes(false)
+    setStreak(0)
+    setPeakStreak(0)
+    setNewRecord(false)
   }
 
   return (
@@ -829,6 +864,29 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   </div>
                 )}
 
+                {/* Peak streak this attempt */}
+                {peakStreak >= 2 && (
+                  <div style={{
+                    background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.35)',
+                    borderRadius: 12, padding: '10px 18px', marginBottom: 16,
+                    fontSize: 13, color: '#FF6B35', fontWeight: 700,
+                    direction: 'rtl', textAlign: 'right',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    gap: 12, minWidth: 220,
+                  }}>
+                    <span>🔥 רצף שיא: {peakStreak}</span>
+                    {newRecord && (
+                      <span style={{
+                        background: 'rgba(255,215,0,0.18)', color: '#FFD700',
+                        fontSize: 11, fontWeight: 800, padding: '2px 8px',
+                        borderRadius: 12, border: '1px solid rgba(255,215,0,0.35)',
+                      }}>
+                        🆕 שיא חדש!
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 {/* Try-again prompt — shown when score < 70% (building reward not granted) */}
                 {score / questions.length < 0.7 && (
                   <div style={{
@@ -985,10 +1043,27 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     {SIMPLE_ANALOGIES[building.id]}
                   </div>
                 )}
-                {/* Question counter pill */}
+                {/* Question counter pill + streak badge */}
                 <div style={{
-                  display: 'flex', justifyContent: 'flex-end', marginBottom: 8,
+                  display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
+                  gap: 8, marginBottom: 8,
                 }}>
+                  {streak >= 2 && (
+                    <span
+                      title={`רצף נוכחי: ${streak} · שיא בניסיון: ${peakStreak}${bestEverStreak > 0 ? ` · שיא כולל: ${bestEverStreak}` : ''}`}
+                      style={{
+                        background: 'rgba(255,107,53,0.14)',
+                        border: '1px solid rgba(255,107,53,0.4)',
+                        borderRadius: 20, padding: '4px 10px', fontSize: 12,
+                        color: '#FF6B35', fontWeight: 700,
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        animation: streakPulse ? 'streak-pulse 0.6s ease-out' : undefined,
+                      }}
+                    >
+                      <span>🔥</span>
+                      <span style={{ fontVariantNumeric: 'tabular-nums' }}>{streak}</span>
+                    </span>
+                  )}
                   <span style={{
                     background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: 20, padding: '4px 12px', fontSize: 12,
