@@ -61,12 +61,23 @@ function accuracyTone(percentage: number): { color: string; bg: string; border: 
   return { color: '#FF6B6B', bg: 'rgba(255,107,107,0.12)', border: 'rgba(255,107,107,0.35)' }
 }
 
+const XP_MILESTONES = [250, 500, 750, 1000]
+
 export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onReset, onPracticeWeakSpots }: Props) {
   const [confirmReset, setConfirmReset] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showShareCard, setShowShareCard] = useState(false)
   const [elapsed, setElapsed] = useState(() => Math.floor((Date.now() - sessionStart) / 60000))
   const weakSpots = loadWeakSpots()
+
+  const nextMilestone = XP_MILESTONES.find(m => xp < m) ?? null
+  const prevMilestone = nextMilestone
+    ? (XP_MILESTONES[XP_MILESTONES.indexOf(nextMilestone) - 1] ?? 0)
+    : null
+  const milestoneProgress = nextMilestone !== null && prevMilestone !== null
+    ? Math.min(100, Math.max(0, ((xp - prevMilestone) / (nextMilestone - prevMilestone)) * 100))
+    : 100
+  const xpToGo = nextMilestone ? nextMilestone - xp : 0
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -229,6 +240,67 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
             Mastered
           </span>
         </div>
+      </div>
+
+      {/* Next Milestone Row */}
+      <div style={{
+        padding: '14px 20px',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        flexShrink: 0,
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 8,
+        }}>
+          <span style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: 'rgba(255,255,255,0.55)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+          }}>
+            🎯 Next Milestone
+          </span>
+          <span style={{
+            fontSize: 12,
+            fontWeight: 700,
+            color: nextMilestone ? '#FFD700' : '#4ECDC4',
+            fontVariantNumeric: 'tabular-nums',
+          }}>
+            {nextMilestone ? `${nextMilestone.toLocaleString()} XP` : '🏆 All reached!'}
+          </span>
+        </div>
+        <div style={{
+          width: '100%',
+          height: 8,
+          background: 'rgba(255,255,255,0.06)',
+          borderRadius: 4,
+          overflow: 'hidden',
+          border: '1px solid rgba(255,255,255,0.04)',
+        }}>
+          <div style={{
+            height: '100%',
+            width: `${milestoneProgress}%`,
+            background: nextMilestone
+              ? 'linear-gradient(90deg, #4ECDC4 0%, #FFD700 100%)'
+              : 'linear-gradient(90deg, #4ECDC4 0%, #4ECDC4 100%)',
+            transition: 'width 0.5s ease',
+            boxShadow: nextMilestone ? '0 0 10px rgba(255,215,0,0.35)' : '0 0 10px rgba(78,205,196,0.4)',
+          }} />
+        </div>
+        {nextMilestone && (
+          <div style={{
+            marginTop: 6,
+            fontSize: 11,
+            color: 'rgba(255,255,255,0.4)',
+            textAlign: 'right',
+            fontVariantNumeric: 'tabular-nums',
+          }}>
+            {xpToGo.toLocaleString()} XP to go
+          </div>
+        )}
       </div>
 
       {/* Share Row */}
