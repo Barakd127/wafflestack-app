@@ -516,13 +516,23 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
         position: 'fixed', inset: 0, zIndex: 300,
         background: 'rgba(5, 5, 15, 0.88)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 12,
+        padding: 'clamp(8px, 3vw, 16px)',
         backdropFilter: 'blur(6px)',
       }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <style>{CONFETTI_STYLE}</style>
-      <div style={{
+      <style>{`
+        @media (max-width: 600px) {
+          .stat-quiz-header { padding: 14px 16px 12px !important; }
+          .stat-quiz-header .concept-icon { width: 40px !important; height: 40px !important; font-size: 22px !important; }
+          .stat-quiz-header h2 { font-size: 16px !important; }
+          .stat-quiz-tabs button { padding: 10px 10px !important; font-size: 12px !important; }
+          .stat-quiz-body { padding: 16px !important; }
+          .stat-quiz-option { padding: 10px 12px !important; font-size: 13px !important; min-height: 44px; }
+        }
+      `}</style>
+      <div className="quiz-modal-inner" style={{
         background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
         border: `1px solid ${color}44`,
         borderRadius: 20,
