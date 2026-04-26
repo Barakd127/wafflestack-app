@@ -45,6 +45,22 @@ function loadWeakSpots(): BuildingScore[] {
   }).filter((x): x is BuildingScore => x !== null && x.percentage < 70)
 }
 
+function loadAccuracy(buildingId: string): { score: number; total: number; percentage: number } | null {
+  const scoreRaw = localStorage.getItem(`wafflestack-score-${buildingId}`)
+  const totalRaw = localStorage.getItem(`wafflestack-total-${buildingId}`)
+  if (!scoreRaw || !totalRaw) return null
+  const score = parseInt(scoreRaw)
+  const total = parseInt(totalRaw)
+  if (!Number.isFinite(score) || !Number.isFinite(total) || total <= 0) return null
+  return { score, total, percentage: Math.round((score / total) * 100) }
+}
+
+function accuracyTone(percentage: number): { color: string; bg: string; border: string } {
+  if (percentage >= 80) return { color: '#4ECDC4', bg: 'rgba(78,205,196,0.12)', border: 'rgba(78,205,196,0.35)' }
+  if (percentage >= 50) return { color: '#FFC700', bg: 'rgba(255,199,0,0.12)', border: 'rgba(255,199,0,0.35)' }
+  return { color: '#FF6B6B', bg: 'rgba(255,107,107,0.12)', border: 'rgba(255,107,107,0.35)' }
+}
+
 export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onReset, onPracticeWeakSpots }: Props) {
   const [confirmReset, setConfirmReset] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -348,6 +364,8 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
       >
         {BUILDINGS_META.map(building => {
           const isMastered = mastered.has(building.id)
+          const accuracy = loadAccuracy(building.id)
+          const tone = accuracy ? accuracyTone(accuracy.percentage) : null
           return (
             <div
               key={building.id}
@@ -392,19 +410,45 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
                 </span>
               </div>
 
-              {/* Right: status */}
+              {/* Right: accuracy badge + status */}
               <div
                 style={{
                   flexShrink: 0,
                   marginLeft: '10px',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  color: isMastered ? '#4ECDC4' : 'rgba(255,255,255,0.2)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  gap: 4,
                   letterSpacing: '0.03em',
                   whiteSpace: 'nowrap',
                 }}
               >
-                {isMastered ? '✓ Mastered' : '○ Not yet'}
+                {accuracy && tone && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: tone.color,
+                      background: tone.bg,
+                      border: `1px solid ${tone.border}`,
+                      padding: '2px 7px',
+                      borderRadius: 999,
+                      lineHeight: 1.2,
+                    }}
+                    title={`Quiz score: ${accuracy.score} / ${accuracy.total}`}
+                  >
+                    {accuracy.percentage}% · {accuracy.score}/{accuracy.total}
+                  </span>
+                )}
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: isMastered ? '#4ECDC4' : 'rgba(255,255,255,0.2)',
+                  }}
+                >
+                  {isMastered ? '✓ Mastered' : '○ Not yet'}
+                </span>
               </div>
             </div>
           )
