@@ -86,9 +86,6 @@ const ROAD_MODELS = [
   { model: 'path-long',  pos: [-6, 0, -3] as [number,number,number], rot: 0 },
   { model: 'path-long',  pos: [0,  0, -3] as [number,number,number], rot: 0 },
   { model: 'path-long',  pos: [6,  0, -3] as [number,number,number], rot: 0 },
-  { model: 'tree-large', pos: [0, 0, 3]   as [number,number,number], rot: 0 },
-  { model: 'tree-small', pos: [-6, 0, 3]  as [number,number,number], rot: 0 },
-  { model: 'tree-small', pos: [6, 0, 3]   as [number,number,number], rot: 0 },
 ]
 
 const GLOSSARY_DATA: Record<string, { conceptEn: string; formula: string }> = {
@@ -456,6 +453,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [onboardingStep, setOnboardingStep] = useState<number>(() =>
     localStorage.getItem('wafflestack-onboarded') ? -1 : 0
   )
+  const [showStudyPanel, setShowStudyPanel] = useState(false)
 
   // Weak spots practice quiz state
   interface WQQuestion { buildingId: string; buildingLabel: string; color: string; q: string; options: string[]; correct: number; explanation: string }
@@ -807,6 +805,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           📝 Exam
         </button>
         <button
+          onClick={() => setShowStudyPanel(s => !s)}
+          style={{
+            background: showStudyPanel ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showStudyPanel ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showStudyPanel ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Study Panel — choose a topic to study"
+        >
+          📖 Study
+        </button>
+        <button
           onClick={() => setShowConceptMap(m => !m)}
           style={{
             background: showConceptMap ? 'rgba(255,107,107,0.2)' : 'rgba(10,10,20,0.75)',
@@ -946,7 +959,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           background: 'rgba(0,0,0,0.4)', padding: '5px 14px', borderRadius: 20,
           backdropFilter: 'blur(6px)', pointerEvents: 'none', whiteSpace: 'nowrap',
         }}>
-          👆 לחץ על בניין כדי ללמוד ולשחק
+          🔍 רחף על בניין לפרטים · לחץ 📖 Study ללמוד
         </div>
       )}
 
@@ -1176,7 +1189,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             <Building
               key={b.id}
               def={b}
-              onClick={setSelectedBuilding}
+              onClick={() => {}}
               isSelected={selectedBuilding?.id === b.id}
               isMastered={mastered.has(b.id)}
               isGlowing={glowBuilding === b.id}
@@ -1189,86 +1202,6 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={40} blur={2} />
         </Suspense>
       </Canvas>
-
-      {/* Info Panel */}
-      {selectedBuilding && (
-        <div style={{
-          position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)',
-          background: 'rgba(10,10,20,0.92)', border: `2px solid ${selectedBuilding.color ?? '#fff'}`,
-          borderRadius: 16, padding: '20px 28px', color: 'white',
-          fontFamily: "'Heebo', system-ui, sans-serif", direction: 'rtl', textAlign: 'right',
-          minWidth: 300, zIndex: 100, backdropFilter: 'blur(12px)',
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: 20, fontWeight: 'bold' }}>{selectedBuilding.label}</div>
-            <button onClick={() => setSelectedBuilding(null)} style={{ background: 'none', border: 'none', color: '#888', fontSize: 18, cursor: 'pointer' }}>✕</button>
-          </div>
-          <div style={{ marginTop: 8, color: selectedBuilding.color, fontSize: 15 }}>📊 {selectedBuilding.statsConcept}</div>
-          {mastered.has(selectedBuilding.id) && (() => {
-            const dateStr = masteryDates[selectedBuilding.id]
-            const days = dateStr ? daysSince(dateStr) : null
-            const needsReview = days !== null && days >= 5
-            return (
-              <div style={{ marginTop: 6, fontSize: 12, color: needsReview ? '#FFB347' : '#4ECDC4' }}>
-                {needsReview ? '📅 כדאי לחזור — ' : '✓ כבר למדת — '}
-                {days === 0 ? 'היום!' : days === 1 ? 'אתמול' : days !== null ? `לפני ${days} ימים` : '+50 XP הרווחת!'}
-              </div>
-            )
-          })()}
-          {/* Kenney color variation selector */}
-          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 6, direction: 'ltr' }}>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', flexShrink: 0 }}>Color:</span>
-            {(['A', 'B', 'C'] as const).map(v => {
-              const label = v === 'A' ? '🟠' : v === 'B' ? '🔵' : '⬜'
-              const isActive = (colorVariations[selectedBuilding.id] ?? 'A') === v
-              return (
-                <button
-                  key={v}
-                  onClick={() => {
-                    const next = { ...colorVariations, [selectedBuilding.id]: v }
-                    setColorVariations(next)
-                    localStorage.setItem('wafflestack-color-variations', JSON.stringify(next))
-                  }}
-                  style={{
-                    padding: '3px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer',
-                    background: isActive ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.04)',
-                    border: isActive ? '1px solid rgba(255,255,255,0.4)' : '1px solid rgba(255,255,255,0.1)',
-                    color: isActive ? '#fff' : 'rgba(255,255,255,0.35)',
-                    fontWeight: isActive ? 700 : 400,
-                    transition: 'all 0.15s',
-                  }}
-                  title={v === 'A' ? 'Variation A — warm/orange' : v === 'B' ? 'Variation B — cool/blue' : 'Variation C — neutral/gray'}
-                >
-                  {label} {v}
-                </button>
-              )
-            })}
-          </div>
-          {CONCEPT_PREVIEW[selectedBuilding.id] && (
-            <div style={{
-              marginTop: 10, padding: '10px 12px',
-              background: 'rgba(255,255,255,0.05)',
-              borderRadius: 8, borderLeft: `3px solid ${selectedBuilding.color ?? '#4ECDC4'}`,
-              fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6,
-              direction: 'ltr', textAlign: 'left',
-            }}>
-              {CONCEPT_PREVIEW[selectedBuilding.id]}
-            </div>
-          )}
-          <div style={{ marginTop: 10, fontSize: 13, color: '#aaa', lineHeight: 1.6 }}>
-            לחץ "התחל אתגר" ללמוד, לראות גרף אינטראקטיבי ולענות על שאלות!
-          </div>
-          <button
-            onClick={() => openChallenge(selectedBuilding)}
-            style={{
-              marginTop: 14, width: '100%', padding: '11px',
-              background: selectedBuilding.color ?? '#4ECDC4', border: 'none', borderRadius: 8,
-              color: '#000', fontWeight: 'bold', fontSize: 14, cursor: 'pointer',
-            }}>
-            {mastered.has(selectedBuilding.id) ? '🔄 שחק שוב' : '🎯 התחל אתגר'}
-          </button>
-        </div>
-      )}
 
       {/* Exam Mode */}
       {showExamMode && <ExamMode onClose={() => setShowExamMode(false)} />}
@@ -1299,6 +1232,64 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           onReset={handleReset}
           onPracticeWeakSpots={handlePracticeWeakSpots}
         />
+      )}
+
+      {/* Study Panel */}
+      {showStudyPanel && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 250,
+          background: 'rgba(5,5,15,0.82)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+        }}
+          onClick={e => { if (e.target === e.currentTarget) setShowStudyPanel(false) }}
+        >
+          <div style={{
+            background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
+            border: '1px solid rgba(78,205,196,0.3)',
+            borderRadius: 20, padding: '28px 32px',
+            maxWidth: 680, width: '100%', maxHeight: '80vh', overflowY: 'auto',
+            fontFamily: "'Heebo', system-ui, sans-serif",
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>📖 בחר מושג ללמידה</div>
+              <button
+                onClick={() => setShowStudyPanel(false)}
+                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, width: 36, height: 36, color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >✕</button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
+              {BUILDINGS.map(b => {
+                const isMast = mastered.has(b.id)
+                const bColor = COLOR_VARIATIONS[colorVariations[b.id] ?? 'A'][b.id] ?? b.color ?? '#4ECDC4'
+                return (
+                  <div
+                    key={b.id}
+                    style={{
+                      background: `${bColor}12`,
+                      border: `1px solid ${bColor}44`,
+                      borderRadius: 12, padding: '14px 16px',
+                      cursor: 'pointer', transition: 'all 0.15s',
+                    }}
+                    onClick={() => {
+                      openChallenge(b)
+                      setShowStudyPanel(false)
+                    }}
+                  >
+                    <div style={{ fontSize: 22, marginBottom: 6 }}>{b.label.split(' ')[0]}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: bColor, marginBottom: 4 }}>{b.statsConcept.split(' (')[0]}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{b.label.split(' ').slice(1).join(' ')}</div>
+                    {isMast && (
+                      <div style={{ marginTop: 8, fontSize: 11, color: '#4ECDC4', fontWeight: 600 }}>✓ נלמד</div>
+                    )}
+                    {!isMast && (
+                      <div style={{ marginTop: 8, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>○ לא נלמד</div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Weak Spots Practice Quiz */}

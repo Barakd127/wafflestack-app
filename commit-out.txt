@@ -1,0 +1,4 @@
+[master 07d9580] feat: spatial progression — locked buildings, unlock chain, mastered glow rings
+ 4 files changed, 180 insertions(+), 79 deletions(-)
+ create mode 100644 build-out.txt
+ create mode 100644 tsc-errors.txt

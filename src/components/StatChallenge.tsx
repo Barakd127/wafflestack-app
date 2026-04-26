@@ -67,7 +67,7 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '⚡', color: '#FFD700',
     explanation: 'הממוצע הוא סכום כל הערכים חלקי מספרם. הוא מייצג את "מרכז הכובד" של הנתונים. אם לכולם יש אותה רמת חשמל, האנרגיה מתחלקת שווה — זה הממוצע!',
     formula: 'μ = (x₁ + x₂ + ... + xₙ) / n',
-    distribution: 'normal',
+    distribution: 'bar-mean',
     defaultParams: { mean: 0, sigma: 1 },
     sliders: [
       { key: 'mean', label: 'Mean (μ)', labelHe: 'ממוצע', min: -3, max: 3, step: 0.1 },
@@ -106,7 +106,7 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🏠', color: '#4ECDC4',
     explanation: 'החציון הוא הערך האמצעי כשהנתונים מסודרים מקטן לגדול. הוא פחות רגיש לערכים קיצוניים מהממוצע. בשכר דיור, החציון מספר לנו מה "אמצע" השוק.',
     formula: 'מסדרים את כל הנתונים → בוחרים את האמצעי',
-    distribution: 'normal',
+    distribution: 'bar-mean',
     defaultParams: { mean: 0, sigma: 1.5 },
     sliders: [
       { key: 'mean', label: 'Center', labelHe: 'מרכז', min: -3, max: 3, step: 0.1 },
@@ -231,7 +231,7 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🏦', color: '#FCBAD3',
     explanation: 'רגרסיה לינארית מוצאת את הקו הישר שמסביר הכי טוב את הקשר בין שני משתנים. משתמשים בו לחיזוי — לדוגמה, חיזוי ציון לפי שעות לימוד.',
     formula: 'y = β₀ + β₁x + ε',
-    distribution: 'normal',
+    distribution: 'scatter-regression',
     defaultParams: { mean: 0, sigma: 0.8 },
     sliders: [
       { key: 'sigma', label: 'Residuals (σ)', labelHe: 'שאריות', min: 0.1, max: 3, step: 0.1 },
@@ -269,7 +269,7 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🏪', color: '#A8E6CF',
     explanation: 'קורלציה מודדת כמה חזק הקשר בין שני משתנים (-1 עד 1). r=1: קשר חיובי מושלם. r=-1: הפוך מושלם. r=0: אין קשר. לא אומרת סיבתיות!',
     formula: 'r = Σ[(xᵢ-x̄)(yᵢ-ȳ)] / (n·σₓ·σᵧ)',
-    distribution: 'normal',
+    distribution: 'scatter-pos',
     defaultParams: { mean: 0, sigma: 1 },
     sliders: [
       { key: 'mean', label: 'Correlation strength', labelHe: 'עוצמת קשר', min: -3, max: 3, step: 0.1 },
@@ -431,6 +431,14 @@ const CHALLENGES: Record<string, ChallengeContent> = {
       },
     ],
   },
+}
+
+// ─── Visualization lookup ────────────────────────────────────────────────────
+
+export function getVisualizationForTopic(buildingId: string): { distribution: DistributionType; params: DistributionParams } {
+  const c = CHALLENGES[buildingId]
+  if (!c) return { distribution: 'bar-mean', params: { mean: 0, sigma: 1 } }
+  return { distribution: c.distribution, params: c.defaultParams }
 }
 
 // ─── Related concept links ───────────────────────────────────────────────────
