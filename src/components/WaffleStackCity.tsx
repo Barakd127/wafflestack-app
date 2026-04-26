@@ -1,7 +1,6 @@
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, useGLTF, Html, useProgress, PerformanceMonitor } from '@react-three/drei'
+import { OrbitControls, useGLTF, Html, useProgress, PerformanceMonitor, Sky } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import SkyGradient from '../three/SkyGradient'
 import CityLighting from '../three/CityLighting'
 import { useQualityTier, BLOOM_ENABLED, DPR_MAX, type QualityTier } from '../three/QualityTier'
 import Clouds from '../three/Aliveness/Clouds'
@@ -56,21 +55,22 @@ interface BuildingDef {
   position: [number, number, number]
   rotation?: number
   scale?: number
+  targetHeight?: number  // auto-normalize to this height (units) — overrides scale for custom GLBs
   color?: string
 }
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 const BUILDINGS: BuildingDef[] = [
   { id: 'power',     model: 'building-type-a', label: '⚡ תחנת כוח',   statsConcept: 'ממוצע (Mean)',        position: [-9, 0, -9], color: '#FFD700' },
-  { id: 'housing',   model: 'building-type-c', label: '🏠 מנהל דיור',  statsConcept: 'חציון (Median)',      position: [-3, 0, -9], color: '#4ECDC4', customModel: 'models/cozy apartment 3d model.glb', scale: 1.0 },
+  { id: 'housing',   model: 'building-type-c', label: '🏠 מנהל דיור',  statsConcept: 'חציון (Median)',      position: [-3, 0, -9], color: '#4ECDC4', customModel: 'models/cozy apartment 3d model.glb', targetHeight: 3.2 },
   { id: 'traffic',   model: 'building-type-e', label: '🚦 בקרת תנועה', statsConcept: 'סטיית תקן (Std Dev)', position: [3,  0, -9], color: '#FF6B6B' },
   { id: 'hospital',  model: 'building-type-g', label: '🏥 בית חולים',  statsConcept: 'התפלגות נורמלית',    position: [9,  0, -9], color: '#95E1D3' },
   { id: 'school',    model: 'building-type-b', label: '🏫 בית ספר',    statsConcept: 'מדגם (Sampling)',     position: [-9, 0, -3], color: '#AA96DA' },
   { id: 'bank',      model: 'building-type-d', label: '🏦 בנק',        statsConcept: 'רגרסיה (Regression)', position: [-3, 0, -3], color: '#FCBAD3' },
-  { id: 'market',    model: 'building-type-f', label: '🏪 שוק',        statsConcept: 'קורלציה (Correlation)',position: [3,  0, -3], color: '#A8E6CF', customModel: 'models/traditional chinese architecture 3d model.glb', scale: 1.0 },
-  { id: 'city-hall', model: 'building-type-h', label: '🏛️ עיריה',      statsConcept: 'בינום (Binomial)',    position: [9,  0, -3], color: '#F38181', customModel: 'models/greco-roman temple 3d model.glb', scale: 1.0 },
-  { id: 'research',  model: 'building-type-i', label: '🔬 מכון מחקר',  statsConcept: 'מבחן השערות',         position: [-3, 0, 3],  color: '#C3A6FF', customModel: 'models/ancient ruins 3d model.glb', scale: 1.0 },
-  { id: 'news',      model: 'building-type-j', label: '📰 תחנת חדשות', statsConcept: 'רווח סמך (CI)',       position: [3,  0, 3],  color: '#FFB347', customModel: 'models/neo utopian city 3d model.glb', scale: 1.0 },
+  { id: 'market',    model: 'building-type-f', label: '🏪 שוק',        statsConcept: 'קורלציה (Correlation)',position: [3,  0, -3], color: '#A8E6CF', customModel: 'models/traditional chinese architecture 3d model.glb', targetHeight: 3.5 },
+  { id: 'city-hall', model: 'building-type-h', label: '🏛️ עיריה',      statsConcept: 'בינום (Binomial)',    position: [9,  0, -3], color: '#F38181', customModel: 'models/greco-roman temple 3d model.glb', targetHeight: 3.8 },
+  { id: 'research',  model: 'building-type-i', label: '🔬 מכון מחקר',  statsConcept: 'מבחן השערות',         position: [-3, 0, 3],  color: '#C3A6FF', customModel: 'models/ancient ruins 3d model.glb', targetHeight: 2.8 },
+  { id: 'news',      model: 'building-type-j', label: '📰 תחנת חדשות', statsConcept: 'רווח סמך (CI)',       position: [3,  0, 3],  color: '#FFB347', customModel: 'models/neo utopian city 3d model.glb', targetHeight: 4.0 },
 ]
 
 // ─── Kenney color variation palettes ─────────────────────────────────────────
@@ -296,13 +296,28 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
     : `${import.meta.env.BASE_URL}models/kenney-suburban/${def.model}.glb`
   const { scene } = useGLTF(modelUrl)
   const groupRef = useRef<THREE.Group>(null)
-  const scaleCurrent = useRef(def.scale ?? 1.4)
-  const hoverEmissive = useRef(0)
+
+  // Compute the base scale: if targetHeight is set, auto-normalize from bounding box
+  const baseScale = useMemo(() => {
+    if (scene && def.targetHeight && def.targetHeight > 0) {
+      try {
+        const box = new THREE.Box3().setFromObject(scene)
+        const size = box.getSize(new THREE.Vector3())
+        if (size.y > 0.001) return def.targetHeight / size.y
+      } catch { /* scene not ready yet */ }
+    }
+    return def.scale ?? 1.4
+  }, [scene, def.targetHeight, def.scale])
+
+  const scaleCurrent = useRef(baseScale)
+  // Keep ref in sync if baseScale recalculates after mount (e.g. async GLB load)
+  useEffect(() => { scaleCurrent.current = baseScale }, [baseScale])
+  const hoverEmissive = useRef(0.15)  // start at baseline — avoids fade-in artifact on mount
 
   const activeColor = colorOverride ?? def.color
 
-  // Clone scene + apply color tinting ONLY — no hover emissive in deps.
-  // This means hovering never triggers a re-clone.
+  // Clone scene + apply color tinting + PBR upgrades.
+  // roughness/metalness added for depth — no hover emissive in deps so hovering never re-clones.
   const clonedScene = useMemo(() => {
     const clone = scene.clone()
     clone.traverse((child) => {
@@ -316,6 +331,15 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
             mat.color.multiply(new THREE.Color(def.color))
           }
         }
+        // PBR upgrade — slight reflectivity gives buildings depth under the Sky light
+        mat.roughness = 0.3
+        mat.metalness = 0.1
+        // Window detection heuristic: very bright/near-white materials get warm lit-window glow
+        const lum = mat.color.r * 0.299 + mat.color.g * 0.587 + mat.color.b * 0.114
+        if (lum > 0.75) {
+          mat.emissive.set('#fffaaa')
+          mat.emissiveIntensity = 0.35
+        }
         mesh.material = mat
       }
     })
@@ -326,8 +350,9 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
   // These only fire when the boolean props actually change — not every frame.
   useEffect(() => {
     if (!clonedScene) return
-    const intensity = isGlowing ? 0.9 : isMastered ? 0.22 : isSelected ? 0.30 : 0
-    const color = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : '#ffffff'
+    // Mastered baseline: 0.15 emissive (spec requirement) + boost to 0.22 for full mastered state
+    const intensity = isGlowing ? 0.9 : isMastered ? 0.22 : isSelected ? 0.30 : 0.15
+    const color = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : isSelected ? '#ffffff' : (activeColor ?? '#4ECDC4')
     clonedScene.traverse((child) => {
       const mesh = child as THREE.Mesh
       if (!mesh.isMesh || !mesh.material) return
@@ -345,14 +370,15 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
   // Per-frame: smooth scale-lift on hover + warm-gold shimmer — zero React re-renders
   useFrame(() => {
     if (!groupRef.current) return
-    const base = def.scale ?? 1.4
+    const base = baseScale
     const targetScale = isGlowing ? base * 1.15 : isSelected ? base * 1.07 : isHovered ? base * 1.05 : base
     scaleCurrent.current += (targetScale - scaleCurrent.current) * 0.10
     groupRef.current.scale.setScalar(scaleCurrent.current)
 
     // Hover emissive shimmer (warm gold), only when not in a mastered/selected/glow state
+    // Base is 0.15 (subtle always-on glow); hover lifts to 0.20 warm gold
     if (!isGlowing && !isMastered && !isSelected) {
-      const targetEm = isHovered ? 0.20 : 0
+      const targetEm = isHovered ? 0.20 : 0.15
       const prev = hoverEmissive.current
       hoverEmissive.current += (targetEm - prev) * 0.12
       const em = hoverEmissive.current
@@ -363,7 +389,8 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
           const apply = (mat: THREE.Material) => {
             const m = mat as THREE.MeshStandardMaterial
             if ('emissive' in m) {
-              m.emissive.set('#ffc96b')
+              // Hover: warm gold shimmer. Default: subtle color glow
+              m.emissive.set(isHovered ? '#ffc96b' : (activeColor ?? '#4ECDC4'))
               m.emissiveIntensity = em
             }
           }
@@ -458,21 +485,34 @@ function TownscaperGround() {
 
   return (
     <group>
-      {/* Deep water / marble base — full world coverage */}
+      {/* Deep base — urban dark asphalt covering full world */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.08, 0]} receiveShadow>
-        <planeGeometry args={[120, 120]} />
-        <meshStandardMaterial color="#3a7d9e" roughness={0.12} metalness={0.28} />
+        <planeGeometry args={[200, 200]} />
+        <meshStandardMaterial color="#1a1a1e" roughness={0.8} metalness={0.05} />
       </mesh>
 
-      {/* Central grass "island" under the building grid */}
+      {/* Central grass "island" under the building grid — deeper green */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, -3]} receiveShadow>
         <planeGeometry args={[30, 22]} />
-        <meshStandardMaterial color="#5e9e58" roughness={0.88} />
+        <meshStandardMaterial color="#2d5a27" roughness={0.9} metalness={0.0} />
       </mesh>
 
-      {/* Irregular grid wireframe overlay */}
+      {/* Road surfaces — darker strip between building rows */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, -6]} receiveShadow>
+        <planeGeometry args={[32, 3.5]} />
+        <meshStandardMaterial color="#1a1a1e" roughness={0.8} metalness={0.0} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
+        <planeGeometry args={[32, 3.5]} />
+        <meshStandardMaterial color="#1a1a1e" roughness={0.8} metalness={0.0} />
+      </mesh>
+
+      {/* Subtle grid overlay — low-contrast city block guide */}
+      <gridHelper args={[200, 40, '#1a1a2e', '#1a1a2e']} position={[0, -0.06, 0]} />
+
+      {/* Irregular grid wireframe overlay — Townscaper aesthetic */}
       <lineSegments geometry={gridGeometry}>
-        <lineBasicMaterial color="#8fd8ee" transparent opacity={0.50} />
+        <lineBasicMaterial color="#3a7d9e" transparent opacity={0.35} />
       </lineSegments>
     </group>
   )
@@ -1249,7 +1289,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       {/* 3D Canvas — adaptive quality, cozy stylized lighting */}
       <Canvas
         shadows
-        camera={{ position: [20, 18, 20], fov: 55 }}
+        camera={{ position: [0, 25, 45], fov: 55 }}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
         dpr={[1, DPR_MAX[useQualityTier.getState().tier]]}
       >
@@ -1267,19 +1307,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           }}
         />
 
-        {/* Cozy golden-hour gradient sky (cheap shader, no HDRI) */}
-        <SkyGradient />
+        {/* Atmospheric sky — physical scattering via drei Sky */}
+        <Sky sunPosition={[100, 20, 100]} turbidity={8} rayleigh={2} />
+        {/* Soft blue-grey haze to push distant geometry back */}
+        <fog attach="fog" args={['#b8d4e8', 80, 200]} />
 
         {/* Shared 3-light cozy setup + ContactShadows */}
-        <CityLighting sunPosition={[25, 28, 18]} contactShadowScale={42} />
+        <CityLighting sunPosition={[50, 50, 25]} sunIntensity={1.2} contactShadowScale={42} />
 
-        <OrbitControls makeDefault enablePan maxPolarAngle={Math.PI / 2.1} minDistance={8} maxDistance={60} target={[0, 0, -3]} />
+        <OrbitControls makeDefault enablePan maxPolarAngle={Math.PI / 2.1} minDistance={8} maxDistance={60} target={[0, 0, 0]} />
         <CameraDrift amplitude={0.18} speed={0.13} />
         <CameraRig
           focusOn={selectedBuilding?.position ?? null}
           focusOffset={[5, 4, 7]}
-          homePosition={[20, 18, 20]}
-          homeTarget={[0, 0, -3]}
+          homePosition={[0, 25, 45]}
+          homeTarget={[0, 0, 0]}
         />
 
         <Suspense fallback={null}>

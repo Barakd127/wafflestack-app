@@ -53,19 +53,19 @@ export default function CityLighting({
         color={sunColor}
         castShadow
         shadow-mapSize={[shadowMap, shadowMap]}
-        shadow-camera-far={100}
-        shadow-camera-left={-30}
-        shadow-camera-right={30}
-        shadow-camera-top={30}
-        shadow-camera-bottom={-30}
+        shadow-camera-far={120}
+        shadow-camera-left={-40}
+        shadow-camera-right={40}
+        shadow-camera-top={40}
+        shadow-camera-bottom={-40}
         shadow-bias={-0.0005}
       />
 
       {/* Cool fill — no shadow cost */}
       <hemisphereLight color={hemiSky} groundColor={hemiGround} intensity={0.55} />
 
-      {/* Soft floor */}
-      <ambientLight color={ambientColor} intensity={0.18} />
+      {/* Soft floor — bumped to 0.4 for better scene fill with Sky component */}
+      <ambientLight color={ambientColor} intensity={0.4} />
 
       {/* Cheap grounding under all objects */}
       {!noContactShadows && (

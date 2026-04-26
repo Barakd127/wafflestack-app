@@ -4,22 +4,10 @@
  * Features: concept explanation, live distribution chart, parameter sliders, quiz.
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react'
-import DistributionChart, { DistributionType, DistributionParams } from './DistributionChart'
+import { useState, useEffect, useMemo } from 'react'
+import { TopicViz } from './TopicViz'
 import { playCorrectTone, playWrongTone } from './SoundManager'
 import { getQuestionsForBuilding } from '../hooks/useQuiz'
-
-// ─── Responsive helper ────────────────────────────────────────────────────────
-
-function useWindowWidth() {
-  const [w, setW] = useState(window.innerWidth)
-  useEffect(() => {
-    const handler = () => setW(window.innerWidth)
-    window.addEventListener('resize', handler)
-    return () => window.removeEventListener('resize', handler)
-  }, [])
-  return w
-}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -37,19 +25,7 @@ interface ChallengeContent {
   color: string
   explanation: string
   formula: string
-  distribution: DistributionType
-  defaultParams: DistributionParams
-  sliders: SliderDef[]
   quiz: QuizQuestion[]
-}
-
-interface SliderDef {
-  key: keyof DistributionParams
-  label: string
-  labelHe: string
-  min: number
-  max: number
-  step: number
 }
 
 export interface BuildingInfo {
@@ -67,12 +43,6 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '⚡', color: '#FFD700',
     explanation: 'הממוצע הוא סכום כל הערכים חלקי מספרם. הוא מייצג את "מרכז הכובד" של הנתונים. אם לכולם יש אותה רמת חשמל, האנרגיה מתחלקת שווה — זה הממוצע!',
     formula: 'μ = (x₁ + x₂ + ... + xₙ) / n',
-    distribution: 'bar-mean',
-    defaultParams: { mean: 0, sigma: 1 },
-    sliders: [
-      { key: 'mean', label: 'Mean (μ)', labelHe: 'ממוצע', min: -3, max: 3, step: 0.1 },
-      { key: 'sigma', label: 'Spread (σ)', labelHe: 'פיזור', min: 0.3, max: 3, step: 0.1 },
-    ],
     quiz: [
       {
         q: 'חמישה סטודנטים קיבלו ציונים: 60, 70, 80, 90, 100. מה הממוצע?',
@@ -106,12 +76,6 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🏠', color: '#4ECDC4',
     explanation: 'החציון הוא הערך האמצעי כשהנתונים מסודרים מקטן לגדול. הוא פחות רגיש לערכים קיצוניים מהממוצע. בשכר דיור, החציון מספר לנו מה "אמצע" השוק.',
     formula: 'מסדרים את כל הנתונים → בוחרים את האמצעי',
-    distribution: 'bar-mean',
-    defaultParams: { mean: 0, sigma: 1.5 },
-    sliders: [
-      { key: 'mean', label: 'Center', labelHe: 'מרכז', min: -3, max: 3, step: 0.1 },
-      { key: 'sigma', label: 'Spread', labelHe: 'פיזור', min: 0.3, max: 3, step: 0.1 },
-    ],
     quiz: [
       {
         q: 'מה החציון של: 3, 7, 2, 9, 4?',
@@ -139,12 +103,6 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🚦', color: '#FF6B6B',
     explanation: 'סטיית התקן מודדת כמה הנתונים מפוזרים סביב הממוצע. σ קטנה = כולם קרובים לממוצע. σ גדולה = הנתונים פרושים. ב-68% מהמקרים הנתונים נמצאים בטווח μ±σ.',
     formula: 'σ = √[ Σ(xᵢ - μ)² / n ]',
-    distribution: 'normal',
-    defaultParams: { mean: 0, sigma: 1 },
-    sliders: [
-      { key: 'sigma', label: 'Std Dev (σ)', labelHe: 'סטיית תקן', min: 0.2, max: 4, step: 0.1 },
-      { key: 'mean', label: 'Mean (μ)', labelHe: 'ממוצע', min: -3, max: 3, step: 0.1 },
-    ],
     quiz: [
       {
         q: 'התפלגות נורמלית עם μ=100 ו-σ=15. כמה אחוז מהנתונים בין 85 ל-115?',
@@ -172,12 +130,6 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🏥', color: '#95E1D3',
     explanation: 'ההתפלגות הנורמלית ("עקומת הפעמון") מופיעה בטבע בכל מקום — גבהים, ציונים, לחץ דם. היא סימטרית סביב הממוצע, ו-68% מהנתונים נמצאים ב-σ± אחד.',
     formula: 'f(x) = (1/σ√2π) · e^(-(x-μ)²/2σ²)',
-    distribution: 'normal',
-    defaultParams: { mean: 0, sigma: 1 },
-    sliders: [
-      { key: 'mean', label: 'Mean (μ)', labelHe: 'ממוצע', min: -3, max: 3, step: 0.1 },
-      { key: 'sigma', label: 'Std Dev (σ)', labelHe: 'סטיית תקן', min: 0.3, max: 3, step: 0.1 },
-    ],
     quiz: [
       {
         q: 'בהתפלגות נורמלית, מה הסבירות שנקבל ערך הגדול מ-μ?',
@@ -193,11 +145,6 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🏫', color: '#AA96DA',
     explanation: 'מדגם הוא קבוצה קטנה שנבחרת מתוך אוכלוסיה גדולה. אנחנו לומדים על כולם מתוך חלק. ככל שהמדגם גדול יותר ואקראי יותר, המסקנות מדויקות יותר.',
     formula: 'שגיאת מדגם = σ / √n',
-    distribution: 'normal',
-    defaultParams: { mean: 0, sigma: 1 },
-    sliders: [
-      { key: 'sigma', label: 'Sample Error', labelHe: 'שגיאת מדגם', min: 0.1, max: 3, step: 0.05 },
-    ],
     quiz: [
       {
         q: 'מדגם של 100 סטודנטים מ-10,000. הגדלנו ל-400. שגיאת המדגם:',
@@ -231,11 +178,6 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🏦', color: '#FCBAD3',
     explanation: 'רגרסיה לינארית מוצאת את הקו הישר שמסביר הכי טוב את הקשר בין שני משתנים. משתמשים בו לחיזוי — לדוגמה, חיזוי ציון לפי שעות לימוד.',
     formula: 'y = β₀ + β₁x + ε',
-    distribution: 'scatter-regression',
-    defaultParams: { mean: 0, sigma: 0.8 },
-    sliders: [
-      { key: 'sigma', label: 'Residuals (σ)', labelHe: 'שאריות', min: 0.1, max: 3, step: 0.1 },
-    ],
     quiz: [
       {
         q: 'קו הרגרסיה: y = 2x + 5. עבור x=3, מה y?',
@@ -269,11 +211,6 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🏪', color: '#A8E6CF',
     explanation: 'קורלציה מודדת כמה חזק הקשר בין שני משתנים (-1 עד 1). r=1: קשר חיובי מושלם. r=-1: הפוך מושלם. r=0: אין קשר. לא אומרת סיבתיות!',
     formula: 'r = Σ[(xᵢ-x̄)(yᵢ-ȳ)] / (n·σₓ·σᵧ)',
-    distribution: 'scatter-pos',
-    defaultParams: { mean: 0, sigma: 1 },
-    sliders: [
-      { key: 'mean', label: 'Correlation strength', labelHe: 'עוצמת קשר', min: -3, max: 3, step: 0.1 },
-    ],
     quiz: [
       {
         q: 'קורלציה של r=0.9 בין שעות לימוד לציון. מה זה אומר?',
@@ -312,11 +249,6 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🏛️', color: '#F38181',
     explanation: 'התפלגות בינומית מחשבת הסתברות של k הצלחות ב-n ניסיונות, כאשר כל ניסיון עצמאי עם הסתברות הצלחה p. לדוגמה: כמה מתוך 10 הטלות מטבע יצאו עץ?',
     formula: 'P(X=k) = C(n,k) · pᵏ · (1-p)^(n-k)',
-    distribution: 'normal',
-    defaultParams: { mean: 0, sigma: 1.5 },
-    sliders: [
-      { key: 'sigma', label: 'Spread', labelHe: 'פיזור', min: 0.5, max: 3, step: 0.1 },
-    ],
     quiz: [
       {
         q: 'הטלת מטבע הוגן 4 פעמים. מה ההסתברות לקבל 0 עץ?',
@@ -350,11 +282,6 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🔬', color: '#C3A6FF',
     explanation: 'מבחן השערות בודק האם נתונים מספיקים כדי לדחות את ה-H₀ (השערת האפס). קובעים רמת מובהקות α (לרוב 0.05) ובודקים האם p-value < α.',
     formula: 'H₀: μ=μ₀ | H₁: μ≠μ₀ | p-value < α → דוחים H₀',
-    distribution: 't',
-    defaultParams: { df: 10 },
-    sliders: [
-      { key: 'df', label: 'Degrees of Freedom', labelHe: 'דרגות חופש', min: 1, max: 30, step: 1 },
-    ],
     quiz: [
       {
         q: 'p-value = 0.03, α = 0.05. מה המסקנה?',
@@ -393,12 +320,6 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '📰', color: '#FFB347',
     explanation: 'רווח סמך 95% אומר: "95% מהרווחים שנחשב בשיטה זו יכילו את הפרמטר האמיתי." הוא מראה כמה בטוחים אנחנו באמידה שלנו.',
     formula: 'CI = x̄ ± z·(σ/√n)',
-    distribution: 'normal',
-    defaultParams: { mean: 0, sigma: 1 },
-    sliders: [
-      { key: 'sigma', label: 'Interval width', labelHe: 'רוחב הרווח', min: 0.2, max: 3, step: 0.05 },
-      { key: 'mean', label: 'Center', labelHe: 'מרכז', min: -2, max: 2, step: 0.1 },
-    ],
     quiz: [
       {
         q: 'רווח סמך 95% הוא [70, 80]. מה המסקנה הנכונה?',
@@ -431,14 +352,6 @@ const CHALLENGES: Record<string, ChallengeContent> = {
       },
     ],
   },
-}
-
-// ─── Visualization lookup ────────────────────────────────────────────────────
-
-export function getVisualizationForTopic(buildingId: string): { distribution: DistributionType; params: DistributionParams } {
-  const c = CHALLENGES[buildingId]
-  if (!c) return { distribution: 'bar-mean', params: { mean: 0, sigma: 1 } }
-  return { distribution: c.distribution, params: c.defaultParams }
 }
 
 // ─── Related concept links ───────────────────────────────────────────────────
@@ -486,47 +399,7 @@ const DID_YOU_KNOW: Record<string, string> = {
   news:        'סקרי שביעות רצון ממשלתיים מדווחים עם רווח סמך של ±3% ברמת ביטחון 95%.',
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
-
-interface SliderRowProps {
-  def: SliderDef
-  value: number
-  onChange: (val: number) => void
-  color: string
-}
-
-function SliderRow({ def, value, onChange, color }: SliderRowProps) {
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>
-          {def.labelHe} <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10 }}>({def.label})</span>
-        </span>
-        <span style={{
-          fontSize: 13, fontWeight: 700, color,
-          background: `${color}22`, padding: '1px 8px', borderRadius: 6,
-        }}>
-          {value.toFixed(def.step < 1 ? 1 : 0)}
-        </span>
-      </div>
-      <input
-        type="range"
-        min={def.min}
-        max={def.max}
-        step={def.step}
-        value={value}
-        onChange={e => onChange(parseFloat(e.target.value))}
-        style={{
-          width: '100%', height: 4, accentColor: color, cursor: 'pointer',
-        }}
-      />
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-        <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>{def.min}</span>
-        <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>{def.max}</span>
-      </div>
-    </div>
-  )
-}
+// (SliderRow removed — interactivity is now inside TopicViz components)
 
 // ─── Confetti animation ──────────────────────────────────────────────────────
 
@@ -557,13 +430,8 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   const content = CHALLENGES[building.id] ?? CHALLENGES['hospital']
   const color = building.color ?? content.color
 
-  // Responsive
-  const windowWidth = useWindowWidth()
-  const isMobile = windowWidth < 720
-  const [mobileTab, setMobileTab] = useState<'learn' | 'quiz'>('learn')
-
-  // Distribution params state
-  const [params, setParams] = useState<DistributionParams>(content.defaultParams)
+  // Tab state — always shown (no more side-by-side columns)
+  const [activeTab, setActiveTab] = useState<'learn' | 'quiz'>('learn')
 
   // Load questions from quiz-bank; fall back to CHALLENGES hardcoded quiz
   const questions = useMemo(() => {
@@ -601,10 +469,6 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   }
 
   const currentQ = questions[quizIndex]
-
-  const handleSlider = useCallback((key: keyof DistributionParams, val: number) => {
-    setParams(prev => ({ ...prev, [key]: val }))
-  }, [])
 
   const handleAnswer = (idx: number) => {
     if (selected !== null) return
@@ -652,7 +516,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
         position: 'fixed', inset: 0, zIndex: 300,
         background: 'rgba(5, 5, 15, 0.88)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: isMobile ? 8 : 20,
+        padding: 12,
         backdropFilter: 'blur(6px)',
       }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
@@ -706,129 +570,156 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
           >✕</button>
         </div>
 
-        {/* Body — two columns */}
-        <div style={{
-          flex: 1, overflow: 'hidden', display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row', gap: 0,
-        }}>
+        {/* Body — tabbed single-column layout */}
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
-          {/* Mobile tab switcher */}
-          {isMobile && (
-            <div style={{
-              display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)',
-              flexShrink: 0,
-            }}>
-              {(['learn', 'quiz'] as const).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setMobileTab(tab)}
-                  style={{
-                    flex: 1, padding: '12px', background: 'none',
-                    border: 'none', borderBottom: `2px solid ${mobileTab === tab ? color : 'transparent'}`,
-                    color: mobileTab === tab ? color : 'rgba(255,255,255,0.4)',
-                    fontWeight: 700, fontSize: 13, cursor: 'pointer',
-                    transition: 'all 0.2s', letterSpacing: 0.5,
-                  }}
-                >
-                  {tab === 'learn' ? '📖 Learn' : '🎯 Quiz'}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Left — concept + chart + sliders */}
-          {(!isMobile || mobileTab === 'learn') && (
+          {/* Tab bar — always visible */}
           <div style={{
-            flex: isMobile ? 'unset' : '1 1 400px',
-            overflow: 'auto',
-            padding: '22px 24px',
-            borderRight: isMobile ? 'none' : '1px solid rgba(255,255,255,0.06)',
+            display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)',
+            flexShrink: 0, background: 'rgba(0,0,0,0.15)',
           }}>
-
-            {/* Previous reflection — shown if student has already written one */}
-            {reflection.length > 10 && (
-              <div style={{
-                background: 'rgba(78,205,196,0.07)', border: '1px solid rgba(78,205,196,0.2)',
-                borderRadius: 12, padding: '12px 14px', marginBottom: 14,
-                direction: 'rtl', textAlign: 'right',
-              }}>
-                <div style={{ fontSize: 10, color: 'rgba(78,205,196,0.6)', letterSpacing: 1, marginBottom: 6, textTransform: 'uppercase' as const }}>
-                  ✍️ הגדרה שלך מהפעם הקודמת
-                </div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
-                  {reflection}
-                </div>
-              </div>
-            )}
-
-            {/* Explanation */}
-            <div style={{
-              background: `${color}0d`, border: `1px solid ${color}22`,
-              borderRadius: 12, padding: '14px 16px', marginBottom: 20,
-              fontSize: 13, color: 'rgba(255,255,255,0.8)',
-              lineHeight: 1.7, direction: 'rtl', textAlign: 'right',
-            }}>
-              {content.explanation}
-            </div>
-
-            {/* Formula */}
-            <div style={{
-              background: 'rgba(255,255,255,0.04)', borderRadius: 8,
-              padding: '10px 14px', marginBottom: 20,
-              fontFamily: 'monospace', fontSize: 13, color,
-              letterSpacing: 0.5,
-            }}>
-              {content.formula}
-            </div>
-
-            {/* Distribution Chart */}
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8, letterSpacing: 1 }}>
-                LIVE DISTRIBUTION PREVIEW
-              </div>
-              <div style={{
-                background: 'rgba(0,0,0,0.3)', borderRadius: 10, padding: 10,
-                border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden',
-              }}>
-                <DistributionChart
-                  distribution={content.distribution}
-                  params={params}
-                  width={340}
-                  height={160}
-                  color={color}
-                />
-              </div>
-            </div>
-
-            {/* Sliders */}
-            <div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 10, letterSpacing: 1 }}>
-                INTERACTIVE PARAMETERS — גרור לשינוי
-              </div>
-              {content.sliders.map(slider => (
-                <SliderRow
-                  key={slider.key}
-                  def={slider}
-                  value={(params[slider.key] as number) ?? slider.min}
-                  onChange={val => handleSlider(slider.key, val)}
-                  color={color}
-                />
-              ))}
-            </div>
+            {(['learn', 'quiz'] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  flex: 1, padding: '14px 16px', background: 'none', border: 'none',
+                  borderBottom: `2px solid ${activeTab === tab ? color : 'transparent'}`,
+                  color: activeTab === tab ? color : 'rgba(255,255,255,0.4)',
+                  fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                  transition: 'all 0.18s', letterSpacing: 0.4,
+                  fontFamily: "'Heebo', system-ui, sans-serif",
+                }}
+              >
+                {tab === 'learn' ? '📖 למד' : '🎯 בחן את עצמך'}
+              </button>
+            ))}
           </div>
+
+          {/* ── LEARN TAB ── */}
+          {activeTab === 'learn' && (
+            <div style={{ flex: 1, overflow: 'auto', padding: '24px 28px' }}>
+
+              {/* TopicViz — hero interactive visualization */}
+              <div style={{
+                background: 'rgba(0,0,0,0.35)', borderRadius: 14,
+                padding: '14px 8px 8px', marginBottom: 22,
+                border: `1px solid ${color}22`, overflow: 'auto',
+              }}>
+                <div style={{
+                  fontSize: 10, color: `${color}99`, letterSpacing: 2,
+                  marginBottom: 10, paddingLeft: 8, fontWeight: 600,
+                }}>
+                  ✦ ויזואליזציה אינטראקטיבית
+                </div>
+                {/* SVGs have fixed pixel dimensions — container clips overflow on narrow screens */}
+                <div style={{ minWidth: 0, overflowX: 'auto' }}>
+                  <TopicViz id={building.id} color={color} width={700} height={220} />
+                </div>
+              </div>
+
+              {/* Analogy warm-up */}
+              {SIMPLE_ANALOGIES[building.id] && (
+                <div style={{
+                  background: 'rgba(255,179,71,0.07)', border: '1px solid rgba(255,179,71,0.22)',
+                  borderRadius: 10, padding: '12px 16px', marginBottom: 18,
+                  fontSize: 13, color: 'rgba(255,255,255,0.7)',
+                  direction: 'rtl', textAlign: 'right', lineHeight: 1.7,
+                }}>
+                  <span style={{ color: '#FFB347', fontWeight: 700, marginLeft: 6 }}>💡 חשוב על זה כך:</span>
+                  {SIMPLE_ANALOGIES[building.id]}
+                </div>
+              )}
+
+              {/* Explanation */}
+              <div style={{
+                background: `${color}0d`, border: `1px solid ${color}22`,
+                borderRadius: 12, padding: '16px 18px', marginBottom: 16,
+                fontSize: 14, color: 'rgba(255,255,255,0.85)',
+                lineHeight: 1.8, direction: 'rtl', textAlign: 'right',
+              }}>
+                {content.explanation}
+              </div>
+
+              {/* Formula */}
+              <div style={{
+                background: 'rgba(255,255,255,0.04)', borderRadius: 10,
+                padding: '12px 16px', marginBottom: 22,
+                fontFamily: 'monospace', fontSize: 13, color,
+                letterSpacing: 0.5, border: `1px solid ${color}22`,
+              }}>
+                {content.formula}
+              </div>
+
+              {/* Previous reflection */}
+              {reflection.length > 10 && (
+                <div style={{
+                  background: 'rgba(78,205,196,0.07)', border: '1px solid rgba(78,205,196,0.2)',
+                  borderRadius: 12, padding: '12px 16px', marginBottom: 14,
+                  direction: 'rtl', textAlign: 'right',
+                }}>
+                  <div style={{ fontSize: 10, color: 'rgba(78,205,196,0.6)', letterSpacing: 1, marginBottom: 6, textTransform: 'uppercase' as const }}>
+                    ✍️ הגדרה שלך מהפעם הקודמת
+                  </div>
+                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+                    {reflection}
+                  </div>
+                </div>
+              )}
+
+              {/* "In My Own Words" reflection textarea */}
+              <div style={{ marginBottom: 6 }}>
+                <div style={{
+                  fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 1,
+                  marginBottom: 8, textTransform: 'uppercase' as const,
+                  textAlign: 'right', direction: 'rtl',
+                }}>
+                  ✍️ בלשוני שלי — הסבר את המושג במילים שלך
+                </div>
+                <textarea
+                  value={reflection}
+                  onChange={e => handleReflectionChange(e.target.value)}
+                  placeholder={`${content.conceptHe} הוא...`}
+                  rows={3}
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${reflection.length > 10 ? color + '55' : 'rgba(255,255,255,0.12)'}`,
+                    borderRadius: 10, padding: '10px 12px',
+                    color: '#fff', fontSize: 13, lineHeight: 1.6,
+                    outline: 'none', resize: 'vertical' as const,
+                    fontFamily: "'Heebo', system-ui, sans-serif", direction: 'rtl',
+                    transition: 'border-color 0.2s',
+                  }}
+                />
+                {reflection.length > 10 && (
+                  <div style={{ fontSize: 11, color: '#4ECDC4', marginTop: 4, textAlign: 'right' }}>✓ נשמר</div>
+                )}
+              </div>
+
+              {/* CTA to quiz */}
+              <button
+                onClick={() => setActiveTab('quiz')}
+                style={{
+                  marginTop: 20, width: '100%', padding: '14px',
+                  background: `linear-gradient(90deg, ${color}33, ${color}22)`,
+                  border: `1px solid ${color}55`, borderRadius: 12,
+                  color, fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                  letterSpacing: 0.3, transition: 'opacity 0.15s',
+                  fontFamily: "'Heebo', system-ui, sans-serif",
+                }}
+              >
+                🎯 מוכן לבחינה? לחץ כאן ←
+              </button>
+            </div>
           )}
 
-          {/* Right — quiz */}
-          {(!isMobile || mobileTab === 'quiz') && (
+          {/* ── QUIZ TAB ── */}
+          {activeTab === 'quiz' && (
           <div style={{
-            flex: isMobile ? 'unset' : '1 1 380px',
-            overflow: 'auto',
-            padding: '22px 24px',
+            flex: 1, overflow: 'auto', padding: '24px 28px',
             display: 'flex', flexDirection: 'column',
           }}>
-            <div style={{ fontSize: 10, letterSpacing: 3, color: 'rgba(255,255,255,0.38)', marginBottom: 8, fontWeight: 700, textTransform: 'uppercase' as const }}>
-              🎯 בחן את עצמך
-            </div>
 
             {quizDone ? (
               <div style={{
@@ -1034,38 +925,6 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   {difficultyRating !== null && (
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 6, textAlign: 'right' }}>
                       {difficultyRating <= 2 ? '😊 קל — ' : difficultyRating === 3 ? '😐 בינוני — ' : '😤 קשה — '}נשמר
-                    </div>
-                  )}
-                </div>
-
-                {/* "In My Own Words" reflection box */}
-                <div style={{ width: '100%', maxWidth: 320, marginBottom: 16 }}>
-                  <div style={{
-                    fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 1,
-                    marginBottom: 8, textTransform: 'uppercase' as const,
-                    textAlign: 'right', direction: 'rtl',
-                  }}>
-                    ✍️ בלשוני שלי — הסבר את המושג במילים שלך
-                  </div>
-                  <textarea
-                    value={reflection}
-                    onChange={e => handleReflectionChange(e.target.value)}
-                    placeholder={`${content.conceptHe} הוא...`}
-                    rows={3}
-                    style={{
-                      width: '100%', boxSizing: 'border-box',
-                      background: 'rgba(255,255,255,0.04)',
-                      border: `1px solid ${reflection.length > 10 ? color + '55' : 'rgba(255,255,255,0.12)'}`,
-                      borderRadius: 10, padding: '10px 12px',
-                      color: '#fff', fontSize: 13, lineHeight: 1.6,
-                      outline: 'none', resize: 'vertical' as const,
-                      fontFamily: "'Heebo', system-ui, sans-serif", direction: 'rtl',
-                      transition: 'border-color 0.2s',
-                    }}
-                  />
-                  {reflection.length > 10 && (
-                    <div style={{ fontSize: 11, color: '#4ECDC4', marginTop: 4, textAlign: 'right' }}>
-                      ✓ נשמר
                     </div>
                   )}
                 </div>
@@ -1292,6 +1151,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
             )}
           </div>
           )}
+
         </div>
       </div>
     </div>
