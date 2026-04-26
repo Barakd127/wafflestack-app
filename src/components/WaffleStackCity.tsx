@@ -560,6 +560,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [xpMilestone, setXpMilestone] = useState<number | null>(null)
   const [xpMilestoneFading, setXpMilestoneFading] = useState(false)
   const [showTopicsList, setShowTopicsList] = useState(false)
+  const [topicsSearch, setTopicsSearch] = useState('')
+  const [topicsFilter, setTopicsFilter] = useState<'all' | 'mastered' | 'remaining'>('all')
   const [showGlossary, setShowGlossary] = useState(false)
   const [showFlashCards, setShowFlashCards] = useState(false)
   const [showExamMode, setShowExamMode] = useState(false)
@@ -1641,7 +1643,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 450, backdropFilter: 'blur(10px)', padding: 20,
-        }} onClick={() => { setShowTopicsList(false); setFormulaDrillActive(false) }}>
+        }} onClick={() => { setShowTopicsList(false); setFormulaDrillActive(false); setTopicsSearch(''); setTopicsFilter('all') }}>
           <div style={{
             background: 'linear-gradient(160deg, #0a0a18 0%, #0f1525 100%)',
             border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
@@ -1690,7 +1692,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                 >
                   🧮 נוסחאות
                 </button>
-                <button onClick={() => { setShowTopicsList(false); setFormulaDrillActive(false) }} style={{
+                <button onClick={() => { setShowTopicsList(false); setFormulaDrillActive(false); setTopicsSearch(''); setTopicsFilter('all') }} style={{
                   background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
                   borderRadius: 8, width: 32, height: 32, color: 'rgba(255,255,255,0.5)',
                   cursor: 'pointer', fontSize: 14,
@@ -1804,8 +1806,98 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                 })() : null}
               </div>
             ) : (
+            <>
+            {/* Search + mastery filter */}
+            <div style={{
+              padding: '10px 16px 4px', display: 'flex', flexDirection: 'column', gap: 8,
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <div style={{ position: 'relative' }}>
+                <span style={{
+                  position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)',
+                  fontSize: 12, color: 'rgba(255,255,255,0.35)', pointerEvents: 'none',
+                }}>🔍</span>
+                <input
+                  value={topicsSearch}
+                  onChange={e => setTopicsSearch(e.target.value)}
+                  placeholder="חפש מושג…"
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8,
+                    padding: '7px 28px 7px 28px', color: '#fff', fontSize: 13,
+                    outline: 'none', direction: 'rtl' as const, textAlign: 'right' as const,
+                    fontFamily: "'Heebo', system-ui, sans-serif",
+                  }}
+                />
+                {topicsSearch && (
+                  <button
+                    onClick={() => setTopicsSearch('')}
+                    aria-label="Clear search"
+                    style={{
+                      position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
+                      background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%',
+                      width: 18, height: 18, color: 'rgba(255,255,255,0.6)', fontSize: 11,
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >✕</button>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {([
+                  { key: 'all', label: `הכל · ${BUILDINGS.length}` },
+                  { key: 'mastered', label: `✓ הושלמו · ${mastered.size}` },
+                  { key: 'remaining', label: `○ נותרו · ${BUILDINGS.length - mastered.size}` },
+                ] as const).map(chip => {
+                  const isActive = topicsFilter === chip.key
+                  return (
+                    <button
+                      key={chip.key}
+                      onClick={() => setTopicsFilter(chip.key)}
+                      style={{
+                        flex: 1, padding: '5px 8px', borderRadius: 16,
+                        background: isActive ? 'rgba(170,150,218,0.18)' : 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${isActive ? 'rgba(170,150,218,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                        color: isActive ? '#AA96DA' : 'rgba(255,255,255,0.5)',
+                        fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                        whiteSpace: 'nowrap', transition: 'all 0.15s',
+                        fontFamily: "'Heebo', system-ui, sans-serif",
+                      }}
+                    >
+                      {chip.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
             <div style={{ overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {BUILDINGS.map(b => {
+              {(() => {
+                const q = topicsSearch.trim().toLowerCase()
+                const filtered = BUILDINGS.filter(b => {
+                  if (topicsFilter === 'mastered' && !mastered.has(b.id)) return false
+                  if (topicsFilter === 'remaining' && mastered.has(b.id)) return false
+                  if (!q) return true
+                  return (
+                    b.label.toLowerCase().includes(q) ||
+                    b.statsConcept.toLowerCase().includes(q) ||
+                    b.id.toLowerCase().includes(q)
+                  )
+                })
+                if (filtered.length === 0) {
+                  return (
+                    <div style={{
+                      padding: '32px 16px', textAlign: 'center',
+                      color: 'rgba(255,255,255,0.45)', direction: 'rtl' as const,
+                    }}>
+                      <div style={{ fontSize: 32, marginBottom: 8 }}>🔎</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>אין תוצאות</div>
+                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
+                        נסה מושג אחר או שנה את הסינון
+                      </div>
+                    </div>
+                  )
+                }
+                return filtered.map(b => {
                 const isMastered = mastered.has(b.id)
                 return (
                   <button
@@ -1893,8 +1985,10 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                     </div>
                   </button>
                 )
-              })}
+              })
+              })()}
             </div>
+            </>
             )}
           </div>
         </div>
