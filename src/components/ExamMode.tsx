@@ -47,6 +47,11 @@ function formatTime(secs: number): string {
   return `${m}:${String(s).padStart(2, '0')}`
 }
 
+/** מזהה אם מחרוזת כוללת עברית ומחזיר direction מתאים */
+function textDir(text: string): 'rtl' | 'ltr' {
+  return /[\u0590-\u05FF]/.test(text) ? 'rtl' : 'ltr'
+}
+
 export default function ExamMode({ onClose }: Props) {
   const [questions] = useState<ExamQuestion[]>(() => buildExam())
   const [index, setIndex] = useState(0)
@@ -101,7 +106,7 @@ export default function ExamMode({ onClose }: Props) {
         position: 'fixed', inset: 0, zIndex: 500,
         background: 'rgba(5,5,15,0.95)', backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: 'system-ui', padding: 16,
+        fontFamily: "'Heebo', system-ui, sans-serif", padding: 16,
       }}>
         <div style={{
           background: 'linear-gradient(160deg, #0f0f20, #161628)',
@@ -199,7 +204,7 @@ export default function ExamMode({ onClose }: Props) {
       position: 'fixed', inset: 0, zIndex: 500,
       background: 'rgba(5,5,15,0.92)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: 16, fontFamily: 'system-ui',
+      padding: 16, fontFamily: "'Heebo', system-ui, sans-serif",
     }}>
       <div style={{
         background: 'linear-gradient(160deg, #0f0f20, #161628)',
@@ -233,6 +238,16 @@ export default function ExamMode({ onClose }: Props) {
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace' }}>
               {index + 1}/{questions.length}
             </span>
+            <button
+              onClick={onClose}
+              title="Exit exam"
+              style={{
+                background: 'none', border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: 8, width: 30, height: 30, color: 'rgba(255,255,255,0.45)',
+                cursor: 'pointer', fontSize: 14, display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >✕</button>
           </div>
         </div>
 
@@ -247,12 +262,15 @@ export default function ExamMode({ onClose }: Props) {
 
         {/* Body */}
         <div style={{ padding: '22px 22px' }}>
-          {/* Question text */}
+          {/* Question text — bold headline with accent border (Sirup P1) */}
           <div style={{
-            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 12, padding: '14px 16px', marginBottom: 14,
-            fontSize: 14, color: 'rgba(255,255,255,0.9)',
-            direction: 'rtl', textAlign: 'right', lineHeight: 1.6,
+            fontSize: 17, fontWeight: 700, color: '#FFFFFF',
+            lineHeight: 1.55, direction: textDir(current.q), textAlign: textDir(current.q) === 'rtl' ? 'right' : 'left',
+            marginBottom: 14, padding: '16px 18px',
+            background: 'rgba(255,255,255,0.07)',
+            borderRadius: 12,
+            borderRight: `3px solid ${current.color}`,
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.10)',
           }}>
             {current.q}
           </div>
@@ -277,8 +295,9 @@ export default function ExamMode({ onClose }: Props) {
                   style={{
                     background: bg, border, borderRadius: 10,
                     padding: '11px 14px', cursor: selected !== null ? 'default' : 'pointer',
-                    color: textColor, fontSize: 13, textAlign: 'right',
-                    direction: 'rtl', transition: 'all 0.2s',
+                    color: textColor, fontSize: 13,
+                    textAlign: textDir(opt) === 'rtl' ? 'right' : 'left',
+                    direction: textDir(opt), transition: 'all 0.2s',
                     display: 'flex', gap: 10, alignItems: 'center',
                   }}
                 >

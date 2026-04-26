@@ -1,6 +1,16 @@
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls, useGLTF, Sky, ContactShadows, Html, useProgress } from '@react-three/drei'
-import { Suspense, useState, useRef, useCallback, useEffect } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { OrbitControls, useGLTF, Html, useProgress, PerformanceMonitor } from '@react-three/drei'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import SkyGradient from '../three/SkyGradient'
+import CityLighting from '../three/CityLighting'
+import { useQualityTier, BLOOM_ENABLED, DPR_MAX, type QualityTier } from '../three/QualityTier'
+import Clouds from '../three/Aliveness/Clouds'
+import Smoke from '../three/Aliveness/Smoke'
+import CameraDrift from '../three/Aliveness/CameraDrift'
+import SwayingTrees from '../three/Aliveness/SwayingTrees'
+import CameraRig from '../three/UI/CameraRig'
+import { generateIrregularGrid } from '../utils/irregularGrid'
+import { Suspense, useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo, getQuizForBuilding } from './StatChallenge'
 import ScoreBoard from './ScoreBoard'
@@ -8,6 +18,9 @@ import ExamMode from './ExamMode'
 import { useCitySound, playBuildingPlacedTone } from './SoundManager'
 import { useLearningStore, BUILDING_UNLOCK_CHAIN } from '../store/learningStore'
 import LearningMap from './LearningMap'
+import LocalLeaderboard, { saveSessionScore } from './LocalLeaderboard'
+import FlashcardMode from './FlashcardMode'
+import ConceptMapViewer from './ConceptMapViewer'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -282,58 +295,111 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
     ? `${import.meta.env.BASE_URL}${def.customModel.replace(/ /g, '%20')}`
     : `${import.meta.env.BASE_URL}models/kenney-suburban/${def.model}.glb`
   const { scene } = useGLTF(modelUrl)
-  const meshRef = useRef<THREE.Group>(null)
-  const clonedScene = scene.clone()
+  const groupRef = useRef<THREE.Group>(null)
+  const scaleCurrent = useRef(def.scale ?? 1.4)
+  const hoverEmissive = useRef(0)
 
   const activeColor = colorOverride ?? def.color
-  const emissiveIntensity = isGlowing ? 0.9 : isMastered ? 0.25 : isSelected ? 0.35 : isHovered ? 0.15 : 0
-  const emissiveColor = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : '#ffffff'
 
-  clonedScene.traverse((child) => {
-    if ((child as THREE.Mesh).isMesh) {
+  // Clone scene + apply color tinting ONLY — no hover emissive in deps.
+  // This means hovering never triggers a re-clone.
+  const clonedScene = useMemo(() => {
+    const clone = scene.clone()
+    clone.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh
+        const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
+        if (activeColor) {
+          if (colorOverride && colorOverride !== def.color) {
+            mat.color.set(activeColor)
+          } else if (def.color) {
+            mat.color.multiply(new THREE.Color(def.color))
+          }
+        }
+        mesh.material = mat
+      }
+    })
+    return clone
+  }, [scene, activeColor, colorOverride, def.color])
+
+  // Apply "slow-changing" states (mastered / selected / glow) via effect.
+  // These only fire when the boolean props actually change — not every frame.
+  useEffect(() => {
+    if (!clonedScene) return
+    const intensity = isGlowing ? 0.9 : isMastered ? 0.22 : isSelected ? 0.30 : 0
+    const color = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : '#ffffff'
+    clonedScene.traverse((child) => {
       const mesh = child as THREE.Mesh
-      const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
-      if (activeColor) {
-        // Use set() for variation B/C (clean palette swap); multiply for A (preserves model texture detail)
-        if (colorOverride && colorOverride !== def.color) {
-          mat.color.set(activeColor)
-        } else if (def.color) {
-          mat.color.multiply(new THREE.Color(def.color))
+      if (!mesh.isMesh || !mesh.material) return
+      const apply = (mat: THREE.Material) => {
+        const m = mat as THREE.MeshStandardMaterial
+        if ('emissive' in m) {
+          m.emissive.set(color)
+          m.emissiveIntensity = intensity
         }
       }
-      if (emissiveIntensity > 0) {
-        mat.emissive = new THREE.Color(emissiveColor)
-        mat.emissiveIntensity = emissiveIntensity
+      Array.isArray(mesh.material) ? mesh.material.forEach(apply) : apply(mesh.material)
+    })
+  }, [isGlowing, isMastered, isSelected, clonedScene, activeColor])
+
+  // Per-frame: smooth scale-lift on hover + warm-gold shimmer — zero React re-renders
+  useFrame(() => {
+    if (!groupRef.current) return
+    const base = def.scale ?? 1.4
+    const targetScale = isGlowing ? base * 1.15 : isSelected ? base * 1.07 : isHovered ? base * 1.05 : base
+    scaleCurrent.current += (targetScale - scaleCurrent.current) * 0.10
+    groupRef.current.scale.setScalar(scaleCurrent.current)
+
+    // Hover emissive shimmer (warm gold), only when not in a mastered/selected/glow state
+    if (!isGlowing && !isMastered && !isSelected) {
+      const targetEm = isHovered ? 0.20 : 0
+      const prev = hoverEmissive.current
+      hoverEmissive.current += (targetEm - prev) * 0.12
+      const em = hoverEmissive.current
+      if (Math.abs(em - prev) > 0.002) {
+        clonedScene.traverse((child) => {
+          const mesh = child as THREE.Mesh
+          if (!mesh.isMesh || !mesh.material) return
+          const apply = (mat: THREE.Material) => {
+            const m = mat as THREE.MeshStandardMaterial
+            if ('emissive' in m) {
+              m.emissive.set('#ffc96b')
+              m.emissiveIntensity = em
+            }
+          }
+          Array.isArray(mesh.material) ? mesh.material.forEach(apply) : apply(mesh.material)
+        })
       }
-      mesh.material = mat
+    } else {
+      hoverEmissive.current = 0
     }
   })
 
   return (
     <group
-      ref={meshRef}
+      ref={groupRef}
       position={def.position}
       rotation={[0, def.rotation ?? 0, 0]}
-      scale={def.scale ?? 1.4}
       onClick={(e) => { e.stopPropagation(); onClick(def) }}
       onPointerEnter={(e) => { e.stopPropagation(); onHoverStart(def.id) }}
       onPointerLeave={() => onHoverEnd()}
     >
       <primitive object={clonedScene} />
-      {/* Hover tooltip — lightweight, shows when hovered but not selected */}
+      {/* Hover tooltip — shows when hovered but not selected */}
       {isHovered && !isSelected && (
         <Html center distanceFactor={15} position={[0, 2.8, 0]}>
           <div style={{
-            background: 'rgba(0,0,0,0.78)', color: 'white',
-            padding: '5px 11px', borderRadius: 8, fontSize: 12,
+            background: 'rgba(0,0,0,0.80)', color: 'white',
+            padding: '5px 12px', borderRadius: 9, fontSize: 12,
             fontFamily: "'Heebo', system-ui, sans-serif", textAlign: 'center',
             direction: 'rtl', whiteSpace: 'nowrap',
             border: `1px solid ${activeColor ?? 'rgba(255,255,255,0.3)'}`,
             pointerEvents: 'none',
+            boxShadow: `0 0 12px ${activeColor ?? 'rgba(255,200,100,0.4)'}44`,
           }}>
-            <div style={{ fontWeight: 600 }}>{def.label}</div>
+            <div style={{ fontWeight: 700 }}>{def.label}</div>
             <div style={{ color: activeColor ?? '#aaa', fontSize: 11, marginTop: 2 }}>
-              {def.statsConcept} {isMastered ? '✓' : '○'}
+              {def.statsConcept} {isMastered ? '✓' : '↗ לחץ ללמוד'}
             </div>
           </div>
         </Html>
@@ -341,11 +407,12 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
       {isSelected && (
         <Html center distanceFactor={15} position={[0, 3, 0]}>
           <div style={{
-            background: 'rgba(0,0,0,0.88)', color: 'white',
-            padding: '8px 14px', borderRadius: 10, fontSize: 13,
+            background: 'rgba(0,0,0,0.90)', color: 'white',
+            padding: '8px 16px', borderRadius: 10, fontSize: 13,
             fontFamily: "'Heebo', system-ui, sans-serif", textAlign: 'center',
             direction: 'rtl', whiteSpace: 'nowrap',
             border: `2px solid ${activeColor ?? '#fff'}`,
+            boxShadow: `0 0 20px ${activeColor ?? '#fff'}44`,
           }}>
             <div style={{ fontSize: 16, marginBottom: 4 }}>{def.label}</div>
             <div style={{ opacity: 0.8 }}>📊 {def.statsConcept}</div>
@@ -360,58 +427,70 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
 // ─── Road/Prop ───────────────────────────────────────────────────────────────
 function Prop({ model, pos, rot }: { model: string, pos: [number,number,number], rot: number }) {
   const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/kenney-suburban/${model}.glb`)
-  return <primitive object={scene.clone()} position={pos} rotation={[0, rot, 0]} scale={1.4} />
+  const cloned = useMemo(() => scene.clone(), [scene])
+  return <primitive object={cloned} position={pos} rotation={[0, rot, 0]} scale={1.4} />
 }
 
-// ─── Grid helpers ─────────────────────────────────────────────────────────────
-const GRID_X = [-9, -3, 3, 9]
-const GRID_Z = [-9, -3, 3]
-const OCCUPIED_CELLS = new Set(BUILDINGS.map(b => `${b.position[0]},${b.position[2]}`))
+// ─── Townscaper-style irregular grid ground ───────────────────────────────────
+// Replaces the flat green plane. Generates the blue marble + irregular wireframe
+// aesthetic from TownscaperScene. Grid is seeded by useMemo([]) so stable per session.
+function TownscaperGround() {
+  const gridGeometry = useMemo(() => {
+    // 20 cols × 16 rows, 2.8 unit cells, 24% irregularity — covers city + margin
+    const grid = generateIrregularGrid(16, 20, 2.8, 0.24)
+    const positions: number[] = []
+    const Y = 0.012
 
-function snapToCell(x: number, z: number): [number, number] {
-  const sx = GRID_X.reduce((a, b) => Math.abs(b - x) < Math.abs(a - x) ? b : a)
-  const sz = GRID_Z.reduce((a, b) => Math.abs(b - z) < Math.abs(a - z) ? b : a)
-  return [sx, sz]
-}
+    grid.forEach(cell => {
+      const { a, b, c, d } = cell.corners
+      // Offset so the grid is centred over the building area (x≈0, z≈-3)
+      const ox = -8, oz = -11
+      positions.push(a.x + ox, Y, a.z + oz,  b.x + ox, Y, b.z + oz)
+      positions.push(b.x + ox, Y, b.z + oz,  c.x + ox, Y, c.z + oz)
+      positions.push(c.x + ox, Y, c.z + oz,  d.x + ox, Y, d.z + oz)
+      positions.push(d.x + ox, Y, d.z + oz,  a.x + ox, Y, a.z + oz)
+    })
 
-// ─── Ghost building preview ───────────────────────────────────────────────────
-function GhostBuilding({ x, z, valid }: { x: number; z: number; valid: boolean }) {
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+    return geo
+  }, [])  // stable — computed once per mount
+
   return (
-    <group position={[x, 0, z]}>
-      <mesh position={[0, 2, 0]}>
-        <boxGeometry args={[3.2, 4, 3.2]} />
-        <meshStandardMaterial
-          color={valid ? '#00ff88' : '#ff4444'}
-          transparent
-          opacity={0.32}
-          depthWrite={false}
-        />
+    <group>
+      {/* Deep water / marble base — full world coverage */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.08, 0]} receiveShadow>
+        <planeGeometry args={[120, 120]} />
+        <meshStandardMaterial color="#3a7d9e" roughness={0.12} metalness={0.28} />
       </mesh>
-      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[5.5, 5.5]} />
-        <meshStandardMaterial
-          color={valid ? '#00ff88' : '#ff4444'}
-          transparent
-          opacity={0.18}
-          depthWrite={false}
-        />
+
+      {/* Central grass "island" under the building grid */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, -3]} receiveShadow>
+        <planeGeometry args={[30, 22]} />
+        <meshStandardMaterial color="#5e9e58" roughness={0.88} />
       </mesh>
+
+      {/* Irregular grid wireframe overlay */}
+      <lineSegments geometry={gridGeometry}>
+        <lineBasicMaterial color="#8fd8ee" transparent opacity={0.50} />
+      </lineSegments>
     </group>
   )
 }
 
-function Ground({ onMove, onLeave }: { onMove?: (x: number, z: number) => void; onLeave?: () => void }) {
+// ─── Post-processing — gated by adaptive quality tier ────────────────────────
+function CityPostFX() {
+  const tier = useQualityTier(s => s.tier)
+  if (!BLOOM_ENABLED[tier]) return null
   return (
-    <mesh
-      rotation={[-Math.PI / 2, 0, 0]}
-      position={[0, -0.05, 0]}
-      receiveShadow
-      onPointerMove={(e) => onMove?.(e.point.x, e.point.z)}
-      onPointerLeave={() => onLeave?.()}
-    >
-      <planeGeometry args={[60, 60]} />
-      <meshStandardMaterial color="#7ec850" roughness={0.9} />
-    </mesh>
+    <EffectComposer multisampling={tier === 'high' ? 4 : 0} enableNormalPass={false}>
+      <Bloom
+        intensity={tier === 'high' ? 0.45 : 0.3}
+        luminanceThreshold={0.85}
+        luminanceSmoothing={0.2}
+        mipmapBlur
+      />
+    </EffectComposer>
   )
 }
 
@@ -446,10 +525,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [showExamMode, setShowExamMode] = useState(false)
   const [showConceptMap, setShowConceptMap] = useState(false)
   const [showLearningMap, setShowLearningMap] = useState(false)
-  const [flashCardIndex, setFlashCardIndex] = useState(0)
-  const [flashCardFlipped, setFlashCardFlipped] = useState(false)
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
-  const [ghostCell, setGhostCell] = useState<[number, number] | null>(null)
   const [onboardingStep, setOnboardingStep] = useState<number>(() =>
     localStorage.getItem('wafflestack-onboarded') ? -1 : 0
   )
@@ -536,7 +613,6 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         case 'f':
         case 'F':
           setShowFlashCards(f => !f)
-          setFlashCardFlipped(false)
           break
         case 'e':
         case 'E':
@@ -572,6 +648,13 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
     else if (showScoreBoard) window.location.hash = '#score'
     else window.location.hash = '#city'
   }, [challengeBuilding, showTopicsList, showScoreBoard])
+
+  // Save session score to leaderboard on page unload
+  useEffect(() => {
+    const save = () => saveSessionScore(xp, mastered.size)
+    window.addEventListener('beforeunload', save)
+    return () => window.removeEventListener('beforeunload', save)
+  }, [xp, mastered])
 
   const openChallenge = useCallback((building: BuildingDef) => {
     setChallengeBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
@@ -775,7 +858,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           🎵
         </button>
         <button
-          onClick={() => { setShowFlashCards(f => !f); setFlashCardFlipped(false) }}
+          onClick={() => setShowFlashCards(f => !f)}
           style={{
             background: showFlashCards ? 'rgba(255,199,0,0.2)' : 'rgba(10,10,20,0.75)',
             backdropFilter: 'blur(10px)',
@@ -879,6 +962,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         >
           📊 Scores
         </button>
+        <button
+          onClick={() => setShowLeaderboard(l => !l)}
+          style={{
+            background: showLeaderboard ? 'rgba(255,215,0,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showLeaderboard ? 'rgba(255,215,0,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showLeaderboard ? '#FFD700' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Local Leaderboard — top 5 scores on this device"
+        >
+          🏆 Top
+        </button>
       </div>
 
       {/* Progress bar — top left */}
@@ -938,18 +1036,6 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           >✕</button>
         </div>
       )}
-
-      {/* Title */}
-      <div style={{
-        position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)',
-        color: 'white', fontSize: 20, fontWeight: 'bold',
-        fontFamily: "'Heebo', system-ui, sans-serif", zIndex: 50, direction: 'rtl',
-        background: 'rgba(0,0,0,0.5)', padding: '7px 18px', borderRadius: 12,
-        backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)',
-        whiteSpace: 'nowrap',
-      }}>
-        🏙️ WaffleStack — עיר הסטטיסטיקה
-      </div>
 
       {/* Hint */}
       {!selectedBuilding && (
@@ -1160,31 +1246,52 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       {/* Loading overlay — HTML div, lives outside Canvas */}
       <CityLoader />
 
-      {/* 3D Canvas */}
-      <Canvas shadows camera={{ position: [20, 18, 20], fov: 55 }} style={{ background: '#87CEEB' }}>
-        <Sky sunPosition={[100, 50, 100]} />
-        <ambientLight intensity={0.6} />
-        <directionalLight
-          position={[30, 40, 20]} intensity={1.5} castShadow
-          shadow-mapSize={[2048, 2048]}
-          shadow-camera-far={100} shadow-camera-left={-30}
-          shadow-camera-right={30} shadow-camera-top={30} shadow-camera-bottom={-30}
+      {/* 3D Canvas — adaptive quality, cozy stylized lighting */}
+      <Canvas
+        shadows
+        camera={{ position: [20, 18, 20], fov: 55 }}
+        gl={{ antialias: true, powerPreference: 'high-performance' }}
+        dpr={[1, DPR_MAX[useQualityTier.getState().tier]]}
+      >
+        {/* Performance monitor: drops to 'mid'/'low' if FPS sags, climbs back when stable */}
+        <PerformanceMonitor
+          onIncline={() => {
+            const t = useQualityTier.getState().tier
+            const next: QualityTier = t === 'low' ? 'mid' : 'high'
+            useQualityTier.getState().setTier(next)
+          }}
+          onDecline={() => {
+            const t = useQualityTier.getState().tier
+            const next: QualityTier = t === 'high' ? 'mid' : 'low'
+            useQualityTier.getState().setTier(next)
+          }}
         />
-        <OrbitControls enablePan maxPolarAngle={Math.PI / 2.1} minDistance={8} maxDistance={60} target={[0, 0, -3]} />
+
+        {/* Cozy golden-hour gradient sky (cheap shader, no HDRI) */}
+        <SkyGradient />
+
+        {/* Shared 3-light cozy setup + ContactShadows */}
+        <CityLighting sunPosition={[25, 28, 18]} contactShadowScale={42} />
+
+        <OrbitControls makeDefault enablePan maxPolarAngle={Math.PI / 2.1} minDistance={8} maxDistance={60} target={[0, 0, -3]} />
+        <CameraDrift amplitude={0.18} speed={0.13} />
+        <CameraRig
+          focusOn={selectedBuilding?.position ?? null}
+          focusOffset={[5, 4, 7]}
+          homePosition={[20, 18, 20]}
+          homeTarget={[0, 0, -3]}
+        />
 
         <Suspense fallback={null}>
-          <Ground
-            onMove={(x, z) => { const [sx, sz] = snapToCell(x, z); setGhostCell([sx, sz]) }}
-            onLeave={() => setGhostCell(null)}
-          />
-          {ghostCell && !selectedBuilding && !challengeBuilding && (
-            <GhostBuilding
-              x={ghostCell[0]}
-              z={ghostCell[1]}
-              valid={!OCCUPIED_CELLS.has(`${ghostCell[0]},${ghostCell[1]}`)}
-            />
-          )}
+          <TownscaperGround />
           {ROAD_MODELS.map((r, i) => <Prop key={i} model={r.model} pos={r.pos} rot={r.rot} />)}
+
+          {/* Aliveness layer — small sway/drift effects, all tier-gated */}
+          <SwayingTrees swayAmount={0.07} />
+          <Clouds count={6} altitude={24} range={70} speed={0.55} />
+          <Smoke position={[-9, 2.4, -9]}  count={10} riseSpeed={0.45} color="#f0e6d6" />
+          <Smoke position={[-3, 2.0,  3]}  count={8}  riseSpeed={0.35} color="#e8e0d0" drift={0.2} />
+
           {BUILDINGS.map((b) => (
             <Building
               key={b.id}
@@ -1199,12 +1306,17 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               colorOverride={COLOR_VARIATIONS[colorVariations[b.id] ?? 'A'][b.id]}
             />
           ))}
-          <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={40} blur={2} />
         </Suspense>
+
+        {/* Soft warm bloom for emissive accents — gated by quality tier */}
+        <CityPostFX />
       </Canvas>
 
       {/* Exam Mode */}
       {showExamMode && <ExamMode onClose={() => setShowExamMode(false)} />}
+
+      {/* Local Leaderboard */}
+      {showLeaderboard && <LocalLeaderboard onClose={() => setShowLeaderboard(false)} />}
 
       {/* Challenge Modal */}
       {challengeBuilding && (() => {
@@ -1841,140 +1953,23 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         </div>
       )}
 
-      {/* Flash Cards modal */}
-      {showFlashCards && (() => {
-        const card = FLASH_CARDS[flashCardIndex]
-        const isMastered = mastered.has(card.id)
-        return (
-          <div style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 480, backdropFilter: 'blur(10px)', padding: 20,
-          }} onClick={() => setShowFlashCards(false)}>
-            <div style={{
-              background: 'linear-gradient(160deg, #0a0a18 0%, #0f1525 100%)',
-              border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24,
-              padding: '28px 32px', width: '100%', maxWidth: 480,
-              fontFamily: "'Heebo', system-ui, sans-serif", color: '#fff',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-            }} onClick={e => e.stopPropagation()}>
+      {/* Flash Cards modal — extracted to FlashcardMode component */}
+      {showFlashCards && (
+        <FlashcardMode
+          cards={FLASH_CARDS}
+          mastered={mastered}
+          onClose={() => setShowFlashCards(false)}
+        />
+      )}
 
-              {/* Header */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div>
-                  <div style={{ fontSize: 16, fontWeight: 800 }}>📇 Flash Cards</div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
-                    {mastered.size}/10 mastered · כרטיס {flashCardIndex + 1} מתוך {FLASH_CARDS.length}
-                  </div>
-                </div>
-                <button onClick={() => setShowFlashCards(false)} style={{
-                  background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: 8, width: 32, height: 32, color: 'rgba(255,255,255,0.5)',
-                  cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>✕</button>
-              </div>
-
-              {/* Card */}
-              <div
-                onClick={() => setFlashCardFlipped(f => !f)}
-                style={{
-                  background: flashCardFlipped ? `linear-gradient(135deg, ${card.color}18 0%, transparent 100%)` : 'rgba(255,255,255,0.04)',
-                  border: `2px solid ${flashCardFlipped ? card.color + '55' : 'rgba(255,255,255,0.12)'}`,
-                  borderRadius: 20, padding: '32px 28px', cursor: 'pointer',
-                  minHeight: 200, display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', justifyContent: 'center', textAlign: 'center',
-                  transition: 'all 0.3s ease', marginBottom: 20,
-                  position: 'relative',
-                }}
-              >
-                {isMastered && (
-                  <div style={{
-                    position: 'absolute', top: 12, right: 12,
-                    fontSize: 10, color: '#4ECDC4', fontWeight: 700,
-                    background: 'rgba(78,205,196,0.12)', border: '1px solid rgba(78,205,196,0.25)',
-                    borderRadius: 10, padding: '2px 8px',
-                  }}>✓ נלמד</div>
-                )}
-                {!flashCardFlipped ? (
-                  <>
-                    <div style={{ fontSize: 56, marginBottom: 12 }}>{card.emoji}</div>
-                    <div style={{ fontSize: 26, fontWeight: 900, marginBottom: 6, direction: 'rtl' }}>
-                      {card.labelHe}
-                    </div>
-                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 8 }}>
-                      👆 לחץ לגילוי
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ fontSize: 14, color: card.color, fontWeight: 700, marginBottom: 10, letterSpacing: 1 }}>
-                      {card.labelEn}
-                    </div>
-                    <div style={{
-                      fontSize: 14, fontFamily: 'monospace', color: card.color,
-                      background: `${card.color}18`, border: `1px solid ${card.color}33`,
-                      borderRadius: 8, padding: '8px 16px', marginBottom: 14,
-                    }}>
-                      {card.formula}
-                    </div>
-                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, maxWidth: 340 }}>
-                      {card.preview}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Navigation */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <button
-                  onClick={() => { setFlashCardIndex(i => (i - 1 + FLASH_CARDS.length) % FLASH_CARDS.length); setFlashCardFlipped(false) }}
-                  style={{
-                    flex: 1, padding: '10px', background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
-                    color: 'rgba(255,255,255,0.7)', fontSize: 13, cursor: 'pointer', fontWeight: 600,
-                  }}
-                >← הקודם</button>
-                <button
-                  onClick={() => setFlashCardFlipped(f => !f)}
-                  style={{
-                    flex: 2, padding: '10px',
-                    background: card.color + '22', border: `1px solid ${card.color}44`,
-                    borderRadius: 10, color: card.color, fontSize: 13, cursor: 'pointer', fontWeight: 700,
-                  }}
-                >
-                  {flashCardFlipped ? '↩ הצג שאלה' : '💡 הצג תשובה'}
-                </button>
-                <button
-                  onClick={() => { setFlashCardIndex(i => (i + 1) % FLASH_CARDS.length); setFlashCardFlipped(false) }}
-                  style={{
-                    flex: 1, padding: '10px', background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
-                    color: 'rgba(255,255,255,0.7)', fontSize: 13, cursor: 'pointer', fontWeight: 600,
-                  }}
-                >הבא →</button>
-              </div>
-
-              {/* Dot indicators */}
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 16 }}>
-                {FLASH_CARDS.map((fc, i) => (
-                  <div
-                    key={i}
-                    onClick={() => { setFlashCardIndex(i); setFlashCardFlipped(false) }}
-                    style={{
-                      width: flashCardIndex === i ? 20 : 7, height: 7, borderRadius: 4,
-                      background: flashCardIndex === i ? FLASH_CARDS[flashCardIndex].color : mastered.has(fc.id) ? 'rgba(78,205,196,0.4)' : 'rgba(255,255,255,0.2)',
-                      cursor: 'pointer', transition: 'all 0.2s',
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        )
-      })()}
-
-      {/* Concept Map overlay */}
+      {/* Concept Map overlay — 3 Sirup-designed versions */}
       {showConceptMap && (
+        <ConceptMapViewer
+          onClose={() => setShowConceptMap(false)}
+          onOpenChallenge={(id) => { const b = BUILDINGS.find(bld => bld.id === id); if (b) { openChallenge(b); setShowConceptMap(false) } }}
+        />
+      )}
+      {false && showConceptMap && (
         <div
           style={{
             position: 'fixed', inset: 0, background: 'rgba(5,5,15,0.92)',
@@ -2091,7 +2086,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             </div>
           </div>
         </div>
-      )}
+      )}{/* end legacy concept map */}
 
       {/* Learning Map overlay */}
       {showLearningMap && (

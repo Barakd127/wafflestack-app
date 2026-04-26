@@ -1,0 +1,55 @@
+{
+  "_styleSuffix": "stylized low-poly, soft golden-hour palette, warm cream + dusty teal accents, isometric 3/4 view, friendly cozy game art, no text, no background",
+  "buildings": [
+    {
+      "id": "power",
+      "concept": "Mean (ממוצע)",
+      "prompt": "A small power station with one cylindrical cooling tower releasing curling soft smoke and a glowing yellow reactor core orb mounted on a brick base"
+    },
+    {
+      "id": "housing",
+      "concept": "Median (חציון)",
+      "prompt": "A cozy 3-story apartment block with arched windows, terracotta roof tiles, climbing ivy on the side, balconies with tiny potted plants"
+    },
+    {
+      "id": "traffic",
+      "concept": "Standard Deviation (סטיית תקן)",
+      "prompt": "A traffic-control tower with stacked observation decks, a striped red and white pole on top, four small traffic-light heads at the base, glowing screens visible inside"
+    },
+    {
+      "id": "hospital",
+      "concept": "Normal Distribution (התפלגות נורמלית)",
+      "prompt": "A small two-story hospital with a glowing teal cross on the front, a curved bell-shaped white roof, an ambulance silhouette parked at the entrance"
+    },
+    {
+      "id": "school",
+      "concept": "Sampling (מדגם)",
+      "prompt": "A friendly school building with a clock tower, a red flag on top, large arched windows showing chalkboards inside, a small chimney puffing"
+    },
+    {
+      "id": "bank",
+      "concept": "Regression (רגרסיה)",
+      "prompt": "A neoclassical bank with four short white columns, a triangular pediment, gold coin emblem above the door, marble steps with a small lamp post"
+    },
+    {
+      "id": "market",
+      "concept": "Correlation (קורלציה)",
+      "prompt": "An open street market with a striped red and white awning, fruit crates and baskets out front, a chalkboard menu, two paper lanterns hanging"
+    },
+    {
+      "id": "city-hall",
+      "concept": "Binomial Distribution (בינום)",
+      "prompt": "A small city hall building with a copper-domed bell tower, two flagpoles flanking the entrance, ornate stone facade, a clock face on the dome"
+    },
+    {
+      "id": "research",
+      "concept": "Hypothesis Testing (מבחן השערות)",
+      "prompt": "A research lab with a glass observatory dome on top, satellite dish on the roof, glowing blue beakers visible through tall windows, vent stacks"
+    },
+    {
+      "id": "news",
+      "concept": "Confidence Interval (רווח סמך)",
+      "prompt": "A news broadcast station with a radio antenna tower on top, a large illuminated sign on the facade, a clock above the door, microphone-shaped roof ornament"
+    }
+  ]
+}

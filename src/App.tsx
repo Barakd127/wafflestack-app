@@ -22,14 +22,15 @@ function App() {
     if (h === '#view-highcity') return 'city'
     if (h === '#view-townscaper') return 'townscaper'
     if (h === '#view-citymode') return 'citymode'
-    if (h === '#view-wafflecity' || h === '#city') return 'wafflecity'
+    if (h === '#view-wafflecity') return 'wafflecity'
     if (h === '#study') return 'study'
-    if (h === '#landing') return 'landing'
-    return hasUserName ? 'landing' : 'onboarding'
+    // StudyHub is the entry point — skip landing page entirely
+    return hasUserName ? 'study' : 'onboarding'
   })
   const [lessonTopic, setLessonTopic] = useState<LessonTopicId>('mean')
   const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('wafflestack-dark-mode') === 'true'
+    const stored = localStorage.getItem('wafflestack-dark-mode')
+    return stored !== null ? stored === 'true' : true
   })
   // Track which view opened the mind map, so the close button returns correctly
   const [mindmapFrom, setMindmapFrom] = useState<string>('study')
@@ -63,14 +64,14 @@ function App() {
 
   // Update hash when top-level view changes (WaffleStackCity manages its own sub-hashes)
   useEffect(() => {
-    if (activeView === 'landing') window.location.hash = '#landing'
+    if (activeView === 'study') window.location.hash = ''
+    else if (activeView === 'landing') window.location.hash = ''
     else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
-    else if (activeView === 'study') window.location.hash = '#study'
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
   }, [activeView])
 
   return (
-    <div className="relative w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
+    <div className="relative w-full h-full bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
       {/* Dark mode toggle — always visible, fixed */}
       <button
         onClick={() => setDarkMode(d => !d)}
@@ -192,11 +193,26 @@ function App() {
 
         {activeView === 'wafflecity' && (
           <div className="w-full h-full relative">
-            <WaffleStackCity onBack={() => setActiveView('landing')} />
-            <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
+            <WaffleStackCity onBack={() => setActiveView('study')} />
+            {/* Mind Map button — bottom-right, away from WaffleStackCity's top HUD */}
+            <div className="absolute bottom-6 right-6 z-50 pointer-events-auto">
               <button
                 onClick={() => openMindMap('wafflecity')}
-                className="px-4 py-2 backdrop-blur-xl bg-violet-600/80 border border-violet-400/50 rounded-xl text-white hover:bg-violet-700/80 transition-all font-semibold shadow-lg"
+                style={{
+                  background: 'rgba(109,40,217,0.85)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(167,139,250,0.5)',
+                  borderRadius: 20,
+                  padding: '8px 18px',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(109,40,217,0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
               >
                 🧠 Mind Map
               </button>
@@ -222,7 +238,7 @@ function App() {
 
       {/* Onboarding overlay — rendered on top of everything */}
       {activeView === 'onboarding' && (
-        <OnboardingFlow onComplete={() => setActiveView('wafflecity')} />
+        <OnboardingFlow onComplete={() => setActiveView('study')} />
       )}
     </div>
   )

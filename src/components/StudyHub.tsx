@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { LessonTopicId } from './LessonPage'
 import { useLearningStore } from '../store/learningStore'
 
@@ -10,34 +10,70 @@ interface StudyHubProps {
 
 type InternalView = 'home' | 'learning' | 'complete'
 
-// ── Exact Figma design tokens ──────────────────────────────────────────────────
-const PAGE_BG       = 'linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 49.05%, #3351CA 136%)'
-const SIDEBAR_BG    = 'linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%)'
-const SIDEBAR_ACTIVE = '#254A9F'
-const GLASS_CARD    = 'linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%)'
-const GLASS_CARD_SM = 'linear-gradient(180deg, rgba(255,255,255,0.30) 54.33%, rgba(255,255,255,0.10) 100%)'
-const CARD_SHADOW   = '0px 15px 30px rgba(31,41,55,0.25)'
+// ── Design tokens — driven by CSS custom properties for dark/light mode ────────
+const PAGE_BG       = 'var(--sh-page-bg)'
+const SIDEBAR_BG    = 'var(--sh-sidebar-bg)'
+const SIDEBAR_ACTIVE = 'var(--sh-sidebar-active)'
+const GLASS_CARD    = 'var(--sh-glass-card)'
+const GLASS_CARD_SM = 'var(--sh-glass-card-sm)'
+const CARD_SHADOW   = 'var(--sh-card-shadow)'
 const CARD_RADIUS   = 24
-const BUTTON_COLOR  = '#122460'
-const TEXT_DARK     = '#1F3E6C'
-const TEXT_MED      = '#254A9F'
-const TEXT_LIGHT    = '#7F9BD9'
-const TEXT_TIP      = '#465CA5'
+const BUTTON_COLOR  = 'var(--sh-btn-color)'
+const TEXT_DARK     = 'var(--sh-text-dark)'
+const TEXT_MED      = 'var(--sh-text-med)'
+const TEXT_LIGHT    = 'var(--sh-text-light)'
+const TEXT_TIP      = 'var(--sh-text-tip)'
 
-// ── Questions ──────────────────────────────────────────────────────────────────
+// ── Questions with model answers ──────────────────────────────────────────────
 const QUESTIONS = [
-  { id: 1, topic: 'ממוצע', text: 'בכיתה יש 10 תלמידים. ציוני המבחן שלהם הם:\n65, 70, 70, 75, 80, 85, 85, 90, 95, 100\n\nא. חשב/י את הממוצע של הציונים\nב. מצא/י את החציון\nג. קבע/י מהו השכיח\nד. חשב/י את טווח הציונים' },
-  { id: 2, topic: 'ממוצע', text: 'גבהות (בס"מ) של 5 שחקני כדורסל:\n180, 195, 188, 202, 175\n\nא. חשב/י את הממוצע\nב. מה ההפרש בין הגובה הגבוה לנמוך ביותר?' },
-  { id: 3, topic: 'חציון', text: 'הצג/י את הנתונים הבאים בסדר עולה:\n12, 7, 3, 18, 5, 9, 14\n\nא. מצא/י את החציון\nב. כמה ערכים גדולים מהחציון?' },
-  { id: 4, topic: 'שכיח', text: 'ציוני בוחן של כיתה: 70, 80, 80, 90, 80, 70, 95, 80\n\nא. מהו השכיח?\nב. כמה פעמים מופיע השכיח?' },
-  { id: 5, topic: 'ממוצע', text: 'בכיתה יש 10 תלמידים. ציוני המבחן שלהם הם:\n65, 70, 70, 75, 80, 85, 85, 90, 95, 100\n\nא. חשב/י את הממוצע של הציונים\nב. מצא/י את החציון\nג. קבע/י מהו השכיח\nד. חשב/י את טווח הציונים' },
-  { id: 6, topic: 'טווח', text: 'נתון מדגם: 4, 8, 15, 16, 23, 42\n\nא. חשב/י את הטווח\nב. מה הממוצע?' },
-  { id: 7, topic: 'ממוצע', text: 'ממוצע ציוני 4 תלמידים הוא 80. תלמיד חמישי קיבל 100.\nמהו הממוצע החדש?' },
-  { id: 8, topic: 'חציון', text: 'סדרה: 2, 4, 6, 8, 10, 12\nמצא/י חציון לסדרה זו ונמק/י.' },
-]
-
-const DOT_STATES: Array<'empty' | 'current' | 'wrong' | 'correct' | 'future'> = [
-  'empty', 'empty', 'empty', 'current', 'wrong', 'correct', 'correct', 'future',
+  {
+    id: 1, topic: 'ממוצע',
+    text: 'בכיתה יש 10 תלמידים. ציוני המבחן שלהם הם:\n65, 70, 70, 75, 80, 85, 85, 90, 95, 100\n\nא. חשב/י את הממוצע\nב. מצא/י את החציון\nג. קבע/י מהו השכיח\nד. חשב/י את הטווח',
+    answer: 'א. ממוצע = (65+70+70+75+80+85+85+90+95+100) ÷ 10 = 815 ÷ 10 = 81.5\nב. חציון = ממוצע הערך ה-5 וה-6 = (80+85) ÷ 2 = 82.5\nג. שכיח: 70 ו-85 מופיעים כל אחד פעמיים (רב-שכיחי)\nד. טווח = 100 − 65 = 35',
+    xp: 15,
+  },
+  {
+    id: 2, topic: 'ממוצע',
+    text: 'גבהות (בס"מ) של 5 שחקני כדורסל:\n180, 195, 188, 202, 175\n\nא. חשב/י את הממוצע\nב. מה ההפרש בין הגובה הגבוה לנמוך ביותר?',
+    answer: 'א. ממוצע = (180+195+188+202+175) ÷ 5 = 940 ÷ 5 = 188 ס"מ\nב. גבוה ביותר: 202, נמוך ביותר: 175 → הפרש = 202 − 175 = 27 ס"מ',
+    xp: 10,
+  },
+  {
+    id: 3, topic: 'חציון',
+    text: 'הצג/י את הנתונים הבאים בסדר עולה:\n12, 7, 3, 18, 5, 9, 14\n\nא. מצא/י את החציון\nב. כמה ערכים גדולים מהחציון?',
+    answer: 'סדר עולה: 3, 5, 7, 9, 12, 14, 18  (7 ערכים)\nא. חציון = ערך האמצעי = הערך ה-4 = 9\nב. ערכים גדולים מ-9: 12, 14, 18 → 3 ערכים',
+    xp: 10,
+  },
+  {
+    id: 4, topic: 'שכיח',
+    text: 'ציוני בוחן של כיתה: 70, 80, 80, 90, 80, 70, 95, 80\n\nא. מהו השכיח?\nב. כמה פעמים מופיע השכיח?',
+    answer: 'ספירה: 70→2, 80→4, 90→1, 95→1\nא. שכיח = 80 (מופיע הכי הרבה)\nב. השכיח מופיע 4 פעמים',
+    xp: 8,
+  },
+  {
+    id: 5, topic: 'טווח',
+    text: 'נתון מדגם: 4, 8, 15, 16, 23, 42\n\nא. חשב/י את הטווח\nב. מה הממוצע?',
+    answer: 'א. טווח = 42 − 4 = 38\nב. ממוצע = (4+8+15+16+23+42) ÷ 6 = 108 ÷ 6 = 18',
+    xp: 10,
+  },
+  {
+    id: 6, topic: 'ממוצע',
+    text: 'ממוצע ציוני 4 תלמידים הוא 80. תלמיד חמישי קיבל 100.\nמהו הממוצע החדש?',
+    answer: 'סכום 4 תלמידים = 4 × 80 = 320\nסכום חדש = 320 + 100 = 420\nממוצע חדש = 420 ÷ 5 = 84',
+    xp: 12,
+  },
+  {
+    id: 7, topic: 'חציון',
+    text: 'סדרה: 2, 4, 6, 8, 10, 12\nמצא/י חציון לסדרה זו ונמק/י.',
+    answer: 'הסדרה כבר מסודרת בסדר עולה. 6 ערכים זוגי.\nחציון = ממוצע הערך ה-3 וה-4 = (6+8) ÷ 2 = 7\nהחציון הוא 7 (אינו אחד מהערכים בסדרה)',
+    xp: 10,
+  },
+  {
+    id: 8, topic: 'שכיח',
+    text: 'נתוני מכירות שבועיות: 5, 8, 5, 12, 8, 5, 9, 5\n\nא. מהו השכיח?\nב. האם הממוצע גדול מהשכיח?',
+    answer: 'ספירה: 5→4, 8→2, 12→1, 9→1\nא. שכיח = 5\nב. ממוצע = (5+8+5+12+8+5+9+5) ÷ 8 = 57 ÷ 8 = 7.125\n   כן, הממוצע (7.125) גדול מהשכיח (5)',
+    xp: 12,
+  },
 ]
 
 // ── Activity chart SVG (exact Figma data points) ──────────────────────────────
@@ -141,7 +177,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap }: {
               style={{
                 background: isActive ? SIDEBAR_ACTIVE : 'transparent',
                 borderRadius: 32,
-                padding: '14px 20px',
+                padding: '12px 20px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'flex-end',
@@ -151,7 +187,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap }: {
                 cursor: 'pointer',
                 width: '100%',
                 fontFamily: "'Rubik', sans-serif",
-                fontSize: 20,
+                fontSize: 17,
                 fontWeight: isActive ? 600 : 400,
                 color: '#FFFFFF',
                 transition: 'background 0.15s',
@@ -160,6 +196,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap }: {
               onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
             >
               <span>{item.label}</span>
+              <span style={{ fontSize: 20, opacity: 0.85, width: 26, textAlign: 'center' }}>{item.icon}</span>
             </button>
           )
         })}
@@ -174,9 +211,9 @@ function TopBar({ title }: { title: string }) {
   const xp = useLearningStore(state => state.xp)
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.55)',
+      background: 'var(--sh-topbar-bg)',
       backdropFilter: 'blur(12px)',
-      borderBottom: '1px solid rgba(255,255,255,0.4)',
+      borderBottom: '1px solid var(--sh-topbar-border)',
       height: 70,
       display: 'flex',
       alignItems: 'center',
@@ -225,6 +262,12 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
   onGoWorld: () => void
   onGoMindmap: () => void
 }) {
+  const xp = useLearningStore(s => s.xp)
+  const totalCorrect = useLearningStore(s => s.totalCorrect)
+  const currentStreak = useLearningStore(s => s.currentStreak)
+  const XP_PER_LEVEL = 100
+  const level = Math.floor(xp / XP_PER_LEVEL) + 1
+  const xpInLevel = xp % XP_PER_LEVEL
   return (
     <div style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
       <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -416,17 +459,43 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
             boxShadow: CARD_SHADOW,
             borderRadius: CARD_RADIUS,
             padding: 28,
-            display: 'flex', flexDirection: 'column',
+            display: 'flex', flexDirection: 'column', gap: 12,
             border: '1px solid rgba(255,255,255,0.5)',
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, textAlign: 'right', marginBottom: 12 }}>העולם שלי</div>
-            <div style={{ flex: 1 }} />
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <button onClick={onGoWorld}
-                style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '11px 28px', fontWeight: 600, fontSize: 16, cursor: 'pointer', fontFamily: "'Rubik', sans-serif", boxShadow: '0px 2px 6px #8DA7FF' }}>
-                כניסה לעולם
-              </button>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, textAlign: 'right' }}>העולם שלי</div>
+
+            {/* Stats row */}
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <div style={{ textAlign: 'center', background: 'rgba(212,175,55,0.12)', borderRadius: 14, padding: '8px 14px', border: '1px solid rgba(212,175,55,0.3)' }}>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: '#D4AF37' }}>⭐ {xp}</div>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>XP סה"כ</div>
+              </div>
+              <div style={{ textAlign: 'center', background: 'rgba(52,168,83,0.10)', borderRadius: 14, padding: '8px 14px', border: '1px solid rgba(52,168,83,0.25)' }}>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: '#34A853' }}>✓ {totalCorrect}</div>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>תשובות נכונות</div>
+              </div>
+              <div style={{ textAlign: 'center', background: 'rgba(51,81,202,0.10)', borderRadius: 14, padding: '8px 14px', border: '1px solid rgba(51,81,202,0.22)' }}>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_MED }}>🔥 {currentStreak}</div>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ימים ברצף</div>
+              </div>
             </div>
+
+            {/* XP level bar */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT }}>Level {level}</span>
+                <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT }}>{xpInLevel}/{XP_PER_LEVEL} XP</span>
+              </div>
+              <div style={{ height: 7, background: 'rgba(212,175,55,0.15)', borderRadius: 10, overflow: 'hidden' }}>
+                <div style={{ width: `${(xpInLevel / XP_PER_LEVEL) * 100}%`, height: '100%', background: 'rgba(212,175,55,0.75)', borderRadius: 10, transition: 'width 0.4s' }} />
+              </div>
+            </div>
+
+            <div style={{ flex: 1 }} />
+            <button onClick={onGoWorld}
+              style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, cursor: 'pointer', fontFamily: "'Rubik', sans-serif", boxShadow: '0px 2px 6px #8DA7FF' }}>
+              כניסה לעולם 🌆
+            </button>
           </div>
         </div>
       </div>
@@ -434,166 +503,271 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
   )
 }
 
+// ── XP Burst animation ─────────────────────────────────────────────────────────
+function XpBurst({ amount, onDone }: { amount: number; onDone: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 1400)
+    return () => clearTimeout(t)
+  }, [onDone])
+  return (
+    <div style={{
+      position: 'fixed', top: '20%', left: '50%', transform: 'translateX(-50%)',
+      zIndex: 9999, pointerEvents: 'none',
+      animation: 'xpBurst 1.4s ease-out forwards',
+    }}>
+      <style>{`
+        @keyframes xpBurst {
+          0%   { opacity: 0; transform: translateX(-50%) scale(0.5) translateY(0px); }
+          20%  { opacity: 1; transform: translateX(-50%) scale(1.3) translateY(-10px); }
+          70%  { opacity: 1; transform: translateX(-50%) scale(1.1) translateY(-30px); }
+          100% { opacity: 0; transform: translateX(-50%) scale(0.9) translateY(-60px); }
+        }
+      `}</style>
+      <div style={{
+        background: 'linear-gradient(135deg,#D4AF37,#F5CC50)',
+        borderRadius: 99, padding: '10px 22px',
+        boxShadow: '0 4px 24px rgba(212,175,55,0.5)',
+        fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22,
+        color: '#fff', whiteSpace: 'nowrap',
+      }}>
+        +{amount} XP ⭐
+      </div>
+    </div>
+  )
+}
+
 // ── Learning area screen ───────────────────────────────────────────────────────
 function LearningScreen({ onBack }: { onBack: () => void }) {
-  const [currentQ, setCurrentQ] = useState(4)
+  const [currentQ, setCurrentQ] = useState(0)
   const [answer, setAnswer] = useState('')
-  const [checked, setChecked] = useState(false)
-  const [dotStates, setDotStates] = useState([...DOT_STATES])
+  const [phase, setPhase] = useState<'write' | 'review' | 'done'>('write')
+  const [dotStates, setDotStates] = useState<Array<'empty' | 'current' | 'correct' | 'wrong' | 'future'>>(
+    QUESTIONS.map((_, i) => i === 0 ? 'current' : 'empty')
+  )
+  const [xpBurst, setXpBurst] = useState<number | null>(null)
+  const recordAnswer = useLearningStore(s => s.recordAnswer)
 
-  const q = QUESTIONS[currentQ] || QUESTIONS[0]
+  const q = QUESTIONS[currentQ]
   const total = QUESTIONS.length
+  const answeredCount = dotStates.filter(s => s === 'correct' || s === 'wrong').length
+  const correctCount = dotStates.filter(s => s === 'correct').length
 
-  // Completion check: all dots are 'correct' or 'future'
-  const isComplete = dotStates.every(s => s === 'correct' || s === 'future')
-
-  const handleCheck = () => {
+  const handleReveal = () => {
     if (!answer.trim()) return
-    setChecked(true)
-    const next = [...dotStates]; next[currentQ] = 'correct'; setDotStates(next)
+    setPhase('review')
   }
-  const handleSkip = () => {
-    const next = [...dotStates]; next[currentQ] = 'future'; setDotStates(next)
-    goNext()
-  }
-  const goNext = () => {
-    const ni = Math.min(currentQ + 1, total - 1)
-    setCurrentQ(ni); setAnswer(''); setChecked(false)
+
+  const handleSelfAssess = (correct: boolean) => {
+    const xpReward = correct ? q.xp : 0
+    recordAnswer(`studyhub-q${q.id}`, correct, xpReward)
+
     const next = [...dotStates]
-    if (next[ni] === 'future' || next[ni] === 'empty') next[ni] = 'current'
+    next[currentQ] = correct ? 'correct' : 'wrong'
     setDotStates(next)
+
+    if (correct && xpReward > 0) {
+      setXpBurst(xpReward)
+    }
+
+    // auto advance after a moment
+    setTimeout(() => goNext(next), correct ? 900 : 600)
+  }
+
+  const handleSkip = () => {
+    const next = [...dotStates]
+    next[currentQ] = 'wrong'
+    setDotStates(next)
+    goNext(next)
+  }
+
+  const goNext = (currentDots?: typeof dotStates) => {
+    const dots = currentDots ?? dotStates
+    const ni = currentQ + 1
+    if (ni >= total) {
+      setPhase('done')
+      return
+    }
+    const next = [...dots]
+    if (next[ni] === 'empty') next[ni] = 'current'
+    setDotStates(next)
+    setCurrentQ(ni)
+    setAnswer('')
+    setPhase('write')
   }
 
   const handleReset = () => {
     setCurrentQ(0)
     setAnswer('')
-    setChecked(false)
-    setDotStates([...DOT_STATES])
+    setPhase('write')
+    setDotStates(QUESTIONS.map((_, i) => i === 0 ? 'current' : 'empty'))
   }
+
+  const isDone = phase === 'done'
 
   return (
     <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }} dir="rtl">
-      {/* Top bar (white, from Figma) */}
-      <div style={{ background: '#FFFFFF', boxShadow: '2px 2px 6px rgba(0,0,0,0.25)', height: 74, display: 'flex', alignItems: 'center', padding: '0 32px', flexShrink: 0 }}>
-        {/* Breadcrumb with building thumb + progress bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1 }}>
-          <img src={`${import.meta.env.BASE_URL}building-figma.png`} alt="" style={{ width: 43, height: 31, objectFit: 'cover', borderRadius: 6 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-          <div style={{ flex: 1 }}>
-            <div style={{ height: 7, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
-              <div style={{ width: `${((currentQ+1)/total)*100}%`, height: '100%', background: 'rgba(212,175,55,0.7)', borderRadius: 10, transition: 'width 0.3s' }} />
-            </div>
+      {xpBurst !== null && <XpBurst amount={xpBurst} onDone={() => setXpBurst(null)} />}
+
+      {/* Top bar */}
+      <div style={{ background: '#FFFFFF', boxShadow: '2px 2px 6px rgba(0,0,0,0.18)', height: 68, display: 'flex', alignItems: 'center', padding: '0 32px', flexShrink: 0, gap: 16 }}>
+        <img src={`${import.meta.env.BASE_URL}building-figma.png`} alt="" style={{ width: 40, height: 30, objectFit: 'cover', borderRadius: 6 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+        <div style={{ flex: 1 }}>
+          <div style={{ height: 7, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
+            <div style={{ width: `${isDone ? 100 : ((currentQ)/total)*100}%`, height: '100%', background: 'rgba(212,175,55,0.75)', borderRadius: 10, transition: 'width 0.4s' }} />
           </div>
-          <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: '#1F3E6C' }}>
-            <span style={{ fontWeight: 700 }}>סטטיסטיקה תיאורית</span> | {q.topic}
+          <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginTop: 3 }}>
+            {answeredCount} מתוך {total} הושלמו · {correctCount} נכון
           </div>
+        </div>
+        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK }}>
+          <span style={{ fontWeight: 700 }}>סטטיסטיקה תיאורית</span>{!isDone && ` | ${q.topic}`}
         </div>
       </div>
 
-      {/* Question area — glassmorphism whiteboard */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '32px 40px' }}>
+      {/* Main content */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '28px 40px' }}>
         <div style={{
-          background: 'linear-gradient(178.82deg, rgba(255,255,255,0.77) 17.91%, rgba(192,216,255,0.77) 199.73%)',
-          borderRadius: 20,
-          width: '100%', maxWidth: 1000,
-          padding: '32px 40px 28px',
-          position: 'relative',
+          background: 'var(--sh-q-card-bg)',
+          borderRadius: 20, width: '100%', maxWidth: 900,
+          padding: '32px 40px 28px', position: 'relative',
+          boxShadow: '0 8px 32px rgba(51,81,202,0.12)',
         }}>
-          {isComplete ? (
+
+          {isDone ? (
             /* ── Completion panel ── */
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: 16 }}>
-              <div style={{ fontSize: 64 }}>✅</div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 0', gap: 18 }}>
+              <div style={{ fontSize: 60 }}>🏆</div>
               <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 28, color: TEXT_DARK, textAlign: 'center' }}>
                 סיימת את הסשן!
               </div>
-              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 18, color: TEXT_TIP, textAlign: 'center' }}>
-                ענית על כל 8 השאלות 🎉
+              <div style={{ display: 'flex', gap: 24, margin: '4px 0' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#34A853' }}>{correctCount}</div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>נכון</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#EA4335' }}>{total - correctCount}</div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>לשיפור</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#D4AF37' }}>
+                    {QUESTIONS.filter((_, i) => dotStates[i] === 'correct').reduce((s, q) => s + q.xp, 0)}
+                  </div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>XP הרווחת</div>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
-                <button
-                  onClick={onBack}
-                  style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '12px 28px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}
-                >
+              <div style={{ display: 'flex', gap: 14, marginTop: 4 }}>
+                <button onClick={onBack}
+                  style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '12px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}>
                   חזור לדף הבית
                 </button>
-                <button
-                  onClick={handleReset}
-                  style={{ background: '#fff', color: BUTTON_COLOR, border: `2px solid ${BUTTON_COLOR}`, borderRadius: 24, padding: '12px 28px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
-                >
-                  עוד סשן
+                <button onClick={handleReset}
+                  style={{ background: '#fff', color: BUTTON_COLOR, border: `2px solid ${BUTTON_COLOR}`, borderRadius: 24, padding: '12px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
+                  סשן נוסף
                 </button>
               </div>
             </div>
-          ) : (
-            <>
-              {/* Question number */}
-              <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 24, color: TEXT_DARK, marginBottom: 16, textAlign: 'right' }}>שאלה {currentQ + 1}</div>
 
-              {/* Question text */}
-              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 20, color: '#000', lineHeight: 2, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: 24 }}>
+          ) : phase === 'write' ? (
+            /* ── Write your answer ── */
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>
+                  +{q.xp} XP ⭐
+                </div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>
+                  שאלה {currentQ + 1} / {total}
+                </div>
+              </div>
+
+              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 19, color: 'var(--sh-q-text-color)', lineHeight: 2.1, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: 22 }}>
                 {q.text}
               </div>
 
-              {/* Textarea */}
-              <div style={{ border: '2px solid #B4B4B4', borderRadius: 12, overflow: 'hidden', marginBottom: 20 }}>
+              <div style={{ border: `2px solid ${answer.trim() ? '#3351CA' : '#C8D0E0'}`, borderRadius: 12, overflow: 'hidden', marginBottom: 18, transition: 'border-color 0.2s' }}>
                 <textarea
                   value={answer}
                   onChange={e => setAnswer(e.target.value)}
-                  placeholder="הכנס את תשובתך כאן..."
+                  placeholder="כתוב/י את פתרונך כאן..."
                   dir="rtl"
                   style={{
-                    width: '100%', minHeight: 120,
+                    width: '100%', minHeight: 110,
                     border: 'none', outline: 'none',
-                    padding: '16px 20px',
-                    fontSize: 20, color: '#B0B0B0',
+                    padding: '14px 18px',
+                    fontSize: 18, color: TEXT_DARK,
                     background: 'transparent',
-                    fontFamily: "'Inter', sans-serif",
-                    resize: 'vertical',
-                    direction: 'rtl', textAlign: 'center',
+                    fontFamily: "'Assistant', sans-serif",
+                    resize: 'vertical', direction: 'rtl',
                     boxSizing: 'border-box',
                   }}
-                  onFocus={e => { e.target.style.color = TEXT_DARK }}
-                  onBlur={e => { if (!e.target.value) e.target.style.color = '#B0B0B0' }}
                 />
               </div>
 
-              {/* Next arrow button (right edge) */}
-              <button onClick={goNext}
-                style={{ position: 'absolute', left: -20, top: '40%', background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(18,36,96,0.3)', fontSize: 20 }}>
-                ›
-              </button>
-
-              {/* Action bar */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                {/* Left: check + skip */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <button onClick={handleCheck}
-                    style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '10px 28px', fontFamily: "'Assistant', sans-serif", fontSize: 18, fontWeight: 700, cursor: 'pointer', opacity: answer.trim() ? 1 : 0.5, boxShadow: '0px 2px 6px #8DA7FF' }}>
-                    בדיקת תשובה
-                  </button>
-                  <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 18, color: BUTTON_COLOR, cursor: 'pointer' }} onClick={handleSkip}>דלג</span>
-                </div>
+                <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_LIGHT, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleSkip}>דלג</span>
 
-                {/* Center: progress dots */}
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                {/* Dots */}
+                <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                   {dotStates.map((state, i) => {
-                    const bg = state === 'correct' ? '#34A853' : state === 'wrong' ? '#EA4335' : state === 'current' ? BUTTON_COLOR : state === 'empty' ? '#E0E0E0' : '#F5F5F5'
-                    const inner = state === 'correct' ? '✓' : state === 'wrong' ? '✗' : ''
+                    const bg = state === 'correct' ? '#34A853' : state === 'wrong' ? '#EA4335' : state === 'current' ? BUTTON_COLOR : '#D8E0F0'
                     return (
-                      <div key={i} onClick={() => setCurrentQ(i)}
-                        style={{ width: state === 'current' ? 14 : 11, height: state === 'current' ? 14 : 11, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 7, color: '#fff', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}>
-                        {inner}
+                      <div key={i} style={{ width: state === 'current' ? 14 : 10, height: state === 'current' ? 14 : 10, borderRadius: '50%', background: bg, transition: 'all 0.25s', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 6, color: '#fff', fontWeight: 700 }}>
+                        {state === 'correct' ? '✓' : state === 'wrong' ? '✗' : ''}
                       </div>
                     )
                   })}
                 </div>
 
-                {/* Right: counter */}
-                <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 18, color: '#000' }}>
-                  שאלה {currentQ + 1} מתוך {total}
+                <button onClick={handleReveal} disabled={!answer.trim()}
+                  style={{ background: answer.trim() ? BUTTON_COLOR : '#C8D0E0', color: '#fff', border: 'none', borderRadius: 24, padding: '10px 28px', fontFamily: "'Rubik', sans-serif", fontSize: 16, fontWeight: 700, cursor: answer.trim() ? 'pointer' : 'not-allowed', boxShadow: answer.trim() ? '0px 2px 6px #8DA7FF' : 'none', transition: 'all 0.2s' }}>
+                  בדוק תשובה ←
+                </button>
+              </div>
+            </>
+
+          ) : (
+            /* ── Review: show model answer ── */
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>+{q.xp} XP ⭐ אם נכון</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>שאלה {currentQ + 1} / {total}</div>
+              </div>
+
+              {/* User's answer */}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT, marginBottom: 6, textAlign: 'right' }}>התשובה שלך:</div>
+                <div style={{ background: 'var(--sh-answer-bg)', borderRadius: 10, padding: '12px 16px', border: '1.5px solid var(--sh-answer-border)', fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK, lineHeight: 1.7, whiteSpace: 'pre-wrap', textAlign: 'right' }}>
+                  {answer}
+                </div>
+              </div>
+
+              {/* Model answer */}
+              <div style={{ marginBottom: 22 }}>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: '#34A853', marginBottom: 6, textAlign: 'right', fontWeight: 600 }}>✅ פתרון מלא:</div>
+                <div style={{ background: 'linear-gradient(135deg, rgba(52,168,83,0.08), rgba(52,168,83,0.04))', borderRadius: 10, padding: '14px 18px', border: '1.5px solid rgba(52,168,83,0.3)', fontFamily: "'Assistant', sans-serif", fontSize: 17, color: TEXT_DARK, lineHeight: 1.9, whiteSpace: 'pre-wrap', textAlign: 'right' }}>
+                  {q.answer}
+                </div>
+              </div>
+
+              {/* Self-assessment */}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_MED, marginBottom: 14 }}>
+                  כמה הצלחת?
+                </div>
+                <div style={{ display: 'flex', gap: 14, justifyContent: 'center' }}>
+                  <button onClick={() => handleSelfAssess(false)}
+                    style={{ background: 'rgba(234,67,53,0.1)', color: '#EA4335', border: '2px solid rgba(234,67,53,0.35)', borderRadius: 24, padding: '10px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
+                    😅 לא ממש
+                  </button>
+                  <button onClick={() => handleSelfAssess(true)}
+                    style={{ background: 'rgba(52,168,83,0.1)', color: '#34A853', border: '2px solid rgba(52,168,83,0.35)', borderRadius: 24, padding: '10px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
+                    ✅ הצלחתי!
+                  </button>
                 </div>
               </div>
             </>
           )}
+
         </div>
       </div>
     </div>
