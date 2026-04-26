@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DistributionChart — SVG-based interactive statistical distribution visualizer.
  * No external charting library required. Pure SVG + React.
  */
@@ -52,7 +52,9 @@ function seededRand(seed: number): () => number {
 
 export type DistributionType =
   | 'normal' | 't' | 'chi-squared' | 'binomial'
-  | 'bar-mean' | 'scatter-pos' | 'scatter-neg' | 'scatter-regression'
+  | 'bar-mean' | 'bar-median'
+  | 'scatter-pos' | 'scatter-neg' | 'scatter-regression'
+  | 'sampling' | 'confidence-interval'
 
 export interface DistributionParams {
   mean?: number
@@ -183,6 +185,182 @@ function ScatterChart({ params, width, height, color, showLine }: {
   )
 }
 
+
+// ─── Bar-Median Chart ─────────────────────────────────────────────────────────
+
+function BarMedianChart({ params, width, height, color }: { params: DistributionParams; width: number; height: number; color: string }) {
+  const PAD = { top: 24, right: 16, bottom: 36, left: 12 }
+  const W = width - PAD.left - PAD.right
+  const H = height - PAD.top - PAD.bottom
+  // Sorted dataset — 10 values, median = avg of index 4 and 5 = (8+9)/2 = 8.5
+  const barValues = [3, 5, 6, 7, 8, 9, 10, 12, 14, 16]
+  const n = barValues.length
+  const medianIdx1 = Math.floor((n - 1) / 2)   // index 4
+  const medianIdx2 = Math.ceil((n - 1) / 2)    // index 5
+  const median = (barValues[medianIdx1] + barValues[medianIdx2]) / 2
+  const maxVal = Math.max(...barValues) * 1.12
+  const barW = W / n
+  return (
+    <svg width={width} height={height} style={{ display: 'block', overflow: 'visible' }}>
+      <g transform={`translate(${PAD.left},${PAD.top})`}>
+        {/* Bars */}
+        {barValues.map((v, i) => {
+          const bh = (v / maxVal) * H
+          const isMedian = i === medianIdx1 || i === medianIdx2
+          return (
+            <rect
+              key={i}
+              x={i * barW + barW * 0.1}
+              y={H - bh}
+              width={barW * 0.8}
+              height={bh}
+              fill={isMedian ? color : `${color}44`}
+              rx={2}
+            />
+          )
+        })}
+        {/* Bracket over median bars */}
+        {(() => {
+          const x1 = medianIdx1 * barW + barW * 0.1
+          const x2 = medianIdx2 * barW + barW * 0.9
+          const bracketY = -10
+          return (
+            <>
+              <line x1={x1} y1={bracketY + 6} x2={x1} y2={bracketY} stroke={color} strokeWidth={1.5} />
+              <line x1={x1} y1={bracketY} x2={x2} y2={bracketY} stroke={color} strokeWidth={1.5} />
+              <line x1={x2} y1={bracketY} x2={x2} y2={bracketY + 6} stroke={color} strokeWidth={1.5} />
+              <text x={(x1 + x2) / 2} y={bracketY - 4} textAnchor="middle" fill={color} fontSize={10} fontWeight="600">
+                חציון={median}
+              </text>
+            </>
+          )
+        })()}
+        {/* Sorted label */}
+        <text x={W / 2} y={H + 28} textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize={9}>
+          ← מסודר לפי ערך
+        </text>
+        {/* Baseline */}
+        <line x1={0} y1={H} x2={W} y2={H} stroke="rgba(255,255,255,0.2)" strokeWidth={1} />
+      </g>
+    </svg>
+  )
+}
+
+// ─── Sampling Chart ───────────────────────────────────────────────────────────
+
+function SamplingChart({ params, width, height, color }: { params: DistributionParams; width: number; height: number; color: string }) {
+  const PAD = { top: 12, right: 12, bottom: 36, left: 12 }
+  const W = width - PAD.left - PAD.right
+  const H = height - PAD.top - PAD.bottom
+  const TOTAL = 60
+  // Sample fraction: sigma param (0.1–3) mapped to fraction 0.10–0.55
+  const sigma = Math.max(0.1, Math.min(3, params.sigma ?? 1))
+  const sampleFrac = 0.10 + (sigma / 3) * 0.45
+  const sampleN = Math.round(TOTAL * sampleFrac)
+  const rand = seededRand(99)
+  // Generate dot positions scattered in a wide ellipse
+  const dots = Array.from({ length: TOTAL }, (_, i) => {
+    const r = rand()
+    const angle = rand() * Math.PI * 2
+    const rx = W * 0.44 * Math.sqrt(r)
+    const ry = H * 0.38 * Math.sqrt(r)
+    return {
+      x: W / 2 + rx * Math.cos(angle),
+      y: H * 0.45 + ry * Math.sin(angle),
+      inSample: i < sampleN,
+    }
+  })
+  return (
+    <svg width={width} height={height} style={{ display: 'block', overflow: 'visible' }}>
+      <g transform={`translate(${PAD.left},${PAD.top})`}>
+        {/* Population ellipse outline */}
+        <ellipse cx={W / 2} cy={H * 0.45} rx={W * 0.47} ry={H * 0.42}
+          fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={1.5} strokeDasharray="6 4" />
+        {/* Dots */}
+        {dots.map((d, i) => (
+          <circle key={i} cx={d.x} cy={d.y} r={d.inSample ? 4 : 3}
+            fill={d.inSample ? color : 'rgba(255,255,255,0.18)'}
+            stroke={d.inSample ? color : 'none'} strokeWidth={1}
+            fillOpacity={d.inSample ? 0.9 : 1}
+          />
+        ))}
+        {/* Labels */}
+        <text x={W / 2} y={H + 14} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize={9}>
+          אוכלוסייה N={TOTAL}
+        </text>
+        <text x={W / 2} y={H + 26} textAnchor="middle" fill={color} fontSize={10} fontWeight="600">
+          מדגם n={sampleN} ({Math.round(sampleFrac * 100)}%)
+        </text>
+      </g>
+    </svg>
+  )
+}
+
+// ─── Confidence Interval Chart ────────────────────────────────────────────────
+
+function ConfidenceIntervalChart({ params, width, height, color }: { params: DistributionParams; width: number; height: number; color: string }) {
+  const PAD = { top: 16, right: 16, bottom: 48, left: 40 }
+  const W = width - PAD.left - PAD.right
+  const H = height - PAD.top - PAD.bottom
+  const mu = params.mean ?? 0
+  const sig = Math.max(params.sigma ?? 1, 0.1)
+  const Z = 1.96  // 95% CI
+  const ciLow = mu - Z * sig
+  const ciHigh = mu + Z * sig
+  const xMin = mu - 4 * sig
+  const xMax = mu + 4 * sig
+  const N = 200
+  const toSvgX = (x: number) => ((x - xMin) / (xMax - xMin)) * W
+  // Build curve path
+  const pts: [number, number][] = []
+  for (let i = 0; i <= N; i++) {
+    const x = xMin + (i / N) * (xMax - xMin)
+    pts.push([x, normalPDF(x, mu, sig)])
+  }
+  const yMax = Math.max(...pts.map(p => p[1])) * 1.1
+  const toSvgY = (y: number) => H - (y / yMax) * H
+  const pathD = pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${toSvgX(x).toFixed(1)},${toSvgY(y).toFixed(1)}`).join(' ')
+  // Shaded CI region
+  const ciPts = pts.filter(([x]) => x >= ciLow && x <= ciHigh)
+  const shadedD = ciPts.length > 1
+    ? `M${toSvgX(ciLow).toFixed(1)},${H} ` +
+      ciPts.map(([x, y]) => `L${toSvgX(x).toFixed(1)},${toSvgY(y).toFixed(1)}`).join(' ') +
+      ` L${toSvgX(ciHigh).toFixed(1)},${H} Z`
+    : ''
+  // CI bracket below x-axis
+  const bY = H + 14
+  const lX = toSvgX(ciLow)
+  const rX = toSvgX(ciHigh)
+  const mX = toSvgX(mu)
+  return (
+    <svg width={width} height={height} style={{ display: 'block', overflow: 'visible' }}>
+      <g transform={`translate(${PAD.left},${PAD.top})`}>
+        {/* Shaded CI */}
+        {shadedD && <path d={shadedD} fill={color} fillOpacity={0.25} />}
+        {/* Curve */}
+        <path d={pathD} fill="none" stroke={color} strokeWidth={2.5} strokeLinejoin="round" />
+        {/* Mean line */}
+        <line x1={mX} y1={0} x2={mX} y2={H} stroke={color} strokeWidth={1.5} strokeDasharray="4 3" opacity={0.7} />
+        {/* Baseline */}
+        <line x1={0} y1={H} x2={W} y2={H} stroke="rgba(255,255,255,0.2)" strokeWidth={1} />
+        {/* CI bracket */}
+        <line x1={lX} y1={bY} x2={rX} y2={bY} stroke={color} strokeWidth={2} />
+        <line x1={lX} y1={bY - 5} x2={lX} y2={bY + 5} stroke={color} strokeWidth={2} />
+        <line x1={rX} y1={bY - 5} x2={rX} y2={bY + 5} stroke={color} strokeWidth={2} />
+        {/* CI label */}
+        <text x={mX} y={bY + 18} textAnchor="middle" fill={color} fontSize={10} fontWeight="600">
+          רווח סמך 95%
+        </text>
+        <text x={lX} y={bY + 30} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize={8}>
+          {ciLow.toFixed(2)}
+        </text>
+        <text x={rX} y={bY + 30} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize={8}>
+          {ciHigh.toFixed(2)}
+        </text>
+      </g>
+    </svg>
+  )
+}
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function DistributionChart({
@@ -204,6 +382,15 @@ export default function DistributionChart({
   }
   if (distribution === 'scatter-regression') {
     return <ScatterChart params={{ ...params, correlation: params.correlation ?? 0.8 }} width={width} height={height} color={color} showLine />
+  }
+  if (distribution === 'bar-median') {
+    return <BarMedianChart params={params} width={width} height={height} color={color} />
+  }
+  if (distribution === 'sampling') {
+    return <SamplingChart params={params} width={width} height={height} color={color} />
+  }
+  if (distribution === 'confidence-interval') {
+    return <ConfidenceIntervalChart params={params} width={width} height={height} color={color} />
   }
 
   // ─── Curve-based charts ────────────────────────────────────────────────────

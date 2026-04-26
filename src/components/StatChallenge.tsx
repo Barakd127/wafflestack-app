@@ -1,4 +1,4 @@
-/**
+﻿/**
  * StatChallenge — Interactive statistics learning modal.
  * Opens when user clicks a building in WaffleStackCity.
  * Features: concept explanation, live distribution chart, parameter sliders, quiz.
@@ -106,7 +106,7 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🏠', color: '#4ECDC4',
     explanation: 'החציון הוא הערך האמצעי כשהנתונים מסודרים מקטן לגדול. הוא פחות רגיש לערכים קיצוניים מהממוצע. בשכר דיור, החציון מספר לנו מה "אמצע" השוק.',
     formula: 'מסדרים את כל הנתונים → בוחרים את האמצעי',
-    distribution: 'bar-mean',
+    distribution: 'bar-median',
     defaultParams: { mean: 0, sigma: 1.5 },
     sliders: [
       { key: 'mean', label: 'Center', labelHe: 'מרכז', min: -3, max: 3, step: 0.1 },
@@ -193,7 +193,7 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '🏫', color: '#AA96DA',
     explanation: 'מדגם הוא קבוצה קטנה שנבחרת מתוך אוכלוסיה גדולה. אנחנו לומדים על כולם מתוך חלק. ככל שהמדגם גדול יותר ואקראי יותר, המסקנות מדויקות יותר.',
     formula: 'שגיאת מדגם = σ / √n',
-    distribution: 'normal',
+    distribution: 'sampling',
     defaultParams: { mean: 0, sigma: 1 },
     sliders: [
       { key: 'sigma', label: 'Sample Error', labelHe: 'שגיאת מדגם', min: 0.1, max: 3, step: 0.05 },
@@ -270,9 +270,9 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     explanation: 'קורלציה מודדת כמה חזק הקשר בין שני משתנים (-1 עד 1). r=1: קשר חיובי מושלם. r=-1: הפוך מושלם. r=0: אין קשר. לא אומרת סיבתיות!',
     formula: 'r = Σ[(xᵢ-x̄)(yᵢ-ȳ)] / (n·σₓ·σᵧ)',
     distribution: 'scatter-pos',
-    defaultParams: { mean: 0, sigma: 1 },
+    defaultParams: { correlation: 0.75 },
     sliders: [
-      { key: 'mean', label: 'Correlation strength', labelHe: 'עוצמת קשר', min: -3, max: 3, step: 0.1 },
+      { key: 'correlation', label: 'Correlation (r)', labelHe: 'עוצמת קשר', min: -0.99, max: 0.99, step: 0.05 },
     ],
     quiz: [
       {
@@ -393,7 +393,7 @@ const CHALLENGES: Record<string, ChallengeContent> = {
     emoji: '📰', color: '#FFB347',
     explanation: 'רווח סמך 95% אומר: "95% מהרווחים שנחשב בשיטה זו יכילו את הפרמטר האמיתי." הוא מראה כמה בטוחים אנחנו באמידה שלנו.',
     formula: 'CI = x̄ ± z·(σ/√n)',
-    distribution: 'normal',
+    distribution: 'confidence-interval',
     defaultParams: { mean: 0, sigma: 1 },
     sliders: [
       { key: 'sigma', label: 'Interval width', labelHe: 'רוחב הרווח', min: 0.2, max: 3, step: 0.05 },
