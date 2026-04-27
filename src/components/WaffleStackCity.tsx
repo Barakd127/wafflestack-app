@@ -606,6 +606,18 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
     localStorage.setItem('wafflestack-onboarded', '1')
   }
 
+  // Pick a random building, preferring unmastered. Skip the currently-open challenge.
+  const openRandomChallenge = useCallback(() => {
+    const unmastered = BUILDINGS.filter(b => !mastered.has(b.id) && b.id !== challengeBuilding?.id)
+    const pool = unmastered.length > 0
+      ? unmastered
+      : BUILDINGS.filter(b => b.id !== challengeBuilding?.id)
+    if (pool.length === 0) return
+    const pick = pool[Math.floor(Math.random() * pool.length)]
+    setChallengeBuilding({ id: pick.id, label: pick.label, statsConcept: pick.statsConcept, color: pick.color })
+    setSelectedBuilding(null)
+  }, [mastered, challengeBuilding])
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -664,12 +676,16 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         case 'C':
           setShowConceptMap(m => !m)
           break
+        case 'r':
+        case 'R':
+          openRandomChallenge()
+          break
       }
     }
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, toggleSound])
+  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, toggleSound, openRandomChallenge])
 
   // Handle deep-link hash on mount
   useEffect(() => {
@@ -1018,6 +1034,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           title="Local Leaderboard — top 5 scores on this device"
         >
           🏆 Top
+        </button>
+        <button
+          onClick={openRandomChallenge}
+          style={{
+            background: 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: 20, padding: '6px 14px',
+            color: 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Surprise quiz — opens a random building, prefers unmastered (R)"
+        >
+          🎲 Surprise
         </button>
       </div>
 
@@ -2259,6 +2290,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               { key: 'G', desc: 'Toggle concept glossary' },
               { key: 'F', desc: 'Toggle flash cards' },
               { key: 'C', desc: 'Toggle concept map' },
+              { key: 'R', desc: 'Surprise quiz — random unmastered building' },
             ].map(({ key, desc }) => (
               <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
                 <span style={{
