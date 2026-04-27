@@ -21,6 +21,7 @@ import LocalLeaderboard, { saveSessionScore } from './LocalLeaderboard'
 import FlashcardMode from './FlashcardMode'
 import ConceptMapViewer from './ConceptMapViewer'
 import StreakCalendar from './StreakCalendar'
+import StatsCalculator from './StatsCalculator'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -570,6 +571,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [showLearningMap, setShowLearningMap] = useState(false)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [showStreakCalendar, setShowStreakCalendar] = useState(false)
+  const [showStatsCalculator, setShowStatsCalculator] = useState(false)
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
   const [onboardingStep, setOnboardingStep] = useState<number>(() =>
     localStorage.getItem('wafflestack-onboarded') ? -1 : 0
@@ -646,6 +648,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             setShowTopicsList(false)
           } else if (showFlashCards) {
             setShowFlashCards(false)
+          } else if (showStatsCalculator) {
+            setShowStatsCalculator(false)
           } else {
             setShowHelp(false)
           }
@@ -682,12 +686,16 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         case 'R':
           openRandomChallenge()
           break
+        case 'k':
+        case 'K':
+          setShowStatsCalculator(c => !c)
+          break
       }
     }
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, toggleSound, openRandomChallenge])
+  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, showStatsCalculator, toggleSound, openRandomChallenge])
 
   // Handle deep-link hash on mount
   useEffect(() => {
@@ -916,6 +924,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           title={quizSoundEnabled ? 'Mute quiz sounds' : 'Enable quiz sounds'}
         >
           🎵
+        </button>
+        <button
+          onClick={() => setShowStatsCalculator(c => !c)}
+          style={{
+            background: showStatsCalculator ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showStatsCalculator ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showStatsCalculator ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Stats Calculator — compute mean/median/stddev (K)"
+        >
+          🧮 Calc
         </button>
         <button
           onClick={() => setShowFlashCards(f => !f)}
@@ -2149,6 +2172,11 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         />
       )}
 
+      {/* Stats Calculator overlay */}
+      {showStatsCalculator && (
+        <StatsCalculator onClose={() => setShowStatsCalculator(false)} />
+      )}
+
       {/* Concept Map overlay — 3 Sirup-designed versions */}
       {showConceptMap && (
         <ConceptMapViewer
@@ -2310,6 +2338,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               { key: 'G', desc: 'Toggle concept glossary' },
               { key: 'F', desc: 'Toggle flash cards' },
               { key: 'C', desc: 'Toggle concept map' },
+              { key: 'K', desc: 'Toggle stats calculator' },
               { key: 'R', desc: 'Surprise quiz — random unmastered building' },
               { key: '1–4', desc: 'In quiz: select answer option' },
               { key: '⏎', desc: 'In quiz: continue to next question' },
