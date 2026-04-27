@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import ShareCard from './ShareCard'
+import DailyGoal from './DailyGoal'
 
 const BUILDINGS_META = [
   { id: 'power',     label: '⚡ תחנת כוח',   concept: 'ממוצע',              color: '#FFD700' },
@@ -432,6 +433,9 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
           {isStudiedToday ? '✓ Studied today' : 'Not yet today'}
         </div>
       </div>
+
+      {/* Daily XP Goal Row */}
+      <DailyGoal todayXp={weeklyBars[weeklyBars.length - 1]?.delta ?? 0} />
 
       {/* Session Timer Row */}
       <div style={{
