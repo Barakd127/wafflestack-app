@@ -51,14 +51,6 @@ export default function CityLighting({
         position={sunPosition}
         intensity={sunIntensity}
         color={sunColor}
-        castShadow
-        shadow-mapSize={[shadowMap, shadowMap]}
-        shadow-camera-far={120}
-        shadow-camera-left={-40}
-        shadow-camera-right={40}
-        shadow-camera-top={40}
-        shadow-camera-bottom={-40}
-        shadow-bias={-0.0005}
       />
 
       {/* Cool fill — no shadow cost */}

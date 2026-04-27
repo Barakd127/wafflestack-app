@@ -1,4 +1,4 @@
-import { Canvas, useFrame } from '@react-three/fiber'
+﻿import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Html, useProgress, PerformanceMonitor, Sky } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import CityLighting from '../three/CityLighting'
@@ -298,6 +298,7 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
     : `${import.meta.env.BASE_URL}models/kenney-suburban/${def.model}.glb`
   const { scene } = useGLTF(modelUrl)
   const groupRef = useRef<THREE.Group>(null)
+  const { invalidate } = useThree()
 
   // Compute the base scale: if targetHeight is set, auto-normalize from bounding box
   const baseScale = useMemo(() => {
@@ -409,9 +410,9 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
       ref={groupRef}
       position={def.position}
       rotation={[0, def.rotation ?? 0, 0]}
-      onClick={(e) => { e.stopPropagation(); onClick(def) }}
-      onPointerEnter={(e) => { e.stopPropagation(); onHoverStart(def.id) }}
-      onPointerLeave={() => onHoverEnd()}
+      onClick={(e) => { e.stopPropagation(); onClick(def); invalidate() }}
+      onPointerEnter={(e) => { e.stopPropagation(); onHoverStart(def.id); invalidate() }}
+      onPointerLeave={() => { onHoverEnd(); invalidate() }}
     >
       <primitive object={clonedScene} />
       {/* Hover tooltip — shows when hovered but not selected */}
@@ -1361,10 +1362,11 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
       {/* 3D Canvas — adaptive quality, cozy stylized lighting */}
       <Canvas
-        shadows
+        shadows={false}
+        frameloop="demand"
         camera={{ position: [0, 25, 45], fov: 55 }}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
-        dpr={[1, DPR_MAX[useQualityTier.getState().tier]]}
+        dpr={[1, 1.5]}
       >
         {/* Performance monitor: drops to 'mid'/'low' if FPS sags, climbs back when stable */}
         <PerformanceMonitor
