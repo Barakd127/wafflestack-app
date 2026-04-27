@@ -22,6 +22,7 @@ import FlashcardMode from './FlashcardMode'
 import ConceptMapViewer from './ConceptMapViewer'
 import StreakCalendar from './StreakCalendar'
 import StatsCalculator from './StatsCalculator'
+import StreakReminderBanner from './StreakReminderBanner'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -877,6 +878,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       {/* Inject CSS animations */}
       <style>{ANIM_STYLE}</style>
+
+      <StreakReminderBanner xp={xp} />
 
       {/* Top-right controls: XP + ScoreBoard toggle */}
       <div style={{
