@@ -20,6 +20,7 @@ import LearningMap from './LearningMap'
 import LocalLeaderboard, { saveSessionScore } from './LocalLeaderboard'
 import FlashcardMode from './FlashcardMode'
 import ConceptMapViewer from './ConceptMapViewer'
+import StreakCalendar from './StreakCalendar'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -568,6 +569,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [showConceptMap, setShowConceptMap] = useState(false)
   const [showLearningMap, setShowLearningMap] = useState(false)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [showStreakCalendar, setShowStreakCalendar] = useState(false)
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
   const [onboardingStep, setOnboardingStep] = useState<number>(() =>
     localStorage.getItem('wafflestack-onboarded') ? -1 : 0
@@ -1036,6 +1038,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           🏆 Top
         </button>
         <button
+          onClick={() => setShowStreakCalendar(c => !c)}
+          style={{
+            background: showStreakCalendar ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showStreakCalendar ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showStreakCalendar ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="30-day activity calendar"
+        >
+          📅 30 Days
+        </button>
+        <button
           onClick={openRandomChallenge}
           style={{
             background: 'rgba(10,10,20,0.75)',
@@ -1392,6 +1409,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
       {/* Local Leaderboard */}
       {showLeaderboard && <LocalLeaderboard onClose={() => setShowLeaderboard(false)} />}
+
+      {/* 30-Day Streak Calendar */}
+      {showStreakCalendar && <StreakCalendar onClose={() => setShowStreakCalendar(false)} />}
 
       {/* Challenge Modal */}
       {challengeBuilding && (() => {
