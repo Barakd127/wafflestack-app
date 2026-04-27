@@ -23,6 +23,7 @@ import ConceptMapViewer from './ConceptMapViewer'
 import StreakCalendar from './StreakCalendar'
 import StatsCalculator from './StatsCalculator'
 import StreakReminderBanner from './StreakReminderBanner'
+import DailyStatFact from './DailyStatFact'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -880,6 +881,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       <style>{ANIM_STYLE}</style>
 
       <StreakReminderBanner xp={xp} />
+      <DailyStatFact />
 
       {/* Top-right controls: XP + ScoreBoard toggle */}
       <div style={{
