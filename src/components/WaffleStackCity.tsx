@@ -64,15 +64,15 @@ interface BuildingDef {
 // ─── Data ────────────────────────────────────────────────────────────────────
 const BUILDINGS: BuildingDef[] = [
   { id: 'power',     model: 'building-type-a', label: '⚡ תחנת כוח',   statsConcept: 'ממוצע (Mean)',        position: [-9, 0, -9], color: '#FFD700' },
-  { id: 'housing',   model: 'building-type-c', label: '🏠 מנהל דיור',  statsConcept: 'חציון (Median)',      position: [-3, 0, -9], color: '#4ECDC4', customModel: 'models/cozy apartment 3d model.glb', targetHeight: 3.2 },
-  { id: 'traffic',   model: 'building-type-e', label: '🚦 בקרת תנועה', statsConcept: 'סטיית תקן (Std Dev)', position: [3,  0, -9], color: '#FF6B6B' },
-  { id: 'hospital',  model: 'building-type-g', label: '🏥 בית חולים',  statsConcept: 'התפלגות נורמלית',    position: [9,  0, -9], color: '#95E1D3' },
-  { id: 'school',    model: 'building-type-b', label: '🏫 בית ספר',    statsConcept: 'מדגם (Sampling)',     position: [-9, 0, -3], color: '#AA96DA' },
-  { id: 'bank',      model: 'building-type-d', label: '🏦 בנק',        statsConcept: 'רגרסיה (Regression)', position: [-3, 0, -3], color: '#FCBAD3' },
-  { id: 'market',    model: 'building-type-f', label: '🏪 שוק',        statsConcept: 'קורלציה (Correlation)',position: [3,  0, -3], color: '#A8E6CF', customModel: 'models/traditional chinese architecture 3d model.glb', targetHeight: 3.5 },
-  { id: 'city-hall', model: 'building-type-h', label: '🏛️ עיריה',      statsConcept: 'בינום (Binomial)',    position: [9,  0, -3], color: '#F38181', customModel: 'models/greco-roman temple 3d model.glb', targetHeight: 3.8 },
-  { id: 'research',  model: 'building-type-i', label: '🔬 מכון מחקר',  statsConcept: 'מבחן השערות',         position: [-3, 0, 3],  color: '#C3A6FF', customModel: 'models/ancient ruins 3d model.glb', targetHeight: 2.8 },
-  { id: 'news',      model: 'building-type-j', label: '📰 תחנת חדשות', statsConcept: 'רווח סמך (CI)',       position: [3,  0, 3],  color: '#FFB347', customModel: 'models/neo utopian city 3d model.glb', targetHeight: 4.0 },
+  { id: 'housing',   model: 'building-type-c', label: '🏠 מנהל דיור',  statsConcept: 'חציון (Median)',      position: [-3, 0, -9], color: '#4ECDC4', customModel: 'kenney/building-a.glb', targetHeight: 2.8 },
+  { id: 'traffic',   model: 'building-type-e', label: '🚦 בקרת תנועה', statsConcept: 'סטיית תקן (Std Dev)', position: [3,  0, -9], color: '#FF6B6B', customModel: 'kenney/building-skyscraper-a.glb', targetHeight: 5.0 },
+  { id: 'hospital',  model: 'building-type-g', label: '🏥 בית חולים',  statsConcept: 'התפלגות נורמלית',    position: [9,  0, -9], color: '#95E1D3', customModel: 'kenney/building-j.glb', targetHeight: 4.5 },
+  { id: 'school',    model: 'building-type-b', label: '🏫 בית ספר',    statsConcept: 'מדגם (Sampling)',     position: [-9, 0, -3], color: '#AA96DA', customModel: 'kenney/building-sample-house-c.glb', targetHeight: 3.0 },
+  { id: 'bank',      model: 'building-type-d', label: '🏦 בנק',        statsConcept: 'רגרסיה (Regression)', position: [-3, 0, -3], color: '#FCBAD3', customModel: 'kenney/building-skyscraper-c.glb', targetHeight: 5.5 },
+  { id: 'market',    model: 'building-type-f', label: '🏪 שוק',        statsConcept: 'קורלציה (Correlation)',position: [3,  0, -3], color: '#A8E6CF', customModel: 'kenney/building-n.glb', targetHeight: 3.8 },
+  { id: 'city-hall', model: 'building-type-h', label: '🏛️ עיריה',      statsConcept: 'בינום (Binomial)',    position: [9,  0, -3], color: '#F38181', customModel: 'kenney/building-sample-tower-b.glb', targetHeight: 4.2 },
+  { id: 'research',  model: 'building-type-i', label: '🔬 מכון מחקר',  statsConcept: 'מבחן השערות',         position: [-3, 0, 3],  color: '#C3A6FF', customModel: 'kenney/building-sample-tower-a.glb', targetHeight: 4.5 },
+  { id: 'news',      model: 'building-type-j', label: '📰 תחנת חדשות', statsConcept: 'רווח סמך (CI)',       position: [3,  0, 3],  color: '#FFB347', customModel: 'kenney/building-k.glb', targetHeight: 3.5 },
 ]
 
 // ─── Kenney color variation palettes ─────────────────────────────────────────
