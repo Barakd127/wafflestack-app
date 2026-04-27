@@ -2311,6 +2311,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               { key: 'F', desc: 'Toggle flash cards' },
               { key: 'C', desc: 'Toggle concept map' },
               { key: 'R', desc: 'Surprise quiz — random unmastered building' },
+              { key: '1–4', desc: 'In quiz: select answer option' },
+              { key: '⏎', desc: 'In quiz: continue to next question' },
             ].map(({ key, desc }) => (
               <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
                 <span style={{

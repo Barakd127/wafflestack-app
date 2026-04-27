@@ -545,6 +545,30 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     setNewRecord(false)
   }
 
+  // Quiz keyboard shortcuts: 1–4 select an option, Enter/Space advance.
+  // Only active on the quiz tab while a question is open (not in mistakes-review or done state).
+  useEffect(() => {
+    if (activeTab !== 'quiz' || quizDone || showMistakes) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.key >= '1' && e.key <= '9') {
+        const idx = parseInt(e.key, 10) - 1
+        if (selected === null && idx < currentQ.options.length) {
+          e.preventDefault()
+          handleAnswer(idx)
+        }
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        if (selected !== null) {
+          e.preventDefault()
+          nextQuestion()
+        }
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [activeTab, quizDone, showMistakes, selected, quizIndex, currentQ])
+
   return (
     <div
       style={{
@@ -1071,6 +1095,17 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   }}>
                     Q {quizIndex + 1} / {questions.length}
                   </span>
+                  <span
+                    title="Press 1–4 to choose · Enter to continue"
+                    style={{
+                      background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.25)',
+                      borderRadius: 20, padding: '4px 10px', fontSize: 11,
+                      color: 'rgba(78,205,196,0.85)', fontWeight: 600,
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                    }}
+                  >
+                    ⌨ 1–4 · ⏎
+                  </span>
                 </div>
                 {/* Progress */}
                 <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
@@ -1132,7 +1167,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                           fontSize: 11, fontWeight: 700, flexShrink: 0,
                           color: selected !== null && isCorrect ? '#000' : 'inherit',
                         }}>
-                          {selected !== null && isCorrect ? '✓' : String.fromCharCode(65 + idx)}
+                          {selected !== null && isCorrect ? '✓' : idx + 1}
                         </span>
                         {opt}
                       </button>
