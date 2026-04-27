@@ -129,6 +129,37 @@ function accuracyTone(percentage: number): { color: string; bg: string; border: 
   return { color: '#FF6B6B', bg: 'rgba(255,107,107,0.12)', border: 'rgba(255,107,107,0.35)' }
 }
 
+// Days since the user last completed a quiz for this building. null = never.
+function loadReviewedDays(buildingId: string): number | null {
+  const raw = localStorage.getItem(`wafflestack-reviewed-${buildingId}`)
+  if (!raw) return null
+  const ts = new Date(raw).getTime()
+  if (!Number.isFinite(ts)) return null
+  return Math.max(0, Math.floor((Date.now() - ts) / 86400000))
+}
+
+const STALE_REVIEW_DAYS = 7
+
+interface StaleBuilding {
+  id: string
+  label: string
+  concept: string
+  color: string
+  days: number
+}
+
+function loadStaleMastered(mastered: Set<string>): StaleBuilding[] {
+  return BUILDINGS_META
+    .filter(b => mastered.has(b.id))
+    .map(b => {
+      const days = loadReviewedDays(b.id)
+      if (days === null || days < STALE_REVIEW_DAYS) return null
+      return { id: b.id, label: b.label, concept: b.concept, color: b.color, days }
+    })
+    .filter((x): x is StaleBuilding => x !== null)
+    .sort((a, b) => b.days - a.days)
+}
+
 const XP_MILESTONES = [250, 500, 750, 1000]
 
 export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onReset, onPracticeWeakSpots }: Props) {
@@ -138,6 +169,7 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
   const [elapsed, setElapsed] = useState(() => Math.floor((Date.now() - sessionStart) / 60000))
   const [xpHistory, setXpHistory] = useState<Record<string, number>>(() => loadXpHistory())
   const weakSpots = loadWeakSpots()
+  const staleMastered = loadStaleMastered(mastered)
 
   // Snapshot today's XP whenever it changes so the weekly chart stays current.
   useEffect(() => {
@@ -519,6 +551,47 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
         </div>
       </div>
 
+      {/* Review Reminders — mastered concepts not quizzed in 7+ days */}
+      {staleMastered.length > 0 && (
+        <div style={{
+          padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+          flexShrink: 0,
+        }}>
+          <div style={{
+            fontSize: 11, color: '#FFB347', fontWeight: 700,
+            letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: 10,
+          }}>
+            🔁 Review Reminders ({staleMastered.length})
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {staleMastered.map(b => (
+              <div key={b.id} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '7px 10px', borderRadius: 8,
+                background: 'rgba(255,179,71,0.08)', border: '1px solid rgba(255,179,71,0.22)',
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', direction: 'rtl' as const }}>{b.label}</span>
+                  <span style={{ fontSize: 10, color: b.color }}>{b.concept}</span>
+                </div>
+                <span style={{
+                  fontSize: 11, color: '#FFB347', fontWeight: 700,
+                  background: 'rgba(255,179,71,0.12)', padding: '2px 8px', borderRadius: 6, whiteSpace: 'nowrap' as const,
+                }}>
+                  {b.days}d ago · refresh
+                </span>
+              </div>
+            ))}
+          </div>
+          <div style={{
+            marginTop: 8, fontSize: 11, color: 'rgba(255,255,255,0.4)',
+            lineHeight: 1.5,
+          }}>
+            Spaced repetition: re-quiz mastered concepts after a week to lock them in.
+          </div>
+        </div>
+      )}
+
       {/* Needs Review Section */}
       {weakSpots.length > 0 && (
         <div style={{
@@ -583,6 +656,8 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
           const isMastered = mastered.has(building.id)
           const accuracy = loadAccuracy(building.id)
           const tone = accuracy ? accuracyTone(accuracy.percentage) : null
+          const reviewedDays = loadReviewedDays(building.id)
+          const isStale = isMastered && reviewedDays !== null && reviewedDays >= STALE_REVIEW_DAYS
           return (
             <div
               key={building.id}
@@ -655,6 +730,23 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
                     title={`Quiz score: ${accuracy.score} / ${accuracy.total}`}
                   >
                     {accuracy.percentage}% · {accuracy.score}/{accuracy.total}
+                  </span>
+                )}
+                {isMastered && reviewedDays !== null && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 600,
+                      color: isStale ? '#FFB347' : 'rgba(255,255,255,0.45)',
+                      background: isStale ? 'rgba(255,179,71,0.12)' : 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${isStale ? 'rgba(255,179,71,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                      padding: '2px 7px',
+                      borderRadius: 999,
+                      lineHeight: 1.2,
+                    }}
+                    title={isStale ? 'Refresh this concept — it has been a while' : 'Last reviewed'}
+                  >
+                    🕒 {reviewedDays === 0 ? 'today' : `${reviewedDays}d`}
                   </span>
                 )}
                 <span
