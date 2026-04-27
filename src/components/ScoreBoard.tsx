@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import ShareCard from './ShareCard'
 import DailyGoal from './DailyGoal'
+import AchievementsPanel from './AchievementsPanel'
 
 const BUILDINGS_META = [
   { id: 'power',     label: '⚡ תחנת כוח',   concept: 'ממוצע',              color: '#FFD700' },
@@ -550,6 +551,9 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
           })}
         </div>
       </div>
+
+      {/* Achievements — milestone badges derived from existing localStorage */}
+      <AchievementsPanel xp={xp} mastered={mastered} />
 
       {/* Review Reminders — mastered concepts not quizzed in 7+ days */}
       {staleMastered.length > 0 && (
