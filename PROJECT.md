@@ -101,10 +101,8 @@ Vault working copy: `C:\Users\ofekd\Documents\Obsidian Vault\AI\WaffleStack\code
 5. **No regressions** — Never break working features when adding new ones
 
 ### Priority Order
-1. Fix default view → Study Hub
-2. Complete quiz content (15+ questions across 3 topics)
-3. Connect XP to city growth
-4. Achievement system
-5. Spaced repetition
-6. Polish and animations
+1. **F8 Auth (Supabase)** — code drafted (`supabase.ts`, `authStore.ts`, `AuthPage.tsx`); blocked on human provisioning of supabase.com project + `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` env vars
+2. **PostHog analytics wiring** — `useAnalytics` hook + 8 event wrappers ready; blocked on `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST` env vars
+3. Post-unblock: server-side progress sync + per-student SM-2 state persistence
+
 GITHUB_BRIDGE=https://github.com/Barakd127/wafflestack-ops
