@@ -354,7 +354,9 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
         // Main building body: disable vertex-color multiply, apply concept color
         mat.vertexColors = false          // THREE.NoColors — no vertex-color interference
         if (activeColor) {
-          mat.color.set(activeColor)
+          const c = new THREE.Color(activeColor)
+          c.lerp(new THREE.Color('#ffffff'), 0.4) // let UV texture show through
+          mat.color.set(c)
           mat.roughness = 0.75
           mat.metalness = 0.1
         }
@@ -1426,8 +1428,6 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
           {/* Aliveness layer — clouds + smoke, tier-gated */}
           <Clouds count={6} altitude={24} range={70} speed={0.55} />
-          <Smoke position={[-9, 2.4, -9]}  count={10} riseSpeed={0.45} color="#f0e6d6" />
-          <Smoke position={[-3, 2.0,  3]}  count={8}  riseSpeed={0.35} color="#e8e0d0" drift={0.2} />
 
           {BUILDINGS.map((b) => (
             <Building
