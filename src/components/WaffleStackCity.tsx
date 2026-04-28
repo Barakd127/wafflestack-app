@@ -323,58 +323,43 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
   const scaleCurrent = useRef(baseScale)
   // Keep ref in sync if baseScale recalculates after mount (e.g. async GLB load)
   useEffect(() => { scaleCurrent.current = baseScale }, [baseScale])
-  const hoverEmissive = useRef(0.15)  // start at baseline — avoids fade-in artifact on mount
+  const hoverEmissive = useRef(0.18)  // start at baseline — avoids fade-in artifact on mount
 
   const activeColor = colorOverride ?? def.color
 
-  // ─── Smart Paint: mesh-size approach — largest mesh gets concept color ────────
-  // Kenney GLBs have 1 mesh + 1 "colormap" UV-atlas material (no vertex colors).
-  // Sorting by vertex count picks the building body as mesh[0]; any future
-  // multi-mesh kits will naturally separate body vs. roof/window detail meshes.
-  // Main mesh: vertexColors disabled + concept color applied cleanly.
-  // Secondary meshes (i > 0): original Kenney vertex/colormap colors preserved.
+  // Keep Kenney's baked UV colormap visible (windows, walls, roof, doors all show).
+  // Concept color is applied as a low emissive tint so the building still reads
+  // "of that color" without flattening it into a solid block.
   const clonedScene = useMemo(() => {
     const clone = scene.clone()
 
-    // Collect all meshes, then sort largest-first
-    const meshes: THREE.Mesh[] = []
     clone.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) meshes.push(child as THREE.Mesh)
-    })
-    meshes.sort((a, b) =>
-      (b.geometry?.attributes?.position?.count || 0) -
-      (a.geometry?.attributes?.position?.count || 0)
-    )
+      const mesh = child as THREE.Mesh
+      if (!mesh.isMesh || !mesh.material) return
+      mesh.material = (mesh.material as THREE.Material).clone()
+      const mat = mesh.material as THREE.MeshStandardMaterial
 
-    meshes.forEach((child, i) => {
-      child.material = (child.material as THREE.Material).clone()
-      const mat = child.material as THREE.MeshStandardMaterial
-
-      if (i === 0) {
-        // Main building body: disable vertex-color multiply, apply concept color
-        mat.vertexColors = false          // THREE.NoColors — no vertex-color interference
-        if (activeColor) {
-          const c = new THREE.Color(activeColor)
-          c.lerp(new THREE.Color('#ffffff'), 0.4) // let UV texture show through
-          mat.color.set(c)
-          mat.roughness = 0.75
-          mat.metalness = 0.1
-        }
+      mat.vertexColors = true
+      mat.color.set('#ffffff') // neutral so the baked UV colormap atlas shows through
+      if (activeColor) {
+        mat.emissive.set(activeColor)
+        mat.emissiveIntensity = 0.18
       } else {
-        // Secondary meshes (roof, windows, details): keep Kenney vertex colors
-        mat.vertexColors = true           // THREE.VertexColors — preserve original look
+        mat.emissiveIntensity = 0
       }
+      mat.roughness = 0.75
+      mat.metalness = 0.1
+      mat.needsUpdate = true
     })
 
     return clone
-  }, [scene, activeColor, colorOverride, def.color])
+  }, [scene, activeColor])
 
   // Apply "slow-changing" states (mastered / selected / glow) via effect.
   // These only fire when the boolean props actually change — not every frame.
   useEffect(() => {
     if (!clonedScene) return
-    // Mastered: subtle wall glow (0.10) per Smart Paint spec; selected lifts to 0.30; glow = 0.9
-    const intensity = isGlowing ? 0.9 : isMastered ? 0.10 : isSelected ? 0.30 : 0.05
+    const intensity = isGlowing ? 0.9 : isMastered ? 0.35 : isSelected ? 0.30 : 0.05
     const color = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : isSelected ? '#ffffff' : (activeColor ?? '#4ECDC4')
     clonedScene.traverse((child) => {
       const mesh = child as THREE.Mesh
@@ -399,9 +384,8 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
     groupRef.current.scale.setScalar(scaleCurrent.current)
 
     // Hover emissive shimmer (warm gold), only when not in a mastered/selected/glow state
-    // Base is 0.15 (subtle always-on glow); hover lifts to 0.20 warm gold
     if (!isGlowing && !isMastered && !isSelected) {
-      const targetEm = isHovered ? 0.20 : 0.15
+      const targetEm = isHovered ? 0.28 : 0.18
       const prev = hoverEmissive.current
       hoverEmissive.current += (targetEm - prev) * 0.12
       const em = hoverEmissive.current
