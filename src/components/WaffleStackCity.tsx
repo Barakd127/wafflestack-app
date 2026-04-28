@@ -327,43 +327,35 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
 
   const activeColor = colorOverride ?? def.color
 
-  // ─── Smart Paint: mesh-size approach — largest mesh gets concept color ────────
-  // Kenney GLBs have 1 mesh + 1 "colormap" UV-atlas material (no vertex colors).
-  // Sorting by vertex count picks the building body as mesh[0]; any future
-  // multi-mesh kits will naturally separate body vs. roof/window detail meshes.
-  // Main mesh: vertexColors disabled + concept color applied cleanly.
-  // Secondary meshes (i > 0): original Kenney vertex/colormap colors preserved.
+  // ─── Native Kenney UV atlas — preserve walls/windows/roof color variety ───────
+  // Kenney GLBs UV-map onto a colormap atlas where walls/windows/roof/doors each
+  // sample different palette squares. Overriding mat.color destroys that variety
+  // and flattens the building. Keep mat.color = white so the texture passes through;
+  // express the concept identity as a soft emissive glow only.
   const clonedScene = useMemo(() => {
     const clone = scene.clone()
 
-    // Collect all meshes, then sort largest-first
-    const meshes: THREE.Mesh[] = []
     clone.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) meshes.push(child as THREE.Mesh)
-    })
-    meshes.sort((a, b) =>
-      (b.geometry?.attributes?.position?.count || 0) -
-      (a.geometry?.attributes?.position?.count || 0)
-    )
+      const mesh = child as THREE.Mesh
+      if (!mesh.isMesh) return
+      mesh.material = (mesh.material as THREE.Material).clone()
+      const mat = mesh.material as THREE.MeshStandardMaterial
 
-    meshes.forEach((child, i) => {
-      child.material = (child.material as THREE.Material).clone()
-      const mat = child.material as THREE.MeshStandardMaterial
+      // Let the UV colormap atlas show through unmodified
+      mat.vertexColors = true
+      mat.color.set('#ffffff')
+      mat.roughness = 0.75
+      mat.metalness = 0.1
 
-      if (i === 0) {
-        // Main building body: disable vertex-color multiply, apply concept color
-        mat.vertexColors = false          // THREE.NoColors — no vertex-color interference
-        if (activeColor) {
-          const c = new THREE.Color(activeColor)
-          c.lerp(new THREE.Color('#ffffff'), 0.4) // let UV texture show through
-          mat.color.set(c)
-          mat.roughness = 0.75
-          mat.metalness = 0.1
-        }
+      // Concept color appears as a subtle emissive identity only
+      if (activeColor) {
+        mat.emissive.set(activeColor)
+        mat.emissiveIntensity = 0.12
       } else {
-        // Secondary meshes (roof, windows, details): keep Kenney vertex colors
-        mat.vertexColors = true           // THREE.VertexColors — preserve original look
+        mat.emissive.set('#000000')
+        mat.emissiveIntensity = 0
       }
+      mat.needsUpdate = true
     })
 
     return clone
