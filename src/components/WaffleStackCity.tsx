@@ -76,6 +76,159 @@ const BUILDINGS: BuildingDef[] = [
   { id: 'news',      model: 'building-type-j', label: '📰 תחנת חדשות', statsConcept: 'רווח סמך (CI)',       position: [3,  0, 3],  color: '#FFB347', customModel: 'kenney/building-k.glb', targetHeight: 3.5 },
 ]
 
+// ─── Kenney building pool — user-pickable for the "Build" picker ─────────────
+interface KenneyAsset {
+  id: string
+  path: string          // relative to BASE_URL
+  label: string
+  emoji: string
+  height: number        // target height in world units (auto-normalized)
+}
+
+const KENNEY_POOL: KenneyAsset[] = [
+  { id: 'k-house',    path: 'kenney/building-sample-house-c.glb',  label: 'Cottage',     emoji: '🏠', height: 2.5 },
+  { id: 'k-apt-a',    path: 'kenney/building-a.glb',                label: 'Apartment A', emoji: '🏢', height: 3.2 },
+  { id: 'k-apt-j',    path: 'kenney/building-j.glb',                label: 'Apartment J', emoji: '🏢', height: 3.6 },
+  { id: 'k-apt-k',    path: 'kenney/building-k.glb',                label: 'Apartment K', emoji: '🏢', height: 3.4 },
+  { id: 'k-apt-n',    path: 'kenney/building-n.glb',                label: 'Apartment N', emoji: '🏢', height: 3.0 },
+  { id: 'k-tower-a',  path: 'kenney/building-sample-tower-a.glb',   label: 'Tower A',     emoji: '🏯', height: 4.6 },
+  { id: 'k-tower-b',  path: 'kenney/building-sample-tower-b.glb',   label: 'Tower B',     emoji: '🏯', height: 4.4 },
+  { id: 'k-sky-a',    path: 'kenney/building-skyscraper-a.glb',     label: 'Skyscraper A',emoji: '🏙️', height: 5.6 },
+  { id: 'k-sky-c',    path: 'kenney/building-skyscraper-c.glb',     label: 'Skyscraper C',emoji: '🏙️', height: 5.8 },
+]
+
+// Grid of free positions for user-placed buildings (avoids the 10 fixed BUILDINGS)
+const PLACE_GRID: Array<[number, number, number]> = [
+  // Extend front row (z=3) — only -9 and 9 are free there
+  [-9, 0, 3], [9, 0, 3],
+  // New row in front (z=9)
+  [-9, 0, 9], [-3, 0, 9], [3, 0, 9], [9, 0, 9],
+  // Further row (z=15)
+  [-9, 0, 15], [-3, 0, 15], [3, 0, 15], [9, 0, 15],
+  // New row behind (z=-15)
+  [-9, 0, -15], [-3, 0, -15], [3, 0, -15], [9, 0, -15],
+  // Side column right (x=15)
+  [15, 0, -9], [15, 0, -3], [15, 0, 3], [15, 0, 9],
+  // Side column left (x=-15)
+  [-15, 0, -9], [-15, 0, -3], [-15, 0, 3], [-15, 0, 9],
+]
+
+interface UserBuilding {
+  uid: string
+  poolId: string
+  position: [number, number, number]
+  rotation: number
+}
+
+const USER_BUILDINGS_KEY = 'waffleStack.userBuildings.v1'
+
+// Persisted store for user-placed Kenney buildings
+function useUserBuildings() {
+  const [list, setList] = useState<UserBuilding[]>(() => {
+    try {
+      const raw = localStorage.getItem(USER_BUILDINGS_KEY)
+      return raw ? (JSON.parse(raw) as UserBuilding[]) : []
+    } catch { return [] }
+  })
+
+  const persist = (next: UserBuilding[]) => {
+    setList(next)
+    try { localStorage.setItem(USER_BUILDINGS_KEY, JSON.stringify(next)) } catch {}
+  }
+
+  const add = (poolId: string) => {
+    const used = new Set(list.map(b => `${b.position[0]},${b.position[2]}`))
+    const free = PLACE_GRID.find(p => !used.has(`${p[0]},${p[2]}`))
+    if (!free) return false
+    const uid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `ub-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    persist([...list, { uid, poolId, position: free, rotation: Math.random() * Math.PI * 2 }])
+    return true
+  }
+  const remove = (uid: string) => persist(list.filter(b => b.uid !== uid))
+  const clear  = () => persist([])
+
+  return { list, add, remove, clear, capacity: PLACE_GRID.length }
+}
+
+// Render a Kenney GLB with native colormap textures (no concept tinting)
+function PlacedBuilding({
+  asset,
+  position,
+  rotation,
+  onRemove,
+}: {
+  asset: KenneyAsset
+  position: [number, number, number]
+  rotation: number
+  onRemove?: () => void
+}) {
+  const url = `${import.meta.env.BASE_URL}${asset.path}`
+  const { scene } = useGLTF(url)
+  const [hovered, setHovered] = useState(false)
+  const { invalidate } = useThree()
+
+  const cloned = useMemo(() => {
+    const clone = scene.clone()
+    clone.traverse((child) => {
+      const mesh = child as THREE.Mesh
+      if (!mesh.isMesh) return
+      mesh.material = (mesh.material as THREE.Material).clone()
+      const mat = mesh.material as THREE.MeshStandardMaterial
+      // Same treatment as the main Building component — let texture pass through
+      mat.vertexColors = false
+      mat.color.set('#ffffff')
+      mat.roughness = 0.7
+      mat.metalness = 0.05
+      mat.emissive.set('#000000')
+      mat.emissiveIntensity = 0
+      mat.needsUpdate = true
+    })
+    return clone
+  }, [scene])
+
+  // Auto-scale to target height
+  const scale = useMemo(() => {
+    try {
+      const box = new THREE.Box3().setFromObject(cloned)
+      const sizeY = box.max.y - box.min.y
+      return sizeY > 0.001 ? asset.height / sizeY : 1.4
+    } catch { return 1.4 }
+  }, [cloned, asset.height])
+
+  return (
+    <group
+      position={position}
+      rotation={[0, rotation, 0]}
+      scale={hovered ? scale * 1.06 : scale}
+      onPointerEnter={(e) => { e.stopPropagation(); setHovered(true); invalidate() }}
+      onPointerLeave={() => { setHovered(false); invalidate() }}
+      onContextMenu={(e) => { e.stopPropagation(); if (onRemove) onRemove(); invalidate() }}
+    >
+      <primitive object={cloned} />
+      {hovered && onRemove && (
+        <Html position={[0, asset.height + 0.4, 0]} center distanceFactor={10}>
+          <div
+            onClick={(ev) => { ev.stopPropagation(); onRemove() }}
+            style={{
+              background: 'rgba(0,0,0,0.85)', color: '#FF6B6B', padding: '4px 10px',
+              borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+              border: '1px solid rgba(255,107,107,0.4)', whiteSpace: 'nowrap',
+              fontFamily: "'Heebo', system-ui, sans-serif",
+            }}
+          >
+            🗑 Remove · right-click
+          </div>
+        </Html>
+      )}
+    </group>
+  )
+}
+
+// Preload all pool models so the picker feels snappy
+KENNEY_POOL.forEach(a => { try { useGLTF.preload(`${import.meta.env.BASE_URL}${a.path}`) } catch {} })
+
 // ─── Kenney color variation palettes ─────────────────────────────────────────
 const COLOR_VARIATIONS: Record<'A' | 'B' | 'C', Record<string, string>> = {
   A: { // Smart Paint concept colors — walls only, windows/doors/roofs preserved
@@ -585,6 +738,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [showStreakCalendar, setShowStreakCalendar] = useState(false)
   const [showStatsCalculator, setShowStatsCalculator] = useState(false)
+  const [showBuildPicker, setShowBuildPicker] = useState(false)
+  const userBuildings = useUserBuildings()
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
   const [onboardingStep, setOnboardingStep] = useState<number>(() =>
     localStorage.getItem('wafflestack-onboarded') ? -1 : 0
@@ -1106,6 +1261,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         >
           🎲 Surprise
         </button>
+        <button
+          onClick={() => setShowBuildPicker(s => !s)}
+          style={{
+            background: showBuildPicker ? 'rgba(255,209,102,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showBuildPicker ? 'rgba(255,209,102,0.6)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showBuildPicker ? '#FFD166' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Add Kenney buildings to your city"
+        >
+          🏗️ Build
+        </button>
       </div>
 
       {/* Progress bar — top left */}
@@ -1311,6 +1481,100 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         </div>
       )}
 
+      {/* Build Picker — pick a Kenney building to add to the city */}
+      {showBuildPicker && (
+        <div
+          style={{
+            position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 600,
+            background: 'rgba(10,10,20,0.92)', backdropFilter: 'blur(14px)',
+            border: '1px solid rgba(255,209,102,0.35)', borderRadius: 18,
+            padding: 18, color: 'white',
+            fontFamily: "'Heebo', system-ui, sans-serif",
+            boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+            maxWidth: 720,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#FFD166' }}>
+              🏗️ Build a Kenney building
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', alignSelf: 'center' }}>
+                {userBuildings.list.length} / {userBuildings.capacity} placed
+              </span>
+              {userBuildings.list.length > 0 && (
+                <button
+                  onClick={() => { if (confirm('Remove all user-placed buildings?')) userBuildings.clear() }}
+                  style={{
+                    background: 'rgba(255,107,107,0.12)', border: '1px solid rgba(255,107,107,0.4)',
+                    borderRadius: 8, padding: '4px 10px', color: '#FF6B6B',
+                    fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                  }}
+                >
+                  Clear all
+                </button>
+              )}
+              <button
+                onClick={() => setShowBuildPicker(false)}
+                style={{
+                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: 8, padding: '4px 10px', color: 'rgba(255,255,255,0.7)',
+                  fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+              gap: 10,
+              minWidth: 560,
+            }}
+          >
+            {KENNEY_POOL.map(asset => {
+              const placedCount = userBuildings.list.filter(b => b.poolId === asset.id).length
+              const full = userBuildings.list.length >= userBuildings.capacity
+              return (
+                <button
+                  key={asset.id}
+                  disabled={full}
+                  onClick={() => {
+                    const ok = userBuildings.add(asset.id)
+                    if (!ok) alert('No free spots — clear some buildings first.')
+                  }}
+                  style={{
+                    background: full
+                      ? 'rgba(80,80,80,0.3)'
+                      : 'linear-gradient(160deg, rgba(78,205,196,0.10) 0%, rgba(255,209,102,0.06) 100%)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: 12, padding: '14px 8px',
+                    color: 'white', cursor: full ? 'not-allowed' : 'pointer',
+                    fontFamily: "'Heebo', system-ui, sans-serif",
+                    transition: 'transform 0.15s, border-color 0.15s',
+                    opacity: full ? 0.5 : 1,
+                  }}
+                  onMouseEnter={(e) => { if (!full) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(255,209,102,0.5)' } }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)' }}
+                >
+                  <div style={{ fontSize: 28, lineHeight: 1, marginBottom: 6 }}>{asset.emoji}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700 }}>{asset.label}</div>
+                  {placedCount > 0 && (
+                    <div style={{ fontSize: 10, color: '#FFD166', marginTop: 4 }}>×{placedCount} placed</div>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+          <div style={{ marginTop: 10, fontSize: 11, color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+            Pick a building to drop it on the next free grid spot · right-click a placed building to remove
+          </div>
+        </div>
+      )}
+
       {/* Onboarding overlay */}
       {onboardingStep >= 0 && onboardingStep < ONBOARDING_STEPS.length && (
         <div style={{
@@ -1379,7 +1643,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       <Canvas
         shadows={false}
         frameloop="demand"
-        camera={{ position: [0, 25, 45], fov: 55 }}
+        camera={{ position: [14, 16, 22], fov: 55 }}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
         dpr={[1, 1.5]}
       >
@@ -1405,12 +1669,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         {/* Shared 3-light cozy setup + ContactShadows */}
         <CityLighting sunPosition={[50, 50, 25]} sunIntensity={1.2} contactShadowScale={42} />
 
-        <OrbitControls makeDefault enablePan maxPolarAngle={Math.PI / 2.1} minDistance={8} maxDistance={60} target={[0, 0, 0]} />
+        <OrbitControls
+          makeDefault
+          enablePan
+          enableZoom
+          zoomSpeed={1.4}
+          maxPolarAngle={Math.PI / 2.1}
+          minDistance={5}
+          maxDistance={55}
+          target={[0, 0, 0]}
+        />
         <CameraDrift amplitude={0.18} speed={0.13} />
         <CameraRig
           focusOn={selectedBuilding?.position ?? null}
           focusOffset={[5, 4, 7]}
-          homePosition={[0, 25, 45]}
+          homePosition={[14, 16, 22]}
           homeTarget={[0, 0, 0]}
         />
 
@@ -1435,6 +1708,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               colorOverride={COLOR_VARIATIONS[colorVariations[b.id] ?? 'A'][b.id]}
             />
           ))}
+
+          {/* User-placed Kenney buildings */}
+          {userBuildings.list.map((ub) => {
+            const asset = KENNEY_POOL.find(p => p.id === ub.poolId)
+            if (!asset) return null
+            return (
+              <PlacedBuilding
+                key={ub.uid}
+                asset={asset}
+                position={ub.position}
+                rotation={ub.rotation}
+                onRemove={() => userBuildings.remove(ub.uid)}
+              />
+            )
+          })}
         </Suspense>
 
         {/* Soft warm bloom for emissive accents — gated by quality tier */}
