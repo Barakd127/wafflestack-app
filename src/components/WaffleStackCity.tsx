@@ -62,6 +62,18 @@ interface BuildingDef {
   color?: string
 }
 
+// ─── XP milestone progress (kept in sync with ScoreBoard.tsx) ────────────────
+const XP_MILESTONES = [250, 500, 750, 1000]
+
+function computeXpProgress(xp: number): { next: number | null; pct: number; toGo: number } {
+  const next = XP_MILESTONES.find(m => xp < m) ?? null
+  if (next === null) return { next: null, pct: 100, toGo: 0 }
+  const idx = XP_MILESTONES.indexOf(next)
+  const prev = idx > 0 ? XP_MILESTONES[idx - 1] : 0
+  const pct = Math.min(100, Math.max(0, ((xp - prev) / (next - prev)) * 100))
+  return { next, pct, toGo: next - xp }
+}
+
 // ─── Data ────────────────────────────────────────────────────────────────────
 const BUILDINGS: BuildingDef[] = [
   { id: 'power',     model: 'building-type-a', label: '⚡ תחנת כוח',   statsConcept: 'ממוצע (Mean)',        position: [-9, 0, -9], color: '#FFD700' },
@@ -906,15 +918,41 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         position: 'absolute', top: 16, right: 16, zIndex: 50,
         display: 'flex', alignItems: 'center', gap: 8, fontFamily: "'Heebo', system-ui, sans-serif",
       }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255,215,0,0.4)', borderRadius: 20,
-          padding: '6px 14px',
-        }}>
-          <span style={{ fontSize: 16 }}>⭐</span>
-          <span style={{ color: '#FFD700', fontWeight: 700, fontSize: 16 }}>{xp} XP</span>
-        </div>
+        {(() => {
+          const { next: nextMilestone, pct: milestonePct, toGo: xpToGo } = computeXpProgress(xp)
+          return (
+            <div
+              title={nextMilestone !== null ? `${xpToGo} XP to next reward (${nextMilestone})` : 'All XP rewards unlocked!'}
+              style={{
+                position: 'relative', overflow: 'hidden',
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,215,0,0.4)', borderRadius: 20,
+                padding: '6px 14px',
+              }}
+            >
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute', left: 0, top: 0, bottom: 0,
+                  width: `${milestonePct}%`,
+                  background: 'linear-gradient(90deg, rgba(255,215,0,0.22), rgba(255,215,0,0.06))',
+                  transition: 'width 0.6s ease',
+                  pointerEvents: 'none',
+                }}
+              />
+              <span style={{ fontSize: 16, position: 'relative' }}>⭐</span>
+              <span style={{ color: '#FFD700', fontWeight: 700, fontSize: 16, position: 'relative' }}>{xp}</span>
+              {nextMilestone !== null ? (
+                <span style={{ color: 'rgba(255,215,0,0.6)', fontSize: 11, fontWeight: 500, position: 'relative' }}>
+                  / {nextMilestone}
+                </span>
+              ) : (
+                <span style={{ fontSize: 13, position: 'relative' }} aria-label="All rewards unlocked">🏆</span>
+              )}
+            </div>
+          )
+        })()}
         <button
           onClick={toggleSound}
           style={{
