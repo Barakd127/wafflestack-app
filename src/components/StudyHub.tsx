@@ -1,6 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { LessonTopicId } from './LessonPage'
 import { useLearningStore } from '../store/learningStore'
+import StatsCalculator from './StatsCalculator'
+import FlashcardMode from './FlashcardMode'
+import ExamMode from './ExamMode'
+import ConceptMapViewer from './ConceptMapViewer'
+import LearningMap from './LearningMap'
+import LocalLeaderboard from './LocalLeaderboard'
+import StreakCalendar from './StreakCalendar'
+import ScoreBoard from './ScoreBoard'
+import { BUILDINGS, FLASH_CARDS } from './WaffleStackCity'
+
+function loadMastered(): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem('wafflestack-mastered') || '[]')) }
+  catch { return new Set() }
+}
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
@@ -8,7 +22,7 @@ interface StudyHubProps {
   onOpenLesson?: (id: LessonTopicId) => void
 }
 
-type InternalView = 'home' | 'learning' | 'complete'
+type InternalView = 'home' | 'learning' | 'tools' | 'complete'
 
 // ── Design tokens — driven by CSS custom properties for dark/light mode ────────
 const PAGE_BG       = 'var(--sh-page-bg)'
@@ -130,6 +144,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap }: {
     { id: 'home',     label: 'דף הבית',    icon: '⌂' },
     { id: null,       label: 'מפת לימוד',  icon: '◫', action: 'mindmap' },
     { id: 'learning', label: 'אזור למידה', icon: '📖' },
+    { id: 'tools',    label: 'כלים',       icon: '🧰' },
     { id: null,       label: 'העולם שלי',  icon: '🌐', action: 'world' },
   ]
 
@@ -774,10 +789,172 @@ function LearningScreen({ onBack }: { onBack: () => void }) {
   )
 }
 
+// ── Tools screen ───────────────────────────────────────────────────────────────
+type ToolKey =
+  | 'calc' | 'flash' | 'exam' | 'map' | 'path' | 'topics'
+  | 'scores' | 'top' | 'streak' | 'surprise'
+
+function ToolsScreen({ onGoWorld }: { onGoWorld: () => void }) {
+  const [openTool, setOpenTool] = useState<ToolKey | null>(null)
+  const [mastered, setMastered] = useState<Set<string>>(() => loadMastered())
+  const xp = useLearningStore(s => s.xp)
+  const sessionStart = useMemo(() => Date.now(), [])
+
+  // Refresh mastered when a modal closes (in case user mastered something)
+  const refreshMastered = () => setMastered(loadMastered())
+
+  const goCityChallenge = (buildingId: string) => {
+    window.location.hash = `#challenge/${buildingId}`
+    onGoWorld()
+  }
+
+  const openSurprise = () => {
+    const unmastered = BUILDINGS.filter(b => !mastered.has(b.id))
+    const pool = unmastered.length > 0 ? unmastered : BUILDINGS
+    if (pool.length === 0) return
+    const pick = pool[Math.floor(Math.random() * pool.length)]
+    goCityChallenge(pick.id)
+  }
+
+  const tools: Array<{
+    key: ToolKey | 'surprise-action'
+    icon: string
+    label: string
+    desc: string
+    accent: string
+    onClick: () => void
+  }> = [
+    { key: 'calc',      icon: '🧮', label: 'מחשבון',         desc: 'חשב/י ממוצע, חציון, סטיית תקן',       accent: '#4ECDC4', onClick: () => setOpenTool('calc') },
+    { key: 'flash',     icon: '📇', label: 'כרטיסי לימוד',   desc: 'סקור/י את כל המושגים',                accent: '#FFC700', onClick: () => setOpenTool('flash') },
+    { key: 'exam',      icon: '📝', label: 'מצב מבחן',       desc: '10 שאלות, מתוזמן',                    accent: '#F38181', onClick: () => setOpenTool('exam') },
+    { key: 'map',       icon: '🗺️', label: 'מפת מושגים',     desc: 'תצוגת קשרים בין מושגים',              accent: '#FF6B6B', onClick: () => setOpenTool('map') },
+    { key: 'path',      icon: '📍', label: 'מסלול לימוד',    desc: '5 מושגי ליבה',                        accent: '#4ECDC4', onClick: () => setOpenTool('path') },
+    { key: 'topics',    icon: '📚', label: 'כל הנושאים',     desc: `${BUILDINGS.length} מושגים זמינים`,   accent: '#AA96DA', onClick: () => setOpenTool('topics') },
+    { key: 'scores',    icon: '📊', label: 'תוצאות',         desc: 'ציוני המשחק שלך',                    accent: '#4ECDC4', onClick: () => setOpenTool('scores') },
+    { key: 'top',       icon: '🏆', label: 'טופ 5',          desc: 'הציונים הטובים ביותר במכשיר',         accent: '#FFD700', onClick: () => setOpenTool('top') },
+    { key: 'streak',    icon: '📅', label: '30 ימים',        desc: 'יומן פעילות חודשי',                   accent: '#4ECDC4', onClick: () => setOpenTool('streak') },
+    { key: 'surprise-action', icon: '🎲', label: 'הפתעה',    desc: 'אתגר אקראי בעיר',                     accent: '#FF6B6B', onClick: openSurprise },
+  ]
+
+  return (
+    <div style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
+      <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+        <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_MED, marginBottom: 18, textAlign: 'right' }}>
+          כלים ללמידה ומעקב — {mastered.size}/{BUILDINGS.length} מבנים נשלטים
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+          gap: 18,
+        }}>
+          {tools.map(t => (
+            <button key={t.key}
+              onClick={t.onClick}
+              style={{
+                background: GLASS_CARD,
+                backdropFilter: 'blur(20px)',
+                boxShadow: CARD_SHADOW,
+                borderRadius: 20,
+                padding: '20px 18px',
+                border: `1px solid ${t.accent}33`,
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: 8,
+                textAlign: 'right',
+                transition: 'transform 0.15s, box-shadow 0.15s',
+                fontFamily: "'Rubik', sans-serif",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = `0 8px 24px ${t.accent}44`
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = CARD_SHADOW as string
+              }}
+            >
+              <div style={{ fontSize: 32 }}>{t.icon}</div>
+              <div style={{ fontWeight: 700, fontSize: 18, color: TEXT_DARK }}>{t.label}</div>
+              <div style={{ fontSize: 13, color: TEXT_LIGHT, lineHeight: 1.5 }}>{t.desc}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Modals */}
+      {openTool === 'calc'   && <StatsCalculator    onClose={() => { setOpenTool(null); refreshMastered() }} />}
+      {openTool === 'flash'  && <FlashcardMode      cards={FLASH_CARDS} mastered={mastered} onClose={() => { setOpenTool(null); refreshMastered() }} />}
+      {openTool === 'exam'   && <ExamMode           onClose={() => { setOpenTool(null); refreshMastered() }} />}
+      {openTool === 'map'    && <ConceptMapViewer   onClose={() => setOpenTool(null)} />}
+      {openTool === 'path'   && <LearningMap        mastered={mastered} onClose={() => setOpenTool(null)} onOpenChallenge={(id) => { setOpenTool(null); goCityChallenge(id) }} />}
+      {openTool === 'topics' && <TopicsModal        mastered={mastered} onClose={() => setOpenTool(null)} onPick={(id) => { setOpenTool(null); goCityChallenge(id) }} />}
+      {openTool === 'scores' && <ScoreBoard         mastered={mastered} xp={xp} sessionStart={sessionStart} onClose={() => setOpenTool(null)} onReset={() => { localStorage.removeItem('wafflestack-mastered'); localStorage.removeItem('wafflestack-xp'); setOpenTool(null); refreshMastered() }} />}
+      {openTool === 'top'    && <LocalLeaderboard   onClose={() => setOpenTool(null)} />}
+      {openTool === 'streak' && <StreakCalendar     onClose={() => setOpenTool(null)} />}
+    </div>
+  )
+}
+
+// ── Topics modal — simple list with mastery checkmarks ────────────────────────
+function TopicsModal({ mastered, onClose, onPick }: {
+  mastered: Set<string>
+  onClose: () => void
+  onPick: (buildingId: string) => void
+}) {
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)',
+      zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+    }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} dir="rtl" style={{
+        background: 'var(--sh-page-bg, #fff)',
+        borderRadius: 20, maxWidth: 720, width: '100%', maxHeight: '80vh',
+        overflow: 'auto', padding: '28px 32px',
+        fontFamily: "'Rubik', 'Assistant', sans-serif",
+        boxShadow: '0 24px 60px rgba(0,0,0,0.4)',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: TEXT_DARK }}>📚 כל הנושאים</div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: TEXT_LIGHT }}>✕</button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+          {BUILDINGS.map(b => {
+            const isMastered = mastered.has(b.id)
+            return (
+              <button key={b.id} onClick={() => onPick(b.id)}
+                style={{
+                  background: isMastered ? 'rgba(78,205,196,0.12)' : 'rgba(0,0,0,0.04)',
+                  border: `1.5px solid ${isMastered ? 'rgba(78,205,196,0.4)' : 'rgba(0,0,0,0.08)'}`,
+                  borderRadius: 14, padding: '12px 14px', cursor: 'pointer',
+                  display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4,
+                  fontFamily: "'Rubik', sans-serif", textAlign: 'right',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <div style={{ fontSize: 16, fontWeight: 600, color: TEXT_DARK }}>{b.label}</div>
+                <div style={{ fontSize: 13, color: TEXT_LIGHT }}>
+                  {isMastered ? '✓ ' : '○ '}{b.statsConcept}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Root ───────────────────────────────────────────────────────────────────────
 const StudyHub = ({ onViewChange }: StudyHubProps) => {
   const [internalView, setInternalView] = useState<InternalView>('home')
-  const title = internalView === 'home' ? 'דף הבית' : 'אזור למידה'
+  const title =
+    internalView === 'home'     ? 'דף הבית' :
+    internalView === 'learning' ? 'אזור למידה' :
+    internalView === 'tools'    ? 'כלים' :
+    'אזור למידה'
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', overflow: 'hidden', direction: 'rtl', background: PAGE_BG, fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
@@ -801,6 +978,9 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
         )}
         {internalView === 'learning' && (
           <LearningScreen onBack={() => setInternalView('home')} />
+        )}
+        {internalView === 'tools' && (
+          <ToolsScreen onGoWorld={() => onViewChange('3d')} />
         )}
       </div>
     </div>
