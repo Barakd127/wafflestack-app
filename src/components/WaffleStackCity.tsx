@@ -323,7 +323,7 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
   const scaleCurrent = useRef(baseScale)
   // Keep ref in sync if baseScale recalculates after mount (e.g. async GLB load)
   useEffect(() => { scaleCurrent.current = baseScale }, [baseScale])
-  const hoverEmissive = useRef(0.15)  // start at baseline — avoids fade-in artifact on mount
+  const hoverEmissive = useRef(0)     // start at zero — texture shows through unchanged
 
   const activeColor = colorOverride ?? def.color
 
@@ -341,20 +341,19 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
       mesh.material = (mesh.material as THREE.Material).clone()
       const mat = mesh.material as THREE.MeshStandardMaterial
 
-      // Let the UV colormap atlas show through unmodified
-      mat.vertexColors = true
+      // Let the UV colormap atlas show through unmodified — Kenney GLBs use a
+      // `colormap` baseColorTexture sampled by TEXCOORD_0 (no vertex colors).
+      // Setting mat.color = white keeps the texture sample unchanged.
+      mat.vertexColors = false
       mat.color.set('#ffffff')
-      mat.roughness = 0.75
-      mat.metalness = 0.1
+      mat.roughness = 0.7
+      mat.metalness = 0.05
 
-      // Concept color appears as a subtle emissive identity only
-      if (activeColor) {
-        mat.emissive.set(activeColor)
-        mat.emissiveIntensity = 0.12
-      } else {
-        mat.emissive.set('#000000')
-        mat.emissiveIntensity = 0
-      }
+      // No always-on emissive — it would overpower the texture in the dim scene.
+      // The state-driven useEffect/useFrame layers below paint emissive only when
+      // the building is mastered/selected/glowing/hovered.
+      mat.emissive.set('#000000')
+      mat.emissiveIntensity = 0
       mat.needsUpdate = true
     })
 
@@ -365,9 +364,10 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
   // These only fire when the boolean props actually change — not every frame.
   useEffect(() => {
     if (!clonedScene) return
-    // Mastered: subtle wall glow (0.10) per Smart Paint spec; selected lifts to 0.30; glow = 0.9
-    const intensity = isGlowing ? 0.9 : isMastered ? 0.10 : isSelected ? 0.30 : 0.05
-    const color = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : isSelected ? '#ffffff' : (activeColor ?? '#4ECDC4')
+    // Mastered: subtle wall glow; selected lifts higher; glow brightest. Default = 0
+    // so the Kenney colormap texture shows through unchanged.
+    const intensity = isGlowing ? 0.9 : isMastered ? 0.10 : isSelected ? 0.30 : 0
+    const color = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : isSelected ? '#ffffff' : '#000000'
     clonedScene.traverse((child) => {
       const mesh = child as THREE.Mesh
       if (!mesh.isMesh || !mesh.material) return
@@ -391,9 +391,9 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
     groupRef.current.scale.setScalar(scaleCurrent.current)
 
     // Hover emissive shimmer (warm gold), only when not in a mastered/selected/glow state
-    // Base is 0.15 (subtle always-on glow); hover lifts to 0.20 warm gold
+    // Base is 0 (texture shows through); hover lifts to 0.18 warm gold
     if (!isGlowing && !isMastered && !isSelected) {
-      const targetEm = isHovered ? 0.20 : 0.15
+      const targetEm = isHovered ? 0.18 : 0
       const prev = hoverEmissive.current
       hoverEmissive.current += (targetEm - prev) * 0.12
       const em = hoverEmissive.current
