@@ -46,3 +46,7 @@ build_err.txt
 build_log.txt
 build_output.txt
 bot.py
+
+# Stray shell-redirect dumps (e.g. `git ... > amend-out.txt`)
+*-out.txt
+tsc-errors.txt
