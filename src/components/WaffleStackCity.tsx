@@ -11,6 +11,7 @@ import { generateIrregularGrid } from '../utils/irregularGrid'
 import { Suspense, useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo, getQuizForBuilding } from './StatChallenge'
+import ReviewMode from './ReviewMode'
 import ScoreBoard from './ScoreBoard'
 import ExamMode from './ExamMode'
 import { useCitySound, playBuildingPlacedTone } from './SoundManager'
@@ -573,6 +574,7 @@ function CityPostFX() {
 export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingDef | null>(null)
   const [challengeBuilding, setChallengeBuilding] = useState<BuildingInfo | null>(null)
+  const [reviewBuilding, setReviewBuilding] = useState<BuildingInfo | null>(null)
   const [mastered, setMastered] = useState<Set<string>>(loadMastered)
   const [xp, setXp] = useState(loadXP)
   const [xpPopup, setXpPopup] = useState(false)
@@ -668,8 +670,10 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           setShowHelp(h => !h)
           break
         case 'Escape':
-          // Priority: challenge > info panel > scoreboard > help
-          if (challengeBuilding !== null) {
+          // Priority: review > challenge > info panel > scoreboard > help
+          if (reviewBuilding !== null) {
+            setReviewBuilding(null)
+          } else if (challengeBuilding !== null) {
             setChallengeBuilding(null)
           } else if (selectedBuilding !== null) {
             setSelectedBuilding(null)
@@ -728,7 +732,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, showStatsCalculator, toggleSound, openRandomChallenge])
+  }, [reviewBuilding, challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, showStatsCalculator, toggleSound, openRandomChallenge])
 
   // Handle deep-link hash on mount
   useEffect(() => {
@@ -759,6 +763,11 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
   const openChallenge = useCallback((building: BuildingDef) => {
     setChallengeBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
+    setSelectedBuilding(null)
+  }, [])
+
+  const openReview = useCallback((building: BuildingDef) => {
+    setReviewBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
     setSelectedBuilding(null)
   }, [])
 
@@ -1512,6 +1521,19 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         )
       })()}
 
+      {/* Review Modal — for already-mastered buildings */}
+      {reviewBuilding && (
+        <ReviewMode
+          building={reviewBuilding}
+          onClose={() => setReviewBuilding(null)}
+          onReQuiz={() => {
+            const b = BUILDINGS.find(bld => bld.id === reviewBuilding.id)
+            setReviewBuilding(null)
+            if (b) openChallenge(b)
+          }}
+        />
+      )}
+
       {/* Score Board panel */}
       {showScoreBoard && (
         <ScoreBoard
@@ -2038,7 +2060,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                     key={b.id}
                     onClick={() => {
                       setShowTopicsList(false)
-                      openChallenge(b)
+                      if (isMastered) openReview(b)
+                      else openChallenge(b)
                     }}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 14,
