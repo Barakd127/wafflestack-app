@@ -1,4 +1,4 @@
-﻿import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Html, useProgress, PerformanceMonitor, Sky } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import CityLighting from '../three/CityLighting'
@@ -327,56 +327,43 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
 
   const activeColor = colorOverride ?? def.color
 
-  // ─── Smart Paint: color walls only, preserve windows/doors/roofs ────────────
-  // Traverses the cloned scene and checks mesh/material names to determine if
-  // a surface is a "secondary" element (window, glass, door, roof, trim, metal).
-  // Only primary wall materials get the concept color; secondary elements keep
-  // their original Kenney colors for visual clarity.
+  // ─── Smart Paint: mesh-size approach — largest mesh gets concept color ────────
+  // Kenney GLBs have 1 mesh + 1 "colormap" UV-atlas material (no vertex colors).
+  // Sorting by vertex count picks the building body as mesh[0]; any future
+  // multi-mesh kits will naturally separate body vs. roof/window detail meshes.
+  // Main mesh: vertexColors disabled + concept color applied cleanly.
+  // Secondary meshes (i > 0): original Kenney vertex/colormap colors preserved.
   const clonedScene = useMemo(() => {
     const clone = scene.clone()
+
+    // Collect all meshes, then sort largest-first
+    const meshes: THREE.Mesh[] = []
     clone.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh
-        const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
-        const meshName = (mesh.name ?? '').toLowerCase()
-        const matName  = ((mat as THREE.MeshStandardMaterial).name ?? '').toLowerCase()
+      if ((child as THREE.Mesh).isMesh) meshes.push(child as THREE.Mesh)
+    })
+    meshes.sort((a, b) =>
+      (b.geometry?.attributes?.position?.count || 0) -
+      (a.geometry?.attributes?.position?.count || 0)
+    )
 
-        // Secondary surface keywords — these preserve original Kenney colors
-        const isSecondary =
-          meshName.includes('window') || meshName.includes('glass')  ||
-          meshName.includes('door')   || meshName.includes('roof')   ||
-          meshName.includes('shingle')|| meshName.includes('detail') ||
-          meshName.includes('trim')   || meshName.includes('accent') ||
-          meshName.includes('metal')  || meshName.includes('chrome') ||
-          matName.includes('window')  || matName.includes('glass')   ||
-          matName.includes('door')    || matName.includes('roof')    ||
-          matName.includes('shingle') || matName.includes('detail')  ||
-          matName.includes('trim')    || matName.includes('accent')  ||
-          matName.includes('metal')   || matName.includes('chrome')
+    meshes.forEach((child, i) => {
+      child.material = (child.material as THREE.Material).clone()
+      const mat = child.material as THREE.MeshStandardMaterial
 
-        if (!isSecondary && activeColor) {
-          // Primary wall: apply concept color directly (no multiply — saturated & accurate)
+      if (i === 0) {
+        // Main building body: disable vertex-color multiply, apply concept color
+        mat.vertexColors = false          // THREE.NoColors — no vertex-color interference
+        if (activeColor) {
           mat.color.set(activeColor)
           mat.roughness = 0.75
           mat.metalness = 0.1
-          // Subtle warm lit-window glow on wall base (very low, overridden by hover/state effects)
-          mat.emissive.set(activeColor)
-          mat.emissiveIntensity = 0.05
-        } else {
-          // Secondary element: keep original color, clean PBR values
-          mat.roughness = 0.4
-          mat.metalness = 0.05
-          // Warm lit-window glow for bright glass/windows
-          const lum = mat.color.r * 0.299 + mat.color.g * 0.587 + mat.color.b * 0.114
-          if (lum > 0.70) {
-            mat.emissive.set('#fffaaa')
-            mat.emissiveIntensity = 0.30
-          }
         }
-
-        mesh.material = mat
+      } else {
+        // Secondary meshes (roof, windows, details): keep Kenney vertex colors
+        mat.vertexColors = true           // THREE.VertexColors — preserve original look
       }
     })
+
     return clone
   }, [scene, activeColor, colorOverride, def.color])
 
