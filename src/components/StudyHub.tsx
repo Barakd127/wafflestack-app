@@ -76,46 +76,139 @@ const QUESTIONS = [
   },
 ]
 
-// ── Activity chart SVG (exact Figma data points) ──────────────────────────────
+// ── Activity chart SVG — driven by real XP history (wafflestack-xp-history) ───
+const HE_DAY_NAMES = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת']
+const XP_HISTORY_KEY = 'wafflestack-xp-history'
+
+function dateKey(d: Date): string {
+  return d.toISOString().slice(0, 10)
+}
+
+interface ActivityDay {
+  key: string
+  dayHe: string
+  value: number
+  isToday: boolean
+}
+
+// Mirrors ScoreBoard.buildWeeklyBars: cumulative XP snapshot per day → daily delta.
+function loadActivityWeek(): ActivityDay[] {
+  let history: Record<string, number> = {}
+  try {
+    const raw = localStorage.getItem(XP_HISTORY_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (parsed && typeof parsed === 'object') history = parsed
+    }
+  } catch { /* ignore corrupt history */ }
+
+  const today = new Date()
+  const todayKey = dateKey(today)
+  const windowStart = new Date(today); windowStart.setDate(windowStart.getDate() - 6)
+  const windowStartKey = dateKey(windowStart)
+  const earlierKeys = Object.keys(history).filter(k => k < windowStartKey).sort()
+  let prevXp = earlierKeys.length > 0 ? history[earlierKeys[earlierKeys.length - 1]] : 0
+
+  const days: ActivityDay[] = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i)
+    const key = dateKey(d)
+    const recorded = history[key]
+    const xpEnd = recorded !== undefined ? recorded : prevXp
+    const delta = Math.max(0, xpEnd - prevXp)
+    days.push({ key, dayHe: HE_DAY_NAMES[d.getDay()], value: delta, isToday: key === todayKey })
+    prevXp = xpEnd
+  }
+  return days
+}
+
 function ActivityChart() {
-  const days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת']
-  const values = [200, 340, 260, 200, 220, 370, 190]
+  const week = loadActivityWeek()
+  const values = week.map(w => w.value)
+  const total = values.reduce((s, v) => s + v, 0)
+  const dataMax = values.reduce((m, v) => Math.max(m, v), 0)
+  // Floor at 100 so an empty week still draws sensible gridlines.
+  const niceMax = dataMax === 0
+    ? 100
+    : Math.max(100, Math.ceil((dataMax * 1.15) / 50) * 50)
+  const tickStep = niceMax / 4
+
   const W = 460, H = 200, padL = 36, padB = 28, padT = 10, padR = 10
   const innerW = W - padL - padR
   const innerH = H - padT - padB
-  const maxV = 400
 
-  const toX = (i: number) => padL + (i / (days.length - 1)) * innerW
-  const toY = (v: number) => padT + innerH - (v / maxV) * innerH
+  const toX = (i: number) => padL + (i / (week.length - 1)) * innerW
+  const toY = (v: number) => padT + innerH - (v / niceMax) * innerH
 
   const pts = values.map((v, i) => [toX(i), toY(v)] as [number, number])
   const line = pts.map((p, i) => (i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`)).join(' ')
   const area = line + ` L${pts[pts.length-1][0]},${padT+innerH} L${pts[0][0]},${padT+innerH} Z`
-  const ticks = [0, 100, 200, 300, 400]
+  const ticks = [0, tickStep, tickStep * 2, tickStep * 3, niceMax]
 
   return (
-    <svg width={W} height={H} style={{ overflow: 'visible', display: 'block' }}>
-      <defs>
-        <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(212,175,55,0.45)" />
-          <stop offset="100%" stopColor="rgba(212,175,55,0.03)" />
-        </linearGradient>
-      </defs>
-      {ticks.map(v => (
-        <g key={v}>
-          <line x1={padL} y1={toY(v)} x2={padL+innerW} y2={toY(v)} stroke="#DBDEE4" strokeWidth="1" strokeDasharray="3,3" />
-          <text x={padL-5} y={toY(v)+4} textAnchor="end" fontSize={10} fill="#54555A" fontFamily="Inter">{v}</text>
-        </g>
-      ))}
-      <path d={area} fill="url(#chartArea)" />
-      <path d={line} fill="none" stroke="rgba(212,175,55,0.8)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      {pts.map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r={3.5} fill="#D4AF37" />
-      ))}
-      {days.map((d, i) => (
-        <text key={i} x={toX(i)} y={H-4} textAnchor="middle" fontSize={9} fill="#54555A" fontFamily="Rubik">{d}</text>
-      ))}
-    </svg>
+    <div>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 4px 10px', direction: 'rtl' as const,
+      }}>
+        <span style={{
+          fontFamily: "'Rubik', sans-serif", fontSize: 16, fontWeight: 700, color: TEXT_DARK,
+        }}>
+          📈 פעילות השבוע
+        </span>
+        <span style={{
+          fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600,
+          color: total > 0 ? '#D4AF37' : TEXT_LIGHT, fontVariantNumeric: 'tabular-nums',
+        }}>
+          {total > 0 ? `+${total.toLocaleString()} XP` : 'אין פעילות עדיין'}
+        </span>
+      </div>
+      <svg width={W} height={H} style={{ overflow: 'visible', display: 'block' }}>
+        <defs>
+          <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(212,175,55,0.45)" />
+            <stop offset="100%" stopColor="rgba(212,175,55,0.03)" />
+          </linearGradient>
+        </defs>
+        {ticks.map(v => (
+          <g key={v}>
+            <line x1={padL} y1={toY(v)} x2={padL+innerW} y2={toY(v)} stroke="#DBDEE4" strokeWidth="1" strokeDasharray="3,3" />
+            <text x={padL-5} y={toY(v)+4} textAnchor="end" fontSize={10} fill="#54555A" fontFamily="Inter">{Math.round(v)}</text>
+          </g>
+        ))}
+        <path d={area} fill="url(#chartArea)" />
+        <path d={line} fill="none" stroke="rgba(212,175,55,0.8)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {pts.map(([x, y], i) => {
+          const day = week[i]
+          return (
+            <g key={i}>
+              <circle
+                cx={x} cy={y}
+                r={day.isToday ? 5 : 3.5}
+                fill={day.isToday ? '#FFC700' : '#D4AF37'}
+                stroke={day.isToday ? '#fff' : 'none'}
+                strokeWidth={day.isToday ? 1.5 : 0}
+              >
+                <title>{`${day.key}: +${day.value} XP`}</title>
+              </circle>
+            </g>
+          )
+        })}
+        {week.map((day, i) => (
+          <text
+            key={i}
+            x={toX(i)} y={H-4}
+            textAnchor="middle"
+            fontSize={9}
+            fill={day.isToday ? '#D4AF37' : '#54555A'}
+            fontWeight={day.isToday ? 700 : 400}
+            fontFamily="Rubik"
+          >
+            {day.dayHe}
+          </text>
+        ))}
+      </svg>
+    </div>
   )
 }
 
