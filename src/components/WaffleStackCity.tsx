@@ -3,8 +3,6 @@ import { OrbitControls, useGLTF, Html, useProgress, PerformanceMonitor, Sky } fr
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import CityLighting from '../three/CityLighting'
 import { useQualityTier, BLOOM_ENABLED, DPR_MAX, type QualityTier } from '../three/QualityTier'
-import Clouds from '../three/Aliveness/Clouds'
-import Smoke from '../three/Aliveness/Smoke'
 import CameraDrift from '../three/Aliveness/CameraDrift'
 import CameraRig from '../three/UI/CameraRig'
 import { generateIrregularGrid } from '../utils/irregularGrid'
@@ -1409,9 +1407,6 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         <Suspense fallback={null}>
           <TownscaperGround />
           {ROAD_MODELS.map((r, i) => <Prop key={i} model={r.model} pos={r.pos} rot={r.rot} />)}
-
-          {/* Aliveness layer — clouds + smoke, tier-gated */}
-          <Clouds count={6} altitude={24} range={70} speed={0.55} />
 
           {BUILDINGS.map((b) => (
             <Building
