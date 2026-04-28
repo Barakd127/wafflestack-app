@@ -6,7 +6,6 @@ import { useQualityTier, BLOOM_ENABLED, DPR_MAX, type QualityTier } from '../thr
 import Clouds from '../three/Aliveness/Clouds'
 import Smoke from '../three/Aliveness/Smoke'
 import CameraDrift from '../three/Aliveness/CameraDrift'
-import SwayingTrees from '../three/Aliveness/SwayingTrees'
 import CameraRig from '../three/UI/CameraRig'
 import { generateIrregularGrid } from '../utils/irregularGrid'
 import { Suspense, useState, useRef, useCallback, useEffect, useMemo } from 'react'
@@ -79,10 +78,17 @@ const BUILDINGS: BuildingDef[] = [
 
 // ─── Kenney color variation palettes ─────────────────────────────────────────
 const COLOR_VARIATIONS: Record<'A' | 'B' | 'C', Record<string, string>> = {
-  A: { // Original warm tones (Kenney Variation A — orange/red/teal)
-    power: '#FFD700', housing: '#4ECDC4', traffic: '#FF6B6B', hospital: '#95E1D3',
-    school: '#AA96DA', bank: '#FCBAD3', market: '#A8E6CF', 'city-hall': '#F38181',
-    research: '#C3A6FF', news: '#FFB347',
+  A: { // Smart Paint concept colors — walls only, windows/doors/roofs preserved
+    power:      '#FF6B35', // Mean — warm orange
+    housing:    '#FF4F79', // Median — coral pink
+    traffic:    '#7B5EA7', // Std Dev — purple
+    hospital:   '#4A90D9', // Normal Distribution — sky blue
+    school:     '#00C9A7', // Sampling — bright teal
+    bank:       '#F39C12', // Regression — amber
+    market:     '#27AE60', // Correlation — green
+    'city-hall':'#1ABC9C', // Binomial — cyan
+    research:   '#E74C3C', // Hypothesis Testing — red
+    news:       '#6C5CE7', // Confidence Interval — indigo
   },
   B: { // Cool tones (Kenney Variation B — blue/purple)
     power: '#5B8CFF', housing: '#7B5EA7', traffic: '#4A90D9', hospital: '#6C9DC9',
@@ -321,30 +327,53 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
 
   const activeColor = colorOverride ?? def.color
 
-  // Clone scene + apply color tinting + PBR upgrades.
-  // roughness/metalness added for depth — no hover emissive in deps so hovering never re-clones.
+  // ─── Smart Paint: color walls only, preserve windows/doors/roofs ────────────
+  // Traverses the cloned scene and checks mesh/material names to determine if
+  // a surface is a "secondary" element (window, glass, door, roof, trim, metal).
+  // Only primary wall materials get the concept color; secondary elements keep
+  // their original Kenney colors for visual clarity.
   const clonedScene = useMemo(() => {
     const clone = scene.clone()
     clone.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh
         const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
-        if (activeColor) {
-          if (colorOverride && colorOverride !== def.color) {
-            mat.color.set(activeColor)
-          } else if (def.color) {
-            mat.color.multiply(new THREE.Color(def.color))
+        const meshName = (mesh.name ?? '').toLowerCase()
+        const matName  = ((mat as THREE.MeshStandardMaterial).name ?? '').toLowerCase()
+
+        // Secondary surface keywords — these preserve original Kenney colors
+        const isSecondary =
+          meshName.includes('window') || meshName.includes('glass')  ||
+          meshName.includes('door')   || meshName.includes('roof')   ||
+          meshName.includes('shingle')|| meshName.includes('detail') ||
+          meshName.includes('trim')   || meshName.includes('accent') ||
+          meshName.includes('metal')  || meshName.includes('chrome') ||
+          matName.includes('window')  || matName.includes('glass')   ||
+          matName.includes('door')    || matName.includes('roof')    ||
+          matName.includes('shingle') || matName.includes('detail')  ||
+          matName.includes('trim')    || matName.includes('accent')  ||
+          matName.includes('metal')   || matName.includes('chrome')
+
+        if (!isSecondary && activeColor) {
+          // Primary wall: apply concept color directly (no multiply — saturated & accurate)
+          mat.color.set(activeColor)
+          mat.roughness = 0.75
+          mat.metalness = 0.1
+          // Subtle warm lit-window glow on wall base (very low, overridden by hover/state effects)
+          mat.emissive.set(activeColor)
+          mat.emissiveIntensity = 0.05
+        } else {
+          // Secondary element: keep original color, clean PBR values
+          mat.roughness = 0.4
+          mat.metalness = 0.05
+          // Warm lit-window glow for bright glass/windows
+          const lum = mat.color.r * 0.299 + mat.color.g * 0.587 + mat.color.b * 0.114
+          if (lum > 0.70) {
+            mat.emissive.set('#fffaaa')
+            mat.emissiveIntensity = 0.30
           }
         }
-        // PBR upgrade — slight reflectivity gives buildings depth under the Sky light
-        mat.roughness = 0.3
-        mat.metalness = 0.1
-        // Window detection heuristic: very bright/near-white materials get warm lit-window glow
-        const lum = mat.color.r * 0.299 + mat.color.g * 0.587 + mat.color.b * 0.114
-        if (lum > 0.75) {
-          mat.emissive.set('#fffaaa')
-          mat.emissiveIntensity = 0.35
-        }
+
         mesh.material = mat
       }
     })
@@ -355,8 +384,8 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
   // These only fire when the boolean props actually change — not every frame.
   useEffect(() => {
     if (!clonedScene) return
-    // Mastered baseline: 0.15 emissive (spec requirement) + boost to 0.22 for full mastered state
-    const intensity = isGlowing ? 0.9 : isMastered ? 0.22 : isSelected ? 0.30 : 0.15
+    // Mastered: subtle wall glow (0.10) per Smart Paint spec; selected lifts to 0.30; glow = 0.9
+    const intensity = isGlowing ? 0.9 : isMastered ? 0.10 : isSelected ? 0.30 : 0.05
     const color = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : isSelected ? '#ffffff' : (activeColor ?? '#4ECDC4')
     clonedScene.traverse((child) => {
       const mesh = child as THREE.Mesh
@@ -1408,8 +1437,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           <TownscaperGround />
           {ROAD_MODELS.map((r, i) => <Prop key={i} model={r.model} pos={r.pos} rot={r.rot} />)}
 
-          {/* Aliveness layer — small sway/drift effects, all tier-gated */}
-          <SwayingTrees swayAmount={0.07} />
+          {/* Aliveness layer — clouds + smoke, tier-gated */}
           <Clouds count={6} altitude={24} range={70} speed={0.55} />
           <Smoke position={[-9, 2.4, -9]}  count={10} riseSpeed={0.45} color="#f0e6d6" />
           <Smoke position={[-3, 2.0,  3]}  count={8}  riseSpeed={0.35} color="#e8e0d0" drift={0.2} />
