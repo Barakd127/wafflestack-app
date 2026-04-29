@@ -808,12 +808,12 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
   const openChallenge = useCallback((building: BuildingDef) => {
     setChallengeBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
-    setSelectedBuilding(null)
+    setSelectedBuilding(building)  // keep for camera zoom-in
   }, [])
 
   const openReview = useCallback((building: BuildingDef) => {
     setReviewBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
-    setSelectedBuilding(null)
+    setSelectedBuilding(building)  // keep for camera zoom-in
   }, [])
 
   const handleReset = useCallback(() => {
@@ -1363,7 +1363,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               <Building
                 key={b.id}
                 def={{ ...b, position: pos }}
-                onClick={() => {}}
+                onClick={(clicked) => mastered.has(clicked.id) ? openReview(clicked) : openChallenge(clicked)}
                 isSelected={selectedBuilding?.id === b.id}
                 isMastered={mastered.has(b.id)}
                 isGlowing={glowBuilding === b.id}
