@@ -24,6 +24,7 @@ import StreakCalendar from './StreakCalendar'
 import StatsCalculator from './StatsCalculator'
 import StreakReminderBanner from './StreakReminderBanner'
 import DailyStatFact from './DailyStatFact'
+import PomodoroTimer from './PomodoroTimer'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -1405,6 +1406,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
       {/* Local Leaderboard */}
       {showLeaderboard && <LocalLeaderboard onClose={() => setShowLeaderboard(false)} />}
+
+      {/* Pomodoro focus timer */}
+      <PomodoroTimer />
 
       {/* 30-Day Streak Calendar */}
       {showStreakCalendar && <StreakCalendar onClose={() => setShowStreakCalendar(false)} />}
