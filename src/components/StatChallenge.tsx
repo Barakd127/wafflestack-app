@@ -37,7 +37,7 @@ export interface BuildingInfo {
 
 // ─── Challenge Definitions ────────────────────────────────────────────────────
 
-const CHALLENGES: Record<string, ChallengeContent> = {
+export const CHALLENGES: Record<string, ChallengeContent> = {
   power: {
     concept: 'Mean', conceptHe: 'ממוצע',
     emoji: '⚡', color: '#FFD700',

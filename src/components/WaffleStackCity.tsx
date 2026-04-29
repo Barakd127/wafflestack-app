@@ -11,6 +11,7 @@ import { generateIrregularGrid } from '../utils/irregularGrid'
 import { Suspense, useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import StatChallenge, { BuildingInfo, getQuizForBuilding } from './StatChallenge'
+import ReviewMode from './ReviewMode'
 import ScoreBoard from './ScoreBoard'
 import ExamMode from './ExamMode'
 import { useCitySound, playBuildingPlacedTone } from './SoundManager'
@@ -62,8 +63,20 @@ interface BuildingDef {
   color?: string
 }
 
+// ─── XP milestone progress (kept in sync with ScoreBoard.tsx) ────────────────
+const XP_MILESTONES = [250, 500, 750, 1000]
+
+function computeXpProgress(xp: number): { next: number | null; pct: number; toGo: number } {
+  const next = XP_MILESTONES.find(m => xp < m) ?? null
+  if (next === null) return { next: null, pct: 100, toGo: 0 }
+  const idx = XP_MILESTONES.indexOf(next)
+  const prev = idx > 0 ? XP_MILESTONES[idx - 1] : 0
+  const pct = Math.min(100, Math.max(0, ((xp - prev) / (next - prev)) * 100))
+  return { next, pct, toGo: next - xp }
+}
+
 // ─── Data ────────────────────────────────────────────────────────────────────
-export const BUILDINGS: BuildingDef[] = [
+const BUILDINGS: BuildingDef[] = [
   { id: 'power',     model: 'building-type-a', label: '⚡ תחנת כוח',   statsConcept: 'ממוצע (Mean)',        position: [-9, 0, -9], color: '#FFD700' },
   { id: 'housing',   model: 'building-type-c', label: '🏠 מנהל דיור',  statsConcept: 'חציון (Median)',      position: [-3, 0, -9], color: '#4ECDC4', customModel: 'kenney/building-a.glb', targetHeight: 2.8 },
   { id: 'traffic',   model: 'building-type-e', label: '🚦 בקרת תנועה', statsConcept: 'סטיית תקן (Std Dev)', position: [3,  0, -9], color: '#FF6B6B', customModel: 'kenney/building-skyscraper-a.glb', targetHeight: 5.0 },
@@ -74,24 +87,30 @@ export const BUILDINGS: BuildingDef[] = [
   { id: 'city-hall', model: 'building-type-h', label: '🏛️ עיריה',      statsConcept: 'בינום (Binomial)',    position: [9,  0, -3], color: '#F38181', customModel: 'kenney/building-sample-tower-b.glb', targetHeight: 4.2 },
   { id: 'research',  model: 'building-type-i', label: '🔬 מכון מחקר',  statsConcept: 'מבחן השערות',         position: [-3, 0, 3],  color: '#C3A6FF', customModel: 'kenney/building-sample-tower-a.glb', targetHeight: 4.5 },
   { id: 'news',      model: 'building-type-j', label: '📰 תחנת חדשות', statsConcept: 'רווח סמך (CI)',       position: [3,  0, 3],  color: '#FFB347', customModel: 'kenney/building-k.glb', targetHeight: 3.5 },
-  { id: 'zscore',    model: 'building-type-a', label: '📐 מגדל z',       statsConcept: 'ציון z (Z-Score)',          position: [-3, 0, 9],  color: '#FF6B6B' },
-  { id: 'pvalue',    model: 'building-type-b', label: '🎯 מרכז הסיכוי',  statsConcept: 'ערך p (P-Value)',           position: [3,  0, 9],  color: '#4ECDC4' },
-  { id: 'anova',     model: 'building-type-c', label: '🏟️ אצטדיון',      statsConcept: 'אנובה (ANOVA)',             position: [9,  0, 9],  color: '#A8E6CF' },
-  { id: 'ttest',     model: 'building-type-d', label: '⚖️ בית המשפט',    statsConcept: 'מבחן t (T-Test)',           position: [-9, 0, 3],  color: '#FFB347' },
-  { id: 'variance',  model: 'building-type-e', label: '🌡️ מגדל המדידה',  statsConcept: 'שונות (Variance)',          position: [-9, 0, 9],  color: '#C3A6FF' },
-  { id: 'chisq',     model: 'building-type-f', label: '🔭 מצפה כוכבים',  statsConcept: 'מבחן χ² (Chi-Square)',      position: [9,  0, 3],  color: '#FCBAD3' },
-  { id: 'iqr',       model: 'building-type-g', label: '📦 המחסן',        statsConcept: 'טווח רבעוני (IQR)',         position: [-9, 0, -9], color: '#95E1D3' },
-  { id: 'clt',       model: 'building-type-h', label: '🌉 גשר הגבול',    statsConcept: 'משפט הגבול המרכזי (CLT)',   position: [-9, 0, -3], color: '#F38181' },
+  // ─── New buildings — placed by user via placement picker ───────────────────
+  { id: 'zscore',   model: 'building-type-a', label: '📐 מגדל z',       statsConcept: 'ציון z (Z-Score)',           position: [0,0,0], color: '#E74C3C' },
+  { id: 'pvalue',   model: 'building-type-b', label: '🎯 מרכז הסיכוי',  statsConcept: 'ערך p (P-Value)',            position: [0,0,0], color: '#16A085' },
+  { id: 'anova',    model: 'building-type-c', label: '🏟️ אצטדיון',      statsConcept: 'אנובה (ANOVA)',              position: [0,0,0], color: '#8E44AD' },
+  { id: 'ttest',    model: 'building-type-d', label: '⚖️ בית המשפט',    statsConcept: 'מבחן t (T-Test)',            position: [0,0,0], color: '#D35400' },
+  { id: 'variance', model: 'building-type-e', label: '🌡️ מגדל המדידה',  statsConcept: 'שונות (Variance)',           position: [0,0,0], color: '#2980B9' },
+  { id: 'chisq',    model: 'building-type-f', label: '🔭 מצפה כוכבים',  statsConcept: 'מבחן χ² (Chi-Square)',       position: [0,0,0], color: '#C0392B' },
+  { id: 'iqr',      model: 'building-type-g', label: '📦 המחסן',        statsConcept: 'טווח רבעוני (IQR)',          position: [0,0,0], color: '#27AE60' },
+  { id: 'clt',      model: 'building-type-h', label: '🌉 גשר הגבול',    statsConcept: 'משפט הגבול המרכזי (CLT)',    position: [0,0,0], color: '#1ABC9C' },
 ]
 
-// ─── Grid slots for placement system ─────────────────────────────────────────
-const ALL_GRID_SLOTS: [number, number, number][] = []
-for (let row = 0; row < 5; row++) {
-  for (let col = 0; col < 5; col++) {
-    ALL_GRID_SLOTS.push([(col - 2) * 6, 0, (row - 2) * 6] as [number, number, number])
+// ─── All grid slots — 5×5 at 6-unit spacing ──────────────────────────────────
+const ALL_GRID_SLOTS: [number, number, number][] = (() => {
+  const slots: [number, number, number][] = []
+  for (let row = 0; row < 5; row++) {
+    for (let col = 0; col < 5; col++) {
+      slots.push([(col - 2) * 6, 0, (row - 2) * 6])
+    }
   }
-}
-// x: -12,-6,0,6,12  z: -12,-6,0,6,12
+  return slots
+})()
+
+// Buildings that always have a fixed position (original 10)
+const ORIGINAL_IDS = new Set(['power','housing','traffic','hospital','school','bank','market','city-hall','research','news'])
 
 // ─── Kenney color variation palettes ─────────────────────────────────────────
 const COLOR_VARIATIONS: Record<'A' | 'B' | 'C', Record<string, string>> = {
@@ -145,14 +164,14 @@ const GLOSSARY_DATA: Record<string, { conceptEn: string; formula: string }> = {
   'city-hall':{ conceptEn: 'Binomial Distribution', formula: 'P(X=k) = C(n,k)·pᵏ·(1-p)^(n-k)' },
   research:   { conceptEn: 'Hypothesis Testing',    formula: 'z = (x̄-μ₀) / (σ/√n)' },
   news:       { conceptEn: 'Confidence Interval',   formula: 'CI = x̄ ± z·(σ/√n)' },
-  zscore:   { conceptEn: 'Z-Score',             formula: 'z = (x − μ) / σ' },
-  pvalue:   { conceptEn: 'P-Value',             formula: 'p = P(data | H₀)' },
-  anova:    { conceptEn: 'ANOVA',               formula: 'F = MSB / MSW' },
-  ttest:    { conceptEn: 'T-Test',              formula: 't = (x̄₁−x̄₂) / SE' },
-  variance: { conceptEn: 'Variance',            formula: 'σ² = Σ(xᵢ−μ)² / n' },
-  chisq:    { conceptEn: 'Chi-Square Test',     formula: 'χ² = Σ(O−E)² / E' },
-  iqr:      { conceptEn: 'Interquartile Range', formula: 'IQR = Q₃ − Q₁' },
-  clt:      { conceptEn: 'Central Limit Theorem', formula: 'x̄ ~ N(μ, σ²/n)' },
+  zscore:     { conceptEn: 'Z-Score',              formula: 'z = (x − μ) / σ' },
+  pvalue:     { conceptEn: 'P-Value',              formula: 'p = P(data | H₀)' },
+  anova:      { conceptEn: 'ANOVA',                formula: 'F = MSB / MSW' },
+  ttest:      { conceptEn: 'T-Test',               formula: 't = (x̄₁−x̄₂) / SE' },
+  variance:   { conceptEn: 'Variance',             formula: 'σ² = Σ(xᵢ−μ)² / n' },
+  chisq:      { conceptEn: 'Chi-Square Test',      formula: 'χ² = Σ(O−E)² / E' },
+  iqr:        { conceptEn: 'Interquartile Range',  formula: 'IQR = Q₃ − Q₁' },
+  clt:        { conceptEn: 'Central Limit Theorem',formula: 'x̄ ~ N(μ, σ²/n)' },
 }
 
 const CONCEPT_PREVIEW: Record<string, string> = {
@@ -166,18 +185,18 @@ const CONCEPT_PREVIEW: Record<string, string> = {
   'city-hall': 'The binomial distribution counts successes in a fixed number of yes/no trials (coin flips, votes).',
   'research':  'Hypothesis testing decides if data provides enough evidence to reject the null hypothesis.',
   'news':      'A confidence interval gives a range where the true population parameter likely falls (e.g. 95% CI).',
-  'zscore':   'Z-score measures how many standard deviations a value is from the mean. It standardizes data from any distribution.',
-  'pvalue':   'The p-value is the probability of observing results at least as extreme as your data, assuming the null hypothesis is true.',
-  'anova':    'ANOVA (Analysis of Variance) tests whether three or more group means are significantly different from each other.',
-  'ttest':    'The t-test compares the means of two groups to determine if the difference is statistically significant.',
-  'variance': 'Variance measures how far data points are spread from the mean. It is the square of the standard deviation.',
-  'chisq':    'The Chi-square test evaluates whether observed frequencies match expected frequencies in categorical data.',
-  'iqr':      'The interquartile range (Q3−Q1) measures the spread of the middle 50% of data, ignoring outliers.',
-  'clt':      'The Central Limit Theorem states that the distribution of sample means approaches normal as sample size grows.',
+  'zscore':    'Z-score measures how many standard deviations a value is from the mean. It standardizes data from any distribution.',
+  'pvalue':    'The p-value is the probability of observing results at least as extreme as your data, assuming the null hypothesis is true.',
+  'anova':     'ANOVA tests whether three or more group means are significantly different from each other.',
+  'ttest':     'The t-test compares the means of two groups to determine if the difference is statistically significant.',
+  'variance':  'Variance measures how far data points are spread from the mean. It is the square of the standard deviation.',
+  'chisq':     'The Chi-square test evaluates whether observed frequencies match expected frequencies in categorical data.',
+  'iqr':       'The interquartile range (Q3−Q1) measures the spread of the middle 50% of data, ignoring outliers.',
+  'clt':       'The Central Limit Theorem states that the distribution of sample means approaches normal as sample size grows.',
 }
 
 // ─── Flash card data ─────────────────────────────────────────────────────────
-export const FLASH_CARDS = BUILDINGS.map(b => ({
+const FLASH_CARDS = BUILDINGS.map(b => ({
   id: b.id,
   emoji: b.label.split(' ')[0],
   labelHe: b.statsConcept.split(' (')[0],
@@ -600,6 +619,7 @@ function CityPostFX() {
 export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingDef | null>(null)
   const [challengeBuilding, setChallengeBuilding] = useState<BuildingInfo | null>(null)
+  const [reviewBuilding, setReviewBuilding] = useState<BuildingInfo | null>(null)
   const [mastered, setMastered] = useState<Set<string>>(loadMastered)
   const [xp, setXp] = useState(loadXP)
   const [xpPopup, setXpPopup] = useState(false)
@@ -632,15 +652,15 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [showStreakCalendar, setShowStreakCalendar] = useState(false)
   const [showStatsCalculator, setShowStatsCalculator] = useState(false)
+  const [placedPositions, setPlacedPositions] = useState<Record<string, [number,number,number]>>(() => {
+    try { return JSON.parse(localStorage.getItem('wafflestack-placements') || '{}') } catch { return {} }
+  })
+  const [showPlacementPicker, setShowPlacementPicker] = useState<string | null>(null)
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null)
   const [onboardingStep, setOnboardingStep] = useState<number>(() =>
     localStorage.getItem('wafflestack-onboarded') ? -1 : 0
   )
   const [showStudyPanel, setShowStudyPanel] = useState(false)
-  const [placedPositions, setPlacedPositions] = useState<Record<string, [number,number,number]>>(() => {
-    try { return JSON.parse(localStorage.getItem('wafflestack-placements') || '{}') } catch { return {} }
-  })
-  const [showPlacementPicker, setShowPlacementPicker] = useState<string | null>(null) // building id being placed
 
   // Weak spots practice quiz state
   interface WQQuestion { buildingId: string; buildingLabel: string; color: string; q: string; options: string[]; correct: number; explanation: string }
@@ -699,8 +719,10 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           setShowHelp(h => !h)
           break
         case 'Escape':
-          // Priority: challenge > info panel > scoreboard > help
-          if (challengeBuilding !== null) {
+          // Priority: review > challenge > info panel > scoreboard > help
+          if (reviewBuilding !== null) {
+            setReviewBuilding(null)
+          } else if (challengeBuilding !== null) {
             setChallengeBuilding(null)
           } else if (selectedBuilding !== null) {
             setSelectedBuilding(null)
@@ -759,7 +781,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, showStatsCalculator, toggleSound, openRandomChallenge])
+  }, [reviewBuilding, challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, showStatsCalculator, toggleSound, openRandomChallenge])
 
   // Handle deep-link hash on mount
   useEffect(() => {
@@ -788,8 +810,18 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
     return () => window.removeEventListener('beforeunload', save)
   }, [xp, mastered])
 
+  const getBuildingPosition = (b: BuildingDef): [number,number,number] | null => {
+    if (ORIGINAL_IDS.has(b.id)) return b.position
+    return placedPositions[b.id] ?? null
+  }
+
   const openChallenge = useCallback((building: BuildingDef) => {
     setChallengeBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
+    setSelectedBuilding(null)
+  }, [])
+
+  const openReview = useCallback((building: BuildingDef) => {
+    setReviewBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
     setSelectedBuilding(null)
   }, [])
 
@@ -936,12 +968,6 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
   const masteredCount = mastered.size
 
-  const ORIGINAL_IDS = ['power','housing','traffic','hospital','school','bank','market','city-hall','research','news']
-  const getBuildingPosition = (b: BuildingDef): [number,number,number] | null => {
-    if (ORIGINAL_IDS.includes(b.id)) return b.position
-    return placedPositions[b.id] ?? null
-  }
-
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       {/* Inject CSS animations */}
@@ -950,8 +976,266 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       <StreakReminderBanner xp={xp} />
       <DailyStatFact />
 
-      {/* Toolbar moved to StudyHub → Tools view. City stays clean (3D world only). */}
-      {/* Keyboard shortcuts (K, F, E, C, R, T, S, G, M, ?) still open the underlying modals. */}
+      {/* Top-right controls: XP + ScoreBoard toggle */}
+      <div style={{
+        position: 'absolute', top: 16, right: 16, zIndex: 50,
+        display: 'flex', alignItems: 'center', gap: 8, fontFamily: "'Heebo', system-ui, sans-serif",
+      }}>
+        {(() => {
+          const { next: nextMilestone, pct: milestonePct, toGo: xpToGo } = computeXpProgress(xp)
+          return (
+            <div
+              title={nextMilestone !== null ? `${xpToGo} XP to next reward (${nextMilestone})` : 'All XP rewards unlocked!'}
+              style={{
+                position: 'relative', overflow: 'hidden',
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,215,0,0.4)', borderRadius: 20,
+                padding: '6px 14px',
+              }}
+            >
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute', left: 0, top: 0, bottom: 0,
+                  width: `${milestonePct}%`,
+                  background: 'linear-gradient(90deg, rgba(255,215,0,0.22), rgba(255,215,0,0.06))',
+                  transition: 'width 0.6s ease',
+                  pointerEvents: 'none',
+                }}
+              />
+              <span style={{ fontSize: 16, position: 'relative' }}>⭐</span>
+              <span style={{ color: '#FFD700', fontWeight: 700, fontSize: 16, position: 'relative' }}>{xp}</span>
+              {nextMilestone !== null ? (
+                <span style={{ color: 'rgba(255,215,0,0.6)', fontSize: 11, fontWeight: 500, position: 'relative' }}>
+                  / {nextMilestone}
+                </span>
+              ) : (
+                <span style={{ fontSize: 13, position: 'relative' }} aria-label="All rewards unlocked">🏆</span>
+              )}
+            </div>
+          )
+        })()}
+        <button
+          onClick={toggleSound}
+          style={{
+            background: 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: 20, padding: '6px 14px',
+            color: 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title={soundPlaying ? 'Mute city sound' : 'Unmute city sound'}
+        >
+          {soundPlaying ? '🔊' : '🔇'}
+        </button>
+        <button
+          onClick={() => {
+            const next = !quizSoundEnabled
+            setQuizSoundEnabled(next)
+            localStorage.setItem('wafflestack-quiz-sound', String(next))
+          }}
+          style={{
+            background: quizSoundEnabled ? 'rgba(78,205,196,0.15)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${quizSoundEnabled ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: quizSoundEnabled ? '#4ECDC4' : 'rgba(255,255,255,0.5)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title={quizSoundEnabled ? 'Mute quiz sounds' : 'Enable quiz sounds'}
+        >
+          🎵
+        </button>
+        <button
+          onClick={() => setShowStatsCalculator(c => !c)}
+          style={{
+            background: showStatsCalculator ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showStatsCalculator ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showStatsCalculator ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Stats Calculator — compute mean/median/stddev (K)"
+        >
+          🧮 Calc
+        </button>
+        <button
+          onClick={() => setShowFlashCards(f => !f)}
+          style={{
+            background: showFlashCards ? 'rgba(255,199,0,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showFlashCards ? 'rgba(255,199,0,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showFlashCards ? '#FFC700' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Flash Cards — review all concepts (F)"
+        >
+          📇 Flash
+        </button>
+        <button
+          onClick={() => setShowExamMode(m => !m)}
+          style={{
+            background: showExamMode ? 'rgba(243,129,129,0.25)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showExamMode ? 'rgba(243,129,129,0.6)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showExamMode ? '#F38181' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Exam Mode — 10 questions, timed (E)"
+        >
+          📝 Exam
+        </button>
+        <button
+          onClick={() => setShowStudyPanel(s => !s)}
+          style={{
+            background: showStudyPanel ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showStudyPanel ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showStudyPanel ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Study Panel — choose a topic to study"
+        >
+          📖 Study
+        </button>
+        <button
+          onClick={() => setShowConceptMap(m => !m)}
+          style={{
+            background: showConceptMap ? 'rgba(255,107,107,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showConceptMap ? 'rgba(255,107,107,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showConceptMap ? '#FF6B6B' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Concept Map (C)"
+        >
+          🗺️ Map
+        </button>
+        <button
+          onClick={() => setShowLearningMap(m => !m)}
+          style={{
+            background: showLearningMap ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showLearningMap ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showLearningMap ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Learning Path — 5 core topics"
+        >
+          📍 Path
+        </button>
+        <button
+          onClick={() => setShowTopicsList(t => !t)}
+          style={{
+            background: showTopicsList ? 'rgba(170,150,218,0.25)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showTopicsList ? 'rgba(170,150,218,0.6)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showTopicsList ? '#AA96DA' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="All topics list"
+        >
+          📚 Topics
+        </button>
+        <button
+          onClick={() => setShowScoreBoard(s => !s)}
+          style={{
+            background: showScoreBoard ? 'rgba(78,205,196,0.25)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showScoreBoard ? 'rgba(78,205,196,0.6)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showScoreBoard ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Toggle Score Board"
+        >
+          📊 Scores
+        </button>
+        <button
+          onClick={() => setShowLeaderboard(l => !l)}
+          style={{
+            background: showLeaderboard ? 'rgba(255,215,0,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showLeaderboard ? 'rgba(255,215,0,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showLeaderboard ? '#FFD700' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Local Leaderboard — top 5 scores on this device"
+        >
+          🏆 Top
+        </button>
+        <button
+          onClick={() => setShowStreakCalendar(c => !c)}
+          style={{
+            background: showStreakCalendar ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: `1px solid ${showStreakCalendar ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: 20, padding: '6px 14px',
+            color: showStreakCalendar ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="30-day activity calendar"
+        >
+          📅 30 Days
+        </button>
+        <button
+          onClick={openRandomChallenge}
+          style={{
+            background: 'rgba(10,10,20,0.75)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: 20, padding: '6px 14px',
+            color: 'rgba(255,255,255,0.8)',
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="Surprise quiz — opens a random building, prefers unmastered (R)"
+        >
+          🎲 Surprise
+        </button>
+      </div>
+
+      {/* Progress bar — top left */}
+      <div style={{
+        position: 'absolute', top: 16, left: 60, zIndex: 50,
+        background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(78,205,196,0.3)', borderRadius: 20,
+        padding: '6px 14px', fontFamily: "'Heebo', system-ui, sans-serif", color: 'white',
+        display: 'flex', alignItems: 'center', gap: 10,
+      }}>
+        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+          🏙️ {masteredCount}/{BUILDINGS.length} buildings mastered
+        </span>
+        <div style={{ width: 80, height: 5, background: 'rgba(255,255,255,0.15)', borderRadius: 3 }}>
+          <div style={{
+            height: '100%', borderRadius: 3, background: '#4ECDC4',
+            width: `${(masteredCount / BUILDINGS.length) * 100}%`,
+            transition: 'width 0.5s ease',
+          }} />
+        </div>
+      </div>
 
       {/* Daily goal chip */}
       {!dailyGoalDismissed && dailyBuilding && (
@@ -1248,7 +1532,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
           {BUILDINGS.map((b) => {
             const pos = getBuildingPosition(b)
-            if (!pos) return null
+            if (!pos) return null // new buildings not yet placed by user
             return (
               <Building
                 key={b.id}
@@ -1295,6 +1579,19 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         )
       })()}
 
+      {/* Review Modal — for already-mastered buildings */}
+      {reviewBuilding && (
+        <ReviewMode
+          building={reviewBuilding}
+          onClose={() => setReviewBuilding(null)}
+          onReQuiz={() => {
+            const b = BUILDINGS.find(bld => bld.id === reviewBuilding.id)
+            setReviewBuilding(null)
+            if (b) openChallenge(b)
+          }}
+        />
+      )}
+
       {/* Score Board panel */}
       {showScoreBoard && (
         <ScoreBoard
@@ -1311,16 +1608,16 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       {showStudyPanel && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 250,
-          background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
+          background: 'rgba(10,20,50,0.75)', backdropFilter: 'blur(10px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
         }}
           onClick={e => { if (e.target === e.currentTarget) setShowStudyPanel(false) }}
         >
           <div style={{
             background: 'linear-gradient(35deg, #FFFFFF 0%, #D8E7FA 60%, #B8D0F5 100%)',
-            border: '1px solid rgba(51,81,202,0.18)',
-            borderRadius: 20, padding: '28px 32px',
-            maxWidth: 680, width: '100%', maxHeight: '80vh', overflowY: 'auto',
+            boxShadow: '0 20px 60px rgba(31,62,108,0.3)',
+            borderRadius: 24, padding: '28px 32px',
+            maxWidth: 720, width: '100%', maxHeight: '82vh', overflowY: 'auto',
             fontFamily: "'Heebo', system-ui, sans-serif",
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -1330,27 +1627,35 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                 style={{ background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 10, width: 36, height: 36, color: '#1F3E6C', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >✕</button>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 12 }}>
               {BUILDINGS.map(b => {
                 const isMast = mastered.has(b.id)
                 const bColor = COLOR_VARIATIONS[colorVariations[b.id] ?? 'A'][b.id] ?? b.color ?? '#4ECDC4'
+                const isPlaced = ORIGINAL_IDS.has(b.id) || placedPositions[b.id] != null
                 return (
                   <div
                     key={b.id}
                     style={{
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(216,231,250,0.35) 100%)',
+                      background: 'linear-gradient(180deg, rgba(255,255,255,0.75) 0%, rgba(216,231,250,0.45) 100%)',
                       border: `2px solid ${bColor}55`,
-                      borderRadius: 16,
-                      padding: '16px',
-                      cursor: 'pointer',
-                      transition: 'all 0.18s',
+                      borderRadius: 16, padding: '14px 16px',
+                      cursor: 'pointer', transition: 'all 0.18s',
                       boxShadow: '0 4px 16px rgba(31,62,108,0.08)',
                     }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = `linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(216,231,250,0.6) 100%)`; (e.currentTarget as HTMLDivElement).style.boxShadow = `0 6px 24px ${bColor}33` }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(216,231,250,0.35) 100%)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(31,62,108,0.08)' }}
+                    onMouseEnter={e => {
+                      const el = e.currentTarget as HTMLDivElement
+                      el.style.background = `linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(216,231,250,0.75) 100%)`
+                      el.style.boxShadow = `0 8px 28px ${bColor}44`
+                      el.style.transform = 'translateY(-2px)'
+                    }}
+                    onMouseLeave={e => {
+                      const el = e.currentTarget as HTMLDivElement
+                      el.style.background = 'linear-gradient(180deg, rgba(255,255,255,0.75) 0%, rgba(216,231,250,0.45) 100%)'
+                      el.style.boxShadow = '0 4px 16px rgba(31,62,108,0.08)'
+                      el.style.transform = 'translateY(0)'
+                    }}
                     onClick={() => {
-                      const hasPosition = ORIGINAL_IDS.includes(b.id) || placedPositions[b.id] != null
-                      if (!hasPosition) {
+                      if (!isPlaced) {
                         setShowPlacementPicker(b.id)
                         setShowStudyPanel(false)
                       } else {
@@ -1359,19 +1664,16 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                       }
                     }}
                   >
-                    <div style={{ fontSize: 22, marginBottom: 6 }}>{b.label.split(' ')[0]}</div>
+                    <div style={{ fontSize: 24, marginBottom: 6 }}>{b.label.split(' ')[0]}</div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#1F3E6C', marginBottom: 4 }}>{b.statsConcept.split(' (')[0]}</div>
                     <div style={{ fontSize: 11, color: '#7F9BD9' }}>{b.label.split(' ').slice(1).join(' ')}</div>
-                    {isMast && (
-                      <div style={{ marginTop: 8, fontSize: 11, color: '#254A9F', background: 'rgba(51,81,202,0.12)', borderRadius: 8, padding: '3px 8px', display: 'inline-block', fontWeight: 600 }}>✓ נלמד</div>
-                    )}
-                    {!isMast && (
+                    {isMast ? (
+                      <div style={{ marginTop: 8, fontSize: 11, color: '#254A9F', fontWeight: 700, background: 'rgba(51,81,202,0.12)', borderRadius: 8, padding: '3px 8px', display: 'inline-block' }}>✓ נלמד</div>
+                    ) : (
                       <div style={{ marginTop: 8, fontSize: 11, color: '#7F9BD9' }}>○ לא נלמד</div>
                     )}
-                    {!ORIGINAL_IDS.includes(b.id) && !placedPositions[b.id] && (
-                      <div style={{ marginTop: 6, fontSize: 10, color: '#254A9F', fontWeight: 600, background: 'rgba(51,81,202,0.10)', borderRadius: 6, padding: '2px 6px', display: 'inline-block' }}>
-                        📍 לא מוצב בעיר
-                      </div>
+                    {!isPlaced && (
+                      <div style={{ marginTop: 6, fontSize: 10, color: '#254A9F', fontWeight: 600, background: 'rgba(51,81,202,0.10)', borderRadius: 6, padding: '2px 7px', display: 'inline-block' }}>📍 לא מוצב</div>
                     )}
                   </div>
                 )
@@ -1380,6 +1682,60 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           </div>
         </div>
       )}
+
+      {/* Building Placement Picker */}
+      {showPlacementPicker && (() => {
+        const building = BUILDINGS.find(b => b.id === showPlacementPicker)
+        if (!building) return null
+        const bColor = COLOR_VARIATIONS[colorVariations[building.id] ?? 'A'][building.id] ?? building.color ?? '#4ECDC4'
+        const occupied = new Set(
+          BUILDINGS.flatMap(b => {
+            const pos = getBuildingPosition(b)
+            return pos ? [`${pos[0]},${pos[2]}`] : []
+          })
+        )
+        return (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 600, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+            <div style={{ background: 'linear-gradient(35deg,#FFFFFF,#D8E7FA)', borderRadius: 24, padding: 32, maxWidth: 480, width: '100%', boxShadow: '0 20px 60px rgba(31,62,108,0.3)', fontFamily: "'Heebo', sans-serif" }}>
+              <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                <div style={{ fontSize: 40, marginBottom: 8 }}>{building.label.split(' ')[0]}</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: '#1F3E6C', marginBottom: 4 }}>{building.statsConcept.split(' (')[0]}</div>
+                <div style={{ fontSize: 14, color: '#7F9BD9' }}>בחר/י מיקום בעיר להנחת המבנה</div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 8, marginBottom: 24 }}>
+                {ALL_GRID_SLOTS.map(([x,,z]) => {
+                  const key = `${x},${z}`
+                  const isOccupied = occupied.has(key)
+                  return (
+                    <button
+                      key={key}
+                      disabled={isOccupied}
+                      onClick={() => {
+                        const updated = { ...placedPositions, [showPlacementPicker]: [x, 0, z] as [number,number,number] }
+                        setPlacedPositions(updated)
+                        localStorage.setItem('wafflestack-placements', JSON.stringify(updated))
+                        setShowPlacementPicker(null)
+                      }}
+                      style={{
+                        height: 56, borderRadius: 10,
+                        border: isOccupied ? '2px solid rgba(31,62,108,0.12)' : `2px solid ${bColor}66`,
+                        background: isOccupied ? 'rgba(31,62,108,0.06)' : `linear-gradient(135deg,${bColor}22,${bColor}0a)`,
+                        cursor: isOccupied ? 'not-allowed' : 'pointer',
+                        fontSize: 20, transition: 'all 0.15s',
+                      }}
+                    >
+                      {isOccupied ? '🏢' : '➕'}
+                    </button>
+                  )
+                })}
+              </div>
+              <button onClick={() => setShowPlacementPicker(null)} style={{ width: '100%', padding: '12px', background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 12, color: '#1F3E6C', fontWeight: 600, cursor: 'pointer', fontFamily: "'Heebo', sans-serif", fontSize: 15 }}>
+                ביטול
+              </button>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Weak Spots Practice Quiz */}
       {showWeakSpotsQuiz && wqQuestions.length > 0 && (() => {
@@ -1837,7 +2193,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                     key={b.id}
                     onClick={() => {
                       setShowTopicsList(false)
-                      openChallenge(b)
+                      if (isMastered) openReview(b)
+                      else openChallenge(b)
                     }}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 14,
@@ -2173,63 +2530,6 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           }}
         />
       )}
-
-      {/* Placement Picker Modal */}
-      {showPlacementPicker && (() => {
-        const building = BUILDINGS.find(b => b.id === showPlacementPicker)
-        if (!building) return null
-        const bColor = COLOR_VARIATIONS[colorVariations[building.id] ?? 'A'][building.id] ?? building.color ?? '#4ECDC4'
-        const occupied = new Set(
-          BUILDINGS.map(b => {
-            const pos = getBuildingPosition(b)
-            return pos ? `${pos[0]},${pos[2]}` : null
-          }).filter(Boolean) as string[]
-        )
-        return (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 600, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ background: 'linear-gradient(35deg,#FFFFFF,#D8E7FA)', borderRadius: 24, padding: 32, maxWidth: 480, width: '90%', boxShadow: '0 20px 60px rgba(31,62,108,0.3)', fontFamily: "'Heebo', sans-serif" }}>
-              <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                <div style={{ fontSize: 36, marginBottom: 8 }}>{building.label.split(' ')[0]}</div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#1F3E6C', marginBottom: 4 }}>{building.statsConcept.split(' (')[0]}</div>
-                <div style={{ fontSize: 14, color: '#7F9BD9' }}>בחר/י מיקום בעיר להנחת המבנה</div>
-              </div>
-              {/* 5x5 grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 8, marginBottom: 24 }}>
-                {ALL_GRID_SLOTS.map(([x,,z]) => {
-                  const key = `${x},${z}`
-                  const isOccupied = occupied.has(key)
-                  return (
-                    <button
-                      key={key}
-                      disabled={isOccupied}
-                      onClick={() => {
-                        const newPos: [number,number,number] = [x, 0, z]
-                        const updated = { ...placedPositions, [showPlacementPicker]: newPos }
-                        setPlacedPositions(updated)
-                        localStorage.setItem('wafflestack-placements', JSON.stringify(updated))
-                        setShowPlacementPicker(null)
-                      }}
-                      style={{
-                        height: 56, borderRadius: 10, border: isOccupied ? '2px solid rgba(31,62,108,0.15)' : `2px solid ${bColor}66`,
-                        background: isOccupied ? 'rgba(31,62,108,0.08)' : `linear-gradient(135deg,${bColor}22,${bColor}11)`,
-                        cursor: isOccupied ? 'not-allowed' : 'pointer',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 18, transition: 'all 0.15s',
-                      }}
-                      title={isOccupied ? 'תפוס' : `x=${x} z=${z}`}
-                    >
-                      {isOccupied ? '🏢' : '➕'}
-                    </button>
-                  )
-                })}
-              </div>
-              <button onClick={() => setShowPlacementPicker(null)} style={{ width: '100%', padding: '12px', background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 12, color: '#1F3E6C', fontWeight: 600, cursor: 'pointer', fontFamily: "'Heebo', sans-serif" }}>
-                ביטול
-              </button>
-            </div>
-          </div>
-        )
-      })()}
 
       {/* Help overlay */}
       {showHelp && (
