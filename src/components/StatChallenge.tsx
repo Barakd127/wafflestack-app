@@ -18,7 +18,7 @@ interface QuizQuestion {
   explanation: string
 }
 
-interface ChallengeContent {
+export interface ChallengeContent {
   concept: string
   conceptHe: string
   emoji: string

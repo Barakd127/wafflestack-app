@@ -1,5 +1,7 @@
 # 📥 How to Install Node.js (Based on Your Screenshot)
 
+> ⚠️ **HISTORICAL** — Step 6 below references the cancelled `C:\Users\BARAK\Projects\base44` directory. The current WaffleStack code lives in this vault at `AI/WaffleStack/code/` and is already deployed to https://barakd127.github.io/wafflestack-app/. For local dev today, `git clone https://github.com/barakd127/wafflestack-app.git` (or `cd` into the vault `AI/WaffleStack/code/` working tree) instead of the path shown below. The Node.js install steps themselves (Steps 1–5) are still accurate.
+
 ## Step-by-Step Instructions
 
 ### Step 1: Click the Download Button

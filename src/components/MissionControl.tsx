@@ -125,8 +125,7 @@ const AGENTS = [
     trigger: 'auto',
     desc: 'Runs every 30min. Scans codebase for TODO/FIXME, auto-suggests fixes.',
     color: '#C3A6FF',
-    active: false,
-    note: 'Needs manual setup on second laptop',
+    active: true,
   },
   {
     id: 'daily-briefer',
@@ -136,8 +135,7 @@ const AGENTS = [
     trigger: 'auto 8am',
     desc: 'Every morning: summarises overnight agent activity + surfaces top 3 priorities.',
     color: '#FFB347',
-    active: false,
-    note: 'Needs manual setup on second laptop',
+    active: true,
   },
   {
     id: 'scout',
@@ -147,8 +145,7 @@ const AGENTS = [
     trigger: 'auto 2×/day',
     desc: 'Searches for EdTech news, stats education research, competitor updates. Saves to AI/Raw/scout/.',
     color: '#A8E6CF',
-    active: false,
-    note: 'Needs manual setup on second laptop',
+    active: true,
   },
   {
     id: 'wiki-gardener',
@@ -158,8 +155,7 @@ const AGENTS = [
     trigger: 'auto nightly',
     desc: 'Processes AI/Raw/ → synthesises into AI/Wiki/ knowledge base.',
     color: '#7ec850',
-    active: false,
-    note: 'Needs manual setup on second laptop',
+    active: true,
   },
 ]
 
@@ -290,9 +286,6 @@ function AgentCard({ a }: { a: typeof AGENTS[0] }) {
       <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 8, lineHeight: 1.5 }}>
         {a.desc}
       </div>
-      {a.note && (
-        <div style={{ fontSize: 11, color: '#FFB347', marginTop: 6 }}>⚠️ {a.note}</div>
-      )}
     </div>
   )
 }

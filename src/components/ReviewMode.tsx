@@ -7,7 +7,6 @@
 import { TopicViz } from './TopicViz'
 import { CHALLENGES, BuildingInfo } from './StatChallenge'
 
-
 interface Props {
   building: BuildingInfo
   onClose: () => void
