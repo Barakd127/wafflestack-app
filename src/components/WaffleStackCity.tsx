@@ -748,6 +748,12 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             setShowFlashCards(false)
           } else if (showStatsCalculator) {
             setShowStatsCalculator(false)
+          } else if (showLeaderboard) {
+            setShowLeaderboard(false)
+          } else if (showLearningMap) {
+            setShowLearningMap(false)
+          } else if (showStreakCalendar) {
+            setShowStreakCalendar(false)
           } else {
             setShowHelp(false)
           }
@@ -788,12 +794,24 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         case 'K':
           setShowStatsCalculator(c => !c)
           break
+        case 'l':
+        case 'L':
+          setShowLeaderboard(l => !l)
+          break
+        case 'p':
+        case 'P':
+          setShowLearningMap(m => !m)
+          break
+        case 'n':
+        case 'N':
+          setShowStreakCalendar(c => !c)
+          break
       }
     }
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [reviewBuilding, challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, showStatsCalculator, toggleSound, openRandomChallenge])
+  }, [reviewBuilding, challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, showStatsCalculator, showLeaderboard, showLearningMap, showStreakCalendar, toggleSound, openRandomChallenge])
 
   // Handle deep-link hash on mount
   useEffect(() => {
@@ -2134,21 +2152,49 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         </div>
       )}
 
-      {/* Help button — bottom-right */}
-      <button
-        onClick={() => setShowHelp(h => !h)}
-        style={{
-          position: 'absolute', bottom: 24, right: 24, zIndex: 50,
-          background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%',
-          width: 36, height: 36, color: 'rgba(255,255,255,0.6)',
-          fontWeight: 700, fontSize: 16, cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}
-        title="Keyboard shortcuts"
-      >
-        ?
-      </button>
+      {/* HUD button cluster — bottom-right */}
+      <div style={{
+        position: 'absolute', bottom: 24, right: 24, zIndex: 50,
+        display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end',
+      }}>
+        {[
+          { emoji: '🗺️', label: 'Learning path (P)', onClick: () => setShowLearningMap(m => !m), active: showLearningMap },
+          { emoji: '🏆', label: 'Local leaderboard (L)', onClick: () => setShowLeaderboard(l => !l), active: showLeaderboard },
+          { emoji: '📅', label: 'Streak calendar (N)', onClick: () => setShowStreakCalendar(c => !c), active: showStreakCalendar },
+        ].map(({ emoji, label, onClick, active }) => (
+          <button
+            key={label}
+            onClick={onClick}
+            title={label}
+            aria-label={label}
+            style={{
+              background: active ? 'rgba(78,205,196,0.18)' : 'rgba(10,10,20,0.75)',
+              backdropFilter: 'blur(10px)',
+              border: `1px solid ${active ? 'rgba(78,205,196,0.55)' : 'rgba(255,255,255,0.2)'}`,
+              borderRadius: '50%', width: 36, height: 36,
+              color: active ? '#4ECDC4' : 'rgba(255,255,255,0.7)',
+              fontSize: 16, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s',
+            }}
+          >
+            {emoji}
+          </button>
+        ))}
+        <button
+          onClick={() => setShowHelp(h => !h)}
+          style={{
+            background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%',
+            width: 36, height: 36, color: 'rgba(255,255,255,0.6)',
+            fontWeight: 700, fontSize: 16, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+          title="Keyboard shortcuts"
+        >
+          ?
+        </button>
+      </div>
 
       {/* Concept Glossary overlay */}
       {showGlossary && (
@@ -2405,6 +2451,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               { key: 'F', desc: 'Toggle flash cards' },
               { key: 'C', desc: 'Toggle concept map' },
               { key: 'K', desc: 'Toggle stats calculator' },
+              { key: 'L', desc: 'Toggle local leaderboard' },
+              { key: 'P', desc: 'Toggle learning path map' },
+              { key: 'N', desc: 'Toggle streak calendar' },
               { key: 'R', desc: 'Surprise quiz — random unmastered building' },
               { key: '1–4', desc: 'In quiz: select answer option' },
               { key: '⏎', desc: 'In quiz: continue to next question' },
