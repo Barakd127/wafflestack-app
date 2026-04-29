@@ -2,42 +2,38 @@ import { ContactShadows } from '@react-three/drei'
 import { useQualityTier, SHADOW_MAP_SIZE } from './QualityTier'
 
 /**
- * CityLighting — shared cozy 3-light setup for all WaffleStack 3D scenes.
+ * CityLighting -- shared cozy 3-light setup for all WaffleStack 3D scenes.
  *
- *   - Directional sun: warm low-angle (golden hour ~25° elevation, 35° azimuth)
- *     casts the only real shadow. Shadow-map size scales with quality tier.
+ *   - Directional sun: warm low-angle casts the only real shadow.
+ *     Shadow-map size scales with quality tier.
  *   - Hemisphere fill: cool sky + warm ground bounce (cheap, no shadow cost).
- *   - Soft ambient: floor for very dark areas (low intensity).
+ *   - Soft ambient: floor for very dark areas.
+ *   - Fill light: second directional from back-left for Kenney toy-style flatness.
  *   - ContactShadows: cheap circular AO under everything for grounding.
  *
  * Tunable via props but defaults are tuned to the SkyGradient palette.
  */
 interface CityLightingProps {
-  /** Position of the directional sun light (also defines its shadow camera origin) */
   sunPosition?: [number, number, number]
-  /** Sun color (default warm) */
   sunColor?: string
-  /** Sun intensity (default 1.6) */
   sunIntensity?: number
-  /** Hemisphere sky color */
   hemiSky?: string
-  /** Hemisphere ground color */
   hemiGround?: string
-  /** Ambient color */
   ambientColor?: string
-  /** Disable ContactShadows entirely */
+  /** Ambient intensity (default 0.4; use 0.7 for flat Kenney toy-style) */
+  ambientIntensity?: number
   noContactShadows?: boolean
-  /** Scale of contact-shadow plane (default 40) */
   contactShadowScale?: number
 }
 
 export default function CityLighting({
-  sunPosition        = [25, 28, 18],   // ~25° elevation, 35° azimuth
+  sunPosition        = [25, 28, 18],
   sunColor           = '#ffeacb',
   sunIntensity       = 1.6,
   hemiSky            = '#9ec7ff',
   hemiGround         = '#c8a37a',
   ambientColor       = '#fff5e1',
+  ambientIntensity   = 0.4,
   noContactShadows   = false,
   contactShadowScale = 40,
 }: CityLightingProps) {
@@ -46,7 +42,7 @@ export default function CityLighting({
 
   return (
     <>
-      {/* Warm key light — only shadow caster */}
+      {/* Warm key light -- only shadow caster */}
       <directionalLight
         position={sunPosition}
         intensity={sunIntensity}
@@ -61,11 +57,14 @@ export default function CityLighting({
         shadow-bias={-0.0005}
       />
 
-      {/* Cool fill — no shadow cost */}
+      {/* Cool fill -- no shadow cost */}
       <hemisphereLight color={hemiSky} groundColor={hemiGround} intensity={0.55} />
 
-      {/* Soft floor — bumped to 0.4 for better scene fill with Sky component */}
-      <ambientLight color={ambientColor} intensity={0.4} />
+      {/* Soft floor ambient -- higher = flatter/more toy-like (Kenney style) */}
+      <ambientLight color={ambientColor} intensity={ambientIntensity} />
+
+      {/* Second soft fill from back-left -- reduces harsh shadow contrast */}
+      <directionalLight position={[-15, 10, -15]} intensity={0.2} color="#d4e8ff" />
 
       {/* Cheap grounding under all objects */}
       {!noContactShadows && (

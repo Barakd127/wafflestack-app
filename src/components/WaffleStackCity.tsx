@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Html, useProgress, PerformanceMonitor, Sky } from '@react-three/drei'
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Outline, Selection, Select } from '@react-three/postprocessing'
 import CityLighting from '../three/CityLighting'
 import { useQualityTier, BLOOM_ENABLED, DPR_MAX, type QualityTier } from '../three/QualityTier'
 import Clouds from '../three/Aliveness/Clouds'
@@ -518,18 +518,21 @@ function TownscaperGround() {
   )
 }
 
-// ─── Post-processing — gated by adaptive quality tier ────────────────────────
+// ─── Post-processing — cel outline (always on) + bloom (tier-gated) ──────────
+// Two explicit branches avoids null|false children in EffectComposer (JSX.Element constraint).
 function CityPostFX() {
   const tier = useQualityTier(s => s.tier)
-  if (!BLOOM_ENABLED[tier]) return null
+  if (!BLOOM_ENABLED[tier]) {
+    return (
+      <EffectComposer multisampling={0} enableNormalPass={false}>
+        <Outline edgeStrength={2.5} visibleEdgeColor={0x111111} hiddenEdgeColor={0x222222} blur={false} xRay={false} />
+      </EffectComposer>
+    )
+  }
   return (
     <EffectComposer multisampling={tier === 'high' ? 4 : 0} enableNormalPass={false}>
-      <Bloom
-        intensity={tier === 'high' ? 0.45 : 0.3}
-        luminanceThreshold={0.85}
-        luminanceSmoothing={0.2}
-        mipmapBlur
-      />
+      <Outline edgeStrength={2.5} visibleEdgeColor={0x111111} hiddenEdgeColor={0x222222} blur={false} xRay={false} />
+      <Bloom intensity={tier === 'high' ? 0.45 : 0.3} luminanceThreshold={0.85} luminanceSmoothing={0.2} mipmapBlur />
     </EffectComposer>
   )
 }
@@ -1289,7 +1292,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       {/* 3D Canvas — adaptive quality, cozy stylized lighting */}
       <Canvas
         shadows
-        camera={{ position: [0, 25, 45], fov: 55 }}
+        camera={{ position: [0, 28, 48], fov: 45 }}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
         dpr={[1, DPR_MAX[useQualityTier.getState().tier]]}
       >
@@ -1310,48 +1313,65 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         {/* Atmospheric sky — physical scattering via drei Sky */}
         <Sky sunPosition={[100, 20, 100]} turbidity={8} rayleigh={2} />
         {/* Soft blue-grey haze to push distant geometry back */}
-        <fog attach="fog" args={['#b8d4e8', 80, 200]} />
+        {/* Lighter fog pushed far back — preserves toy-city clarity up close */}
+        <fog attach="fog" args={['#e8f4f8', 150, 400]} />
 
         {/* Shared 3-light cozy setup + ContactShadows */}
-        <CityLighting sunPosition={[50, 50, 25]} sunIntensity={1.2} contactShadowScale={42} />
+        {/* Kenney toy lighting: brighter ambient for flat/cartoon look, softer sun */}
+        <CityLighting sunPosition={[50, 50, 25]} sunIntensity={0.8} ambientIntensity={0.7} hemiSky="#c4dcff" contactShadowScale={42} />
 
         <OrbitControls makeDefault enablePan maxPolarAngle={Math.PI / 2.1} minDistance={8} maxDistance={60} target={[0, 0, 0]} />
         <CameraDrift amplitude={0.18} speed={0.13} />
         <CameraRig
           focusOn={selectedBuilding?.position ?? null}
           focusOffset={[5, 4, 7]}
-          homePosition={[0, 25, 45]}
+          homePosition={[0, 28, 48]}
           homeTarget={[0, 0, 0]}
         />
 
-        <Suspense fallback={null}>
-          <TownscaperGround />
-          {ROAD_MODELS.map((r, i) => <Prop key={i} model={r.model} pos={r.pos} rot={r.rot} />)}
+        {/* Selection context: buildings registered here drive the Outline effect */}
+        <Selection>
+          <Suspense fallback={null}>
+            <TownscaperGround />
+            {ROAD_MODELS.map((r, i) => <Prop key={i} model={r.model} pos={r.pos} rot={r.rot} />)}
 
-          {/* Aliveness layer — small sway/drift effects, all tier-gated */}
-          <SwayingTrees swayAmount={0.07} />
-          <Clouds count={6} altitude={24} range={70} speed={0.55} />
-          <Smoke position={[-9, 2.4, -9]}  count={10} riseSpeed={0.45} color="#f0e6d6" />
-          <Smoke position={[-3, 2.0,  3]}  count={8}  riseSpeed={0.35} color="#e8e0d0" drift={0.2} />
+            {/* Kenney suburban trees — scattered for toy-city dressing */}
+            <Prop model="tree-large" pos={[-13, 0, -10]} rot={0} />
+            <Prop model="tree-small" pos={[-13, 0,  -4]} rot={0.9} />
+            <Prop model="tree-large" pos={[ 13, 0, -10]} rot={1.4} />
+            <Prop model="tree-small" pos={[ 13, 0,  -4]} rot={2.1} />
+            <Prop model="tree-small" pos={[-6,  0,   4]} rot={0.5} />
+            <Prop model="tree-large" pos={[ 6,  0,   4]} rot={3.0} />
+            <Prop model="planter"    pos={[-9,  0,  -6]} rot={0} />
+            <Prop model="planter"    pos={[ 9,  0,  -6]} rot={Math.PI} />
 
-          {BUILDINGS.map((b) => (
-            <Building
-              key={b.id}
-              def={b}
-              onClick={() => {}}
-              isSelected={selectedBuilding?.id === b.id}
-              isMastered={mastered.has(b.id)}
-              isGlowing={glowBuilding === b.id}
-              isHovered={hoveredBuilding === b.id}
-              onHoverStart={setHoveredBuilding}
-              onHoverEnd={() => setHoveredBuilding(null)}
-              colorOverride={COLOR_VARIATIONS[colorVariations[b.id] ?? 'A'][b.id]}
-            />
-          ))}
-        </Suspense>
+            {/* Aliveness layer — small sway/drift effects, all tier-gated */}
+            <SwayingTrees swayAmount={0.07} />
+            <Clouds count={6} altitude={24} range={70} speed={0.55} />
+            <Smoke position={[-9, 2.4, -9]}  count={10} riseSpeed={0.45} color="#f0e6d6" />
+            <Smoke position={[-3, 2.0,  3]}  count={8}  riseSpeed={0.35} color="#e8e0d0" drift={0.2} />
 
-        {/* Soft warm bloom for emissive accents — gated by quality tier */}
-        <CityPostFX />
+            {/* Each building wrapped in Select so Outline picks them up */}
+            {BUILDINGS.map((b) => (
+              <Select key={b.id} enabled>
+                <Building
+                  def={b}
+                  onClick={() => {}}
+                  isSelected={selectedBuilding?.id === b.id}
+                  isMastered={mastered.has(b.id)}
+                  isGlowing={glowBuilding === b.id}
+                  isHovered={hoveredBuilding === b.id}
+                  onHoverStart={setHoveredBuilding}
+                  onHoverEnd={() => setHoveredBuilding(null)}
+                  colorOverride={COLOR_VARIATIONS[colorVariations[b.id] ?? 'A'][b.id]}
+                />
+              </Select>
+            ))}
+          </Suspense>
+
+          {/* Kenney cel-outline always on + bloom tier-gated */}
+          <CityPostFX />
+        </Selection>
       </Canvas>
 
       {/* Exam Mode */}
@@ -1388,56 +1408,114 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         />
       )}
 
-      {/* Study Panel */}
+      {/* Study Panel — glassmorphism overlay with rich concept cards */}
       {showStudyPanel && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 250,
-          background: 'rgba(5,5,15,0.82)', backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+          background: 'rgba(4,4,14,0.78)',
+          backdropFilter: 'blur(18px) saturate(1.4)',
+          WebkitBackdropFilter: 'blur(18px) saturate(1.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '16px',
         }}
           onClick={e => { if (e.target === e.currentTarget) setShowStudyPanel(false) }}
         >
-          <div style={{
-            background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
-            border: '1px solid rgba(78,205,196,0.3)',
-            borderRadius: 20, padding: '28px 32px',
-            maxWidth: 680, width: '100%', maxHeight: '80vh', overflowY: 'auto',
+          <div className="study-panel-inner" style={{
+            background: 'linear-gradient(160deg, rgba(15,15,32,0.97) 0%, rgba(20,20,42,0.97) 100%)',
+            border: '1px solid rgba(78,205,196,0.28)',
+            borderRadius: 22, padding: '26px 28px',
+            maxWidth: 700, width: '100%',
+            maxHeight: '82vh', overflowY: 'auto',
             fontFamily: "'Heebo', system-ui, sans-serif",
+            boxShadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>📖 בחר מושג ללמידה</div>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
+              <div>
+                <div style={{ fontSize: 19, fontWeight: 800, color: '#fff', direction: 'rtl' }}>📖 בחר מושג ללמידה</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 3, direction: 'rtl' }}>
+                  {mastered.size}/{BUILDINGS.length} מושגים נלמדו
+                </div>
+              </div>
               <button
                 onClick={() => setShowStudyPanel(false)}
-                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, width: 36, height: 36, color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: 10, width: 36, height: 36,
+                  color: 'rgba(255,255,255,0.55)', cursor: 'pointer',
+                  fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.15s',
+                }}
               >✕</button>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
+            {/* Concept cards grid */}
+            <div className="study-panel-grid" style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+              gap: 12,
+            }}>
               {BUILDINGS.map(b => {
-                const isMast = mastered.has(b.id)
-                const bColor = COLOR_VARIATIONS[colorVariations[b.id] ?? 'A'][b.id] ?? b.color ?? '#4ECDC4'
+                const isMast   = mastered.has(b.id)
+                const score    = parseInt(localStorage.getItem(`wafflestack-score-${b.id}`) ?? '0')
+                const total    = parseInt(localStorage.getItem(`wafflestack-total-${b.id}`) ?? '0')
+                const pct      = isMast ? 100 : total > 0 ? Math.round((score / total) * 100) : 0
+                const inProg   = !isMast && total > 0
+                const bColor   = COLOR_VARIATIONS[colorVariations[b.id] ?? 'A'][b.id] ?? b.color ?? '#4ECDC4'
+                const statusIcon = isMast ? '✅' : inProg ? '📖' : '🔒'
+                const isLocked = !isMast && !inProg
                 return (
                   <div
                     key={b.id}
+                    onClick={() => { openChallenge(b); setShowStudyPanel(false) }}
                     style={{
-                      background: `${bColor}12`,
-                      border: `1px solid ${bColor}44`,
-                      borderRadius: 12, padding: '14px 16px',
-                      cursor: 'pointer', transition: 'all 0.15s',
+                      background: isLocked
+                        ? 'rgba(255,255,255,0.03)'
+                        : `linear-gradient(145deg, ${bColor}14 0%, ${bColor}08 100%)`,
+                      border: `1px solid ${isLocked ? 'rgba(255,255,255,0.08)' : bColor + '44'}`,
+                      borderRadius: 14, padding: '14px 15px',
+                      cursor: 'pointer',
+                      transition: 'transform 0.15s, box-shadow 0.15s',
+                      filter: isLocked ? 'grayscale(85%) brightness(0.7)' : 'none',
+                      position: 'relative', overflow: 'hidden',
                     }}
-                    onClick={() => {
-                      openChallenge(b)
-                      setShowStudyPanel(false)
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'
+                      ;(e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 24px ${bColor}28`
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLDivElement).style.transform = ''
+                      ;(e.currentTarget as HTMLDivElement).style.boxShadow = ''
                     }}
                   >
-                    <div style={{ fontSize: 22, marginBottom: 6 }}>{b.label.split(' ')[0]}</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: bColor, marginBottom: 4 }}>{b.statsConcept.split(' (')[0]}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{b.label.split(' ').slice(1).join(' ')}</div>
-                    {isMast && (
-                      <div style={{ marginTop: 8, fontSize: 11, color: '#4ECDC4', fontWeight: 600 }}>✓ נלמד</div>
-                    )}
-                    {!isMast && (
-                      <div style={{ marginTop: 8, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>○ לא נלמד</div>
-                    )}
+                    {/* Status icon top-right */}
+                    <div style={{ position: 'absolute', top: 10, right: 11, fontSize: 14 }}>{statusIcon}</div>
+                    {/* Emoji + names */}
+                    <div style={{ fontSize: 24, marginBottom: 7 }}>{b.label.split(' ')[0]}</div>
+                    <div style={{
+                      fontSize: 13, fontWeight: 700,
+                      color: isLocked ? 'rgba(255,255,255,0.35)' : bColor,
+                      marginBottom: 2, direction: 'rtl', lineHeight: 1.3,
+                    }}>
+                      {b.statsConcept.split(' (')[0]}
+                    </div>
+                    <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.35)', direction: 'rtl', marginBottom: 10 }}>
+                      {b.label.split(' ').slice(1).join(' ')}
+                    </div>
+                    {/* Mini mastery bar */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ flex: 1, height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%', borderRadius: 2,
+                          width: `${pct}%`,
+                          background: isMast ? '#4ECDC4' : bColor,
+                          transition: 'width 0.4s',
+                        }} />
+                      </div>
+                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.38)', whiteSpace: 'nowrap' }}>
+                        {pct}%
+                      </span>
+                    </div>
                   </div>
                 )
               })}
@@ -2194,9 +2272,3 @@ BUILDINGS.forEach(b => {
   useGLTF.preload(url)
 })
 ROAD_MODELS.forEach(r => useGLTF.preload(`${import.meta.env.BASE_URL}models/kenney-suburban/${r.model}.glb`))
-
-
-
-
-
-
