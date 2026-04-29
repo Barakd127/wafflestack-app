@@ -395,6 +395,15 @@ body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1
     <button class="wbt" data-tool="eraser" onclick="wbTool('eraser')" title="Eraser [E]">⌫ Erase</button>
     <button class="wbt" onclick="wbOpenEquationModal()">∑ Eq</button>
     <div class="wb-sep"></div>
+    <select class="wbt" onchange="wbApplyTemplate(this.value);this.value=''" style="padding:0 6px;min-width:106px;cursor:pointer" title="Load a template into the canvas">
+      <option value="">📐 Templates</option>
+      <option value="venn">Venn Diagram</option>
+      <option value="matrix">2×2 Matrix</option>
+      <option value="normal">Normal Distribution</option>
+      <option value="timeline">Timeline</option>
+      <option value="freqtable">Frequency Table</option>
+    </select>
+    <div class="wb-sep"></div>
 
     <div class="swatch-grp">
       <span class="swatch-lbl">Stroke</span>
@@ -459,6 +468,8 @@ body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1
   <div class="wb-ctx-item" onclick="wbCtxEditLabel()">✎ Edit Label</div>
   <div class="wb-ctx-item" onclick="wbCtxBringToFront()">⬆ Bring to Front</div>
   <div class="wb-ctx-item" onclick="wbCtxSendToBack()">⬇ Send to Back</div>
+  <div class="wb-ctx-item" onclick="wbCtxCopy()">⎘ Copy</div>
+  <div class="wb-ctx-item" onclick="wbCtxPaste()" id="wb-ctx-paste">📋 Paste</div>
   <div class="wb-ctx-item" onclick="wbCtxDuplicate()">⋱ Duplicate</div>
   <div class="wb-ctx-item danger" onclick="wbCtxDelete()">🗑 Delete</div>
 </div>
@@ -1099,7 +1110,7 @@ let WB={
   selId:null,_hoverObjId:null,_lastMouse:null,
   tableCell:null,labelObj:null,textObj:null,
   spacePanning:false,panning:false,panStartX:0,panStartY:0,
-  _editingEqId:null
+  _editingEqId:null,clipboard:null
 };
 
 function wbOpenEquationModal(){
@@ -1681,6 +1692,18 @@ canvas.addEventListener('keydown',e=>{
     WB.scene=WB.scene.filter(x=>x.type!=='connector'||(x.fromId!==WB.selId&&x.toId!==WB.selId));
     WB.selId=null;WB._connDelBtn=null;wbPush();wbRedraw();
   }
+  if((e.ctrlKey||e.metaKey)&&e.code==='KeyC'&&WB.selId){
+    e.preventDefault();
+    WB.clipboard=JSON.parse(JSON.stringify(WB.scene.find(x=>x.id===WB.selId)||null));
+  }
+  if((e.ctrlKey||e.metaKey)&&e.code==='KeyV'&&WB.clipboard){
+    e.preventDefault();
+    const cloned=JSON.parse(JSON.stringify(WB.clipboard));
+    cloned.id=uid();
+    if(cloned.x!==undefined)cloned.x+=24;if(cloned.cx!==undefined)cloned.cx+=24;
+    if(cloned.y!==undefined)cloned.y+=24;if(cloned.cy!==undefined)cloned.cy+=24;
+    WB.scene.push(cloned);WB.selId=cloned.id;wbPush();wbRedraw();
+  }
   if(e.code==='F2'&&WB.selId){
     const o=WB.scene.find(x=>x.id===WB.selId);
     if(o&&o.type==='table'&&o.rows.length>0){
@@ -2121,6 +2144,51 @@ function wbCtxDelete(){
   WB.scene=WB.scene.filter(x=>x.id!==WB.selId);
   WB.selId=null;wbPush();wbRedraw();
   closeWBCtxMenu();
+}
+
+function wbCtxCopy(){
+  if(!WB.selId)return;
+  WB.clipboard=JSON.parse(JSON.stringify(WB.scene.find(x=>x.id===WB.selId)||null));
+  closeWBCtxMenu();
+}
+
+function wbCtxPaste(){
+  if(!WB.clipboard)return;
+  const cloned=JSON.parse(JSON.stringify(WB.clipboard));
+  cloned.id=uid();
+  if(cloned.x!==undefined)cloned.x+=24;if(cloned.cx!==undefined)cloned.cx+=24;
+  if(cloned.y!==undefined)cloned.y+=24;if(cloned.cy!==undefined)cloned.cy+=24;
+  WB.scene.push(cloned);WB.selId=cloned.id;wbPush();wbRedraw();
+  closeWBCtxMenu();
+}
+
+// Load a template scene directly into the whiteboard (used in standalone mode and wb-fs-bar select)
+function wbApplyTemplate(name){
+  const def=TEMPLATES[name];if(!def)return;
+  // In standalone/whiteboard-only mode: load scene directly
+  if(document.getElementById('wb-overlay').classList.contains('open')){
+    try{
+      const newObjs=def.sceneFn?def.sceneFn():[];
+      // Append to current scene rather than replace, offset by current max X
+      let maxX=0;
+      WB.scene.forEach(o=>{
+        if(o.x!==undefined)maxX=Math.max(maxX,o.x+(o.w||0));
+        if(o.cx!==undefined)maxX=Math.max(maxX,o.cx+(o.rx||0));
+      });
+      const offset=WB.scene.length>0?maxX+60:0;
+      newObjs.forEach(o=>{
+        o.id=uid();
+        if(o.x!==undefined)o.x+=offset;
+        if(o.cx!==undefined)o.cx+=offset;
+        if(o.x1!==undefined){o.x1+=offset;o.x2+=offset;}
+        WB.scene.push(o);
+      });
+      wbPush();wbRedraw();
+    }catch(e){console.warn('wbApplyTemplate error:',e);}
+    return;
+  }
+  // Otherwise use the mind-map version
+  applyTemplate(name);
 }
 
 let _tblCtxCell={tableId:null,row:0,col:0};
@@ -3168,5 +3236,52 @@ document.addEventListener('DOMContentLoaded',()=>{
   <button class="na-btn" onclick="naAction('canvas')">⬜ Add Canvas</button>
   <button class="na-btn" onclick="naAction('delete')" style="color:#f87171">🗑 Delete  <span style="opacity:.4;font-size:10px">Del</span></button>
 </div>
+
+<!-- Standalone whiteboard mode: loaded with ?mode=wb URL parameter.
+     Hides the mind-map chrome and shows only the drawing canvas. -->
+<script>
+(function initStandaloneWB(){
+  if(new URLSearchParams(location.search).get('mode')!=='wb') return;
+
+  window.addEventListener('load', function(){
+    // Hide mind-map UI elements
+    ['topbar','app','minimap-container','bottom-bar','search-overlay','pomo-widget','node-actions']
+      .forEach(function(id){
+        var el=document.getElementById(id);
+        if(el){el.style.display='none';}
+      });
+
+    // Make whiteboard overlay fill the whole screen
+    var ol=document.getElementById('wb-overlay');
+    if(ol){
+      ol.style.position='fixed';
+      ol.style.left='0';ol.style.top='0';
+      ol.style.width='100%';ol.style.height='100%';
+      ol.style.display='flex';
+    }
+
+    // Hide the "Done" close button (there's nothing to return to)
+    var doneBtn=document.getElementById('wb-done');
+    if(doneBtn) doneBtn.style.display='none';
+
+    // Also hide "wb-node-title" label
+    var titleEl=document.getElementById('wb-node-title');
+    if(titleEl) titleEl.style.display='none';
+
+    // Initialise a fresh empty whiteboard
+    WB.scene=[];WB.histIdx=-1;WB.history=[];WB.selId=null;
+    var cnvs=document.getElementById('wb-canvas');
+    if(cnvs){cnvs.width=window.innerWidth;cnvs.height=window.innerHeight;}
+    wbPush();
+    wbRedraw();
+
+    // Resize canvas when window resizes
+    window.addEventListener('resize',function(){
+      var c=document.getElementById('wb-canvas');
+      if(c){c.width=window.innerWidth;c.height=window.innerHeight;wbRedraw();}
+    });
+  });
+})();
+</script>
 </body>
 </html>

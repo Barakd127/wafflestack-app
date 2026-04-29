@@ -638,6 +638,7 @@ function LearningScreen({ onBack }: { onBack: () => void }) {
     QUESTIONS.map((_, i) => i === 0 ? 'current' : 'empty')
   )
   const [xpBurst, setXpBurst] = useState<number | null>(null)
+  const [showCanvas, setShowCanvas] = useState(true)
   const recordAnswer = useLearningStore(s => s.recordAnswer)
 
   const q = QUESTIONS[currentQ]
@@ -698,31 +699,50 @@ function LearningScreen({ onBack }: { onBack: () => void }) {
   const isDone = phase === 'done'
 
   return (
-    <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }} dir="rtl">
+    <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }} dir="rtl">
       {xpBurst !== null && <XpBurst amount={xpBurst} onDone={() => setXpBurst(null)} />}
 
       {/* Top bar */}
-      <div style={{ background: '#FFFFFF', boxShadow: '2px 2px 6px rgba(0,0,0,0.18)', height: 68, display: 'flex', alignItems: 'center', padding: '0 32px', flexShrink: 0, gap: 16 }}>
-        <img src={`${import.meta.env.BASE_URL}building-figma.png`} alt="" style={{ width: 40, height: 30, objectFit: 'cover', borderRadius: 6 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+      <div style={{ background: '#FFFFFF', boxShadow: '2px 2px 6px rgba(0,0,0,0.18)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12 }}>
+        <img src={`${import.meta.env.BASE_URL}building-figma.png`} alt="" style={{ width: 34, height: 26, objectFit: 'cover', borderRadius: 5 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
         <div style={{ flex: 1 }}>
-          <div style={{ height: 7, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
+          <div style={{ height: 6, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
             <div style={{ width: `${isDone ? 100 : ((currentQ)/total)*100}%`, height: '100%', background: 'rgba(212,175,55,0.75)', borderRadius: 10, transition: 'width 0.4s' }} />
           </div>
-          <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginTop: 3 }}>
-            {answeredCount} מתוך {total} הושלמו · {correctCount} נכון
+          <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT, marginTop: 2 }}>
+            {answeredCount} / {total} · {correctCount} ✓
           </div>
         </div>
-        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK }}>
-          <span style={{ fontWeight: 700 }}>סטטיסטיקה תיאורית</span>{!isDone && ` | ${q.topic}`}
+        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: TEXT_DARK }}>
+          <span style={{ fontWeight: 700 }}>סטטיסטיקה</span>{!isDone && ` | ${q.topic}`}
         </div>
+        {/* Canvas toggle */}
+        <button
+          onClick={() => setShowCanvas(v => !v)}
+          title={showCanvas ? 'הסתר לוח ציור' : 'הצג לוח ציור'}
+          style={{
+            background: showCanvas ? 'rgba(99,102,241,0.15)' : 'rgba(0,0,0,0.06)',
+            border: `1px solid ${showCanvas ? 'rgba(99,102,241,0.5)' : 'rgba(0,0,0,0.15)'}`,
+            borderRadius: 8, padding: '4px 10px', cursor: 'pointer',
+            color: showCanvas ? '#6366f1' : '#64748b', fontSize: 13, fontWeight: 600,
+            display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0,
+          }}
+        >
+          ✏️ {showCanvas ? 'הסתר לוח' : 'לוח ציור'}
+        </button>
       </div>
 
+      {/* Content row: question panel + optional canvas */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
+
+        {/* Question panel */}
+        <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
       {/* Main content */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '28px 40px' }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px 24px' }}>
         <div style={{
           background: 'var(--sh-q-card-bg)',
-          borderRadius: 20, width: '100%', maxWidth: 900,
-          padding: '32px 40px 28px', position: 'relative',
+          borderRadius: 20, width: '100%', maxWidth: showCanvas ? 'none' : 900,
+          padding: '24px 28px 22px', position: 'relative',
           boxShadow: '0 8px 32px rgba(51,81,202,0.12)',
         }}>
 
@@ -863,6 +883,34 @@ function LearningScreen({ onBack }: { onBack: () => void }) {
 
         </div>
       </div>
+        </div>{/* end question panel */}
+
+        {/* Canvas panel — standalone whiteboard iframe */}
+        {showCanvas && !isDone && (
+          <div style={{
+            width: '42%', flexShrink: 0,
+            borderLeft: '1px solid rgba(99,102,241,0.25)',
+            display: 'flex', flexDirection: 'column',
+            background: '#0f0f1a',
+          }}>
+            <div style={{
+              height: 30, background: 'rgba(13,13,26,0.95)',
+              borderBottom: '1px solid rgba(99,102,241,0.2)',
+              display: 'flex', alignItems: 'center', padding: '0 12px', gap: 8, flexShrink: 0,
+            }}>
+              <span style={{ fontSize: 12, color: 'rgba(99,102,241,0.9)', fontWeight: 600 }}>✏️ לוח ציור</span>
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginRight: 'auto' }}>רשום את פתרונך</span>
+            </div>
+            <iframe
+              src={`${import.meta.env.BASE_URL}mindmap.html?mode=wb`}
+              title="Study Whiteboard"
+              style={{ flex: 1, border: 'none', width: '100%', display: 'block' }}
+              allow="clipboard-read; clipboard-write"
+            />
+          </div>
+        )}
+
+      </div>{/* end content row */}
     </div>
   )
 }
