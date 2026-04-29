@@ -49,7 +49,7 @@ function formatTime(secs: number): string {
 
 /** מזהה אם מחרוזת כוללת עברית ומחזיר direction מתאים */
 function textDir(text: string): 'rtl' | 'ltr' {
-  return /[\u0590-\u05FF]/.test(text) ? 'rtl' : 'ltr'
+  return /[֐-׿]/.test(text) ? 'rtl' : 'ltr'
 }
 
 export default function ExamMode({ onClose }: Props) {
@@ -104,13 +104,13 @@ export default function ExamMode({ onClose }: Props) {
     return (
       <div style={{
         position: 'fixed', inset: 0, zIndex: 500,
-        background: 'rgba(5,5,15,0.95)', backdropFilter: 'blur(8px)',
+        background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'Heebo', system-ui, sans-serif", padding: 16,
       }}>
         <div style={{
-          background: 'linear-gradient(160deg, #0f0f20, #161628)',
-          border: '1px solid rgba(78,205,196,0.3)',
+          background: 'linear-gradient(35deg, #FFFFFF, #D8E7FA, #B8D0F5)',
+          border: '1px solid rgba(31,62,108,0.2)',
           borderRadius: 20, width: '100%', maxWidth: 560,
           maxHeight: '90vh', overflow: 'auto', padding: '28px 24px',
         }}>
@@ -118,16 +118,16 @@ export default function ExamMode({ onClose }: Props) {
             <div style={{ fontSize: 52, marginBottom: 8 }}>
               {score >= 9 ? '🏆' : score >= 7 ? '⭐' : score >= 5 ? '👍' : '📖'}
             </div>
-            <div style={{ fontSize: 32, fontWeight: 900, color: score >= 7 ? '#4ECDC4' : '#FFD700', lineHeight: 1, marginBottom: 4 }}>
+            <div style={{ fontSize: 32, fontWeight: 900, color: '#1F3E6C', lineHeight: 1, marginBottom: 4 }}>
               {score}/10
             </div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
+            <div style={{ fontSize: 12, color: '#7F9BD9', marginBottom: 8 }}>
               {timedOut ? '⏰ Time\'s up!' : `⏱️ ${formatTime(timeTakenSecs)}`}
             </div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 4 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#1F3E6C', marginBottom: 4 }}>
               {score >= 9 ? 'מצוין! כמעט מושלם!' : score >= 7 ? 'כל הכבוד!' : score >= 5 ? 'המשיכו לתרגל' : 'צריכים עוד תרגול'}
             </div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginBottom: 20 }}>
+            <div style={{ fontSize: 12, color: '#7F9BD9', marginBottom: 20 }}>
               {Math.round((score / 10) * 100)}% correct
             </div>
           </div>
@@ -140,24 +140,24 @@ export default function ExamMode({ onClose }: Props) {
                 <div key={i} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '8px 12px', borderRadius: 10,
-                  background: correct ? 'rgba(78,205,196,0.07)' : 'rgba(255,107,107,0.07)',
-                  border: `1px solid ${correct ? 'rgba(78,205,196,0.22)' : 'rgba(255,107,107,0.22)'}`,
+                  background: correct ? 'rgba(31,122,110,0.12)' : 'rgba(155,32,32,0.08)',
+                  border: `1px solid ${correct ? 'rgba(31,122,110,0.3)' : 'rgba(155,32,32,0.2)'}`,
                 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, flex: 1 }}>
                     <span style={{ fontSize: 11, color: q.color, fontWeight: 700 }}>{q.concept}</span>
                     <span style={{
-                      fontSize: 11, color: 'rgba(255,255,255,0.45)',
+                      fontSize: 11, color: '#7F9BD9',
                       direction: 'rtl', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }}>
                       {q.q}
                     </span>
                     {!correct && ans !== null && (
-                      <span style={{ fontSize: 10, color: '#4ECDC4', direction: 'rtl' }}>
+                      <span style={{ fontSize: 10, color: '#1F7A6E', direction: 'rtl' }}>
                         ✓ {q.options[q.correct]}
                       </span>
                     )}
                   </div>
-                  <span style={{ fontSize: 16, marginLeft: 10, flexShrink: 0, color: correct ? '#4ECDC4' : '#FF6B6B' }}>
+                  <span style={{ fontSize: 16, marginLeft: 10, flexShrink: 0, color: correct ? '#1F7A6E' : '#9B2020' }}>
                     {correct ? '✓' : '✗'}
                   </span>
                 </div>
@@ -177,8 +177,8 @@ export default function ExamMode({ onClose }: Props) {
               }}
               style={{
                 flex: 1, padding: '11px',
-                background: 'rgba(78,205,196,0.12)', border: '1px solid rgba(78,205,196,0.35)',
-                borderRadius: 10, color: '#4ECDC4', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                background: 'rgba(31,122,110,0.12)', border: '1px solid rgba(31,122,110,0.3)',
+                borderRadius: 10, color: '#1F7A6E', fontWeight: 700, fontSize: 13, cursor: 'pointer',
               }}
             >
               🔄 נסו שוב
@@ -187,8 +187,8 @@ export default function ExamMode({ onClose }: Props) {
               onClick={onClose}
               style={{
                 flex: 1, padding: '11px',
-                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 10, color: 'rgba(255,255,255,0.7)', fontWeight: 600, fontSize: 13, cursor: 'pointer',
+                background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.2)',
+                borderRadius: 10, color: '#254A9F', fontWeight: 600, fontSize: 13, cursor: 'pointer',
               }}
             >
               🏙️ חזרה לעיר
@@ -202,12 +202,12 @@ export default function ExamMode({ onClose }: Props) {
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 500,
-      background: 'rgba(5,5,15,0.92)', backdropFilter: 'blur(8px)',
+      background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: 16, fontFamily: "'Heebo', system-ui, sans-serif",
     }}>
       <div style={{
-        background: 'linear-gradient(160deg, #0f0f20, #161628)',
+        background: 'linear-gradient(35deg, #FFFFFF, #D8E7FA, #B8D0F5)',
         border: `1px solid ${urgent ? '#FF6B6B44' : current.color + '44'}`,
         borderRadius: 20, width: '100%', maxWidth: 580,
         overflow: 'hidden',
@@ -215,12 +215,12 @@ export default function ExamMode({ onClose }: Props) {
       }}>
         {/* Header */}
         <div style={{
-          padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+          padding: '14px 20px', borderBottom: '1px solid rgba(31,62,108,0.1)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          background: urgent ? 'rgba(255,107,107,0.06)' : 'transparent',
+          background: urgent ? 'rgba(155,32,32,0.06)' : 'rgba(255,255,255,0.4)',
         }}>
           <div>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase' as const, marginBottom: 2 }}>
+            <div style={{ fontSize: 10, letterSpacing: 2, color: '#7F9BD9', textTransform: 'uppercase' as const, marginBottom: 2 }}>
               📝 מצב בחינה — EXAM MODE
             </div>
             <div style={{ fontSize: 13, color: current.color, fontWeight: 700 }}>
@@ -230,20 +230,20 @@ export default function ExamMode({ onClose }: Props) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <span style={{
               fontSize: 15, fontWeight: 800,
-              color: urgent ? '#FF6B6B' : 'rgba(255,255,255,0.6)',
+              color: urgent ? '#9B2020' : '#254A9F',
               fontFamily: 'monospace',
             }}>
               {urgent ? '⚠️ ' : '⏱️ '}{formatTime(timeLeft)}
             </span>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace' }}>
+            <span style={{ fontSize: 11, color: '#7F9BD9', fontFamily: 'monospace' }}>
               {index + 1}/{questions.length}
             </span>
             <button
               onClick={onClose}
               title="Exit exam"
               style={{
-                background: 'none', border: '1px solid rgba(255,255,255,0.15)',
-                borderRadius: 8, width: 30, height: 30, color: 'rgba(255,255,255,0.45)',
+                background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.2)',
+                borderRadius: 8, width: 30, height: 30, color: '#254A9F',
                 cursor: 'pointer', fontSize: 14, display: 'flex',
                 alignItems: 'center', justifyContent: 'center',
               }}
@@ -252,9 +252,9 @@ export default function ExamMode({ onClose }: Props) {
         </div>
 
         {/* Progress bar */}
-        <div style={{ height: 3, background: 'rgba(255,255,255,0.07)' }}>
+        <div style={{ height: 3, background: 'rgba(31,62,108,0.08)' }}>
           <div style={{
-            height: '100%', background: urgent ? '#FF6B6B' : current.color,
+            height: '100%', background: urgent ? '#9B2020' : current.color,
             width: `${(index / questions.length) * 100}%`,
             transition: 'width 0.3s',
           }} />
@@ -262,15 +262,15 @@ export default function ExamMode({ onClose }: Props) {
 
         {/* Body */}
         <div style={{ padding: '22px 22px' }}>
-          {/* Question text — bold headline with accent border (Sirup P1) */}
+          {/* Question text */}
           <div style={{
-            fontSize: 17, fontWeight: 700, color: '#FFFFFF',
+            fontSize: 17, fontWeight: 700, color: '#1F3E6C',
             lineHeight: 1.55, direction: textDir(current.q), textAlign: textDir(current.q) === 'rtl' ? 'right' : 'left',
             marginBottom: 14, padding: '16px 18px',
-            background: 'rgba(255,255,255,0.07)',
+            background: 'rgba(255,255,255,0.55)',
             borderRadius: 12,
             borderRight: `3px solid ${current.color}`,
-            boxShadow: '0 0 0 1px rgba(255,255,255,0.10)',
+            boxShadow: '0 0 0 1px rgba(31,62,108,0.08)',
           }}>
             {current.q}
           </div>
@@ -280,12 +280,12 @@ export default function ExamMode({ onClose }: Props) {
             {current.options.map((opt, idx) => {
               const isCorrect = idx === current.correct
               const isSelected = idx === selected
-              let bg = 'rgba(255,255,255,0.04)'
-              let border = '1px solid rgba(255,255,255,0.1)'
-              let textColor = 'rgba(255,255,255,0.75)'
+              let bg = 'rgba(255,255,255,0.55)'
+              let border = '1px solid rgba(31,62,108,0.1)'
+              let textColor = '#254A9F'
               if (selected !== null) {
-                if (isCorrect) { bg = 'rgba(78,205,196,0.15)'; border = '2px solid #4ECDC4'; textColor = '#4ECDC4' }
-                else if (isSelected) { bg = '#FF6B6B22'; border = '1px solid #FF6B6B'; textColor = '#FF6B6B' }
+                if (isCorrect) { bg = 'rgba(31,122,110,0.12)'; border = '2px solid #1F7A6E'; textColor = '#1F7A6E' }
+                else if (isSelected) { bg = 'rgba(155,32,32,0.08)'; border = '1px solid #9B2020'; textColor = '#9B2020' }
               }
               return (
                 <button
@@ -303,10 +303,10 @@ export default function ExamMode({ onClose }: Props) {
                 >
                   <span style={{
                     width: 22, height: 22, borderRadius: '50%',
-                    background: selected !== null && isCorrect ? '#4ECDC4' : 'rgba(255,255,255,0.1)',
+                    background: selected !== null && isCorrect ? '#1F7A6E' : 'rgba(31,62,108,0.1)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 11, fontWeight: 700, flexShrink: 0,
-                    color: selected !== null && isCorrect ? '#000' : 'inherit',
+                    color: selected !== null && isCorrect ? '#fff' : 'inherit',
                   }}>
                     {selected !== null && isCorrect ? '✓' : String.fromCharCode(65 + idx)}
                   </span>
@@ -323,8 +323,8 @@ export default function ExamMode({ onClose }: Props) {
                 onClick={goNext}
                 style={{
                   width: '100%', padding: '11px',
-                  background: current.color, border: 'none', borderRadius: 10,
-                  color: '#000', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                  background: '#3351CA', border: 'none', borderRadius: 10,
+                  color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer',
                 }}
               >
                 {index + 1 >= questions.length ? '📊 ראו תוצאות' : 'שאלה הבאה →'}
@@ -332,7 +332,7 @@ export default function ExamMode({ onClose }: Props) {
             </div>
           )}
 
-          <div style={{ marginTop: 12, fontSize: 11, color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}>
+          <div style={{ marginTop: 12, fontSize: 11, color: '#7F9BD9', textAlign: 'center' }}>
             מצב בחינה — ללא רמזים · הסברים מוצגים בסיום
           </div>
         </div>

@@ -18,7 +18,7 @@ interface QuizQuestion {
   explanation: string
 }
 
-interface ChallengeContent {
+export interface ChallengeContent {
   concept: string
   conceptHe: string
   emoji: string
@@ -37,7 +37,7 @@ export interface BuildingInfo {
 
 // ─── Challenge Definitions ────────────────────────────────────────────────────
 
-const CHALLENGES: Record<string, ChallengeContent> = {
+export const CHALLENGES: Record<string, ChallengeContent> = {
   power: {
     concept: 'Mean', conceptHe: 'ממוצע',
     emoji: '⚡', color: '#FFD700',
@@ -408,6 +408,11 @@ const CONFETTI_STYLE = `
   0%   { opacity: 1; transform: translate(0, 0) scale(1.2) rotate(0deg); }
   100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.3) rotate(540deg); }
 }
+@keyframes streak-pulse {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.35); filter: drop-shadow(0 0 14px #FF6B35); }
+  100% { transform: scale(1); }
+}
 `
 
 // ─── Main Component ──────────────────────────────────────────────────────────
@@ -449,6 +454,32 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   const [wrongAnswers, setWrongAnswers] = useState<{ qIndex: number; chosen: number }[]>([])
   const [showMistakes, setShowMistakes] = useState(false)
 
+  // In-quiz streak (correct answers in a row this attempt)
+  const [streak, setStreak] = useState(0)
+  const [peakStreak, setPeakStreak] = useState(0)
+  const [streakPulse, setStreakPulse] = useState(false)
+  const [bestEverStreak, setBestEverStreak] = useState(() => {
+    const stored = localStorage.getItem(`wafflestack-best-streak-${building.id}`)
+    const n = stored ? parseInt(stored) : 0
+    return Number.isFinite(n) ? n : 0
+  })
+  const [newRecord, setNewRecord] = useState(false)
+
+  // Timer mode — exam-style 30s countdown per quiz question. Persisted globally.
+  const TIMER_INITIAL = 30
+  const [timerEnabled, setTimerEnabled] = useState(
+    () => localStorage.getItem('wafflestack-timer-mode') === 'true'
+  )
+  const [secondsLeft, setSecondsLeft] = useState(TIMER_INITIAL)
+  const toggleTimer = () => {
+    setTimerEnabled(t => {
+      const next = !t
+      localStorage.setItem('wafflestack-timer-mode', String(next))
+      return next
+    })
+    setSecondsLeft(TIMER_INITIAL)
+  }
+
   // Reflection state — persisted per building
   const [reflection, setReflection] = useState(
     () => localStorage.getItem(`wafflestack-reflection-${building.id}`) ?? ''
@@ -478,9 +509,19 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
       setConfettiBurst(true)
       setTimeout(() => setConfettiBurst(false), 900)
       if (soundEnabled) playCorrectTone()
+      setStreak(s => {
+        const next = s + 1
+        setPeakStreak(p => Math.max(p, next))
+        if (next === 3 || next === 5 || next === 7 || next === 10) {
+          setStreakPulse(true)
+          setTimeout(() => setStreakPulse(false), 700)
+        }
+        return next
+      })
     } else {
       setWrongAnswers(prev => [...prev, { qIndex: quizIndex, chosen: idx }])
       if (soundEnabled) playWrongTone()
+      setStreak(0)
     }
   }
 
@@ -490,13 +531,21 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
       const finalScore = score + (selected === currentQ.correct ? 1 : 0)
       localStorage.setItem(`wafflestack-score-${building.id}`, String(finalScore))
       localStorage.setItem(`wafflestack-total-${building.id}`, String(questions.length))
+      localStorage.setItem(`wafflestack-reviewed-${building.id}`, new Date().toISOString())
       if (finalScore / questions.length >= 0.7) {
         onComplete?.(building.id)
+      }
+      // Persist best-ever streak per building
+      if (peakStreak > bestEverStreak) {
+        localStorage.setItem(`wafflestack-best-streak-${building.id}`, String(peakStreak))
+        setBestEverStreak(peakStreak)
+        setNewRecord(true)
       }
     } else {
       setQuizIndex(i => i + 1)
       setSelected(null)
       setHintShown(false)
+      setSecondsLeft(TIMER_INITIAL)
     }
   }
 
@@ -508,7 +557,52 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     setHintShown(false)
     setWrongAnswers([])
     setShowMistakes(false)
+    setStreak(0)
+    setPeakStreak(0)
+    setNewRecord(false)
+    setSecondsLeft(TIMER_INITIAL)
   }
+
+  // Quiz keyboard shortcuts: 1–4 select an option, Enter/Space advance.
+  // Only active on the quiz tab while a question is open (not in mistakes-review or done state).
+  useEffect(() => {
+    if (activeTab !== 'quiz' || quizDone || showMistakes) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.key >= '1' && e.key <= '9') {
+        const idx = parseInt(e.key, 10) - 1
+        if (selected === null && idx < currentQ.options.length) {
+          e.preventDefault()
+          handleAnswer(idx)
+        }
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        if (selected !== null) {
+          e.preventDefault()
+          nextQuestion()
+        }
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [activeTab, quizDone, showMistakes, selected, quizIndex, currentQ])
+
+  // Timer countdown — only ticks while on quiz tab, question unanswered, and timer enabled.
+  // On timeout the question is marked wrong (selected = -1 sentinel) and the correct answer is revealed.
+  useEffect(() => {
+    if (!timerEnabled) return
+    if (activeTab !== 'quiz' || quizDone || showMistakes) return
+    if (selected !== null) return
+    if (secondsLeft <= 0) {
+      setSelected(-1)
+      setWrongAnswers(prev => [...prev, { qIndex: quizIndex, chosen: -1 }])
+      if (soundEnabled) playWrongTone()
+      setStreak(0)
+      return
+    }
+    const id = setTimeout(() => setSecondsLeft(s => s - 1), 1000)
+    return () => clearTimeout(id)
+  }, [timerEnabled, activeTab, quizDone, showMistakes, selected, secondsLeft, quizIndex, soundEnabled])
 
   return (
     <div
@@ -587,6 +681,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
           <div style={{
             display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)',
             flexShrink: 0, background: 'rgba(0,0,0,0.15)',
+            alignItems: 'stretch',
           }}>
             {(['learn', 'quiz'] as const).map(tab => (
               <button
@@ -604,6 +699,25 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 {tab === 'learn' ? '📖 למד' : '🎯 בחן את עצמך'}
               </button>
             ))}
+            <button
+              onClick={toggleTimer}
+              title={timerEnabled
+                ? 'Disable 30-second timer per question'
+                : 'Enable 30-second timer per question — exam-style practice'}
+              style={{
+                padding: '0 16px', background: timerEnabled ? 'rgba(255,179,71,0.10)' : 'none',
+                border: 'none', borderLeft: '1px solid rgba(255,255,255,0.08)',
+                borderBottom: `2px solid ${timerEnabled ? '#FFB347' : 'transparent'}`,
+                color: timerEnabled ? '#FFB347' : 'rgba(255,255,255,0.4)',
+                fontWeight: 700, fontSize: 12, cursor: 'pointer',
+                transition: 'all 0.18s', letterSpacing: 0.4,
+                fontFamily: "'Heebo', system-ui, sans-serif",
+                display: 'flex', alignItems: 'center', gap: 6,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ⏱️ {timerEnabled ? `Timer: ${TIMER_INITIAL}s` : 'Timer: Off'}
+            </button>
           </div>
 
           {/* ── LEARN TAB ── */}
@@ -806,7 +920,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                                 fontSize: 11, color: '#FF6B6B', direction: 'rtl',
                                 textAlign: 'right', marginBottom: 4,
                               }}>
-                                ✗ {q.options[chosen]}
+                                {chosen === -1 ? '⏱️ נגמר הזמן' : `✗ ${q.options[chosen]}`}
                               </div>
                               <div style={{
                                 fontSize: 11, color: '#4ECDC4', direction: 'rtl',
@@ -836,6 +950,29 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     fontSize: 14, color: '#FFD700', fontWeight: 700,
                   }}>
                     ⭐ +50 XP Earned!
+                  </div>
+                )}
+
+                {/* Peak streak this attempt */}
+                {peakStreak >= 2 && (
+                  <div style={{
+                    background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.35)',
+                    borderRadius: 12, padding: '10px 18px', marginBottom: 16,
+                    fontSize: 13, color: '#FF6B35', fontWeight: 700,
+                    direction: 'rtl', textAlign: 'right',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    gap: 12, minWidth: 220,
+                  }}>
+                    <span>🔥 רצף שיא: {peakStreak}</span>
+                    {newRecord && (
+                      <span style={{
+                        background: 'rgba(255,215,0,0.18)', color: '#FFD700',
+                        fontSize: 11, fontWeight: 800, padding: '2px 8px',
+                        borderRadius: 12, border: '1px solid rgba(255,215,0,0.35)',
+                      }}>
+                        🆕 שיא חדש!
+                      </span>
+                    )}
                   </div>
                 )}
 
@@ -995,16 +1132,71 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     {SIMPLE_ANALOGIES[building.id]}
                   </div>
                 )}
-                {/* Question counter pill */}
+                {/* Question counter pill + streak badge */}
                 <div style={{
-                  display: 'flex', justifyContent: 'flex-end', marginBottom: 8,
+                  display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
+                  gap: 8, marginBottom: 8,
                 }}>
+                  {timerEnabled && selected === null && !quizDone && (
+                    <span
+                      title="Time remaining for this question"
+                      style={{
+                        background: secondsLeft <= 8
+                          ? 'rgba(255,107,107,0.18)'
+                          : secondsLeft <= 15
+                            ? 'rgba(255,180,0,0.14)'
+                            : 'rgba(78,205,196,0.10)',
+                        border: `1px solid ${secondsLeft <= 8
+                          ? 'rgba(255,107,107,0.5)'
+                          : secondsLeft <= 15
+                            ? 'rgba(255,180,0,0.4)'
+                            : 'rgba(78,205,196,0.3)'}`,
+                        borderRadius: 20, padding: '4px 10px', fontSize: 12,
+                        color: secondsLeft <= 8 ? '#FF6B6B' : secondsLeft <= 15 ? '#FFB347' : '#4ECDC4',
+                        fontWeight: 700,
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        fontFamily: 'monospace',
+                        animation: secondsLeft > 0 && secondsLeft <= 5 ? 'streak-pulse 0.6s ease-in-out infinite' : undefined,
+                        fontVariantNumeric: 'tabular-nums',
+                      }}
+                    >
+                      <span>⏱️</span>
+                      <span>{secondsLeft}s</span>
+                    </span>
+                  )}
+                  {streak >= 2 && (
+                    <span
+                      title={`רצף נוכחי: ${streak} · שיא בניסיון: ${peakStreak}${bestEverStreak > 0 ? ` · שיא כולל: ${bestEverStreak}` : ''}`}
+                      style={{
+                        background: 'rgba(255,107,53,0.14)',
+                        border: '1px solid rgba(255,107,53,0.4)',
+                        borderRadius: 20, padding: '4px 10px', fontSize: 12,
+                        color: '#FF6B35', fontWeight: 700,
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        animation: streakPulse ? 'streak-pulse 0.6s ease-out' : undefined,
+                      }}
+                    >
+                      <span>🔥</span>
+                      <span style={{ fontVariantNumeric: 'tabular-nums' }}>{streak}</span>
+                    </span>
+                  )}
                   <span style={{
                     background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: 20, padding: '4px 12px', fontSize: 12,
                     color: 'rgba(255,255,255,0.45)', fontFamily: 'monospace',
                   }}>
                     Q {quizIndex + 1} / {questions.length}
+                  </span>
+                  <span
+                    title="Press 1–4 to choose · Enter to continue"
+                    style={{
+                      background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.25)',
+                      borderRadius: 20, padding: '4px 10px', fontSize: 11,
+                      color: 'rgba(78,205,196,0.85)', fontWeight: 600,
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                    }}
+                  >
+                    ⌨ 1–4 · ⏎
                   </span>
                 </div>
                 {/* Progress */}
@@ -1067,7 +1259,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                           fontSize: 11, fontWeight: 700, flexShrink: 0,
                           color: selected !== null && isCorrect ? '#000' : 'inherit',
                         }}>
-                          {selected !== null && isCorrect ? '✓' : String.fromCharCode(65 + idx)}
+                          {selected !== null && isCorrect ? '✓' : idx + 1}
                         </span>
                         {opt}
                       </button>
@@ -1146,7 +1338,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                       direction: 'rtl', textAlign: 'right', lineHeight: 1.6,
                       marginBottom: 10,
                     }}>
-                      {selected === currentQ.correct ? '✅ ' : '❌ '}{currentQ.explanation}
+                      {selected === -1 ? '⏱️ נגמר הזמן · ' : selected === currentQ.correct ? '✅ ' : '❌ '}{currentQ.explanation}
                     </div>
                     <button onClick={nextQuestion} style={{
                       width: '100%', padding: '11px',

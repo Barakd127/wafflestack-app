@@ -1,13 +1,43 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 
 interface Props {
   onEnterCity: () => void
   onOpenStudy?: () => void
 }
 
+interface ReturningUser {
+  name: string
+  xp: number
+  masteredCount: number
+  total: number
+  lastStudyDays: number | null
+}
+
+function loadReturningUser(): ReturningUser | null {
+  const name = localStorage.getItem('userName')
+  const xp = parseInt(localStorage.getItem('wafflestack-xp') || '0')
+  let mastered: string[] = []
+  try {
+    mastered = JSON.parse(localStorage.getItem('wafflestack-mastered') || '[]')
+  } catch { mastered = [] }
+  const masteredCount = Array.isArray(mastered) ? mastered.length : 0
+  if (!name && xp === 0 && masteredCount === 0) return null
+  const lastStudy = localStorage.getItem('wafflestack-last-study') || ''
+  let lastStudyDays: number | null = null
+  if (lastStudy) {
+    const todayMs = new Date(new Date().toISOString().slice(0, 10)).getTime()
+    const lastMs = new Date(lastStudy).getTime()
+    if (Number.isFinite(lastMs)) {
+      lastStudyDays = Math.max(0, Math.round((todayMs - lastMs) / 86400000))
+    }
+  }
+  return { name: name || 'מתכנן/ת העיר', xp, masteredCount, total: 10, lastStudyDays }
+}
+
 export default function LandingPage({ onEnterCity, onOpenStudy }: Props) {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const returningUser = useMemo(() => loadReturningUser(), [])
 
   const handleWaitlist = () => {
     if (!email.trim() || !email.includes('@')) return
@@ -59,6 +89,71 @@ export default function LandingPage({ onEnterCity, onOpenStudy }: Props) {
           </button>
         </div>
       </nav>
+
+      {/* Welcome Back card — only shown to returning users with progress */}
+      {returningUser && (returningUser.xp > 0 || returningUser.masteredCount > 0) && (
+        <div style={{
+          width: '100%', maxWidth: 720, padding: '0 24px', marginTop: 12,
+          boxSizing: 'border-box',
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(78,205,196,0.12) 0%, rgba(255,215,0,0.08) 100%)',
+            border: '1px solid rgba(78,205,196,0.3)',
+            borderRadius: 18,
+            padding: '20px 24px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            gap: 20, flexWrap: 'wrap',
+            boxShadow: '0 4px 30px rgba(78,205,196,0.12)',
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0, flex: '1 1 220px' }}>
+              <div style={{ fontSize: 12, color: '#4ECDC4', fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+                👋 Welcome back
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {returningUser.name}
+              </div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
+                {returningUser.lastStudyDays === 0
+                  ? 'Studied today — keep it up!'
+                  : returningUser.lastStudyDays === 1
+                    ? 'Studied yesterday — pick up where you left off.'
+                    : returningUser.lastStudyDays !== null && returningUser.lastStudyDays > 1
+                      ? `${returningUser.lastStudyDays} days since last visit — your city is waiting.`
+                      : 'Your city is waiting.'}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 22, fontWeight: 800, color: '#FFD700', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                  {returningUser.xp.toLocaleString()}
+                </div>
+                <div style={{ fontSize: 10, color: 'rgba(255,215,0,0.6)', textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>
+                  XP
+                </div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 22, fontWeight: 800, color: '#4ECDC4', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                  {returningUser.masteredCount}/{returningUser.total}
+                </div>
+                <div style={{ fontSize: 10, color: 'rgba(78,205,196,0.7)', textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>
+                  Mastered
+                </div>
+              </div>
+              <button
+                onClick={onEnterCity}
+                style={{
+                  background: 'linear-gradient(90deg, #4ECDC4, #44b8b0)', border: 'none',
+                  borderRadius: 12, padding: '12px 22px', color: '#000',
+                  fontWeight: 800, fontSize: 14, cursor: 'pointer',
+                  boxShadow: '0 4px 20px rgba(78,205,196,0.3)', whiteSpace: 'nowrap',
+                }}
+              >
+                Continue →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero */}
       <div style={{
