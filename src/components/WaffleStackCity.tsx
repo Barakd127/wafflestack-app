@@ -385,42 +385,56 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
 
   const activeColor = colorOverride ?? def.color
 
-  // ─── Smart Paint: mesh-size approach — largest mesh gets concept color ────────
-  // Kenney GLBs have 1 mesh + 1 "colormap" UV-atlas material (no vertex colors).
-  // Sorting by vertex count picks the building body as mesh[0]; any future
-  // multi-mesh kits will naturally separate body vs. roof/window detail meshes.
-  // Main mesh: vertexColors disabled + concept color applied cleanly.
-  // Secondary meshes (i > 0): original Kenney vertex/colormap colors preserved.
+  // ─── Smart Paint: color walls only, preserve windows/doors/roofs ─────────────
+  // Traverses the cloned scene and checks mesh/material names to determine if
+  // a surface is a "secondary" element (window, glass, door, roof, trim, metal).
+  // Only primary wall materials get the concept color; secondary elements keep
+  // their original Kenney colors for visual clarity.
   const clonedScene = useMemo(() => {
     const clone = scene.clone()
-
-    // Collect all meshes, then sort largest-first
-    const meshes: THREE.Mesh[] = []
     clone.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) meshes.push(child as THREE.Mesh)
-    })
-    meshes.sort((a, b) =>
-      (b.geometry?.attributes?.position?.count || 0) -
-      (a.geometry?.attributes?.position?.count || 0)
-    )
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh
+        const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
+        const meshName = (mesh.name ?? '').toLowerCase()
+        const matName  = ((mat as THREE.MeshStandardMaterial).name ?? '').toLowerCase()
 
-    meshes.forEach((child, i) => {
-      child.material = (child.material as THREE.Material).clone()
-      const mat = child.material as THREE.MeshStandardMaterial
+        // Secondary surface keywords — these preserve original Kenney colors
+        const isSecondary =
+          meshName.includes('window') || meshName.includes('glass')  ||
+          meshName.includes('door')   || meshName.includes('roof')   ||
+          meshName.includes('shingle')|| meshName.includes('detail') ||
+          meshName.includes('trim')   || meshName.includes('accent') ||
+          meshName.includes('metal')  || meshName.includes('chrome') ||
+          matName.includes('window')  || matName.includes('glass')   ||
+          matName.includes('door')    || matName.includes('roof')    ||
+          matName.includes('shingle') || matName.includes('detail')  ||
+          matName.includes('trim')    || matName.includes('accent')  ||
+          matName.includes('metal')   || matName.includes('chrome')
 
-      // Keep vertex colors on ALL meshes — Kenney architectural detail depends on them.
-      // mat.color acts as a tint multiplier: concept_color × vertex_color = tinted detail.
-      mat.vertexColors = true
+        if (!isSecondary && activeColor) {
+          // Primary wall: apply concept color directly (no multiply — saturated & accurate)
+          mat.color.set(activeColor)
+          mat.roughness = 0.75
+          mat.metalness = 0.1
+          // Subtle concept-color glow on wall base
+          mat.emissive.set(activeColor)
+          mat.emissiveIntensity = 0.05
+        } else {
+          // Secondary element: keep original Kenney color, clean PBR values
+          mat.roughness = 0.4
+          mat.metalness = 0.05
+          // Warm lit-window glow for bright glass/windows
+          const lum = mat.color.r * 0.299 + mat.color.g * 0.587 + mat.color.b * 0.114
+          if (lum > 0.70) {
+            mat.emissive.set('#fffaaa')
+            mat.emissiveIntensity = 0.30
+          }
+        }
 
-      if (i === 0 && activeColor) {
-        // Tint main body with concept color while preserving Kenney vertex-color variation
-        mat.color.set(new THREE.Color(activeColor))
-        mat.roughness = 0.75
-        mat.metalness = 0.1
+        mesh.material = mat
       }
-      // Secondary meshes keep their original mat.color (white = no tint, full Kenney look)
     })
-
     return clone
   }, [scene, activeColor, colorOverride, def.color])
 
