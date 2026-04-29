@@ -413,7 +413,6 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
         mat.vertexColors = false          // THREE.NoColors — no vertex-color interference
         if (activeColor) {
           const c = new THREE.Color(activeColor)
-          c.lerp(new THREE.Color('#ffffff'), 0.4) // let UV texture show through
           mat.color.set(c)
           mat.roughness = 0.75
           mat.metalness = 0.1
@@ -1050,171 +1049,6 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         >
           🎵
         </button>
-        <button
-          onClick={() => setShowStatsCalculator(c => !c)}
-          style={{
-            background: showStatsCalculator ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
-            backdropFilter: 'blur(10px)',
-            border: `1px solid ${showStatsCalculator ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
-            borderRadius: 20, padding: '6px 14px',
-            color: showStatsCalculator ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
-            fontWeight: 600, fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          title="Stats Calculator — compute mean/median/stddev (K)"
-        >
-          🧮 Calc
-        </button>
-        <button
-          onClick={() => setShowFlashCards(f => !f)}
-          style={{
-            background: showFlashCards ? 'rgba(255,199,0,0.2)' : 'rgba(10,10,20,0.75)',
-            backdropFilter: 'blur(10px)',
-            border: `1px solid ${showFlashCards ? 'rgba(255,199,0,0.5)' : 'rgba(255,255,255,0.2)'}`,
-            borderRadius: 20, padding: '6px 14px',
-            color: showFlashCards ? '#FFC700' : 'rgba(255,255,255,0.8)',
-            fontWeight: 600, fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          title="Flash Cards — review all concepts (F)"
-        >
-          📇 Flash
-        </button>
-        <button
-          onClick={() => setShowExamMode(m => !m)}
-          style={{
-            background: showExamMode ? 'rgba(243,129,129,0.25)' : 'rgba(10,10,20,0.75)',
-            backdropFilter: 'blur(10px)',
-            border: `1px solid ${showExamMode ? 'rgba(243,129,129,0.6)' : 'rgba(255,255,255,0.2)'}`,
-            borderRadius: 20, padding: '6px 14px',
-            color: showExamMode ? '#F38181' : 'rgba(255,255,255,0.8)',
-            fontWeight: 600, fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          title="Exam Mode — 10 questions, timed (E)"
-        >
-          📝 Exam
-        </button>
-        <button
-          onClick={() => setShowStudyPanel(s => !s)}
-          style={{
-            background: showStudyPanel ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
-            backdropFilter: 'blur(10px)',
-            border: `1px solid ${showStudyPanel ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
-            borderRadius: 20, padding: '6px 14px',
-            color: showStudyPanel ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
-            fontWeight: 600, fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          title="Study Panel — choose a topic to study"
-        >
-          📖 Study
-        </button>
-        <button
-          onClick={() => setShowConceptMap(m => !m)}
-          style={{
-            background: showConceptMap ? 'rgba(255,107,107,0.2)' : 'rgba(10,10,20,0.75)',
-            backdropFilter: 'blur(10px)',
-            border: `1px solid ${showConceptMap ? 'rgba(255,107,107,0.5)' : 'rgba(255,255,255,0.2)'}`,
-            borderRadius: 20, padding: '6px 14px',
-            color: showConceptMap ? '#FF6B6B' : 'rgba(255,255,255,0.8)',
-            fontWeight: 600, fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          title="Concept Map (C)"
-        >
-          🗺️ Map
-        </button>
-        <button
-          onClick={() => setShowLearningMap(m => !m)}
-          style={{
-            background: showLearningMap ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
-            backdropFilter: 'blur(10px)',
-            border: `1px solid ${showLearningMap ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
-            borderRadius: 20, padding: '6px 14px',
-            color: showLearningMap ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
-            fontWeight: 600, fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          title="Learning Path — 5 core topics"
-        >
-          📍 Path
-        </button>
-        <button
-          onClick={() => setShowTopicsList(t => !t)}
-          style={{
-            background: showTopicsList ? 'rgba(170,150,218,0.25)' : 'rgba(10,10,20,0.75)',
-            backdropFilter: 'blur(10px)',
-            border: `1px solid ${showTopicsList ? 'rgba(170,150,218,0.6)' : 'rgba(255,255,255,0.2)'}`,
-            borderRadius: 20, padding: '6px 14px',
-            color: showTopicsList ? '#AA96DA' : 'rgba(255,255,255,0.8)',
-            fontWeight: 600, fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          title="All topics list"
-        >
-          📚 Topics
-        </button>
-        <button
-          onClick={() => setShowScoreBoard(s => !s)}
-          style={{
-            background: showScoreBoard ? 'rgba(78,205,196,0.25)' : 'rgba(10,10,20,0.75)',
-            backdropFilter: 'blur(10px)',
-            border: `1px solid ${showScoreBoard ? 'rgba(78,205,196,0.6)' : 'rgba(255,255,255,0.2)'}`,
-            borderRadius: 20, padding: '6px 14px',
-            color: showScoreBoard ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
-            fontWeight: 600, fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          title="Toggle Score Board"
-        >
-          📊 Scores
-        </button>
-        <button
-          onClick={() => setShowLeaderboard(l => !l)}
-          style={{
-            background: showLeaderboard ? 'rgba(255,215,0,0.2)' : 'rgba(10,10,20,0.75)',
-            backdropFilter: 'blur(10px)',
-            border: `1px solid ${showLeaderboard ? 'rgba(255,215,0,0.5)' : 'rgba(255,255,255,0.2)'}`,
-            borderRadius: 20, padding: '6px 14px',
-            color: showLeaderboard ? '#FFD700' : 'rgba(255,255,255,0.8)',
-            fontWeight: 600, fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          title="Local Leaderboard — top 5 scores on this device"
-        >
-          🏆 Top
-        </button>
-        <button
-          onClick={() => setShowStreakCalendar(c => !c)}
-          style={{
-            background: showStreakCalendar ? 'rgba(78,205,196,0.2)' : 'rgba(10,10,20,0.75)',
-            backdropFilter: 'blur(10px)',
-            border: `1px solid ${showStreakCalendar ? 'rgba(78,205,196,0.5)' : 'rgba(255,255,255,0.2)'}`,
-            borderRadius: 20, padding: '6px 14px',
-            color: showStreakCalendar ? '#4ECDC4' : 'rgba(255,255,255,0.8)',
-            fontWeight: 600, fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          title="30-day activity calendar"
-        >
-          📅 30 Days
-        </button>
-        <button
-          onClick={openRandomChallenge}
-          style={{
-            background: 'rgba(10,10,20,0.75)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: 20, padding: '6px 14px',
-            color: 'rgba(255,255,255,0.8)',
-            fontWeight: 600, fontSize: 13, cursor: 'pointer',
-            transition: 'all 0.2s',
-          }}
-          title="Surprise quiz — opens a random building, prefers unmastered (R)"
-        >
-          🎲 Surprise
-        </button>
       </div>
 
       {/* Progress bar — top left */}
@@ -1743,27 +1577,27 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         if (wqDone) {
           return (
             <div style={{
-              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)',
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               zIndex: 450, backdropFilter: 'blur(10px)', padding: 20,
             }}>
               <div style={{
-                background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
-                border: '1px solid rgba(78,205,196,0.3)',
+                background: 'linear-gradient(35deg, #FFFFFF, #D8E7FA, #B8D0F5)',
+                border: '1px solid rgba(31,62,108,0.2)',
                 borderRadius: 20, padding: '36px 32px', maxWidth: 440, width: '100%',
                 fontFamily: "'Heebo', system-ui, sans-serif", textAlign: 'center',
-                boxShadow: '0 0 60px rgba(78,205,196,0.1)',
+                boxShadow: '0 20px 60px rgba(31,62,108,0.25)',
               }}>
                 <div style={{ fontSize: 56, marginBottom: 12 }}>
                   {wqScore === wqQuestions.length ? '🏆' : wqScore >= wqQuestions.length * 0.7 ? '⭐' : '📖'}
                 </div>
-                <div style={{ fontSize: 20, fontWeight: 900, color: '#4ECDC4', marginBottom: 8 }}>
+                <div style={{ fontSize: 20, fontWeight: 900, color: '#3351CA', marginBottom: 8 }}>
                   Practice Complete!
                 </div>
-                <div style={{ fontSize: 48, fontWeight: 900, color: '#fff', marginBottom: 4, letterSpacing: -2 }}>
-                  {wqScore}<span style={{ fontSize: 28, color: 'rgba(255,255,255,0.35)', fontWeight: 400 }}>/{wqQuestions.length}</span>
+                <div style={{ fontSize: 48, fontWeight: 900, color: '#1F3E6C', marginBottom: 4, letterSpacing: -2 }}>
+                  {wqScore}<span style={{ fontSize: 28, color: '#7F9BD9', fontWeight: 400 }}>/{wqQuestions.length}</span>
                 </div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 28 }}>
+                <div style={{ fontSize: 13, color: '#7F9BD9', marginBottom: 28 }}>
                   {Math.round((wqScore / wqQuestions.length) * 100)}% correct
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 260, margin: '0 auto' }}>
@@ -1771,18 +1605,18 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                     <button
                       onClick={() => { setWqIndex(0); setWqSelected(null); setWqScore(0); setWqDone(false) }}
                       style={{
-                        padding: '12px', background: 'rgba(78,205,196,0.15)',
-                        border: '1px solid rgba(78,205,196,0.4)', borderRadius: 10,
-                        color: '#4ECDC4', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                        padding: '12px', background: 'rgba(51,81,202,0.12)',
+                        border: '1px solid rgba(51,81,202,0.35)', borderRadius: 10,
+                        color: '#3351CA', fontWeight: 700, fontSize: 14, cursor: 'pointer',
                       }}
                     >🔄 Try Again</button>
                   )}
                   <button
                     onClick={() => setShowWeakSpotsQuiz(false)}
                     style={{
-                      padding: '12px', background: 'rgba(255,255,255,0.06)',
-                      border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
-                      color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                      padding: '12px', background: 'rgba(31,62,108,0.07)',
+                      border: '1px solid rgba(31,62,108,0.18)', borderRadius: 10,
+                      color: '#254A9F', fontWeight: 600, fontSize: 14, cursor: 'pointer',
                     }}
                   >🏙️ Back to City</button>
                 </div>
@@ -1792,21 +1626,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         }
         return (
           <div style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)',
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 450, backdropFilter: 'blur(10px)', padding: 20,
           }}>
             <div style={{
-              background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
-              border: `1px solid ${q.color}44`,
+              background: 'linear-gradient(35deg, #FFFFFF, #D8E7FA, #B8D0F5)',
+              border: `1px solid ${q.color}55`,
               borderRadius: 20, padding: '24px 28px', maxWidth: 520, width: '100%',
               fontFamily: "'Heebo', system-ui, sans-serif", maxHeight: '90vh', overflowY: 'auto',
-              boxShadow: `0 0 60px ${q.color}18`,
+              boxShadow: `0 20px 60px rgba(31,62,108,0.25), 0 0 0 1px ${q.color}22`,
             }}>
               {/* Header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                 <div>
-                  <div style={{ fontSize: 11, letterSpacing: 2, color: wqMode === 'quick-mix' ? '#FFD700' : '#4ECDC4', fontWeight: 600, marginBottom: 4 }}>
+                  <div style={{ fontSize: 11, letterSpacing: 2, color: wqMode === 'quick-mix' ? '#7A5C00' : '#3351CA', fontWeight: 600, marginBottom: 4 }}>
                     {wqMode === 'quick-mix' ? '🎲 QUICK MIX — חמש שאלות אקראיות' : '🎯 PRACTICE WEAK SPOTS'}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1815,7 +1649,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                       background: `${q.color}18`, border: `1px solid ${q.color}44`,
                       borderRadius: 10, padding: '2px 8px',
                     }}>{q.buildingLabel}</span>
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+                    <span style={{ fontSize: 11, color: '#7F9BD9' }}>
                       {wqIndex + 1} / {wqQuestions.length}
                     </span>
                   </div>
@@ -1823,15 +1657,15 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                 <button
                   onClick={() => setShowWeakSpotsQuiz(false)}
                   style={{
-                    background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
+                    background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.18)',
                     borderRadius: 10, width: 32, height: 32,
-                    color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 14,
+                    color: '#7F9BD9', cursor: 'pointer', fontSize: 14,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}
                 >✕</button>
               </div>
               {/* Progress bar */}
-              <div style={{ height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 2, marginBottom: 20, overflow: 'hidden' }}>
+              <div style={{ height: 3, background: 'rgba(31,62,108,0.12)', borderRadius: 2, marginBottom: 20, overflow: 'hidden' }}>
                 <div style={{
                   height: '100%', borderRadius: 2, background: q.color,
                   width: `${(wqIndex / wqQuestions.length) * 100}%`,
@@ -1840,9 +1674,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               </div>
               {/* Question */}
               <div style={{
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(31,62,108,0.12)',
                 borderRadius: 12, padding: '16px 18px', marginBottom: 16,
-                fontSize: 14, color: 'rgba(255,255,255,0.9)',
+                fontSize: 14, color: '#1F3E6C',
                 direction: 'rtl', textAlign: 'right', lineHeight: 1.6,
               }}>
                 {q.q}
@@ -1852,12 +1686,12 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                 {q.options.map((opt, idx) => {
                   const isCorrect = idx === q.correct
                   const isSelected = idx === wqSelected
-                  let bg = 'rgba(255,255,255,0.04)'
-                  let border = '1px solid rgba(255,255,255,0.08)'
-                  let textColor = 'rgba(255,255,255,0.75)'
+                  let bg = 'rgba(255,255,255,0.55)'
+                  let border = '1px solid rgba(31,62,108,0.12)'
+                  let textColor = '#254A9F'
                   if (wqSelected !== null) {
-                    if (isCorrect) { bg = 'rgba(78,205,196,0.15)'; border = '2px solid #4ECDC4'; textColor = '#4ECDC4' }
-                    else if (isSelected) { bg = '#FF6B6B22'; border = '1px solid #FF6B6B'; textColor = '#FF6B6B' }
+                    if (isCorrect) { bg = 'rgba(31,122,110,0.12)'; border = '2px solid #1F7A6E'; textColor = '#1F7A6E' }
+                    else if (isSelected) { bg = 'rgba(155,32,32,0.08)'; border = '1px solid #9B2020'; textColor = '#9B2020' }
                   }
                   return (
                     <button
@@ -1878,10 +1712,10 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                     >
                       <span style={{
                         width: 22, height: 22, borderRadius: '50%',
-                        background: wqSelected !== null && isCorrect ? '#4ECDC4' : 'rgba(255,255,255,0.1)',
+                        background: wqSelected !== null && isCorrect ? '#1F7A6E' : 'rgba(31,62,108,0.1)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 11, fontWeight: 700, flexShrink: 0,
-                        color: wqSelected !== null && isCorrect ? '#000' : 'inherit',
+                        color: wqSelected !== null && isCorrect ? '#fff' : 'inherit',
                       }}>
                         {wqSelected !== null && isCorrect ? '✓' : String.fromCharCode(65 + idx)}
                       </span>
@@ -1894,10 +1728,10 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               {wqSelected !== null && (
                 <div>
                   <div style={{
-                    background: wqSelected === q.correct ? '#4ECDC411' : '#FF6B6B11',
-                    border: `1px solid ${wqSelected === q.correct ? '#4ECDC444' : '#FF6B6B44'}`,
+                    background: wqSelected === q.correct ? 'rgba(31,122,110,0.08)' : 'rgba(155,32,32,0.06)',
+                    border: `1px solid ${wqSelected === q.correct ? 'rgba(31,122,110,0.3)' : 'rgba(155,32,32,0.2)'}`,
                     borderRadius: 10, padding: '10px 14px',
-                    fontSize: 12, color: 'rgba(255,255,255,0.7)',
+                    fontSize: 12, color: '#254A9F',
                     direction: 'rtl', textAlign: 'right', lineHeight: 1.6, marginBottom: 10,
                   }}>
                     {wqSelected === q.correct ? '✅ ' : '❌ '}{q.explanation}
@@ -1914,7 +1748,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                     style={{
                       width: '100%', padding: '11px',
                       background: q.color, border: 'none', borderRadius: 10,
-                      color: '#000', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                      color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer',
                     }}
                   >
                     {wqIndex + 1 >= wqQuestions.length ? '🏆 סיים' : 'שאלה הבאה →'}
@@ -1934,22 +1768,22 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           zIndex: 450, backdropFilter: 'blur(10px)', padding: 20,
         }} onClick={() => { setShowTopicsList(false); setFormulaDrillActive(false); setTopicsSearch(''); setTopicsFilter('all') }}>
           <div style={{
-            background: 'linear-gradient(160deg, #0a0a18 0%, #0f1525 100%)',
-            border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
+            background: 'linear-gradient(35deg, #FFFFFF, #D8E7FA, #B8D0F5)',
+            border: '1px solid rgba(31,62,108,0.15)', borderRadius: 20,
             width: '100%', maxWidth: 560, maxHeight: '80vh',
             display: 'flex', flexDirection: 'column', overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+            boxShadow: '0 20px 60px rgba(31,62,108,0.25)',
           }} onClick={e => e.stopPropagation()}>
 
             {/* Header */}
             <div style={{
               padding: '20px 24px 16px',
-              borderBottom: '1px solid rgba(255,255,255,0.07)',
+              borderBottom: '1px solid rgba(31,62,108,0.1)',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
               <div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>📚 All Topics</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#1F3E6C' }}>📚 All Topics</div>
+                <div style={{ fontSize: 12, color: '#7F9BD9', marginTop: 2 }}>
                   {mastered.size}/10 mastered · Click to open challenge
                 </div>
               </div>
@@ -1957,8 +1791,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                 <button
                   onClick={handleStartQuickMix}
                   style={{
-                    background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.35)',
-                    borderRadius: 8, padding: '6px 12px', color: '#FFD700',
+                    background: 'rgba(255,199,0,0.12)', border: '1px solid rgba(180,140,0,0.35)',
+                    borderRadius: 8, padding: '6px 12px', color: '#7A5C00',
                     cursor: 'pointer', fontSize: 12, fontWeight: 700,
                     display: 'flex', alignItems: 'center', gap: 5,
                     whiteSpace: 'nowrap',
@@ -1970,9 +1804,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                 <button
                   onClick={startFormulaDrill}
                   style={{
-                    background: formulaDrillActive ? 'rgba(195,166,255,0.2)' : 'rgba(195,166,255,0.08)',
-                    border: `1px solid ${formulaDrillActive ? 'rgba(195,166,255,0.6)' : 'rgba(195,166,255,0.3)'}`,
-                    borderRadius: 8, padding: '6px 12px', color: '#C3A6FF',
+                    background: formulaDrillActive ? 'rgba(51,81,202,0.15)' : 'rgba(51,81,202,0.07)',
+                    border: `1px solid ${formulaDrillActive ? 'rgba(51,81,202,0.5)' : 'rgba(51,81,202,0.25)'}`,
+                    borderRadius: 8, padding: '6px 12px', color: '#3351CA',
                     cursor: 'pointer', fontSize: 12, fontWeight: 700,
                     display: 'flex', alignItems: 'center', gap: 5,
                     whiteSpace: 'nowrap',
@@ -1982,8 +1816,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                   🧮 נוסחאות
                 </button>
                 <button onClick={() => { setShowTopicsList(false); setFormulaDrillActive(false); setTopicsSearch(''); setTopicsFilter('all') }} style={{
-                  background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: 8, width: 32, height: 32, color: 'rgba(255,255,255,0.5)',
+                  background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.15)',
+                  borderRadius: 8, width: 32, height: 32, color: '#7F9BD9',
                   cursor: 'pointer', fontSize: 14,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>✕</button>
@@ -1998,25 +1832,25 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                     <div style={{ fontSize: 56, marginBottom: 8 }}>
                       {fdScore === fdItems.length ? '🏆' : fdScore >= fdItems.length * 0.7 ? '⭐' : '📖'}
                     </div>
-                    <div style={{ fontSize: 20, fontWeight: 900, color: '#C3A6FF', marginBottom: 8 }}>
+                    <div style={{ fontSize: 20, fontWeight: 900, color: '#3351CA', marginBottom: 8 }}>
                       {fdScore === fdItems.length ? 'Formula Master!' : fdScore >= fdItems.length * 0.7 ? 'Great Job!' : 'Keep Practicing!'}
                     </div>
-                    <div style={{ fontSize: 42, fontWeight: 900, color: '#fff', marginBottom: 4, letterSpacing: -2 }}>
-                      {fdScore}<span style={{ fontSize: 24, color: 'rgba(255,255,255,0.35)', fontWeight: 400 }}>/{fdItems.length}</span>
+                    <div style={{ fontSize: 42, fontWeight: 900, color: '#1F3E6C', marginBottom: 4, letterSpacing: -2 }}>
+                      {fdScore}<span style={{ fontSize: 24, color: '#7F9BD9', fontWeight: 400 }}>/{fdItems.length}</span>
                     </div>
-                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 24 }}>
+                    <div style={{ fontSize: 12, color: '#7F9BD9', marginBottom: 24 }}>
                       {Math.round((fdScore / fdItems.length) * 100)}% correct
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 240, margin: '0 auto' }}>
                       <button onClick={startFormulaDrill} style={{
-                        padding: '11px', background: 'rgba(195,166,255,0.15)',
-                        border: '1px solid rgba(195,166,255,0.4)', borderRadius: 10,
-                        color: '#C3A6FF', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                        padding: '11px', background: 'rgba(51,81,202,0.1)',
+                        border: '1px solid rgba(51,81,202,0.35)', borderRadius: 10,
+                        color: '#3351CA', fontWeight: 700, fontSize: 13, cursor: 'pointer',
                       }}>🔄 Try Again</button>
                       <button onClick={() => setFormulaDrillActive(false)} style={{
-                        padding: '11px', background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
-                        color: 'rgba(255,255,255,0.5)', fontWeight: 600, fontSize: 13, cursor: 'pointer',
+                        padding: '11px', background: 'rgba(31,62,108,0.07)',
+                        border: '1px solid rgba(31,62,108,0.18)', borderRadius: 10,
+                        color: '#254A9F', fontWeight: 600, fontSize: 13, cursor: 'pointer',
                       }}>📚 Back to Topics</button>
                     </div>
                   </div>
@@ -2028,36 +1862,36 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                         {fdItems.map((_, i) => (
                           <div key={i} style={{
                             height: 4, flex: 1, borderRadius: 2,
-                            background: i < fdIndex ? '#C3A6FF' : i === fdIndex ? 'rgba(195,166,255,0.55)' : 'rgba(255,255,255,0.12)',
+                            background: i < fdIndex ? '#3351CA' : i === fdIndex ? 'rgba(51,81,202,0.45)' : 'rgba(31,62,108,0.15)',
                             transition: 'background 0.3s',
                           }} />
                         ))}
                       </div>
-                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', textAlign: 'center', letterSpacing: 1 }}>
+                      <div style={{ fontSize: 11, color: '#7F9BD9', textAlign: 'center', letterSpacing: 1 }}>
                         🧮 זהה את הנוסחה — {fdIndex + 1} / {fdItems.length}
                       </div>
                       <div style={{
-                        background: 'rgba(195,166,255,0.08)', border: '1px solid rgba(195,166,255,0.25)',
+                        background: 'rgba(51,81,202,0.07)', border: '1px solid rgba(51,81,202,0.2)',
                         borderRadius: 14, padding: '20px 24px', textAlign: 'center',
-                        fontFamily: 'monospace', fontSize: 15, color: '#C3A6FF',
+                        fontFamily: 'monospace', fontSize: 15, color: '#3351CA',
                         letterSpacing: 0.5, lineHeight: 1.7, direction: 'ltr',
                       }}>
                         <div style={{ fontSize: 28, marginBottom: 10, fontFamily: "'Heebo', system-ui, sans-serif" }}>{item.emoji}</div>
                         {item.formula}
                       </div>
-                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', textAlign: 'center', direction: 'rtl' }}>
+                      <div style={{ fontSize: 12, color: '#7F9BD9', textAlign: 'center', direction: 'rtl' }}>
                         לאיזה מושג שייכת הנוסחה הזו?
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         {item.options.map((opt, idx) => {
                           const isCorrect = idx === item.correctIdx
                           const isSelected = idx === fdSelected
-                          let bg = 'rgba(255,255,255,0.04)'
-                          let border = '1px solid rgba(255,255,255,0.1)'
-                          let color = 'rgba(255,255,255,0.75)'
+                          let bg = 'rgba(255,255,255,0.55)'
+                          let border = '1px solid rgba(31,62,108,0.12)'
+                          let color = '#254A9F'
                           if (fdSelected !== null) {
-                            if (isCorrect) { bg = 'rgba(78,205,196,0.15)'; border = '2px solid #4ECDC4'; color = '#4ECDC4' }
-                            else if (isSelected) { bg = 'rgba(255,107,107,0.12)'; border = '1px solid #FF6B6B'; color = '#FF6B6B' }
+                            if (isCorrect) { bg = 'rgba(31,122,110,0.12)'; border = '2px solid #1F7A6E'; color = '#1F7A6E' }
+                            else if (isSelected) { bg = 'rgba(155,32,32,0.08)'; border = '1px solid #9B2020'; color = '#9B2020' }
                           }
                           return (
                             <button key={idx} onClick={() => {
@@ -2084,8 +1918,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                             setFdSelected(null)
                           }
                         }} style={{
-                          padding: '12px', background: '#C3A6FF', border: 'none', borderRadius: 10,
-                          color: '#000', fontWeight: 800, fontSize: 14, cursor: 'pointer',
+                          padding: '12px', background: '#3351CA', border: 'none', borderRadius: 10,
+                          color: '#fff', fontWeight: 800, fontSize: 14, cursor: 'pointer',
                         }}>
                           {fdIndex + 1 >= fdItems.length ? '🏆 סיים' : 'הבא →'}
                         </button>
@@ -2099,12 +1933,12 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             {/* Search + mastery filter */}
             <div style={{
               padding: '10px 16px 4px', display: 'flex', flexDirection: 'column', gap: 8,
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              borderBottom: '1px solid rgba(31,62,108,0.08)',
             }}>
               <div style={{ position: 'relative' }}>
                 <span style={{
                   position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)',
-                  fontSize: 12, color: 'rgba(255,255,255,0.35)', pointerEvents: 'none',
+                  fontSize: 12, color: '#7F9BD9', pointerEvents: 'none',
                 }}>🔍</span>
                 <input
                   value={topicsSearch}
@@ -2112,9 +1946,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                   placeholder="חפש מושג…"
                   style={{
                     width: '100%', boxSizing: 'border-box',
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8,
-                    padding: '7px 28px 7px 28px', color: '#fff', fontSize: 13,
+                    background: 'rgba(255,255,255,0.6)',
+                    border: '1px solid rgba(31,62,108,0.15)', borderRadius: 8,
+                    padding: '7px 28px 7px 28px', color: '#1F3E6C', fontSize: 13,
                     outline: 'none', direction: 'rtl' as const, textAlign: 'right' as const,
                     fontFamily: "'Heebo', system-ui, sans-serif",
                   }}
@@ -2125,8 +1959,8 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                     aria-label="Clear search"
                     style={{
                       position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
-                      background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%',
-                      width: 18, height: 18, color: 'rgba(255,255,255,0.6)', fontSize: 11,
+                      background: 'rgba(31,62,108,0.1)', border: 'none', borderRadius: '50%',
+                      width: 18, height: 18, color: '#7F9BD9', fontSize: 11,
                       cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}
                   >✕</button>
@@ -2145,9 +1979,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                       onClick={() => setTopicsFilter(chip.key)}
                       style={{
                         flex: 1, padding: '5px 8px', borderRadius: 16,
-                        background: isActive ? 'rgba(170,150,218,0.18)' : 'rgba(255,255,255,0.04)',
-                        border: `1px solid ${isActive ? 'rgba(170,150,218,0.5)' : 'rgba(255,255,255,0.08)'}`,
-                        color: isActive ? '#AA96DA' : 'rgba(255,255,255,0.5)',
+                        background: isActive ? 'rgba(51,81,202,0.12)' : 'rgba(255,255,255,0.5)',
+                        border: `1px solid ${isActive ? 'rgba(51,81,202,0.4)' : 'rgba(31,62,108,0.12)'}`,
+                        color: isActive ? '#3351CA' : '#7F9BD9',
                         fontSize: 11, fontWeight: 700, cursor: 'pointer',
                         whiteSpace: 'nowrap', transition: 'all 0.15s',
                         fontFamily: "'Heebo', system-ui, sans-serif",
@@ -2176,11 +2010,11 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                   return (
                     <div style={{
                       padding: '32px 16px', textAlign: 'center',
-                      color: 'rgba(255,255,255,0.45)', direction: 'rtl' as const,
+                      color: '#7F9BD9', direction: 'rtl' as const,
                     }}>
                       <div style={{ fontSize: 32, marginBottom: 8 }}>🔎</div>
-                      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>אין תוצאות</div>
-                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4, color: '#254A9F' }}>אין תוצאות</div>
+                      <div style={{ fontSize: 11, color: '#7F9BD9' }}>
                         נסה מושג אחר או שנה את הסינון
                       </div>
                     </div>
@@ -2199,20 +2033,20 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                     style={{
                       display: 'flex', alignItems: 'center', gap: 14,
                       padding: '12px 16px', borderRadius: 12, cursor: 'pointer', width: '100%',
-                      background: isMastered ? `linear-gradient(90deg, ${b.color ?? '#fff'}12 0%, transparent 100%)` : 'rgba(255,255,255,0.03)',
-                      border: isMastered ? `1px solid ${b.color ?? '#fff'}30` : '1px solid rgba(255,255,255,0.06)',
+                      background: isMastered ? `linear-gradient(90deg, ${b.color ?? '#3351CA'}18 0%, rgba(255,255,255,0.5) 100%)` : 'rgba(255,255,255,0.5)',
+                      border: isMastered ? `1px solid ${b.color ?? '#3351CA'}40` : '1px solid rgba(31,62,108,0.1)',
                       textAlign: 'left', transition: 'all 0.15s',
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.background = isMastered ? `linear-gradient(90deg, ${b.color ?? '#fff'}22 0%, transparent 100%)` : 'rgba(255,255,255,0.07)' }}
-                    onMouseLeave={e => { e.currentTarget.style.background = isMastered ? `linear-gradient(90deg, ${b.color ?? '#fff'}12 0%, transparent 100%)` : 'rgba(255,255,255,0.03)' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = isMastered ? `linear-gradient(90deg, ${b.color ?? '#3351CA'}28 0%, rgba(255,255,255,0.7) 100%)` : 'rgba(255,255,255,0.75)' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = isMastered ? `linear-gradient(90deg, ${b.color ?? '#3351CA'}18 0%, rgba(255,255,255,0.5) 100%)` : 'rgba(255,255,255,0.5)' }}
                   >
                     <div
                       className="building-thumb"
                       style={{
                         width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                        background: `linear-gradient(135deg, ${b.color ?? '#fff'}28 0%, ${b.color ?? '#fff'}0e 100%)`,
-                        border: `2px solid ${b.color ?? '#fff'}55`,
-                        boxShadow: `0 4px 14px rgba(0,0,0,0.45), inset 0 1px 0 ${b.color ?? '#fff'}22`,
+                        background: `linear-gradient(135deg, ${b.color ?? '#3351CA'}28 0%, ${b.color ?? '#3351CA'}0e 100%)`,
+                        border: `2px solid ${b.color ?? '#3351CA'}55`,
+                        boxShadow: `0 4px 14px rgba(31,62,108,0.15), inset 0 1px 0 ${b.color ?? '#3351CA'}22`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
                       }}
                     >
@@ -2220,12 +2054,12 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
-                        fontSize: 14, fontWeight: 600, color: isMastered ? '#fff' : 'rgba(255,255,255,0.7)',
+                        fontSize: 14, fontWeight: 600, color: '#1F3E6C',
                         direction: 'rtl', textAlign: 'right',
                       }}>
                         {b.label}
                       </div>
-                      <div style={{ fontSize: 12, color: b.color ?? '#4ECDC4', marginTop: 2 }}>
+                      <div style={{ fontSize: 12, color: b.color ?? '#3351CA', marginTop: 2, fontWeight: 600 }}>
                         {b.statsConcept}
                       </div>
                     </div>
@@ -2235,9 +2069,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                       return (
                         <div style={{
                           fontSize: 10, fontWeight: 700,
-                          color: needsReview ? '#FFB347' : '#4ECDC4',
-                          background: needsReview ? 'rgba(255,179,71,0.12)' : 'rgba(78,205,196,0.1)',
-                          border: `1px solid ${needsReview ? 'rgba(255,179,71,0.35)' : 'rgba(78,205,196,0.3)'}`,
+                          color: needsReview ? '#C47A00' : '#1F7A6E',
+                          background: needsReview ? 'rgba(196,122,0,0.1)' : 'rgba(31,122,110,0.1)',
+                          border: `1px solid ${needsReview ? 'rgba(196,122,0,0.3)' : 'rgba(31,122,110,0.25)'}`,
                           borderRadius: 10, padding: '2px 7px', flexShrink: 0,
                         }}>
                           {needsReview ? '📅 חזור' : days === 0 ? '✓ היום' : `✓ ${days}d`}
@@ -2251,9 +2085,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                       return (
                         <div style={{
                           fontSize: 10, fontWeight: 700,
-                          color: diffRating <= 2 ? '#4ECDC4' : diffRating === 3 ? '#FFD700' : '#FF6B6B',
-                          background: diffRating <= 2 ? 'rgba(78,205,196,0.1)' : diffRating === 3 ? 'rgba(255,215,0,0.1)' : 'rgba(255,107,107,0.1)',
-                          border: `1px solid ${diffRating <= 2 ? 'rgba(78,205,196,0.3)' : diffRating === 3 ? 'rgba(255,215,0,0.3)' : 'rgba(255,107,107,0.3)'}`,
+                          color: diffRating <= 2 ? '#1F7A6E' : diffRating === 3 ? '#7A5C00' : '#9B2020',
+                          background: diffRating <= 2 ? 'rgba(31,122,110,0.1)' : diffRating === 3 ? 'rgba(122,92,0,0.1)' : 'rgba(155,32,32,0.08)',
+                          border: `1px solid ${diffRating <= 2 ? 'rgba(31,122,110,0.25)' : diffRating === 3 ? 'rgba(122,92,0,0.25)' : 'rgba(155,32,32,0.2)'}`,
                           borderRadius: 10, padding: '2px 7px', flexShrink: 0,
                         }}>
                           {'★'.repeat(diffRating)}
@@ -2262,14 +2096,14 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                     })()}
                     {b.id === dailyChallengeId && !dailyDone && (
                       <div style={{
-                        fontSize: 10, fontWeight: 700, color: '#FFD700',
-                        background: 'rgba(255,215,0,0.12)', border: '1px solid rgba(255,215,0,0.35)',
+                        fontSize: 10, fontWeight: 700, color: '#7A5C00',
+                        background: 'rgba(196,160,0,0.1)', border: '1px solid rgba(122,92,0,0.3)',
                         borderRadius: 10, padding: '2px 7px', flexShrink: 0,
                       }}>🌟 Daily</div>
                     )}
                     <div style={{
                       flexShrink: 0, fontSize: 12, fontWeight: 700,
-                      color: isMastered ? '#4ECDC4' : 'rgba(255,255,255,0.25)',
+                      color: isMastered ? '#3351CA' : '#B8D0F5',
                     }}>
                       {isMastered ? '✓' : '→'}
                     </div>
@@ -2308,22 +2142,22 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           zIndex: 490, backdropFilter: 'blur(10px)', padding: 20,
         }} onClick={() => setShowGlossary(false)}>
           <div style={{
-            background: 'linear-gradient(160deg, #0a0a18 0%, #0f1525 100%)',
-            border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20,
+            background: 'linear-gradient(35deg, #FFFFFF, #D8E7FA, #B8D0F5)',
+            border: '1px solid rgba(31,62,108,0.15)', borderRadius: 20,
             padding: '24px 28px', width: '100%', maxWidth: 580,
             maxHeight: '85vh', overflowY: 'auto',
             fontFamily: "'Heebo', system-ui, sans-serif",
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>📚 Concept Glossary</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#1F3E6C' }}>📚 Concept Glossary</div>
+                <div style={{ fontSize: 12, color: '#7F9BD9', marginTop: 2 }}>
                   {mastered.size}/10 mastered · all formulas in one place
                 </div>
               </div>
               <button onClick={() => setShowGlossary(false)} style={{
-                background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 8, width: 32, height: 32, color: 'rgba(255,255,255,0.5)',
+                background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.15)',
+                borderRadius: 8, width: 32, height: 32, color: '#7F9BD9',
                 cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>✕</button>
             </div>
@@ -2333,36 +2167,36 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                 const glossary = GLOSSARY_DATA[b.id]
                 return (
                   <div key={b.id} style={{
-                    background: isMastered ? `${b.color}10` : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${isMastered ? `${b.color}30` : 'rgba(255,255,255,0.07)'}`,
+                    background: isMastered ? `${b.color}15` : 'rgba(255,255,255,0.55)',
+                    border: `1px solid ${isMastered ? `${b.color}35` : 'rgba(31,62,108,0.1)'}`,
                     borderRadius: 12, padding: '12px 14px',
                     display: 'flex', alignItems: 'flex-start', gap: 12,
                   }}>
                     <div style={{
                       width: 36, height: 36, borderRadius: 8, flexShrink: 0,
-                      background: `${b.color}20`, border: `1px solid ${b.color}40`,
+                      background: `${b.color}20`, border: `1px solid ${b.color}45`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
                     }}>
                       {b.label.split(' ')[0]}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                        <span style={{ fontSize: 14, fontWeight: 700, color: isMastered ? b.color : '#fff', direction: 'rtl' }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: isMastered ? b.color : '#1F3E6C', direction: 'rtl' }}>
                           {b.statsConcept.split(' (')[0]}
                         </span>
-                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>·</span>
-                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{glossary?.conceptEn}</span>
+                        <span style={{ fontSize: 12, color: '#B8D0F5' }}>·</span>
+                        <span style={{ fontSize: 12, color: '#7F9BD9' }}>{glossary?.conceptEn}</span>
                         {isMastered && (
                           <span style={{
-                            marginLeft: 'auto', fontSize: 10, fontWeight: 700, color: '#4ECDC4',
-                            background: 'rgba(78,205,196,0.12)', border: '1px solid rgba(78,205,196,0.25)',
+                            marginLeft: 'auto', fontSize: 10, fontWeight: 700, color: '#1F7A6E',
+                            background: 'rgba(31,122,110,0.1)', border: '1px solid rgba(31,122,110,0.25)',
                             borderRadius: 10, padding: '2px 8px',
                           }}>✓ mastered</span>
                         )}
                       </div>
                       <div style={{
-                        fontSize: 12, fontFamily: 'monospace', color: isMastered ? b.color : 'rgba(255,255,255,0.45)',
-                        background: 'rgba(0,0,0,0.2)', borderRadius: 6,
+                        fontSize: 12, fontFamily: 'monospace', color: isMastered ? b.color : '#254A9F',
+                        background: 'rgba(31,62,108,0.06)', borderRadius: 6,
                         padding: '4px 8px', display: 'inline-block',
                       }}>
                         {glossary?.formula}
@@ -2372,7 +2206,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
                 )
               })}
             </div>
-            <div style={{ marginTop: 16, fontSize: 12, color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
+            <div style={{ marginTop: 16, fontSize: 12, color: '#7F9BD9', textAlign: 'center' }}>
               Press G or click outside to close
             </div>
           </div>

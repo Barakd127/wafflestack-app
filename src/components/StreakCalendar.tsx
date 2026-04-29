@@ -56,7 +56,7 @@ function buildCells(history: Record<string, number>): DayCell[] {
 }
 
 function intensityColor(delta: number, max: number): string {
-  if (delta === 0) return 'rgba(255,255,255,0.06)'
+  if (delta === 0) return 'rgba(31,62,108,0.06)'
   const ratio = max > 0 ? delta / max : 0
   if (ratio >= 0.75) return '#4ECDC4'
   if (ratio >= 0.5) return 'rgba(78,205,196,0.75)'
@@ -93,22 +93,22 @@ export default function StreakCalendar({ onClose }: Props) {
     >
       <div
         style={{
-          background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
-          border: '1px solid rgba(78,205,196,0.3)',
+          background: 'linear-gradient(35deg, #FFFFFF, #D8E7FA, #B8D0F5)',
+          border: '1px solid rgba(31,62,108,0.15)',
           borderRadius: 20, padding: '24px 26px 22px',
           minWidth: 320, maxWidth: 460, width: '92%',
           fontFamily: "'Heebo', system-ui, sans-serif",
-          boxShadow: '0 0 60px rgba(78,205,196,0.1)',
+          boxShadow: '0 0 60px rgba(31,62,108,0.08)',
         }}
         onClick={e => e.stopPropagation()}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-          <h2 style={{ color: '#4ECDC4', fontSize: 18, fontWeight: 700, margin: 0 }}>
+          <h2 style={{ color: '#1F3E6C', fontSize: 18, fontWeight: 700, margin: 0 }}>
             📅 30 ימים אחרונים
           </h2>
           <button
             onClick={onClose}
-            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 20, cursor: 'pointer', lineHeight: 1 }}
+            style={{ background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, color: '#254A9F', fontSize: 20, cursor: 'pointer', lineHeight: 1, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             aria-label="סגור"
           >✕</button>
         </div>
@@ -117,13 +117,13 @@ export default function StreakCalendar({ onClose }: Props) {
         <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
           <div style={{
             flex: 1, padding: '10px 12px',
-            background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.3)',
+            background: 'rgba(255,107,53,0.08)', border: '1px solid rgba(255,107,53,0.25)',
             borderRadius: 10, textAlign: 'center',
           }}>
-            <div style={{ fontSize: 22, fontWeight: 800, color: currentStreak > 0 ? '#FF6B35' : 'rgba(255,255,255,0.3)', lineHeight: 1 }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: currentStreak > 0 ? '#FF6B35' : 'rgba(31,62,108,0.25)', lineHeight: 1 }}>
               🔥 {currentStreak}
             </div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', letterSpacing: 0.5, marginTop: 4 }}>
+            <div style={{ fontSize: 10, color: '#7F9BD9', letterSpacing: 0.5, marginTop: 4 }}>
               רצף נוכחי
             </div>
           </div>
@@ -133,9 +133,9 @@ export default function StreakCalendar({ onClose }: Props) {
             borderRadius: 10, textAlign: 'center',
           }}>
             <div style={{ fontSize: 22, fontWeight: 800, color: '#4ECDC4', lineHeight: 1 }}>
-              {activeDays}<span style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>/30</span>
+              {activeDays}<span style={{ fontSize: 13, color: '#7F9BD9' }}>/30</span>
             </div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', letterSpacing: 0.5, marginTop: 4 }}>
+            <div style={{ fontSize: 10, color: '#7F9BD9', letterSpacing: 0.5, marginTop: 4 }}>
               ימים פעילים
             </div>
           </div>
@@ -144,10 +144,10 @@ export default function StreakCalendar({ onClose }: Props) {
             background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.25)',
             borderRadius: 10, textAlign: 'center',
           }}>
-            <div style={{ fontSize: 22, fontWeight: 800, color: totalXp > 0 ? '#FFD700' : 'rgba(255,255,255,0.3)', lineHeight: 1 }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: totalXp > 0 ? '#FFD700' : 'rgba(31,62,108,0.25)', lineHeight: 1 }}>
               +{totalXp}
             </div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', letterSpacing: 0.5, marginTop: 4 }}>
+            <div style={{ fontSize: 10, color: '#7F9BD9', letterSpacing: 0.5, marginTop: 4 }}>
               XP בחודש
             </div>
           </div>
@@ -161,7 +161,7 @@ export default function StreakCalendar({ onClose }: Props) {
           {cells.map(cell => {
             const monthDay = `${cell.date.getMonth() + 1}/${cell.date.getDate()}`
             const fill = intensityColor(cell.delta, maxDelta)
-            const border = cell.isToday ? '2px solid #FFD700' : '1px solid rgba(255,255,255,0.08)'
+            const border = cell.isToday ? '2px solid #FFD700' : '1px solid rgba(31,62,108,0.1)'
             return (
               <div
                 key={cell.key}
@@ -181,14 +181,14 @@ export default function StreakCalendar({ onClose }: Props) {
                 }}
               >
                 <span style={{
-                  fontSize: 10, color: cell.delta > 0 ? '#000' : 'rgba(255,255,255,0.35)',
+                  fontSize: 10, color: cell.delta > 0 ? '#1F3E6C' : '#7F9BD9',
                   fontWeight: cell.isToday ? 800 : 600, fontVariantNumeric: 'tabular-nums',
                 }}>
                   {monthDay}
                 </span>
                 {cell.delta > 0 && (
                   <span style={{
-                    fontSize: 9, color: 'rgba(0,0,0,0.7)', fontWeight: 700,
+                    fontSize: 9, color: '#1F3E6C', fontWeight: 700,
                     fontVariantNumeric: 'tabular-nums', marginTop: 1,
                   }}>
                     +{cell.delta}
@@ -202,22 +202,22 @@ export default function StreakCalendar({ onClose }: Props) {
         {/* Legend */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          fontSize: 10, color: 'rgba(255,255,255,0.4)',
+          fontSize: 10, color: '#7F9BD9',
         }}>
           <span>פחות</span>
           <div style={{ display: 'flex', gap: 4 }}>
             {[0, 0.25, 0.5, 0.75, 1].map((r, i) => (
               <div key={i} style={{
                 width: 12, height: 12, borderRadius: 3,
-                background: r === 0 ? 'rgba(255,255,255,0.06)' : intensityColor(maxDelta * r, maxDelta),
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: r === 0 ? 'rgba(31,62,108,0.06)' : intensityColor(maxDelta * r, maxDelta),
+                border: '1px solid rgba(31,62,108,0.1)',
               }} />
             ))}
           </div>
           <span>יותר</span>
         </div>
 
-        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, textAlign: 'center', marginTop: 16 }}>
+        <p style={{ color: '#7F9BD9', fontSize: 11, textAlign: 'center', marginTop: 16 }}>
           המסגרת הזהובה = היום
         </p>
       </div>

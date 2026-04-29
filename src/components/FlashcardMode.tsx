@@ -100,26 +100,26 @@ export default function FlashcardMode({ cards, mastered, onClose }: Props) {
       <style>{FLIP_STYLE}</style>
       <div
         style={{
-          background: 'linear-gradient(160deg, #0a0a18 0%, #0f1525 100%)',
-          border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24,
+          background: 'linear-gradient(35deg, #FFFFFF, #D8E7FA, #B8D0F5)',
+          border: '1px solid rgba(31,62,108,0.15)', borderRadius: 24,
           padding: '28px 32px', width: '100%', maxWidth: 480,
-          fontFamily: "'Heebo', system-ui, sans-serif", color: '#fff',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+          fontFamily: "'Heebo', system-ui, sans-serif", color: '#1F3E6C',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
         }}
         onClick={e => e.stopPropagation()}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 800 }}>📇 Flash Cards</div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#1F3E6C' }}>📇 Flash Cards</div>
+            <div style={{ fontSize: 12, color: '#7F9BD9', marginTop: 2 }}>
               {reviewedCount}/{cards.length} reviewed · כרטיס {index + 1} מתוך {cards.length}
             </div>
           </div>
           <button
             onClick={onClose}
             style={{
-              background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: 8, width: 32, height: 32, color: 'rgba(255,255,255,0.5)',
+              background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.2)',
+              borderRadius: 8, width: 32, height: 32, color: '#254A9F',
               cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
             aria-label="סגור"
@@ -131,8 +131,8 @@ export default function FlashcardMode({ cards, mastered, onClose }: Props) {
             <div
               className="fc-face front"
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '2px solid rgba(255,255,255,0.12)',
+                background: 'rgba(255,255,255,0.55)',
+                border: '2px solid rgba(31,62,108,0.1)',
               }}
             >
               {(isMastered || isReviewed) && (
@@ -141,8 +141,8 @@ export default function FlashcardMode({ cards, mastered, onClose }: Props) {
                 }}>
                   {isMastered && (
                     <span style={{
-                      fontSize: 10, color: '#4ECDC4', fontWeight: 700,
-                      background: 'rgba(78,205,196,0.12)', border: '1px solid rgba(78,205,196,0.25)',
+                      fontSize: 10, color: '#1F7A6E', fontWeight: 700,
+                      background: 'rgba(31,122,110,0.1)', border: '1px solid rgba(31,122,110,0.25)',
                       borderRadius: 10, padding: '2px 8px',
                     }}>✓ נלמד</span>
                   )}
@@ -156,17 +156,17 @@ export default function FlashcardMode({ cards, mastered, onClose }: Props) {
                 </div>
               )}
               <div style={{ fontSize: 56, marginBottom: 12 }}>{card.emoji}</div>
-              <div style={{ fontSize: 26, fontWeight: 900, marginBottom: 6, direction: 'rtl' }}>
+              <div style={{ fontSize: 26, fontWeight: 900, marginBottom: 6, direction: 'rtl', color: '#1F3E6C' }}>
                 {card.labelHe}
               </div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 8 }}>
+              <div style={{ fontSize: 12, color: '#7F9BD9', marginTop: 8 }}>
                 👆 לחץ לגילוי · רווח להפוך
               </div>
             </div>
             <div
               className="fc-face back"
               style={{
-                background: `linear-gradient(135deg, ${card.color}18 0%, transparent 100%)`,
+                background: `linear-gradient(135deg, ${card.color}18 0%, rgba(255,255,255,0.55) 100%)`,
                 border: `2px solid ${card.color}55`,
               }}
             >
@@ -175,12 +175,12 @@ export default function FlashcardMode({ cards, mastered, onClose }: Props) {
               </div>
               <div style={{
                 fontSize: 14, fontFamily: 'monospace', color: card.color,
-                background: `${card.color}18`, border: `1px solid ${card.color}33`,
+                background: 'rgba(31,62,108,0.06)', border: `1px solid ${card.color}33`,
                 borderRadius: 8, padding: '8px 16px', marginBottom: 14,
               }}>
                 {card.formula}
               </div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, maxWidth: 340 }}>
+              <div style={{ fontSize: 13, color: '#254A9F', lineHeight: 1.6, maxWidth: 340 }}>
                 {card.preview}
               </div>
             </div>
@@ -191,9 +191,9 @@ export default function FlashcardMode({ cards, mastered, onClose }: Props) {
           <button
             onClick={prev}
             style={{
-              flex: 1, padding: '10px', background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
-              color: 'rgba(255,255,255,0.7)', fontSize: 13, cursor: 'pointer', fontWeight: 600,
+              flex: 1, padding: '10px', background: 'rgba(31,62,108,0.07)',
+              border: '1px solid rgba(31,62,108,0.2)', borderRadius: 10,
+              color: '#254A9F', fontSize: 13, cursor: 'pointer', fontWeight: 600,
             }}
             aria-label="הקודם"
           >← הקודם</button>
@@ -202,10 +202,10 @@ export default function FlashcardMode({ cards, mastered, onClose }: Props) {
             disabled={isReviewed}
             style={{
               flex: 2, padding: '10px',
-              background: isReviewed ? 'rgba(78,205,196,0.18)' : `${card.color}22`,
-              border: `1px solid ${isReviewed ? 'rgba(78,205,196,0.4)' : card.color + '44'}`,
+              background: isReviewed ? 'rgba(31,122,110,0.12)' : `${card.color}22`,
+              border: `1px solid ${isReviewed ? 'rgba(31,122,110,0.3)' : card.color + '44'}`,
               borderRadius: 10,
-              color: isReviewed ? '#4ECDC4' : card.color,
+              color: isReviewed ? '#1F7A6E' : card.color,
               fontSize: 13, cursor: isReviewed ? 'default' : 'pointer', fontWeight: 700,
               opacity: isReviewed ? 0.85 : 1,
             }}
@@ -215,9 +215,9 @@ export default function FlashcardMode({ cards, mastered, onClose }: Props) {
           <button
             onClick={next}
             style={{
-              flex: 1, padding: '10px', background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
-              color: 'rgba(255,255,255,0.7)', fontSize: 13, cursor: 'pointer', fontWeight: 600,
+              flex: 1, padding: '10px', background: 'rgba(31,62,108,0.07)',
+              border: '1px solid rgba(31,62,108,0.2)', borderRadius: 10,
+              color: '#254A9F', fontSize: 13, cursor: 'pointer', fontWeight: 600,
             }}
             aria-label="הבא"
           >הבא →</button>
@@ -235,8 +235,8 @@ export default function FlashcardMode({ cards, mastered, onClose }: Props) {
                   : reviewed.has(c.id)
                     ? 'rgba(255,199,0,0.5)'
                     : mastered.has(c.id)
-                      ? 'rgba(78,205,196,0.4)'
-                      : 'rgba(255,255,255,0.2)',
+                      ? 'rgba(31,122,110,0.4)'
+                      : 'rgba(31,62,108,0.15)',
                 cursor: 'pointer', transition: 'all 0.2s',
               }}
             />
