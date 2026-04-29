@@ -381,7 +381,7 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
   const scaleCurrent = useRef(baseScale)
   // Keep ref in sync if baseScale recalculates after mount (e.g. async GLB load)
   useEffect(() => { scaleCurrent.current = baseScale }, [baseScale])
-  const hoverEmissive = useRef(0.15)  // start at baseline — avoids fade-in artifact on mount
+  const hoverEmissive = useRef(0)  // starts at 0 — texture shows through until hover
 
   const activeColor = colorOverride ?? def.color
 
@@ -393,47 +393,26 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
   const clonedScene = useMemo(() => {
     const clone = scene.clone()
     clone.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh
-        const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
-        const meshName = (mesh.name ?? '').toLowerCase()
-        const matName  = ((mat as THREE.MeshStandardMaterial).name ?? '').toLowerCase()
+      const mesh = child as THREE.Mesh
+      if (!mesh.isMesh) return
+      mesh.material = (mesh.material as THREE.Material).clone()
+      const mat = mesh.material as THREE.MeshStandardMaterial
 
-        // Secondary surface keywords — these preserve original Kenney colors
-        const isSecondary =
-          meshName.includes('window') || meshName.includes('glass')  ||
-          meshName.includes('door')   || meshName.includes('roof')   ||
-          meshName.includes('shingle')|| meshName.includes('detail') ||
-          meshName.includes('trim')   || meshName.includes('accent') ||
-          meshName.includes('metal')  || meshName.includes('chrome') ||
-          matName.includes('window')  || matName.includes('glass')   ||
-          matName.includes('door')    || matName.includes('roof')    ||
-          matName.includes('shingle') || matName.includes('detail')  ||
-          matName.includes('trim')    || matName.includes('accent')  ||
-          matName.includes('metal')   || matName.includes('chrome')
+      // Kenney GLBs use a single UV-mapped colormap atlas (TEXCOORD_0) so that
+      // walls/windows/roof/doors each sample different colour squares on the same
+      // texture.  Setting mat.color = concept-colour multiplies against the texture
+      // and flattens everything to one hue.  Keep mat.color = white so the atlas
+      // passes through completely unmodified; express building identity via emissive
+      // glow only (applied by the state-driven useEffect below).
+      mat.vertexColors = false
+      mat.color.set('#ffffff')
+      mat.roughness = 0.7
+      mat.metalness = 0.05
 
-        if (!isSecondary && activeColor) {
-          // Primary wall: apply concept color directly (no multiply — saturated & accurate)
-          mat.color.set(activeColor)
-          mat.roughness = 0.75
-          mat.metalness = 0.1
-          // Subtle concept-color glow on wall base
-          mat.emissive.set(activeColor)
-          mat.emissiveIntensity = 0.05
-        } else {
-          // Secondary element: keep original Kenney color, clean PBR values
-          mat.roughness = 0.4
-          mat.metalness = 0.05
-          // Warm lit-window glow for bright glass/windows
-          const lum = mat.color.r * 0.299 + mat.color.g * 0.587 + mat.color.b * 0.114
-          if (lum > 0.70) {
-            mat.emissive.set('#fffaaa')
-            mat.emissiveIntensity = 0.30
-          }
-        }
-
-        mesh.material = mat
-      }
+      // No always-on emissive — it overpowers the texture in a dim scene.
+      mat.emissive.set('#000000')
+      mat.emissiveIntensity = 0
+      mat.needsUpdate = true
     })
     return clone
   }, [scene, activeColor, colorOverride, def.color])
@@ -442,9 +421,10 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
   // These only fire when the boolean props actually change — not every frame.
   useEffect(() => {
     if (!clonedScene) return
-    // Mastered: subtle wall glow (0.10) per Smart Paint spec; selected lifts to 0.30; glow = 0.9
-    const intensity = isGlowing ? 0.9 : isMastered ? 0.10 : isSelected ? 0.30 : 0.05
-    const color = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : isSelected ? '#ffffff' : (activeColor ?? '#4ECDC4')
+    // Mastered: subtle glow; selected lifts higher; glow = brightest. Default = 0
+    // so the Kenney colormap texture shows through unchanged.
+    const intensity = isGlowing ? 0.9 : isMastered ? 0.10 : isSelected ? 0.30 : 0
+    const color = isGlowing ? '#ffffff' : isMastered ? (activeColor ?? '#4ECDC4') : isSelected ? '#ffffff' : '#000000'
     clonedScene.traverse((child) => {
       const mesh = child as THREE.Mesh
       if (!mesh.isMesh || !mesh.material) return
@@ -468,9 +448,9 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
     groupRef.current.scale.setScalar(scaleCurrent.current)
 
     // Hover emissive shimmer (warm gold), only when not in a mastered/selected/glow state
-    // Base is 0.15 (subtle always-on glow); hover lifts to 0.20 warm gold
+    // Base is 0 (texture shows through); hover lifts to 0.18 warm gold
     if (!isGlowing && !isMastered && !isSelected) {
-      const targetEm = isHovered ? 0.20 : 0.15
+      const targetEm = isHovered ? 0.18 : 0
       const prev = hoverEmissive.current
       hoverEmissive.current += (targetEm - prev) * 0.12
       const em = hoverEmissive.current
@@ -481,8 +461,8 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
           const apply = (mat: THREE.Material) => {
             const m = mat as THREE.MeshStandardMaterial
             if ('emissive' in m) {
-              // Hover: warm gold shimmer. Default: subtle color glow
-              m.emissive.set(isHovered ? '#ffc96b' : (activeColor ?? '#4ECDC4'))
+              // Hover: warm gold shimmer. Default: no emissive (texture shows through)
+              m.emissive.set(isHovered ? '#ffc96b' : '#000000')
               m.emissiveIntensity = em
             }
           }
