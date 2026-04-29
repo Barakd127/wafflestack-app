@@ -1,11 +1,13 @@
 # 🏘️ Install Townscaper Experience Packages
 
+> ⚠️ **HISTORICAL** — This was for the **TownscaperScene** experiment in the cancelled BASE44 project. WaffleStack now uses `WaffleStackCity.tsx` (Kenney GLB) for the 3D city; `TownscaperScene` was deleted. `@react-spring/three` and `@react-three/postprocessing` are **not** in WaffleStack's current `package.json`. Do not run these install commands unless you are reviving the Townscaper experiment.
+
 ## Required Dependencies
 
 Run these commands to install the animation and post-processing libraries:
 
 ```bash
-cd c:\Users\BARAK\Projects\base44
+cd "AI/WaffleStack/code"   # vault working tree; cancelled path: c:\Users\BARAK\Projects\base44
 
 # Animation library for "The Juice"
 npm install @react-spring/three

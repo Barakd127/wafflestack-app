@@ -71,22 +71,27 @@ For concept mapping and relationship visualization:
 - Video content
 - Payment system
 
-## Current State (as of 2026-03-21)
-The 3D engine is impressive but overbuilt for v1. The default view opens to TownscaperScene (3D city builder), not the study experience. StudyHub exists but is not the entry point.
+## Current State (as of 2026-04-27)
+Educational loop is live. F1–F7 shipped: 7-step onboarding (with skip), 5 Hebrew lesson pages, 100-question quiz bank with SM-2 spaced repetition + interval-based XP multipliers, 3D city with 10 XP-gated Kenney buildings, Learning Map, daily challenges, streak tracking, and achievement badges.
 
-**The critical gap:** App feels like a tech demo, not an educational tool. The 3D work is beautiful but the student-facing learning loop is incomplete.
+Default entry is the Study Hub (changed 2026-04-15). Mind-Map Canvas reachable from sidebar; Distribution Explorer + LaTeX equation library shipped. R3F perf pass complete (memoized scene.clone, ContactShadows@256, shadow-map@512). Mobile + RTL screen-reader + prefers-reduced-motion all addressed.
+
+**Open work:** F8 Auth (Supabase) — code ready, blocked on human provisioning of supabase.com project + env vars (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`). PostHog analytics similarly blocked on `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST`.
 
 ## Tech Stack
 - React + TypeScript + Vite
-- Three.js + React Three Fiber (3D)
-- Zustand (state management)
-- Tailwind CSS
-- Served from VPS: 76.13.151.44
+- Three.js + React Three Fiber + Drei (3D)
+- Zustand with `persist` middleware (state)
+- Tailwind CSS (styling)
+- KaTeX (equation rendering)
+- Framer Motion (animations)
+- Deployed via GitHub Actions → GitHub Pages: https://barakd127.github.io/wafflestack-app/
 
 ## GSD Agent Instructions
 
-### Working Directory
-`C:\Users\BARAK\Projects\base44\src\`
+### Repo
+GitHub: https://github.com/barakd127/wafflestack-app
+Vault working copy: `C:\Users\ofekd\Documents\Obsidian Vault\AI\WaffleStack\code\src\`
 
 ### Design Principles
 1. **Statistics first** — Every session should move the education forward, not just the 3D rendering
@@ -96,10 +101,8 @@ The 3D engine is impressive but overbuilt for v1. The default view opens to Town
 5. **No regressions** — Never break working features when adding new ones
 
 ### Priority Order
-1. Fix default view → Study Hub
-2. Complete quiz content (15+ questions across 3 topics)
-3. Connect XP to city growth
-4. Achievement system
-5. Spaced repetition
-6. Polish and animations
+1. **F8 Auth (Supabase)** — code drafted (`supabase.ts`, `authStore.ts`, `AuthPage.tsx`); blocked on human provisioning of supabase.com project + `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` env vars
+2. **PostHog analytics wiring** — `useAnalytics` hook + 8 event wrappers ready; blocked on `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST` env vars
+3. Post-unblock: server-side progress sync + per-student SM-2 state persistence
+
 GITHUB_BRIDGE=https://github.com/Barakd127/wafflestack-ops

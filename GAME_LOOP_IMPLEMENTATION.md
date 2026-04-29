@@ -1,5 +1,13 @@
 # Base44 - Core Game Loop Implementation Guide
 
+> ⚠️ **HISTORICAL / ARCHIVED — DO NOT USE FOR CURRENT WORK.**
+>
+> This document describes the cancelled **BASE44 cyberpunk voxel city builder**. Every component it references — `Voxel.tsx`, `VoxelGrid.tsx`, `BottomDock.tsx`, `GameScene.tsx`, `gameStore.ts` — has been **deleted** from `src/`. The localStorage key `base44-storage` (line 99 below) is no longer used by anything. The `cd base44` install path (line 229) is dead.
+>
+> **Current WaffleStack reality:** statistics-learning game with a Kenney GLB city (`WaffleStackCity.tsx`), XP + SM-2 spaced repetition store (`learningStore.ts`, key `wafflestack-learning`), and a Hebrew RTL StatChallenge quiz panel. See `README.md`, `PROJECT.md`, and `PRD.md` in this directory for the live spec.
+>
+> Kept on disk as a record of the prior project's game-loop architecture; some patterns (auto-persist, ghost preview, store-driven UI) carried over to WaffleStack but the code did not.
+
 ## 🎮 Overview
 
 This document details the **Core Game Loop**, **State Management**, and **Persistence** implementation for Base44 - a cyberpunk voxel city builder with "Toy Theory" aesthetics.
