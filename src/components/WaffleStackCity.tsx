@@ -408,19 +408,17 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
       child.material = (child.material as THREE.Material).clone()
       const mat = child.material as THREE.MeshStandardMaterial
 
-      if (i === 0) {
-        // Main building body: disable vertex-color multiply, apply concept color
-        mat.vertexColors = false          // THREE.NoColors — no vertex-color interference
-        if (activeColor) {
-          const c = new THREE.Color(activeColor)
-          mat.color.set(c)
-          mat.roughness = 0.75
-          mat.metalness = 0.1
-        }
-      } else {
-        // Secondary meshes (roof, windows, details): keep Kenney vertex colors
-        mat.vertexColors = true           // THREE.VertexColors — preserve original look
+      // Keep vertex colors on ALL meshes — Kenney architectural detail depends on them.
+      // mat.color acts as a tint multiplier: concept_color × vertex_color = tinted detail.
+      mat.vertexColors = true
+
+      if (i === 0 && activeColor) {
+        // Tint main body with concept color while preserving Kenney vertex-color variation
+        mat.color.set(new THREE.Color(activeColor))
+        mat.roughness = 0.75
+        mat.metalness = 0.1
       }
+      // Secondary meshes keep their original mat.color (white = no tint, full Kenney look)
     })
 
     return clone
