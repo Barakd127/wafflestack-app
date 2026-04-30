@@ -465,6 +465,17 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   })
   const [newRecord, setNewRecord] = useState(false)
 
+  // Personal best — fastest correct-answer time (seconds) ever recorded for this building.
+  // Builds on existing response-time tracking; persists across sessions for motivation.
+  const [bestEverTime, setBestEverTime] = useState<number | null>(() => {
+    const stored = localStorage.getItem(`wafflestack-best-time-${building.id}`)
+    if (!stored) return null
+    const n = parseInt(stored)
+    return Number.isFinite(n) && n > 0 ? n : null
+  })
+  const [newTimeRecord, setNewTimeRecord] = useState(false)
+  const [bestTimePulse, setBestTimePulse] = useState(false)
+
   // Timer mode — exam-style 30s countdown per quiz question. Persisted globally.
   const TIMER_INITIAL = 30
   const [timerEnabled, setTimerEnabled] = useState(
@@ -518,6 +529,17 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
       setConfettiBurst(true)
       setTimeout(() => setConfettiBurst(false), 900)
       if (soundEnabled) playCorrectTone()
+      // Personal best time — only celebrate when there was a previous benchmark to beat.
+      if (bestEverTime === null || elapsedSec < bestEverTime) {
+        const hadPrevBest = bestEverTime !== null
+        setBestEverTime(elapsedSec)
+        try { localStorage.setItem(`wafflestack-best-time-${building.id}`, String(elapsedSec)) } catch { /* quota */ }
+        if (hadPrevBest) {
+          setNewTimeRecord(true)
+          setBestTimePulse(true)
+          setTimeout(() => setBestTimePulse(false), 700)
+        }
+      }
       setStreak(s => {
         const next = s + 1
         setPeakStreak(p => Math.max(p, next))
@@ -571,6 +593,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     setStreak(0)
     setPeakStreak(0)
     setNewRecord(false)
+    setNewTimeRecord(false)
     setSecondsLeft(TIMER_INITIAL)
     setQuestionStartTime(Date.now())
     setResponseTimes([])
@@ -1002,6 +1025,29 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   )
                 })()}
 
+                {/* Personal best time across all attempts for this building */}
+                {bestEverTime !== null && (
+                  <div style={{
+                    background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.35)',
+                    borderRadius: 12, padding: '10px 18px', marginBottom: 16,
+                    fontSize: 13, color: '#FFD700', fontWeight: 700,
+                    direction: 'rtl', textAlign: 'right',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    gap: 12, minWidth: 220,
+                  }}>
+                    <span>🏆 שיא זמן אישי: {bestEverTime}s</span>
+                    {newTimeRecord && (
+                      <span style={{
+                        background: 'rgba(255,215,0,0.18)', color: '#FFD700',
+                        fontSize: 11, fontWeight: 800, padding: '2px 8px',
+                        borderRadius: 12, border: '1px solid rgba(255,215,0,0.35)',
+                      }}>
+                        🆕 שיא חדש!
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 {/* Peak streak this attempt */}
                 {peakStreak >= 2 && (
                   <div style={{
@@ -1211,6 +1257,22 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     >
                       <span>⏱️</span>
                       <span>{secondsLeft}s</span>
+                    </span>
+                  )}
+                  {bestEverTime !== null && (
+                    <span
+                      title={`שיא זמן תגובה אישי לבניין זה — ${bestEverTime}s`}
+                      style={{
+                        background: 'rgba(255,215,0,0.12)',
+                        border: '1px solid rgba(255,215,0,0.4)',
+                        borderRadius: 20, padding: '4px 10px', fontSize: 12,
+                        color: '#FFD700', fontWeight: 700,
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        animation: bestTimePulse ? 'streak-pulse 0.6s ease-out' : undefined,
+                      }}
+                    >
+                      <span>🏆</span>
+                      <span style={{ fontVariantNumeric: 'tabular-nums' }}>{bestEverTime}s</span>
                     </span>
                   )}
                   {streak >= 2 && (
