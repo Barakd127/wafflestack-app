@@ -14,11 +14,10 @@ export interface User {
 const AUTH_KEY = 'wafflestack-user'
 
 export function initializeUser(): User {
-  let user: User | null = null
   try {
     const stored = localStorage.getItem(AUTH_KEY)
     if (stored) {
-      user = JSON.parse(stored)
+      const user = JSON.parse(stored) as User
       // Update lastActiveAt
       user.lastActiveAt = new Date().toISOString()
       localStorage.setItem(AUTH_KEY, JSON.stringify(user))

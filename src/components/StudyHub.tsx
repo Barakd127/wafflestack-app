@@ -798,8 +798,8 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate 
   const recordAnswer = useLearningStore(s => s.recordAnswer)
 
   // Load questions from selected topic or fallback to hardcoded
-  const questions = selectedTopic && quizBankData.topics[selectedTopic]
-    ? quizBankData.topics[selectedTopic].questions.map((q: any) => ({
+  const questions = selectedTopic && (quizBankData.topics as Record<string, any>)[selectedTopic]
+    ? (quizBankData.topics as Record<string, any>)[selectedTopic].questions.map((q: any) => ({
         id: q.id,
         topic: selectedTopic,
         text: q.question,
@@ -809,7 +809,7 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate 
     : QUESTIONS
 
   const [dotStates, setDotStates] = useState<Array<'empty' | 'current' | 'correct' | 'wrong' | 'future'>>(
-    questions.map((_, i) => i === 0 ? 'current' : 'empty')
+    questions.map((_: any, i: number) => i === 0 ? 'current' : 'empty')
   )
 
   const q = questions[currentQ]
@@ -842,7 +842,7 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate 
     if (!selectedTopic) return
 
     // Record quiz session in progress store
-    const topicData = quizBankData.topics[selectedTopic]
+    const topicData = (quizBankData.topics as Record<string, any>)[selectedTopic]
     if (!topicData) return
 
     const answers: QuizAnswer[] = questions.map((q: any, i: number) => ({
