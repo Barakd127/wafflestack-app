@@ -82,7 +82,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
       </button>
 
       <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
-        בחר/י נושא ללימוד
+        בחר/י נושא ללימוד 📚
       </h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20, maxWidth: 1200 }}>
@@ -372,10 +372,10 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap }: {
   onGoMindmap: () => void
 }) {
   const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string }> = [
-    { id: 'home',     label: 'דף הבית',    icon: '⌂' },
-    { id: 'topics',   label: 'נושאים',     icon: '📚' },
-    { id: null,       label: 'מפת לימוד',  icon: '◫', action: 'mindmap' },
-    { id: null,       label: 'העולם שלי',  icon: '🌐', action: 'world' },
+    { id: 'home',     label: 'דף הבית',      icon: '⌂' },
+    { id: 'topics',   label: 'אזור למידה',   icon: '📖' },
+    { id: null,       label: 'מפת לימוד',    icon: '◫', action: 'mindmap' },
+    { id: null,       label: 'העולם שלי',    icon: '🌐', action: 'world' },
   ]
 
   return (
@@ -1125,7 +1125,7 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
     return loadProgress(user.userId)
   })
 
-  const title = internalView === 'home' ? 'דף הבית' : internalView === 'topics' ? 'בחירת נושא' : 'אזור למידה'
+  const title = internalView === 'home' ? 'דף הבית' : internalView === 'topics' ? 'אזור למידה' : 'אזור למידה'
 
   const handleSelectTopic = (topicId: string) => {
     setSelectedTopic(topicId)
