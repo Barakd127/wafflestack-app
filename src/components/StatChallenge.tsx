@@ -465,6 +465,17 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   })
   const [newRecord, setNewRecord] = useState(false)
 
+  // Personal best — fastest correct-answer time (seconds) ever recorded for this building.
+  // Builds on existing response-time tracking; persists across sessions for motivation.
+  const [bestEverTime, setBestEverTime] = useState<number | null>(() => {
+    const stored = localStorage.getItem(`wafflestack-best-time-${building.id}`)
+    if (!stored) return null
+    const n = parseInt(stored)
+    return Number.isFinite(n) && n > 0 ? n : null
+  })
+  const [newTimeRecord, setNewTimeRecord] = useState(false)
+  const [bestTimePulse, setBestTimePulse] = useState(false)
+
   // Timer mode — exam-style 30s countdown per quiz question. Persisted globally.
   const TIMER_INITIAL = 30
   const [timerEnabled, setTimerEnabled] = useState(
@@ -494,6 +505,12 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     const stored = localStorage.getItem(`wafflestack-difficulty-${building.id}`)
     return stored ? parseInt(stored) : null
   })
+
+  // Response time tracking — measures think-time per question (excludes timeouts).
+  // Fuels per-question pacing feedback + an average summary at quiz end.
+  const [questionStartTime, setQuestionStartTime] = useState(() => Date.now())
+  const [responseTimes, setResponseTimes] = useState<number[]>([])
+  const [lastResponseSeconds, setLastResponseSeconds] = useState<number | null>(null)
   const handleDifficultyRating = (rating: number) => {
     setDifficultyRating(rating)
     localStorage.setItem(`wafflestack-difficulty-${building.id}`, String(rating))
@@ -503,12 +520,26 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
 
   const handleAnswer = (idx: number) => {
     if (selected !== null) return
+    const elapsedSec = Math.max(1, Math.round((Date.now() - questionStartTime) / 1000))
+    setLastResponseSeconds(elapsedSec)
+    setResponseTimes(prev => [...prev, elapsedSec])
     setSelected(idx)
     if (idx === currentQ.correct) {
       setScore(s => s + 1)
       setConfettiBurst(true)
       setTimeout(() => setConfettiBurst(false), 900)
       if (soundEnabled) playCorrectTone()
+      // Personal best time — only celebrate when there was a previous benchmark to beat.
+      if (bestEverTime === null || elapsedSec < bestEverTime) {
+        const hadPrevBest = bestEverTime !== null
+        setBestEverTime(elapsedSec)
+        try { localStorage.setItem(`wafflestack-best-time-${building.id}`, String(elapsedSec)) } catch { /* quota */ }
+        if (hadPrevBest) {
+          setNewTimeRecord(true)
+          setBestTimePulse(true)
+          setTimeout(() => setBestTimePulse(false), 700)
+        }
+      }
       setStreak(s => {
         const next = s + 1
         setPeakStreak(p => Math.max(p, next))
@@ -546,6 +577,8 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
       setSelected(null)
       setHintShown(false)
       setSecondsLeft(TIMER_INITIAL)
+      setQuestionStartTime(Date.now())
+      setLastResponseSeconds(null)
     }
   }
 
@@ -560,8 +593,21 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     setStreak(0)
     setPeakStreak(0)
     setNewRecord(false)
+    setNewTimeRecord(false)
     setSecondsLeft(TIMER_INITIAL)
+    setQuestionStartTime(Date.now())
+    setResponseTimes([])
+    setLastResponseSeconds(null)
   }
+
+  // Reset start-time when entering the quiz tab so the first question's
+  // timer begins on tab activation, not on modal mount.
+  useEffect(() => {
+    if (activeTab === 'quiz' && selected === null && !quizDone && !showMistakes) {
+      setQuestionStartTime(Date.now())
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab])
 
   // Quiz keyboard shortcuts: 1–4 select an option, Enter/Space advance.
   // Only active on the quiz tab while a question is open (not in mistakes-review or done state).
@@ -610,13 +656,23 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
         position: 'fixed', inset: 0, zIndex: 300,
         background: 'rgba(5, 20, 60, 0.78)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 12,
+        padding: 'clamp(8px, 3vw, 16px)',
         backdropFilter: 'blur(6px)',
       }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <style>{CONFETTI_STYLE}</style>
-      <div style={{
+      <style>{`
+        @media (max-width: 600px) {
+          .stat-quiz-header { padding: 14px 16px 12px !important; }
+          .stat-quiz-header .concept-icon { width: 40px !important; height: 40px !important; font-size: 22px !important; }
+          .stat-quiz-header h2 { font-size: 16px !important; }
+          .stat-quiz-tabs button { padding: 10px 10px !important; font-size: 12px !important; }
+          .stat-quiz-body { padding: 16px !important; }
+          .stat-quiz-option { padding: 10px 12px !important; font-size: 13px !important; min-height: 44px; }
+        }
+      `}</style>
+      <div className="quiz-modal-inner" style={{
         background: 'linear-gradient(135deg, #FFFFFF 0%, #D8E7FA 60%, #B8D0F5 100%)',
         border: `1px solid ${color}44`,
         borderRadius: 20,
@@ -944,6 +1000,55 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   </div>
                 )}
 
+                {/* Average response time — metacognitive pacing feedback */}
+                {responseTimes.length > 0 && (() => {
+                  const avg = Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length)
+                  const fastest = Math.min(...responseTimes)
+                  return (
+                    <div style={{
+                      background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.3)',
+                      borderRadius: 12, padding: '10px 18px', marginBottom: 16,
+                      fontSize: 13, color: '#4ECDC4', fontWeight: 700,
+                      direction: 'rtl', textAlign: 'right',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      gap: 12, minWidth: 220,
+                    }}>
+                      <span>⏱️ ממוצע זמן תגובה</span>
+                      <span style={{ fontVariantNumeric: 'tabular-nums', display: 'inline-flex', gap: 8, alignItems: 'baseline' }}>
+                        <span>{avg}s</span>
+                        {responseTimes.length >= 2 && (
+                          <span style={{ fontSize: 10, fontWeight: 500, color: 'rgba(78,205,196,0.7)' }}>
+                            (מהיר: {fastest}s)
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  )
+                })()}
+
+                {/* Personal best time across all attempts for this building */}
+                {bestEverTime !== null && (
+                  <div style={{
+                    background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.35)',
+                    borderRadius: 12, padding: '10px 18px', marginBottom: 16,
+                    fontSize: 13, color: '#FFD700', fontWeight: 700,
+                    direction: 'rtl', textAlign: 'right',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    gap: 12, minWidth: 220,
+                  }}>
+                    <span>🏆 שיא זמן אישי: {bestEverTime}s</span>
+                    {newTimeRecord && (
+                      <span style={{
+                        background: 'rgba(255,215,0,0.18)', color: '#FFD700',
+                        fontSize: 11, fontWeight: 800, padding: '2px 8px',
+                        borderRadius: 12, border: '1px solid rgba(255,215,0,0.35)',
+                      }}>
+                        🆕 שיא חדש!
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 {/* Peak streak this attempt */}
                 {peakStreak >= 2 && (
                   <div style={{
@@ -1156,6 +1261,22 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                       <span>{secondsLeft}s</span>
                     </span>
                   )}
+                  {bestEverTime !== null && (
+                    <span
+                      title={`שיא זמן תגובה אישי לבניין זה — ${bestEverTime}s`}
+                      style={{
+                        background: 'rgba(255,215,0,0.12)',
+                        border: '1px solid rgba(255,215,0,0.4)',
+                        borderRadius: 20, padding: '4px 10px', fontSize: 12,
+                        color: '#FFD700', fontWeight: 700,
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        animation: bestTimePulse ? 'streak-pulse 0.6s ease-out' : undefined,
+                      }}
+                    >
+                      <span>🏆</span>
+                      <span style={{ fontVariantNumeric: 'tabular-nums' }}>{bestEverTime}s</span>
+                    </span>
+                  )}
                   {streak >= 2 && (
                     <span
                       title={`רצף נוכחי: ${streak} · שיא בניסיון: ${peakStreak}${bestEverStreak > 0 ? ` · שיא כולל: ${bestEverStreak}` : ''}`}
@@ -1322,6 +1443,27 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 {/* Explanation + Next */}
                 {selected !== null && (
                   <div style={{ marginTop: 14 }}>
+                    {lastResponseSeconds !== null && selected !== -1 && (
+                      <div style={{
+                        display: 'flex', justifyContent: 'flex-end', marginBottom: 8,
+                      }}>
+                        <span
+                          title="Time you spent on this question — useful for pacing"
+                          style={{
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            borderRadius: 20, padding: '3px 10px',
+                            fontSize: 11, color: 'rgba(255,255,255,0.55)',
+                            fontVariantNumeric: 'tabular-nums',
+                            direction: 'rtl', display: 'inline-flex',
+                            alignItems: 'center', gap: 4,
+                          }}
+                        >
+                          <span>⏱️</span>
+                          <span>עניתם תוך {lastResponseSeconds}s</span>
+                        </span>
+                      </div>
+                    )}
                     <div style={{
                       background: selected === currentQ.correct ? 'rgba(31,122,110,0.1)' : 'rgba(155,32,32,0.07)',
                       border: `1px solid ${selected === currentQ.correct ? 'rgba(31,122,110,0.3)' : 'rgba(155,32,32,0.25)'}`,

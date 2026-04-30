@@ -44,7 +44,9 @@ function loadWeakSpots(): BuildingScore[] {
     const total = parseInt(totalRaw)
     const percentage = total > 0 ? Math.round((score / total) * 100) : 0
     return { ...b, score, total, percentage }
-  }).filter((x): x is BuildingScore => x !== null && x.percentage < 70)
+  })
+    .filter((x): x is BuildingScore => x !== null && x.percentage < 70)
+    .sort((a, b) => a.percentage - b.percentage)
 }
 
 function loadAccuracy(buildingId: string): { score: number; total: number; percentage: number } | null {
@@ -466,6 +468,57 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
           {isStudiedToday ? '✓ Studied today' : 'Not yet today'}
         </div>
       </div>
+
+      {/* Focus Topic — single weakest building, only when one exists */}
+      {weakSpots.length > 0 && (
+        <button
+          onClick={() => onPracticeWeakSpots?.()}
+          disabled={!onPracticeWeakSpots}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '12px 20px', borderBottom: '1px solid rgba(31,62,108,0.1)',
+            background: `linear-gradient(90deg, ${weakSpots[0].color}1a 0%, rgba(255,255,255,0.0) 100%)`,
+            border: 'none', borderTop: 'none', borderRight: 'none', borderLeft: 'none',
+            width: '100%', textAlign: 'left' as const, flexShrink: 0,
+            cursor: onPracticeWeakSpots ? 'pointer' : 'default',
+            transition: 'background 0.2s',
+          }}
+          onMouseEnter={e => {
+            if (onPracticeWeakSpots) e.currentTarget.style.background = `linear-gradient(90deg, ${weakSpots[0].color}2e 0%, rgba(255,255,255,0.0) 100%)`
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = `linear-gradient(90deg, ${weakSpots[0].color}1a 0%, rgba(255,255,255,0.0) 100%)`
+          }}
+          title={onPracticeWeakSpots ? 'Practice weak spots' : undefined}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+            <span style={{ fontSize: 20 }}>💪</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+              <div style={{
+                fontSize: 10, fontWeight: 700, color: '#9B2020',
+                letterSpacing: '0.08em', textTransform: 'uppercase' as const,
+              }}>
+                Focus topic
+              </div>
+              <div style={{
+                fontSize: 13, fontWeight: 700, color: '#1F3E6C',
+                direction: 'rtl' as const, overflow: 'hidden',
+                textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const,
+              }}>
+                {weakSpots[0].label}
+              </div>
+            </div>
+          </div>
+          <span style={{
+            fontSize: 12, fontWeight: 800, color: '#9B2020',
+            background: 'rgba(155,32,32,0.1)', padding: '4px 10px',
+            borderRadius: 8, whiteSpace: 'nowrap' as const,
+            fontVariantNumeric: 'tabular-nums',
+          }}>
+            {weakSpots[0].percentage}%
+          </span>
+        </button>
+      )}
 
       {/* Daily XP Goal Row */}
       <DailyGoal todayXp={weeklyBars[weeklyBars.length - 1]?.delta ?? 0} />

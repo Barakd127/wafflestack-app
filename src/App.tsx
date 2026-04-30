@@ -28,7 +28,8 @@ function App() {
     if (h === '#view-wafflecity') return 'wafflecity'
     if (h === '#study') return 'study'
     if (h === '#split') return 'split'
-    return hasUserName ? 'study' : 'onboarding'
+    // Landing page is the entry point for first-time visitors; returning users go straight to StudyHub
+    return hasUserName ? 'study' : 'landing'
   })
   const [lessonTopic, setLessonTopic] = useState<LessonTopicId>('mean')
   const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -259,7 +260,7 @@ function App() {
         {activeView === 'landing' && (
           <div className="w-full h-full">
             <LandingPage
-              onEnterCity={() => setActiveView('wafflecity')}
+              onEnterCity={() => hasUserName ? setActiveView('wafflecity') : setActiveView('onboarding')}
               onOpenStudy={() => setActiveView('study')}
             />
           </div>

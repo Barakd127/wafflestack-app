@@ -24,7 +24,9 @@ import ConceptMapViewer from './ConceptMapViewer'
 import StreakCalendar from './StreakCalendar'
 import StatsCalculator from './StatsCalculator'
 import StreakReminderBanner from './StreakReminderBanner'
+import WelcomeBackToast from './WelcomeBackToast'
 import DailyStatFact from './DailyStatFact'
+import PomodoroTimer from './PomodoroTimer'
 
 // ─── localStorage helpers ────────────────────────────────────────────────────
 function loadMastered(): Set<string> {
@@ -666,6 +668,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [pickerTarget, setPickerTarget] = useState<BuildingDef | null>(null)
   const [pickerMode, setPickerMode] = useState(false)
 
+  // Resume chip — surfaces the last challenge the user opened if it's still
+  // recent and unmastered, so they can pick up where they left off.
+  const [resumeChip, setResumeChip] = useState<{ id: string; label: string; statsConcept: string; color?: string; ts: number } | null>(() => {
+    try {
+      const raw = localStorage.getItem('wafflestack-last-challenge')
+      if (!raw) return null
+      const parsed = JSON.parse(raw)
+      if (!parsed || typeof parsed.id !== 'string' || !Number.isFinite(parsed.ts)) return null
+      if (Date.now() - parsed.ts > 7 * 86400000) return null
+      return parsed
+    } catch {
+      return null
+    }
+  })
+
   // Weak spots practice quiz state
   interface WQQuestion { buildingId: string; buildingLabel: string; color: string; q: string; options: string[]; correct: number; explanation: string }
   const [showWeakSpotsQuiz, setShowWeakSpotsQuiz] = useState(false)
@@ -710,6 +727,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
     setSelectedBuilding(null)
   }, [mastered, challengeBuilding])
 
+  // Persist the last challenge the user opened so we can offer a Resume chip later.
+  useEffect(() => {
+    if (!challengeBuilding) return
+    const data = {
+      id: challengeBuilding.id,
+      label: challengeBuilding.label,
+      statsConcept: challengeBuilding.statsConcept,
+      color: challengeBuilding.color,
+      ts: Date.now(),
+    }
+    try { localStorage.setItem('wafflestack-last-challenge', JSON.stringify(data)) } catch { /* ignore */ }
+    // Hide the resume chip for this session — they're already back on it.
+    setResumeChip(null)
+  }, [challengeBuilding])
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -740,6 +772,12 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             setShowFlashCards(false)
           } else if (showStatsCalculator) {
             setShowStatsCalculator(false)
+          } else if (showLeaderboard) {
+            setShowLeaderboard(false)
+          } else if (showLearningMap) {
+            setShowLearningMap(false)
+          } else if (showStreakCalendar) {
+            setShowStreakCalendar(false)
           } else {
             setShowHelp(false)
           }
@@ -780,12 +818,24 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         case 'K':
           setShowStatsCalculator(c => !c)
           break
+        case 'l':
+        case 'L':
+          setShowLeaderboard(l => !l)
+          break
+        case 'p':
+        case 'P':
+          setShowLearningMap(m => !m)
+          break
+        case 'n':
+        case 'N':
+          setShowStreakCalendar(c => !c)
+          break
       }
     }
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [reviewBuilding, challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, showStatsCalculator, toggleSound, openRandomChallenge])
+  }, [reviewBuilding, challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, showStatsCalculator, showLeaderboard, showLearningMap, showStreakCalendar, toggleSound, openRandomChallenge])
 
   // Handle deep-link hash on mount
   useEffect(() => {
@@ -987,6 +1037,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       <style>{ANIM_STYLE}</style>
 
       <StreakReminderBanner xp={xp} />
+      <WelcomeBackToast />
       <DailyStatFact />
 
       {/* Top-right controls: XP + ScoreBoard toggle */}
@@ -1119,6 +1170,48 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               color: 'rgba(255,255,255,0.35)', fontSize: 10, padding: 0,
               lineHeight: 1, flexShrink: 0,
             }}
+          >✕</button>
+        </div>
+      )}
+
+      {/* Resume chip — picks up the last unmastered challenge the user opened. */}
+      {resumeChip && !mastered.has(resumeChip.id) && !challengeBuilding && (
+        <div
+          onClick={() => {
+            setChallengeBuilding({
+              id: resumeChip.id,
+              label: resumeChip.label,
+              statsConcept: resumeChip.statsConcept,
+              color: resumeChip.color,
+            })
+            setSelectedBuilding(null)
+          }}
+          style={{
+            position: 'absolute', top: 92, left: 60, zIndex: 50,
+            background: 'rgba(99,102,241,0.12)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(99,102,241,0.35)', borderRadius: 20,
+            padding: '4px 10px 4px 13px',
+            fontFamily: "'Heebo', system-ui, sans-serif",
+            display: 'flex', alignItems: 'center', gap: 8,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="לחץ כדי להמשיך מאיפה שעצרת"
+        >
+          <span style={{ fontSize: 11, color: '#a5b4fc', fontWeight: 700, whiteSpace: 'nowrap' }}>
+            ↩️ המשך: {resumeChip.statsConcept.split(' (')[0]}
+          </span>
+          <button
+            onClick={e => {
+              e.stopPropagation()
+              setResumeChip(null)
+            }}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'rgba(255,255,255,0.35)', fontSize: 10, padding: 0,
+              lineHeight: 1, flexShrink: 0,
+            }}
+            aria-label="Dismiss resume chip"
           >✕</button>
         </div>
       )}
@@ -1439,6 +1532,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
       {/* Local Leaderboard */}
       {showLeaderboard && <LocalLeaderboard onClose={() => setShowLeaderboard(false)} />}
+
+      {/* Pomodoro focus timer */}
+      <PomodoroTimer />
 
       {/* 30-Day Streak Calendar */}
       {showStreakCalendar && <StreakCalendar onClose={() => setShowStreakCalendar(false)} />}
@@ -2175,21 +2271,49 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         </div>
       )}
 
-      {/* Help button — bottom-right */}
-      <button
-        onClick={() => setShowHelp(h => !h)}
-        style={{
-          position: 'absolute', bottom: 24, right: 24, zIndex: 50,
-          background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%',
-          width: 36, height: 36, color: 'rgba(255,255,255,0.6)',
-          fontWeight: 700, fontSize: 16, cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}
-        title="Keyboard shortcuts"
-      >
-        ?
-      </button>
+      {/* HUD button cluster — bottom-right */}
+      <div style={{
+        position: 'absolute', bottom: 24, right: 24, zIndex: 50,
+        display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end',
+      }}>
+        {[
+          { emoji: '🗺️', label: 'Learning path (P)', onClick: () => setShowLearningMap(m => !m), active: showLearningMap },
+          { emoji: '🏆', label: 'Local leaderboard (L)', onClick: () => setShowLeaderboard(l => !l), active: showLeaderboard },
+          { emoji: '📅', label: 'Streak calendar (N)', onClick: () => setShowStreakCalendar(c => !c), active: showStreakCalendar },
+        ].map(({ emoji, label, onClick, active }) => (
+          <button
+            key={label}
+            onClick={onClick}
+            title={label}
+            aria-label={label}
+            style={{
+              background: active ? 'rgba(78,205,196,0.18)' : 'rgba(10,10,20,0.75)',
+              backdropFilter: 'blur(10px)',
+              border: `1px solid ${active ? 'rgba(78,205,196,0.55)' : 'rgba(255,255,255,0.2)'}`,
+              borderRadius: '50%', width: 36, height: 36,
+              color: active ? '#4ECDC4' : 'rgba(255,255,255,0.7)',
+              fontSize: 16, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s',
+            }}
+          >
+            {emoji}
+          </button>
+        ))}
+        <button
+          onClick={() => setShowHelp(h => !h)}
+          style={{
+            background: 'rgba(10,10,20,0.75)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%',
+            width: 36, height: 36, color: 'rgba(255,255,255,0.6)',
+            fontWeight: 700, fontSize: 16, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+          title="Keyboard shortcuts"
+        >
+          ?
+        </button>
+      </div>
 
       {/* Concept Glossary overlay */}
       {showGlossary && (
@@ -2446,6 +2570,9 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               { key: 'F', desc: 'Toggle flash cards' },
               { key: 'C', desc: 'Toggle concept map' },
               { key: 'K', desc: 'Toggle stats calculator' },
+              { key: 'L', desc: 'Toggle local leaderboard' },
+              { key: 'P', desc: 'Toggle learning path map' },
+              { key: 'N', desc: 'Toggle streak calendar' },
               { key: 'R', desc: 'Surprise quiz — random unmastered building' },
               { key: '1–4', desc: 'In quiz: select answer option' },
               { key: '⏎', desc: 'In quiz: continue to next question' },

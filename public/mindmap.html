@@ -1239,10 +1239,10 @@ function wbRedraw(){
     WB._connDelBtn=null;
   }
 
-  // Draw contact points for hovered AND selected objects (in select or connect mode)
+  // Draw contact points for hovered shape in ANY mode; selected shape in select/connect
   const cpShowIds=new Set();
+  if(WB._hoverObjId)cpShowIds.add(WB._hoverObjId);
   if(WB.tool==='select'||WB.tool==='connect'){
-    if(WB._hoverObjId)cpShowIds.add(WB._hoverObjId);
     if(WB.selId)cpShowIds.add(WB.selId);
   }
   cpShowIds.forEach(cpId=>{
@@ -1767,11 +1767,9 @@ canvas.addEventListener('mousedown',e=>{
     }
   }
 
-  // Contact point click → start connecting (works in Select mode too)
-  if(WB.tool==='select'||WB.tool==='connect'){
-    const cp=findContactPointHit(e.offsetX,e.offsetY,10);
-    if(cp){const sc2=sc2scene(e.offsetX,e.offsetY);WB.drag={type:'connecting',fromId:cp.objId,fromAnchor:cp.anchor,mx:sc2.x,my:sc2.y};return;}
-  }
+  // Contact point click → start connecting in ANY mode
+  const _cpHit=findContactPointHit(e.offsetX,e.offsetY,10);
+  if(_cpHit){const sc2=sc2scene(e.offsetX,e.offsetY);WB.drag={type:'connecting',fromId:_cpHit.objId,fromAnchor:_cpHit.anchor,mx:sc2.x,my:sc2.y};return;}
 
   if(WB.tool==='connect'){
     const sc=sc2scene(e.offsetX,e.offsetY);
@@ -1870,7 +1868,8 @@ canvas.addEventListener('mousemove',e=>{
       }
     }
     if(WB._hoveredHandlePos){WB._hoveredHandlePos=null;wbRedraw();}
-    canvas.style.cursor='default';
+    if(findContactPointHit(e.offsetX,e.offsetY,10)){canvas.style.cursor='crosshair';}
+    else canvas.style.cursor='default';
   }
 
   if(WB.drag&&WB.drag.type==='connecting'){WB.drag.mx=sc.x;WB.drag.my=sc.y;wbRedraw();return;}
@@ -1977,9 +1976,39 @@ canvas.addEventListener('mouseup',e=>{
   if(d.type==='connecting'){
     const snap=findNearestAnchor(sc.x,sc.y,d.fromId,25/WB.vp.s);
     const conn={id:uid(),type:'connector',fromId:d.fromId,fromAnchor:d.fromAnchor||'center',color:WB.strokeColor,size:WB.size||2};
-    if(snap){conn.toId=snap.objId;conn.toAnchor=snap.anchor;}
-    else{conn.x2=sc.x;conn.y2=sc.y;}
-    WB.scene.push(conn);wbPush();wbRedraw();
+    if(snap){
+      conn.toId=snap.objId;conn.toAnchor=snap.anchor;
+      WB.scene.push(conn);
+    } else {
+      // Empty-space release: auto-spawn an exact duplicate of the source shape (rect/circle)
+      // at the drop point, then attach the connector to it.
+      const src=WB.scene.find(o=>o.id===d.fromId);
+      const startAnc=src?findAnchor(d.fromId,d.fromAnchor||'center'):null;
+      const dragDist=startAnc?Math.hypot(sc.x-startAnc.x,sc.y-startAnc.y):0;
+      const onShape=WB.scene.some(o=>o.id!==d.fromId&&o.type!=='connector'&&hitObj(o,sc.x,sc.y));
+      const cloneable=src&&!onShape&&dragDist>20&&(src.type==='rect'||src.type==='circle');
+      if(cloneable){
+        const clone=JSON.parse(JSON.stringify(src));
+        clone.id=uid();
+        if(clone.type==='rect'){
+          clone.x=sc.x-(clone.w||0)/2;
+          clone.y=sc.y-(clone.h||0)/2;
+          delete clone.x1;delete clone.y1;
+        } else {
+          clone.cx=sc.x;clone.cy=sc.y;
+          delete clone.x1;delete clone.y1;
+        }
+        WB.scene.push(clone);
+        const opp={N:'S',S:'N',E:'W',W:'E'};
+        conn.toId=clone.id;conn.toAnchor=opp[d.fromAnchor]||'center';
+        WB.scene.push(conn);
+        WB.selId=clone.id;
+      } else {
+        conn.x2=sc.x;conn.y2=sc.y;
+        WB.scene.push(conn);
+      }
+    }
+    wbPush();wbRedraw();
   }else if(d.type==='pen'){
     if(WB.penPts.length>1){
       const o={id:uid(),type:'pen',pts:WB.penPts,color:WB.strokeColor,size:WB.size};
@@ -2519,8 +2548,44 @@ document.addEventListener('keydown', e => {
     e.preventDefault(); mmRedo();
   } else if((e.ctrlKey||e.metaKey)&&e.key==='f'){
     e.preventDefault(); openSearch();
+  } else if(e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='ArrowUp'||e.key==='ArrowDown'){
+    // Arrow-key navigation between topics and side topics
+    e.preventDefault();
+    if(!MM.sel){MM.sel=MM.root;mmRender();mmEnsureSelVisible();return;}
+    const cur=MM.nodes[MM.sel];if(!cur)return;
+    let nextId=null;
+    if(e.key==='ArrowRight'){
+      if(!cur.collapsed&&cur.childIds.length){nextId=cur.childIds[0];}
+    } else if(e.key==='ArrowLeft'){
+      if(cur.parentId)nextId=cur.parentId;
+    } else if(e.key==='ArrowUp'||e.key==='ArrowDown'){
+      if(cur.parentId){
+        const sibs=MM.nodes[cur.parentId].childIds.filter(id=>MM.nodes[id]);
+        const idx=sibs.indexOf(MM.sel);
+        if(idx>=0){
+          const step=e.key==='ArrowDown'?1:-1;
+          nextId=sibs[(idx+step+sibs.length)%sibs.length];
+        }
+      }
+    }
+    if(nextId&&MM.nodes[nextId]){MM.sel=nextId;mmRender();mmEnsureSelVisible();}
   }
 });
+
+// Pan viewport so the currently selected node is on screen (used by arrow-key nav)
+function mmEnsureSelVisible(){
+  const n=MM.sel&&MM.nodes[MM.sel];if(!n)return;
+  const _app=document.getElementById('app');if(!_app)return;
+  const margin=80;
+  const sx=n.x*MM.zoom+MM.panX, sy=n.y*MM.zoom+MM.panY;
+  const W=_app.clientWidth, H=_app.clientHeight;
+  let dx=0,dy=0;
+  if(sx<margin)dx=margin-sx;
+  else if(sx>W-margin-(n.W||140)*MM.zoom)dx=W-margin-(n.W||140)*MM.zoom-sx;
+  if(sy<margin)dy=margin-sy;
+  else if(sy>H-margin-(n.H||40)*MM.zoom)dy=H-margin-(n.H||40)*MM.zoom-sy;
+  if(dx||dy){MM.panX+=dx;MM.panY+=dy;mmApplyTransform();}
+}
 
 // ═══════════════════════════════════════════════════════════
 // v14 — MIND MAP NAVIGATION (scroll, right-click pan, zoom)
