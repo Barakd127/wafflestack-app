@@ -11,18 +11,18 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1a1a}
 
-/* ── Top Bar (Study Hub style with gold accents) ── */
-#topbar{height:52px;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:white;gap:8px;box-shadow:0 4px 16px rgba(212,175,55,.12);position:relative;z-index:200;backdrop-filter:blur(10px)}
+/* ── Top Bar (Study Hub navy-blue palette) ── */
+#topbar{height:52px;background:linear-gradient(135deg,#1F3E6C 0%,#1a3260 100%);display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:white;gap:8px;box-shadow:0 4px 16px rgba(31,62,108,.35);position:relative;z-index:200;backdrop-filter:blur(10px)}
 .tb-left{display:flex;align-items:center;gap:10px;font-size:13px}
 .tb-logo{font-size:18px;cursor:pointer;font-weight:700;letter-spacing:-.5px;color:#D4AF37}
 .tb-center{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
-.tb-btn{height:28px;padding:0 10px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);color:#D4AF37;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:4px;font-weight:500}
-.tb-btn:hover{background:rgba(212,175,55,.25);border-color:rgba(212,175,55,.6);box-shadow:0 0 12px rgba(212,175,55,.2)}
-.tb-div{width:1px;height:20px;background:rgba(212,175,55,.2);margin:0 2px}
+.tb-btn{height:28px;padding:0 10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:4px;font-weight:500}
+.tb-btn:hover{background:rgba(212,175,55,.3);border-color:rgba(212,175,55,.6);color:#D4AF37}
+.tb-div{width:1px;height:20px;background:rgba(255,255,255,.2);margin:0 2px}
 .tb-right{display:flex;align-items:center;gap:8px}
-.tb-select{height:28px;padding:0 8px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);color:#D4AF37;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;transition:all .15s}
-.tb-select:hover{background:rgba(212,175,55,.25);border-color:rgba(212,175,55,.6)}
-.tb-select option{background:#16213e;color:#D4AF37}
+.tb-select{height:28px;padding:0 8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:white;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;transition:all .15s}
+.tb-select:hover{background:rgba(212,175,55,.2);border-color:rgba(212,175,55,.5)}
+.tb-select option{background:#1F3E6C;color:white}
 
 /* ── Search Bar (overlay) ── */
 #search-overlay{position:fixed;top:52px;left:0;width:300px;background:#1a1a1a;padding:12px;display:none;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.3);border-bottom:1px solid rgba(255,255,255,.1)}
@@ -167,14 +167,14 @@ body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1
 #wb-resize-handle{position:absolute;left:0;top:0;width:7px;height:100%;cursor:ew-resize;background:rgba(99,102,241,.12);transition:background .15s;z-index:10}
 #wb-resize-handle:hover,#wb-resize-handle.dragging{background:rgba(99,102,241,.45)}
 
-#wb-fs-bar{background:#1a1a2e;padding:8px 14px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;min-height:52px}
+#wb-fs-bar{background:linear-gradient(135deg,#1F3E6C 0%,#1a3260 100%);padding:8px 14px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;border-bottom:1px solid rgba(127,155,217,.2);flex-shrink:0;min-height:52px;box-shadow:0 2px 12px rgba(31,62,108,.25)}
 #wb-node-title{color:rgba(255,255,255,.45);font-size:11px;margin-left:auto;flex-shrink:0}
 .wb-sep{width:1px;height:20px;background:rgba(255,255,255,.12);margin:0 2px;flex-shrink:0}
 
 /* Tool buttons */
-.wbt{height:30px;padding:0 9px;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.2);color:#D4AF37;border-radius:5px;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:4px;flex-shrink:0;font-weight:500}
-.wbt:hover{background:rgba(212,175,55,.22);border-color:rgba(212,175,55,.4);box-shadow:0 0 10px rgba(212,175,55,.15)}
-.wbt.on{background:rgba(212,175,55,.35);border-color:#D4AF37;color:white;box-shadow:0 0 12px rgba(212,175,55,.25)}
+.wbt{height:30px;padding:0 9px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.9);border-radius:5px;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:4px;flex-shrink:0;font-weight:500}
+.wbt:hover{background:rgba(212,175,55,.25);border-color:rgba(212,175,55,.5);color:#D4AF37}
+.wbt.on{background:rgba(37,74,159,.7);border-color:rgba(127,155,217,.6);color:#D4AF37;box-shadow:0 0 10px rgba(37,74,159,.35)}
 
 /* Color swatches */
 .swatch-grp{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0}

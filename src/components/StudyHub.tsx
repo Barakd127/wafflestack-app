@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import type { LessonTopicId } from './LessonPage'
 import { useLearningStore } from '../store/learningStore'
-import { initializeUser } from '../stores/authStore'
+import { initializeUser, getCurrentUser, loginUser, registerUser, logoutUser, listUsers, deleteUser, type User } from '../stores/authStore'
 import { loadProgress, recordQuizSession, saveCanvasNotes, type QuizAnswer, type UserProgress } from '../stores/progressStore'
 import quizBankData from '../data/quiz-bank.json'
 
@@ -35,6 +35,164 @@ const TEXT_DARK     = 'var(--sh-text-dark)'
 const TEXT_MED      = 'var(--sh-text-med)'
 const TEXT_LIGHT    = 'var(--sh-text-light)'
 const TEXT_TIP      = 'var(--sh-text-tip)'
+
+// ── Login / Register Screen ────────────────────────────────────────────────────
+function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
+  const [mode, setMode] = useState<'login' | 'register'>('login')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [displayName, setDisplayName] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const existingUsers = listUsers()
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    setTimeout(() => {
+      if (mode === 'login') {
+        const result = loginUser(username, password)
+        if (result) {
+          onLogin(result)
+        } else {
+          setError('שם משתמש או סיסמה שגויים')
+        }
+      } else {
+        const result = registerUser(username, password, displayName)
+        if (typeof result === 'string') {
+          setError(result)
+        } else {
+          onLogin(result)
+        }
+      }
+      setLoading(false)
+    }, 200)
+  }
+
+  const handleQuickLogin = (userId: string) => {
+    const user = listUsers().find(u => u.userId === userId)
+    if (!user) return
+    // Quick-switch by building a session directly
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+    localStorage.setItem('wafflestack-session', JSON.stringify({ userId, expiresAt }))
+    onLogin(user as User)
+  }
+
+  return (
+    <div dir="rtl" style={{
+      width: '100%', height: '100%',
+      background: 'linear-gradient(160deg, #EBF1FF 0%, #D6E4FF 40%, #C4DCFF 100%)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: "'Rubik', 'Assistant', sans-serif",
+    }}>
+      <div style={{ width: '100%', maxWidth: 900, padding: 24, display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+
+        {/* Auth card */}
+        <div style={{
+          flex: 1, background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)',
+          borderRadius: 24, padding: '36px 40px',
+          boxShadow: '0 8px 40px rgba(31,62,108,0.18)',
+          border: '1px solid rgba(255,255,255,0.6)',
+        }}>
+          {/* Logo */}
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <div style={{ fontSize: 42, marginBottom: 6 }}>🏙️</div>
+            <div style={{ fontWeight: 800, fontSize: 26, color: '#1F3E6C' }}>WaffleStack</div>
+            <div style={{ fontSize: 13, color: '#7F9BD9', marginTop: 4 }}>פלטפורמת למידה לסטטיסטיקה</div>
+          </div>
+
+          {/* Mode tabs */}
+          <div style={{ display: 'flex', borderRadius: 12, background: 'rgba(31,62,108,0.07)', padding: 4, marginBottom: 24, gap: 4 }}>
+            {(['login', 'register'] as const).map(m => (
+              <button key={m} onClick={() => { setMode(m); setError('') }} style={{
+                flex: 1, padding: '9px 0', border: 'none', borderRadius: 9, cursor: 'pointer',
+                background: mode === m ? '#1F3E6C' : 'transparent',
+                color: mode === m ? '#fff' : '#1F3E6C',
+                fontWeight: 600, fontSize: 14, transition: 'all 0.2s',
+                fontFamily: "'Rubik', sans-serif",
+              }}>
+                {m === 'login' ? '🔑 כניסה' : '✨ הרשמה'}
+              </button>
+            ))}
+          </div>
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {mode === 'register' && (
+              <div>
+                <label style={{ fontSize: 12, color: '#7F9BD9', fontWeight: 600, display: 'block', marginBottom: 5 }}>שם מלא</label>
+                <input value={displayName} onChange={e => setDisplayName(e.target.value)}
+                  placeholder="ישראל ישראלי"
+                  style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #C4DCFF', borderRadius: 10, fontSize: 15, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C' }} />
+              </div>
+            )}
+            <div>
+              <label style={{ fontSize: 12, color: '#7F9BD9', fontWeight: 600, display: 'block', marginBottom: 5 }}>שם משתמש</label>
+              <input value={username} onChange={e => setUsername(e.target.value)} required
+                placeholder="username"
+                autoComplete="username"
+                style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #C4DCFF', borderRadius: 10, fontSize: 15, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', direction: 'ltr' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, color: '#7F9BD9', fontWeight: 600, display: 'block', marginBottom: 5 }}>סיסמה</label>
+              <input value={password} onChange={e => setPassword(e.target.value)} required
+                type="password" placeholder="••••••"
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #C4DCFF', borderRadius: 10, fontSize: 15, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', direction: 'ltr' }} />
+            </div>
+            {error && <div style={{ background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.3)', borderRadius: 8, padding: '8px 12px', color: '#d32f2f', fontSize: 13, textAlign: 'center' }}>{error}</div>}
+            <button type="submit" disabled={loading} style={{
+              marginTop: 4, padding: '13px 0', background: 'linear-gradient(135deg,#1F3E6C,#254A9F)',
+              color: '#fff', border: 'none', borderRadius: 12, fontSize: 16, fontWeight: 700,
+              cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
+              fontFamily: "'Rubik', sans-serif", boxShadow: '0 4px 16px rgba(31,62,108,0.3)',
+            }}>
+              {loading ? '...' : mode === 'login' ? 'כניסה →' : 'צור חשבון →'}
+            </button>
+          </form>
+        </div>
+
+        {/* Student quick-login panel (shown if students exist) */}
+        {existingUsers.length > 0 && (
+          <div style={{
+            width: 240, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(14px)',
+            borderRadius: 20, padding: '24px 20px',
+            boxShadow: '0 8px 32px rgba(31,62,108,0.12)',
+            border: '1px solid rgba(255,255,255,0.6)',
+            flexShrink: 0,
+          }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: '#1F3E6C', marginBottom: 14, textAlign: 'right' }}>
+              👥 כניסה מהירה
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {existingUsers.map(u => (
+                <button key={u.userId} onClick={() => handleQuickLogin(u.userId)}
+                  style={{
+                    padding: '10px 14px', background: 'rgba(31,62,108,0.06)',
+                    border: '1px solid rgba(31,62,108,0.12)', borderRadius: 10,
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    cursor: 'pointer', textAlign: 'right', width: '100%',
+                    transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(31,62,108,0.12)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(31,62,108,0.06)' }}
+                >
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#254A9F,#7F9BD9)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
+                    {(u.displayName || u.username).slice(0, 1).toUpperCase()}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: '#1F3E6C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.displayName || u.username}</div>
+                    <div style={{ fontSize: 10, color: '#7F9BD9' }}>{u.role === 'teacher' ? '👩‍🏫 מורה' : '🎓 תלמיד'}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 // ── Toolbar buttons (restored from 3D city HUD) ────────────────────────────────
 interface ToolbarButton {
@@ -365,11 +523,12 @@ function ActivityChart() {
 }
 
 // ── Sidebar ────────────────────────────────────────────────────────────────────
-function Sidebar({ active, onNav, onGoWorld, onGoMindmap }: {
+function Sidebar({ active, onNav, onGoWorld, onGoMindmap, width = 247 }: {
   active: InternalView
   onNav: (v: InternalView) => void
   onGoWorld: () => void
   onGoMindmap: () => void
+  width?: number
 }) {
   const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string }> = [
     { id: 'home',     label: 'דף הבית',      icon: '⌂' },
@@ -378,15 +537,17 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap }: {
     { id: null,       label: 'העולם שלי',    icon: '🌐', action: 'world' },
   ]
 
+  const collapsed = width < 80
   return (
     <div style={{
       background: SIDEBAR_BG,
-      width: 247,
+      width: '100%',
       flexShrink: 0,
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
       boxShadow: '-4px 0 24px rgba(51,81,202,0.25)',
+      overflow: 'hidden',
     }}>
       {/* Logo / avatar area */}
       <div style={{ display: 'flex', justifyContent: 'center', padding: '28px 0 20px', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
@@ -419,13 +580,14 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap }: {
                 if (item.action === 'mindmap') { onGoMindmap(); return }
                 if (item.id !== null) onNav(item.id)
               }}
+              title={collapsed ? item.label : undefined}
               style={{
                 background: isActive ? SIDEBAR_ACTIVE : 'transparent',
                 borderRadius: 32,
-                padding: '12px 20px',
+                padding: collapsed ? '12px 0' : '12px 20px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'flex-end',
+                justifyContent: collapsed ? 'center' : 'flex-end',
                 gap: 12,
                 direction: 'rtl',
                 border: 'none',
@@ -440,8 +602,8 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap }: {
               onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)' }}
               onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
             >
-              <span>{item.label}</span>
-              <span style={{ fontSize: 20, opacity: 0.85, width: 26, textAlign: 'center' }}>{item.icon}</span>
+              {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
+              <span style={{ fontSize: 20, opacity: 0.85, width: 26, textAlign: 'center', flexShrink: 0 }}>{item.icon}</span>
             </button>
           )
         })}
@@ -451,8 +613,8 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap }: {
 }
 
 // ── Top bar ────────────────────────────────────────────────────────────────────
-function TopBar({ title }: { title: string }) {
-  const userName = localStorage.getItem('userName') || 'Bdakar'
+function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
+  const userName = localStorage.getItem('userName') || 'Student'
   const xp = useLearningStore(state => state.xp)
   return (
     <div style={{
@@ -481,21 +643,16 @@ function TopBar({ title }: { title: string }) {
           ⭐ {xp} XP
         </span>
         <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_DARK }}>Hi, {userName}</span>
-        {/* Profile icon */}
-        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, display: 'flex', alignItems: 'center' }}>
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <circle cx="16" cy="16" r="14" stroke={TEXT_DARK} strokeWidth="1.8" />
-            <circle cx="16" cy="12" r="4.5" stroke={TEXT_DARK} strokeWidth="1.8" />
-            <path d="M7 26c0-5 4-8 9-8s9 3 9 8" stroke={TEXT_DARK} strokeWidth="1.8" strokeLinecap="round" />
-          </svg>
-        </button>
-        {/* Bell icon */}
-        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, display: 'flex', alignItems: 'center' }}>
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <path d="M14 4C10 4 7 7.5 7 11v6l-2 3h18l-2-3v-6c0-3.5-3-7-7-7z" stroke={TEXT_DARK} strokeWidth="1.7" strokeLinejoin="round" />
-            <path d="M11.5 23.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5" stroke={TEXT_DARK} strokeWidth="1.7" />
-          </svg>
-        </button>
+        {/* Logout button */}
+        {onLogout && (
+          <button onClick={onLogout} title="התנתק" style={{
+            background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.2)',
+            borderRadius: 8, padding: '5px 12px', cursor: 'pointer',
+            color: '#d32f2f', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
+          }}>
+            ↩ יציאה
+          </button>
+        )}
       </div>
     </div>
   )
@@ -795,7 +952,29 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate 
   const [phase, setPhase] = useState<'write' | 'review' | 'done'>('write')
   const [xpBurst, setXpBurst] = useState<number | null>(null)
   const [showCanvas, setShowCanvas] = useState(true)
+  const [canvasPct, setCanvasPct] = useState(42)
+  const canvasDragging = useRef(false)
+  const contentRowRef = useRef<HTMLDivElement>(null)
   const recordAnswer = useLearningStore(s => s.recordAnswer)
+
+  const onCanvasDragStart = useCallback((e: React.MouseEvent) => {
+    canvasDragging.current = true
+    e.preventDefault()
+    const onMove = (ev: MouseEvent) => {
+      if (!canvasDragging.current || !contentRowRef.current) return
+      const rect = contentRowRef.current.getBoundingClientRect()
+      const fromLeft = ev.clientX - rect.left
+      const pct = Math.min(65, Math.max(25, ((rect.width - fromLeft) / rect.width) * 100))
+      setCanvasPct(pct)
+    }
+    const onUp = () => {
+      canvasDragging.current = false
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }, [])
 
   // Load questions from selected topic or fallback to hardcoded
   const questions = selectedTopic && (quizBankData.topics as Record<string, any>)[selectedTopic]
@@ -931,7 +1110,7 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate 
       </div>
 
       {/* Content row: question panel + optional canvas */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
+      <div ref={contentRowRef} style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
 
         {/* Question panel */}
         <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -1086,21 +1265,46 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate 
       </div>
         </div>{/* end question panel */}
 
+        {/* Drag handle between quiz and canvas */}
+        {showCanvas && !isDone && (
+          <div
+            onMouseDown={onCanvasDragStart}
+            title="גרור כדי לשנות גודל"
+            style={{
+              width: 8, flexShrink: 0, cursor: 'col-resize',
+              background: 'linear-gradient(180deg,rgba(31,62,108,0.0),rgba(37,74,159,0.35),rgba(31,62,108,0.0))',
+              borderLeft: '1px solid rgba(127,155,217,0.25)',
+              borderRight: '1px solid rgba(127,155,217,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 0.15s',
+              position: 'relative',
+            }}
+          >
+            {/* Grip dots */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 3, pointerEvents: 'none' }}>
+              {[0,1,2,3,4].map(i => (
+                <div key={i} style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(127,155,217,0.6)' }} />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Canvas panel — standalone whiteboard iframe */}
         {showCanvas && !isDone && (
           <div style={{
-            width: '42%', flexShrink: 0,
-            borderLeft: '1px solid rgba(99,102,241,0.25)',
+            width: `${canvasPct}%`, flexShrink: 0,
             display: 'flex', flexDirection: 'column',
-            background: '#0f0f1a',
+            background: '#0d1628',
           }}>
             <div style={{
-              height: 30, background: 'rgba(13,13,26,0.95)',
-              borderBottom: '1px solid rgba(99,102,241,0.2)',
+              height: 32, background: 'linear-gradient(135deg,#1F3E6C,#1a3260)',
+              borderBottom: '1px solid rgba(127,155,217,0.2)',
               display: 'flex', alignItems: 'center', padding: '0 12px', gap: 8, flexShrink: 0,
+              boxShadow: '0 2px 8px rgba(31,62,108,0.2)',
             }}>
-              <span style={{ fontSize: 12, color: 'rgba(99,102,241,0.9)', fontWeight: 600 }}>✏️ לוח ציור</span>
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginRight: 'auto' }}>רשום את פתרונך</span>
+              <span style={{ fontSize: 12, color: '#D4AF37', fontWeight: 600 }}>✏️ לוח ציור</span>
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', marginRight: 'auto' }}>רשום את פתרונך</span>
+              <span style={{ fontSize: 9, color: 'rgba(127,155,217,0.6)' }}>⟵ גרור כדי לשנות גודל</span>
             </div>
             <iframe
               src={`${import.meta.env.BASE_URL}mindmap.html?mode=wb`}
@@ -1118,12 +1322,34 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate 
 
 // ── Root ───────────────────────────────────────────────────────────────────────
 const StudyHub = ({ onViewChange }: StudyHubProps) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(() => getCurrentUser())
   const [internalView, setInternalView] = useState<InternalView>('home')
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>()
   const [userProgress, setUserProgress] = useState<UserProgress>(() => {
-    const user = initializeUser()
+    const user = getCurrentUser() || initializeUser()
     return loadProgress(user.userId)
   })
+  const [sidebarWidth, setSidebarWidth] = useState(247)
+  const sidebarDragging = useRef(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  const onSidebarDragStart = useCallback((e: React.MouseEvent) => {
+    sidebarDragging.current = true
+    e.preventDefault()
+    const onMove = (ev: MouseEvent) => {
+      if (!sidebarDragging.current || !rootRef.current) return
+      const rect = rootRef.current.getBoundingClientRect()
+      const fromRight = rect.right - ev.clientX
+      setSidebarWidth(Math.min(360, Math.max(60, fromRight)))
+    }
+    const onUp = () => {
+      sidebarDragging.current = false
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }, [])
 
   const title = internalView === 'home' ? 'דף הבית' : internalView === 'topics' ? 'אזור למידה' : 'אזור למידה'
 
@@ -1136,25 +1362,57 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
     setUserProgress(updated)
   }
 
+  const handleLogin = (user: User) => {
+    setCurrentUser(user)
+    setUserProgress(loadProgress(user.userId))
+    localStorage.setItem('userName', user.displayName || user.username)
+  }
+
+  const handleLogout = () => {
+    logoutUser()
+    setCurrentUser(null)
+  }
+
+  // Show login screen if no user is logged in
+  if (!currentUser) {
+    return <LoginScreen onLogin={handleLogin} />
+  }
+
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', overflow: 'hidden', direction: 'rtl', background: PAGE_BG, fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
+    <div ref={rootRef} style={{ width: '100%', height: '100%', display: 'flex', overflow: 'hidden', direction: 'rtl', background: PAGE_BG, fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
       {/* Sidebar — right side (RTL) */}
-      <Sidebar
-        active={internalView}
-        onNav={(view) => {
-          if (view === 'topics') {
-            setInternalView('topics')
-          } else {
-            setInternalView(view)
-          }
-        }}
-        onGoWorld={() => onViewChange('3d')}
-        onGoMindmap={() => onViewChange('mindmap')}
-      />
+      <div style={{ width: sidebarWidth, flexShrink: 0, position: 'relative', display: 'flex' }}>
+        <Sidebar
+          active={internalView}
+          onNav={(view) => {
+            if (view === 'topics') {
+              setInternalView('topics')
+            } else {
+              setInternalView(view)
+            }
+          }}
+          onGoWorld={() => onViewChange('3d')}
+          onGoMindmap={() => onViewChange('mindmap')}
+          width={sidebarWidth}
+        />
+        {/* Sidebar resize handle — on the left edge (RTL: left is outer edge) */}
+        <div
+          onMouseDown={onSidebarDragStart}
+          title="גרור לשינוי רוחב הסרגל"
+          style={{
+            position: 'absolute', left: 0, top: 0, bottom: 0, width: 6,
+            cursor: 'col-resize', zIndex: 10,
+            background: 'transparent',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(127,155,217,0.35)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
+        />
+      </div>
 
       {/* Main */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <TopBar title={title} />
+        <TopBar title={title} onLogout={handleLogout} />
         {internalView === 'home' && (
           <HomeScreen
             onGoLearning={() => setInternalView('topics')}

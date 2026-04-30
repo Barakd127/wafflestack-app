@@ -162,31 +162,30 @@ const ROAD_MODELS = [
   { model: 'path-long',  pos: [6,  0, -3] as [number,number,number], rot: 0 },
 ]
 
-// Tree placements for greenery and natural feel
-const TREE_MODELS = [
-  { path: 'kenney/suburban/tree-pine.glb', pos: [-12, 0, -12] as [number,number,number], scale: 1.2 },
-  { path: 'kenney/suburban/tree-pine.glb', pos: [12, 0, -12] as [number,number,number], scale: 1.2 },
-  { path: 'kenney/suburban/tree-pine.glb', pos: [-12, 0, 6] as [number,number,number], scale: 1.2 },
-  { path: 'kenney/suburban/tree-pine.glb', pos: [12, 0, 6] as [number,number,number], scale: 1.2 },
-  { path: 'kenney/suburban/tree-oak.glb', pos: [-8, 0, -14] as [number,number,number], scale: 1.1 },
-  { path: 'kenney/suburban/tree-oak.glb', pos: [8, 0, -14] as [number,number,number], scale: 1.1 },
+// Tree positions for greenery (rendered as Three.js primitives — no GLB needed)
+const TREE_POSITIONS: [number, number, number][] = [
+  [-13, 0, -13], [13, 0, -13], [-13, 0, 7], [13, 0, 7],
+  [-9, 0, -16], [9, 0, -16], [-16, 0, -3], [16, 0, -3],
+  [-13, 0, -7], [13, 0, -7],
 ]
 
-// Vehicle placements for street activity
-const VEHICLE_MODELS = [
-  { path: 'kenney/suburban/car-suv-a.glb', pos: [-15, 0, -6] as [number,number,number], rot: Math.PI / 4 },
-  { path: 'kenney/suburban/car-sedan-a.glb', pos: [15, 0, 0] as [number,number,number], rot: -Math.PI / 3 },
-  { path: 'kenney/suburban/truck-delivery.glb', pos: [-18, 0, 3] as [number,number,number], rot: Math.PI / 2 },
+// Car positions (rendered as Three.js primitives)
+const CAR_POSITIONS: { pos: [number,number,number]; rot: number; color: string }[] = [
+  { pos: [-15, 0, -5.5], rot: 0,          color: '#3498DB' },
+  { pos: [15,  0,  0.5], rot: Math.PI,    color: '#E74C3C' },
+  { pos: [-19, 0,  3],   rot: Math.PI/2,  color: '#2ECC71' },
+  { pos: [0,   0, -17],  rot: Math.PI/4,  color: '#F39C12' },
 ]
 
-// Street furniture for detail and character
-const STREET_FURNITURE = [
-  { path: 'kenney/suburban/bench.glb', pos: [-10, 0, -5] as [number,number,number], scale: 1.0 },
-  { path: 'kenney/suburban/bench.glb', pos: [10, 0, -5] as [number,number,number], scale: 1.0, rot: Math.PI },
-  { path: 'kenney/suburban/lamp-street.glb', pos: [-14, 0, -3] as [number,number,number], scale: 1.5 },
-  { path: 'kenney/suburban/lamp-street.glb', pos: [14, 0, -3] as [number,number,number], scale: 1.5 },
-  { path: 'kenney/suburban/sign-welcome.glb', pos: [-16, 0, 8] as [number,number,number], scale: 1.2 },
-  { path: 'kenney/suburban/fountain.glb', pos: [0, 0, 12] as [number,number,number], scale: 1.8 },
+// Bench positions
+const BENCH_POSITIONS: [number, number, number][] = [
+  [-11, 0, -5], [11, 0, -5], [-11, 0, 1], [11, 0, 1],
+]
+
+// Street lamp positions
+const LAMP_POSITIONS: [number, number, number][] = [
+  [-15, 0, -3], [15, 0, -3], [-15, 0, -9], [15, 0, -9],
+  [0, 0, -15], [-6, 0, -15], [6, 0, -15],
 ]
 
 const GLOSSARY_DATA: Record<string, { conceptEn: string; formula: string }> = {
@@ -569,26 +568,117 @@ function Prop({ model, pos, rot }: { model: string, pos: [number,number,number],
   return <primitive object={cloned} position={pos} rotation={[0, rot, 0]} scale={1.4} />
 }
 
-// ─── Street Asset (trees, vehicles, furniture) ────────────────────────────────
-function StreetAsset({
-  path,
-  pos,
-  rot = 0,
-  scale = 1.0
-}: {
-  path: string
-  pos: [number,number,number]
-  rot?: number
-  scale?: number
-}) {
-  try {
-    const { scene } = useGLTF(`${import.meta.env.BASE_URL}${path}`)
-    const cloned = useMemo(() => scene.clone(), [scene])
-    return <primitive object={cloned} position={pos} rotation={[0, rot, 0]} scale={scale} />
-  } catch {
-    // Asset not available - gracefully skip rendering
-    return null
-  }
+// ─── Primitive Tree (pine style, no GLB required) ─────────────────────────────
+function CityTree({ pos }: { pos: [number,number,number] }) {
+  return (
+    <group position={pos}>
+      {/* Trunk */}
+      <mesh position={[0, 0.55, 0]} castShadow>
+        <cylinderGeometry args={[0.12, 0.18, 1.1, 7]} />
+        <meshStandardMaterial color="#6B4226" roughness={0.9} />
+      </mesh>
+      {/* Lower foliage */}
+      <mesh position={[0, 1.7, 0]} castShadow>
+        <coneGeometry args={[0.9, 1.6, 8]} />
+        <meshStandardMaterial color="#1E5B1E" roughness={0.8} />
+      </mesh>
+      {/* Upper foliage */}
+      <mesh position={[0, 2.7, 0]} castShadow>
+        <coneGeometry args={[0.6, 1.2, 8]} />
+        <meshStandardMaterial color="#247A24" roughness={0.8} />
+      </mesh>
+      {/* Top */}
+      <mesh position={[0, 3.4, 0]} castShadow>
+        <coneGeometry args={[0.3, 0.7, 7]} />
+        <meshStandardMaterial color="#2D9A2D" roughness={0.8} />
+      </mesh>
+    </group>
+  )
+}
+
+// ─── Primitive Car ─────────────────────────────────────────────────────────────
+function CityCar({ pos, rot, color }: { pos: [number,number,number]; rot: number; color: string }) {
+  return (
+    <group position={pos} rotation={[0, rot, 0]}>
+      {/* Body */}
+      <mesh position={[0, 0.22, 0]} castShadow>
+        <boxGeometry args={[2.0, 0.45, 0.95]} />
+        <meshStandardMaterial color={color} roughness={0.4} metalness={0.3} />
+      </mesh>
+      {/* Cabin */}
+      <mesh position={[0.1, 0.58, 0]} castShadow>
+        <boxGeometry args={[1.1, 0.4, 0.82]} />
+        <meshStandardMaterial color={color} roughness={0.3} metalness={0.2} />
+      </mesh>
+      {/* Windshield */}
+      <mesh position={[0.58, 0.58, 0]}>
+        <boxGeometry args={[0.02, 0.35, 0.76]} />
+        <meshStandardMaterial color="#88ccff" roughness={0.0} metalness={0.1} transparent opacity={0.6} />
+      </mesh>
+      {/* Wheels x4 */}
+      {([-0.75, 0.75] as number[]).flatMap(x =>
+        ([-0.48, 0.48] as number[]).map(z => (
+          <mesh key={`${x}-${z}`} position={[x, 0.13, z]} rotation={[Math.PI/2, 0, 0]}>
+            <cylinderGeometry args={[0.18, 0.18, 0.14, 12]} />
+            <meshStandardMaterial color="#1a1a1a" roughness={0.9} />
+          </mesh>
+        ))
+      )}
+    </group>
+  )
+}
+
+// ─── Primitive Bench ───────────────────────────────────────────────────────────
+function CityBench({ pos }: { pos: [number,number,number] }) {
+  return (
+    <group position={pos}>
+      {/* Seat */}
+      <mesh position={[0, 0.42, 0]}>
+        <boxGeometry args={[1.2, 0.07, 0.4]} />
+        <meshStandardMaterial color="#8B6340" roughness={0.9} />
+      </mesh>
+      {/* Back */}
+      <mesh position={[0, 0.72, -0.15]}>
+        <boxGeometry args={[1.2, 0.35, 0.06]} />
+        <meshStandardMaterial color="#8B6340" roughness={0.9} />
+      </mesh>
+      {/* Legs */}
+      {([-0.5, 0.5] as number[]).map(x => (
+        <mesh key={x} position={[x, 0.2, 0]}>
+          <boxGeometry args={[0.06, 0.4, 0.35]} />
+          <meshStandardMaterial color="#555" roughness={0.8} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+// ─── Primitive Street Lamp ─────────────────────────────────────────────────────
+function CityLamp({ pos }: { pos: [number,number,number] }) {
+  return (
+    <group position={pos}>
+      {/* Pole */}
+      <mesh position={[0, 1.5, 0]}>
+        <cylinderGeometry args={[0.05, 0.07, 3.0, 8]} />
+        <meshStandardMaterial color="#999" roughness={0.5} metalness={0.5} />
+      </mesh>
+      {/* Arm */}
+      <mesh position={[0.35, 3.05, 0]} rotation={[0, 0, -Math.PI/8]}>
+        <cylinderGeometry args={[0.03, 0.03, 0.8, 6]} />
+        <meshStandardMaterial color="#aaa" roughness={0.4} metalness={0.5} />
+      </mesh>
+      {/* Lamp head */}
+      <mesh position={[0.65, 3.1, 0]}>
+        <boxGeometry args={[0.25, 0.12, 0.18]} />
+        <meshStandardMaterial color="#333" roughness={0.6} metalness={0.4} />
+      </mesh>
+      {/* Light bulb glow */}
+      <mesh position={[0.65, 3.04, 0]}>
+        <sphereGeometry args={[0.06, 8, 8]} />
+        <meshStandardMaterial color="#ffffaa" emissive="#ffee66" emissiveIntensity={1.5} />
+      </mesh>
+    </group>
+  )
 }
 
 // ─── Townscaper-style irregular grid ground ───────────────────────────────────
@@ -1295,6 +1385,67 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         </button>
       )}
 
+      {/* Zoom controls — bottom-right */}
+      <div style={{
+        position: 'absolute', bottom: 70, right: 16, zIndex: 50,
+        display: 'flex', flexDirection: 'column', gap: 6,
+        fontFamily: "'Heebo', system-ui, sans-serif",
+      }}>
+        {/* Zoom in */}
+        <button
+          title="Zoom In (+)"
+          onClick={() => {
+            const canvas = document.querySelector('canvas')
+            if (!canvas) return
+            canvas.dispatchEvent(new WheelEvent('wheel', { deltaY: -300, bubbles: true }))
+          }}
+          style={{
+            width: 38, height: 38, borderRadius: 10,
+            background: 'rgba(10,10,20,0.82)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.25)', color: 'white',
+            fontSize: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.15s',
+          }}
+        >+</button>
+        {/* Reset zoom / home view */}
+        <button
+          title="Reset View"
+          onClick={() => {
+            // Dispatch multiple wheel-up events to zoom out to a comfortable distance
+            const canvas = document.querySelector('canvas')
+            if (!canvas) return
+            for (let i = 0; i < 6; i++) {
+              setTimeout(() => {
+                canvas.dispatchEvent(new WheelEvent('wheel', { deltaY: 200, bubbles: true }))
+              }, i * 40)
+            }
+          }}
+          style={{
+            width: 38, height: 38, borderRadius: 10,
+            background: 'rgba(10,10,20,0.82)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.25)', color: 'rgba(255,255,255,0.7)',
+            fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.15s',
+          }}
+        >⊙</button>
+        {/* Zoom out */}
+        <button
+          title="Zoom Out (-)"
+          onClick={() => {
+            const canvas = document.querySelector('canvas')
+            if (!canvas) return
+            canvas.dispatchEvent(new WheelEvent('wheel', { deltaY: 300, bubbles: true }))
+          }}
+          style={{
+            width: 38, height: 38, borderRadius: 10,
+            background: 'rgba(10,10,20,0.82)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.25)', color: 'white',
+            fontSize: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.15s',
+          }}
+        >−</button>
+      </div>
+
       {/* Model Picker toggle button */}
       <button
         onClick={() => setPickerMode(m => !m)}
@@ -1543,10 +1694,11 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           {/* Road paths */}
           {ROAD_MODELS.map((r, i) => <Prop key={`road-${i}`} model={r.model} pos={r.pos} rot={r.rot} />)}
 
-          {/* Street furniture & greenery */}
-          {TREE_MODELS.map((t, i) => <StreetAsset key={`tree-${i}`} path={t.path} pos={t.pos} scale={t.scale} />)}
-          {VEHICLE_MODELS.map((v, i) => <StreetAsset key={`vehicle-${i}`} path={v.path} pos={v.pos} rot={v.rot} scale={1.2} />)}
-          {STREET_FURNITURE.map((f, i) => <StreetAsset key={`furniture-${i}`} path={f.path} pos={f.pos} rot={f.rot ?? 0} scale={f.scale ?? 1.0} />)}
+          {/* Primitive city street elements — no GLBs needed */}
+          {TREE_POSITIONS.map((pos, i) => <CityTree key={`tree-${i}`} pos={pos} />)}
+          {CAR_POSITIONS.map((c, i) => <CityCar key={`car-${i}`} pos={c.pos} rot={c.rot} color={c.color} />)}
+          {BENCH_POSITIONS.map((pos, i) => <CityBench key={`bench-${i}`} pos={pos} />)}
+          {LAMP_POSITIONS.map((pos, i) => <CityLamp key={`lamp-${i}`} pos={pos} />)}
 
           {/* Aliveness layer — clouds + smoke, tier-gated */}
           <Clouds count={6} altitude={24} range={70} speed={0.55} />

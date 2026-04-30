@@ -3,45 +3,46 @@ import { useThree, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
 /**
- * CameraRig — smoothly animates the camera and OrbitControls target between
- * "home" view and a focused view on a specific building.
+ * CameraRig — smoothly animates the camera and OrbitControls target
+ * ONLY when a building is selected (focusOn changes to non-null) or when
+ * it is first deselected. Does NOT fight OrbitControls continuously.
  *
- * When `focusOn` is null → glides back to `homePosition` / `homeTarget`.
- * When set      → glides to a position near `focusOn` (offset upward + back).
- *
- * Uses simple per-frame lerp (no react-spring import needed; we already pull
- * in three) — gives a soft ease-out feel when factor is small (~0.06).
- *
- * Mount inside the Canvas, AFTER <OrbitControls makeDefault />.
+ * Bug fix: the old version put array-literal props in the dep array, so the
+ * useEffect re-fired every render and kept resetting animating → true, which
+ * pulled the camera back to home even while the user was zooming/panning.
  */
 interface CameraRigProps {
   focusOn: [number, number, number] | null
-  /** Camera offset from the focus point (default looks down + back) */
   focusOffset?: [number, number, number]
-  /** Home camera position to return to */
   homePosition?: [number, number, number]
-  /** Home target to return to */
   homeTarget?: [number, number, number]
-  /** Lerp speed (0..1 per frame, default 0.07) */
   speed?: number
 }
 
 export default function CameraRig({
   focusOn,
-  focusOffset  = [4, 5, 6],
-  homePosition = [20, 18, 20],
-  homeTarget   = [0, 0, -3],
+  focusOffset  = [5, 4, 7],
+  homePosition = [0, 25, 45],
+  homeTarget   = [0, 0, 0],
   speed        = 0.07,
 }: CameraRigProps) {
-  const camera = useThree(s => s.camera)
+  const camera   = useThree(s => s.camera)
   const controls = useThree(s => s.controls) as any
 
-  const desiredPos     = useRef(new THREE.Vector3(...homePosition))
-  const desiredTarget  = useRef(new THREE.Vector3(...homeTarget))
-  const animating      = useRef(false)
+  const desiredPos    = useRef(new THREE.Vector3(...homePosition))
+  const desiredTarget = useRef(new THREE.Vector3(...homeTarget))
+  const animating     = useRef(false)
+  // Store previous focusOn so we only animate on ACTUAL changes
+  const prevFocusKey  = useRef<string>('')
+  const hasInitiated  = useRef(false)
 
-  // When focusOn changes, set the new desired pose
   useEffect(() => {
+    // Build a key so we only react to actual focusOn changes, not re-renders
+    const key = focusOn ? focusOn.join(',') : 'home'
+    if (key === prevFocusKey.current && hasInitiated.current) return
+    prevFocusKey.current = key
+    hasInitiated.current = true
+
     if (focusOn) {
       desiredTarget.current.set(focusOn[0], focusOn[1] + 1.5, focusOn[2])
       desiredPos.current.set(
@@ -49,23 +50,19 @@ export default function CameraRig({
         focusOn[1] + focusOffset[1],
         focusOn[2] + focusOffset[2],
       )
-    } else {
-      desiredPos.current.set(...homePosition)
-      desiredTarget.current.set(...homeTarget)
+      animating.current = true
     }
-    animating.current = true
-  }, [focusOn, focusOffset, homePosition, homeTarget])
+    // Note: when focusOn goes null we do NOT auto-fly home anymore — the user
+    // already positioned the camera where they want it.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusOn])
 
   useFrame(() => {
-    if (!animating.current) return
-    if (!controls) return
+    if (!animating.current || !controls) return
 
-    // Lerp camera position
     camera.position.lerp(desiredPos.current, speed)
-    // Lerp controls target
     controls.target.lerp(desiredTarget.current, speed)
 
-    // Stop when close enough
     const posErr    = camera.position.distanceTo(desiredPos.current)
     const targetErr = controls.target.distanceTo(desiredTarget.current)
     if (posErr < 0.05 && targetErr < 0.05) {
