@@ -19,6 +19,7 @@ import { useLearningStore, BUILDING_UNLOCK_CHAIN } from '../store/learningStore'
 import LearningMap from './LearningMap'
 import LocalLeaderboard, { saveSessionScore } from './LocalLeaderboard'
 import FlashcardMode from './FlashcardMode'
+import ModelPicker, { KenneyModel } from './ModelPicker'
 import ConceptMapViewer from './ConceptMapViewer'
 import StreakCalendar from './StreakCalendar'
 import StatsCalculator from './StatsCalculator'
@@ -42,6 +43,10 @@ function loadColorVariations(): Record<string, 'A' | 'B' | 'C'> {
 }
 function loadMasteryDates(): Record<string, string> {
   try { return JSON.parse(localStorage.getItem('wafflestack-mastery-dates') || '{}') }
+  catch { return {} }
+}
+function loadModelOverrides(): Record<string, { path: string; targetHeight: number }> {
+  try { return JSON.parse(localStorage.getItem('wafflestack-model-overrides') || '{}') }
   catch { return {} }
 }
 function daysSince(dateStr: string): number {
@@ -77,25 +82,25 @@ function computeXpProgress(xp: number): { next: number | null; pct: number; toGo
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 const BUILDINGS: BuildingDef[] = [
-  { id: 'power',     model: 'building-type-a', label: '⚡ תחנת כוח',   statsConcept: 'ממוצע (Mean)',        position: [-9, 0, -9], color: '#FFD700' },
-  { id: 'housing',   model: 'building-type-c', label: '🏠 מנהל דיור',  statsConcept: 'חציון (Median)',      position: [-3, 0, -9], color: '#4ECDC4', customModel: 'kenney/building-a.glb', targetHeight: 2.8 },
-  { id: 'traffic',   model: 'building-type-e', label: '🚦 בקרת תנועה', statsConcept: 'סטיית תקן (Std Dev)', position: [3,  0, -9], color: '#FF6B6B', customModel: 'kenney/building-skyscraper-a.glb', targetHeight: 5.0 },
-  { id: 'hospital',  model: 'building-type-g', label: '🏥 בית חולים',  statsConcept: 'התפלגות נורמלית',    position: [9,  0, -9], color: '#95E1D3', customModel: 'kenney/building-j.glb', targetHeight: 4.5 },
-  { id: 'school',    model: 'building-type-b', label: '🏫 בית ספר',    statsConcept: 'מדגם (Sampling)',     position: [-9, 0, -3], color: '#AA96DA', customModel: 'kenney/building-sample-house-c.glb', targetHeight: 3.0 },
-  { id: 'bank',      model: 'building-type-d', label: '🏦 בנק',        statsConcept: 'רגרסיה (Regression)', position: [-3, 0, -3], color: '#FCBAD3', customModel: 'kenney/building-skyscraper-c.glb', targetHeight: 5.5 },
-  { id: 'market',    model: 'building-type-f', label: '🏪 שוק',        statsConcept: 'קורלציה (Correlation)',position: [3,  0, -3], color: '#A8E6CF', customModel: 'kenney/building-n.glb', targetHeight: 3.8 },
-  { id: 'city-hall', model: 'building-type-h', label: '🏛️ עיריה',      statsConcept: 'בינום (Binomial)',    position: [9,  0, -3], color: '#F38181', customModel: 'kenney/building-sample-tower-b.glb', targetHeight: 4.2 },
-  { id: 'research',  model: 'building-type-i', label: '🔬 מכון מחקר',  statsConcept: 'מבחן השערות',         position: [-3, 0, 3],  color: '#C3A6FF', customModel: 'kenney/building-sample-tower-a.glb', targetHeight: 4.5 },
-  { id: 'news',      model: 'building-type-j', label: '📰 תחנת חדשות', statsConcept: 'רווח סמך (CI)',       position: [3,  0, 3],  color: '#FFB347', customModel: 'kenney/building-k.glb', targetHeight: 3.5 },
+  { id: 'power',     model: 'building-type-a', label: '⚡ תחנת כוח',   statsConcept: 'ממוצע (Mean)',        position: [-9, 0, -9], color: '#FFD700', customModel: 'kenney/commercial/building-d.glb', targetHeight: 3.0 },
+  { id: 'housing',   model: 'building-type-c', label: '🏠 מנהל דיור',  statsConcept: 'חציון (Median)',      position: [-3, 0, -9], color: '#4ECDC4', customModel: 'kenney/commercial/building-a.glb', targetHeight: 2.8 },
+  { id: 'traffic',   model: 'building-type-e', label: '🚦 בקרת תנועה', statsConcept: 'סטיית תקן (Std Dev)', position: [3,  0, -9], color: '#FF6B6B', customModel: 'kenney/commercial/building-skyscraper-a.glb', targetHeight: 5.0 },
+  { id: 'hospital',  model: 'building-type-g', label: '🏥 בית חולים',  statsConcept: 'התפלגות נורמלית',    position: [9,  0, -9], color: '#95E1D3', customModel: 'kenney/commercial/building-j.glb', targetHeight: 4.5 },
+  { id: 'school',    model: 'building-type-b', label: '🏫 בית ספר',    statsConcept: 'מדגם (Sampling)',     position: [-9, 0, -3], color: '#AA96DA', customModel: 'kenney/modular/building-sample-house-c.glb', targetHeight: 3.0 },
+  { id: 'bank',      model: 'building-type-d', label: '🏦 בנק',        statsConcept: 'רגרסיה (Regression)', position: [-3, 0, -3], color: '#FCBAD3', customModel: 'kenney/commercial/building-skyscraper-c.glb', targetHeight: 5.5 },
+  { id: 'market',    model: 'building-type-f', label: '🏪 שוק',        statsConcept: 'קורלציה (Correlation)',position: [3,  0, -3], color: '#A8E6CF', customModel: 'kenney/commercial/building-n.glb', targetHeight: 3.8 },
+  { id: 'city-hall', model: 'building-type-h', label: '🏛️ עיריה',      statsConcept: 'בינום (Binomial)',    position: [9,  0, -3], color: '#F38181', customModel: 'kenney/modular/building-sample-tower-b.glb', targetHeight: 4.2 },
+  { id: 'research',  model: 'building-type-i', label: '🔬 מכון מחקר',  statsConcept: 'מבחן השערות',         position: [-3, 0, 3],  color: '#C3A6FF', customModel: 'kenney/modular/building-sample-tower-a.glb', targetHeight: 4.5 },
+  { id: 'news',      model: 'building-type-j', label: '📰 תחנת חדשות', statsConcept: 'רווח סמך (CI)',       position: [3,  0, 3],  color: '#FFB347', customModel: 'kenney/commercial/building-k.glb', targetHeight: 3.5 },
   // ─── New buildings — placed by user via placement picker ───────────────────
-  { id: 'zscore',   model: 'building-type-a', label: '📐 מגדל z',       statsConcept: 'ציון z (Z-Score)',           position: [0,0,0], color: '#E74C3C' },
-  { id: 'pvalue',   model: 'building-type-b', label: '🎯 מרכז הסיכוי',  statsConcept: 'ערך p (P-Value)',            position: [0,0,0], color: '#16A085' },
-  { id: 'anova',    model: 'building-type-c', label: '🏟️ אצטדיון',      statsConcept: 'אנובה (ANOVA)',              position: [0,0,0], color: '#8E44AD' },
-  { id: 'ttest',    model: 'building-type-d', label: '⚖️ בית המשפט',    statsConcept: 'מבחן t (T-Test)',            position: [0,0,0], color: '#D35400' },
-  { id: 'variance', model: 'building-type-e', label: '🌡️ מגדל המדידה',  statsConcept: 'שונות (Variance)',           position: [0,0,0], color: '#2980B9' },
-  { id: 'chisq',    model: 'building-type-f', label: '🔭 מצפה כוכבים',  statsConcept: 'מבחן χ² (Chi-Square)',       position: [0,0,0], color: '#C0392B' },
-  { id: 'iqr',      model: 'building-type-g', label: '📦 המחסן',        statsConcept: 'טווח רבעוני (IQR)',          position: [0,0,0], color: '#27AE60' },
-  { id: 'clt',      model: 'building-type-h', label: '🌉 גשר הגבול',    statsConcept: 'משפט הגבול המרכזי (CLT)',    position: [0,0,0], color: '#1ABC9C' },
+  { id: 'zscore',   model: 'building-type-a', label: '📐 מגדל z',       statsConcept: 'ציון z (Z-Score)',           position: [0,0,0], color: '#E74C3C', customModel: 'kenney/commercial/building-skyscraper-b.glb', targetHeight: 5.2 },
+  { id: 'pvalue',   model: 'building-type-b', label: '🎯 מרכז הסיכוי',  statsConcept: 'ערך p (P-Value)',            position: [0,0,0], color: '#16A085', customModel: 'kenney/commercial/building-b.glb', targetHeight: 2.8 },
+  { id: 'anova',    model: 'building-type-c', label: '🏟️ אצטדיון',      statsConcept: 'אנובה (ANOVA)',              position: [0,0,0], color: '#8E44AD', customModel: 'kenney/commercial/building-skyscraper-d.glb', targetHeight: 5.5 },
+  { id: 'ttest',    model: 'building-type-d', label: '⚖️ בית המשפט',    statsConcept: 'מבחן t (T-Test)',            position: [0,0,0], color: '#D35400', customModel: 'kenney/commercial/building-e.glb', targetHeight: 3.2 },
+  { id: 'variance', model: 'building-type-e', label: '🌡️ מגדל המדידה',  statsConcept: 'שונות (Variance)',           position: [0,0,0], color: '#2980B9', customModel: 'kenney/commercial/building-f.glb', targetHeight: 3.0 },
+  { id: 'chisq',    model: 'building-type-f', label: '🔭 מצפה כוכבים',  statsConcept: 'מבחן χ² (Chi-Square)',       position: [0,0,0], color: '#C0392B', customModel: 'kenney/commercial/building-skyscraper-e.glb', targetHeight: 5.8 },
+  { id: 'iqr',      model: 'building-type-g', label: '📦 המחסן',        statsConcept: 'טווח רבעוני (IQR)',          position: [0,0,0], color: '#27AE60', customModel: 'kenney/commercial/building-g.glb', targetHeight: 2.6 },
+  { id: 'clt',      model: 'building-type-h', label: '🌉 גשר הגבול',    statsConcept: 'משפט הגבול המרכזי (CLT)',    position: [0,0,0], color: '#1ABC9C', customModel: 'kenney/modular/building-sample-tower-c.glb', targetHeight: 5.0 },
 ]
 
 // ─── All grid slots — 5×5 at 6-unit spacing ──────────────────────────────────
@@ -400,12 +405,15 @@ function Building({ def, onClick, isSelected, isMastered, isGlowing, isHovered, 
 
       // Kenney GLBs use a single UV-mapped colormap atlas (TEXCOORD_0) so that
       // walls/windows/roof/doors each sample different colour squares on the same
-      // texture.  Setting mat.color = concept-colour multiplies against the texture
-      // and flattens everything to one hue.  Keep mat.color = white so the atlas
-      // passes through completely unmodified; express building identity via emissive
-      // glow only (applied by the state-driven useEffect below).
+      // texture.  A pure white (1,1,1) multiplier leaves the atlas untouched.
+      // We apply a very subtle 12% concept-colour tint so each building reads as
+      // its topic colour family while keeping full UV detail visible.
       mat.vertexColors = false
-      mat.color.set('#ffffff')
+      if (activeColor) {
+        mat.color.set('#ffffff').lerp(new THREE.Color(activeColor), 0.12)
+      } else {
+        mat.color.set('#ffffff')
+      }
       mat.roughness = 0.7
       mat.metalness = 0.05
 
@@ -653,6 +661,11 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   )
   const [showStudyPanel, setShowStudyPanel] = useState(false)
 
+  // Model picker state
+  const [modelOverrides, setModelOverrides] = useState<Record<string, { path: string; targetHeight: number }>>(loadModelOverrides)
+  const [pickerTarget, setPickerTarget] = useState<BuildingDef | null>(null)
+  const [pickerMode, setPickerMode] = useState(false)
+
   // Weak spots practice quiz state
   interface WQQuestion { buildingId: string; buildingLabel: string; color: string; q: string; options: string[]; correct: number; explanation: string }
   const [showWeakSpotsQuiz, setShowWeakSpotsQuiz] = useState(false)
@@ -815,6 +828,15 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
     setReviewBuilding({ id: building.id, label: building.label, statsConcept: building.statsConcept, color: building.color })
     setSelectedBuilding(building)  // keep for camera zoom-in
   }, [])
+
+  const handleModelSelect = useCallback((model: KenneyModel) => {
+    if (!pickerTarget) return
+    const next = { ...modelOverrides, [pickerTarget.id]: { path: model.path, targetHeight: model.targetHeight } }
+    setModelOverrides(next)
+    localStorage.setItem('wafflestack-model-overrides', JSON.stringify(next))
+    setPickerTarget(null)
+    setPickerMode(false)
+  }, [pickerTarget, modelOverrides])
 
   const handleReset = useCallback(() => {
     localStorage.removeItem('wafflestack-mastered')
@@ -1129,6 +1151,28 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         </button>
       )}
 
+      {/* Model Picker toggle button */}
+      <button
+        onClick={() => setPickerMode(m => !m)}
+        title={pickerMode ? 'Exit model picker mode (click a building to swap its model)' : 'Swap building models'}
+        style={{
+          position: 'absolute', bottom: 24, left: onBack ? 108 : 24, zIndex: 50,
+          background: pickerMode
+            ? 'rgba(51,81,202,0.85)'
+            : 'rgba(10,10,20,0.75)',
+          backdropFilter: 'blur(10px)',
+          border: `1px solid ${pickerMode ? 'rgba(150,180,255,0.6)' : 'rgba(255,255,255,0.2)'}`,
+          borderRadius: 20,
+          padding: '5px 14px',
+          color: pickerMode ? '#fff' : 'rgba(255,255,255,0.7)',
+          fontSize: 12, fontWeight: pickerMode ? 700 : 400,
+          fontFamily: "'Heebo', system-ui, sans-serif", cursor: 'pointer',
+          transition: 'all 0.2s',
+        }}
+      >
+        🏗️ {pickerMode ? 'Click a building…' : 'Models'}
+      </button>
+
       {/* XP popup animation */}
       {xpPopup && (
         <div style={{
@@ -1359,11 +1403,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           {BUILDINGS.map((b) => {
             const pos = getBuildingPosition(b)
             if (!pos) return null // new buildings not yet placed by user
+            const override = modelOverrides[b.id]
+            const defWithOverride: BuildingDef = override
+              ? { ...b, position: pos, customModel: override.path, targetHeight: override.targetHeight }
+              : { ...b, position: pos }
             return (
               <Building
-                key={b.id}
-                def={{ ...b, position: pos }}
-                onClick={(clicked) => mastered.has(clicked.id) ? openReview(clicked) : openChallenge(clicked)}
+                key={`${b.id}-${override?.path ?? 'default'}`}
+                def={defWithOverride}
+                onClick={(clicked) => {
+                  if (pickerMode) {
+                    setPickerTarget(clicked)
+                  } else {
+                    mastered.has(clicked.id) ? openReview(clicked) : openChallenge(clicked)
+                  }
+                }}
                 isSelected={selectedBuilding?.id === b.id}
                 isMastered={mastered.has(b.id)}
                 isGlowing={glowBuilding === b.id}
@@ -1415,6 +1469,17 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             setReviewBuilding(null)
             if (b) openChallenge(b)
           }}
+        />
+      )}
+
+      {/* Model Picker panel — opens when user clicks a building in picker mode */}
+      {pickerTarget && (
+        <ModelPicker
+          buildingId={pickerTarget.id}
+          buildingLabel={pickerTarget.label}
+          currentPath={modelOverrides[pickerTarget.id]?.path}
+          onSelect={handleModelSelect}
+          onClose={() => { setPickerTarget(null); setPickerMode(false) }}
         />
       )}
 

@@ -608,7 +608,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     <div
       style={{
         position: 'fixed', inset: 0, zIndex: 300,
-        background: 'rgba(5, 5, 15, 0.88)',
+        background: 'rgba(5, 20, 60, 0.78)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 12,
         backdropFilter: 'blur(6px)',
@@ -617,22 +617,22 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     >
       <style>{CONFETTI_STYLE}</style>
       <div style={{
-        background: 'linear-gradient(160deg, #0f0f20 0%, #161628 100%)',
+        background: 'linear-gradient(135deg, #FFFFFF 0%, #D8E7FA 60%, #B8D0F5 100%)',
         border: `1px solid ${color}44`,
         borderRadius: 20,
         width: '100%', maxWidth: 900,
         maxHeight: '90vh', overflow: 'hidden',
         display: 'flex', flexDirection: 'column',
-        boxShadow: `0 0 60px ${color}22`,
+        boxShadow: `0 0 60px ${color}22, 0 20px 60px rgba(0,0,0,0.15)`,
         fontFamily: "'Heebo', system-ui, sans-serif",
       }}>
 
         {/* Header */}
         <div style={{
           padding: '20px 28px 16px',
-          borderBottom: `1px solid ${color}22`,
+          borderBottom: `1px solid rgba(31,62,108,0.1)`,
           display: 'flex', alignItems: 'center', gap: 14,
-          background: `linear-gradient(90deg, ${color}11 0%, transparent 100%)`,
+          background: `linear-gradient(90deg, ${color}22 0%, rgba(255,255,255,0.4) 100%)`,
         }}>
           <div style={{
             fontSize: 36, background: `${color}22`,
@@ -646,9 +646,9 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
             <div style={{ fontSize: 11, letterSpacing: 3, color, fontWeight: 600, marginBottom: 2 }}>
               {building.label}
             </div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: '#fff' }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#1F3E6C' }}>
               {content.conceptHe}
-              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 400, marginLeft: 8 }}>
+              <span style={{ fontSize: 14, color: 'rgba(31,62,108,0.5)', fontWeight: 400, marginLeft: 8 }}>
                 ({content.concept})
               </span>
             </div>
@@ -656,9 +656,9 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
           <button
             onClick={onClose}
             style={{
-              background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.2)',
               borderRadius: 10, width: 36, height: 36,
-              color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: 16,
+              color: '#254A9F', cursor: 'pointer', fontSize: 16,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >✕</button>
@@ -669,8 +669,8 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
 
           {/* Tab bar — always visible */}
           <div style={{
-            display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)',
-            flexShrink: 0, background: 'rgba(0,0,0,0.15)',
+            display: 'flex', borderBottom: '1px solid rgba(31,62,108,0.1)',
+            flexShrink: 0, background: 'rgba(255,255,255,0.4)',
             alignItems: 'stretch',
           }}>
             {(['learn', 'quiz'] as const).map(tab => (
@@ -680,7 +680,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 style={{
                   flex: 1, padding: '14px 16px', background: 'none', border: 'none',
                   borderBottom: `2px solid ${activeTab === tab ? color : 'transparent'}`,
-                  color: activeTab === tab ? color : 'rgba(255,255,255,0.4)',
+                  color: activeTab === tab ? color : 'rgba(31,62,108,0.45)',
                   fontWeight: 700, fontSize: 14, cursor: 'pointer',
                   transition: 'all 0.18s', letterSpacing: 0.4,
                   fontFamily: "'Heebo', system-ui, sans-serif",
@@ -695,10 +695,10 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 ? 'Disable 30-second timer per question'
                 : 'Enable 30-second timer per question — exam-style practice'}
               style={{
-                padding: '0 16px', background: timerEnabled ? 'rgba(255,179,71,0.10)' : 'none',
-                border: 'none', borderLeft: '1px solid rgba(255,255,255,0.08)',
-                borderBottom: `2px solid ${timerEnabled ? '#FFB347' : 'transparent'}`,
-                color: timerEnabled ? '#FFB347' : 'rgba(255,255,255,0.4)',
+                padding: '0 16px', background: timerEnabled ? 'rgba(217,119,6,0.10)' : 'none',
+                border: 'none', borderLeft: '1px solid rgba(31,62,108,0.1)',
+                borderBottom: `2px solid ${timerEnabled ? '#d97706' : 'transparent'}`,
+                color: timerEnabled ? '#d97706' : 'rgba(31,62,108,0.4)',
                 fontWeight: 700, fontSize: 12, cursor: 'pointer',
                 transition: 'all 0.18s', letterSpacing: 0.4,
                 fontFamily: "'Heebo', system-ui, sans-serif",
@@ -716,12 +716,12 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
 
               {/* TopicViz — hero interactive visualization */}
               <div style={{
-                background: 'rgba(0,0,0,0.35)', borderRadius: 14,
+                background: 'rgba(255,255,255,0.55)', borderRadius: 14,
                 padding: '14px 8px 8px', marginBottom: 22,
                 border: `1px solid ${color}22`, overflow: 'auto',
               }}>
                 <div style={{
-                  fontSize: 10, color: `${color}99`, letterSpacing: 2,
+                  fontSize: 10, color: `${color}bb`, letterSpacing: 2,
                   marginBottom: 10, paddingLeft: 8, fontWeight: 600,
                 }}>
                   ✦ ויזואליזציה אינטראקטיבית
@@ -735,21 +735,22 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
               {/* Analogy warm-up */}
               {SIMPLE_ANALOGIES[building.id] && (
                 <div style={{
-                  background: 'rgba(255,179,71,0.07)', border: '1px solid rgba(255,179,71,0.22)',
+                  background: 'rgba(255,179,71,0.12)', border: '1px solid rgba(255,179,71,0.3)',
                   borderRadius: 10, padding: '12px 16px', marginBottom: 18,
-                  fontSize: 13, color: 'rgba(255,255,255,0.7)',
+                  fontSize: 13, color: '#1F3E6C',
                   direction: 'rtl', textAlign: 'right', lineHeight: 1.7,
                 }}>
-                  <span style={{ color: '#FFB347', fontWeight: 700, marginLeft: 6 }}>💡 חשוב על זה כך:</span>
+                  <span style={{ color: '#d97706', fontWeight: 700, marginLeft: 6 }}>💡 חשוב על זה כך:</span>
                   {SIMPLE_ANALOGIES[building.id]}
                 </div>
               )}
 
               {/* Explanation */}
               <div style={{
-                background: `${color}0d`, border: `1px solid ${color}22`,
+                background: 'rgba(255,255,255,0.55)', border: `1px solid ${color}33`,
+                borderLeft: `3px solid ${color}`,
                 borderRadius: 12, padding: '16px 18px', marginBottom: 16,
-                fontSize: 14, color: 'rgba(255,255,255,0.85)',
+                fontSize: 14, color: '#1F3E6C',
                 lineHeight: 1.8, direction: 'rtl', textAlign: 'right',
               }}>
                 {content.explanation}
@@ -757,10 +758,10 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
 
               {/* Formula */}
               <div style={{
-                background: 'rgba(255,255,255,0.04)', borderRadius: 10,
+                background: 'rgba(255,255,255,0.55)', borderRadius: 10,
                 padding: '12px 16px', marginBottom: 22,
                 fontFamily: 'monospace', fontSize: 13, color,
-                letterSpacing: 0.5, border: `1px solid ${color}22`,
+                letterSpacing: 0.5, border: `1px solid ${color}33`,
               }}>
                 {content.formula}
               </div>
@@ -768,14 +769,14 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
               {/* Previous reflection */}
               {reflection.length > 10 && (
                 <div style={{
-                  background: 'rgba(78,205,196,0.07)', border: '1px solid rgba(78,205,196,0.2)',
+                  background: 'rgba(31,122,110,0.07)', border: '1px solid rgba(31,122,110,0.2)',
                   borderRadius: 12, padding: '12px 16px', marginBottom: 14,
                   direction: 'rtl', textAlign: 'right',
                 }}>
-                  <div style={{ fontSize: 10, color: 'rgba(78,205,196,0.6)', letterSpacing: 1, marginBottom: 6, textTransform: 'uppercase' as const }}>
+                  <div style={{ fontSize: 10, color: '#1F7A6E', letterSpacing: 1, marginBottom: 6, textTransform: 'uppercase' as const }}>
                     ✍️ הגדרה שלך מהפעם הקודמת
                   </div>
-                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+                  <div style={{ fontSize: 13, color: '#1F3E6C', lineHeight: 1.6 }}>
                     {reflection}
                   </div>
                 </div>
@@ -784,7 +785,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
               {/* "In My Own Words" reflection textarea */}
               <div style={{ marginBottom: 6 }}>
                 <div style={{
-                  fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 1,
+                  fontSize: 11, color: '#7F9BD9', letterSpacing: 1,
                   marginBottom: 8, textTransform: 'uppercase' as const,
                   textAlign: 'right', direction: 'rtl',
                 }}>
@@ -797,17 +798,17 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   rows={3}
                   style={{
                     width: '100%', boxSizing: 'border-box',
-                    background: 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${reflection.length > 10 ? color + '55' : 'rgba(255,255,255,0.12)'}`,
+                    background: 'rgba(255,255,255,0.65)',
+                    border: `1px solid ${reflection.length > 10 ? color + '77' : 'rgba(31,62,108,0.15)'}`,
                     borderRadius: 10, padding: '10px 12px',
-                    color: '#fff', fontSize: 13, lineHeight: 1.6,
+                    color: '#1F3E6C', fontSize: 13, lineHeight: 1.6,
                     outline: 'none', resize: 'vertical' as const,
                     fontFamily: "'Heebo', system-ui, sans-serif", direction: 'rtl',
                     transition: 'border-color 0.2s',
                   }}
                 />
                 {reflection.length > 10 && (
-                  <div style={{ fontSize: 11, color: '#4ECDC4', marginTop: 4, textAlign: 'right' }}>✓ נשמר</div>
+                  <div style={{ fontSize: 11, color: '#1F7A6E', marginTop: 4, textAlign: 'right' }}>✓ נשמר</div>
                 )}
               </div>
 
@@ -855,17 +856,17 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
 
                 {/* Score fraction */}
                 <div style={{
-                  fontSize: 48, fontWeight: 900, color: '#fff',
+                  fontSize: 48, fontWeight: 900, color: '#1F3E6C',
                   marginBottom: 4, letterSpacing: -2,
                 }}>
-                  {score}<span style={{ fontSize: 28, color: 'rgba(255,255,255,0.35)', fontWeight: 400 }}>/{questions.length}</span>
+                  {score}<span style={{ fontSize: 28, color: 'rgba(31,62,108,0.4)', fontWeight: 400 }}>/{questions.length}</span>
                 </div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 24 }}>
+                <div style={{ fontSize: 13, color: '#7F9BD9', marginBottom: 24 }}>
                   {Math.round((score / questions.length) * 100)}% correct
                 </div>
 
                 {/* Score bar */}
-                <div style={{ width: '100%', maxWidth: 240, height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3, marginBottom: 28, overflow: 'hidden' }}>
+                <div style={{ width: '100%', maxWidth: 240, height: 6, background: 'rgba(31,62,108,0.1)', borderRadius: 3, marginBottom: 28, overflow: 'hidden' }}>
                   <div style={{
                     height: '100%', borderRadius: 3,
                     background: score === questions.length ? '#4ECDC4' : score >= questions.length * 0.75 ? '#FFD700' : score >= questions.length * 0.5 ? '#FF9F43' : '#FF6B6B',
@@ -881,9 +882,9 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                       onClick={() => setShowMistakes(m => !m)}
                       style={{
                         width: '100%', padding: '9px 14px',
-                        background: showMistakes ? 'rgba(255,107,107,0.12)' : 'rgba(255,107,107,0.07)',
-                        border: '1px solid rgba(255,107,107,0.3)', borderRadius: 10,
-                        color: '#FF6B6B', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                        background: showMistakes ? 'rgba(155,32,32,0.12)' : 'rgba(155,32,32,0.07)',
+                        border: '1px solid rgba(155,32,32,0.3)', borderRadius: 10,
+                        color: '#9B2020', fontSize: 12, fontWeight: 700, cursor: 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       }}
                     >
@@ -896,30 +897,30 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                           const q = questions[qIndex]
                           return (
                             <div key={qIndex} style={{
-                              background: 'rgba(255,255,255,0.03)',
-                              border: '1px solid rgba(255,107,107,0.2)',
+                              background: 'rgba(255,255,255,0.55)',
+                              border: '1px solid rgba(155,32,32,0.2)',
                               borderRadius: 10, padding: '10px 12px',
                             }}>
                               <div style={{
-                                fontSize: 12, color: 'rgba(255,255,255,0.75)',
+                                fontSize: 12, color: '#1F3E6C',
                                 direction: 'rtl', textAlign: 'right', marginBottom: 8, lineHeight: 1.5,
                               }}>
                                 {q.q}
                               </div>
                               <div style={{
-                                fontSize: 11, color: '#FF6B6B', direction: 'rtl',
+                                fontSize: 11, color: '#9B2020', direction: 'rtl',
                                 textAlign: 'right', marginBottom: 4,
                               }}>
                                 {chosen === -1 ? '⏱️ נגמר הזמן' : `✗ ${q.options[chosen]}`}
                               </div>
                               <div style={{
-                                fontSize: 11, color: '#4ECDC4', direction: 'rtl',
+                                fontSize: 11, color: '#1F7A6E', direction: 'rtl',
                                 textAlign: 'right', marginBottom: 6,
                               }}>
                                 ✓ {q.options[q.correct]}
                               </div>
                               <div style={{
-                                fontSize: 10, color: 'rgba(255,255,255,0.4)',
+                                fontSize: 10, color: '#7F9BD9',
                                 direction: 'rtl', textAlign: 'right', lineHeight: 1.5,
                               }}>
                                 {q.explanation}
@@ -969,13 +970,13 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 {/* Try-again prompt — shown when score < 70% (building reward not granted) */}
                 {score / questions.length < 0.7 && (
                   <div style={{
-                    background: 'rgba(255,107,107,0.12)', border: '1px solid rgba(255,107,107,0.35)',
+                    background: 'rgba(155,32,32,0.08)', border: '1px solid rgba(155,32,32,0.3)',
                     borderRadius: 12, padding: '12px 20px', marginBottom: 20,
-                    fontSize: 13, color: '#FF6B6B', fontWeight: 600,
+                    fontSize: 13, color: '#9B2020', fontWeight: 600,
                     textAlign: 'center', lineHeight: 1.5,
                   }}>
                     נדרשים 70% לפחות כדי לקבל את הבניין.<br />
-                    <span style={{ fontWeight: 400, color: 'rgba(255,107,107,0.8)' }}>
+                    <span style={{ fontWeight: 400, color: 'rgba(155,32,32,0.75)' }}>
                       Try again to earn your building reward!
                     </span>
                   </div>
@@ -984,15 +985,15 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 {/* Did You Know fact card */}
                 {DID_YOU_KNOW[building.id] && (
                   <div style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'rgba(255,255,255,0.55)',
+                    border: '1px solid rgba(31,62,108,0.15)',
                     borderRadius: 12, padding: '12px 16px', marginBottom: 20,
                     maxWidth: 320, textAlign: 'right', direction: 'rtl',
                   }}>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 6, letterSpacing: 1 }}>
+                    <div style={{ fontSize: 11, color: '#7F9BD9', marginBottom: 6, letterSpacing: 1 }}>
                       🌍 ידעת?
                     </div>
-                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+                    <div style={{ fontSize: 13, color: '#1F3E6C', lineHeight: 1.6 }}>
                       {DID_YOU_KNOW[building.id]}
                     </div>
                   </div>
@@ -1002,7 +1003,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 {(RELATED_CONCEPTS[building.id] ?? []).length > 0 && (
                   <div style={{ width: '100%', maxWidth: 320, marginBottom: 16 }}>
                     <div style={{
-                      fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 1,
+                      fontSize: 11, color: '#7F9BD9', letterSpacing: 1,
                       marginBottom: 8, textTransform: 'uppercase' as const,
                       textAlign: 'right', direction: 'rtl',
                     }}>
@@ -1037,7 +1038,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 {/* Difficulty rating */}
                 <div style={{ width: '100%', maxWidth: 320, marginBottom: 16 }}>
                   <div style={{
-                    fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 1,
+                    fontSize: 11, color: '#7F9BD9', letterSpacing: 1,
                     marginBottom: 8, textAlign: 'right', direction: 'rtl',
                   }}>
                     ⭐ כמה קשה היה המושג הזה?
@@ -1049,10 +1050,11 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                         onClick={() => handleDifficultyRating(rating)}
                         style={{
                           background: difficultyRating !== null && rating <= difficultyRating
-                            ? `${color}33` : 'rgba(255,255,255,0.05)',
-                          border: `1px solid ${difficultyRating !== null && rating <= difficultyRating ? color + '66' : 'rgba(255,255,255,0.1)'}`,
+                            ? `${color}33` : 'rgba(31,62,108,0.06)',
+                          border: `1px solid ${difficultyRating !== null && rating <= difficultyRating ? color + '66' : 'rgba(31,62,108,0.1)'}`,
                           borderRadius: 8, padding: '6px 10px', cursor: 'pointer',
-                          fontSize: 16, transition: 'all 0.15s', color: '#fff',
+                          fontSize: 16, transition: 'all 0.15s',
+                          color: difficultyRating !== null && rating <= difficultyRating ? color : '#254A9F',
                         }}
                       >
                         {difficultyRating !== null && rating <= difficultyRating ? '★' : '☆'}
@@ -1060,7 +1062,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     ))}
                   </div>
                   {difficultyRating !== null && (
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 6, textAlign: 'right' }}>
+                    <div style={{ fontSize: 11, color: '#7F9BD9', marginTop: 6, textAlign: 'right' }}>
                       {difficultyRating <= 2 ? '😊 קל — ' : difficultyRating === 3 ? '😐 בינוני — ' : '😤 קשה — '}נשמר
                     </div>
                   )}
@@ -1072,9 +1074,9 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     <button
                       onClick={onNext}
                       style={{
-                        padding: '13px', background: 'linear-gradient(90deg, #4ECDC4, #44b8b0)',
+                        padding: '13px', background: 'linear-gradient(90deg, #1F7A6E, #167a68)',
                         border: 'none', borderRadius: 10,
-                        color: '#000', fontWeight: 800, fontSize: 14, cursor: 'pointer',
+                        color: '#fff', fontWeight: 800, fontSize: 14, cursor: 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                       }}
                     >
@@ -1095,9 +1097,9 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   <button
                     onClick={onClose}
                     style={{
-                      padding: '12px', background: 'rgba(255,255,255,0.06)',
-                      border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10,
-                      color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                      padding: '12px', background: 'rgba(31,62,108,0.07)',
+                      border: '1px solid rgba(31,62,108,0.18)', borderRadius: 10,
+                      color: '#254A9F', fontWeight: 600, fontSize: 14, cursor: 'pointer',
                     }}
                   >
                     🏙️ Back to City
@@ -1110,15 +1112,15 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 {/* Analogy warm-up card */}
                 {SIMPLE_ANALOGIES[building.id] && (
                   <div style={{
-                    background: 'rgba(255,179,71,0.07)',
-                    border: '1px solid rgba(255,179,71,0.22)',
+                    background: 'rgba(255,179,71,0.12)',
+                    border: '1px solid rgba(255,179,71,0.3)',
                     borderRadius: 10, padding: '10px 14px',
                     marginBottom: 14,
-                    fontSize: 12, color: 'rgba(255,255,255,0.65)',
+                    fontSize: 12, color: '#1F3E6C',
                     direction: 'rtl', textAlign: 'right',
                     lineHeight: 1.6,
                   }}>
-                    <span style={{ color: '#FFB347', fontWeight: 700, marginLeft: 6 }}>💡 חשוב על זה כך:</span>
+                    <span style={{ color: '#d97706', fontWeight: 700, marginLeft: 6 }}>💡 חשוב על זה כך:</span>
                     {SIMPLE_ANALOGIES[building.id]}
                   </div>
                 )}
@@ -1171,18 +1173,18 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     </span>
                   )}
                   <span style={{
-                    background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
+                    background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.15)',
                     borderRadius: 20, padding: '4px 12px', fontSize: 12,
-                    color: 'rgba(255,255,255,0.45)', fontFamily: 'monospace',
+                    color: '#7F9BD9', fontFamily: 'monospace',
                   }}>
                     Q {quizIndex + 1} / {questions.length}
                   </span>
                   <span
                     title="Press 1–4 to choose · Enter to continue"
                     style={{
-                      background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.25)',
+                      background: 'rgba(31,122,110,0.08)', border: '1px solid rgba(31,122,110,0.25)',
                       borderRadius: 20, padding: '4px 10px', fontSize: 11,
-                      color: 'rgba(78,205,196,0.85)', fontWeight: 600,
+                      color: '#1F7A6E', fontWeight: 600,
                       display: 'inline-flex', alignItems: 'center', gap: 4,
                     }}
                   >
@@ -1194,7 +1196,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   {questions.map((_, i) => (
                     <div key={i} style={{
                       height: 3, flex: 1, borderRadius: 2,
-                      background: i < quizIndex ? color : i === quizIndex ? `${color}88` : 'rgba(255,255,255,0.12)',
+                      background: i < quizIndex ? color : i === quizIndex ? `${color}88` : 'rgba(31,62,108,0.15)',
                     }} />
                   ))}
                 </div>
@@ -1203,16 +1205,16 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 <div style={{
                   fontSize: 17,
                   fontWeight: 700,
-                  color: '#FFFFFF',
+                  color: '#1F3E6C',
                   lineHeight: 1.55,
                   direction: 'rtl',
                   textAlign: 'right',
                   marginBottom: 16,
                   padding: '16px 18px',
-                  background: 'rgba(255,255,255,0.07)',
+                  background: 'rgba(255,255,255,0.55)',
                   borderRadius: 12,
                   borderRight: `3px solid ${color}`,
-                  boxShadow: '0 0 0 1px rgba(255,255,255,0.10)',
+                  boxShadow: '0 0 0 1px rgba(31,62,108,0.08)',
                 }}>
                   {currentQ.q}
                 </div>
@@ -1222,12 +1224,12 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   {currentQ.options.map((opt, idx) => {
                     const isCorrect = idx === currentQ.correct
                     const isSelected = idx === selected
-                    let bg = 'rgba(255,255,255,0.04)'
-                    let border = '1px solid rgba(255,255,255,0.1)'
-                    let textColor = 'rgba(255,255,255,0.75)'
+                    let bg = 'rgba(255,255,255,0.5)'
+                    let border = '1px solid rgba(31,62,108,0.12)'
+                    let textColor = '#254A9F'
                     if (selected !== null) {
-                      if (isCorrect) { bg = 'rgba(78,205,196,0.15)'; border = '2px solid #4ECDC4'; textColor = '#4ECDC4' }
-                      else if (isSelected) { bg = '#FF6B6B22'; border = '1px solid #FF6B6B'; textColor = '#FF6B6B' }
+                      if (isCorrect) { bg = 'rgba(31,122,110,0.12)'; border = '2px solid #1F7A6E'; textColor = '#1F7A6E' }
+                      else if (isSelected) { bg = 'rgba(155,32,32,0.08)'; border = '1px solid #9B2020'; textColor = '#9B2020' }
                     }
                     return (
                       <button
@@ -1244,10 +1246,10 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                       >
                         <span style={{
                           width: 22, height: 22, borderRadius: '50%',
-                          background: selected !== null && isCorrect ? '#4ECDC4' : 'rgba(255,255,255,0.1)',
+                          background: selected !== null && isCorrect ? '#1F7A6E' : 'rgba(31,62,108,0.1)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 11, fontWeight: 700, flexShrink: 0,
-                          color: selected !== null && isCorrect ? '#000' : 'inherit',
+                          color: selected !== null && isCorrect ? '#fff' : 'inherit',
                         }}>
                           {selected !== null && isCorrect ? '✓' : idx + 1}
                         </span>
@@ -1292,10 +1294,10 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                       onClick={() => setHintShown(true)}
                       style={{
                         width: '100%', padding: '9px 14px',
-                        background: 'rgba(255,180,0,0.08)',
-                        border: '1px solid rgba(255,180,0,0.25)',
+                        background: 'rgba(217,119,6,0.08)',
+                        border: '1px solid rgba(217,119,6,0.25)',
                         borderRadius: 10, cursor: 'pointer',
-                        color: '#FFB347', fontSize: 13, fontWeight: 600,
+                        color: '#d97706', fontSize: 13, fontWeight: 600,
                       }}
                     >
                       💡 הצג רמז
@@ -1307,10 +1309,10 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 {hintShown && selected !== null && selected !== currentQ.correct && (
                   <div style={{
                     marginTop: 10,
-                    background: 'rgba(255,180,0,0.1)',
-                    border: '1px solid rgba(255,180,0,0.3)',
+                    background: 'rgba(217,119,6,0.08)',
+                    border: '1px solid rgba(217,119,6,0.25)',
                     borderRadius: 8, padding: '10px 14px',
-                    fontSize: 13, color: '#FFB347',
+                    fontSize: 13, color: '#d97706',
                     direction: 'rtl', textAlign: 'right', lineHeight: 1.5,
                   }}>
                     💡 {currentQ.explanation.split('.')[0]}.
@@ -1321,10 +1323,10 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 {selected !== null && (
                   <div style={{ marginTop: 14 }}>
                     <div style={{
-                      background: selected === currentQ.correct ? '#4ECDC411' : '#FF6B6B11',
-                      border: `1px solid ${selected === currentQ.correct ? '#4ECDC444' : '#FF6B6B44'}`,
+                      background: selected === currentQ.correct ? 'rgba(31,122,110,0.1)' : 'rgba(155,32,32,0.07)',
+                      border: `1px solid ${selected === currentQ.correct ? 'rgba(31,122,110,0.3)' : 'rgba(155,32,32,0.25)'}`,
                       borderRadius: 10, padding: '10px 14px',
-                      fontSize: 12, color: 'rgba(255,255,255,0.7)',
+                      fontSize: 12, color: '#1F3E6C',
                       direction: 'rtl', textAlign: 'right', lineHeight: 1.6,
                       marginBottom: 10,
                     }}>
@@ -1332,8 +1334,8 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     </div>
                     <button onClick={nextQuestion} style={{
                       width: '100%', padding: '11px',
-                      background: color, border: 'none', borderRadius: 10,
-                      color: '#000', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                      background: '#3351CA', border: 'none', borderRadius: 10,
+                      color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer',
                     }}>
                       {quizIndex + 1 >= questions.length ? '🏆 סיים' : 'שאלה הבאה →'}
                     </button>
