@@ -288,7 +288,7 @@ export default function ModelPicker({ buildingId, buildingLabel, currentPath, on
                   <span style={{ fontSize: 30, lineHeight: 1 }}>{model.emoji}</span>
                 ) : (
                   <img
-                    src={`/${previewUrlFromPath(model.path)}`}
+                    src={`${import.meta.env.BASE_URL}${previewUrlFromPath(model.path)}`}
                     alt={model.label}
                     onError={() => setImgFailed(prev => new Set(prev).add(model.path))}
                     style={{

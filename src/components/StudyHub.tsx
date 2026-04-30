@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import type { LessonTopicId } from './LessonPage'
 import { useLearningStore } from '../store/learningStore'
+import { initializeUser } from '../stores/authStore'
+import { loadProgress, recordQuizSession, saveCanvasNotes, type QuizAnswer, type UserProgress } from '../stores/progressStore'
+import quizBankData from '../data/quiz-bank.json'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
@@ -8,7 +11,16 @@ interface StudyHubProps {
   onOpenLesson?: (id: LessonTopicId) => void
 }
 
-type InternalView = 'home' | 'learning' | 'complete'
+type InternalView = 'home' | 'learning' | 'topics' | 'complete'
+
+// Extract topics from quiz-bank data
+const QUIZ_TOPICS = Object.entries(quizBankData.topics || {}).map(([key, data]: [string, any]) => ({
+  id: key,
+  label: data.concept || key,
+  building: data.building || '',
+  concept: data.concept || key,
+  questionCount: (data.questions || []).length,
+}))
 
 // ── Design tokens — driven by CSS custom properties for dark/light mode ────────
 const PAGE_BG       = 'var(--sh-page-bg)'
@@ -24,7 +36,147 @@ const TEXT_MED      = 'var(--sh-text-med)'
 const TEXT_LIGHT    = 'var(--sh-text-light)'
 const TEXT_TIP      = 'var(--sh-text-tip)'
 
+// ── Toolbar buttons (restored from 3D city HUD) ────────────────────────────────
+interface ToolbarButton {
+  id: string
+  label: string
+  icon: string
+  description: string
+}
+
+const TOOLBAR_BUTTONS: ToolbarButton[] = [
+  { id: 'flash', label: 'Flash', icon: '⚡', description: 'Flashcard drill mode' },
+  { id: 'calc', label: 'Calc', icon: '🧮', description: 'Calculator tool' },
+  { id: 'topics', label: 'Topics', icon: '📚', description: 'Topic browser' },
+  { id: 'scores', label: 'Scores', icon: '📊', description: 'Performance dashboard' },
+  { id: 'streaks', label: '30Days', icon: '🔥', description: '30-day challenge' },
+]
+
+// ── Topic Selector Component ───────────────────────────────────────────────────
+interface TopicSelectorProps {
+  userProgress: UserProgress
+  onSelectTopic: (topicId: string) => void
+  onBack: () => void
+}
+
+function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorProps) {
+  return (
+    <div style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
+      <button
+        onClick={onBack}
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: TEXT_DARK,
+          fontFamily: "'Rubik', sans-serif",
+          fontSize: 16,
+          marginBottom: 24,
+          padding: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}
+      >
+        ← חזור לדף הבית
+      </button>
+
+      <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
+        בחר/י נושא ללימוד
+      </h2>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20, maxWidth: 1200 }}>
+        {QUIZ_TOPICS.map(topic => {
+          const progress = userProgress.topics[topic.id]
+          const isMastered = progress?.mastered
+          const bestScore = progress?.bestScore || 0
+          const sessionsAttempted = progress?.sessionsAttempted || 0
+
+          return (
+            <button
+              key={topic.id}
+              onClick={() => onSelectTopic(topic.id)}
+              style={{
+                background: GLASS_CARD,
+                backdropFilter: 'blur(20px)',
+                border: `2px solid ${isMastered ? 'rgba(212,175,55,0.6)' : 'rgba(255,255,255,0.3)'}`,
+                borderRadius: CARD_RADIUS,
+                padding: 24,
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 16,
+                textAlign: 'right',
+                transition: 'all 0.3s',
+                boxShadow: CARD_SHADOW,
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'
+                ;(e.currentTarget as HTMLElement).style.boxShadow = `0 12px 40px rgba(51,81,202,0.25)`
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+                ;(e.currentTarget as HTMLElement).style.boxShadow = CARD_SHADOW
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                <div style={{ fontSize: 32 }}>{isMastered ? '⭐' : '📖'}</div>
+                <div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>
+                    {topic.label}
+                  </div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginTop: 4 }}>
+                    {topic.building}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: TEXT_MED }}>
+                    {sessionsAttempted}
+                  </div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>סשנים</div>
+                </div>
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: bestScore > 85 ? '#34A853' : TEXT_MED }}>
+                    {bestScore}%
+                  </div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ציון הטוב</div>
+                </div>
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: '#D4AF37' }}>
+                    {topic.questionCount}
+                  </div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>שאלות</div>
+                </div>
+              </div>
+
+              {isMastered && (
+                <div style={{
+                  background: 'rgba(212,175,55,0.15)',
+                  border: '1px solid rgba(212,175,55,0.4)',
+                  borderRadius: 8,
+                  padding: '6px 10px',
+                  fontFamily: "'Rubik', sans-serif",
+                  fontSize: 12,
+                  color: '#D4AF37',
+                  fontWeight: 600,
+                  textAlign: 'center',
+                }}>
+                  ✅ הושגת שליטה!
+                </div>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── Questions with model answers ──────────────────────────────────────────────
+// Fallback for initial questions (will be overridden by quiz-bank data)
 const QUESTIONS = [
   {
     id: 1, topic: 'ממוצע',
@@ -630,19 +782,38 @@ function XpBurst({ amount, onDone }: { amount: number; onDone: () => void }) {
 }
 
 // ── Learning area screen ───────────────────────────────────────────────────────
-function LearningScreen({ onBack }: { onBack: () => void }) {
+interface LearningScreenProps {
+  onBack: () => void
+  selectedTopic?: string
+  userProgress: UserProgress
+  onProgressUpdate: (progress: UserProgress) => void
+}
+
+function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate }: LearningScreenProps) {
   const [currentQ, setCurrentQ] = useState(0)
   const [answer, setAnswer] = useState('')
   const [phase, setPhase] = useState<'write' | 'review' | 'done'>('write')
-  const [dotStates, setDotStates] = useState<Array<'empty' | 'current' | 'correct' | 'wrong' | 'future'>>(
-    QUESTIONS.map((_, i) => i === 0 ? 'current' : 'empty')
-  )
   const [xpBurst, setXpBurst] = useState<number | null>(null)
   const [showCanvas, setShowCanvas] = useState(true)
   const recordAnswer = useLearningStore(s => s.recordAnswer)
 
-  const q = QUESTIONS[currentQ]
-  const total = QUESTIONS.length
+  // Load questions from selected topic or fallback to hardcoded
+  const questions = selectedTopic && quizBankData.topics[selectedTopic]
+    ? quizBankData.topics[selectedTopic].questions.map((q: any) => ({
+        id: q.id,
+        topic: selectedTopic,
+        text: q.question,
+        answer: q.explanation,
+        xp: 15,
+      }))
+    : QUESTIONS
+
+  const [dotStates, setDotStates] = useState<Array<'empty' | 'current' | 'correct' | 'wrong' | 'future'>>(
+    questions.map((_, i) => i === 0 ? 'current' : 'empty')
+  )
+
+  const q = questions[currentQ]
+  const total = questions.length
   const answeredCount = dotStates.filter(s => s === 'correct' || s === 'wrong').length
   const correctCount = dotStates.filter(s => s === 'correct').length
 
@@ -665,6 +836,33 @@ function LearningScreen({ onBack }: { onBack: () => void }) {
 
     // auto advance after a moment
     setTimeout(() => goNext(next), correct ? 900 : 600)
+  }
+
+  const handleQuizComplete = () => {
+    if (!selectedTopic) return
+
+    // Record quiz session in progress store
+    const topicData = quizBankData.topics[selectedTopic]
+    if (!topicData) return
+
+    const answers: QuizAnswer[] = questions.map((q: any, i: number) => ({
+      questionId: q.id || `q${i}`,
+      answered: dotStates[i] !== 'empty',
+      correct: dotStates[i] === 'correct',
+      userAnswer: answer,
+    }))
+
+    const duration = 0 // Could track actual time if needed
+    const updatedProgress = recordQuizSession(
+      userProgress,
+      selectedTopic,
+      topicData.concept || selectedTopic,
+      topicData.building || '',
+      answers,
+      duration
+    )
+
+    onProgressUpdate(updatedProgress)
   }
 
   const handleSkip = () => {
@@ -764,13 +962,16 @@ function LearningScreen({ onBack }: { onBack: () => void }) {
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#D4AF37' }}>
-                    {QUESTIONS.filter((_, i) => dotStates[i] === 'correct').reduce((s, q) => s + q.xp, 0)}
+                    {questions.filter((_: any, i: number) => dotStates[i] === 'correct').reduce((s: number, q: any) => s + q.xp, 0)}
                   </div>
                   <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>XP הרווחת</div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 14, marginTop: 4 }}>
-                <button onClick={onBack}
+                <button onClick={() => {
+                  handleQuizComplete()
+                  onBack()
+                }}
                   style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '12px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}>
                   חזור לדף הבית
                 </button>
@@ -918,14 +1119,35 @@ function LearningScreen({ onBack }: { onBack: () => void }) {
 // ── Root ───────────────────────────────────────────────────────────────────────
 const StudyHub = ({ onViewChange }: StudyHubProps) => {
   const [internalView, setInternalView] = useState<InternalView>('home')
-  const title = internalView === 'home' ? 'דף הבית' : 'אזור למידה'
+  const [selectedTopic, setSelectedTopic] = useState<string | undefined>()
+  const [userProgress, setUserProgress] = useState<UserProgress>(() => {
+    const user = initializeUser()
+    return loadProgress(user.userId)
+  })
+
+  const title = internalView === 'home' ? 'דף הבית' : internalView === 'topics' ? 'בחירת נושא' : 'אזור למידה'
+
+  const handleSelectTopic = (topicId: string) => {
+    setSelectedTopic(topicId)
+    setInternalView('learning')
+  }
+
+  const handleProgressUpdate = (updated: UserProgress) => {
+    setUserProgress(updated)
+  }
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', overflow: 'hidden', direction: 'rtl', background: PAGE_BG, fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
       {/* Sidebar — right side (RTL) */}
       <Sidebar
         active={internalView}
-        onNav={setInternalView}
+        onNav={(view) => {
+          if (view === 'topics') {
+            setInternalView('topics')
+          } else {
+            setInternalView(view)
+          }
+        }}
         onGoWorld={() => onViewChange('3d')}
         onGoMindmap={() => onViewChange('mindmap')}
       />
@@ -935,13 +1157,25 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
         <TopBar title={title} />
         {internalView === 'home' && (
           <HomeScreen
-            onGoLearning={() => setInternalView('learning')}
+            onGoLearning={() => setInternalView('topics')}
             onGoWorld={() => onViewChange('3d')}
             onGoMindmap={() => onViewChange('mindmap')}
           />
         )}
+        {internalView === 'topics' && (
+          <TopicSelector
+            userProgress={userProgress}
+            onSelectTopic={handleSelectTopic}
+            onBack={() => setInternalView('home')}
+          />
+        )}
         {internalView === 'learning' && (
-          <LearningScreen onBack={() => setInternalView('home')} />
+          <LearningScreen
+            onBack={() => setInternalView('topics')}
+            selectedTopic={selectedTopic}
+            userProgress={userProgress}
+            onProgressUpdate={handleProgressUpdate}
+          />
         )}
       </div>
     </div>
