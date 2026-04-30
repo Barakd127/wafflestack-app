@@ -1228,10 +1228,10 @@ function wbRedraw(){
     WB._connDelBtn=null;
   }
 
-  // Draw contact points for hovered AND selected objects (in select or connect mode)
+  // Draw contact points for hovered shape in ANY mode; selected shape in select/connect
   const cpShowIds=new Set();
+  if(WB._hoverObjId)cpShowIds.add(WB._hoverObjId);
   if(WB.tool==='select'||WB.tool==='connect'){
-    if(WB._hoverObjId)cpShowIds.add(WB._hoverObjId);
     if(WB.selId)cpShowIds.add(WB.selId);
   }
   cpShowIds.forEach(cpId=>{
@@ -1744,11 +1744,9 @@ canvas.addEventListener('mousedown',e=>{
     }
   }
 
-  // Contact point click → start connecting (works in Select mode too)
-  if(WB.tool==='select'||WB.tool==='connect'){
-    const cp=findContactPointHit(e.offsetX,e.offsetY,10);
-    if(cp){const sc2=sc2scene(e.offsetX,e.offsetY);WB.drag={type:'connecting',fromId:cp.objId,fromAnchor:cp.anchor,mx:sc2.x,my:sc2.y};return;}
-  }
+  // Contact point click → start connecting in ANY mode
+  const _cpHit=findContactPointHit(e.offsetX,e.offsetY,10);
+  if(_cpHit){const sc2=sc2scene(e.offsetX,e.offsetY);WB.drag={type:'connecting',fromId:_cpHit.objId,fromAnchor:_cpHit.anchor,mx:sc2.x,my:sc2.y};return;}
 
   if(WB.tool==='connect'){
     const sc=sc2scene(e.offsetX,e.offsetY);
@@ -1847,7 +1845,8 @@ canvas.addEventListener('mousemove',e=>{
       }
     }
     if(WB._hoveredHandlePos){WB._hoveredHandlePos=null;wbRedraw();}
-    canvas.style.cursor='default';
+    if(findContactPointHit(e.offsetX,e.offsetY,10)){canvas.style.cursor='crosshair';}
+    else canvas.style.cursor='default';
   }
 
   if(WB.drag&&WB.drag.type==='connecting'){WB.drag.mx=sc.x;WB.drag.my=sc.y;wbRedraw();return;}
