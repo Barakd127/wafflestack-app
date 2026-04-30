@@ -151,6 +151,8 @@ const COLOR_VARIATIONS: Record<'A' | 'B' | 'C', Record<string, string>> = {
   },
 }
 
+// ─── Street assets: trees, vehicles, furniture ───────────────────────────────
+// These will be loaded from Kenney's asset packs to create a living city feel
 const ROAD_MODELS = [
   { model: 'path-long',  pos: [-6, 0, -9] as [number,number,number], rot: 0 },
   { model: 'path-long',  pos: [0,  0, -9] as [number,number,number], rot: 0 },
@@ -158,6 +160,33 @@ const ROAD_MODELS = [
   { model: 'path-long',  pos: [-6, 0, -3] as [number,number,number], rot: 0 },
   { model: 'path-long',  pos: [0,  0, -3] as [number,number,number], rot: 0 },
   { model: 'path-long',  pos: [6,  0, -3] as [number,number,number], rot: 0 },
+]
+
+// Tree placements for greenery and natural feel
+const TREE_MODELS = [
+  { path: 'kenney/suburban/tree-pine.glb', pos: [-12, 0, -12] as [number,number,number], scale: 1.2 },
+  { path: 'kenney/suburban/tree-pine.glb', pos: [12, 0, -12] as [number,number,number], scale: 1.2 },
+  { path: 'kenney/suburban/tree-pine.glb', pos: [-12, 0, 6] as [number,number,number], scale: 1.2 },
+  { path: 'kenney/suburban/tree-pine.glb', pos: [12, 0, 6] as [number,number,number], scale: 1.2 },
+  { path: 'kenney/suburban/tree-oak.glb', pos: [-8, 0, -14] as [number,number,number], scale: 1.1 },
+  { path: 'kenney/suburban/tree-oak.glb', pos: [8, 0, -14] as [number,number,number], scale: 1.1 },
+]
+
+// Vehicle placements for street activity
+const VEHICLE_MODELS = [
+  { path: 'kenney/suburban/car-suv-a.glb', pos: [-15, 0, -6] as [number,number,number], rot: Math.PI / 4 },
+  { path: 'kenney/suburban/car-sedan-a.glb', pos: [15, 0, 0] as [number,number,number], rot: -Math.PI / 3 },
+  { path: 'kenney/suburban/truck-delivery.glb', pos: [-18, 0, 3] as [number,number,number], rot: Math.PI / 2 },
+]
+
+// Street furniture for detail and character
+const STREET_FURNITURE = [
+  { path: 'kenney/suburban/bench.glb', pos: [-10, 0, -5] as [number,number,number], scale: 1.0 },
+  { path: 'kenney/suburban/bench.glb', pos: [10, 0, -5] as [number,number,number], scale: 1.0, rot: Math.PI },
+  { path: 'kenney/suburban/lamp-street.glb', pos: [-14, 0, -3] as [number,number,number], scale: 1.5 },
+  { path: 'kenney/suburban/lamp-street.glb', pos: [14, 0, -3] as [number,number,number], scale: 1.5 },
+  { path: 'kenney/suburban/sign-welcome.glb', pos: [-16, 0, 8] as [number,number,number], scale: 1.2 },
+  { path: 'kenney/suburban/fountain.glb', pos: [0, 0, 12] as [number,number,number], scale: 1.8 },
 ]
 
 const GLOSSARY_DATA: Record<string, { conceptEn: string; formula: string }> = {
@@ -538,6 +567,28 @@ function Prop({ model, pos, rot }: { model: string, pos: [number,number,number],
   const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/kenney-suburban/${model}.glb`)
   const cloned = useMemo(() => scene.clone(), [scene])
   return <primitive object={cloned} position={pos} rotation={[0, rot, 0]} scale={1.4} />
+}
+
+// ─── Street Asset (trees, vehicles, furniture) ────────────────────────────────
+function StreetAsset({
+  path,
+  pos,
+  rot = 0,
+  scale = 1.0
+}: {
+  path: string
+  pos: [number,number,number]
+  rot?: number
+  scale?: number
+}) {
+  try {
+    const { scene } = useGLTF(`${import.meta.env.BASE_URL}${path}`)
+    const cloned = useMemo(() => scene.clone(), [scene])
+    return <primitive object={cloned} position={pos} rotation={[0, rot, 0]} scale={scale} />
+  } catch {
+    // Asset not available - gracefully skip rendering
+    return null
+  }
 }
 
 // ─── Townscaper-style irregular grid ground ───────────────────────────────────
@@ -1488,7 +1539,14 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
 
         <Suspense fallback={null}>
           <TownscaperGround />
-          {ROAD_MODELS.map((r, i) => <Prop key={i} model={r.model} pos={r.pos} rot={r.rot} />)}
+
+          {/* Road paths */}
+          {ROAD_MODELS.map((r, i) => <Prop key={`road-${i}`} model={r.model} pos={r.pos} rot={r.rot} />)}
+
+          {/* Street furniture & greenery */}
+          {TREE_MODELS.map((t, i) => <StreetAsset key={`tree-${i}`} path={t.path} pos={t.pos} scale={t.scale} />)}
+          {VEHICLE_MODELS.map((v, i) => <StreetAsset key={`vehicle-${i}`} path={v.path} pos={v.pos} rot={v.rot} scale={1.2} />)}
+          {STREET_FURNITURE.map((f, i) => <StreetAsset key={`furniture-${i}`} path={f.path} pos={f.pos} rot={f.rot ?? 0} scale={f.scale ?? 1.0} />)}
 
           {/* Aliveness layer — clouds + smoke, tier-gated */}
           <Clouds count={6} altitude={24} range={70} speed={0.55} />
