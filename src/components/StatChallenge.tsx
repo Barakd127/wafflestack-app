@@ -438,6 +438,10 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
   // Tab state — always shown (no more side-by-side columns)
   const [activeTab, setActiveTab] = useState<'learn' | 'quiz'>('learn')
 
+  // Canvas side-panel toggle — opens the mind-map canvas alongside the quiz so
+  // the student can sketch / take notes while answering. Persists per session.
+  const [canvasOpen, setCanvasOpen] = useState(false)
+
   // Load questions from quiz-bank; fall back to CHALLENGES hardcoded quiz
   const questions = useMemo(() => {
     const bankQuestions = getQuestionsForBuilding(building.id)
@@ -658,10 +662,56 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 'clamp(8px, 3vw, 16px)',
         backdropFilter: 'blur(6px)',
+        gap: 12,
       }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <style>{CONFETTI_STYLE}</style>
+
+      {/* Mind Map Canvas side panel — opens alongside the quiz for sketching/notes */}
+      {canvasOpen && activeTab === 'quiz' && (
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            width: 'min(46vw, 720px)', height: '90vh',
+            background: '#0d0d1a',
+            border: `1px solid ${color}44`,
+            borderRadius: 20,
+            overflow: 'hidden',
+            display: 'flex', flexDirection: 'column',
+            boxShadow: `0 0 60px ${color}22, 0 20px 60px rgba(0,0,0,0.18)`,
+          }}
+        >
+          <div style={{
+            height: 40, background: 'rgba(13,13,26,0.95)',
+            borderBottom: '1px solid #2a2a3d',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '0 14px', flexShrink: 0,
+            fontFamily: "'Heebo', system-ui, sans-serif",
+          }}>
+            <span style={{ color: '#a5b4fc', fontSize: 12, fontWeight: 700, letterSpacing: 1 }}>
+              🧠 קנבס · Mind Map
+            </span>
+            <button
+              onClick={() => setCanvasOpen(false)}
+              aria-label="Close canvas panel"
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: 6, padding: '3px 9px',
+                color: 'rgba(255,255,255,0.7)', fontSize: 11,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >✕</button>
+          </div>
+          <iframe
+            src="/mindmap.html"
+            title="Mind Map Canvas"
+            style={{ flex: 1, width: '100%', border: 'none', background: '#0d0d1a' }}
+          />
+        </div>
+      )}
+
       <style>{`
         @media (max-width: 600px) {
           .stat-quiz-header { padding: 14px 16px 12px !important; }
@@ -764,6 +814,28 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
             >
               ⏱️ {timerEnabled ? `Timer: ${TIMER_INITIAL}s` : 'Timer: Off'}
             </button>
+            {activeTab === 'quiz' && (
+              <button
+                onClick={() => setCanvasOpen(o => !o)}
+                title={canvasOpen
+                  ? 'Close the mind-map canvas panel'
+                  : 'Open the mind-map canvas alongside this question to sketch or take notes'}
+                style={{
+                  padding: '0 16px',
+                  background: canvasOpen ? 'rgba(108,99,255,0.12)' : 'none',
+                  border: 'none', borderLeft: '1px solid rgba(31,62,108,0.1)',
+                  borderBottom: `2px solid ${canvasOpen ? '#6c63ff' : 'transparent'}`,
+                  color: canvasOpen ? '#6c63ff' : 'rgba(31,62,108,0.4)',
+                  fontWeight: 700, fontSize: 12, cursor: 'pointer',
+                  transition: 'all 0.18s', letterSpacing: 0.4,
+                  fontFamily: "'Heebo', system-ui, sans-serif",
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                🧠 {canvasOpen ? 'Canvas: On' : 'Canvas: Off'}
+              </button>
+            )}
           </div>
 
           {/* ── LEARN TAB ── */}

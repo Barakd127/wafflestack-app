@@ -121,10 +121,20 @@ interface Props {
   onClose: () => void
 }
 
+/**
+ * Derive the preview-PNG URL from a model's GLB path.
+ * Example: "kenney/commercial/building-a.glb" → "previews/commercial/building-a.png"
+ * Falls back to emoji if the image fails to load.
+ */
+function previewUrlFromPath(path: string): string {
+  return path.replace(/^kenney\//, 'previews/').replace(/\.glb$/, '.png')
+}
+
 export default function ModelPicker({ buildingId, buildingLabel, currentPath, onSelect, onClose }: Props) {
   const [activePack, setActivePack] = useState<PackId>('commercial')
   const [search, setSearch] = useState('')
   const [hoveredPath, setHoveredPath] = useState<string | null>(null)
+  const [imgFailed, setImgFailed] = useState<Set<string>>(new Set())
 
   const pack = PACKS.find(p => p.id === activePack)!
   const filtered = search.trim()
@@ -274,7 +284,20 @@ export default function ModelPicker({ buildingId, buildingLabel, currentPath, on
                     borderRadius: 4, padding: '1px 4px', fontWeight: 700,
                   }}>✓</div>
                 )}
-                <span style={{ fontSize: 22 }}>{model.emoji}</span>
+                {imgFailed.has(model.path) ? (
+                  <span style={{ fontSize: 30, lineHeight: 1 }}>{model.emoji}</span>
+                ) : (
+                  <img
+                    src={`/${previewUrlFromPath(model.path)}`}
+                    alt={model.label}
+                    onError={() => setImgFailed(prev => new Set(prev).add(model.path))}
+                    style={{
+                      width: 56, height: 56, objectFit: 'contain',
+                      imageRendering: 'auto',
+                      filter: isActive ? 'drop-shadow(0 0 6px ' + pack.accent + '88)' : 'none',
+                    }}
+                  />
+                )}
                 <span style={{
                   fontSize: 10, fontWeight: 600,
                   color: isActive ? pack.accent : '#1F3E6C',

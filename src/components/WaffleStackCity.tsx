@@ -1249,7 +1249,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         onClick={() => setPickerMode(m => !m)}
         title={pickerMode ? 'Exit model picker mode (click a building to swap its model)' : 'Swap building models'}
         style={{
-          position: 'absolute', bottom: 24, left: onBack ? 108 : 24, zIndex: 50,
+          position: 'absolute', bottom: 24, left: onBack ? 200 : 100, zIndex: 50,
           background: pickerMode
             ? 'rgba(51,81,202,0.85)'
             : 'rgba(10,10,20,0.75)',
@@ -1534,7 +1534,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       {showLeaderboard && <LocalLeaderboard onClose={() => setShowLeaderboard(false)} />}
 
       {/* Pomodoro focus timer */}
-      <PomodoroTimer />
+      <PomodoroTimer leftOffset={onBack ? 120 : 24} />
 
       {/* 30-Day Streak Calendar */}
       {showStreakCalendar && <StreakCalendar onClose={() => setShowStreakCalendar(false)} />}

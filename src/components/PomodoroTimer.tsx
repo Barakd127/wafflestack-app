@@ -40,7 +40,11 @@ function playChime(mode: Mode) {
   } catch { /* audio unavailable */ }
 }
 
-export default function PomodoroTimer() {
+interface PomodoroTimerProps {
+  leftOffset?: number
+}
+
+export default function PomodoroTimer({ leftOffset = 90 }: PomodoroTimerProps = {}) {
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState<Mode>('work')
   const [secondsLeft, setSecondsLeft] = useState(WORK_MIN * 60)
@@ -109,7 +113,7 @@ export default function PomodoroTimer() {
         title="טיימר פומודורו"
         aria-label="Open Pomodoro timer"
         style={{
-          position: 'absolute', bottom: 24, left: 90, zIndex: 50,
+          position: 'absolute', bottom: 24, left: leftOffset, zIndex: 50,
           background: running ? 'rgba(255,107,107,0.18)' : 'rgba(10,10,20,0.75)',
           backdropFilter: 'blur(10px)',
           border: `1px solid ${running ? accent : 'rgba(255,255,255,0.2)'}`,
