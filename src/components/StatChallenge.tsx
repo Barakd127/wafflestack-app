@@ -494,6 +494,12 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     const stored = localStorage.getItem(`wafflestack-difficulty-${building.id}`)
     return stored ? parseInt(stored) : null
   })
+
+  // Response time tracking — measures think-time per question (excludes timeouts).
+  // Fuels per-question pacing feedback + an average summary at quiz end.
+  const [questionStartTime, setQuestionStartTime] = useState(() => Date.now())
+  const [responseTimes, setResponseTimes] = useState<number[]>([])
+  const [lastResponseSeconds, setLastResponseSeconds] = useState<number | null>(null)
   const handleDifficultyRating = (rating: number) => {
     setDifficultyRating(rating)
     localStorage.setItem(`wafflestack-difficulty-${building.id}`, String(rating))
@@ -503,6 +509,9 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
 
   const handleAnswer = (idx: number) => {
     if (selected !== null) return
+    const elapsedSec = Math.max(1, Math.round((Date.now() - questionStartTime) / 1000))
+    setLastResponseSeconds(elapsedSec)
+    setResponseTimes(prev => [...prev, elapsedSec])
     setSelected(idx)
     if (idx === currentQ.correct) {
       setScore(s => s + 1)
@@ -546,6 +555,8 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
       setSelected(null)
       setHintShown(false)
       setSecondsLeft(TIMER_INITIAL)
+      setQuestionStartTime(Date.now())
+      setLastResponseSeconds(null)
     }
   }
 
@@ -561,7 +572,19 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     setPeakStreak(0)
     setNewRecord(false)
     setSecondsLeft(TIMER_INITIAL)
+    setQuestionStartTime(Date.now())
+    setResponseTimes([])
+    setLastResponseSeconds(null)
   }
+
+  // Reset start-time when entering the quiz tab so the first question's
+  // timer begins on tab activation, not on modal mount.
+  useEffect(() => {
+    if (activeTab === 'quiz' && selected === null && !quizDone && !showMistakes) {
+      setQuestionStartTime(Date.now())
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab])
 
   // Quiz keyboard shortcuts: 1–4 select an option, Enter/Space advance.
   // Only active on the quiz tab while a question is open (not in mistakes-review or done state).
@@ -953,6 +976,32 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   </div>
                 )}
 
+                {/* Average response time — metacognitive pacing feedback */}
+                {responseTimes.length > 0 && (() => {
+                  const avg = Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length)
+                  const fastest = Math.min(...responseTimes)
+                  return (
+                    <div style={{
+                      background: 'rgba(78,205,196,0.08)', border: '1px solid rgba(78,205,196,0.3)',
+                      borderRadius: 12, padding: '10px 18px', marginBottom: 16,
+                      fontSize: 13, color: '#4ECDC4', fontWeight: 700,
+                      direction: 'rtl', textAlign: 'right',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      gap: 12, minWidth: 220,
+                    }}>
+                      <span>⏱️ ממוצע זמן תגובה</span>
+                      <span style={{ fontVariantNumeric: 'tabular-nums', display: 'inline-flex', gap: 8, alignItems: 'baseline' }}>
+                        <span>{avg}s</span>
+                        {responseTimes.length >= 2 && (
+                          <span style={{ fontSize: 10, fontWeight: 500, color: 'rgba(78,205,196,0.7)' }}>
+                            (מהיר: {fastest}s)
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  )
+                })()}
+
                 {/* Peak streak this attempt */}
                 {peakStreak >= 2 && (
                   <div style={{
@@ -1330,6 +1379,27 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 {/* Explanation + Next */}
                 {selected !== null && (
                   <div style={{ marginTop: 14 }}>
+                    {lastResponseSeconds !== null && selected !== -1 && (
+                      <div style={{
+                        display: 'flex', justifyContent: 'flex-end', marginBottom: 8,
+                      }}>
+                        <span
+                          title="Time you spent on this question — useful for pacing"
+                          style={{
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            borderRadius: 20, padding: '3px 10px',
+                            fontSize: 11, color: 'rgba(255,255,255,0.55)',
+                            fontVariantNumeric: 'tabular-nums',
+                            direction: 'rtl', display: 'inline-flex',
+                            alignItems: 'center', gap: 4,
+                          }}
+                        >
+                          <span>⏱️</span>
+                          <span>עניתם תוך {lastResponseSeconds}s</span>
+                        </span>
+                      </div>
+                    )}
                     <div style={{
                       background: selected === currentQ.correct ? '#4ECDC411' : '#FF6B6B11',
                       border: `1px solid ${selected === currentQ.correct ? '#4ECDC444' : '#FF6B6B44'}`,

@@ -674,6 +674,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   )
   const [showStudyPanel, setShowStudyPanel] = useState(false)
 
+  // Resume chip — surfaces the last challenge the user opened if it's still
+  // recent and unmastered, so they can pick up where they left off.
+  const [resumeChip, setResumeChip] = useState<{ id: string; label: string; statsConcept: string; color?: string; ts: number } | null>(() => {
+    try {
+      const raw = localStorage.getItem('wafflestack-last-challenge')
+      if (!raw) return null
+      const parsed = JSON.parse(raw)
+      if (!parsed || typeof parsed.id !== 'string' || !Number.isFinite(parsed.ts)) return null
+      if (Date.now() - parsed.ts > 7 * 86400000) return null
+      return parsed
+    } catch {
+      return null
+    }
+  })
+
   // Weak spots practice quiz state
   interface WQQuestion { buildingId: string; buildingLabel: string; color: string; q: string; options: string[]; correct: number; explanation: string }
   const [showWeakSpotsQuiz, setShowWeakSpotsQuiz] = useState(false)
@@ -717,6 +732,21 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
     setChallengeBuilding({ id: pick.id, label: pick.label, statsConcept: pick.statsConcept, color: pick.color })
     setSelectedBuilding(null)
   }, [mastered, challengeBuilding])
+
+  // Persist the last challenge the user opened so we can offer a Resume chip later.
+  useEffect(() => {
+    if (!challengeBuilding) return
+    const data = {
+      id: challengeBuilding.id,
+      label: challengeBuilding.label,
+      statsConcept: challengeBuilding.statsConcept,
+      color: challengeBuilding.color,
+      ts: Date.now(),
+    }
+    try { localStorage.setItem('wafflestack-last-challenge', JSON.stringify(data)) } catch { /* ignore */ }
+    // Hide the resume chip for this session — they're already back on it.
+    setResumeChip(null)
+  }, [challengeBuilding])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1136,6 +1166,48 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
               color: 'rgba(255,255,255,0.35)', fontSize: 10, padding: 0,
               lineHeight: 1, flexShrink: 0,
             }}
+          >✕</button>
+        </div>
+      )}
+
+      {/* Resume chip — picks up the last unmastered challenge the user opened. */}
+      {resumeChip && !mastered.has(resumeChip.id) && !challengeBuilding && (
+        <div
+          onClick={() => {
+            setChallengeBuilding({
+              id: resumeChip.id,
+              label: resumeChip.label,
+              statsConcept: resumeChip.statsConcept,
+              color: resumeChip.color,
+            })
+            setSelectedBuilding(null)
+          }}
+          style={{
+            position: 'absolute', top: 92, left: 60, zIndex: 50,
+            background: 'rgba(99,102,241,0.12)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(99,102,241,0.35)', borderRadius: 20,
+            padding: '4px 10px 4px 13px',
+            fontFamily: "'Heebo', system-ui, sans-serif",
+            display: 'flex', alignItems: 'center', gap: 8,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          title="לחץ כדי להמשיך מאיפה שעצרת"
+        >
+          <span style={{ fontSize: 11, color: '#a5b4fc', fontWeight: 700, whiteSpace: 'nowrap' }}>
+            ↩️ המשך: {resumeChip.statsConcept.split(' (')[0]}
+          </span>
+          <button
+            onClick={e => {
+              e.stopPropagation()
+              setResumeChip(null)
+            }}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'rgba(255,255,255,0.35)', fontSize: 10, padding: 0,
+              lineHeight: 1, flexShrink: 0,
+            }}
+            aria-label="Dismiss resume chip"
           >✕</button>
         </div>
       )}
