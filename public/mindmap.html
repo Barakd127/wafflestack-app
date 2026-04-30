@@ -809,12 +809,116 @@ function mmAddChild(parentId){
 
 function mmAddEquation(){
   const sel=MM.sel||MM.root;
-  const parent=MM.nodes[sel];
+  if(!MM.nodes[sel])return;
+  openMMFormulaLibrary(sel);
+}
+
+function openMMFormulaLibrary(parentId){
+  const parent=MM.nodes[parentId];
   if(!parent)return;
-  EQ.targetNodeId=sel;
-  EQ.targetMode='insertMM';
-  EQ.currentLatex='';
-  document.body.appendChild(createEquationModal());
+
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.72)';
+
+  const panel=document.createElement('div');
+  panel.style.cssText='background:#1e1e2e;border-radius:12px;border:1px solid rgba(99,102,241,.3);width:540px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.85);overflow:hidden;font-family:Inter,sans-serif';
+
+  // ── Header ──
+  const header=document.createElement('div');
+  header.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0';
+  const title=document.createElement('span');
+  title.style.cssText='color:#fff;font-size:14px;font-weight:600';
+  title.textContent='∑ Formula Library — click any formula to add to mind map';
+  const xBtn=document.createElement('button');
+  xBtn.textContent='×';xBtn.style.cssText='background:none;border:none;color:rgba(255,255,255,.5);font-size:22px;cursor:pointer;line-height:1;padding:0 4px;flex-shrink:0';
+  xBtn.onclick=()=>overlay.remove();
+  header.appendChild(title);header.appendChild(xBtn);
+
+  // ── Search ──
+  const searchWrap=document.createElement('div');
+  searchWrap.style.cssText='padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0';
+  const searchInput=document.createElement('input');
+  searchInput.type='text';searchInput.placeholder='🔍 Search formulas…';
+  searchInput.style.cssText='width:100%;padding:7px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:white;font-family:Inter,sans-serif;font-size:12px;outline:none;box-sizing:border-box';
+  searchInput.onfocus=()=>searchInput.style.borderColor='#6366f1';
+  searchInput.onblur=()=>searchInput.style.borderColor='rgba(255,255,255,.12)';
+  searchWrap.appendChild(searchInput);
+
+  // ── Formula List ──
+  const listWrap=document.createElement('div');
+  listWrap.style.cssText='flex:1;overflow-y:auto;padding-bottom:6px';
+  listWrap.style.scrollbarWidth='thin';
+
+  function insertAndClose(latex){
+    const baseY=mmNextChildY(parent);
+    const n=mmNode('equation','Equation',parent.x+MM_XSTEP,baseY,parentId,mmPickColor(parentId));
+    n.latex=latex;
+    mmFinishAdd(n,false);
+    overlay.remove();
+  }
+
+  function renderList(filter){
+    listWrap.innerHTML='';
+    const f=filter.toLowerCase().trim();
+    for(const topic of FTB_DATA){
+      const visible=topic.formulas.filter(fm=>!f||fm.label.toLowerCase().includes(f)||fm.desc.toLowerCase().includes(f)||fm.latex.includes(f));
+      if(!visible.length)continue;
+      const sec=document.createElement('div');
+      const head=document.createElement('div');
+      head.style.cssText='padding:9px 16px 4px;font-size:10px;font-weight:700;color:rgba(99,102,241,.8);text-transform:uppercase;letter-spacing:.7px';
+      head.textContent=topic.label;
+      sec.appendChild(head);
+      for(const fm of visible){
+        const row=document.createElement('div');
+        row.style.cssText='display:flex;align-items:center;gap:10px;padding:7px 16px;cursor:pointer;border-radius:0';
+        row.onmouseenter=()=>row.style.background='rgba(99,102,241,.16)';
+        row.onmouseleave=()=>row.style.background='';
+        const info=document.createElement('div');info.style.cssText='flex:1;min-width:0;overflow:hidden';
+        const lbl=document.createElement('div');lbl.style.cssText='font-size:10px;color:rgba(255,255,255,.4);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';lbl.textContent=fm.label+' — '+fm.desc;
+        const prev=document.createElement('div');prev.style.cssText='color:#e0e0ff;font-size:12px';
+        try{if(window.katex)katex.render(fm.latex,prev,{throwOnError:false,displayMode:false,output:'html'});}catch(e){prev.textContent=fm.latex;}
+        info.appendChild(lbl);info.appendChild(prev);
+        const addBtn=document.createElement('button');
+        addBtn.textContent='+ Node';addBtn.title='Add as equation node';
+        addBtn.style.cssText='height:26px;padding:0 11px;background:rgba(99,102,241,.55);border:none;color:white;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;font-family:Inter,sans-serif';
+        addBtn.onmouseenter=()=>addBtn.style.background='#6366f1';
+        addBtn.onmouseleave=()=>addBtn.style.background='rgba(99,102,241,.55)';
+        addBtn.onclick=e=>{e.stopPropagation();insertAndClose(fm.latex);};
+        row.appendChild(info);row.appendChild(addBtn);
+        row.onclick=()=>insertAndClose(fm.latex);
+        sec.appendChild(row);
+      }
+      listWrap.appendChild(sec);
+    }
+    if(!listWrap.children.length){
+      const empty=document.createElement('div');
+      empty.style.cssText='padding:24px;text-align:center;color:rgba(255,255,255,.3);font-size:12px';
+      empty.textContent='No formulas match "'+filter+'"';
+      listWrap.appendChild(empty);
+    }
+  }
+  searchInput.oninput=()=>renderList(searchInput.value);
+  renderList('');
+
+  // ── Custom LaTeX footer ──
+  const footer=document.createElement('div');
+  footer.style.cssText='border-top:1px solid rgba(255,255,255,.08);padding:11px 16px;display:flex;gap:8px;align-items:center;flex-shrink:0';
+  const customIn=document.createElement('input');
+  customIn.type='text';customIn.placeholder='Custom LaTeX…  e.g. \\bar{x}=\\frac{\\sum x_i}{n}';
+  customIn.style.cssText='flex:1;padding:7px 10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:white;font-family:monospace;font-size:12px;outline:none';
+  const customBtn=document.createElement('button');
+  customBtn.textContent='+ Insert';
+  customBtn.style.cssText='height:32px;padding:0 14px;background:#6366f1;border:none;color:white;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif;font-size:12px;font-weight:600;white-space:nowrap';
+  customBtn.onclick=()=>{if(customIn.value.trim())insertAndClose(customIn.value.trim());};
+  customIn.onkeydown=e=>{if(e.key==='Enter')customBtn.click();if(e.key==='Escape')overlay.remove();};
+  searchInput.onkeydown=e=>{if(e.key==='Escape')overlay.remove();};
+  footer.appendChild(customIn);footer.appendChild(customBtn);
+
+  panel.appendChild(header);panel.appendChild(searchWrap);panel.appendChild(listWrap);panel.appendChild(footer);
+  overlay.appendChild(panel);
+  overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
+  document.body.appendChild(overlay);
+  setTimeout(()=>searchInput.focus(),50);
 }
 
 function mmAddCanvas(){
