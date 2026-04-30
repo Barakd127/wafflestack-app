@@ -625,6 +625,10 @@ function mmRender(){
     else{nodeDiv.textContent=n.text;}
     nodeDiv.oncontextmenu=e=>{e.preventDefault();showNodeActions(e,n.id);};
     nodeDiv.onclick=()=>{MM.sel=id;mmRender();};
+    if(n.type==='equation'){
+      nodeDiv.title='Double-click to edit';
+      nodeDiv.ondblclick=e=>{e.stopPropagation();openEquationModal(id,'edit');};
+    }
     if(n.childIds.length>0){
       const tog=document.createElement('div');
       tog.className='node-toggle';
@@ -807,9 +811,10 @@ function mmAddEquation(){
   const sel=MM.sel||MM.root;
   const parent=MM.nodes[sel];
   if(!parent)return;
-  const baseY=mmNextChildY(parent);
-  const n=mmNode('equation','Equation',parent.x+MM_XSTEP,baseY,sel,mmPickColor(sel));
-  mmFinishAdd(n,false);
+  EQ.targetNodeId=sel;
+  EQ.targetMode='insertMM';
+  EQ.currentLatex='';
+  document.body.appendChild(createEquationModal());
 }
 
 function mmAddCanvas(){
@@ -1092,6 +1097,15 @@ function createEquationModal(){
     }else if(EQ.targetMode==='edit'){
       const n=MM.nodes[EQ.targetNodeId];
       if(n)n.latex=latex;mmPushHistory();mmRender();
+    }else if(EQ.targetMode==='insertMM'){
+      const parentId=EQ.targetNodeId;
+      const par=MM.nodes[parentId];
+      if(par&&latex.trim()){
+        const baseY=mmNextChildY(par);
+        const n=mmNode('equation','Equation',par.x+MM_XSTEP,baseY,parentId,mmPickColor(parentId));
+        n.latex=latex;
+        mmFinishAdd(n,false);
+      }
     }
     modal.remove();
   };
