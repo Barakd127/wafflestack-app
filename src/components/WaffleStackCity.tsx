@@ -23,6 +23,7 @@ import ConceptMapViewer from './ConceptMapViewer'
 import StreakCalendar from './StreakCalendar'
 import StatsCalculator from './StatsCalculator'
 import StreakReminderBanner from './StreakReminderBanner'
+import WelcomeBackToast from './WelcomeBackToast'
 import DailyStatFact from './DailyStatFact'
 import PomodoroTimer from './PomodoroTimer'
 
@@ -1034,6 +1035,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
       <style>{ANIM_STYLE}</style>
 
       <StreakReminderBanner xp={xp} />
+      <WelcomeBackToast />
       <DailyStatFact />
 
       {/* Top-right controls: XP + ScoreBoard toggle */}
