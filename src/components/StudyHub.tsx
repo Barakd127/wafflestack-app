@@ -373,8 +373,8 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap }: {
 }) {
   const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string }> = [
     { id: 'home',     label: 'דף הבית',    icon: '⌂' },
+    { id: 'topics',   label: 'נושאים',     icon: '📚' },
     { id: null,       label: 'מפת לימוד',  icon: '◫', action: 'mindmap' },
-    { id: 'learning', label: 'אזור למידה', icon: '📖' },
     { id: null,       label: 'העולם שלי',  icon: '🌐', action: 'world' },
   ]
 
