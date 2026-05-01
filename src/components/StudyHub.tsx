@@ -219,7 +219,7 @@ interface TopicSelectorProps {
 
 function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorProps) {
   return (
-    <div style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
+    <div style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }}>
       <button
         onClick={onBack}
         style={{
@@ -236,11 +236,11 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
           gap: 8,
         }}
       >
-        ← חזור לדף הבית
+        ← Back to Home
       </button>
 
-      <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
-        בחר/י נושא ללימוד 📚
+      <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28 }}>
+        Choose a Topic to Study 📚
       </h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20, maxWidth: 1200 }}>
@@ -294,19 +294,19 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
                   <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: TEXT_MED }}>
                     {sessionsAttempted}
                   </div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>סשנים</div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>Sessions</div>
                 </div>
                 <div style={{ textAlign: 'center', flex: 1 }}>
                   <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: bestScore > 85 ? '#34A853' : TEXT_MED }}>
                     {bestScore}%
                   </div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ציון הטוב</div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>Best Score</div>
                 </div>
                 <div style={{ textAlign: 'center', flex: 1 }}>
                   <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: '#D4AF37' }}>
                     {topic.questionCount}
                   </div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>שאלות</div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>Questions</div>
                 </div>
               </div>
 
@@ -322,7 +322,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
                   fontWeight: 600,
                   textAlign: 'center',
                 }}>
-                  ✅ הושגת שליטה!
+                  ✅ Mastered!
                 </div>
               )}
             </button>
@@ -587,7 +587,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, width = 247 }: {
                 padding: collapsed ? '12px 0' : '12px 20px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: collapsed ? 'center' : 'flex-end',
+                justifyContent: collapsed ? 'center' : 'flex-start',
                 gap: 12,
                 direction: 'rtl',
                 border: 'none',
@@ -602,8 +602,8 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, width = 247 }: {
               onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)' }}
               onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
             >
-              {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
               <span style={{ fontSize: 20, opacity: 0.85, width: 26, textAlign: 'center', flexShrink: 0 }}>{item.icon}</span>
+              {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
             </button>
           )
         })}
@@ -952,11 +952,16 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate,
   const [answer, setAnswer] = useState('')
   const [phase, setPhase] = useState<'write' | 'review' | 'done'>('write')
   const [xpBurst, setXpBurst] = useState<number | null>(null)
+  // Store each question's typed answer so users can navigate back and re-read
+  const [userAnswers, setUserAnswers] = useState<Record<number, string>>({})
   const [showCard, setShowCard] = useState(true)
   const [collapsed, setCollapsed] = useState(false)
   const [cardPos, setCardPos] = useState<{ x: number; y: number }>({ x: 24, y: 24 })
   const cardDragging = useRef(false)
   const dragStart = useRef({ mx: 0, my: 0, cx: 0, cy: 0 })
+  const [showCanvas, setShowCanvas] = useState(true)
+  const [canvasPct, setCanvasPct] = useState(42)
+  const canvasDragging = useRef(false)
   const contentRowRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
   const recordAnswer = useLearningStore(s => s.recordAnswer)
@@ -1011,7 +1016,25 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate,
 
   const handleReveal = () => {
     if (!answer.trim()) return
+    setUserAnswers(prev => ({ ...prev, [currentQ]: answer }))
     setPhase('review')
+  }
+
+  // Navigate to any question by clicking its dot
+  const navigateToQuestion = (index: number) => {
+    if (index === currentQ) return
+    const state = dotStates[index]
+    // Can only jump to answered or current questions (not future unvisited ones)
+    if (state === 'empty') return
+    // Save current in-progress answer before leaving
+    if (answer.trim()) setUserAnswers(prev => ({ ...prev, [currentQ]: answer }))
+    setCurrentQ(index)
+    setAnswer(userAnswers[index] || '')
+    if (state === 'correct' || state === 'wrong') {
+      setPhase('review')
+    } else {
+      setPhase('write')
+    }
   }
 
   const handleSelfAssess = (correct: boolean) => {
@@ -1278,12 +1301,32 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate,
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_LIGHT, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleSkip}>דלג</span>
 
-                {/* Dots */}
-                <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                {/* Dots — clickable navigation */}
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   {dotStates.map((state, i) => {
                     const bg = state === 'correct' ? '#34A853' : state === 'wrong' ? '#EA4335' : state === 'current' ? BUTTON_COLOR : '#D8E0F0'
+                    const isClickable = state === 'correct' || state === 'wrong' || state === 'current'
+                    const size = state === 'current' ? 16 : isClickable ? 12 : 9
                     return (
-                      <div key={i} style={{ width: state === 'current' ? 14 : 10, height: state === 'current' ? 14 : 10, borderRadius: '50%', background: bg, transition: 'all 0.25s', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 6, color: '#fff', fontWeight: 700 }}>
+                      <div
+                        key={i}
+                        title={isClickable ? `Question ${i + 1}${state === 'correct' ? ' ✓' : state === 'wrong' ? ' ✗' : ''}` : ''}
+                        onClick={() => navigateToQuestion(i)}
+                        style={{
+                          width: size, height: size,
+                          borderRadius: '50%',
+                          background: bg,
+                          transition: 'all 0.25s',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 7, color: '#fff', fontWeight: 700,
+                          cursor: isClickable ? 'pointer' : 'default',
+                          opacity: isClickable ? 1 : 0.45,
+                          boxShadow: state === 'current' ? `0 0 0 2px rgba(51,81,202,0.3)` : 'none',
+                          transform: isClickable && i !== currentQ ? 'scale(1)' : 'scale(1)',
+                        }}
+                        onMouseEnter={e => { if (isClickable && i !== currentQ) (e.currentTarget as HTMLElement).style.transform = 'scale(1.35)' }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}
+                      >
                         {state === 'correct' ? '✓' : state === 'wrong' ? '✗' : ''}
                       </div>
                     )
@@ -1321,22 +1364,58 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate,
                 </div>
               </div>
 
-              {/* Self-assessment */}
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_MED, marginBottom: 14 }}>
-                  כמה הצלחת?
+              {/* Self-assessment or already-reviewed navigation */}
+              {dotStates[currentQ] === 'correct' || dotStates[currentQ] === 'wrong' ? (
+                /* Navigated back to an already-assessed question — show result + nav */
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    padding: '8px 20px', borderRadius: 99,
+                    background: dotStates[currentQ] === 'correct' ? 'rgba(52,168,83,0.12)' : 'rgba(234,67,53,0.10)',
+                    border: `1.5px solid ${dotStates[currentQ] === 'correct' ? 'rgba(52,168,83,0.4)' : 'rgba(234,67,53,0.35)'}`,
+                    fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 15,
+                    color: dotStates[currentQ] === 'correct' ? '#34A853' : '#EA4335',
+                  }}>
+                    {dotStates[currentQ] === 'correct' ? '✅ Marked correct' : '❌ Marked incorrect'}
+                  </div>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    {currentQ > 0 && (
+                      <button onClick={() => navigateToQuestion(currentQ - 1)}
+                        style={{ background: 'rgba(51,81,202,0.08)', color: BUTTON_COLOR, border: `1.5px solid rgba(51,81,202,0.25)`, borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
+                        ← Previous
+                      </button>
+                    )}
+                    {currentQ < total - 1 ? (
+                      <button onClick={() => navigateToQuestion(currentQ + 1)}
+                        style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', boxShadow: '0 2px 8px rgba(51,81,202,0.3)' }}>
+                        Next →
+                      </button>
+                    ) : (
+                      <button onClick={() => setPhase('done')}
+                        style={{ background: '#D4AF37', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
+                        Finish 🏆
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div style={{ display: 'flex', gap: 14, justifyContent: 'center' }}>
-                  <button onClick={() => handleSelfAssess(false)}
-                    style={{ background: 'rgba(234,67,53,0.1)', color: '#EA4335', border: '2px solid rgba(234,67,53,0.35)', borderRadius: 24, padding: '10px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
-                    😅 לא ממש
-                  </button>
-                  <button onClick={() => handleSelfAssess(true)}
-                    style={{ background: 'rgba(52,168,83,0.1)', color: '#34A853', border: '2px solid rgba(52,168,83,0.35)', borderRadius: 24, padding: '10px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
-                    ✅ הצלחתי!
-                  </button>
+              ) : (
+                /* Fresh review — self-assessment */
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_MED, marginBottom: 14 }}>
+                    כמה הצלחת?
+                  </div>
+                  <div style={{ display: 'flex', gap: 14, justifyContent: 'center' }}>
+                    <button onClick={() => handleSelfAssess(false)}
+                      style={{ background: 'rgba(234,67,53,0.1)', color: '#EA4335', border: '2px solid rgba(234,67,53,0.35)', borderRadius: 24, padding: '10px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
+                      😅 לא ממש
+                    </button>
+                    <button onClick={() => handleSelfAssess(true)}
+                      style={{ background: 'rgba(52,168,83,0.1)', color: '#34A853', border: '2px solid rgba(52,168,83,0.35)', borderRadius: 24, padding: '10px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
+                      ✅ הצלחתי!
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </>
           )}
 
@@ -1381,7 +1460,7 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
     window.addEventListener('mouseup', onUp)
   }, [])
 
-  const title = internalView === 'home' ? 'דף הבית' : internalView === 'topics' ? 'אזור למידה' : 'אזור למידה'
+  const title = internalView === 'home' ? 'דף הבית' : internalView === 'topics' ? 'Study Zone' : 'Study Zone'
 
   const handleSelectTopic = (topicId: string) => {
     setSelectedTopic(topicId)

@@ -28,8 +28,8 @@
   --sh-text-med: #254A9F;
   --sh-text-light: #7F9BD9;
   --sh-text-tip: #465CA5;
-  --sh-topbar-bg: rgba(255,255,255,0.55);
-  --sh-topbar-border: rgba(255,255,255,0.4);
+  --sh-topbar-bg: linear-gradient(135deg, rgba(31,62,108,0.10) 0%, rgba(37,74,159,0.08) 60%, rgba(212,175,55,0.07) 100%);
+  --sh-topbar-border: rgba(212,175,55,0.28);
   --sh-q-card-bg: linear-gradient(178.82deg, rgba(255,255,255,0.82) 17.91%, rgba(192,216,255,0.77) 199.73%);
   --sh-answer-bg: rgba(255,255,255,0.7);
   --sh-answer-border: rgba(51,81,202,0.2);
@@ -58,8 +58,8 @@ html.dark {
   --sh-text-med: #a5b4fc;
   --sh-text-light: #94a3b8;
   --sh-text-tip: #64748b;
-  --sh-topbar-bg: rgba(10,10,20,0.9);
-  --sh-topbar-border: rgba(255,255,255,0.08);
+  --sh-topbar-bg: linear-gradient(135deg, rgba(15,22,60,0.92) 0%, rgba(20,30,80,0.90) 70%, rgba(100,80,0,0.12) 100%);
+  --sh-topbar-border: rgba(212,175,55,0.20);
   --sh-q-card-bg: linear-gradient(178.82deg, rgba(20,20,60,0.9) 17.91%, rgba(15,20,55,0.85) 199.73%);
   --sh-answer-bg: rgba(20,20,50,0.8);
   --sh-answer-border: rgba(78,205,196,0.25);
