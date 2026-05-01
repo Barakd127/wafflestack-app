@@ -952,30 +952,42 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate,
   const [answer, setAnswer] = useState('')
   const [phase, setPhase] = useState<'write' | 'review' | 'done'>('write')
   const [xpBurst, setXpBurst] = useState<number | null>(null)
-  const [showCanvas, setShowCanvas] = useState(true)
-  const [canvasPct, setCanvasPct] = useState(42)
-  const canvasDragging = useRef(false)
+  const [showCard, setShowCard] = useState(true)
+  const [collapsed, setCollapsed] = useState(false)
+  const [cardPos, setCardPos] = useState<{ x: number; y: number }>({ x: 24, y: 24 })
+  const cardDragging = useRef(false)
+  const dragStart = useRef({ mx: 0, my: 0, cx: 0, cy: 0 })
   const contentRowRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
   const recordAnswer = useLearningStore(s => s.recordAnswer)
 
-  const onCanvasDragStart = useCallback((e: React.MouseEvent) => {
-    canvasDragging.current = true
+  const onCardDragStart = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('[data-no-drag]')) return
+    cardDragging.current = true
+    dragStart.current = { mx: e.clientX, my: e.clientY, cx: cardPos.x, cy: cardPos.y }
     e.preventDefault()
     const onMove = (ev: MouseEvent) => {
-      if (!canvasDragging.current || !contentRowRef.current) return
-      const rect = contentRowRef.current.getBoundingClientRect()
-      const fromLeft = ev.clientX - rect.left
-      const pct = Math.min(65, Math.max(25, ((rect.width - fromLeft) / rect.width) * 100))
-      setCanvasPct(pct)
+      if (!cardDragging.current || !contentRowRef.current) return
+      const container = contentRowRef.current.getBoundingClientRect()
+      const cardRect = cardRef.current?.getBoundingClientRect()
+      const cardW = cardRect?.width ?? 460
+      const cardH = cardRect?.height ?? 240
+      // RTL: cardPos.x is offset from RIGHT edge — moving mouse left increases x
+      const dx = dragStart.current.mx - ev.clientX
+      const dy = ev.clientY - dragStart.current.my
+      setCardPos({
+        x: Math.max(8, Math.min(container.width - cardW - 8, dragStart.current.cx + dx)),
+        y: Math.max(8, Math.min(container.height - cardH - 8, dragStart.current.cy + dy)),
+      })
     }
     const onUp = () => {
-      canvasDragging.current = false
+      cardDragging.current = false
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
     }
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
-  }, [])
+  }, [cardPos])
 
   // Load questions from selected topic or fallback to hardcoded
   const questions = selectedTopic && (quizBankData.topics as Record<string, any>)[selectedTopic]
@@ -1081,7 +1093,7 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate,
       {xpBurst !== null && <XpBurst amount={xpBurst} onDone={() => setXpBurst(null)} />}
 
       {/* Top bar */}
-      <div style={{ background: '#FFFFFF', boxShadow: '2px 2px 6px rgba(0,0,0,0.18)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12 }}>
+      <div style={{ background: '#FFFFFF', boxShadow: '2px 2px 6px rgba(0,0,0,0.18)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12, zIndex: 10 }}>
         <img src={`${import.meta.env.BASE_URL}building-figma.png`} alt="" style={{ width: 34, height: 26, objectFit: 'cover', borderRadius: 5 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
         <div style={{ flex: 1 }}>
           <div style={{ height: 6, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
@@ -1094,35 +1106,101 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate,
         <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: TEXT_DARK }}>
           <span style={{ fontWeight: 700 }}>סטטיסטיקה</span>{!isDone && ` | ${q.topic}`}
         </div>
-        {/* Canvas toggle */}
-        <button
-          onClick={() => setShowCanvas(v => !v)}
-          title={showCanvas ? 'הסתר לוח ציור' : 'הצג לוח ציור'}
-          style={{
-            background: showCanvas ? 'rgba(99,102,241,0.15)' : 'rgba(0,0,0,0.06)',
-            border: `1px solid ${showCanvas ? 'rgba(99,102,241,0.5)' : 'rgba(0,0,0,0.15)'}`,
-            borderRadius: 8, padding: '4px 10px', cursor: 'pointer',
-            color: showCanvas ? '#6366f1' : '#64748b', fontSize: 13, fontWeight: 600,
-            display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0,
-          }}
-        >
-          ✏️ {showCanvas ? 'הסתר לוח' : 'לוח ציור'}
-        </button>
       </div>
 
-      {/* Content row: question panel + optional canvas */}
-      <div ref={contentRowRef} style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
+      {/* Full-bleed canvas with floating draggable quiz card on top */}
+      <div ref={contentRowRef} style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#0d1628' }}>
 
-        {/* Question panel */}
-        <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-      {/* Main content */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px 24px' }}>
-        <div style={{
-          background: 'var(--sh-q-card-bg)',
-          borderRadius: 20, width: '100%', maxWidth: showCanvas ? 'none' : 900,
-          padding: '24px 28px 22px', position: 'relative',
-          boxShadow: '0 8px 32px rgba(51,81,202,0.12)',
-        }}>
+        {/* Canvas iframe — fills the entire content area */}
+        <iframe
+          src={`${import.meta.env.BASE_URL}mindmap.html?mode=wb&userId=${userId || 'default'}`}
+          title="Study Whiteboard"
+          style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
+          allow="clipboard-read; clipboard-write"
+        />
+
+        {/* Floating "show question" pill when card is hidden */}
+        {!showCard && !isDone && (
+          <button
+            onClick={() => setShowCard(true)}
+            style={{
+              position: 'absolute', top: 16, right: 16, zIndex: 6,
+              background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)', color: '#fff',
+              border: '1px solid rgba(127,155,217,0.5)', borderRadius: 22,
+              padding: '8px 16px', cursor: 'pointer',
+              fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
+              boxShadow: '0 6px 20px rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', gap: 8,
+            }}
+            title="הצג את השאלה"
+          >
+            📝 שאלה {currentQ + 1} / {total}
+          </button>
+        )}
+
+        {/* Floating quiz card — always rendered when isDone (centered modal style) or when showCard is true */}
+        {(showCard || isDone) && (
+          <div
+            ref={cardRef}
+            style={isDone
+              ? {
+                  position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+                  width: 'min(560px, calc(100% - 32px))',
+                  background: 'var(--sh-q-card-bg, #ffffff)',
+                  borderRadius: 16,
+                  boxShadow: '0 30px 80px rgba(0,0,0,0.55), 0 8px 24px rgba(31,62,108,0.4)',
+                  border: '1px solid rgba(127,155,217,0.4)',
+                  overflow: 'hidden', zIndex: 5,
+                }
+              : {
+                  position: 'absolute', top: cardPos.y, right: cardPos.x,
+                  width: 'min(480px, calc(100% - 32px))',
+                  background: 'var(--sh-q-card-bg, #ffffff)',
+                  borderRadius: 14,
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.45), 0 6px 20px rgba(31,62,108,0.35)',
+                  border: '1px solid rgba(127,155,217,0.4)',
+                  overflow: 'hidden', zIndex: 5,
+                }
+            }
+          >
+            {/* Drag handle / header */}
+            <div
+              onMouseDown={isDone ? undefined : onCardDragStart}
+              style={{
+                cursor: isDone ? 'default' : 'grab', userSelect: 'none',
+                background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
+                color: '#fff', padding: '8px 14px',
+                display: 'flex', alignItems: 'center', gap: 10,
+                fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600,
+              }}
+            >
+              {!isDone && <span style={{ fontSize: 14, opacity: 0.7 }}>⋮⋮</span>}
+              <span>{isDone ? '🏆 סיום' : `שאלה ${currentQ + 1} / ${total}`}</span>
+              {!isDone && (
+                <div data-no-drag style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
+                  <button
+                    onClick={() => setCollapsed(v => !v)}
+                    title={collapsed ? 'הרחב' : 'מזער'}
+                    style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: 'none', borderRadius: 6, width: 26, height: 22, cursor: 'pointer', fontSize: 11, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    {collapsed ? '▾' : '▴'}
+                  </button>
+                  <button
+                    onClick={() => setShowCard(false)}
+                    title="הסתר שאלה (תוכל להחזיר אותה)"
+                    style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: 'none', borderRadius: 6, width: 26, height: 22, cursor: 'pointer', fontSize: 13, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Body */}
+            {!collapsed && (
+              <div data-no-drag style={{
+                padding: '20px 22px 18px', maxHeight: isDone ? 'none' : 'calc(100vh - 200px)',
+                overflowY: 'auto',
+              }}>
 
           {isDone ? (
             /* ── Completion panel ── */
@@ -1262,61 +1340,12 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate,
             </>
           )}
 
-        </div>
-      </div>
-        </div>{/* end question panel */}
-
-        {/* Drag handle between quiz and canvas */}
-        {showCanvas && !isDone && (
-          <div
-            onMouseDown={onCanvasDragStart}
-            title="גרור כדי לשנות גודל"
-            style={{
-              width: 8, flexShrink: 0, cursor: 'col-resize',
-              background: 'linear-gradient(180deg,rgba(31,62,108,0.0),rgba(37,74,159,0.35),rgba(31,62,108,0.0))',
-              borderLeft: '1px solid rgba(127,155,217,0.25)',
-              borderRight: '1px solid rgba(127,155,217,0.25)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'background 0.15s',
-              position: 'relative',
-            }}
-          >
-            {/* Grip dots */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 3, pointerEvents: 'none' }}>
-              {[0,1,2,3,4].map(i => (
-                <div key={i} style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(127,155,217,0.6)' }} />
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Canvas panel — standalone whiteboard iframe */}
-        {showCanvas && !isDone && (
-          <div style={{
-            width: `${canvasPct}%`, flexShrink: 0,
-            display: 'flex', flexDirection: 'column',
-            background: '#0d1628',
-          }}>
-            <div style={{
-              height: 32, background: 'linear-gradient(135deg,#1F3E6C,#1a3260)',
-              borderBottom: '1px solid rgba(127,155,217,0.2)',
-              display: 'flex', alignItems: 'center', padding: '0 12px', gap: 8, flexShrink: 0,
-              boxShadow: '0 2px 8px rgba(31,62,108,0.2)',
-            }}>
-              <span style={{ fontSize: 12, color: '#D4AF37', fontWeight: 600 }}>✏️ לוח ציור</span>
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', marginRight: 'auto' }}>רשום את פתרונך</span>
-              <span style={{ fontSize: 9, color: 'rgba(127,155,217,0.6)' }}>⟵ גרור כדי לשנות גודל</span>
-            </div>
-            <iframe
-              src={`${import.meta.env.BASE_URL}mindmap.html?mode=wb&userId=${userId || 'default'}`}
-              title="Study Whiteboard"
-              style={{ flex: 1, border: 'none', width: '100%', display: 'block' }}
-              allow="clipboard-read; clipboard-write"
-            />
-          </div>
-        )}
-
-      </div>{/* end content row */}
+      </div>{/* end full-bleed canvas area */}
     </div>
   )
 }
