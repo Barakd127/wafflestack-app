@@ -538,6 +538,12 @@ function cloneScene(scene){return JSON.parse(JSON.stringify(scene));}
 // hitObj() and wboSync() reference it; both run at parse time if called early.
 const WB_DOM_TYPES = new Set(['rect','circle','sticky','text']);
 
+// ── Per-user auto-save keys ────────────────────────────────────────────────────
+const _MM_USER_ID = new URLSearchParams(location.search).get('userId') || 'default';
+const MM_SAVE_KEY = 'mm-data-' + _MM_USER_ID;
+const WB_SAVE_KEY = 'wb-data-' + _MM_USER_ID;
+let _mmSaveTimer = null;
+
 // ═══════════════════════════════════════════════════════════
 // MIND MAP SYSTEM
 // ═══════════════════════════════════════════════════════════
@@ -572,6 +578,22 @@ function mmNode(type,text,x,y,parentId,color){
 }
 
 function initMM(){
+  // Try to load saved mind map for this user
+  try {
+    const saved = localStorage.getItem(MM_SAVE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.nodes && parsed.root) {
+        MM = parsed;
+        // Ensure required runtime fields exist
+        if (!MM.searchMatches) MM.searchMatches = [];
+        if (!MM.searchIdx) MM.searchIdx = 0;
+        MM_HISTORY = [cloneMMForHistory()];
+        return; // loaded successfully — skip fresh init
+      }
+    }
+  } catch(e) { /* fall through to fresh init */ }
+
   MM={nodes:{},root:'root',sel:null,zoom:1,panX:0,panY:0};
   MM.nodes.root=mmNode('root','Untitled',100,100,null,'#60a5fa');
   MM_HISTORY=[cloneMMForHistory()];
@@ -600,6 +622,10 @@ function mmRedo(){
 }
 
 function mmRender(){
+  // Auto-save after each render (debounced 600ms)
+  clearTimeout(_mmSaveTimer);
+  _mmSaveTimer = setTimeout(function(){ try{ localStorage.setItem(MM_SAVE_KEY, JSON.stringify(MM)); }catch(e){} }, 600);
+
   const vp=document.getElementById('viewport');
   const svg=document.getElementById('svg-layer');
   // v17: SVG is inside viewport — clear nodes but keep svg; then clear svg separately
@@ -1282,6 +1308,8 @@ function wbPush(){
   WB.history.splice(WB.histIdx+1);
   WB.history.push(cloneScene(WB.scene));
   WB.histIdx=WB.history.length-1;
+  // Auto-save WB scene to localStorage
+  try{ localStorage.setItem(WB_SAVE_KEY, JSON.stringify(WB.scene)); }catch(e){}
 }
 
 function wbUndo(){if(WB.histIdx<=0)return;WB.histIdx--;WB.scene=cloneScene(WB.history[WB.histIdx]);WB.selId=null;wbRedraw();}
@@ -3452,10 +3480,20 @@ document.addEventListener('DOMContentLoaded',()=>{
     var titleEl=document.getElementById('wb-node-title');
     if(titleEl) titleEl.style.display='none';
 
-    // Initialise a fresh empty whiteboard
-    WB.scene=[];WB.histIdx=-1;WB.history=[];WB.selId=null;
+    // Initialise whiteboard — load saved state or start fresh
+    WB.histIdx=-1;WB.history=[];WB.selId=null;
     var cnvs=document.getElementById('wb-canvas');
     if(cnvs){cnvs.width=window.innerWidth;cnvs.height=window.innerHeight;}
+    // Try to restore saved whiteboard for this user
+    var wbRestored = false;
+    try {
+      var wbSaved = localStorage.getItem(WB_SAVE_KEY);
+      if (wbSaved) {
+        var wbParsed = JSON.parse(wbSaved);
+        if (Array.isArray(wbParsed)) { WB.scene = wbParsed; wbRestored = true; }
+      }
+    } catch(e) {}
+    if (!wbRestored) WB.scene = [];
     wbPush();
     wbRedraw();
 

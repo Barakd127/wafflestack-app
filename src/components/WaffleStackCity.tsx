@@ -681,6 +681,24 @@ function CityLamp({ pos }: { pos: [number,number,number] }) {
   )
 }
 
+// ─── Placement ground — invisible clickable plane for street asset placement ──
+function PlacementGround({ onPlace }: { onPlace: (pos: [number,number,number]) => void }) {
+  return (
+    <mesh
+      rotation={[-Math.PI / 2, 0, 0]}
+      position={[0, 0.02, 0]}
+      onClick={(e) => {
+        e.stopPropagation()
+        const p = e.point
+        onPlace([Math.round(p.x * 2) / 2, 0, Math.round(p.z * 2) / 2])
+      }}
+    >
+      <planeGeometry args={[200, 200]} />
+      <meshStandardMaterial transparent opacity={0} />
+    </mesh>
+  )
+}
+
 // ─── Townscaper-style irregular grid ground ───────────────────────────────────
 // Replaces the flat green plane. Generates the blue marble + irregular wireframe
 // aesthetic from TownscaperScene. Grid is seeded by useMemo([]) so stable per session.
@@ -809,6 +827,15 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
   const [pickerTarget, setPickerTarget] = useState<BuildingDef | null>(null)
   const [pickerMode, setPickerMode] = useState(false)
 
+  // Street asset placement
+  type StreetAssetType = 'tree' | 'bench' | 'lamp' | 'car'
+  interface PlacedStreetAsset { id: string; type: StreetAssetType; pos: [number,number,number]; color?: string }
+  const [placedStreetAssets, setPlacedStreetAssets] = useState<PlacedStreetAsset[]>(() => {
+    try { return JSON.parse(localStorage.getItem('wafflestack-street-assets') || '[]') } catch { return [] }
+  })
+  const [streetPlacementType, setStreetPlacementType] = useState<StreetAssetType | null>(null)
+  const [showStreetPicker, setShowStreetPicker] = useState(false)
+
   // Resume chip — surfaces the last challenge the user opened if it's still
   // recent and unmastered, so they can pick up where they left off.
   const [resumeChip, setResumeChip] = useState<{ id: string; label: string; statsConcept: string; color?: string; ts: number } | null>(() => {
@@ -919,6 +946,10 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
             setShowLearningMap(false)
           } else if (showStreakCalendar) {
             setShowStreakCalendar(false)
+          } else if (streetPlacementType) {
+            setStreetPlacementType(null)
+          } else if (showStreetPicker) {
+            setShowStreetPicker(false)
           } else {
             setShowHelp(false)
           }
@@ -971,12 +1002,17 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         case 'N':
           setShowStreakCalendar(c => !c)
           break
+        case 'f':
+        case 'F':
+          setShowStreetPicker(p => !p)
+          if (showStreetPicker) setStreetPlacementType(null)
+          break
       }
     }
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [reviewBuilding, challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, showStatsCalculator, showLeaderboard, showLearningMap, showStreakCalendar, toggleSound, openRandomChallenge])
+  }, [reviewBuilding, challengeBuilding, selectedBuilding, showScoreBoard, showTopicsList, showGlossary, showFlashCards, showExamMode, showConceptMap, showStatsCalculator, showLeaderboard, showLearningMap, showStreakCalendar, showStreetPicker, toggleSound, openRandomChallenge])
 
   // Handle deep-link hash on mount
   useEffect(() => {
@@ -1656,6 +1692,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         camera={{ position: [0, 25, 45], fov: 55 }}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
         dpr={[1, 1.5]}
+        style={{ cursor: streetPlacementType ? 'crosshair' : 'grab' }}
       >
         {/* Performance monitor: drops to 'mid'/'low' if FPS sags, climbs back when stable */}
         <PerformanceMonitor
@@ -1699,6 +1736,33 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           {CAR_POSITIONS.map((c, i) => <CityCar key={`car-${i}`} pos={c.pos} rot={c.rot} color={c.color} />)}
           {BENCH_POSITIONS.map((pos, i) => <CityBench key={`bench-${i}`} pos={pos} />)}
           {LAMP_POSITIONS.map((pos, i) => <CityLamp key={`lamp-${i}`} pos={pos} />)}
+
+          {/* User-placed street assets */}
+          {placedStreetAssets.map(a => {
+            if (a.type === 'tree') return <CityTree key={a.id} pos={a.pos} />
+            if (a.type === 'car') return <CityCar key={a.id} pos={a.pos} rot={0} color={a.color ?? '#3498DB'} />
+            if (a.type === 'bench') return <CityBench key={a.id} pos={a.pos} />
+            if (a.type === 'lamp') return <CityLamp key={a.id} pos={a.pos} />
+            return null
+          })}
+
+          {/* Placement ground — only active when a street asset type is selected */}
+          {streetPlacementType && (
+            <PlacementGround onPlace={(pos) => {
+              const CAR_COLORS = ['#3498DB','#E74C3C','#2ECC71','#F39C12','#9B59B6','#E67E22']
+              const newAsset: PlacedStreetAsset = {
+                id: `placed-${Date.now()}-${Math.random().toString(36).substr(2,6)}`,
+                type: streetPlacementType,
+                pos,
+                color: streetPlacementType === 'car' ? CAR_COLORS[Math.floor(Math.random() * CAR_COLORS.length)] : undefined,
+              }
+              setPlacedStreetAssets(prev => {
+                const updated = [...prev, newAsset]
+                try { localStorage.setItem('wafflestack-street-assets', JSON.stringify(updated)) } catch {}
+                return updated
+              })
+            }} />
+          )}
 
           {/* Aliveness layer — clouds + smoke, tier-gated */}
           <Clouds count={6} altitude={24} range={70} speed={0.55} />
@@ -2487,6 +2551,7 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
         display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end',
       }}>
         {[
+          { emoji: '🌳', label: 'Street assets (F)', onClick: () => { setShowStreetPicker(p => !p); if (showStreetPicker) setStreetPlacementType(null) }, active: showStreetPicker },
           { emoji: '🗺️', label: 'Learning path (P)', onClick: () => setShowLearningMap(m => !m), active: showLearningMap },
           { emoji: '🏆', label: 'Local leaderboard (L)', onClick: () => setShowLeaderboard(l => !l), active: showLeaderboard },
           { emoji: '📅', label: 'Streak calendar (N)', onClick: () => setShowStreakCalendar(c => !c), active: showStreakCalendar },
@@ -2524,6 +2589,102 @@ export default function WaffleStackCity({ onBack }: { onBack?: () => void }) {
           ?
         </button>
       </div>
+
+      {/* Street asset picker panel */}
+      {showStreetPicker && (
+        <div style={{
+          position: 'absolute', bottom: 24, right: 80, zIndex: 50,
+          background: 'rgba(10,10,22,0.92)', backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.15)', borderRadius: 16,
+          padding: '14px 16px', minWidth: 220,
+          fontFamily: "'Heebo', system-ui, sans-serif",
+          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+        }}>
+          <div style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 700, fontSize: 13, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>🌆 אלמנטים עירוניים</span>
+            {streetPlacementType && (
+              <span style={{ fontSize: 10, color: '#4ECDC4', fontWeight: 500 }}>
+                לחץ על הקרקע להנחה
+              </span>
+            )}
+          </div>
+
+          {/* Asset type buttons */}
+          {([
+            { type: 'tree' as const,  emoji: '🌲', label: 'עץ',       color: '#2D9A2D' },
+            { type: 'bench' as const, emoji: '🪑', label: 'ספסל',     color: '#8B6340' },
+            { type: 'lamp' as const,  emoji: '💡', label: 'פנס',      color: '#FFD700' },
+            { type: 'car' as const,   emoji: '🚗', label: 'מכונית',   color: '#3498DB' },
+          ] as const).map(({ type, emoji, label, color }) => (
+            <button
+              key={type}
+              onClick={() => setStreetPlacementType(prev => prev === type ? null : type)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                marginBottom: 6, padding: '8px 12px',
+                background: streetPlacementType === type
+                  ? `${color}33`
+                  : 'rgba(255,255,255,0.07)',
+                border: streetPlacementType === type
+                  ? `1px solid ${color}88` : '1px solid rgba(255,255,255,0.12)',
+                borderRadius: 10, cursor: 'pointer',
+                color: streetPlacementType === type ? color : 'rgba(255,255,255,0.8)',
+                fontFamily: "'Heebo', sans-serif", fontSize: 13, fontWeight: streetPlacementType === type ? 700 : 400,
+                transition: 'all 0.15s',
+              }}
+            >
+              <span style={{ fontSize: 18 }}>{emoji}</span>
+              <span>{label}</span>
+              {streetPlacementType === type && (
+                <span style={{ marginRight: 'auto', fontSize: 10, opacity: 0.7 }}>▶ פעיל</span>
+              )}
+            </button>
+          ))}
+
+          {/* Undo last / Clear all */}
+          <div style={{ display: 'flex', gap: 6, marginTop: 8, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 8 }}>
+            <button
+              onClick={() => {
+                if (streetPlacementType) setStreetPlacementType(null)
+                setPlacedStreetAssets(prev => {
+                  const updated = prev.slice(0, -1)
+                  try { localStorage.setItem('wafflestack-street-assets', JSON.stringify(updated)) } catch {}
+                  return updated
+                })
+              }}
+              disabled={placedStreetAssets.length === 0}
+              style={{
+                flex: 1, padding: '6px 8px', borderRadius: 8, cursor: placedStreetAssets.length === 0 ? 'default' : 'pointer',
+                background: 'rgba(255,100,100,0.15)', border: '1px solid rgba(255,100,100,0.3)',
+                color: placedStreetAssets.length === 0 ? 'rgba(255,255,255,0.3)' : '#ff8888',
+                fontSize: 11, fontFamily: "'Heebo', sans-serif",
+              }}
+            >↩ בטל</button>
+            <button
+              onClick={() => {
+                if (window.confirm('למחוק את כל האלמנטים שהוספת?')) {
+                  setPlacedStreetAssets([])
+                  try { localStorage.removeItem('wafflestack-street-assets') } catch {}
+                  setStreetPlacementType(null)
+                }
+              }}
+              disabled={placedStreetAssets.length === 0}
+              style={{
+                flex: 1, padding: '6px 8px', borderRadius: 8, cursor: placedStreetAssets.length === 0 ? 'default' : 'pointer',
+                background: 'rgba(255,80,80,0.12)', border: '1px solid rgba(255,80,80,0.25)',
+                color: placedStreetAssets.length === 0 ? 'rgba(255,255,255,0.3)' : '#ff6666',
+                fontSize: 11, fontFamily: "'Heebo', sans-serif",
+              }}
+            >🗑 נקה הכל</button>
+          </div>
+
+          {placedStreetAssets.length > 0 && (
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginTop: 6 }}>
+              {placedStreetAssets.length} אלמנטים במפה
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Concept Glossary overlay */}
       {showGlossary && (

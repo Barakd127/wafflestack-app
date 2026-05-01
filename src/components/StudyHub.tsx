@@ -944,9 +944,10 @@ interface LearningScreenProps {
   selectedTopic?: string
   userProgress: UserProgress
   onProgressUpdate: (progress: UserProgress) => void
+  userId?: string
 }
 
-function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate }: LearningScreenProps) {
+function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate, userId }: LearningScreenProps) {
   const [currentQ, setCurrentQ] = useState(0)
   const [answer, setAnswer] = useState('')
   const [phase, setPhase] = useState<'write' | 'review' | 'done'>('write')
@@ -1307,7 +1308,7 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate 
               <span style={{ fontSize: 9, color: 'rgba(127,155,217,0.6)' }}>⟵ גרור כדי לשנות גודל</span>
             </div>
             <iframe
-              src={`${import.meta.env.BASE_URL}mindmap.html?mode=wb`}
+              src={`${import.meta.env.BASE_URL}mindmap.html?mode=wb&userId=${userId || 'default'}`}
               title="Study Whiteboard"
               style={{ flex: 1, border: 'none', width: '100%', display: 'block' }}
               allow="clipboard-read; clipboard-write"
@@ -1433,6 +1434,7 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
             selectedTopic={selectedTopic}
             userProgress={userProgress}
             onProgressUpdate={handleProgressUpdate}
+            userId={currentUser?.userId}
           />
         )}
       </div>
