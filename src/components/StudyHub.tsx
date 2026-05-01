@@ -13,10 +13,24 @@ interface StudyHubProps {
 
 type InternalView = 'home' | 'learning' | 'topics' | 'complete'
 
+// Hebrew labels for each topic (quiz-bank concept field is English)
+const HEBREW_LABELS: Record<string, string> = {
+  'mean':                 'ממוצע',
+  'median':               'חציון',
+  'std-dev':              'סטיית תקן',
+  'probability':          'הסתברות',
+  'regression':           'רגרסיה',
+  'correlation':          'קורלציה',
+  'binomial':             'בינום',
+  'hypothesis-testing':   'מבחן השערות',
+  'sampling':             'מדגם',
+  'confidence-intervals': 'רווח סמך',
+}
+
 // Extract topics from quiz-bank data
 const QUIZ_TOPICS = Object.entries(quizBankData.topics || {}).map(([key, data]: [string, any]) => ({
   id: key,
-  label: data.concept || key,
+  label: HEBREW_LABELS[key] || data.concept || key,
   building: data.building || '',
   concept: data.concept || key,
   questionCount: (data.questions || []).length,
@@ -236,11 +250,11 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
           gap: 8,
         }}
       >
-        ← Back to Home
+        → חזרה לדף הבית
       </button>
 
-      <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28 }}>
-        Choose a Topic to Study 📚
+      <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
+        בחר נושא ללמוד 📚
       </h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20, maxWidth: 1200 }}>
@@ -294,19 +308,19 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
                   <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: TEXT_MED }}>
                     {sessionsAttempted}
                   </div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>Sessions</div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>סשנים</div>
                 </div>
                 <div style={{ textAlign: 'center', flex: 1 }}>
                   <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: bestScore > 85 ? '#34A853' : TEXT_MED }}>
                     {bestScore}%
                   </div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>Best Score</div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ציון הטוב</div>
                 </div>
                 <div style={{ textAlign: 'center', flex: 1 }}>
                   <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: '#D4AF37' }}>
                     {topic.questionCount}
                   </div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>Questions</div>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>שאלות</div>
                 </div>
               </div>
 
@@ -322,7 +336,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
                   fontWeight: 600,
                   textAlign: 'center',
                 }}>
-                  ✅ Mastered!
+                  ✅ הושגת שליטה!
                 </div>
               )}
             </button>
@@ -628,7 +642,15 @@ function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
       padding: '0 36px',
       flexShrink: 0,
     }} dir="rtl">
-      <h1 style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 32, color: TEXT_LIGHT, margin: 0 }}>{title}</h1>
+      <h1 style={{
+        fontFamily: "'Rubik', sans-serif",
+        fontWeight: 800,
+        fontSize: 28,
+        color: TEXT_DARK,
+        margin: 0,
+        letterSpacing: '-0.5px',
+        textShadow: '0 1px 4px rgba(255,255,255,0.8)',
+      }}>{title}</h1>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }} dir="ltr">
         {/* XP pill */}
         <span style={{
