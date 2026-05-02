@@ -48,7 +48,9 @@ export default defineConfig({
       }
     }
   ],
-  base: '/wafflestack-app/',
+  // Vercel hosts at the domain root; GitHub Pages used /wafflestack-app/ so
+  // we keep that path active for the legacy deploy via env var override.
+  base: process.env.VITE_BASE_PATH ?? '/',
   server: {
     port: 3000,
     open: true

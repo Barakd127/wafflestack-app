@@ -6,7 +6,10 @@ import HighEndCity from './components/HighEndCity'
 import TownscaperScene from './components/TownscaperScene'
 import CityModeScene from './components/CityModeScene'
 import ModelColorTest from './components/ModelColorTest'
-import WaffleStackCity from './components/WaffleStackCity'
+// Godot 3D city replaces the React-Three-Fiber WaffleStackCity. The iframe
+// (/godot/index.html in public/godot/) shares localStorage with the host app,
+// so progress (XP / coins / mastered) stays in sync without a postMessage bridge.
+import WaffleStackCity from './components/WaffleStackCityGodot'
 import MissionControl from './components/MissionControl'
 import LandingPage from './components/LandingPage'
 import OnboardingFlow from './components/OnboardingFlow'
