@@ -1,11 +1,9 @@
 import { useState, useCallback, useRef } from 'react'
 import WaffleStackCity from './WaffleStackCity'
 import StudyHub from './StudyHub'
-import type { LessonTopicId } from './LessonPage'
 
 interface SplitLayoutProps {
   onBack: () => void
-  onOpenLesson?: (id: LessonTopicId) => void
   darkMode?: boolean
 }
 
@@ -17,7 +15,7 @@ interface SplitLayoutProps {
  *
  * The exit button (top-centre) navigates back to the caller.
  */
-export default function SplitLayout({ onBack, onOpenLesson, darkMode }: SplitLayoutProps) {
+export default function SplitLayout({ onBack, darkMode }: SplitLayoutProps) {
   // City panel width as a percentage (clamped to 30%–75%)
   const [cityPct, setCityPct] = useState(54)
   const dragging = useRef(false)
@@ -140,7 +138,6 @@ export default function SplitLayout({ onBack, onOpenLesson, darkMode }: SplitLay
           <StudyHub
             onViewChange={() => {/* handled internally — no full-view transitions in split mode */}}
             darkMode={darkMode}
-            onOpenLesson={onOpenLesson}
           />
         </div>
       </div>

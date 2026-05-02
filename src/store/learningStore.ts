@@ -358,6 +358,9 @@ interface LearningState {
   // Building progression
   buildingProgress: Record<string, BuildingProgress>
 
+  // Lesson reading progress (one entry per topic id read at least once)
+  completedLessons: string[]
+
   // Actions
   recordAnswer: (questionId: string, correct: boolean, xpReward: number) => void
   recordSM2Answer: (questionId: string, quality: number, xpReward: number) => void
@@ -365,6 +368,7 @@ interface LearningState {
   getDailyChallenge: () => Question[]
   recordDailyChallengeAnswer: (questionId: string, quality: number) => void
   completeBuildingQuiz: (buildingId: string) => void
+  completeLesson: (topicId: string) => void
   clearNewAchievements: () => void
   resetProgress: () => void
   completeOnboarding: (name: string) => void
@@ -392,6 +396,7 @@ export const useLearningStore = create<LearningState>()(
       dailyChallengeDate: null,
       dailyChallengeProgress: 0,
       buildingProgress: INITIAL_BUILDING_PROGRESS,
+      completedLessons: [],
 
       recordAnswer: (questionId, correct, xpReward) => {
         const state = get()
@@ -563,12 +568,22 @@ export const useLearningStore = create<LearningState>()(
         })
       },
 
+      completeLesson: (topicId) => {
+        const state = get()
+        if (state.completedLessons.includes(topicId)) return
+        set({
+          completedLessons: [...state.completedLessons, topicId],
+          xp: state.xp + 5,
+        })
+      },
+
       clearNewAchievements: () => set({ newAchievements: [] }),
       resetProgress: () => set({
         xp: 0, streak: 0, bestStreak: 0, totalAnswered: 0, totalCorrect: 0, answeredIds: [],
         achievements: ACHIEVEMENTS, newAchievements: [], cards: {},
         dailyChallengeDate: null, dailyChallengeProgress: 0,
         buildingProgress: INITIAL_BUILDING_PROGRESS,
+        completedLessons: [],
       }),
       completeOnboarding: (name: string) => set({ userName: name, onboardingCompleted: true }),
     }),

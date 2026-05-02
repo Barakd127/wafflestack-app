@@ -1,17 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import type { LessonTopicId } from './LessonPage'
 import { useLearningStore } from '../store/learningStore'
 import { initializeUser, getCurrentUser, loginUser, registerUser, logoutUser, listUsers, deleteUser, type User } from '../stores/authStore'
 import { loadProgress, recordQuizSession, saveCanvasNotes, type QuizAnswer, type UserProgress } from '../stores/progressStore'
 import quizBankData from '../data/quiz-bank.json'
+import LessonScreen from './LessonScreen'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
   darkMode?: boolean
-  onOpenLesson?: (id: LessonTopicId) => void
 }
 
-type InternalView = 'home' | 'learning' | 'topics' | 'complete'
+type InternalView = 'home' | 'learning' | 'topics' | 'lesson' | 'complete'
 
 // Hebrew labels for each topic (quiz-bank concept field is English)
 const HEBREW_LABELS: Record<string, string> = {
@@ -227,7 +226,7 @@ const TOOLBAR_BUTTONS: ToolbarButton[] = [
 // ── Topic Selector Component ───────────────────────────────────────────────────
 interface TopicSelectorProps {
   userProgress: UserProgress
-  onSelectTopic: (topicId: string) => void
+  onSelectTopic: (topicId: string, mode: 'lesson' | 'quiz') => void
   onBack: () => void
 }
 
@@ -265,16 +264,14 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
           const sessionsAttempted = progress?.sessionsAttempted || 0
 
           return (
-            <button
+            <div
               key={topic.id}
-              onClick={() => onSelectTopic(topic.id)}
               style={{
                 background: GLASS_CARD,
                 backdropFilter: 'blur(20px)',
                 border: `2px solid ${isMastered ? 'rgba(212,175,55,0.6)' : 'rgba(255,255,255,0.3)'}`,
                 borderRadius: CARD_RADIUS,
                 padding: 24,
-                cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 16,
@@ -339,7 +336,46 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
                   ✅ הושגת שליטה!
                 </div>
               )}
-            </button>
+
+              {/* Lesson / Quiz action buttons */}
+              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                <button
+                  onClick={() => onSelectTopic(topic.id, 'lesson')}
+                  style={{
+                    flex: 1,
+                    background: BUTTON_COLOR,
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 14,
+                    padding: '10px 0',
+                    fontWeight: 600,
+                    fontSize: 14,
+                    cursor: 'pointer',
+                    fontFamily: "'Rubik', sans-serif",
+                    boxShadow: '0px 2px 6px rgba(51,81,202,0.35)',
+                  }}
+                >
+                  📚 תיאוריה
+                </button>
+                <button
+                  onClick={() => onSelectTopic(topic.id, 'quiz')}
+                  style={{
+                    flex: 1,
+                    background: 'rgba(255,255,255,0.7)',
+                    color: TEXT_DARK,
+                    border: '1px solid rgba(127,155,217,0.4)',
+                    borderRadius: 14,
+                    padding: '10px 0',
+                    fontWeight: 600,
+                    fontSize: 14,
+                    cursor: 'pointer',
+                    fontFamily: "'Rubik', sans-serif",
+                  }}
+                >
+                  📝 תרגול
+                </button>
+              </div>
+            </div>
           )
         })}
       </div>
@@ -1484,9 +1520,9 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
 
   const title = internalView === 'home' ? 'דף הבית' : internalView === 'topics' ? 'Study Zone' : 'Study Zone'
 
-  const handleSelectTopic = (topicId: string) => {
+  const handleSelectTopic = (topicId: string, mode: 'lesson' | 'quiz' = 'lesson') => {
     setSelectedTopic(topicId)
-    setInternalView('learning')
+    setInternalView(mode === 'lesson' ? 'lesson' : 'learning')
   }
 
   const handleProgressUpdate = (updated: UserProgress) => {
@@ -1556,6 +1592,14 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
             userProgress={userProgress}
             onSelectTopic={handleSelectTopic}
             onBack={() => setInternalView('home')}
+          />
+        )}
+        {internalView === 'lesson' && selectedTopic && (
+          <LessonScreen
+            topicId={selectedTopic}
+            onStartQuiz={() => setInternalView('learning')}
+            onBack={() => setInternalView('topics')}
+            onComplete={(id) => useLearningStore.getState().completeLesson(id)}
           />
         )}
         {internalView === 'learning' && (

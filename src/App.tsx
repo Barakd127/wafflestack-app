@@ -10,7 +10,6 @@ import WaffleStackCity from './components/WaffleStackCity'
 import MissionControl from './components/MissionControl'
 import LandingPage from './components/LandingPage'
 import OnboardingFlow from './components/OnboardingFlow'
-import LessonPage, { LessonTopicId } from './components/LessonPage'
 import SplitLayout from './components/SplitLayout'
 import { useLearningStore } from './store/learningStore'
 
@@ -19,7 +18,7 @@ function App() {
   const hasUserName = Boolean(localStorage.getItem('userName') || onboardingCompleted)
   const [activeView, setActiveView] = useState<
     'onboarding' | 'study' | 'mindmap' | 'city' | 'townscaper' | 'citymode' |
-    'colortest' | 'wafflecity' | 'mission' | 'landing' | 'lesson' | 'split'
+    'colortest' | 'wafflecity' | 'mission' | 'landing' | 'split'
   >(() => {
     const h = typeof window !== 'undefined' ? window.location.hash : ''
     if (h === '#view-highcity') return 'city'
@@ -31,7 +30,6 @@ function App() {
     // Landing page is the entry point for first-time visitors; returning users go straight to StudyHub
     return hasUserName ? 'study' : 'landing'
   })
-  const [lessonTopic, setLessonTopic] = useState<LessonTopicId>('mean')
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     const stored = localStorage.getItem('wafflestack-dark-mode')
     return stored !== null ? stored === 'true' : true
@@ -73,8 +71,6 @@ function App() {
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
   }, [activeView])
 
-  const goToLesson = (id: LessonTopicId) => { setLessonTopic(id); setActiveView('lesson') }
-
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
       {/* Dark mode toggle — always visible, fixed */}
@@ -99,7 +95,6 @@ function App() {
                 else setActiveView(v as Parameters<typeof setActiveView>[0])
               }}
               darkMode={darkMode}
-              onOpenLesson={goToLesson}
             />
             {/* Split-screen shortcut button — bottom-left corner */}
             <button
@@ -124,17 +119,7 @@ function App() {
         {activeView === 'split' && (
           <SplitLayout
             onBack={() => setActiveView('study')}
-            onOpenLesson={goToLesson}
             darkMode={darkMode}
-          />
-        )}
-
-        {/* ── Lesson Page ───────────────────────────────────────────────────── */}
-        {activeView === 'lesson' && (
-          <LessonPage
-            topicId={lessonTopic}
-            onBack={() => setActiveView('study')}
-            onStartQuiz={() => setActiveView('wafflecity')}
           />
         )}
 
