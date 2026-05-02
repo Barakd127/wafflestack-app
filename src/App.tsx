@@ -30,8 +30,8 @@ function App() {
     if (h === '#view-wafflecity') return 'wafflecity'
     if (h === '#study') return 'study'
     if (h === '#split') return 'split'
-    // Landing page is the entry point for first-time visitors; returning users go straight to StudyHub
-    return hasUserName ? 'study' : 'landing'
+    // Landing page removed — everyone goes straight to StudyHub
+    return 'study'
   })
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     const stored = localStorage.getItem('wafflestack-dark-mode')
@@ -57,7 +57,6 @@ function App() {
     const hash = window.location.hash
     if (hash === '#city' || hash === '#topics' || hash === '#score' || hash.startsWith('#challenge/')) {
       setActiveView('wafflecity')
-    } else if (hash === '#landing') setActiveView('landing')
     else if (hash === '#study') setActiveView('study')
     else if (hash === '#split') setActiveView('split')
     else if (hash === '#view-highcity') setActiveView('city')
@@ -68,7 +67,6 @@ function App() {
 
   useEffect(() => {
     if (activeView === 'study') window.location.hash = ''
-    else if (activeView === 'landing') window.location.hash = ''
     else if (activeView === 'split') window.location.hash = '#split'
     else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
