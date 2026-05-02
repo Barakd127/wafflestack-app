@@ -4,13 +4,14 @@ import { initializeUser, getCurrentUser, loginUser, registerUser, logoutUser, li
 import { loadProgress, recordQuizSession, saveCanvasNotes, type QuizAnswer, type UserProgress } from '../stores/progressStore'
 import quizBankData from '../data/quiz-bank.json'
 import LessonScreen from './LessonScreen'
+import { LESSON_CONTENT } from '../data/lesson-content'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
   darkMode?: boolean
 }
 
-type InternalView = 'home' | 'learning' | 'topics' | 'lesson' | 'complete'
+type InternalView = 'home' | 'learning' | 'topics' | 'lesson' | 'quiz-intro' | 'complete'
 
 // Hebrew labels for each topic (quiz-bank concept field is English)
 const HEBREW_LABELS: Record<string, string> = {
@@ -223,6 +224,117 @@ const TOOLBAR_BUTTONS: ToolbarButton[] = [
   { id: 'scores', label: 'Scores', icon: '📊', description: 'Performance dashboard' },
   { id: 'streaks', label: '30Days', icon: '🔥', description: '30-day challenge' },
 ]
+
+// ── Quiz Intro Card ─────────────────────────────────────────────────────────────
+// Centred preview screen shown before launching the actual quiz. Replaces the
+// previous "instant pop-up" behaviour where pressing 📝 תרגול jumped straight
+// into the question carousel.
+function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
+  topicId: string
+  onStart: () => void
+  onBack: () => void
+  onReadLesson: () => void
+}) {
+  const topicData = (quizBankData.topics as Record<string, { concept?: string; questions?: Array<{ difficulty: string }> }>)[topicId]
+  const questions = topicData?.questions || []
+  const easy = questions.filter(q => q.difficulty === 'easy').length
+  const medium = questions.filter(q => q.difficulty === 'medium').length
+  const hard = questions.filter(q => q.difficulty === 'hard').length
+  const hebrewName = HEBREW_LABELS[topicId] || topicData?.concept || topicId
+  const hasLesson = LESSON_CONTENT.some(t => t.id === topicId)
+
+  return (
+    <div dir="rtl" style={{
+      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 32, fontFamily: "'Rubik', 'Assistant', sans-serif",
+    }}>
+      <div style={{
+        width: '100%', maxWidth: 520,
+        background: GLASS_CARD,
+        backdropFilter: 'blur(20px)',
+        borderRadius: 24,
+        boxShadow: CARD_SHADOW,
+        border: '1px solid rgba(255,255,255,0.5)',
+        padding: 36,
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 56, marginBottom: 12 }}>📝</div>
+        <h2 style={{ fontSize: 26, fontWeight: 700, color: TEXT_DARK, margin: '0 0 6px' }}>
+          תרגול: {hebrewName}
+        </h2>
+        <div style={{ fontSize: 14, color: TEXT_LIGHT, marginBottom: 28 }}>
+          {questions.length} שאלות מסודרות לפי רמת קושי
+        </div>
+
+        {/* Difficulty breakdown chips */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 28, flexWrap: 'wrap' }}>
+          <DifficultyChip label="קל" count={easy} color="#10b981" bg="rgba(16,185,129,0.12)" />
+          <DifficultyChip label="בינוני" count={medium} color="#f59e0b" bg="rgba(245,158,11,0.12)" />
+          <DifficultyChip label="מאתגר" count={hard} color="#ef4444" bg="rgba(239,68,68,0.12)" />
+        </div>
+
+        {/* Pep-talk paragraph */}
+        <div style={{
+          background: 'rgba(99,102,241,0.06)',
+          border: '1px solid rgba(99,102,241,0.18)',
+          borderRadius: 14,
+          padding: '14px 18px',
+          fontSize: 14,
+          color: TEXT_MED,
+          lineHeight: 1.7,
+          marginBottom: 28,
+          textAlign: 'right',
+        }}>
+          🎯 התשובה תיבדק אוטומטית. תקבל פידבק מיידי, הסבר על כל שאלה, ו-XP על כל תשובה נכונה.
+        </div>
+
+        {/* Action buttons */}
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button onClick={onStart} style={{
+            background: BUTTON_COLOR, color: '#fff', border: 'none',
+            borderRadius: 24, padding: '12px 28px',
+            fontWeight: 700, fontSize: 16, cursor: 'pointer',
+            fontFamily: "'Rubik', sans-serif",
+            boxShadow: '0 4px 14px rgba(99,102,241,0.4)',
+          }}>
+            התחל תרגול ←
+          </button>
+          {hasLesson && (
+            <button onClick={onReadLesson} style={{
+              background: 'rgba(255,255,255,0.6)', color: TEXT_DARK,
+              border: '1px solid rgba(127,155,217,0.4)',
+              borderRadius: 24, padding: '12px 22px',
+              fontWeight: 600, fontSize: 15, cursor: 'pointer',
+              fontFamily: "'Rubik', sans-serif",
+            }}>
+              📚 קרא תיאוריה
+            </button>
+          )}
+          <button onClick={onBack} style={{
+            background: 'transparent', color: TEXT_LIGHT,
+            border: 'none', cursor: 'pointer',
+            fontSize: 14, padding: '12px 16px', fontFamily: "'Rubik', sans-serif",
+          }}>
+            → חזרה
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DifficultyChip({ label, count, color, bg }: { label: string; count: number; color: string; bg: string }) {
+  return (
+    <div style={{
+      background: bg, border: `1px solid ${color}40`,
+      borderRadius: 14, padding: '8px 16px',
+      display: 'flex', alignItems: 'center', gap: 8,
+    }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color }}>{label}</div>
+      <div style={{ fontSize: 18, fontWeight: 800, color }}>{count}</div>
+    </div>
+  )
+}
 
 // ── Topic Selector Component ───────────────────────────────────────────────────
 interface TopicSelectorProps {
@@ -1523,7 +1635,7 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
 
   const handleSelectTopic = (topicId: string, mode: 'lesson' | 'quiz' = 'lesson') => {
     setSelectedTopic(topicId)
-    setInternalView(mode === 'lesson' ? 'lesson' : 'learning')
+    setInternalView(mode === 'lesson' ? 'lesson' : 'quiz-intro')
   }
 
   const handleProgressUpdate = (updated: UserProgress) => {
@@ -1598,9 +1710,17 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
         {internalView === 'lesson' && selectedTopic && (
           <LessonScreen
             topicId={selectedTopic}
-            onStartQuiz={() => setInternalView('learning')}
+            onStartQuiz={() => setInternalView('quiz-intro')}
             onBack={() => setInternalView('topics')}
             onComplete={(id) => useLearningStore.getState().completeLesson(id)}
+          />
+        )}
+        {internalView === 'quiz-intro' && selectedTopic && (
+          <QuizIntroCard
+            topicId={selectedTopic}
+            onStart={() => setInternalView('learning')}
+            onBack={() => setInternalView('topics')}
+            onReadLesson={() => setInternalView('lesson')}
           />
         )}
         {internalView === 'learning' && (

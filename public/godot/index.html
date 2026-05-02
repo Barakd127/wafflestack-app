@@ -204,6 +204,7 @@ const engine = new Engine(GODOT_CONFIG);
 				if (current > 0 && total > 0) {
 					statusProgress.value = current;
 					statusProgress.max = total;
+					try { window.parent.postMessage({ type: 'godot-progress', current: current, total: total }, '*'); } catch (e) {}
 				} else {
 					statusProgress.removeAttribute('value');
 					statusProgress.removeAttribute('max');
@@ -211,6 +212,7 @@ const engine = new Engine(GODOT_CONFIG);
 			},
 		}).then(() => {
 			setStatusMode('hidden');
+			try { window.parent.postMessage({ type: 'godot-ready' }, '*'); } catch (e) {}
 		}, displayFailureNotice);
 	}
 }());
