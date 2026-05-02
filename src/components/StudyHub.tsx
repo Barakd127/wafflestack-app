@@ -229,19 +229,25 @@ const TOOLBAR_BUTTONS: ToolbarButton[] = [
 // Centred preview screen shown before launching the actual quiz. Replaces the
 // previous "instant pop-up" behaviour where pressing 📝 תרגול jumped straight
 // into the question carousel.
+type DifficultyFilter = 'all' | 'easy' | 'medium' | 'hard'
+
 function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
   topicId: string
-  onStart: () => void
+  onStart: (difficulty: DifficultyFilter) => void
   onBack: () => void
   onReadLesson: () => void
 }) {
   const topicData = (quizBankData.topics as Record<string, { concept?: string; questions?: Array<{ difficulty: string }> }>)[topicId]
   const questions = topicData?.questions || []
-  const easy = questions.filter(q => q.difficulty === 'easy').length
-  const medium = questions.filter(q => q.difficulty === 'medium').length
-  const hard = questions.filter(q => q.difficulty === 'hard').length
+  const counts: Record<DifficultyFilter, number> = {
+    all: questions.length,
+    easy: questions.filter(q => q.difficulty === 'easy').length,
+    medium: questions.filter(q => q.difficulty === 'medium').length,
+    hard: questions.filter(q => q.difficulty === 'hard').length,
+  }
   const hebrewName = HEBREW_LABELS[topicId] || topicData?.concept || topicId
   const hasLesson = LESSON_CONTENT.some(t => t.id === topicId)
+  const [selected, setSelected] = useState<DifficultyFilter>('all')
 
   return (
     <div dir="rtl" style={{
@@ -249,7 +255,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
       padding: 32, fontFamily: "'Rubik', 'Assistant', sans-serif",
     }}>
       <div style={{
-        width: '100%', maxWidth: 520,
+        width: '100%', maxWidth: 540,
         background: GLASS_CARD,
         backdropFilter: 'blur(20px)',
         borderRadius: 24,
@@ -262,15 +268,31 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
         <h2 style={{ fontSize: 26, fontWeight: 700, color: TEXT_DARK, margin: '0 0 6px' }}>
           תרגול: {hebrewName}
         </h2>
-        <div style={{ fontSize: 14, color: TEXT_LIGHT, marginBottom: 28 }}>
-          {questions.length} שאלות מסודרות לפי רמת קושי
+        <div style={{ fontSize: 14, color: TEXT_LIGHT, marginBottom: 22 }}>
+          בחר/י רמת קושי. מקל למאתגר.
         </div>
 
-        {/* Difficulty breakdown chips */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 28, flexWrap: 'wrap' }}>
-          <DifficultyChip label="קל" count={easy} color="#10b981" bg="rgba(16,185,129,0.12)" />
-          <DifficultyChip label="בינוני" count={medium} color="#f59e0b" bg="rgba(245,158,11,0.12)" />
-          <DifficultyChip label="מאתגר" count={hard} color="#ef4444" bg="rgba(239,68,68,0.12)" />
+        {/* Difficulty selector — clickable cards, one of which is selected */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 24 }}>
+          <DifficultySelectorCard
+            label="הכל" count={counts.all} icon="🎯"
+            color="#6366f1" bg="rgba(99,102,241,0.12)"
+            selected={selected === 'all'} onClick={() => setSelected('all')} />
+          <DifficultySelectorCard
+            label="קל" count={counts.easy} icon="🌱"
+            color="#10b981" bg="rgba(16,185,129,0.12)"
+            selected={selected === 'easy'} onClick={() => setSelected('easy')}
+            disabled={counts.easy === 0} />
+          <DifficultySelectorCard
+            label="בינוני" count={counts.medium} icon="⚡"
+            color="#f59e0b" bg="rgba(245,158,11,0.12)"
+            selected={selected === 'medium'} onClick={() => setSelected('medium')}
+            disabled={counts.medium === 0} />
+          <DifficultySelectorCard
+            label="מאתגר" count={counts.hard} icon="🔥"
+            color="#ef4444" bg="rgba(239,68,68,0.12)"
+            selected={selected === 'hard'} onClick={() => setSelected('hard')}
+            disabled={counts.hard === 0} />
         </div>
 
         {/* Pep-talk paragraph */}
@@ -290,14 +312,16 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
 
         {/* Action buttons */}
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button onClick={onStart} style={{
+          <button onClick={() => onStart(selected)} disabled={counts[selected] === 0} style={{
             background: BUTTON_COLOR, color: '#fff', border: 'none',
             borderRadius: 24, padding: '12px 28px',
-            fontWeight: 700, fontSize: 16, cursor: 'pointer',
+            fontWeight: 700, fontSize: 16,
+            cursor: counts[selected] === 0 ? 'not-allowed' : 'pointer',
+            opacity: counts[selected] === 0 ? 0.4 : 1,
             fontFamily: "'Rubik', sans-serif",
             boxShadow: '0 4px 14px rgba(99,102,241,0.4)',
           }}>
-            התחל תרגול ←
+            התחל תרגול ({counts[selected]} שאלות) ←
           </button>
           {hasLesson && (
             <button onClick={onReadLesson} style={{
@@ -352,16 +376,39 @@ function QuizDifficultyBadge({ level, xp }: { level: 'easy' | 'medium' | 'hard';
   )
 }
 
-function DifficultyChip({ label, count, color, bg }: { label: string; count: number; color: string; bg: string }) {
+function DifficultySelectorCard({ label, count, icon, color, bg, selected, onClick, disabled }: {
+  label: string
+  count: number
+  icon: string
+  color: string
+  bg: string
+  selected: boolean
+  onClick: () => void
+  disabled?: boolean
+}) {
   return (
-    <div style={{
-      background: bg, border: `1px solid ${color}40`,
-      borderRadius: 14, padding: '8px 16px',
-      display: 'flex', alignItems: 'center', gap: 8,
-    }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color }}>{label}</div>
-      <div style={{ fontSize: 18, fontWeight: 800, color }}>{count}</div>
-    </div>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        background: selected ? color : bg,
+        border: `2px solid ${selected ? color : color + '40'}`,
+        color: selected ? '#fff' : color,
+        borderRadius: 14,
+        padding: '10px 6px',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.4 : 1,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+        fontFamily: "'Rubik', sans-serif",
+        transition: 'all 0.18s ease',
+        boxShadow: selected ? `0 6px 18px ${color}60` : 'none',
+        transform: selected ? 'translateY(-2px)' : 'translateY(0)',
+      }}
+    >
+      <div style={{ fontSize: 18 }}>{icon}</div>
+      <div style={{ fontSize: 12, fontWeight: 600 }}>{label}</div>
+      <div style={{ fontSize: 16, fontWeight: 800 }}>{count}</div>
+    </button>
   )
 }
 
@@ -1142,12 +1189,13 @@ function XpBurst({ amount, onDone }: { amount: number; onDone: () => void }) {
 interface LearningScreenProps {
   onBack: () => void
   selectedTopic?: string
+  difficultyFilter?: DifficultyFilter
   userProgress: UserProgress
   onProgressUpdate: (progress: UserProgress) => void
   userId?: string
 }
 
-function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate, userId }: LearningScreenProps) {
+function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userProgress, onProgressUpdate, userId }: LearningScreenProps) {
   const [currentQ, setCurrentQ] = useState(0)
   const [answer, setAnswer] = useState('')
   const [phase, setPhase] = useState<'write' | 'review' | 'done'>('write')
@@ -1200,6 +1248,7 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate,
   const DIFFICULTY_XP: Record<string, number> = { easy: 10, medium: 15, hard: 25 }
   const questions = selectedTopic && (quizBankData.topics as Record<string, any>)[selectedTopic]
     ? [...(quizBankData.topics as Record<string, any>)[selectedTopic].questions]
+        .filter((q: any) => difficultyFilter === 'all' || q.difficulty === difficultyFilter)
         .sort((a: any, b: any) => (DIFFICULTY_ORDER[a.difficulty] ?? 1) - (DIFFICULTY_ORDER[b.difficulty] ?? 1))
         .map((q: any) => ({
           id: q.id,
@@ -1404,7 +1453,7 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate,
             >
               {!isDone && <span style={{ fontSize: 14, opacity: 0.7 }}>⋮⋮</span>}
               <span>{isDone ? '🏆 סיום' : `שאלה ${currentQ + 1} / ${total}`}</span>
-              {!isDone && q.difficulty && <QuizDifficultyBadge level={q.difficulty} xp={q.xp} />}
+              {!isDone && (q as any).difficulty && <QuizDifficultyBadge level={(q as any).difficulty} xp={q.xp} />}
               {!isDone && (
                 <div data-no-drag style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
                   <button
@@ -1641,6 +1690,7 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(() => getCurrentUser())
   const [internalView, setInternalView] = useState<InternalView>('home')
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>()
+  const [quizDifficulty, setQuizDifficulty] = useState<DifficultyFilter>('all')
   const [userProgress, setUserProgress] = useState<UserProgress>(() => {
     const user = getCurrentUser() || initializeUser()
     return loadProgress(user.userId)
@@ -1754,7 +1804,7 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
         {internalView === 'quiz-intro' && selectedTopic && (
           <QuizIntroCard
             topicId={selectedTopic}
-            onStart={() => setInternalView('learning')}
+            onStart={(d) => { setQuizDifficulty(d); setInternalView('learning') }}
             onBack={() => setInternalView('topics')}
             onReadLesson={() => setInternalView('lesson')}
           />
@@ -1763,6 +1813,7 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
           <LearningScreen
             onBack={() => setInternalView('topics')}
             selectedTopic={selectedTopic}
+            difficultyFilter={quizDifficulty}
             userProgress={userProgress}
             onProgressUpdate={handleProgressUpdate}
             userId={currentUser?.userId}
