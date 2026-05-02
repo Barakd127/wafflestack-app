@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { LESSON_CONTENT } from '../data/lesson-content'
 import { TOPIC_VISUALS } from './LessonVisuals'
+import ArsenalCapture from './ArsenalCapture'
 
 // Design tokens — keep in sync with StudyHub.tsx
 const GLASS_CARD  = 'var(--sh-glass-card)'
@@ -148,6 +149,9 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
       flex: 1, overflow: 'auto', padding: '24px 28px',
       fontFamily: "'Rubik', 'Assistant', sans-serif",
     }}>
+      {/* Floating "save to arsenal" chip listens at document level */}
+      <ArsenalCapture />
+
       {/* Header bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, gap: 8, flexWrap: 'wrap' }}>
         <button onClick={onBack} style={backLinkStyle}>→ חזרה לבחירת נושא</button>
@@ -183,7 +187,11 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
       </div>
 
       {/* Slide card */}
-      <div style={{ ...glassCardStyle, padding: '26px 30px', marginBottom: 18 }}>
+      <div
+        data-arsenal-source="slide"
+        data-arsenal-topic={topicId}
+        style={{ ...glassCardStyle, padding: '26px 30px', marginBottom: 18 }}
+      >
         <h3 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 20, fontWeight: 700, color: TEXT_DARK, marginTop: 0, marginBottom: 14, textAlign: 'right' }}>
           {slide.title}
         </h3>

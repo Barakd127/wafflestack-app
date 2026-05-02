@@ -5,13 +5,15 @@ import { loadProgress, recordQuizSession, saveCanvasNotes, type QuizAnswer, type
 import quizBankData from '../data/quiz-bank.json'
 import LessonScreen from './LessonScreen'
 import { LESSON_CONTENT } from '../data/lesson-content'
+import ArsenalScreen from './ArsenalScreen'
+import { useArsenalStore, quickAddArsenal } from '../store/arsenalStore'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
   darkMode?: boolean
 }
 
-type InternalView = 'home' | 'learning' | 'topics' | 'lesson' | 'quiz-intro' | 'complete'
+type InternalView = 'home' | 'learning' | 'topics' | 'lesson' | 'quiz-intro' | 'arsenal' | 'complete'
 
 // Hebrew labels for each topic (quiz-bank concept field is English)
 const HEBREW_LABELS: Record<string, string> = {
@@ -344,6 +346,37 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
         </div>
       </div>
     </div>
+  )
+}
+
+// Small "save to arsenal" chip rendered next to the quiz model-answer header.
+// One click saves the explanation as a `gotcha` and shows a brief success state.
+function ArsenalQuizCaptureChip({ explanation, topicId }: { explanation: string; topicId?: string }) {
+  const [saved, setSaved] = useState(false)
+  const handle = () => {
+    if (saved || !explanation) return
+    quickAddArsenal({ kind: 'gotcha', text: explanation, topicId, source: 'quiz' })
+    setSaved(true)
+    window.setTimeout(() => setSaved(false), 1800)
+  }
+  return (
+    <button
+      onClick={handle}
+      title="שמור את ההסבר כטעות נפוצה בארסנל"
+      style={{
+        background: saved ? '#10b981' : 'rgba(99,102,241,0.12)',
+        color: saved ? '#fff' : '#4338ca',
+        border: `1px solid ${saved ? '#10b981' : 'rgba(99,102,241,0.35)'}`,
+        borderRadius: 12, padding: '4px 10px',
+        cursor: saved ? 'default' : 'pointer',
+        fontFamily: "'Rubik', sans-serif",
+        fontSize: 11, fontWeight: 700,
+        display: 'inline-flex', alignItems: 'center', gap: 5,
+        transition: 'all 0.2s ease',
+      }}
+    >
+      {saved ? '✓ נשמר לארסנל' : '🎯 שמור כטעות נפוצה'}
+    </button>
   )
 }
 
@@ -772,6 +805,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, width = 247 }: {
   const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string }> = [
     { id: 'home',     label: 'דף הבית',      icon: '⌂' },
     { id: 'topics',   label: 'אזור למידה',   icon: '📖' },
+    { id: 'arsenal',  label: 'הארסנל שלי',   icon: '🎯' },
     { id: null,       label: 'מפת לימוד',    icon: '◫', action: 'mindmap' },
     { id: null,       label: 'העולם שלי',    icon: '🌐', action: 'world' },
   ]
@@ -1613,9 +1647,16 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               </div>
 
               {/* Model answer */}
-              <div style={{ marginBottom: 22 }}>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: '#34A853', marginBottom: 6, textAlign: 'right', fontWeight: 600 }}>✅ פתרון מלא:</div>
-                <div style={{ background: 'linear-gradient(135deg, rgba(52,168,83,0.08), rgba(52,168,83,0.04))', borderRadius: 10, padding: '14px 18px', border: '1.5px solid rgba(52,168,83,0.3)', fontFamily: "'Assistant', sans-serif", fontSize: 17, color: TEXT_DARK, lineHeight: 1.9, whiteSpace: 'pre-wrap', textAlign: 'right' }}>
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: '#34A853', textAlign: 'right', fontWeight: 600 }}>✅ פתרון מלא:</div>
+                  <ArsenalQuizCaptureChip explanation={q.answer} topicId={selectedTopic} />
+                </div>
+                <div
+                  data-arsenal-source="quiz"
+                  data-arsenal-topic={selectedTopic || ''}
+                  style={{ background: 'linear-gradient(135deg, rgba(52,168,83,0.08), rgba(52,168,83,0.04))', borderRadius: 10, padding: '14px 18px', border: '1.5px solid rgba(52,168,83,0.3)', fontFamily: "'Assistant', sans-serif", fontSize: 17, color: TEXT_DARK, lineHeight: 1.9, whiteSpace: 'pre-wrap', textAlign: 'right' }}
+                >
                   {q.answer}
                 </div>
               </div>
@@ -1739,6 +1780,14 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
     setCurrentUser(null)
   }
 
+  // Hydrate the per-user arsenal whenever the active user changes.
+  useEffect(() => {
+    if (currentUser) {
+      const userId = currentUser.userId || currentUser.username || 'default'
+      useArsenalStore.getState().hydrate(userId)
+    }
+  }, [currentUser])
+
   // Show login screen if no user is logged in
   if (!currentUser) {
     return <LoginScreen onLogin={handleLogin} />
@@ -1801,6 +1850,7 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
             onComplete={(id) => useLearningStore.getState().completeLesson(id)}
           />
         )}
+        {internalView === 'arsenal' && <ArsenalScreen />}
         {internalView === 'quiz-intro' && selectedTopic && (
           <QuizIntroCard
             topicId={selectedTopic}

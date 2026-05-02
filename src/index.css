@@ -82,3 +82,25 @@ body {
   width: 100vw;
   height: 100vh;
 }
+
+/* Arsenal הקאצ'ים — animations for ArsenalScreen / ArsenalCapture / ArsenalCard.
+   Scoped via `arsenal-*` classes so they don't bleed into other components. */
+@keyframes arsenalCardIn {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.96); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0)    scale(1.00); }
+}
+@keyframes arsenalCardOut {
+  0%   { opacity: 1; transform: translateX(0)    scale(1.00); }
+  100% { opacity: 0; transform: translateX(30px) scale(0.95); }
+}
+@keyframes arsenalChipIn {
+  0%   { opacity: 0; transform: translateY(4px) scale(0.92); }
+  100% { opacity: 1; transform: translateY(0)   scale(1.00); }
+}
+@keyframes wsFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.arsenal-card-in  { animation: arsenalCardIn  0.32s cubic-bezier(.22,1.36,.36,1) backwards; }
+.arsenal-card-out { animation: arsenalCardOut 0.22s ease-in forwards; pointer-events: none; }
