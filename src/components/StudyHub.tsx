@@ -323,6 +323,35 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
   )
 }
 
+// Small inline badge shown next to "שאלה X / Y" in the active quiz card —
+// communicates the current question's difficulty level and XP reward at a glance.
+function QuizDifficultyBadge({ level, xp }: { level: 'easy' | 'medium' | 'hard'; xp: number }) {
+  const cfg: Record<string, { label: string; bg: string; color: string }> = {
+    easy:   { label: 'קל',     bg: 'rgba(16,185,129,0.22)', color: '#a7f3d0' },
+    medium: { label: 'בינוני', bg: 'rgba(245,158,11,0.22)', color: '#fde68a' },
+    hard:   { label: 'מאתגר',  bg: 'rgba(239,68,68,0.22)',  color: '#fecaca' },
+  }
+  const c = cfg[level] ?? cfg.medium
+  return (
+    <span style={{
+      marginInlineStart: 8,
+      background: c.bg,
+      color: c.color,
+      borderRadius: 10,
+      padding: '2px 8px',
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: 0.3,
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 6,
+    }}>
+      <span>{c.label}</span>
+      <span style={{ opacity: 0.7, fontSize: 10 }}>+{xp} XP</span>
+    </span>
+  )
+}
+
 function DifficultyChip({ label, count, color, bg }: { label: string; count: number; color: string; bg: string }) {
   return (
     <div style={{
@@ -1165,15 +1194,21 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate,
     window.addEventListener('mouseup', onUp)
   }, [cardPos])
 
-  // Load questions from selected topic or fallback to hardcoded
+  // Load questions from selected topic, sorted progressively easy → medium → hard.
+  // XP scales with difficulty so harder questions feel more rewarding.
+  const DIFFICULTY_ORDER: Record<string, number> = { easy: 0, medium: 1, hard: 2 }
+  const DIFFICULTY_XP: Record<string, number> = { easy: 10, medium: 15, hard: 25 }
   const questions = selectedTopic && (quizBankData.topics as Record<string, any>)[selectedTopic]
-    ? (quizBankData.topics as Record<string, any>)[selectedTopic].questions.map((q: any) => ({
-        id: q.id,
-        topic: selectedTopic,
-        text: q.question,
-        answer: q.explanation,
-        xp: 15,
-      }))
+    ? [...(quizBankData.topics as Record<string, any>)[selectedTopic].questions]
+        .sort((a: any, b: any) => (DIFFICULTY_ORDER[a.difficulty] ?? 1) - (DIFFICULTY_ORDER[b.difficulty] ?? 1))
+        .map((q: any) => ({
+          id: q.id,
+          topic: selectedTopic,
+          text: q.question,
+          answer: q.explanation,
+          xp: DIFFICULTY_XP[q.difficulty] ?? 15,
+          difficulty: q.difficulty as 'easy' | 'medium' | 'hard' | undefined,
+        }))
     : QUESTIONS
 
   const [dotStates, setDotStates] = useState<Array<'empty' | 'current' | 'correct' | 'wrong' | 'future'>>(
@@ -1369,6 +1404,7 @@ function LearningScreen({ onBack, selectedTopic, userProgress, onProgressUpdate,
             >
               {!isDone && <span style={{ fontSize: 14, opacity: 0.7 }}>⋮⋮</span>}
               <span>{isDone ? '🏆 סיום' : `שאלה ${currentQ + 1} / ${total}`}</span>
+              {!isDone && q.difficulty && <QuizDifficultyBadge level={q.difficulty} xp={q.xp} />}
               {!isDone && (
                 <div data-no-drag style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
                   <button
