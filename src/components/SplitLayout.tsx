@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
-import WaffleStackCity from './WaffleStackCity'
+import WaffleStackCity from './WaffleStackCityGodot'
 import StudyHub from './StudyHub'
 
 interface SplitLayoutProps {

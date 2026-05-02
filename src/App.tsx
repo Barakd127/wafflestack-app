@@ -2,35 +2,23 @@ import { useState, useEffect } from 'react'
 import { Moon, Sun } from 'lucide-react'
 import StudyHub from './components/StudyHub'
 import MindMapCanvas from './components/MindMapCanvas'
-import HighEndCity from './components/HighEndCity'
-import TownscaperScene from './components/TownscaperScene'
-import CityModeScene from './components/CityModeScene'
-import ModelColorTest from './components/ModelColorTest'
 // Godot 3D city replaces the React-Three-Fiber WaffleStackCity. The iframe
 // (/godot/index.html in public/godot/) shares localStorage with the host app,
 // so progress (XP / coins / mastered) stays in sync without a postMessage bridge.
 import WaffleStackCity from './components/WaffleStackCityGodot'
 import MissionControl from './components/MissionControl'
-import LandingPage from './components/LandingPage'
 import OnboardingFlow from './components/OnboardingFlow'
 import SplitLayout from './components/SplitLayout'
-import { useLearningStore } from './store/learningStore'
+
+type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split'
 
 function App() {
-  const onboardingCompleted = useLearningStore(s => s.onboardingCompleted)
-  const hasUserName = Boolean(localStorage.getItem('userName') || onboardingCompleted)
-  const [activeView, setActiveView] = useState<
-    'onboarding' | 'study' | 'mindmap' | 'city' | 'townscaper' | 'citymode' |
-    'colortest' | 'wafflecity' | 'mission' | 'landing' | 'split'
-  >(() => {
+  const [activeView, setActiveView] = useState<View>(() => {
     const h = typeof window !== 'undefined' ? window.location.hash : ''
-    if (h === '#view-highcity') return 'city'
-    if (h === '#view-townscaper') return 'townscaper'
-    if (h === '#view-citymode') return 'citymode'
-    if (h === '#view-wafflecity') return 'wafflecity'
+    if (h === '#view-wafflecity' || h === '#city' || h === '#topics' || h === '#score' || h.startsWith('#challenge/')) return 'wafflecity'
     if (h === '#study') return 'study'
     if (h === '#split') return 'split'
-    // Landing page removed — everyone goes straight to StudyHub
+    if (h === '#mindmap') return 'mindmap'
     return 'study'
   })
   const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -54,18 +42,6 @@ function App() {
   }, [darkMode])
 
   useEffect(() => {
-    const hash = window.location.hash
-    if (hash === '#city' || hash === '#topics' || hash === '#score' || hash.startsWith('#challenge/')) {
-      setActiveView('wafflecity')
-    else if (hash === '#study') setActiveView('study')
-    else if (hash === '#split') setActiveView('split')
-    else if (hash === '#view-highcity') setActiveView('city')
-    else if (hash === '#view-townscaper') setActiveView('townscaper')
-    else if (hash === '#view-citymode') setActiveView('citymode')
-    else if (hash === '#view-wafflecity') setActiveView('wafflecity')
-  }, [])
-
-  useEffect(() => {
     if (activeView === 'study') window.location.hash = ''
     else if (activeView === 'split') window.location.hash = '#split'
     else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
@@ -74,7 +50,6 @@ function App() {
 
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
-      {/* Dark mode toggle — always visible, fixed */}
       <button
         onClick={() => setDarkMode(d => !d)}
         className="fixed top-4 left-4 z-[200] p-2.5 rounded-xl backdrop-blur-xl bg-white/10 border border-white/20 text-white hover:bg-white/25 transition-all shadow-lg"
@@ -83,21 +58,17 @@ function App() {
         {darkMode ? <Sun size={18} /> : <Moon size={18} />}
       </button>
 
-      {/* Main Content */}
       <div className="relative z-10 w-full h-full">
-
-        {/* ── Study Hub ─────────────────────────────────────────────────────── */}
         {activeView === 'study' && (
           <div className="relative w-full h-full">
             <StudyHub
               onViewChange={(v) => {
                 if (v === 'mindmap') openMindMap('study')
                 else if (v === '3d') setActiveView('wafflecity')
-                else setActiveView(v as Parameters<typeof setActiveView>[0])
+                else setActiveView(v as View)
               }}
               darkMode={darkMode}
             />
-            {/* Split-screen shortcut button — bottom-left corner */}
             <button
               onClick={() => setActiveView('split')}
               style={{
@@ -116,7 +87,6 @@ function App() {
           </div>
         )}
 
-        {/* ── Split Layout (City + Study side by side) ──────────────────────── */}
         {activeView === 'split' && (
           <SplitLayout
             onBack={() => setActiveView('study')}
@@ -124,86 +94,20 @@ function App() {
           />
         )}
 
-        {/* ── Mind Map Canvas ───────────────────────────────────────────────── */}
         {activeView === 'mindmap' && (
           <MindMapCanvas
             onViewChange={(v) => {
-              if (v === 'study') setActiveView(mindmapFrom as Parameters<typeof setActiveView>[0])
+              if (v === 'study') setActiveView(mindmapFrom as View)
               else if (v === '3d') setActiveView('wafflecity')
-              else setActiveView(v)
+              else setActiveView(v as View)
             }}
             darkMode={darkMode}
           />
         )}
 
-        {/* ── 3D City views ─────────────────────────────────────────────────── */}
-        {activeView === 'city' && (
-          <div className="w-full h-full relative">
-            <HighEndCity />
-            <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
-              <button
-                onClick={() => setActiveView('townscaper')}
-                className="px-4 py-2 backdrop-blur-xl bg-pink-500/80 border border-pink-400/50 rounded-xl text-white hover:bg-pink-600/80 transition-all"
-              >
-                🏘️ Townscaper
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeView === 'townscaper' && (
-          <div className="w-full h-full relative">
-            <TownscaperScene />
-            <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
-              <button onClick={() => setActiveView('citymode')}
-                className="px-4 py-2 backdrop-blur-xl bg-green-500/80 border border-green-400/50 rounded-xl text-white hover:bg-green-600/80 transition-all">
-                🏙️ City Mode
-              </button>
-              <button onClick={() => setActiveView('city')}
-                className="px-4 py-2 backdrop-blur-xl bg-amber-500/80 border border-amber-400/50 rounded-xl text-white hover:bg-amber-600/80 transition-all">
-                🏛️ 3D City
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeView === 'citymode' && (
-          <div className="w-full h-full relative">
-            <CityModeScene />
-            <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
-              <button onClick={() => setActiveView('townscaper')}
-                className="px-4 py-2 backdrop-blur-xl bg-pink-500/80 border border-pink-400/50 rounded-xl text-white hover:bg-pink-600/80 transition-all">
-                🏘️ Townscaper
-              </button>
-              <button onClick={() => setActiveView('city')}
-                className="px-4 py-2 backdrop-blur-xl bg-amber-500/80 border border-amber-400/50 rounded-xl text-white hover:bg-amber-600/80 transition-all">
-                🏛️ 3D City
-              </button>
-              <button onClick={() => setActiveView('study')}
-                className="px-4 py-2 backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all">
-                📚 Study
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeView === 'colortest' && (
-          <div className="w-full h-full relative">
-            <ModelColorTest />
-            <div className="absolute top-6 right-6 flex gap-2 z-50 pointer-events-auto">
-              <button onClick={() => setActiveView('wafflecity')}
-                className="px-4 py-2 backdrop-blur-xl bg-green-500/80 border border-green-400/50 rounded-xl text-white hover:bg-green-600/80 transition-all">
-                🏙️ WaffleStack City
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── Waffle City ───────────────────────────────────────────────────── */}
         {activeView === 'wafflecity' && (
           <div className="w-full h-full relative">
             <WaffleStackCity onBack={() => setActiveView('study')} />
-            {/* Bottom-right action buttons */}
             <div className="absolute bottom-6 right-6 z-50 pointer-events-auto flex gap-2">
               <button
                 onClick={() => setActiveView('split')}
@@ -239,21 +143,11 @@ function App() {
 
         {activeView === 'mission' && (
           <div className="w-full h-full">
-            <MissionControl onViewChange={(v) => setActiveView(v as Parameters<typeof setActiveView>[0])} />
-          </div>
-        )}
-
-        {activeView === 'landing' && (
-          <div className="w-full h-full">
-            <LandingPage
-              onEnterCity={() => hasUserName ? setActiveView('wafflecity') : setActiveView('onboarding')}
-              onOpenStudy={() => setActiveView('study')}
-            />
+            <MissionControl onViewChange={(v) => setActiveView(v as View)} />
           </div>
         )}
       </div>
 
-      {/* Onboarding overlay — rendered on top of everything */}
       {activeView === 'onboarding' && (
         <OnboardingFlow onComplete={() => setActiveView('study')} />
       )}

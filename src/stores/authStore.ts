@@ -1,6 +1,6 @@
 /**
  * authStore — Multi-user authentication with LocalStorage
- * Supports student accounts with username + password (client-side hashing).
+ * Supports student accounts with username + password.
  * All data is local — no server required.
  */
 
@@ -13,7 +13,6 @@ export interface User {
   lastActiveAt: string
 }
 
-// Internal record that also stores the password hash
 interface UserRecord extends User {
   passwordHash: string
 }
@@ -21,18 +20,19 @@ interface UserRecord extends User {
 const USERS_KEY   = 'wafflestack-users'
 const SESSION_KEY = 'wafflestack-session'
 
-// ── Simple client-side hash (educational use — not for sensitive data) ─────────
-function hashPassword(password: string): string {
-  // XOR-based hash with btoa encoding — sufficient for a study app
-  let hash = 0
-  for (let i = 0; i < password.length; i++) {
-    hash = ((hash << 5) - hash) + password.charCodeAt(i)
-    hash |= 0
-  }
-  return btoa(`ws-${Math.abs(hash)}-${password.length}`)
+// ── Password hashing — SHA-256 + per-user salt via Web Crypto ─────────────────
+// Salt is derived from username so the same password produces different hashes
+// for different users (defeats rainbow tables across the user table). Output is
+// a hex string.
+async function hashPassword(password: string, username: string): Promise<string> {
+  const salt = `wafflestack:${username.toLowerCase()}`
+  const data = new TextEncoder().encode(`${salt}:${password}`)
+  const digest = await crypto.subtle.digest('SHA-256', data)
+  return Array.from(new Uint8Array(digest))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
 }
 
-// ── User storage helpers ───────────────────────────────────────────────────────
 function loadUsers(): UserRecord[] {
   try {
     const stored = localStorage.getItem(USERS_KEY)
@@ -44,9 +44,6 @@ function saveUsers(users: UserRecord[]): void {
   localStorage.setItem(USERS_KEY, JSON.stringify(users))
 }
 
-// ── Public API ─────────────────────────────────────────────────────────────────
-
-/** Return the currently logged-in user, or null */
 export function getCurrentUser(): User | null {
   try {
     const stored = localStorage.getItem(SESSION_KEY)
@@ -59,24 +56,21 @@ export function getCurrentUser(): User | null {
     const users = loadUsers()
     const record = users.find(u => u.userId === session.userId)
     if (!record) return null
-    // Return without passwordHash
     const { passwordHash: _ph, ...user } = record
     return { ...user, lastActiveAt: new Date().toISOString() }
   } catch { return null }
 }
 
-/** Log in with username + password. Returns user on success or null on failure. */
-export function loginUser(username: string, password: string): User | null {
+export async function loginUser(username: string, password: string): Promise<User | null> {
   const users = loadUsers()
   const record = users.find(u => u.username.toLowerCase() === username.toLowerCase())
   if (!record) return null
-  if (record.passwordHash !== hashPassword(password)) return null
+  const expected = await hashPassword(password, record.username)
+  if (record.passwordHash !== expected) return null
 
-  // Update lastActiveAt
   record.lastActiveAt = new Date().toISOString()
   saveUsers(users)
 
-  // Create session valid for 30 days
   const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
   localStorage.setItem(SESSION_KEY, JSON.stringify({ userId: record.userId, expiresAt }))
 
@@ -84,13 +78,12 @@ export function loginUser(username: string, password: string): User | null {
   return user
 }
 
-/** Register a new user. Returns the user on success or an error string. */
-export function registerUser(
+export async function registerUser(
   username: string,
   password: string,
   displayName?: string,
   role: 'student' | 'teacher' = 'student'
-): User | string {
+): Promise<User | string> {
   if (!username.trim()) return 'שם משתמש לא יכול להיות ריק'
   if (username.length < 2) return 'שם משתמש חייב להכיל לפחות 2 תווים'
   if (password.length < 4) return 'סיסמה חייבת להכיל לפחות 4 תווים'
@@ -100,12 +93,13 @@ export function registerUser(
     return 'שם המשתמש כבר קיים'
   }
 
+  const cleanName = username.trim()
   const newUser: UserRecord = {
     userId: `user-${Date.now()}-${Math.random().toString(36).substr(2, 7)}`,
-    username: username.trim(),
-    displayName: displayName?.trim() || username.trim(),
+    username: cleanName,
+    displayName: displayName?.trim() || cleanName,
     role,
-    passwordHash: hashPassword(password),
+    passwordHash: await hashPassword(password, cleanName),
     createdAt: new Date().toISOString(),
     lastActiveAt: new Date().toISOString(),
   }
@@ -113,7 +107,6 @@ export function registerUser(
   users.push(newUser)
   saveUsers(users)
 
-  // Auto-login
   const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
   localStorage.setItem(SESSION_KEY, JSON.stringify({ userId: newUser.userId, expiresAt }))
 
@@ -121,28 +114,23 @@ export function registerUser(
   return user
 }
 
-/** Log out the current user */
 export function logoutUser(): void {
   localStorage.removeItem(SESSION_KEY)
 }
 
-/** List all registered users (for teacher view) */
 export function listUsers(): Omit<User, 'passwordHash'>[] {
   return loadUsers().map(({ passwordHash: _ph, ...u }) => u)
 }
 
-/** Delete a user by userId (teacher only) */
 export function deleteUser(userId: string): void {
   const users = loadUsers().filter(u => u.userId !== userId)
   saveUsers(users)
 }
 
-/** Legacy: get or create an anonymous user (for backward compat) */
 export function initializeUser(): User {
   const current = getCurrentUser()
   if (current) return current
 
-  // Check for old-style anonymous user
   const oldKey = 'wafflestack-user'
   try {
     const old = localStorage.getItem(oldKey)
@@ -152,7 +140,6 @@ export function initializeUser(): User {
     }
   } catch { /* ignore */ }
 
-  // Create new anonymous user
   const anon: User = {
     userId: `anon-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     username: 'guest',

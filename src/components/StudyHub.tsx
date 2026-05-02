@@ -59,28 +59,29 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
   const [loading, setLoading] = useState(false)
   const existingUsers = listUsers()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-    setTimeout(() => {
+    try {
       if (mode === 'login') {
-        const result = loginUser(username, password)
+        const result = await loginUser(username, password)
         if (result) {
           onLogin(result)
         } else {
           setError('שם משתמש או סיסמה שגויים')
         }
       } else {
-        const result = registerUser(username, password, displayName)
+        const result = await registerUser(username, password, displayName)
         if (typeof result === 'string') {
           setError(result)
         } else {
           onLogin(result)
         }
       }
+    } finally {
       setLoading(false)
-    }, 200)
+    }
   }
 
   const handleQuickLogin = (userId: string) => {
