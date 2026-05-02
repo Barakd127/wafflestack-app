@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { LESSON_CONTENT } from '../data/lesson-content'
+import { TOPIC_VISUALS } from './LessonVisuals'
 
 // Design tokens — keep in sync with StudyHub.tsx
 const GLASS_CARD  = 'var(--sh-glass-card)'
@@ -117,6 +118,12 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
           </div>
         )}
       </div>
+
+      {/* Interactive visualization */}
+      {TOPIC_VISUALS[topicId] && (() => {
+        const Visual = TOPIC_VISUALS[topicId]
+        return <div style={{ maxWidth: 760, marginBottom: 24 }}><Visual /></div>
+      })()}
 
       {/* Footer controls */}
       <div style={{ maxWidth: 760, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
