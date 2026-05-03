@@ -1795,8 +1795,9 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
 
   return (
     <div ref={rootRef} style={{ width: '100%', height: '100%', display: 'flex', overflow: 'hidden', direction: 'rtl', background: PAGE_BG, fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
+      <h1 style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>WaffleStack — דף הבית</h1>
       {/* Sidebar — right side (RTL) */}
-      <div style={{ width: sidebarWidth, flexShrink: 0, position: 'relative', display: 'flex' }}>
+      <nav aria-label="ניווט ראשי" style={{ width: sidebarWidth, flexShrink: 0, position: 'relative', display: 'flex' }}>
         <Sidebar
           active={internalView}
           onNav={(view) => {
@@ -1823,11 +1824,11 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
           onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(127,155,217,0.35)' }}
           onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
         />
-      </div>
+      </nav>
 
       {/* Main */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <TopBar title={title} onLogout={handleLogout} />
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <header><TopBar title={title} onLogout={handleLogout} /></header>
         {internalView === 'home' && (
           <HomeScreen
             onGoLearning={() => setInternalView('topics')}
@@ -1869,7 +1870,7 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
             userId={currentUser?.userId}
           />
         )}
-      </div>
+      </main>
     </div>
   )
 }

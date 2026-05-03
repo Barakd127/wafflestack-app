@@ -54,8 +54,9 @@ function App() {
     <div className="relative w-full h-full bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
       <button
         onClick={() => setDarkMode(d => !d)}
-        className="fixed top-4 left-4 z-[200] p-2.5 rounded-xl backdrop-blur-xl bg-white/10 border border-white/20 text-white hover:bg-white/25 transition-all shadow-lg"
+        className="fixed top-4 right-4 z-[200] p-3 rounded-xl backdrop-blur-xl bg-white/10 border border-white/20 text-white hover:bg-white/25 transition-all shadow-lg min-w-[44px] min-h-[44px] flex items-center justify-center"
         title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+        aria-label={darkMode ? 'הפעל מצב בהיר' : 'הפעל מצב כהה'}
       >
         {darkMode ? <Sun size={18} /> : <Moon size={18} />}
       </button>

@@ -10,9 +10,15 @@ interface MindMapCanvasProps {
   darkMode: boolean
 }
 
+const SR_ONLY: React.CSSProperties = {
+  position: 'absolute', width: 1, height: 1, padding: 0, margin: -1,
+  overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0,
+}
+
 const MindMapCanvas = ({ onViewChange }: MindMapCanvasProps) => {
   return (
-    <div
+    <main
+      aria-label="מפת חשיבה"
       style={{
         position: 'fixed',
         inset: 0,
@@ -22,8 +28,9 @@ const MindMapCanvas = ({ onViewChange }: MindMapCanvasProps) => {
         flexDirection: 'column',
       }}
     >
+      <h1 style={SR_ONLY}>מפת חשיבה — WaffleStack</h1>
       {/* Thin back bar */}
-      <div
+      <header
         style={{
           height: 42,
           background: 'rgba(13,13,26,0.95)',
@@ -38,6 +45,7 @@ const MindMapCanvas = ({ onViewChange }: MindMapCanvasProps) => {
       >
         <button
           onClick={() => onViewChange('study')}
+          aria-label="חזרה לעיר"
           style={{
             background: 'rgba(108,99,255,0.18)',
             border: '1px solid #6c63ff',
@@ -50,17 +58,17 @@ const MindMapCanvas = ({ onViewChange }: MindMapCanvasProps) => {
             fontFamily: 'inherit',
           }}
         >
-          ← Back to City
+          ← חזרה לעיר
         </button>
         <span style={{ color: '#555', fontSize: 12 }}>
-          🧠 Mind Map v18 — full canvas, equations, tables, drag &amp; drop
+          🧠 מפת חשיבה — קנבס מלא, משוואות, טבלאות וגרירה
         </span>
-      </div>
+      </header>
 
       {/* v18 mind map — full remaining height */}
       <iframe
         src="mindmap.html"
-        title="Mind Map v18"
+        title="מפת חשיבה — קנבס אינטראקטיבי"
         style={{
           flex: 1,
           border: 'none',
@@ -69,7 +77,7 @@ const MindMapCanvas = ({ onViewChange }: MindMapCanvasProps) => {
         }}
         allow="clipboard-read; clipboard-write"
       />
-    </div>
+    </main>
   )
 }
 
