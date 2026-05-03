@@ -10,7 +10,7 @@ import MissionControl from './components/MissionControl'
 import OnboardingFlow from './components/OnboardingFlow'
 import SplitLayout from './components/SplitLayout'
 
-type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split'
+type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap'
 
 function App() {
   const [activeView, setActiveView] = useState<View>(() => {
@@ -18,6 +18,7 @@ function App() {
     if (h === '#view-wafflecity' || h === '#city' || h === '#topics' || h === '#score' || h.startsWith('#challenge/')) return 'wafflecity'
     if (h === '#study') return 'study'
     if (h === '#split') return 'split'
+    if (h === '#split-mindmap') return 'split-mindmap'
     if (h === '#mindmap') return 'mindmap'
     return 'study'
   })
@@ -44,6 +45,7 @@ function App() {
   useEffect(() => {
     if (activeView === 'study') window.location.hash = ''
     else if (activeView === 'split') window.location.hash = '#split'
+    else if (activeView === 'split-mindmap') window.location.hash = '#split-mindmap'
     else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
   }, [activeView])
@@ -91,18 +93,45 @@ function App() {
           <SplitLayout
             onBack={() => setActiveView('study')}
             darkMode={darkMode}
+            initialRight="study"
+          />
+        )}
+
+        {activeView === 'split-mindmap' && (
+          <SplitLayout
+            onBack={() => setActiveView('mindmap')}
+            darkMode={darkMode}
+            initialRight="mindmap"
           />
         )}
 
         {activeView === 'mindmap' && (
-          <MindMapCanvas
-            onViewChange={(v) => {
-              if (v === 'study') setActiveView(mindmapFrom as View)
-              else if (v === '3d') setActiveView('wafflecity')
-              else setActiveView(v as View)
-            }}
-            darkMode={darkMode}
-          />
+          <div className="relative w-full h-full">
+            <MindMapCanvas
+              onViewChange={(v) => {
+                if (v === 'study') setActiveView(mindmapFrom as View)
+                else if (v === '3d') setActiveView('wafflecity')
+                else setActiveView(v as View)
+              }}
+              darkMode={darkMode}
+            />
+            {/* Split-screen with city button — bottom-right */}
+            <button
+              onClick={() => setActiveView('split-mindmap')}
+              style={{
+                position: 'fixed', bottom: 24, right: 24, zIndex: 1000,
+                background: 'rgba(51,81,202,0.9)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(99,162,255,0.55)',
+                borderRadius: 20, padding: '9px 18px',
+                color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                boxShadow: '0 4px 16px rgba(51,81,202,0.45)',
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}
+            >
+              ⊟ עיר + Mind Map
+            </button>
+          </div>
         )}
 
         {activeView === 'wafflecity' && (
