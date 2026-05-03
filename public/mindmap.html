@@ -579,7 +579,7 @@ let _mmSaveTimer = null;
 // MIND MAP SYSTEM
 // ═══════════════════════════════════════════════════════════
 const NODE_COLORS=['#60a5fa','#34d399','#f59e0b','#f87171','#a78bfa','#22d3ee','#fb923c','#10b981','#e879f9','#facc15','#4ade80','#f472b6','#38bdf8','#c084fc','#fbbf24','#86efac'];
-let MM={nodes:{},root:'root',sel:null,zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0};
+let MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0};
 let MM_HISTORY=[];
 let MM_REDO=[]; // FIX #9 support: redo stack for Ctrl+Y
 
@@ -625,7 +625,7 @@ function initMM(){
     }
   } catch(e) { /* fall through to fresh init */ }
 
-  MM={nodes:{},root:'root',sel:null,zoom:1,panX:0,panY:0};
+  MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0};
   MM.nodes.root=mmNode('root','Untitled',100,100,null,'#60a5fa');
   MM_HISTORY=[cloneMMForHistory()];
 }
@@ -669,12 +669,13 @@ function mmRender(){
     if(!mmIsVisible(id)&&id!==MM.root)continue;
     const x=n.x*MM.zoom+MM.panX,y=n.y*MM.zoom+MM.panY;
     const sel=id===MM.sel;
+    const multiSel = MM.multiSel && MM.multiSel.indexOf(id) !== -1;
     const div=document.createElement('div');
     div.className='node-wrap'+(n.collapsed?' collapsed':'');
     div.id='nw_'+id;
     div.style.left=n.x+'px';div.style.top=n.y+'px';div.style.width=n.W+'px';div.style.height=n.H+'px';
     const nodeDiv=document.createElement('div');
-    nodeDiv.className='node-div'+(sel?' selected':'')+(n.type==='equation'?' eq-node':'')+(n.type==='root'?' node-root':'');
+    nodeDiv.className='node-div'+((sel||multiSel)?' selected':'')+(n.type==='equation'?' eq-node':'')+(n.type==='root'?' node-root':'');
     nodeDiv.id='nd_'+id;
     nodeDiv.style.background=n.color||'#60a5fa';
     nodeDiv.style.color=n.type==='root'?'#1a1a1a':'white';
@@ -682,7 +683,7 @@ function mmRender(){
     if(n.type==='equation'){renderKatex(n.latex||'\\frac{x}{2}',nodeDiv);}
     else{nodeDiv.textContent=n.text;}
     nodeDiv.oncontextmenu=e=>{e.preventDefault();showNodeActions(e,n.id);};
-    nodeDiv.onclick=()=>{MM.sel=id;mmRender();};
+    nodeDiv.onclick=()=>{MM.sel=id;MM.multiSel=[];mmRender();};
     if(n.type==='equation'){
       nodeDiv.title='Double-click to edit';
       nodeDiv.ondblclick=e=>{e.stopPropagation();openEquationModal(id,'edit');};
@@ -1290,7 +1291,7 @@ let WB={
   tool:'select',scene:[],history:[],histIdx:-1,sel:null,
   vp:{x:0,y:0,s:1},drag:null,penPts:null,
   strokeColor:'#1a1a1a',fillColor:'#fff',size:2,
-  selId:null,_hoverObjId:null,_lastMouse:null,
+  selId:null,multiSel:[],_hoverObjId:null,_lastMouse:null,
   tableCell:null,labelObj:null,textObj:null,
   spacePanning:false,panning:false,panStartX:0,panStartY:0,
   _editingEqId:null,clipboard:null
@@ -1390,8 +1391,27 @@ function wbRedraw(){
 
   for(const o of WB.scene){
     if(o.type!=='equation'){
-      drawObj(ctx,o,o.id===WB.selId);
+      const isSel = o.id===WB.selId || (WB.multiSel && WB.multiSel.indexOf(o.id) !== -1);
+      drawObj(ctx,o,isSel);
     }
+  }
+
+  // Draw marquee box (canvas-pixel coords → reverse the scene transform first)
+  if (WB.drag && WB.drag.type === 'marquee') {
+    ctx.restore();
+    ctx.save();
+    const x = Math.min(WB.drag.sx, WB.drag.ex), y = Math.min(WB.drag.sy, WB.drag.ey);
+    const w = Math.abs(WB.drag.ex - WB.drag.sx), h = Math.abs(WB.drag.ey - WB.drag.sy);
+    ctx.fillStyle = 'rgba(99,102,241,0.10)';
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6,4]);
+    ctx.strokeRect(x, y, w, h);
+    ctx.setLineDash([]);
+    ctx.restore();
+    ctx.save();
+    ctx.translate(WB.vp.x, WB.vp.y); ctx.scale(WB.vp.s, WB.vp.s);
   }
 
   // Draw selection handles if object is selected
@@ -1870,12 +1890,22 @@ canvas.addEventListener('keydown',e=>{
   if(e.code==='Space'){WB.spacePanning=true;document.getElementById('wb-canvas-wrap').classList.add('cur-panning');}
   if(e.code==='KeyZ'&&e.ctrlKey){e.preventDefault();wbUndo();}
   if(e.code==='KeyY'&&e.ctrlKey){e.preventDefault();wbRedo();}
-  if((e.key==='Delete'||e.key==='Backspace')&&WB.selId&&document.activeElement===canvas){
-    e.preventDefault();
-    WB.scene=WB.scene.filter(x=>x.id!==WB.selId);
-    // Also delete any connectors attached to this object
-    WB.scene=WB.scene.filter(x=>x.type!=='connector'||(x.fromId!==WB.selId&&x.toId!==WB.selId));
-    WB.selId=null;WB._connDelBtn=null;wbPush();wbRedraw();
+  if((e.key==='Delete'||e.key==='Backspace')&&document.activeElement===canvas){
+    // Batch delete: drop everything in WB.multiSel + cleanup connectors that
+    // referenced any deleted object. Falls back to single WB.selId delete.
+    if (WB.multiSel && WB.multiSel.length) {
+      e.preventDefault();
+      const dead = new Set(WB.multiSel);
+      WB.scene = WB.scene.filter(x => !dead.has(x.id));
+      WB.scene = WB.scene.filter(x => x.type !== 'connector' || (!dead.has(x.fromId) && !dead.has(x.toId)));
+      WB.multiSel = []; WB.selId = null; WB._connDelBtn = null;
+      wbPush(); wbRedraw();
+    } else if (WB.selId) {
+      e.preventDefault();
+      WB.scene=WB.scene.filter(x=>x.id!==WB.selId);
+      WB.scene=WB.scene.filter(x=>x.type!=='connector'||(x.fromId!==WB.selId&&x.toId!==WB.selId));
+      WB.selId=null;WB._connDelBtn=null;wbPush();wbRedraw();
+    }
   }
   if((e.ctrlKey||e.metaKey)&&e.code==='KeyC'&&WB.selId){
     e.preventDefault();
@@ -1984,10 +2014,16 @@ canvas.addEventListener('mousedown',e=>{
     }
     if(hit){
       WB.selId=hit.id;
+      // Click on a single object clears any prior multi-selection.
+      WB.multiSel=[];
       const bb=objBB(hit);
       if(bb){WB.drag={type:'move',obj:hit,sx:e.offsetX,sy:e.offsetY,ox:hit.x||hit.cx||0,oy:hit.y||hit.cy||0};}
     }else{
+      // Click on empty whiteboard → start a marquee. Box drawn in wbRedraw,
+      // committed on mouseup.
       WB.selId=null;
+      WB.multiSel=[];
+      WB.drag={type:'marquee', sx:e.offsetX, sy:e.offsetY, ex:e.offsetX, ey:e.offsetY, sceneStart:{x:sc.x,y:sc.y}};
       document.querySelectorAll('.wbo').forEach(x=>x.classList.remove('wbo-sel'));
     }
     wbRedraw();
@@ -2128,6 +2164,8 @@ canvas.addEventListener('mousemove',e=>{
       WB.drag.obj.x=WB.drag.ox+dx;WB.drag.obj.y=WB.drag.oy+dy;
     }
     wbRedraw();
+  }else if(WB.drag&&WB.drag.type==='marquee'){
+    WB.drag.ex=e.offsetX;WB.drag.ey=e.offsetY;wbRedraw();
   }else if(WB.drag&&WB.drag.type==='pen'){
     WB.penPts.push(sc);wbRedraw();
   }else if(WB.drag&&WB.drag.type==='draw'){
@@ -2158,6 +2196,30 @@ canvas.addEventListener('mouseup',e=>{
   const sc=sc2scene(e.offsetX,e.offsetY);
   const d=WB.drag;
   if(!d)return;
+  if(d.type==='marquee'){
+    // Convert marquee canvas-pixel box → scene coords using current viewport transform.
+    const sceneStart = d.sceneStart;
+    const sceneEnd = sc2scene(d.ex, d.ey);
+    const x0 = Math.min(sceneStart.x, sceneEnd.x), x1 = Math.max(sceneStart.x, sceneEnd.x);
+    const y0 = Math.min(sceneStart.y, sceneEnd.y), y1 = Math.max(sceneStart.y, sceneEnd.y);
+    const moved = Math.hypot(d.ex-d.sx, d.ey-d.sy) >= 4;
+    if (moved) {
+      const picked = [];
+      for (const o of WB.scene) {
+        if (o.type === 'connector') continue;
+        const bb = objBB(o);
+        if (!bb) continue;
+        if (bb.x+bb.w < x0 || bb.x > x1 || bb.y+bb.h < y0 || bb.y > y1) continue;
+        picked.push(o.id);
+      }
+      WB.multiSel = picked;
+      WB.selId = picked.length === 1 ? picked[0] : null;
+      if (picked.length === 1) WB.multiSel = [];
+    }
+    WB.drag = null;
+    wbRedraw();
+    return;
+  }
   if(d.type==='connecting'){
     const snap=findNearestAnchor(sc.x,sc.y,d.fromId,25/WB.vp.s);
     const conn={id:uid(),type:'connector',fromId:d.fromId,fromAnchor:d.fromAnchor||'center',color:WB.strokeColor,size:WB.size||2};
@@ -2498,8 +2560,11 @@ function applyTemplate(name){
     const by=cn.y+cn.H/2+(i-(def.branches.length-1)/2)*branchSpacing;
     mmNode('branch',t,bx,by,cn.id,mmPickColor(cn.id));
   });
-  MM.sel=cn.id;mmPushHistory();
-  mmFitView();
+  MM.sel=cn.id;mmPushHistory();mmRender();
+  // Phase 2 follow-up: don't fit-all-nodes (which zooms out, hiding the new
+  // template). Smooth-pan to the new canvas instead, bumping zoom up if
+  // currently low. Same UX as adding a regular branch.
+  if(typeof panToNode==='function')panToNode(cn);
   setTimeout(()=>renderThumb(cn.id),60);
 }
 
@@ -2709,7 +2774,30 @@ document.addEventListener('keydown', e => {
       else if(MM.sel) mmAddChild(MM.sel);
     }
   } else if(e.key==='Delete'||e.key==='Backspace'){
-    if(MM.sel&&MM.sel!==MM.root){
+    // Batch delete: drop every multi-selected node + descendants. Falls back
+    // to single-node deletion if nothing is multi-selected.
+    if (MM.multiSel && MM.multiSel.length) {
+      const ids = MM.multiSel.filter(id => id !== MM.root);
+      // Also recursively gather descendants so we don't leave orphans
+      const queue = ids.slice();
+      const toDelete = new Set(ids);
+      while (queue.length) {
+        const cur = queue.shift();
+        const node = MM.nodes[cur];
+        if (!node || !node.childIds) continue;
+        for (const c of node.childIds) { if (!toDelete.has(c)) { toDelete.add(c); queue.push(c); } }
+      }
+      for (const id of toDelete) {
+        const n = MM.nodes[id]; if (!n) continue;
+        if (n.parentId) {
+          const p = MM.nodes[n.parentId];
+          if (p && !toDelete.has(n.parentId)) p.childIds = p.childIds.filter(x => x !== id);
+        }
+        delete MM.nodes[id];
+      }
+      MM.multiSel = []; MM.sel = null;
+      mmPushHistory(); mmRender();
+    } else if(MM.sel&&MM.sel!==MM.root){
       const n=MM.nodes[MM.sel];
       if(n){
         delete MM.nodes[MM.sel];
@@ -2717,6 +2805,9 @@ document.addEventListener('keydown', e => {
         MM.sel=null; mmPushHistory(); mmRender();
       }
     }
+  } else if(e.key==='Escape'){
+    // Esc clears multi-selection
+    if (MM.multiSel && MM.multiSel.length) { MM.multiSel = []; mmRender(); }
   } else if(e.key==='F2' && MM.sel){
     e.preventDefault();
     const n=MM.nodes[MM.sel];
@@ -2789,6 +2880,10 @@ function mmEnsureSelVisible(){
 
   // Right-click drag OR space+left-click drag = pan
   let panning = false, panSX, panSY, panPX, panPY;
+  // Marquee selection state (drag a rectangle on empty canvas to select
+  // multiple nodes). Mutex with `panning` — one or the other, not both.
+  let marquee = null;            // {sx, sy, el} — screen-coord box
+  let marqueeActive = false;
   ca.addEventListener('mousedown', e => {
     const onNode = e.target.closest('.node-wrap,.cn-outer');
     if(e.button === 2 || (e.button === 0 && spaceDown && !onNode)) {
@@ -2797,23 +2892,81 @@ function mmEnsureSelVisible(){
       panPX = MM.panX;   panPY = MM.panY;
       ca.style.cursor = 'grabbing';
       e.preventDefault();
+    } else if (e.button === 0 && !onNode && !spaceDown) {
+      // Plain left-click on empty canvas → start marquee
+      const rect = ca.getBoundingClientRect();
+      const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+      marquee = { sx, sy, ex: sx, ey: sy };
+      marqueeActive = false;
+      // Clear any existing multi-selection on bare click; commits when drag starts
+      if (MM.multiSel && MM.multiSel.length) { MM.multiSel = []; mmRender(); }
     }
   });
   let panActive = false;
   document.addEventListener('mousemove', e => {
-    if(!panning) return;
-    const dx = e.clientX - panSX, dy = e.clientY - panSY;
-    if(!panActive && Math.hypot(dx,dy) < 6) return;
-    panActive = true;
-    MM.panX = panPX + dx;
-    MM.panY = panPY + dy;
-    mmApplyTransform();
-    mmUpdateScrollbars();
+    if (panning) {
+      const dx = e.clientX - panSX, dy = e.clientY - panSY;
+      if(!panActive && Math.hypot(dx,dy) < 6) return;
+      panActive = true;
+      MM.panX = panPX + dx;
+      MM.panY = panPY + dy;
+      mmApplyTransform();
+      mmUpdateScrollbars();
+      return;
+    }
+    if (marquee) {
+      const rect = ca.getBoundingClientRect();
+      marquee.ex = e.clientX - rect.left;
+      marquee.ey = e.clientY - rect.top;
+      const dx = marquee.ex - marquee.sx, dy = marquee.ey - marquee.sy;
+      // Need a few px of movement to engage marquee (so plain clicks don't trigger)
+      if (!marqueeActive && Math.hypot(dx,dy) < 4) return;
+      marqueeActive = true;
+      // Lazily create the visual rectangle
+      if (!marquee.el) {
+        marquee.el = document.createElement('div');
+        marquee.el.id = 'mm-marquee';
+        marquee.el.style.cssText =
+          'position:absolute;pointer-events:none;border:1.5px dashed #6366f1;'+
+          'background:rgba(99,102,241,0.10);border-radius:4px;z-index:50;';
+        ca.appendChild(marquee.el);
+      }
+      const x = Math.min(marquee.sx, marquee.ex), y = Math.min(marquee.sy, marquee.ey);
+      const w = Math.abs(marquee.ex - marquee.sx), h = Math.abs(marquee.ey - marquee.sy);
+      marquee.el.style.left = x+'px';
+      marquee.el.style.top = y+'px';
+      marquee.el.style.width = w+'px';
+      marquee.el.style.height = h+'px';
+    }
   });
   document.addEventListener('mouseup', e => {
-    if(!panning) return;
-    panning = false; panActive = false;
-    ca.style.cursor = '';
+    if (panning) { panning = false; panActive = false; ca.style.cursor = ''; return; }
+    if (marquee) {
+      if (marqueeActive) {
+        // Convert marquee box (screen coords inside canvas-area) → model coords.
+        // viewport is positioned at (MM.panX, MM.panY) with scale MM.zoom.
+        const x0 = Math.min(marquee.sx, marquee.ex), x1 = Math.max(marquee.sx, marquee.ex);
+        const y0 = Math.min(marquee.sy, marquee.ey), y1 = Math.max(marquee.sy, marquee.ey);
+        const wx0 = (x0 - MM.panX) / MM.zoom, wx1 = (x1 - MM.panX) / MM.zoom;
+        const wy0 = (y0 - MM.panY) / MM.zoom, wy1 = (y1 - MM.panY) / MM.zoom;
+        const picked = [];
+        for (const id in MM.nodes) {
+          if (id === MM.root) continue;        // never multi-select root
+          if (!mmIsVisible(id)) continue;       // skip collapsed branches
+          const n = MM.nodes[id];
+          const nx0 = n.x, ny0 = n.y, nx1 = n.x + (n.W||140), ny1 = n.y + (n.H||40);
+          // AABB intersection test
+          if (nx1 < wx0 || nx0 > wx1 || ny1 < wy0 || ny0 > wy1) continue;
+          picked.push(id);
+        }
+        MM.multiSel = picked;
+        if (picked.length === 1) { MM.sel = picked[0]; MM.multiSel = []; }
+        else if (picked.length > 1) { MM.sel = null; }
+      }
+      if (marquee.el) marquee.el.remove();
+      marquee = null; marqueeActive = false;
+      mmRender();
+    }
   });
 
   // Scroll = pan, Ctrl+Scroll = zoom
