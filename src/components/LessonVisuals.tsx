@@ -245,15 +245,30 @@ export function ProbabilityVisual() {
         <label style={LABEL_STYLE}>P(B): <strong>{pb.toFixed(2)}</strong><input type="range" min={0} max={1} step={0.05} value={pb} onChange={e => setPb(+e.target.value)} style={SLIDER('#f59e0b')} /></label>
         <label style={LABEL_STYLE}>P(A∩B): <strong>{inter.toFixed(2)}</strong><input type="range" min={0} max={Math.min(pa, pb)} step={0.05} value={pab} onChange={e => setPab(+e.target.value)} style={SLIDER('#10b981')} /></label>
       </div>
-      <svg width="100%" viewBox="0 0 300 100">
-        <rect x={4} y={4} width={292} height={92} fill="rgba(99,102,241,0.04)" stroke="rgba(99,102,241,0.25)" strokeWidth={1} rx={6} />
-        <text x={14} y={16} fontSize={10} fill="#6366f1">Ω</text>
-        <circle cx={105} cy={50} r={Math.max(10, 46 * Math.sqrt(pa))} fill="rgba(99,102,241,0.3)" stroke="#6366f1" strokeWidth={1.5} />
-        <text x={80} y={53} fontSize={14} fontWeight="bold" fill="#3730a3">A</text>
-        <circle cx={185} cy={50} r={Math.max(10, 46 * Math.sqrt(pb))} fill="rgba(245,158,11,0.3)" stroke="#f59e0b" strokeWidth={1.5} />
-        <text x={210} y={53} fontSize={14} fontWeight="bold" fill="#92400e">B</text>
-        {inter > 0.01 && <text x={145} y={53} fontSize={10} textAnchor="middle" fill="#065f46" fontWeight="bold">{inter.toFixed(2)}</text>}
-      </svg>
+      {(() => {
+        // Dynamic circle positions: dist between centers shrinks as pab grows.
+        // pab = 0           → dist = rA+rB (no overlap)
+        // pab = min(pa,pb)  → dist = |rA-rB| (one contained in the other)
+        const rA = Math.max(10, 46 * Math.sqrt(pa))
+        const rB = Math.max(10, 46 * Math.sqrt(pb))
+        const overlapRatio = Math.min(pa, pb) > 0 ? Math.min(1, pab / Math.min(pa, pb)) : 0
+        const minD = Math.abs(rA - rB) + 2
+        const maxD = rA + rB - 1
+        const dist = maxD - (maxD - minD) * overlapRatio
+        const cxA = 150 - dist / 2
+        const cxB = 150 + dist / 2
+        return (
+          <svg width="100%" viewBox="0 0 300 110">
+            <rect x={4} y={4} width={292} height={102} fill="rgba(99,102,241,0.04)" stroke="rgba(99,102,241,0.25)" strokeWidth={1} rx={6} />
+            <text x={14} y={16} fontSize={10} fill="#6366f1">Ω</text>
+            <circle cx={cxA} cy={56} r={rA} fill="rgba(99,102,241,0.30)" stroke="#6366f1" strokeWidth={1.5} style={{ transition: 'cx 240ms ease-out, r 200ms ease-out' }} />
+            <circle cx={cxB} cy={56} r={rB} fill="rgba(245,158,11,0.30)" stroke="#f59e0b" strokeWidth={1.5} style={{ transition: 'cx 240ms ease-out, r 200ms ease-out' }} />
+            <text x={cxA - rA - 6} y={59} fontSize={14} fontWeight="bold" fill="#3730a3" textAnchor="end">A</text>
+            <text x={cxB + rB + 6} y={59} fontSize={14} fontWeight="bold" fill="#92400e">B</text>
+            {inter > 0.01 && <text x={150} y={59} fontSize={10} textAnchor="middle" fill="#065f46" fontWeight="bold">{inter.toFixed(2)}</text>}
+          </svg>
+        )
+      })()}
       <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         <span style={BADGE()}>P(A∪B) = {union.toFixed(2)}</span>
         <span style={BADGE({ background: 'rgba(16,185,129,0.1)', color: '#065f46' })}>P(A∩B) = {inter.toFixed(2)}</span>

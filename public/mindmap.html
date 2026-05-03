@@ -28,12 +28,16 @@ body.light #search-input{background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,
 body.light #search-input::placeholder{color:rgba(0,0,0,.4)}
 
 /* ── Top Bar (Study Hub navy-blue palette) ──
-   min-height instead of fixed height so it can grow to a 2nd row when the
-   button strip + new RTL nav buttons exceed viewport width. */
-#topbar{min-height:52px;background:linear-gradient(135deg,#1F3E6C 0%,#1a3260 100%);display:flex;align-items:center;justify-content:space-between;padding:6px 14px;color:white;gap:8px;box-shadow:0 4px 16px rgba(31,62,108,.35);position:relative;z-index:200;backdrop-filter:blur(10px);flex-wrap:wrap;row-gap:6px}
-.tb-left{display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap}
+   Single row that scrolls horizontally if items overflow — wrap caused a
+   weird vertical pile-up at narrow widths. Padding-right reserves space
+   for the React dark-mode toggle (z-200, fixed top-right of host page)
+   so it doesn't obscure tb-left buttons. */
+#topbar{height:52px;background:linear-gradient(135deg,#1F3E6C 0%,#1a3260 100%);display:flex;align-items:center;justify-content:space-between;padding:0 70px 0 14px;color:white;gap:8px;box-shadow:0 4px 16px rgba(31,62,108,.35);position:relative;z-index:200;backdrop-filter:blur(10px);overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap}
+#topbar::-webkit-scrollbar{height:4px}
+#topbar::-webkit-scrollbar-thumb{background:rgba(212,175,55,.4);border-radius:2px}
+.tb-left{display:flex;align-items:center;gap:8px;font-size:13px;flex-shrink:0}
 .tb-logo{font-size:18px;cursor:pointer;font-weight:700;letter-spacing:-.5px;color:#D4AF37}
-.tb-center{display:flex;align-items:center;gap:4px;flex-wrap:wrap;flex:1;min-width:0;justify-content:center}
+.tb-center{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;flex-shrink:0}
 .tb-btn{height:28px;padding:0 10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:4px;font-weight:500}
 .tb-btn:hover{background:rgba(212,175,55,.3);border-color:rgba(212,175,55,.6);color:#D4AF37}
 .tb-div{width:1px;height:20px;background:rgba(255,255,255,.2);margin:0 2px}
@@ -50,9 +54,7 @@ body.light #search-input::placeholder{color:rgba(0,0,0,.4)}
 #search-input:focus{border-color:#6366f1;box-shadow:0 0 0 2px rgba(99,102,241,.2)}
 
 /* ── App ── */
-/* App height = viewport - bottom-bar - topbar (which can wrap on narrow widths,
-   so we use a CSS variable updated by JS instead of a hardcoded 52px). */
-#app{height:calc(100vh - var(--mm-topbar-h, 52px) - 36px);position:relative;overflow:hidden}
+#app{height:calc(100vh - 52px - 36px);position:relative;overflow:hidden}
 #canvas-area{width:100%;height:100%;overflow:hidden;background:#f8f7f4;cursor:grab;position:relative;transition:background .3s;overflow:hidden}
 #canvas-area.panning{cursor:grabbing}
 #viewport{position:absolute;top:0;left:0;transform-origin:0 0}

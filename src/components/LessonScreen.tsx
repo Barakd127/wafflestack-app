@@ -22,7 +22,9 @@ interface LessonScreenProps {
 export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete }: LessonScreenProps) {
   const lesson = LESSON_CONTENT.find(t => t.id === topicId)
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [mindmapOpen, setMindmapOpen] = useState(true)
+  // Theory defaults to FULL-SCREEN. User opens the side mind map explicitly
+  // via the toggle when they want to take notes alongside the lesson.
+  const [mindmapOpen, setMindmapOpen] = useState(false)
   const [splitPct, setSplitPct] = useState(45)  // mind map width %
   const [copied, setCopied] = useState<string | null>(null)
   const completedRef = useRef(false)

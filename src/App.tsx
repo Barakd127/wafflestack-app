@@ -72,16 +72,24 @@ function App() {
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
   }, [activeView])
 
+  // Hide the floating dark-mode toggle in views where the iframe (mindmap or
+  // Godot city) has its own theme button at the bottom — two buttons in the
+  // top-right corner is what the user sees as "the toggle obscures the
+  // back/split buttons".
+  const showDarkToggle = activeView !== 'mindmap' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap'
+
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
-      <button
-        onClick={() => setDarkMode(d => !d)}
-        className="fixed top-4 right-4 z-[200] p-3 rounded-xl backdrop-blur-xl bg-white/10 border border-white/20 text-white hover:bg-white/25 transition-all shadow-lg min-w-[44px] min-h-[44px] flex items-center justify-center"
-        title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-        aria-label={darkMode ? 'הפעל מצב בהיר' : 'הפעל מצב כהה'}
-      >
-        {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-      </button>
+      {showDarkToggle && (
+        <button
+          onClick={() => setDarkMode(d => !d)}
+          className="fixed top-4 right-4 z-[200] p-3 rounded-xl backdrop-blur-xl bg-white/10 border border-white/20 text-white hover:bg-white/25 transition-all shadow-lg min-w-[44px] min-h-[44px] flex items-center justify-center"
+          title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label={darkMode ? 'הפעל מצב בהיר' : 'הפעל מצב כהה'}
+        >
+          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+      )}
 
       <div className="relative z-10 w-full h-full">
         {activeView === 'study' && (
