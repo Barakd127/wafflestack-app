@@ -1236,11 +1236,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   const [xpBurst, setXpBurst] = useState<number | null>(null)
   // Store each question's typed answer so users can navigate back and re-read
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({})
-  // Theory-style layout: question card at the TOP (always visible, centered),
-  // and a tab row that opens one of three companion tools below it. Default
-  // is 'none' — a clean, focused view; the user opens a tool when they want
-  // to take notes alongside the quiz.
+  // Two-mode layout:
+  //   tab === 'none'  → calm centered card, tabs row is the LAUNCHER.
+  //   tab !== 'none'  → companion tool fills the screen; question becomes a
+  //                     floating chip docked top-right (RTL primary corner).
+  //                     chipExpanded toggles between a tiny pill and a full
+  //                     compact card with answer field + dots.
   const [tab, setTab] = useState<'none' | 'mindmap' | 'arsenal' | 'canvas'>('none')
+  const [chipExpanded, setChipExpanded] = useState<boolean>(true)
   const contentRowRef = useRef<HTMLDivElement>(null)
   const recordAnswer = useLearningStore(s => s.recordAnswer)
 
@@ -1391,33 +1394,117 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         </div>
       </div>
 
-      {/* Theory-style layout: question card at the TOP, tab row, then optional
-          companion tool (mindmap / arsenal / canvas) below. */}
-      <div ref={contentRowRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0, background: 'var(--sh-page-bg)' }}>
+      {/* Two-mode layout — calm focus when tab='none', tool-fullscreen with
+          docked chip when a companion tool is active. */}
+      <div ref={contentRowRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0, background: 'var(--sh-page-bg)', position: 'relative' }}>
 
-        {/* ── Question balloon card (always visible, centered) ── */}
-        <div style={{ flexShrink: 0, padding: '18px 24px 12px', display: 'flex', justifyContent: 'center' }}>
-          <div style={{
-            width: 'min(720px, 100%)',
-            background: 'var(--sh-q-card-bg, #ffffff)',
-            borderRadius: 18,
-            boxShadow: 'var(--sh-card-shadow)',
-            border: '1px solid rgba(127,155,217,0.3)',
-            overflow: 'hidden',
-          }}>
-            {/* Card header strip — same gradient as LessonScreen, fixed (not draggable) */}
+        {/* ── Companion tool (renders FIRST so the chip sits on top of it) ── */}
+        {!isDone && tab !== 'none' && (
+          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: '#0d1628', zIndex: 1 }}>
+            {tab === 'mindmap' && (
+              <iframe
+                key="quiz-mm"
+                src={`${import.meta.env.BASE_URL}mindmap.html?userId=${userId || 'default'}`}
+                title="מפת חשיבה — תוך כדי תרגול"
+                style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
+                allow="clipboard-read; clipboard-write"
+              />
+            )}
+            {tab === 'canvas' && (
+              <iframe
+                key="quiz-wb"
+                src={`${import.meta.env.BASE_URL}mindmap.html?mode=wb&userId=${userId || 'default'}`}
+                title="קנבס — תוך כדי תרגול"
+                style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
+                allow="clipboard-read; clipboard-write"
+              />
+            )}
+            {tab === 'arsenal' && (
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }} dir="rtl">
+                <ArsenalScreen />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Floating mini-pill (only when chip is collapsed in tool mode) ── */}
+        {!isDone && tab !== 'none' && !chipExpanded && (
+          <button
+            onClick={() => setChipExpanded(true)}
+            title="הצג שאלה"
+            style={{
+              position: 'absolute', top: 14, insetInlineEnd: 14, zIndex: 50,
+              background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
+              border: '1px solid rgba(127,155,217,0.5)',
+              borderRadius: 22, padding: '8px 16px',
+              color: '#fff', cursor: 'pointer',
+              fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.45)',
+              display: 'flex', alignItems: 'center', gap: 8,
+            }}
+          >
+            📝 שאלה {currentQ + 1} / {total}
+            {(q as any)?.difficulty && <QuizDifficultyBadge level={(q as any).difficulty} xp={q.xp} />}
+          </button>
+        )}
+
+        {/* ── Question card — calm-centered when tab='none', floating chip when tool active ── */}
+        {(tab === 'none' || chipExpanded || isDone) && (
+        <div style={
+          tab === 'none' || isDone
+            ? { flexShrink: 0, padding: '18px 24px 12px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
+            : { position: 'absolute', top: 14, insetInlineEnd: 14, zIndex: 60, width: 'min(420px, calc(100vw - 28px))', maxHeight: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }
+        }>
+          <div style={
+            tab === 'none' || isDone
+              ? {
+                  width: 'min(720px, 100%)',
+                  background: 'var(--sh-q-card-bg, #ffffff)',
+                  borderRadius: 18,
+                  boxShadow: 'var(--sh-card-shadow)',
+                  border: '1px solid rgba(127,155,217,0.3)',
+                  overflow: 'hidden',
+                }
+              : {
+                  width: '100%',
+                  background: 'var(--sh-q-card-bg, #ffffff)',
+                  borderRadius: 14,
+                  boxShadow: '0 16px 48px rgba(0,0,0,0.35)',
+                  border: '1px solid rgba(127,155,217,0.45)',
+                  overflow: 'hidden',
+                  display: 'flex', flexDirection: 'column',
+                  maxHeight: 'inherit',
+                }
+          }>
+            {/* Card header strip — same gradient as LessonScreen, with collapse btn in chip mode */}
             <div style={{
               background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
               color: '#fff', padding: '10px 18px',
               display: 'flex', alignItems: 'center', gap: 10,
               fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
+              flexShrink: 0,
             }}>
               <span>{isDone ? '🏆 סיום' : `שאלה ${currentQ + 1} / ${total}`}</span>
               {!isDone && (q as any).difficulty && <QuizDifficultyBadge level={(q as any).difficulty} xp={q.xp} />}
+              {!isDone && tab !== 'none' && (
+                <button
+                  onClick={() => setChipExpanded(false)}
+                  title="כווץ"
+                  aria-label="כווץ שאלה"
+                  style={{ marginInlineStart: 'auto', background: 'rgba(255,255,255,0.12)', color: '#fff', border: 'none', borderRadius: 6, width: 26, height: 22, cursor: 'pointer', fontSize: 12, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  ▴
+                </button>
+              )}
             </div>
 
-            {/* Card body */}
-            <div style={{ padding: '20px 22px 18px', maxHeight: 'min(60vh, 520px)', overflowY: 'auto' }}>
+            {/* Card body — height/scroll scales with mode */}
+            <div style={{
+              padding: '20px 22px 18px',
+              maxHeight: tab !== 'none' && !isDone ? 'calc(100vh - 280px)' : 'min(60vh, 520px)',
+              overflowY: 'auto',
+              flex: tab !== 'none' && !isDone ? 1 : 'unset',
+            }}>
 
           {isDone ? (
             /* ── Completion panel ── */
@@ -1620,15 +1707,25 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             </>
           )}
 
-            </div>{/* end card body */}
-          </div>{/* end question card */}
-        </div>{/* end question card wrap */}
+            </div>
+          </div>
+        </div>
+        )}
 
-        {/* ── Tab row: choose companion tool ── */}
+        {/* ── Spacer (only in calm mode) so the tab row sits at the bottom ── */}
+        {tab === 'none' && !isDone && <div style={{ flex: 1, minHeight: 0 }} />}
+
+        {/* ── Tab row: tool launcher / switcher (always visible, sticky bottom) ── */}
         {!isDone && (
           <div style={{
-            flexShrink: 0, padding: '0 24px 12px',
+            flexShrink: 0, padding: '12px 24px 16px',
             display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap',
+            position: tab !== 'none' ? 'absolute' : 'relative',
+            bottom: tab !== 'none' ? 0 : undefined,
+            left: tab !== 'none' ? 0 : undefined,
+            right: tab !== 'none' ? 0 : undefined,
+            zIndex: 40,
+            background: tab !== 'none' ? 'linear-gradient(180deg, rgba(13,22,40,0) 0%, rgba(13,22,40,0.82) 60%, rgba(13,22,40,0.95) 100%)' : 'transparent',
           }}>
             {([
               ['none',    '🚫 ללא',         'התמקדו רק בשאלה'],
@@ -1637,19 +1734,20 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               ['canvas',  '✏️ קנבס',         'ציירו, רשמו, פתרו ויזואלית'],
             ] as const).map(([key, label, hint]) => {
               const active = tab === key
+              const onTool = tab !== 'none'
               return (
                 <button
                   key={key}
                   onClick={() => setTab(key as typeof tab)}
                   title={hint}
                   style={{
-                    background: active ? BUTTON_COLOR : 'rgba(255,255,255,0.5)',
+                    background: active ? BUTTON_COLOR : (onTool ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.5)'),
                     color: active ? '#fff' : TEXT_DARK,
-                    border: `1.5px solid ${active ? BUTTON_COLOR : 'rgba(127,155,217,0.35)'}`,
+                    border: `1.5px solid ${active ? BUTTON_COLOR : (onTool ? 'rgba(127,155,217,0.55)' : 'rgba(127,155,217,0.35)')}`,
                     borderRadius: 22, padding: '8px 18px',
                     fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600,
                     cursor: 'pointer', transition: 'all 0.18s ease',
-                    boxShadow: active ? '0 4px 14px rgba(51,81,202,0.30)' : 'none',
+                    boxShadow: active ? '0 4px 14px rgba(51,81,202,0.30)' : (onTool ? '0 2px 8px rgba(0,0,0,0.25)' : 'none'),
                     transform: active ? 'translateY(-1px)' : 'translateY(0)',
                   }}
                 >
@@ -1657,35 +1755,6 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 </button>
               )
             })}
-          </div>
-        )}
-
-        {/* ── Companion tool panel (only when a tab is active, not in done) ── */}
-        {!isDone && tab !== 'none' && (
-          <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minHeight: 0, background: '#0d1628' }}>
-            {tab === 'mindmap' && (
-              <iframe
-                key="quiz-mm"
-                src={`${import.meta.env.BASE_URL}mindmap.html?userId=${userId || 'default'}`}
-                title="מפת חשיבה — תוך כדי תרגול"
-                style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
-                allow="clipboard-read; clipboard-write"
-              />
-            )}
-            {tab === 'canvas' && (
-              <iframe
-                key="quiz-wb"
-                src={`${import.meta.env.BASE_URL}mindmap.html?mode=wb&userId=${userId || 'default'}`}
-                title="קנבס — תוך כדי תרגול"
-                style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
-                allow="clipboard-read; clipboard-write"
-              />
-            )}
-            {tab === 'arsenal' && (
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }} dir="rtl">
-                <ArsenalScreen />
-              </div>
-            )}
           </div>
         )}
 
