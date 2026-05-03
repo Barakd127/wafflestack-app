@@ -41,9 +41,10 @@ body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1
 
 /* ── Bottom bar ── */
 #bottom-bar{height:36px;background:#1a1a1a;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;padding:0 12px;color:rgba(255,255,255,.5);font-size:11px}
-.zoom-controls{display:flex;align-items:center;gap:5px}
-.zoom-btn{width:22px;height:22px;background:rgba(255,255,255,.08);border:none;color:white;border-radius:4px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .15s}
-.zoom-btn:hover{background:rgba(255,255,255,.16)}
+.zoom-controls{display:flex;align-items:center;gap:6px}
+.zoom-btn{width:32px;height:32px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);color:white;border-radius:8px;cursor:pointer;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;transition:background .15s,transform .1s}
+.zoom-btn:hover{background:rgba(99,102,241,.35);border-color:rgba(99,102,241,.6)}
+.zoom-btn:active{transform:scale(.92)}
 #zoom-display{color:rgba(255,255,255,.7);font-size:11px;min-width:40px;text-align:center}
 #node-count{color:rgba(255,255,255,.5);font-size:11px}
 
@@ -93,7 +94,9 @@ body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1
 
 /* ── Mind map nodes ── */
 .node-wrap{position:absolute;z-index:2}
-.node-div{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;user-select:none;box-shadow:0 2px 10px rgba(0,0,0,.22);transition:box-shadow .15s,transform .1s;min-width:50px;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.4}
+.node-div{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;user-select:none;box-shadow:0 2px 10px rgba(0,0,0,.22);transition:box-shadow .15s,transform .1s;min-width:50px;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.4;unicode-bidi:plaintext;direction:rtl;text-align:start}
+.node-div [contenteditable]{unicode-bidi:plaintext;direction:rtl;text-align:start}
+.cn-title-text{unicode-bidi:plaintext}
 .node-div:hover{box-shadow:0 4px 18px rgba(0,0,0,.32);transform:translateY(-1px)}
 .node-div.selected{outline:2.5px solid #D4AF37;outline-offset:2px;box-shadow:0 0 0 4px rgba(212,175,55,.3)}
 .node-div.node-root{background:#fff!important;color:#1a1a1a!important;border:2.5px solid #1a1a1a;font-size:14px;font-weight:700;padding:10px 22px;border-radius:12px;box-shadow:0 3px 14px rgba(0,0,0,.3)}
@@ -306,6 +309,9 @@ body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1
 <!-- Top bar -->
 <div id="topbar">
   <div class="tb-left">
+    <button class="tb-btn" id="back-home-btn" onclick="wsGoHome()" title="חזרה לדף הבית" style="background:rgba(108,99,255,.25);border-color:rgba(108,99,255,.6);color:#a5b4fc;font-weight:600">← דף הבית</button>
+    <button class="tb-btn" id="split-btn" onclick="wsOpenSplit()" title="פצל מסך — עיר ומפת חשיבה">⊟ עיר + מפה</button>
+    <div class="tb-div"></div>
     <span class="tb-logo">✦ XMind</span>
     <div class="tb-div"></div>
     <span style="color:rgba(255,255,255,.45);font-size:12px">Untitled</span>
@@ -815,13 +821,12 @@ function mmNextChildY(parent){
   return maxBottom+MM_GAP;
 }
 
-// Place a newly added node and scroll viewport to it
+// Place a newly added node and smoothly pan viewport to centre it.
+// Uses panToNode (defined at end of file) for animated focus instead of an
+// instant snap — feels much better when adding many nodes in a row.
 function mmFinishAdd(n,editAfter){
   MM.sel=n.id;mmPushHistory();mmRender();
-  const _app=document.getElementById('app');
-  MM.panX=Math.round(_app.clientWidth*0.38-n.x*MM.zoom);
-  MM.panY=Math.round(_app.clientHeight*0.5-n.y*MM.zoom);
-  mmApplyTransform();
+  if (typeof panToNode === 'function') panToNode(n);
   if(editAfter)setTimeout(()=>startEditNode(n,document.getElementById('nw_'+n.id)),50);
 }
 
@@ -3526,6 +3531,8 @@ window.addEventListener('message', function(e){
     MM.sel = node.id;
     if (typeof mmPushHistory === 'function') mmPushHistory();
     if (typeof mmRender === 'function') mmRender();
+    // Auto-focus: pan viewport to centre on the freshly added node
+    try { panToNode(node); } catch(_){}
     try {
       var pill = document.createElement('div');
       pill.textContent = '✓ נוסף למפת המושגים';
@@ -3543,6 +3550,42 @@ window.addEventListener('message', function(e){
     } catch(_){}
   } catch(err) { console.error('ws-add-node failed', err); }
 });
+
+// ── WaffleStack parent-frame helpers ──────────────────────────────────────────
+// These let buttons inside the iframe ask the React host to navigate.
+// MindMapCanvas.tsx listens for these messages and dispatches view changes.
+function wsGoHome(){
+  try { window.parent.postMessage({type:'ws-go-home'}, '*'); } catch(_){}
+}
+function wsOpenSplit(){
+  try { window.parent.postMessage({type:'ws-split', initial:'mindmap'}, '*'); } catch(_){}
+}
+
+// ── panToNode: smoothly centre the viewport on a given node ──────────────────
+// Used for auto-focus when a new node is added (in-app or via ws-add-node).
+// Uses requestAnimationFrame easing instead of mmFinishAdd's instant snap.
+function panToNode(node){
+  if (!node || typeof MM === 'undefined') return;
+  var app = document.getElementById('app');
+  if (!app) return;
+  var targetX = Math.round(app.clientWidth/2 - node.x*MM.zoom);
+  var targetY = Math.round(app.clientHeight/2 - node.y*MM.zoom);
+  var startX = MM.panX, startY = MM.panY;
+  var dx = targetX-startX, dy = targetY-startY;
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+  var duration = 320; // ms
+  var t0 = performance.now();
+  function tick(now){
+    var t = Math.min(1, (now-t0)/duration);
+    var ease = 1 - Math.pow(1-t, 3); // cubic ease-out
+    MM.panX = startX + dx*ease;
+    MM.panY = startY + dy*ease;
+    if (typeof mmApplyTransform === 'function') mmApplyTransform();
+    if (typeof mmRenderMinimap === 'function') mmRenderMinimap();
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
 </script>
 </body>
 </html>

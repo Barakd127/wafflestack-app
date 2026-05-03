@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 // MindMapCanvas — wraps the full xmind-replica v18 mind map as an iframe.
 // The v18 HTML lives at /mindmap.html (WaffleStack public/ folder).
@@ -6,7 +6,7 @@ import React from 'react'
 // subtree-aware layout, collapsible nodes, pan/zoom, drag, themes.
 
 interface MindMapCanvasProps {
-  onViewChange: (view: 'study' | 'mindmap' | '3d') => void
+  onViewChange: (view: 'study' | 'mindmap' | '3d' | 'split-mindmap') => void
   darkMode: boolean
 }
 
@@ -16,6 +16,20 @@ const SR_ONLY: React.CSSProperties = {
 }
 
 const MindMapCanvas = ({ onViewChange }: MindMapCanvasProps) => {
+  // Listen for navigation requests originating INSIDE the iframe.
+  // mindmap.html exposes wsGoHome() (← דף הבית button) and wsOpenSplit()
+  // (⊟ split button) which post these messages to the parent frame.
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      const d = e?.data
+      if (!d || typeof d !== 'object') return
+      if (d.type === 'ws-go-home') onViewChange('study')
+      else if (d.type === 'ws-split') onViewChange('split-mindmap' as 'split-mindmap')
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [onViewChange])
+
   return (
     <main
       aria-label="מפת חשיבה"
@@ -29,39 +43,59 @@ const MindMapCanvas = ({ onViewChange }: MindMapCanvasProps) => {
       }}
     >
       <h1 style={SR_ONLY}>מפת חשיבה — WaffleStack</h1>
-      {/* Thin back bar */}
+      {/* Sticky back bar — z-index higher than iframe so it never gets hidden */}
       <header
         style={{
-          height: 42,
-          background: 'rgba(13,13,26,0.95)',
+          height: 44,
+          background: 'rgba(13,13,26,0.97)',
           borderBottom: '1px solid #2a2a3d',
           display: 'flex',
           alignItems: 'center',
           padding: '0 14px',
           gap: 12,
           flexShrink: 0,
-          zIndex: 10,
+          position: 'sticky',
+          top: 0,
+          zIndex: 1000,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
         }}
       >
         <button
           onClick={() => onViewChange('study')}
-          aria-label="חזרה לעיר"
+          aria-label="חזרה לדף הבית"
           style={{
-            background: 'rgba(108,99,255,0.18)',
+            background: 'rgba(108,99,255,0.22)',
             border: '1px solid #6c63ff',
-            color: '#6c63ff',
-            borderRadius: 7,
-            padding: '4px 14px',
+            color: '#a5b4fc',
+            borderRadius: 8,
+            padding: '6px 16px',
             cursor: 'pointer',
             fontSize: 13,
             fontWeight: 700,
             fontFamily: 'inherit',
           }}
         >
-          ← חזרה לעיר
+          ← דף הבית
         </button>
-        <span style={{ color: '#555', fontSize: 12 }}>
-          🧠 מפת חשיבה — קנבס מלא, משוואות, טבלאות וגרירה
+        <button
+          onClick={() => onViewChange('split-mindmap' as 'split-mindmap')}
+          aria-label="פצל מסך — עיר ומפת חשיבה"
+          style={{
+            background: 'rgba(51,81,202,0.22)',
+            border: '1px solid rgba(99,162,255,0.5)',
+            color: '#a5b4fc',
+            borderRadius: 8,
+            padding: '6px 16px',
+            cursor: 'pointer',
+            fontSize: 13,
+            fontWeight: 600,
+            fontFamily: 'inherit',
+          }}
+        >
+          ⊟ עיר + מפה
+        </button>
+        <span style={{ color: '#6b7280', fontSize: 12, marginInlineStart: 8 }}>
+          🧠 מפת חשיבה — קנבס מלא, משוואות וגרירה
         </span>
       </header>
 

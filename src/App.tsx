@@ -24,7 +24,7 @@ function App() {
   })
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     const stored = localStorage.getItem('wafflestack-dark-mode')
-    return stored !== null ? stored === 'true' : true
+    return stored !== null ? stored === 'true' : false
   })
   const [mindmapFrom, setMindmapFrom] = useState<string>('study')
 
