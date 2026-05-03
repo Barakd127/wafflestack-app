@@ -111,7 +111,7 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":9092276,"index.wasm":37695054},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":9092420,"index.wasm":37695054},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -204,7 +204,6 @@ const engine = new Engine(GODOT_CONFIG);
 				if (current > 0 && total > 0) {
 					statusProgress.value = current;
 					statusProgress.max = total;
-					try { window.parent.postMessage({ type: 'godot-progress', current: current, total: total }, '*'); } catch (e) {}
 				} else {
 					statusProgress.removeAttribute('value');
 					statusProgress.removeAttribute('max');
@@ -212,7 +211,6 @@ const engine = new Engine(GODOT_CONFIG);
 			},
 		}).then(() => {
 			setStatusMode('hidden');
-			try { window.parent.postMessage({ type: 'godot-ready' }, '*'); } catch (e) {}
 		}, displayFailureNotice);
 	}
 }());

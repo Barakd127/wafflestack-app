@@ -83,6 +83,17 @@ body {
   height: 100vh;
 }
 
+/* A11y: high-contrast focus ring on any keyboard-focused interactive element.
+   Uses :focus-visible so mouse clicks don't trigger the ring (only Tab/keyboard). */
+:focus-visible {
+  outline: 3px solid #60a5fa;
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+html.dark :focus-visible {
+  outline-color: #93c5fd;
+}
+
 /* Arsenal הקאצ'ים — animations for ArsenalScreen / ArsenalCapture / ArsenalCard.
    Scoped via `arsenal-*` classes so they don't bleed into other components. */
 @keyframes arsenalCardIn {

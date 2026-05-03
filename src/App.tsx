@@ -74,6 +74,7 @@ function App() {
             />
             <button
               onClick={() => setActiveView('split')}
+              aria-label="פצל מסך — עיר ולימוד"
               style={{
                 position: 'fixed', bottom: 24, left: 72, zIndex: 200,
                 background: 'rgba(51,81,202,0.85)',
@@ -119,6 +120,7 @@ function App() {
             {/* Split-screen with city button — bottom-right */}
             <button
               onClick={() => setActiveView('split-mindmap')}
+              aria-label="פצל מסך — עיר ומפת חשיבה"
               style={{
                 position: 'fixed', bottom: 24, right: 24, zIndex: 1000,
                 background: 'rgba(51,81,202,0.9)',
@@ -141,6 +143,7 @@ function App() {
             <div className="absolute bottom-6 right-6 z-50 pointer-events-auto flex gap-2">
               <button
                 onClick={() => setActiveView('split')}
+                aria-label="פצל מסך — עיר ולימוד"
                 style={{
                   background: 'rgba(51,81,202,0.85)',
                   backdropFilter: 'blur(12px)',
@@ -155,6 +158,7 @@ function App() {
               </button>
               <button
                 onClick={() => openMindMap('wafflecity')}
+                aria-label="פתח מפת חשיבה"
                 style={{
                   background: 'rgba(109,40,217,0.85)',
                   backdropFilter: 'blur(12px)',
