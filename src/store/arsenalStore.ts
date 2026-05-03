@@ -117,9 +117,46 @@ export function quickAddArsenal(input: Omit<ArsenalEntry, 'id' | 'createdAt' | '
   return useArsenalStore.getState().addEntry(input)
 }
 
-/** Hebrew labels and metadata for each kind, used by UI. */
-export const KIND_META: Record<ArsenalKind, { label: string; icon: string; color: string; bg: string; border: string }> = {
-  gotcha: { label: 'גוטצ\'ה',  icon: '🐛', color: '#b91c1c', bg: 'rgba(239,68,68,0.10)',  border: 'rgba(239,68,68,0.35)' },
-  trick:  { label: 'טריק',     icon: '💡', color: '#b45309', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.35)' },
-  tip:    { label: 'טיפ',      icon: '💎', color: '#1e40af', bg: 'rgba(99,102,241,0.10)', border: 'rgba(99,102,241,0.35)' },
+/** Hebrew labels, icons, accent colours, and the long-form description shown
+   inside the togglable hover tooltip. The `kind` keys stay 'gotcha' / 'trick'
+   / 'tip' for backwards-compatibility with stored entries — only the labels
+   and icons changed. */
+export const KIND_META: Record<ArsenalKind, {
+  label: string;
+  icon: string;
+  color: string;
+  bg: string;
+  border: string;
+  description: string;
+}> = {
+  // "Aha! moment" — the realisation/insight type. Lightbulb 💡 is the
+  // universal Aha icon and pairs with "רגע אהה" in Hebrew.
+  gotcha: {
+    label: 'רגע אהה',
+    icon: '💡',
+    color: '#b45309',
+    bg: 'rgba(245,158,11,0.10)',
+    border: 'rgba(245,158,11,0.35)',
+    description: 'תובנה או רגע גילוי שהאיר לכם משהו חדש על הנושא — חשוב לזכור כדי לא לטעות שוב.',
+  },
+  // "Trick" — memorised shortcut / technique. Wand for "magic shortcut"
+  // (the lightbulb moved to gotcha so we needed something distinct).
+  trick: {
+    label: 'טריק',
+    icon: '🪄',
+    color: '#7c3aed',
+    bg: 'rgba(124,58,237,0.10)',
+    border: 'rgba(124,58,237,0.35)',
+    description: 'קיצור דרך, נוסחה שווה לזכור, או תרגיל מנטלי שמקצר את החישוב — כלי מהיר להוצאה ביום הבחינה.',
+  },
+  // "Tip" — pinned advice. Pushpin replaces the gem so each kind has a
+  // visually distinct icon now.
+  tip: {
+    label: 'טיפ',
+    icon: '📌',
+    color: '#1e40af',
+    bg: 'rgba(99,102,241,0.10)',
+    border: 'rgba(99,102,241,0.35)',
+    description: 'עצה כללית או דגש שכדאי לזכור — לא טעות ולא טריק, אלא הכוונה לדרך הנכונה לחשוב על הנושא.',
+  },
 }

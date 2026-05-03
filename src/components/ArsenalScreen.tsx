@@ -42,6 +42,17 @@ export default function ArsenalScreen() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingText, setEditingText] = useState('')
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set())
+  // Toggle for the explanatory hover tooltips on filter pills.
+  // Persisted in localStorage so the user's choice survives reloads.
+  const [showHints, setShowHints] = useState<boolean>(() => {
+    try { return localStorage.getItem('wafflestack-arsenal-hints') !== 'off' } catch { return true }
+  })
+  const toggleHints = () => {
+    setShowHints(v => {
+      try { localStorage.setItem('wafflestack-arsenal-hints', v ? 'off' : 'on') } catch { /* ignore */ }
+      return !v
+    })
+  }
 
   // Counts per kind (includes pinned across all kinds)
   const counts = useMemo(() => ({
@@ -104,39 +115,58 @@ export default function ArsenalScreen() {
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, marginBottom: 22, flexWrap: 'wrap' }}>
         <div>
           <h1 style={{ fontSize: 30, fontWeight: 800, color: TEXT_DARK, margin: 0, letterSpacing: 0.3 }}>
-            🎯 ארסנל הקאצ'ים שלי
+            🎯 הארסנל שלי
           </h1>
           <div style={{ fontSize: 14, color: TEXT_LIGHT, marginTop: 4 }}>
             {entries.length === 0
-              ? 'אוסף אישי של גוטצ\'ות, טריקים וטיפים שתפסת בדרך'
+              ? 'אוסף אישי של רגעי אהה, טריקים וטיפים שתפסת בדרך'
               : `${entries.length} פריטים שתפסת עד עכשיו · המשך לתפוס!`}
           </div>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          style={primaryBtn}
-        >
-          + הוסף חדש
-        </button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* Toggle: show explanatory hover tooltips on the filter pills */}
+          <button
+            onClick={toggleHints}
+            title={showHints ? 'כיבוי הסברים' : 'הצגת הסברים'}
+            aria-label={showHints ? 'כיבוי הסברים' : 'הצגת הסברים'}
+            style={{
+              background: showHints ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.5)',
+              border: `1px solid ${showHints ? 'rgba(99,102,241,0.45)' : 'rgba(127,155,217,0.35)'}`,
+              borderRadius: 18, padding: '7px 13px', cursor: 'pointer',
+              fontFamily: "'Rubik', sans-serif", fontSize: 12, fontWeight: 600,
+              color: showHints ? '#4338ca' : TEXT_LIGHT,
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}
+          >
+            {showHints ? '💬 הסברים פעילים' : '🔇 הסברים כבויים'}
+          </button>
+          <button onClick={() => setShowAddModal(true)} style={primaryBtn}>+ הוסף חדש</button>
+        </div>
       </div>
 
-      {/* Kind filter pills */}
+      {/* Kind filter pills — labels + icons sourced from KIND_META so renames
+          stay consistent across capture / list / cards. */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <FilterPill label="הכל" icon="🎯" count={counts.all}
           selected={kindFilter === 'all'} onClick={() => setKindFilter('all')}
-          color="#6366f1" bg="rgba(99,102,241,0.12)" />
-        <FilterPill label="גוטצ'ות" icon="🐛" count={counts.gotcha}
+          color="#6366f1" bg="rgba(99,102,241,0.12)"
+          tip={showHints ? 'כל הפריטים בארסנל שלך' : undefined} />
+        <FilterPill label={KIND_META.gotcha.label + 'ים'} icon={KIND_META.gotcha.icon} count={counts.gotcha}
           selected={kindFilter === 'gotcha'} onClick={() => setKindFilter('gotcha')}
-          color="#b91c1c" bg="rgba(239,68,68,0.12)" />
-        <FilterPill label="טריקים" icon="💡" count={counts.trick}
+          color={KIND_META.gotcha.color} bg={KIND_META.gotcha.bg}
+          tip={showHints ? KIND_META.gotcha.description : undefined} />
+        <FilterPill label={KIND_META.trick.label + 'ים'} icon={KIND_META.trick.icon} count={counts.trick}
           selected={kindFilter === 'trick'} onClick={() => setKindFilter('trick')}
-          color="#b45309" bg="rgba(245,158,11,0.12)" />
-        <FilterPill label="טיפים" icon="💎" count={counts.tip}
+          color={KIND_META.trick.color} bg={KIND_META.trick.bg}
+          tip={showHints ? KIND_META.trick.description : undefined} />
+        <FilterPill label={KIND_META.tip.label + 'ים'} icon={KIND_META.tip.icon} count={counts.tip}
           selected={kindFilter === 'tip'} onClick={() => setKindFilter('tip')}
-          color="#1e40af" bg="rgba(99,102,241,0.12)" />
-        <FilterPill label="מוצמדים" icon="📌" count={counts.pinned}
+          color={KIND_META.tip.color} bg={KIND_META.tip.bg}
+          tip={showHints ? KIND_META.tip.description : undefined} />
+        <FilterPill label="מוצמדים" icon="📍" count={counts.pinned}
           selected={kindFilter === 'pinned'} onClick={() => setKindFilter('pinned')}
-          color="#92400e" bg="rgba(251,191,36,0.18)" />
+          color="#92400e" bg="rgba(251,191,36,0.18)"
+          tip={showHints ? 'הפריטים שהצמדת — תמיד למעלה ברשימה' : undefined} />
 
         {/* Topic dropdown — pushed to the start (RTL: visually left) */}
         {presentTopics.length > 0 && (
@@ -204,29 +234,60 @@ export default function ArsenalScreen() {
 }
 
 // ── Filter pill ──────────────────────────────────────────────────────────────
-function FilterPill({ label, icon, count, selected, onClick, color, bg }: {
-  label: string; icon: string; count: number; selected: boolean; onClick: () => void; color: string; bg: string
+function FilterPill({ label, icon, count, selected, onClick, color, bg, tip }: {
+  label: string; icon: string; count: number; selected: boolean; onClick: () => void; color: string; bg: string;
+  /** If provided, shown as a hover tooltip explaining what this filter category means. */
+  tip?: string
 }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 6,
-        background: selected ? color : bg,
-        border: `1.5px solid ${selected ? color : color + '50'}`,
-        color: selected ? '#fff' : color,
-        borderRadius: 18, padding: '7px 14px',
-        cursor: 'pointer', fontWeight: 600, fontSize: 13,
-        fontFamily: "'Rubik', sans-serif",
-        transition: 'all 0.18s ease',
-        boxShadow: selected ? `0 4px 14px ${color}55` : 'none',
-        transform: selected ? 'translateY(-1px)' : 'translateY(0)',
-      }}
+    <span style={{ position: 'relative', display: 'inline-block' }}
+          onMouseLeave={e => {
+            const tip = (e.currentTarget.querySelector('[data-fp-tooltip]') as HTMLElement | null)
+            if (tip) tip.style.opacity = '0'
+          }}
+          onMouseEnter={e => {
+            const t = (e.currentTarget.querySelector('[data-fp-tooltip]') as HTMLElement | null)
+            if (t) t.style.opacity = '1'
+          }}
     >
-      <span>{icon}</span>
-      <span>{label}</span>
-      <span style={{ opacity: selected ? 0.95 : 0.7, fontSize: 11, fontWeight: 700 }}>({count})</span>
-    </button>
+      <button
+        onClick={onClick}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          background: selected ? color : bg,
+          border: `1.5px solid ${selected ? color : color + '50'}`,
+          color: selected ? '#fff' : color,
+          borderRadius: 18, padding: '7px 14px',
+          cursor: 'pointer', fontWeight: 600, fontSize: 13,
+          fontFamily: "'Rubik', sans-serif",
+          transition: 'all 0.18s ease',
+          boxShadow: selected ? `0 4px 14px ${color}55` : 'none',
+          transform: selected ? 'translateY(-1px)' : 'translateY(0)',
+        }}
+      >
+        <span>{icon}</span>
+        <span>{label}</span>
+        <span style={{ opacity: selected ? 0.95 : 0.7, fontSize: 11, fontWeight: 700 }}>({count})</span>
+      </button>
+      {tip && (
+        <span
+          data-fp-tooltip
+          dir="rtl"
+          style={{
+            position: 'absolute', top: 'calc(100% + 8px)', insetInlineStart: 0,
+            background: 'rgba(15,15,35,0.96)', color: '#fff',
+            padding: '8px 12px', borderRadius: 10, fontSize: 12, lineHeight: 1.5,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.30)',
+            border: '1px solid rgba(99,102,241,0.4)',
+            opacity: 0, transition: 'opacity 0.18s ease',
+            pointerEvents: 'none', zIndex: 50,
+            width: 250, fontWeight: 500, fontFamily: "'Rubik', sans-serif",
+          }}
+        >
+          {tip}
+        </span>
+      )}
+    </span>
   )
 }
 
@@ -484,7 +545,7 @@ function EmptyState({ hasEntries }: { hasEntries: boolean }) {
       <div style={{ fontSize: 14, lineHeight: 1.7, maxWidth: 460 }}>
         {hasEntries
           ? 'נסה לשנות את סוג הפריט או את הנושא, או הוסף פריט חדש.'
-          : 'תפוס גוטצ\'ות, טריקים וטיפים בזמן הלימוד —\nסמן טקסט בשיעור וייפתח כפתור "שמור לארסנל", או לחץ על "🎯 שמור כטעות נפוצה" אחרי שאלה שטעית בה.'}
+          : 'תפוס רגעי אהה, טריקים וטיפים בזמן הלימוד —\nסמן טקסט בשיעור וייפתח כפתור "שמור לארסנל", או לחץ על "🎯 שמור כתובנה" אחרי שאלה שטעית בה.'}
       </div>
     </div>
   )

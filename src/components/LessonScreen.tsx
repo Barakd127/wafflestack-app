@@ -294,18 +294,10 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
           title="Mind Map"
           style={{ width: '100%', height: '100%', border: 'none', display: 'block', background: '#fafbff' }}
         />
-        {/* Pinned label in iframe corner */}
-        <div style={{
-          position: 'absolute', top: 8, right: 12, zIndex: 4,
-          background: 'rgba(99,102,241,0.85)', color: '#fff',
-          padding: '4px 12px', borderRadius: 12,
-          fontSize: 11, fontWeight: 700, letterSpacing: 0.4,
-          fontFamily: "'Rubik', sans-serif",
-          pointerEvents: 'none',
-          boxShadow: '0 4px 14px rgba(99,102,241,0.35)',
-        }}>
-          🧠 מפת המושגים שלי
-        </div>
+        {/* The redundant "מפת המושגים שלי" chip used to sit here — removed
+            because in RTL its top:right:12 anchor flipped to the LEFT visual
+            edge and obscured the iframe's topbar buttons. Mind map is its
+            own iframe, the user knows what they're looking at. */}
       </div>
 
       {/* Resize handle */}

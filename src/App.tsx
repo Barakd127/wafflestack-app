@@ -10,7 +10,7 @@ import MissionControl from './components/MissionControl'
 import OnboardingFlow from './components/OnboardingFlow'
 import SplitLayout from './components/SplitLayout'
 
-type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap'
+type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap'
 
 function App() {
   const [activeView, setActiveView] = useState<View>(() => {
@@ -58,6 +58,8 @@ function App() {
         setActiveView('study')
       } else if (d.type === 'ws-split') {
         setActiveView('split-mindmap')
+      } else if (d.type === 'ws-split-study') {
+        setActiveView('split-study-mindmap')
       }
     }
     window.addEventListener('message', onMessage)
@@ -135,6 +137,40 @@ function App() {
             darkMode={darkMode}
             initialRight="mindmap"
           />
+        )}
+
+        {/* Split: StudyHub on the right (RTL primary), MindMap iframe on the
+            left. Reached from the iframe's "⊟ לימוד + מפה" button. */}
+        {activeView === 'split-study-mindmap' && (
+          <div dir="ltr" style={{ width: '100%', height: '100%', display: 'flex', overflow: 'hidden', background: '#0d0d1a' }}>
+            <div style={{ width: '50%', height: '100%', position: 'relative', flexShrink: 0 }}>
+              <iframe
+                src="mindmap.html"
+                title="מפת חשיבה — קנבס אינטראקטיבי"
+                style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                allow="clipboard-read; clipboard-write"
+              />
+            </div>
+            <div style={{ width: 4, flexShrink: 0, background: 'rgba(99,102,241,0.25)', cursor: 'col-resize' }} />
+            <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', position: 'relative' }} dir="rtl">
+              <StudyHub
+                onViewChange={() => {/* split mode owns navigation */}}
+                darkMode={darkMode}
+              />
+            </div>
+            <button
+              onClick={() => setActiveView('mindmap')}
+              aria-label="סגור פיצול"
+              style={{
+                position: 'absolute', top: 8, left: 8, zIndex: 1000,
+                background: 'rgba(108,99,255,0.85)', border: '1px solid rgba(165,180,252,0.5)',
+                color: '#fff', borderRadius: 8, padding: '5px 12px',
+                fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              ✕ סגור פיצול
+            </button>
+          </div>
         )}
 
         {activeView === 'mindmap' && (
