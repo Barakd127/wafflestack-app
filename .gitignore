@@ -50,3 +50,4 @@ bot.py
 # Stray shell-redirect dumps (e.g. `git ... > amend-out.txt`)
 *-out.txt
 tsc-errors.txt
+.vercel
