@@ -11,6 +11,22 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1a1a}
 
+/* ── Light-mode overrides — applied when body has class .light ──
+   Toggled by wsToggleTheme() and synced with the parent app's
+   wafflestack-dark-mode localStorage key. */
+body.light{background:#f3f4f6}
+body.light #canvas-area{background:#fafafa}
+body.light #bottom-bar{background:#fff;border-top:1px solid rgba(0,0,0,.08);color:rgba(0,0,0,.55)}
+body.light #node-count,body.light #zoom-display{color:rgba(0,0,0,.65)}
+body.light .zoom-btn{background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.10);color:#1f3e6c}
+body.light .zoom-btn:hover{background:rgba(99,102,241,.16);border-color:rgba(99,102,241,.45);color:#1f3e6c}
+body.light #minimap-container{background:rgba(255,255,255,.95);border-color:rgba(99,102,241,.45)}
+body.light #minimap-header{background:rgba(99,102,241,.10);color:rgba(0,0,0,.75);border-bottom-color:rgba(99,102,241,.20)}
+body.light #minimap-zoom-label{color:rgba(99,102,241,.85)}
+body.light #search-overlay{background:#fff;border-bottom:1px solid rgba(0,0,0,.10)}
+body.light #search-input{background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.12);color:#111}
+body.light #search-input::placeholder{color:rgba(0,0,0,.4)}
+
 /* ── Top Bar (Study Hub navy-blue palette) ── */
 #topbar{height:52px;background:linear-gradient(135deg,#1F3E6C 0%,#1a3260 100%);display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:white;gap:8px;box-shadow:0 4px 16px rgba(31,62,108,.35);position:relative;z-index:200;backdrop-filter:blur(10px)}
 .tb-left{display:flex;align-items:center;gap:10px;font-size:13px}
@@ -375,14 +391,14 @@ body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1
 
 <!-- Bottom bar -->
 <div id="bottom-bar">
-  <span style="color:rgba(255,255,255,.3)">Mind Map</span>
-  <span id="node-count">0 nodes</span>
   <div class="zoom-controls">
-    <button class="zoom-btn" onclick="mmZoomBy(1/1.2)">−</button>
+    <button class="zoom-btn" id="theme-toggle-btn" onclick="wsToggleTheme()" title="החלף מצב בהיר/כהה">🌙</button>
+    <button class="zoom-btn" onclick="mmZoomBy(1/1.2)" title="התרחק (−)">−</button>
     <span id="zoom-display">100%</span>
-    <button class="zoom-btn" onclick="mmZoomBy(1.2)">+</button>
-    <button class="zoom-btn" title="Fit" onclick="mmFitView()" style="font-size:11px;width:auto;padding:0 6px">Fit</button>
+    <button class="zoom-btn" onclick="mmZoomBy(1.2)" title="התקרב (+)">+</button>
+    <button class="zoom-btn" title="התאם לתצוגה" onclick="mmFitView()" style="font-size:11px;width:auto;padding:0 8px">התאם</button>
   </div>
+  <span id="node-count" style="opacity:.6">0 nodes</span>
 </div>
 
 <!-- Half-Screen Whiteboard Panel -->
@@ -747,6 +763,11 @@ function mmRender(){
   mmApplyTransform();
   mmDrawMinimap();
   document.getElementById('node-count').textContent=Object.keys(MM.nodes).length+' nodes';
+  // Phase 2.3: auto-size nodes whose text or KaTeX is wider than the static
+  // default. Scheduled async so the DOM has flushed; guarded against re-entry.
+  if (typeof mmAutoSizeNodes === 'function' && !window._mmAutoSizing) {
+    requestAnimationFrame(mmAutoSizeNodes);
+  }
 }
 
 function mmIsVisible(id){
@@ -773,6 +794,9 @@ function mmApplyTransform(){
   const zd=document.getElementById('zoom-display');
   if(zd) zd.textContent=Math.round(MM.zoom*100)+'%';
   if(typeof mmUpdateScrollbars==='function') mmUpdateScrollbars();
+  // FIX (Phase 2.2): keep navigator viewport rectangle in sync with manual
+  // pan and wheel-zoom — every transform change must redraw the minimap.
+  if(typeof mmDrawMinimap==='function') mmDrawMinimap();
 }
 
 function mmFitView(){
@@ -3561,6 +3585,100 @@ function wsOpenSplit(){
   try { window.parent.postMessage({type:'ws-split', initial:'mindmap'}, '*'); } catch(_){}
 }
 
+// ── Theme: light/dark inside the mind map iframe ─────────────────────────────
+// Synced with the parent app's `wafflestack-dark-mode` localStorage key.
+// On load, read that key and apply matching theme.
+// On toggle, flip both the iframe body class AND the parent's localStorage,
+// then post a message so the parent can flip its own <html.dark> class.
+function wsApplyTheme(dark){
+  document.body.classList.toggle('light', !dark);
+  var btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.textContent = dark ? '🌙' : '☀';
+}
+function wsToggleTheme(){
+  var nowDark = !document.body.classList.contains('light');
+  var nextDark = !nowDark;
+  wsApplyTheme(nextDark);
+  try {
+    // Same-origin: parent localStorage is shared, so write to it directly
+    window.parent.localStorage.setItem('wafflestack-dark-mode', String(nextDark));
+    window.parent.postMessage({type:'ws-theme', dark: nextDark}, '*');
+  } catch(_){}
+}
+// Read parent theme once on load
+(function(){
+  try {
+    var stored = window.parent.localStorage.getItem('wafflestack-dark-mode');
+    var dark = stored === null ? false : stored === 'true';
+    wsApplyTheme(dark);
+  } catch(_){ wsApplyTheme(true); }
+})();
+// Listen for theme changes coming back from the parent
+window.addEventListener('message', function(e){
+  var d = e && e.data;
+  if (d && d.type === 'ws-theme' && typeof d.dark === 'boolean') wsApplyTheme(d.dark);
+});
+
+// ── mmAutoSizeNodes: grow a node's box to fit its text or rendered KaTeX ────
+// Called automatically at the end of mmRender. Uses a re-entry guard so the
+// first measurement pass triggers at most one re-render, never an infinite
+// loop.
+window._mmAutoSizing = false;
+function mmAutoSizeNodes(){
+  if (window._mmAutoSizing || typeof MM === 'undefined' || !MM.nodes) return;
+  window._mmAutoSizing = true;
+  try {
+    var changed = false;
+    // Hidden ruler reused across measurements (single DOM node).
+    var ruler = document.getElementById('mm-text-ruler');
+    if (!ruler) {
+      ruler = document.createElement('div');
+      ruler.id = 'mm-text-ruler';
+      ruler.style.cssText =
+        'position:fixed;top:-9999px;left:-9999px;visibility:hidden;'+
+        "font-family:'Inter',sans-serif;white-space:nowrap;line-height:1.4;"+
+        'unicode-bidi:plaintext;direction:rtl;';
+      document.body.appendChild(ruler);
+    }
+    // Text & root nodes
+    for (var id in MM.nodes) {
+      var n = MM.nodes[id];
+      if (n.type === 'canvas' || n.type === 'equation') continue;
+      if (!mmIsVisible(id) && id !== MM.root) continue;
+      if (n.type === 'root') {
+        ruler.style.fontSize = '14px';
+        ruler.style.fontWeight = '700';
+        ruler.style.padding = '10px 22px';
+      } else {
+        ruler.style.fontSize = '12px';
+        ruler.style.fontWeight = '500';
+        ruler.style.padding = '5px 16px';
+      }
+      ruler.textContent = n.text || '';
+      var natural = Math.ceil(ruler.offsetWidth) + 4;
+      var newW = Math.max(50, Math.min(420, natural));
+      if (Math.abs((n.W||140) - newW) > 2) { n.W = newW; changed = true; }
+    }
+    // Equation nodes — measure the rendered .katex span
+    for (var id2 in MM.nodes) {
+      var en = MM.nodes[id2];
+      if (en.type !== 'equation') continue;
+      if (!mmIsVisible(id2) && id2 !== MM.root) continue;
+      var el = document.getElementById('nw_'+id2);
+      var inner = el && el.querySelector('.node-div');
+      var span = inner && inner.querySelector('.katex');
+      if (span) {
+        var natural2 = Math.ceil(span.offsetWidth) + 36;
+        var newW2 = Math.max(80, Math.min(540, natural2));
+        if (Math.abs((en.W||80) - newW2) > 2) { en.W = newW2; changed = true; }
+      }
+    }
+    if (changed && typeof mmRender === 'function') mmRender();
+  } finally {
+    window._mmAutoSizing = false;
+  }
+}
+
 // ── panToNode: smoothly centre the viewport on a given node ──────────────────
 // Used for auto-focus when a new node is added (in-app or via ws-add-node).
 // Uses requestAnimationFrame easing instead of mmFinishAdd's instant snap.
@@ -3581,7 +3699,7 @@ function panToNode(node){
     MM.panX = startX + dx*ease;
     MM.panY = startY + dy*ease;
     if (typeof mmApplyTransform === 'function') mmApplyTransform();
-    if (typeof mmRenderMinimap === 'function') mmRenderMinimap();
+    // mmApplyTransform now redraws the minimap itself, no extra call needed.
     if (t < 1) requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
