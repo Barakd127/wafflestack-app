@@ -16,25 +16,11 @@ const SR_ONLY: React.CSSProperties = {
 }
 
 const MindMapCanvas = ({ onViewChange }: MindMapCanvasProps) => {
-  // Listen for navigation + theme messages originating INSIDE the iframe.
-  // mindmap.html posts:
-  //   {type:'ws-go-home'}   ← דף הבית button
-  //   {type:'ws-split'}     ⊟ split button
-  //   {type:'ws-theme', dark} when the user toggles inside the iframe
-  // We dispatch view changes / flip the parent app's <html.dark> class.
-  useEffect(() => {
-    const onMessage = (e: MessageEvent) => {
-      const d = e?.data
-      if (!d || typeof d !== 'object') return
-      if (d.type === 'ws-go-home') onViewChange('study')
-      else if (d.type === 'ws-split') onViewChange('split-mindmap' as 'split-mindmap')
-      else if (d.type === 'ws-theme' && typeof d.dark === 'boolean') {
-        document.documentElement.classList.toggle('dark', d.dark)
-      }
-    }
-    window.addEventListener('message', onMessage)
-    return () => window.removeEventListener('message', onMessage)
-  }, [onViewChange])
+  // ws-go-home / ws-split / ws-theme messages from inside the iframe are
+  // now handled by App.tsx (single global listener). Keeping MindMapCanvas
+  // free of cross-frame coupling makes it work identically when embedded
+  // in SplitLayout's right-tab pane.
+  useEffect(() => { /* listener moved to App.tsx */ }, [onViewChange])
 
   return (
     <main

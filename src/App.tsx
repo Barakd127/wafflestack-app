@@ -42,6 +42,28 @@ function App() {
     localStorage.setItem('wafflestack-dark-mode', String(darkMode))
   }, [darkMode])
 
+  // Listen for theme changes posted from inside the mind map iframe.
+  // The iframe's ☀/🌙 button writes to localStorage and posts ws-theme;
+  // we update React state here so the rest of the app re-renders correctly
+  // (rather than just toggling <html.dark> directly which the next render
+  // would overwrite).
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      const d = e?.data
+      if (!d || typeof d !== 'object') return
+      if (d.type === 'ws-theme' && typeof d.dark === 'boolean') {
+        setDarkMode(d.dark)
+      } else if (d.type === 'ws-go-home') {
+        // Iframe's ← דף הבית button — always go to StudyHub regardless of where the user came from.
+        setActiveView('study')
+      } else if (d.type === 'ws-split') {
+        setActiveView('split-mindmap')
+      }
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
+
   useEffect(() => {
     if (activeView === 'study') window.location.hash = ''
     else if (activeView === 'split') window.location.hash = '#split'
@@ -111,7 +133,11 @@ function App() {
           <div className="relative w-full h-full">
             <MindMapCanvas
               onViewChange={(v) => {
-                if (v === 'study') setActiveView(mindmapFrom as View)
+                // The "← דף הבית" button always goes to StudyHub, regardless
+                // of where the user came from. (Old behaviour using
+                // mindmapFrom would route them back to wafflecity if they
+                // came from there, which contradicts the button's label.)
+                if (v === 'study') setActiveView('study')
                 else if (v === '3d') setActiveView('wafflecity')
                 else setActiveView(v as View)
               }}

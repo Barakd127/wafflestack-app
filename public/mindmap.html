@@ -27,11 +27,13 @@ body.light #search-overlay{background:#fff;border-bottom:1px solid rgba(0,0,0,.1
 body.light #search-input{background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.12);color:#111}
 body.light #search-input::placeholder{color:rgba(0,0,0,.4)}
 
-/* ── Top Bar (Study Hub navy-blue palette) ── */
-#topbar{height:52px;background:linear-gradient(135deg,#1F3E6C 0%,#1a3260 100%);display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:white;gap:8px;box-shadow:0 4px 16px rgba(31,62,108,.35);position:relative;z-index:200;backdrop-filter:blur(10px)}
-.tb-left{display:flex;align-items:center;gap:10px;font-size:13px}
+/* ── Top Bar (Study Hub navy-blue palette) ──
+   min-height instead of fixed height so it can grow to a 2nd row when the
+   button strip + new RTL nav buttons exceed viewport width. */
+#topbar{min-height:52px;background:linear-gradient(135deg,#1F3E6C 0%,#1a3260 100%);display:flex;align-items:center;justify-content:space-between;padding:6px 14px;color:white;gap:8px;box-shadow:0 4px 16px rgba(31,62,108,.35);position:relative;z-index:200;backdrop-filter:blur(10px);flex-wrap:wrap;row-gap:6px}
+.tb-left{display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap}
 .tb-logo{font-size:18px;cursor:pointer;font-weight:700;letter-spacing:-.5px;color:#D4AF37}
-.tb-center{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.tb-center{display:flex;align-items:center;gap:4px;flex-wrap:wrap;flex:1;min-width:0;justify-content:center}
 .tb-btn{height:28px;padding:0 10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:4px;font-weight:500}
 .tb-btn:hover{background:rgba(212,175,55,.3);border-color:rgba(212,175,55,.6);color:#D4AF37}
 .tb-div{width:1px;height:20px;background:rgba(255,255,255,.2);margin:0 2px}
@@ -48,7 +50,9 @@ body.light #search-input::placeholder{color:rgba(0,0,0,.4)}
 #search-input:focus{border-color:#6366f1;box-shadow:0 0 0 2px rgba(99,102,241,.2)}
 
 /* ── App ── */
-#app{height:calc(100vh - 52px - 36px);position:relative;overflow:hidden}
+/* App height = viewport - bottom-bar - topbar (which can wrap on narrow widths,
+   so we use a CSS variable updated by JS instead of a hardcoded 52px). */
+#app{height:calc(100vh - var(--mm-topbar-h, 52px) - 36px);position:relative;overflow:hidden}
 #canvas-area{width:100%;height:100%;overflow:hidden;background:#f8f7f4;cursor:grab;position:relative;transition:background .3s;overflow:hidden}
 #canvas-area.panning{cursor:grabbing}
 #viewport{position:absolute;top:0;left:0;transform-origin:0 0}
@@ -110,8 +114,13 @@ body.light #search-input::placeholder{color:rgba(0,0,0,.4)}
 
 /* ── Mind map nodes ── */
 .node-wrap{position:absolute;z-index:2}
-.node-div{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;user-select:none;box-shadow:0 2px 10px rgba(0,0,0,.22);transition:box-shadow .15s,transform .1s;min-width:50px;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.4;unicode-bidi:plaintext;direction:rtl;text-align:start}
-.node-div [contenteditable]{unicode-bidi:plaintext;direction:rtl;text-align:start}
+.node-div{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;user-select:none;box-shadow:0 2px 10px rgba(0,0,0,.22);transition:box-shadow .15s,transform .1s;min-width:50px;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.4}
+/* Bidi: only TEXT nodes (not equations, not canvas wrappers) need plaintext
+   detection so mixed Hebrew/English flows correctly per-substring.
+   Equations + canvas titles MUST stay left-to-right. */
+.node-div:not(.eq-node):not(.node-root){unicode-bidi:plaintext;text-align:start}
+.node-div:not(.eq-node):not(.node-root) [contenteditable]{unicode-bidi:plaintext;text-align:start}
+.node-div.eq-node, .node-div.eq-node *{direction:ltr !important;unicode-bidi:isolate !important}
 .cn-title-text{unicode-bidi:plaintext}
 .node-div:hover{box-shadow:0 4px 18px rgba(0,0,0,.32);transform:translateY(-1px)}
 .node-div.selected{outline:2.5px solid #D4AF37;outline-offset:2px;box-shadow:0 0 0 4px rgba(212,175,55,.3)}
@@ -3613,6 +3622,17 @@ function wsToggleTheme(){
     wsApplyTheme(dark);
   } catch(_){ wsApplyTheme(true); }
 })();
+// Topbar height tracker — keeps #app full-height when the topbar wraps to 2 rows
+function wsUpdateTopbarHeight(){
+  var tb = document.getElementById('topbar');
+  if (!tb) return;
+  var h = tb.offsetHeight || 52;
+  document.documentElement.style.setProperty('--mm-topbar-h', h + 'px');
+}
+window.addEventListener('resize', wsUpdateTopbarHeight);
+window.addEventListener('load', wsUpdateTopbarHeight);
+setTimeout(wsUpdateTopbarHeight, 50);
+setTimeout(wsUpdateTopbarHeight, 500);
 // Listen for theme changes coming back from the parent
 window.addEventListener('message', function(e){
   var d = e && e.data;
@@ -3682,24 +3702,31 @@ function mmAutoSizeNodes(){
 // ── panToNode: smoothly centre the viewport on a given node ──────────────────
 // Used for auto-focus when a new node is added (in-app or via ws-add-node).
 // Uses requestAnimationFrame easing instead of mmFinishAdd's instant snap.
+//
+// If MM.zoom is currently too small to actually see the new node (e.g. user
+// clicked Fit at 9% to see 40+ nodes, then adds a new branch), this helper
+// also tweens zoom up to 1.0 so the freshly added node is visibly centred.
 function panToNode(node){
   if (!node || typeof MM === 'undefined') return;
   var app = document.getElementById('app');
   if (!app) return;
-  var targetX = Math.round(app.clientWidth/2 - node.x*MM.zoom);
-  var targetY = Math.round(app.clientHeight/2 - node.y*MM.zoom);
+  var startZoom = MM.zoom;
+  var targetZoom = startZoom < 0.6 ? 1.0 : startZoom; // snap up if zoomed out
   var startX = MM.panX, startY = MM.panY;
-  var dx = targetX-startX, dy = targetY-startY;
-  if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
-  var duration = 320; // ms
+  // Compute pan target using FINAL zoom so node lands at exact viewport centre
+  var targetX = Math.round(app.clientWidth/2 - node.x*targetZoom);
+  var targetY = Math.round(app.clientHeight/2 - node.y*targetZoom);
+  var dx = targetX-startX, dy = targetY-startY, dz = targetZoom-startZoom;
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(dz) < 0.001) return;
+  var duration = 380; // ms
   var t0 = performance.now();
   function tick(now){
     var t = Math.min(1, (now-t0)/duration);
     var ease = 1 - Math.pow(1-t, 3); // cubic ease-out
     MM.panX = startX + dx*ease;
     MM.panY = startY + dy*ease;
+    MM.zoom = startZoom + dz*ease;
     if (typeof mmApplyTransform === 'function') mmApplyTransform();
-    // mmApplyTransform now redraws the minimap itself, no extra call needed.
     if (t < 1) requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);

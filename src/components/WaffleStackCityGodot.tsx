@@ -62,7 +62,11 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
   const totalMb = progress ? (progress.total / 1048576).toFixed(0) : null
 
   return (
-    <div className="fixed inset-0 z-0" style={{ background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f1f3f 100%)' }}>
+    // absolute (not fixed) so this fills its parent container — works for both
+    // standalone full-screen mode AND split-pane mode without escaping the
+    // panel boundary. Parent (App.tsx wafflecity wrapper or SplitLayout left
+    // panel) provides position:relative.
+    <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f1f3f 100%)' }}>
       {/* Custom Hebrew loading overlay — masks the Godot canvas until ready */}
       {!ready && (
         <div
@@ -134,7 +138,11 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
       {onBack && (
         <button
           onClick={onBack}
-          className="fixed top-4 right-4 z-50 px-4 py-2 rounded-xl backdrop-blur-xl bg-white/10 border border-white/20 text-white text-sm hover:bg-white/25 transition-all shadow-lg"
+          aria-label="חזרה ללימוד"
+          // absolute (not fixed) so the button stays inside the city panel
+          // when in split mode. Sits at top-LEFT to avoid collision with
+          // App.tsx's dark-mode toggle at top-RIGHT.
+          className="absolute top-3 left-3 z-50 px-4 py-2 rounded-xl backdrop-blur-xl bg-white/10 border border-white/20 text-white text-sm hover:bg-white/25 transition-all shadow-lg"
         >
           ← חזרה ללימוד
         </button>
@@ -146,6 +154,10 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
         title="WaffleStack 3D city (Godot)"
         allow="autoplay; cross-origin-isolated; clipboard-write; gamepad; xr-spatial-tracking"
         className="w-full h-full border-0"
+        // Fallback: even if the Godot project never posts 'godot-ready',
+        // hide the loader once the iframe document itself loads. Godot
+        // shows its own progress UI inside the iframe.
+        onLoad={() => setReady(true)}
         style={{ display: 'block', visibility: ready ? 'visible' : 'hidden' }}
       />
     </div>
