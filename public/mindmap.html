@@ -3160,7 +3160,24 @@ function wboBuild(o){
   txt.textContent=wboGetText(o);
   txt.addEventListener('input',()=>{wboSetText(o,txt.textContent);});
   txt.addEventListener('blur',()=>wbPush());
-  txt.addEventListener('mousedown',e=>e.stopPropagation());
+  // BUG FIX: blanket stopPropagation here was swallowing every mousedown
+  // before it could reach the wbo's own select/drag handler — clicking on
+  // any shape (rect / circle / text / sticky) did nothing because the
+  // contentEditable txt child filled the entire wbo and ate the click.
+  //
+  // New rule:
+  //  • If this object is NOT yet selected → let the event bubble up so the
+  //    wbo handler runs (select + start drag). Suppress contentEditable's
+  //    caret placement so the first click is "select" not "type".
+  //  • If this object IS already selected → stop propagation so the user
+  //    can drag-select text inside the box without re-triggering shape drag.
+  txt.addEventListener('mousedown', e => {
+    if (WB.selId !== o.id) {
+      e.preventDefault();              // don't move caret on first-click select
+    } else {
+      e.stopPropagation();             // already selected — text-editing mode
+    }
+  });
 
   // Delete btn
   const del=document.createElement('div');
