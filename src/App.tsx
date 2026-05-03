@@ -130,7 +130,7 @@ function App() {
                 display: 'flex', alignItems: 'center', gap: 8,
               }}
             >
-              ⊟ עיר + Mind Map
+              ⊟ עיר + מפת חשיבה
             </button>
           </div>
         )}
@@ -165,7 +165,7 @@ function App() {
                   display: 'flex', alignItems: 'center', gap: 8,
                 }}
               >
-                🧠 Mind Map
+                🧠 מפת חשיבה
               </button>
             </div>
           </div>

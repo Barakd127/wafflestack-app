@@ -87,7 +87,7 @@ export default function SplitLayout({ onBack, darkMode, initialRight = 'study' }
             📚 לימוד
           </button>
           <button onClick={() => setRightTab('mindmap')} style={tabBtnStyle(rightTab === 'mindmap')}>
-            🧠 Mind Map
+            🧠 מפת חשיבה
           </button>
         </div>
 

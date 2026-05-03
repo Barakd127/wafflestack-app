@@ -996,11 +996,11 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
             fontFamily: "'Heebo', system-ui, sans-serif",
           }}>
             <span style={{ color: '#a5b4fc', fontSize: 12, fontWeight: 700, letterSpacing: 1 }}>
-              🧠 קנבס · Mind Map
+              🧠 קנבס · מפת חשיבה
             </span>
             <button
               onClick={() => setCanvasOpen(false)}
-              aria-label="Close canvas panel"
+              aria-label="סגור חלון קנבס"
               style={{
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.15)',
@@ -1585,7 +1585,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                       color: '#254A9F', fontWeight: 600, fontSize: 14, cursor: 'pointer',
                     }}
                   >
-                    🏙️ Back to City
+                    🏙️ חזרה לעיר
                   </button>
                 </div>
               </div>
