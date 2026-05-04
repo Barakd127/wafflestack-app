@@ -45,13 +45,31 @@ const HEBREW_LABELS: Record<string, string> = {
 }
 
 // Extract topics from quiz-bank data
-const QUIZ_TOPICS = Object.entries(quizBankData.topics || {}).map(([key, data]: [string, any]) => ({
-  id: key,
-  label: HEBREW_LABELS[key] || data.concept || key,
-  building: data.building || '',
-  concept: data.concept || key,
-  questionCount: (data.questions || []).length,
-}))
+// Build the topic picker from BOTH quiz-bank.json AND lesson-content.ts so
+// lesson-only topics (no quiz yet) still show up. quiz-bank entries take
+// precedence (they have building / concept / question metadata); lesson-only
+// topics come last with questionCount=0 so the UI can label them as
+// "תיאוריה בלבד" if desired.
+const QUIZ_TOPICS = (() => {
+  const quizEntries = Object.entries(quizBankData.topics || {}).map(([key, data]: [string, any]) => ({
+    id: key,
+    label: HEBREW_LABELS[key] || data.concept || key,
+    building: data.building || '',
+    concept: data.concept || key,
+    questionCount: (data.questions || []).length,
+  }))
+  const quizIds = new Set(quizEntries.map(e => e.id))
+  const lessonOnly = LESSON_CONTENT
+    .filter(l => !quizIds.has(l.id))
+    .map(l => ({
+      id: l.id,
+      label: HEBREW_LABELS[l.id] || l.hebrewName,
+      building: '',
+      concept: l.hebrewName,
+      questionCount: 0,
+    }))
+  return [...quizEntries, ...lessonOnly]
+})()
 
 // ── Design tokens — driven by CSS custom properties for dark/light mode ────────
 const PAGE_BG       = 'var(--sh-page-bg)'

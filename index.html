@@ -10,6 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700&family=Rubik:wght@300;400;600;700&family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="preload" as="fetch" type="application/wasm" href="/godot/index.wasm" crossorigin>
     <link rel="preload" as="fetch" href="/godot/index.pck" crossorigin>
+    <!-- KaTeX for math typesetting in lessons (matches mindmap.html). Loaded
+         from the same CDN so it caches once across the app. -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   </head>
   <body>
     <div id="root"></div>

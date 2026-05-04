@@ -206,15 +206,14 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
               background: 'rgba(127,155,217,0.12)',
               border: '1px solid rgba(127,155,217,0.3)',
               borderRadius: 12,
-              padding: '14px 18px',
-              fontFamily: "'Inter', 'Consolas', monospace",
-              fontSize: 17,
-              color: TEXT_DARK,
+              padding: '18px 18px',
               direction: 'ltr',
               textAlign: 'center',
-              letterSpacing: 0.3,
+              minHeight: 56,
+              fontSize: 19,
+              color: TEXT_DARK,
             }}>
-              {slide.formula}
+              <KatexFormula latex={slide.formula} />
             </div>
             {mindmapOpen && (
               <button
@@ -421,5 +420,40 @@ function formulaCopyBtnStyle(success: boolean): React.CSSProperties {
     display: 'flex', alignItems: 'center',
     boxShadow: '0 2px 8px rgba(99,102,241,0.3)',
   }
+}
+
+// KaTeX renders the formula with proper math typography (real fraction bars,
+// Greek letters, subscripts/superscripts). Falls back to plain text if KaTeX
+// hasn't loaded yet (CDN race) or the LaTeX string is malformed.
+declare global {
+  interface Window { katex?: { renderToString: (latex: string, opts?: object) => string } }
+}
+function KatexFormula({ latex }: { latex: string }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+    let cancelled = false
+    const tryRender = () => {
+      if (cancelled) return
+      if (window.katex) {
+        try {
+          node.innerHTML = window.katex.renderToString(latex, {
+            throwOnError: false,
+            displayMode: true,
+            output: 'html',
+          })
+        } catch {
+          node.textContent = latex
+        }
+      } else {
+        // KaTeX still loading from CDN — retry shortly
+        setTimeout(tryRender, 80)
+      }
+    }
+    tryRender()
+    return () => { cancelled = true }
+  }, [latex])
+  return <span ref={ref}>{latex}</span>
 }
 
