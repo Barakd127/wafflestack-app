@@ -184,8 +184,62 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
           </button>
         )}
       </div>
-      <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginBottom: 18, textAlign: 'right' }}>
-        שקופית {currentSlide + 1} מתוך {total}
+      {/* ── Slide navigation strip — clearly labeled prev/next at the top
+          of the card. Sticks to the top of the scroll container so it's
+          always visible without scrolling. RTL-aware: 'הקודם' on the right
+          (where the user reads from), 'הבא' on the left. ─────────────────── */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 30,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        gap: 8, marginBottom: 14, padding: '10px 14px',
+        background: 'rgba(255,255,255,0.92)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(127,155,217,0.30)',
+        borderRadius: 14,
+        boxShadow: '0 4px 14px rgba(31,62,108,0.10)',
+      }}>
+        <button
+          onClick={handlePrev}
+          disabled={isFirst}
+          aria-label="שקופית קודמת"
+          title="הקודם (חץ ימני)"
+          style={{
+            background: isFirst ? 'rgba(127,155,217,0.12)' : 'rgba(127,155,217,0.20)',
+            color: isFirst ? TEXT_LIGHT : BUTTON_COLOR,
+            border: `1.5px solid ${isFirst ? 'rgba(127,155,217,0.25)' : 'rgba(127,155,217,0.45)'}`,
+            borderRadius: 10, padding: '8px 18px',
+            cursor: isFirst ? 'not-allowed' : 'pointer',
+            fontSize: 14, fontWeight: 700,
+            fontFamily: "'Rubik', sans-serif",
+            display: 'flex', alignItems: 'center', gap: 6,
+            opacity: isFirst ? 0.55 : 1,
+            transition: 'all 0.18s',
+          }}
+        >
+          → הקודם
+        </button>
+        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600, color: TEXT_DARK }}>
+          שקופית {currentSlide + 1} מתוך {total}
+        </div>
+        <button
+          onClick={handleNext}
+          aria-label={isLast ? 'התחל תרגול' : 'שקופית הבאה'}
+          title={isLast ? 'התחל תרגול' : 'הבא (חץ שמאלי)'}
+          style={{
+            background: isLast ? '#D4AF37' : BUTTON_COLOR,
+            color: '#fff',
+            border: 'none',
+            borderRadius: 10, padding: '8px 20px',
+            cursor: 'pointer',
+            fontSize: 14, fontWeight: 700,
+            fontFamily: "'Rubik', sans-serif",
+            display: 'flex', alignItems: 'center', gap: 6,
+            boxShadow: isLast ? '0 4px 14px rgba(212,175,55,0.45)' : '0 4px 14px rgba(31,62,108,0.30)',
+            transition: 'all 0.18s',
+          }}
+        >
+          {isLast ? 'התחל תרגול ✓' : 'הבא ←'}
+        </button>
       </div>
 
       {/* Slide card */}
@@ -249,43 +303,10 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
         ))}
       </div>
 
-      {/* Floating prev/next arrows — fixed to viewport sides, always accessible
-          regardless of card scroll. RTL: 'הקודם' on the RIGHT (where the user
-          reads from), 'הבא' on the LEFT. Big circular buttons, vertical-center. */}
-      <button
-        onClick={handlePrev}
-        disabled={isFirst}
-        aria-label="שקופית קודמת"
-        title="שקופית קודמת (Shift+Tab)"
-        style={{
-          position: 'fixed', top: '50%', insetInlineEnd: 14, transform: 'translateY(-50%)',
-          width: 56, height: 56, borderRadius: '50%',
-          background: BUTTON_COLOR, color: '#fff', border: 'none',
-          fontSize: 26, fontWeight: 700, cursor: isFirst ? 'not-allowed' : 'pointer',
-          boxShadow: '0 6px 20px rgba(31,62,108,0.4)',
-          opacity: isFirst ? 0.35 : 1,
-          transition: 'all 0.18s', zIndex: 100,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}
-      >
-        →
-      </button>
-      <button
-        onClick={handleNext}
-        aria-label={isLast ? 'התחל תרגול' : 'שקופית הבאה'}
-        title={isLast ? 'התחל תרגול (Tab)' : 'שקופית הבאה (Tab)'}
-        style={{
-          position: 'fixed', top: '50%', insetInlineStart: 14, transform: 'translateY(-50%)',
-          width: 56, height: 56, borderRadius: '50%',
-          background: isLast ? '#D4AF37' : BUTTON_COLOR, color: '#fff', border: 'none',
-          fontSize: 26, fontWeight: 700, cursor: 'pointer',
-          boxShadow: isLast ? '0 6px 20px rgba(212,175,55,0.55)' : '0 6px 20px rgba(31,62,108,0.4)',
-          transition: 'all 0.18s', zIndex: 100,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}
-      >
-        {isLast ? '✓' : '←'}
-      </button>
+      {/* Floating side-arrows removed — replaced by labeled prev/next buttons
+          in the sticky strip at the top of the slide card (above). The strip
+          stays visible regardless of scroll, and 'הקודם' / 'הבא' labels make
+          the function unambiguous. */}
       {/* Hover styles for the formula copy button */}
       <style>{`
         .ws-formula-copy { transition: all 0.2s ease; }
