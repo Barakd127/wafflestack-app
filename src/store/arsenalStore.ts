@@ -129,15 +129,17 @@ export const KIND_META: Record<ArsenalKind, {
   border: string;
   description: string;
 }> = {
-  // "Aha! moment" — the realisation/insight type. Lightbulb 💡 is the
-  // universal Aha icon and pairs with "רגע אהה" in Hebrew.
+  // "Catch" (קאצ'ים) — the realisation/insight type. Lightbulb 💡 stays as
+  // the icon (universal Aha symbol). Label restored from "רגע אהה" to the
+  // user's preferred "קאצ'ים" — short, slangy, matches the Hebrew slang for
+  // catching subtle ideas.
   gotcha: {
-    label: 'רגע אהה',
+    label: 'קאצ\'',
     icon: '💡',
     color: '#b45309',
     bg: 'rgba(245,158,11,0.10)',
     border: 'rgba(245,158,11,0.35)',
-    description: 'תובנה או רגע גילוי שהאיר לכם משהו חדש על הנושא — חשוב לזכור כדי לא לטעות שוב.',
+    description: 'קאצ׳ — תובנה או רגע גילוי שהאיר לכם משהו חדש על הנושא. חשוב לזכור כדי לא לטעות שוב.',
   },
   // "Trick" — memorised shortcut / technique. Wand for "magic shortcut"
   // (the lightbulb moved to gotcha so we needed something distinct).

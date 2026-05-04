@@ -233,6 +233,18 @@ export function ProbabilityVisual() {
   const [pa, setPa] = useState(0.5)
   const [pb, setPb] = useState(0.4)
   const [pab, setPab] = useState(0.2)
+  // P(A∩B) is mathematically bounded by min(P(A), P(B)). But the user wants a
+  // full 0–1 slider so they can demonstrate "complete overlap". Solution: when
+  // they drag the intersection beyond min(pa,pb), AUTOMATICALLY raise pa & pb
+  // so the math stays valid. This way pab=1 → pa=pb=1 (everything coincides).
+  // Same idea symmetrically: lowering pa/pb below pab clamps pab down.
+  const setPabSafe = (next: number) => {
+    setPab(next)
+    if (next > pa) setPa(next)
+    if (next > pb) setPb(next)
+  }
+  const setPaSafe = (next: number) => { setPa(next); if (pab > next) setPab(next) }
+  const setPbSafe = (next: number) => { setPb(next); if (pab > next) setPab(next) }
   const inter = Math.min(pab, pa, pb)
   const union = pa + pb - inter
   const cond = pb > 0 ? (inter / pb).toFixed(2) : '—'
@@ -241,9 +253,9 @@ export function ProbabilityVisual() {
     <div style={WRAP}>
       <div style={CAPTION}>🎯 ויזואליזציה — הסתברות (דיאגרמת ון)</div>
       <div style={{ display: 'flex', gap: 12, marginBottom: 10, flexWrap: 'wrap' }}>
-        <label style={LABEL_STYLE}>P(A): <strong>{pa.toFixed(2)}</strong><input type="range" min={0} max={1} step={0.05} value={pa} onChange={e => setPa(+e.target.value)} style={SLIDER()} /></label>
-        <label style={LABEL_STYLE}>P(B): <strong>{pb.toFixed(2)}</strong><input type="range" min={0} max={1} step={0.05} value={pb} onChange={e => setPb(+e.target.value)} style={SLIDER('#f59e0b')} /></label>
-        <label style={LABEL_STYLE}>P(A∩B): <strong>{inter.toFixed(2)}</strong><input type="range" min={0} max={Math.min(pa, pb)} step={0.05} value={pab} onChange={e => setPab(+e.target.value)} style={SLIDER('#10b981')} /></label>
+        <label style={LABEL_STYLE}>P(A): <strong>{pa.toFixed(2)}</strong><input type="range" min={0} max={1} step={0.05} value={pa} onChange={e => setPaSafe(+e.target.value)} style={SLIDER()} /></label>
+        <label style={LABEL_STYLE}>P(B): <strong>{pb.toFixed(2)}</strong><input type="range" min={0} max={1} step={0.05} value={pb} onChange={e => setPbSafe(+e.target.value)} style={SLIDER('#f59e0b')} /></label>
+        <label style={LABEL_STYLE}>P(A∩B): <strong>{inter.toFixed(2)}</strong><input type="range" min={0} max={1} step={0.05} value={pab} onChange={e => setPabSafe(+e.target.value)} style={SLIDER('#10b981')} /></label>
       </div>
       {(() => {
         // Dynamic circle positions: dist between centers shrinks as pab grows.

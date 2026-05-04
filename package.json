@@ -17,6 +17,7 @@
     "@react-three/fiber": "^8.15.16",
     "@react-three/postprocessing": "^2.19.1",
     "@react-three/rapier": "^1.2.1",
+    "@supabase/supabase-js": "^2.105.1",
     "@xyflow/react": "^12.10.0",
     "axios": "^1.6.5",
     "framer-motion": "^11.0.3",

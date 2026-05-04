@@ -119,7 +119,7 @@ export default function ArsenalScreen() {
           </h1>
           <div style={{ fontSize: 14, color: TEXT_LIGHT, marginTop: 4 }}>
             {entries.length === 0
-              ? 'אוסף אישי של רגעי אהה, טריקים וטיפים שתפסת בדרך'
+              ? 'אוסף אישי של קאצ\'ים, טריקים וטיפים שתפסת בדרך'
               : `${entries.length} פריטים שתפסת עד עכשיו · המשך לתפוס!`}
           </div>
         </div>
@@ -369,10 +369,18 @@ function ArsenalCard({
           }}
         />
       ) : (
-        <div style={{
-          flex: 1, fontFamily: "'Assistant', sans-serif", fontSize: 14,
-          color: TEXT_MED, lineHeight: 1.6, whiteSpace: 'pre-wrap',
-        }}>
+        <div
+          // Force RTL on the catch text so Hebrew lays out correctly even when
+          // mixed with Latin/numeric tokens (e.g. equations or formula names).
+          // unicode-bidi:plaintext lets each line resolve its own direction.
+          dir="rtl"
+          style={{
+            flex: 1, fontFamily: "'Assistant', sans-serif", fontSize: 14,
+            color: TEXT_MED, lineHeight: 1.6, whiteSpace: 'pre-wrap',
+            direction: 'rtl', textAlign: 'right',
+            unicodeBidi: 'plaintext' as React.CSSProperties['unicodeBidi'],
+          }}
+        >
           {entry.text}
         </div>
       )}
@@ -545,7 +553,7 @@ function EmptyState({ hasEntries }: { hasEntries: boolean }) {
       <div style={{ fontSize: 14, lineHeight: 1.7, maxWidth: 460 }}>
         {hasEntries
           ? 'נסה לשנות את סוג הפריט או את הנושא, או הוסף פריט חדש.'
-          : 'תפוס רגעי אהה, טריקים וטיפים בזמן הלימוד —\nסמן טקסט בשיעור וייפתח כפתור "שמור לארסנל", או לחץ על "🎯 שמור כתובנה" אחרי שאלה שטעית בה.'}
+          : 'תפוס קאצ\'ים, טריקים וטיפים בזמן הלימוד —\nסמן טקסט בשיעור וייפתח כפתור "שמור לארסנל", או לחץ על "🎯 שמור כקאצ׳" אחרי שאלה שטעית בה.'}
       </div>
     </div>
   )

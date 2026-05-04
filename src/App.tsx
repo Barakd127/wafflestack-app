@@ -57,9 +57,12 @@ function App() {
         // Iframe's ← דף הבית button — always go to StudyHub regardless of where the user came from.
         setActiveView('study')
       } else if (d.type === 'ws-split') {
-        setActiveView('split-mindmap')
+        // Don't allow splitting a split — if we're already in any split-*
+        // view, ignore. Prevents nested-split confusion when the user clicks
+        // an iframe-internal split button while already inside a split pane.
+        setActiveView(prev => (prev === 'split' || prev === 'split-mindmap' || prev === 'split-study-mindmap') ? prev : 'split-mindmap')
       } else if (d.type === 'ws-split-study') {
-        setActiveView('split-study-mindmap')
+        setActiveView(prev => (prev === 'split' || prev === 'split-mindmap' || prev === 'split-study-mindmap') ? prev : 'split-study-mindmap')
       }
     }
     window.addEventListener('message', onMessage)

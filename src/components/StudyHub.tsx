@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLearningStore } from '../store/learningStore'
-import { initializeUser, getCurrentUser, loginUser, registerUser, logoutUser, listUsers, deleteUser, type User } from '../stores/authStore'
+import { initializeUser, getCurrentUser, loginUser, registerUser, logoutUser, onAuthStateChange, type User } from '../stores/authStore'
 import { loadProgress, recordQuizSession, saveCanvasNotes, type QuizAnswer, type UserProgress } from '../stores/progressStore'
 import quizBankData from '../data/quiz-bank.json'
 import LessonScreen from './LessonScreen'
@@ -93,7 +93,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
   const [displayName, setDisplayName] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const existingUsers = listUsers()
+  const existingUsers: User[] = []
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -120,13 +120,8 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
     }
   }
 
-  const handleQuickLogin = (userId: string) => {
-    const user = listUsers().find(u => u.userId === userId)
-    if (!user) return
-    // Quick-switch by building a session directly
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-    localStorage.setItem('wafflestack-session', JSON.stringify({ userId, expiresAt }))
-    onLogin(user as User)
+  const handleQuickLogin = (_userId: string) => {
+    // Not available with Supabase — panel never renders (existingUsers is always empty)
   }
 
   return (
@@ -1449,7 +1444,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
 
         {/* ── Companion tool (renders FIRST so the chip sits on top of it) ── */}
         {!isDone && tab !== 'none' && (
-          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: '#0d1628', zIndex: 1 }}>
+          <div style={{
+            position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 1,
+            // Only use the dark navy fallback for iframe-based tools (mindmap /
+            // canvas) where it sits behind the loading iframe. The arsenal is a
+            // React component with its own theme — let it inherit from the page
+            // so it tracks light/dark mode correctly.
+            background: tab === 'arsenal' ? 'var(--sh-page-bg)' : '#0d1628',
+          }}>
             {tab === 'mindmap' && (
               <iframe
                 key="quiz-mm"
@@ -1854,17 +1856,25 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
 
 // ── Root ───────────────────────────────────────────────────────────────────────
 const StudyHub = ({ onViewChange }: StudyHubProps) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(() => getCurrentUser())
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [internalView, setInternalView] = useState<InternalView>('home')
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>()
   const [quizDifficulty, setQuizDifficulty] = useState<DifficultyFilter>('all')
-  const [userProgress, setUserProgress] = useState<UserProgress>(() => {
-    const user = getCurrentUser() || initializeUser()
-    return loadProgress(user.userId)
-  })
+  const [userProgress, setUserProgress] = useState<UserProgress>(() =>
+    loadProgress(initializeUser().userId)
+  )
   const [sidebarWidth, setSidebarWidth] = useState(247)
   const sidebarDragging = useRef(false)
   const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    getCurrentUser().then(user => {
+      if (user) {
+        setCurrentUser(user)
+        setUserProgress(loadProgress(user.userId))
+      }
+    })
+  }, [])
 
   const onSidebarDragStart = useCallback((e: React.MouseEvent) => {
     sidebarDragging.current = true
