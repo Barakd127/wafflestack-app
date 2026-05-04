@@ -1333,6 +1333,22 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     }
   }
 
+  // Quiz prev/next — same UX as LessonScreen. 'הקודם' goes back if there's a
+  // previous question (always navigable since it's already been seen). 'הבא'
+  // jumps forward but only to questions the user has already reached
+  // (otherwise it would skip unread material). On the LAST answered question
+  // it falls back to handleSkip so 'הבא' always advances something.
+  const isFirstQ = currentQ === 0
+  const isLastQ = currentQ === total - 1
+  const canGoNextQ =
+    currentQ + 1 < total &&
+    dotStates[currentQ + 1] !== 'empty' // already visited
+  const navPrev = () => { if (!isFirstQ) navigateToQuestion(currentQ - 1) }
+  const navNext = () => {
+    if (canGoNextQ) navigateToQuestion(currentQ + 1)
+    else if (!isLastQ) handleSkip() // unseen → mark current as skipped and advance
+  }
+
   const handleSelfAssess = (correct: boolean) => {
     const xpReward = correct ? q.xp : 0
     recordAnswer(`studyhub-q${q.id}`, correct, xpReward)
@@ -1509,22 +1525,62 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   maxHeight: 'inherit',
                 }
           }>
-            {/* Card header strip — same gradient as LessonScreen, with collapse btn in chip mode */}
+            {/* Card header strip — labeled prev/next buttons (same UX as
+                LessonScreen) + question counter + difficulty + chip-collapse. */}
             <div style={{
               background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
-              color: '#fff', padding: '10px 18px',
-              display: 'flex', alignItems: 'center', gap: 10,
+              color: '#fff', padding: '10px 14px',
+              display: 'flex', alignItems: 'center', gap: 8,
               fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
               flexShrink: 0,
             }}>
-              <span>{isDone ? '🏆 סיום' : `שאלה ${currentQ + 1} / ${total}`}</span>
+              {!isDone && (
+                <button
+                  onClick={navPrev}
+                  disabled={isFirstQ}
+                  aria-label="שאלה קודמת"
+                  title="הקודם"
+                  style={{
+                    background: isFirstQ ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.18)',
+                    color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    borderRadius: 8, padding: '5px 12px',
+                    cursor: isFirstQ ? 'not-allowed' : 'pointer',
+                    fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
+                    opacity: isFirstQ ? 0.45 : 1,
+                  }}
+                >
+                  → הקודם
+                </button>
+              )}
+              <span style={{ flex: 1, textAlign: 'center' }}>{isDone ? '🏆 סיום' : `שאלה ${currentQ + 1} / ${total}`}</span>
               {!isDone && (q as any).difficulty && <QuizDifficultyBadge level={(q as any).difficulty} xp={q.xp} />}
+              {!isDone && (
+                <button
+                  onClick={navNext}
+                  disabled={isLastQ && !canGoNextQ}
+                  aria-label="שאלה הבאה"
+                  title={canGoNextQ ? 'הבא' : 'דלג והבא'}
+                  style={{
+                    background: '#D4AF37',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 8, padding: '5px 14px',
+                    cursor: (isLastQ && !canGoNextQ) ? 'not-allowed' : 'pointer',
+                    fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
+                    opacity: (isLastQ && !canGoNextQ) ? 0.45 : 1,
+                    boxShadow: '0 2px 8px rgba(212,175,55,0.35)',
+                  }}
+                >
+                  הבא ←
+                </button>
+              )}
               {!isDone && tab !== 'none' && (
                 <button
                   onClick={() => setChipExpanded(false)}
                   title="כווץ"
                   aria-label="כווץ שאלה"
-                  style={{ marginInlineStart: 'auto', background: 'rgba(255,255,255,0.12)', color: '#fff', border: 'none', borderRadius: 6, width: 26, height: 22, cursor: 'pointer', fontSize: 12, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: 'none', borderRadius: 6, width: 24, height: 22, cursor: 'pointer', fontSize: 12, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   ▴
                 </button>

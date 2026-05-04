@@ -3739,10 +3739,25 @@ window.addEventListener('message', function(e){
     var root = MM.nodes[MM.root];
     if (!root) { console.warn('ws-add-node: no root'); return; }
     var siblings = root.childIds ? root.childIds.length : 0;
-    var x = root.x + 260;
-    var y = root.y + (siblings - 2) * 70 + (Math.random() * 30 - 15);
     var kind = d.kind === 'equation' ? 'equation' : 'text';
-    var node = mmNode(kind, d.text || '', x, y, MM.root);
+    // connectMode === 'free' → place far from root with NO parent so the
+    // user can decide later where to connect it. 'connected' (default)
+    // adds as a child of root with a connection line drawn automatically.
+    var freeMode = d.connectMode === 'free';
+    var x, y, parentId;
+    if (freeMode) {
+      // Drop in the upper-left corner of the canvas, with random jitter so
+      // multiple free nodes don't stack. parentId is null → no connection.
+      var freeCount = Object.values(MM.nodes).filter(function(n){ return !n.parentId && n.id !== MM.root; }).length;
+      x = root.x - 450 - (freeCount % 3) * 30;
+      y = root.y - 200 + freeCount * 80;
+      parentId = null;
+    } else {
+      x = root.x + 260;
+      y = root.y + (siblings - 2) * 70 + (Math.random() * 30 - 15);
+      parentId = MM.root;
+    }
+    var node = mmNode(kind, d.text || '', x, y, parentId);
     if (kind === 'equation' && d.latex) { node.latex = d.latex; }
     MM.sel = node.id;
     if (typeof mmPushHistory === 'function') mmPushHistory();

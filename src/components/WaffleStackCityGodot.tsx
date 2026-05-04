@@ -139,10 +139,11 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
         <button
           onClick={onBack}
           aria-label="חזרה ללימוד"
-          // absolute (not fixed) so the button stays inside the city panel
-          // when in split mode. Sits at top-LEFT to avoid collision with
-          // App.tsx's dark-mode toggle at top-RIGHT.
-          className="absolute top-3 left-3 z-50 px-4 py-2 rounded-xl backdrop-blur-xl bg-white/10 border border-white/20 text-white text-sm hover:bg-white/25 transition-all shadow-lg"
+          // BOTTOM-left: top-left was overlapping the Godot HUD's "🏗️ Build"
+          // button (which sits inside the iframe at the top of the canvas).
+          // Bottom-left is empty space in the city view. Top-right stays for
+          // the dark-mode toggle.
+          className="absolute bottom-4 left-4 z-50 px-4 py-2 rounded-xl backdrop-blur-xl bg-white/10 border border-white/25 text-white text-sm hover:bg-white/25 transition-all shadow-lg"
         >
           ← חזרה ללימוד
         </button>

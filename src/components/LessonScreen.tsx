@@ -54,39 +54,52 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
   }
   const handlePrev = () => setCurrentSlide(s => Math.max(0, s - 1))
 
+  // Pending insertion (waiting for the user to choose connect-mode in the modal).
+  // null while the modal is closed; populated when the user clicks "add to map".
+  const [pendingInsert, setPendingInsert] = useState<
+    { text: string; kind: 'text' | 'equation'; sourceLabel: 'formula' | 'title' } | null
+  >(null)
+
   // Send a node into the mind map via postMessage. Equations render as KaTeX nodes.
-  const sendToMindMap = (text: string, kind: 'text' | 'equation' = 'text') => {
+  // `connectMode`: 'connected' (default — adds as child of root, connection
+  // line drawn) | 'free' (creates a disconnected node so the user can decide
+  // later where to connect it).
+  const sendToMindMap = (
+    text: string,
+    kind: 'text' | 'equation' = 'text',
+    connectMode: 'connected' | 'free' = 'connected',
+  ) => {
     const win = mindmapRef.current?.contentWindow
     if (!win) return false
     const payload = kind === 'equation'
-      ? { type: 'ws-add-node', kind, latex: text, text }
-      : { type: 'ws-add-node', kind, text }
+      ? { type: 'ws-add-node', kind, latex: text, text, connectMode }
+      : { type: 'ws-add-node', kind, text, connectMode }
     try { win.postMessage(payload, '*'); return true } catch { return false }
   }
 
-  const handleCopyFormula = (formula: string) => {
+  // Confirm the chooser: complete the pending insert with the user's choice.
+  const confirmInsert = (mode: 'connected' | 'free') => {
+    if (!pendingInsert) return
+    const { text, kind, sourceLabel } = pendingInsert
+    setPendingInsert(null)
     if (!mindmapOpen) setMindmapOpen(true)
-    // Slight delay so the iframe is mounted/loaded if it was just opened
     setTimeout(() => {
-      const ok = sendToMindMap(formula, 'equation')
+      const ok = sendToMindMap(text, kind, mode)
       if (ok) {
-        setCopied('formula')
+        setCopied(sourceLabel)
         setTimeout(() => setCopied(null), 1500)
       }
     }, mindmapOpen ? 0 : 320)
   }
 
+  const handleCopyFormula = (formula: string) => {
+    setPendingInsert({ text: formula, kind: 'equation', sourceLabel: 'formula' })
+  }
+
   const handleCopyTitle = () => {
-    if (!mindmapOpen) setMindmapOpen(true)
     const slide = slides[currentSlide]
     if (!slide) return
-    setTimeout(() => {
-      const ok = sendToMindMap(slide.title, 'text')
-      if (ok) {
-        setCopied('title')
-        setTimeout(() => setCopied(null), 1500)
-      }
-    }, mindmapOpen ? 0 : 320)
+    setPendingInsert({ text: slide.title, kind: 'text', sourceLabel: 'title' })
   }
 
   // Drag-to-resize the split
@@ -367,6 +380,89 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {rightPane}
       </div>
+
+      {/* ── Chooser modal: when adding to mindmap, ask whether to connect or
+            create a free-floating node. Pedagogically: encourages the user to
+            think about WHERE this concept fits before committing. ────────── */}
+      {pendingInsert && (
+        <div
+          dir="rtl"
+          onClick={() => setPendingInsert(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 1000,
+            background: 'rgba(13,22,40,0.62)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 16,
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: '#fff', borderRadius: 18, padding: '24px 28px',
+              maxWidth: 460, width: '100%',
+              boxShadow: '0 24px 60px rgba(0,0,0,0.45)',
+              border: '1px solid rgba(127,155,217,0.30)',
+              fontFamily: "'Rubik','Assistant',sans-serif",
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <span style={{ fontSize: 28 }}>🧠</span>
+              <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: TEXT_DARK }}>
+                איך להוסיף למפת חשיבה?
+              </h3>
+            </div>
+            <p style={{ margin: '6px 0 18px', fontSize: 14, color: TEXT_MED, lineHeight: 1.6 }}>
+              {pendingInsert.kind === 'equation'
+                ? 'בחרו אם הנוסחה הזו נקשרת לנושא הנוכחי שלכם, או שתעמוד בענף משלה ותתחברו אליה אחר כך.'
+                : 'בחרו אם הכותרת הזו נקשרת לנושא הנוכחי שלכם, או שתעמוד בענף משלה ותתחברו אליה אחר כך.'}
+            </p>
+            <div style={{ background: 'rgba(127,155,217,0.10)', borderRadius: 10, padding: '10px 14px', marginBottom: 18, fontSize: 14, color: TEXT_DARK, direction: pendingInsert.kind === 'equation' ? 'ltr' : 'rtl', textAlign: 'center', fontFamily: pendingInsert.kind === 'equation' ? "'Inter','Consolas',monospace" : 'inherit' }}>
+              {pendingInsert.text}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button
+                onClick={() => confirmInsert('connected')}
+                style={{
+                  background: BUTTON_COLOR, color: '#fff', border: 'none',
+                  borderRadius: 12, padding: '12px 18px', cursor: 'pointer',
+                  fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                  boxShadow: '0 4px 14px rgba(31,62,108,0.30)',
+                  textAlign: 'right',
+                }}
+              >
+                <span style={{ fontSize: 18 }}>🔗</span>
+                <span style={{ flex: 1, textAlign: 'right' }}>חבר עכשיו לנושא הנוכחי</span>
+              </button>
+              <button
+                onClick={() => confirmInsert('free')}
+                style={{
+                  background: '#fff', color: TEXT_DARK,
+                  border: '1.5px solid rgba(127,155,217,0.50)',
+                  borderRadius: 12, padding: '12px 18px', cursor: 'pointer',
+                  fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                  textAlign: 'right',
+                }}
+              >
+                <span style={{ fontSize: 18 }}>✨</span>
+                <span style={{ flex: 1, textAlign: 'right' }}>התחל ענף חדש (אחבר אחר כך)</span>
+              </button>
+              <button
+                onClick={() => setPendingInsert(null)}
+                style={{
+                  background: 'transparent', color: TEXT_LIGHT, border: 'none',
+                  padding: '8px', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit',
+                  marginTop: 4,
+                }}
+              >
+                ביטול
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
