@@ -233,33 +233,59 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
       {/* Interactive visualization */}
       {Visual && (<div><Visual /></div>)}
 
-      {/* Footer controls */}
-      <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <button
-          onClick={handlePrev}
-          disabled={isFirst}
-          style={{ ...secondaryBtnStyle, opacity: isFirst ? 0.4 : 1, cursor: isFirst ? 'not-allowed' : 'pointer' }}
-        >
-          → הקודם
-        </button>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {slides.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentSlide(idx)}
-              aria-label={`עבור לשקופית ${idx + 1}`}
-              style={{
-                width: 10, height: 10, borderRadius: '50%',
-                background: idx === currentSlide ? BUTTON_COLOR : 'rgba(127,155,217,0.35)',
-                border: 'none', cursor: 'pointer', padding: 0, transition: 'background 0.2s',
-              }}
-            />
-          ))}
-        </div>
-        <button onClick={handleNext} style={primaryBtnStyle}>
-          {isLast ? 'התחל תרגול ←' : 'הבא ←'}
-        </button>
+      {/* Footer controls — dot navigation only (prev/next moved to floating arrows) */}
+      <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
+        {slides.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCurrentSlide(idx)}
+            aria-label={`עבור לשקופית ${idx + 1}`}
+            style={{
+              width: idx === currentSlide ? 14 : 10, height: idx === currentSlide ? 14 : 10, borderRadius: '50%',
+              background: idx === currentSlide ? BUTTON_COLOR : 'rgba(127,155,217,0.35)',
+              border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.2s',
+            }}
+          />
+        ))}
       </div>
+
+      {/* Floating prev/next arrows — fixed to viewport sides, always accessible
+          regardless of card scroll. RTL: 'הקודם' on the RIGHT (where the user
+          reads from), 'הבא' on the LEFT. Big circular buttons, vertical-center. */}
+      <button
+        onClick={handlePrev}
+        disabled={isFirst}
+        aria-label="שקופית קודמת"
+        title="שקופית קודמת (Shift+Tab)"
+        style={{
+          position: 'fixed', top: '50%', insetInlineEnd: 14, transform: 'translateY(-50%)',
+          width: 56, height: 56, borderRadius: '50%',
+          background: BUTTON_COLOR, color: '#fff', border: 'none',
+          fontSize: 26, fontWeight: 700, cursor: isFirst ? 'not-allowed' : 'pointer',
+          boxShadow: '0 6px 20px rgba(31,62,108,0.4)',
+          opacity: isFirst ? 0.35 : 1,
+          transition: 'all 0.18s', zIndex: 100,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+      >
+        →
+      </button>
+      <button
+        onClick={handleNext}
+        aria-label={isLast ? 'התחל תרגול' : 'שקופית הבאה'}
+        title={isLast ? 'התחל תרגול (Tab)' : 'שקופית הבאה (Tab)'}
+        style={{
+          position: 'fixed', top: '50%', insetInlineStart: 14, transform: 'translateY(-50%)',
+          width: 56, height: 56, borderRadius: '50%',
+          background: isLast ? '#D4AF37' : BUTTON_COLOR, color: '#fff', border: 'none',
+          fontSize: 26, fontWeight: 700, cursor: 'pointer',
+          boxShadow: isLast ? '0 6px 20px rgba(212,175,55,0.55)' : '0 6px 20px rgba(31,62,108,0.4)',
+          transition: 'all 0.18s', zIndex: 100,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+      >
+        {isLast ? '✓' : '←'}
+      </button>
       {/* Hover styles for the formula copy button */}
       <style>{`
         .ws-formula-copy { transition: all 0.2s ease; }
