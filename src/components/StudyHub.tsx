@@ -8,6 +8,7 @@ import { LESSON_CONTENT } from '../data/lesson-content'
 import ArsenalScreen from './ArsenalScreen'
 import { useArsenalStore, quickAddArsenal } from '../store/arsenalStore'
 import PotionInventory from './PotionInventory'
+import { useTutorialStep } from '../hooks/useTutorialStep'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
@@ -1876,6 +1877,19 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
   const [sidebarWidth, setSidebarWidth] = useState(247)
   const sidebarDragging = useRef(false)
   const rootRef = useRef<HTMLDivElement>(null)
+  const sidebarTutRef = useRef<HTMLElement>(null)
+  const topbarTutRef = useRef<HTMLElement>(null)
+
+  useTutorialStep('study-sidebar', sidebarTutRef, {
+    title: 'התפריט שלך',
+    body:  'מכאן עוברים בין דף הבית, נושאי לימוד, חידונים והקאצ\'ים שאספת. אפשר לגרור את הקצה כדי לשנות רוחב.',
+    placement: 'left',
+  })
+  useTutorialStep('study-topbar', topbarTutRef, {
+    title: 'הסטטוס שלך',
+    body:  'כאן מופיעים ה-XP, המטבעות, ומנות הסיר שצברת. ככל שתאסוף יותר קאצ\'ים — תקבל יותר מנות.',
+    placement: 'bottom',
+  })
 
   useEffect(() => {
     getCurrentUser().then(user => {
@@ -1946,7 +1960,7 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
     <div ref={rootRef} style={{ width: '100%', height: '100%', display: 'flex', overflow: 'hidden', direction: 'rtl', background: PAGE_BG, fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
       <h1 style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>WaffleStack — דף הבית</h1>
       {/* Sidebar — right side (RTL) */}
-      <nav aria-label="ניווט ראשי" style={{ width: sidebarWidth, flexShrink: 0, position: 'relative', display: 'flex' }}>
+      <nav ref={sidebarTutRef} aria-label="ניווט ראשי" style={{ width: sidebarWidth, flexShrink: 0, position: 'relative', display: 'flex' }}>
         <Sidebar
           active={internalView}
           onNav={(view) => {
@@ -1977,7 +1991,7 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
 
       {/* Main */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <header><TopBar title={title} onLogout={handleLogout} /></header>
+        <header ref={topbarTutRef}><TopBar title={title} onLogout={handleLogout} /></header>
         {internalView === 'home' && (
           <HomeScreen
             onGoLearning={() => setInternalView('topics')}

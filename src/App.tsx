@@ -9,6 +9,7 @@ import WaffleStackCity from './components/WaffleStackCityGodot'
 import MissionControl from './components/MissionControl'
 import OnboardingFlow from './components/OnboardingFlow'
 import SplitLayout from './components/SplitLayout'
+import TutorialOverlay from './components/TutorialOverlay'
 
 type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap'
 
@@ -263,6 +264,8 @@ function App() {
       {activeView === 'onboarding' && (
         <OnboardingFlow onComplete={() => setActiveView('study')} />
       )}
+
+      {loggedIn && <TutorialOverlay />}
     </div>
   )
 }

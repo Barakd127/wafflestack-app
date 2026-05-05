@@ -79,7 +79,7 @@ function toPublicUser(r: LocalUserRecord): User {
 // ── Supabase helpers ──────────────────────────────────────────────────────────
 
 function toEmail(username: string): string {
-  return `${username.toLowerCase().trim()}@wafflestack.app`
+  return `${username.toLowerCase().trim().split('@')[0]}@wafflestack.app`
 }
 
 function supabaseUserToUser(sbUser: {
