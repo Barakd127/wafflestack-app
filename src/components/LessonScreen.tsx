@@ -156,7 +156,9 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
   }
 
   const slide = slides[currentSlide]
-  const Visual = TOPIC_VISUALS[topicId] as React.FC | undefined
+  // Slides may override the topic-level visual via `visualId` — used by the
+  // probability lesson to attach distinct Venn variants to specific slides.
+  const Visual = TOPIC_VISUALS[slide.visualId ?? topicId] as React.FC | undefined
 
   // ── Right-side content (slide + visualization + footer) ─────────────────────
   const rightPane = (

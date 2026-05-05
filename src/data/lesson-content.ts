@@ -16,6 +16,12 @@ export interface LessonSlide {
   title: string
   content: string
   formula?: string
+  /** Optional override of the topic-level visual. When set, the LessonScreen
+   *  will look up TOPIC_VISUALS[visualId] for this slide instead of the
+   *  topic's default visual. Used to attach the three Venn variants
+   *  (venn-independent / venn-disjoint / venn-dependent) to specific
+   *  probability slides. */
+  visualId?: string
 }
 
 export interface LessonTopic {
@@ -397,6 +403,28 @@ export const LESSON_CONTENT: LessonTopic[] = [
         title: 'תרגיל מסכם — בחירת קלפים',
         content:
           'מחבילה של 52 קלפים מוציאים 5 קלפים. מהי הסתברות לקבל 4 אסים? מספר אופנים לקבל 4 אסים מתוך 4: C(4,4)=1. הקלף החמישי מתוך 48 הנותרים: C(48,1)=48. סך כל ידיים אפשריות: C(52,5) = 2,598,960. P = 48/2,598,960 ≈ 0.0000185.',
+      },
+      // ── Three Venn variants — illustrate each event-relationship type ─────
+      {
+        title: 'מאורעות בלתי תלויים — זריקת שתי קוביות',
+        content:
+          'שני מאורעות נחשבים בלתי תלויים אם התרחשות אחד אינו משנה את ההסתברות של השני. דוגמה קלאסית: זריקת שתי קוביות הוגנות. A = "קוביה 1 מראה 6", B = "קוביה 2 מראה 6". מאחר שלקוביות אין "זיכרון" זו מזו, P(A∩B) = P(A)·P(B) = 1/6 · 1/6 = 1/36. שחקו עם הויזואליזציה — שימו לב שהחיתוך הוא בדיוק המכפלה.',
+        formula: 'A,B \\text{ב}"\\text{ת}\\iff P(A\\cap B) = P(A)\\cdot P(B)',
+        visualId: 'venn-independent',
+      },
+      {
+        title: 'מאורעות זרים — מין הילד',
+        content:
+          'שני מאורעות זרים (mutually exclusive) אם הם לא יכולים להתרחש יחד. דוגמה: A = "הילד הוא בן", B = "הילד היא בת". זה או זה — לא שניהם. P(A∩B) = 0, ולכן P(A∪B) = P(A) + P(B). שימו לב: זרים ≠ בלתי תלויים! זרים בעלי P חיובי הם תמיד תלויים — אם A קרה, אנחנו יודעים בוודאות ש-B לא קרה.',
+        formula: 'A\\cap B = \\emptyset \\Rightarrow P(A\\cup B) = P(A) + P(B)',
+        visualId: 'venn-disjoint',
+      },
+      {
+        title: 'תלות מלאה — מאורע מוכל',
+        content:
+          'כאשר מאורע אחד "כלוא" בתוך השני, יש בינהם תלות מלאה. דוגמה: B = "קניתי כרטיס הגרלה", A = "זכיתי בהגרלה". אי אפשר לזכות בלי לקנות, אז A ⊂ B. במקרה הזה: P(A∩B) = P(A), P(B|A) = 1 (כל זוכה בהכרח קנה כרטיס), ו-P(A|B) הוא ההסתברות שכרטיס יזכה. הויזואליזציה ממחישה: עיגול A הקטן יושב כולו בתוך עיגול B.',
+        formula: 'A\\subseteq B \\Rightarrow P(A\\cap B) = P(A)',
+        visualId: 'venn-dependent',
       },
     ],
   },
