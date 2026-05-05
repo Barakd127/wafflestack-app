@@ -1,13 +1,13 @@
 /**
- * authStore — Multi-user authentication backed by Supabase
- * Falls back to local-only guest session when Supabase is unavailable.
+ * authStore — Multi-user authentication.
  *
- * SETUP: In Supabase Dashboard → Authentication → Settings →
- *   disable "Enable email confirmations" for development / username-only sign-in.
+ * When Supabase env vars are present → full Supabase auth.
+ * When absent (local dev / Vercel without secrets) → localStorage-based auth
+ *   with a DJB2-hashed password. Good enough for classroom/demo use.
  *
- * Username-based sign-in uses the synthetic email pattern:
- *   {username}@wafflestack.app
- * No real emails are sent — usernames are the primary identity.
+ * SETUP (Supabase mode): Dashboard → Authentication → Settings →
+ *   disable "Enable email confirmations" for username-only sign-in.
+ *   Username maps to synthetic email: {username}@wafflestack.app
  */
 
 import { supabase } from '../lib/supabase'
@@ -21,7 +21,62 @@ export interface User {
   lastActiveAt: string
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+const SUPABASE_CONFIGURED = !!(
+  import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY
+)
+
+// ── Local-auth helpers ────────────────────────────────────────────────────────
+
+const LOCAL_USERS_KEY  = 'wafflestack-local-users'
+const LOCAL_ACTIVE_KEY = 'wafflestack-active-user'
+
+interface LocalUserRecord extends User {
+  passwordHash: number
+}
+
+function djb2(s: string): number {
+  let h = 5381
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i)
+  return h >>> 0
+}
+
+function stableId(username: string): string {
+  const a = djb2(username.toLowerCase())
+  const b = djb2(username + 'wafflestack')
+  return `local-${a.toString(16)}-${b.toString(16)}`
+}
+
+function loadLocalUsers(): LocalUserRecord[] {
+  try {
+    const raw = localStorage.getItem(LOCAL_USERS_KEY)
+    return raw ? (JSON.parse(raw) as LocalUserRecord[]) : []
+  } catch { return [] }
+}
+
+function saveLocalUsers(users: LocalUserRecord[]): void {
+  try { localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users)) } catch { /* quota */ }
+}
+
+function getActiveLocalUser(): User | null {
+  try {
+    const raw = localStorage.getItem(LOCAL_ACTIVE_KEY)
+    return raw ? (JSON.parse(raw) as User) : null
+  } catch { return null }
+}
+
+function setActiveLocalUser(user: User | null): void {
+  try {
+    if (user) localStorage.setItem(LOCAL_ACTIVE_KEY, JSON.stringify(user))
+    else localStorage.removeItem(LOCAL_ACTIVE_KEY)
+  } catch { /* quota */ }
+}
+
+function toPublicUser(r: LocalUserRecord): User {
+  const { passwordHash: _omit, ...pub } = r
+  return { ...pub, lastActiveAt: new Date().toISOString() }
+}
+
+// ── Supabase helpers ──────────────────────────────────────────────────────────
 
 function toEmail(username: string): string {
   return `${username.toLowerCase().trim()}@wafflestack.app`
@@ -43,9 +98,12 @@ function supabaseUserToUser(sbUser: {
   }
 }
 
-// ── Public API (same interface as before) ────────────────────────────────────
+// ── Public API ────────────────────────────────────────────────────────────────
 
 export async function getCurrentUser(): Promise<User | null> {
+  if (!SUPABASE_CONFIGURED) {
+    return getActiveLocalUser()
+  }
   try {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) return null
@@ -56,6 +114,16 @@ export async function getCurrentUser(): Promise<User | null> {
 }
 
 export async function loginUser(username: string, password: string): Promise<User | null> {
+  if (!SUPABASE_CONFIGURED) {
+    const users = loadLocalUsers()
+    const record = users.find(u => u.username.toLowerCase() === username.toLowerCase().trim())
+    if (!record) return null
+    if (record.passwordHash !== djb2(password)) return null
+    const user = toPublicUser(record)
+    setActiveLocalUser(user)
+    return user
+  }
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email: toEmail(username),
     password,
@@ -73,6 +141,27 @@ export async function registerUser(
   if (!username.trim()) return 'שם משתמש לא יכול להיות ריק'
   if (username.length < 2) return 'שם משתמש חייב להכיל לפחות 2 תווים'
   if (password.length < 4) return 'סיסמה חייבת להכיל לפחות 4 תווים'
+
+  if (!SUPABASE_CONFIGURED) {
+    const users = loadLocalUsers()
+    if (users.some(u => u.username.toLowerCase() === username.toLowerCase().trim())) {
+      return 'שם המשתמש כבר קיים'
+    }
+    const now = new Date().toISOString()
+    const record: LocalUserRecord = {
+      userId: stableId(username),
+      username: username.trim(),
+      displayName: displayName?.trim() || username.trim(),
+      role,
+      createdAt: now,
+      lastActiveAt: now,
+      passwordHash: djb2(password),
+    }
+    saveLocalUsers([...users, record])
+    const user = toPublicUser(record)
+    setActiveLocalUser(user)
+    return user
+  }
 
   const { data, error } = await supabase.auth.signUp({
     email: toEmail(username),
@@ -97,12 +186,14 @@ export async function registerUser(
 }
 
 export async function logoutUser(): Promise<void> {
+  if (!SUPABASE_CONFIGURED) {
+    setActiveLocalUser(null)
+    return
+  }
   await supabase.auth.signOut()
 }
 
 export function initializeUser(): User {
-  // Synchronous fallback for components that can't await — returns a guest.
-  // Real auth state should be checked via getCurrentUser() or onAuthStateChange.
   return {
     userId: `guest-${Date.now()}`,
     username: 'guest',
@@ -113,9 +204,12 @@ export function initializeUser(): User {
   }
 }
 
-// ── Auth state listener — call once at app root ───────────────────────────────
-
 export function onAuthStateChange(callback: (user: User | null) => void) {
+  if (!SUPABASE_CONFIGURED) {
+    // Local mode: no persistent listener needed — state is synchronous.
+    callback(getActiveLocalUser())
+    return { data: { subscription: { unsubscribe: () => {} } } }
+  }
   return supabase.auth.onAuthStateChange((_event, session) => {
     const user = session?.user
       ? supabaseUserToUser(session.user as Parameters<typeof supabaseUserToUser>[0])
@@ -127,12 +221,17 @@ export function onAuthStateChange(callback: (user: User | null) => void) {
 // ── Legacy helpers (kept for backward compat) ─────────────────────────────────
 
 export async function listUsers(): Promise<Omit<User, 'passwordHash'>[]> {
-  // Server-side user listing requires the service_role key — not available client-side.
-  // Return empty array; teacher dashboards should query via a Supabase Edge Function.
+  if (!SUPABASE_CONFIGURED) {
+    return loadLocalUsers().map(toPublicUser)
+  }
   return []
 }
 
 export function deleteUser(_userId: string): void {
-  // Deletion requires the service_role key — handle via Supabase dashboard or Edge Function.
+  if (!SUPABASE_CONFIGURED) {
+    const users = loadLocalUsers().filter(u => u.userId !== _userId)
+    saveLocalUsers(users)
+    return
+  }
   console.warn('deleteUser: use Supabase Dashboard or Edge Function for user deletion')
 }

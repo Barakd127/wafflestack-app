@@ -12,6 +12,8 @@ import PotionInventory from './PotionInventory'
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
   darkMode?: boolean
+  onLoggedIn?: () => void
+  onLoggedOut?: () => void
 }
 
 type InternalView = 'home' | 'learning' | 'topics' | 'lesson' | 'quiz-intro' | 'arsenal' | 'complete'
@@ -1863,7 +1865,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
 }
 
 // ── Root ───────────────────────────────────────────────────────────────────────
-const StudyHub = ({ onViewChange }: StudyHubProps) => {
+const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [internalView, setInternalView] = useState<InternalView>('home')
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>()
@@ -1880,9 +1882,10 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
       if (user) {
         setCurrentUser(user)
         setUserProgress(loadProgress(user.userId))
+        onLoggedIn?.()
       }
     })
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const onSidebarDragStart = useCallback((e: React.MouseEvent) => {
     sidebarDragging.current = true
@@ -1917,11 +1920,13 @@ const StudyHub = ({ onViewChange }: StudyHubProps) => {
     setCurrentUser(user)
     setUserProgress(loadProgress(user.userId))
     localStorage.setItem('userName', user.displayName || user.username)
+    onLoggedIn?.()
   }
 
   const handleLogout = () => {
     logoutUser()
     setCurrentUser(null)
+    onLoggedOut?.()
   }
 
   // Hydrate the per-user arsenal whenever the active user changes.

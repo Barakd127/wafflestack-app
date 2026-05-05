@@ -27,6 +27,7 @@ function App() {
     return stored !== null ? stored === 'true' : false
   })
   const [mindmapFrom, setMindmapFrom] = useState<string>('study')
+  const [loggedIn, setLoggedIn] = useState(false)
 
   const openMindMap = (from: string) => {
     setMindmapFrom(from)
@@ -106,23 +107,27 @@ function App() {
                 else setActiveView(v as View)
               }}
               darkMode={darkMode}
+              onLoggedIn={() => setLoggedIn(true)}
+              onLoggedOut={() => setLoggedIn(false)}
             />
-            <button
-              onClick={() => setActiveView('split')}
-              aria-label="פצל מסך — עיר ולימוד"
-              style={{
-                position: 'fixed', bottom: 24, left: 72, zIndex: 200,
-                background: 'rgba(51,81,202,0.85)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(99,162,255,0.5)',
-                borderRadius: 20, padding: '8px 18px',
-                color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(51,81,202,0.4)',
-                display: 'flex', alignItems: 'center', gap: 8,
-              }}
-            >
-              ⊟ עיר + לימוד
-            </button>
+            {loggedIn && (
+              <button
+                onClick={() => setActiveView('split')}
+                aria-label="פצל מסך — עיר ולימוד"
+                style={{
+                  position: 'fixed', bottom: 24, left: 72, zIndex: 200,
+                  background: 'rgba(51,81,202,0.85)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(99,162,255,0.5)',
+                  borderRadius: 20, padding: '8px 18px',
+                  color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(51,81,202,0.4)',
+                  display: 'flex', alignItems: 'center', gap: 8,
+                }}
+              >
+                ⊟ עיר + לימוד
+              </button>
+            )}
           </div>
         )}
 
