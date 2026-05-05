@@ -336,6 +336,60 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 
 /* ═══ v14: WB TOOLBAR ICONS ═══ */
 .wbt-icon{font-size:14px;display:flex;align-items:center;gap:3px}
+
+/* ═══ Notebook view ═══ */
+#notebook-panel{display:none;position:relative;height:calc(100vh - 52px - 36px);background:#0e1220;color:#e9ecf3;font-family:'Rubik','Assistant','Inter',sans-serif;flex-direction:row-reverse}
+body.notebook-mode #app{display:none}
+body.notebook-mode #notebook-panel{display:flex}
+body.notebook-mode #minimap-container{display:none}
+body.light #notebook-panel{background:#f8f9fc;color:#1a1f2e}
+.nb-tree{width:320px;min-width:220px;max-width:480px;flex-shrink:0;border-left:1px solid rgba(255,255,255,.08);overflow-y:auto;padding:12px 8px;background:rgba(20,24,40,.55)}
+body.light .nb-tree{background:rgba(99,102,241,.04);border-left:1px solid rgba(0,0,0,.08)}
+.nb-tree-header{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45)}
+body.light .nb-tree-header{color:rgba(0,0,0,.5)}
+.nb-tree-header button{background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit}
+.nb-tree-header button:hover{border-color:rgba(91,139,255,.6);color:#fff}
+body.light .nb-tree-header button{border-color:rgba(0,0,0,.15);color:rgba(0,0,0,.65)}
+.nb-row{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:6px;cursor:pointer;font-size:13px;user-select:none;direction:rtl}
+.nb-row:hover{background:rgba(255,255,255,.06)}
+body.light .nb-row:hover{background:rgba(99,102,241,.08)}
+.nb-row.selected{background:rgba(91,139,255,.22)}
+body.light .nb-row.selected{background:rgba(99,102,241,.18)}
+.nb-row .chev{width:14px;flex-shrink:0;text-align:center;color:rgba(255,255,255,.55);cursor:pointer;font-size:10px;transition:transform .15s}
+body.light .nb-row .chev{color:rgba(0,0,0,.5)}
+.nb-row .chev.empty{visibility:hidden}
+.nb-row .icon{font-size:13px;flex-shrink:0}
+.nb-row .label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nb-row .row-actions{display:none;gap:2px;flex-shrink:0}
+.nb-row:hover .row-actions{display:flex}
+.nb-row .row-actions button{background:transparent;border:none;color:rgba(255,255,255,.55);font-size:12px;padding:1px 5px;cursor:pointer;border-radius:4px}
+.nb-row .row-actions button:hover{background:rgba(255,255,255,.12);color:#fff}
+body.light .nb-row .row-actions button{color:rgba(0,0,0,.5)}
+body.light .nb-row .row-actions button:hover{background:rgba(0,0,0,.08);color:#000}
+.nb-content{flex:1;min-width:0;overflow-y:auto;padding:24px 36px;direction:rtl}
+.nb-breadcrumb{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:14px}
+body.light .nb-breadcrumb{color:rgba(0,0,0,.55)}
+.nb-breadcrumb span.crumb{color:rgba(165,180,252,.85);cursor:pointer}
+.nb-breadcrumb span.crumb:hover{text-decoration:underline}
+.nb-breadcrumb .sep{margin:0 6px;color:rgba(255,255,255,.3)}
+.nb-title-input{width:100%;background:transparent;border:none;outline:none;color:inherit;font-size:28px;font-weight:700;padding:0;margin-bottom:14px;font-family:inherit;direction:rtl}
+.nb-body{width:100%;min-height:260px;resize:vertical;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:12px 14px;color:#d6dcec;font-size:14px;line-height:1.7;font-family:inherit;outline:none;direction:rtl}
+body.light .nb-body{background:#fff;border-color:rgba(0,0,0,.08);color:#1a1f2e}
+.nb-body:focus{border-color:rgba(91,139,255,.55)}
+.nb-subpages{margin-top:30px}
+.nb-subpages h4{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);margin:0 0 8px 0;font-weight:600}
+body.light .nb-subpages h4{color:rgba(0,0,0,.5)}
+.nb-subpage-card{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:#c8d0e8;direction:rtl}
+body.light .nb-subpage-card{color:#1f2937}
+.nb-subpage-card:hover{background:rgba(255,255,255,.06)}
+body.light .nb-subpage-card:hover{background:rgba(99,102,241,.08)}
+.nb-add-page-btn{margin-top:6px;background:transparent;border:1px dashed rgba(255,255,255,.20);color:rgba(255,255,255,.65);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit}
+body.light .nb-add-page-btn{border-color:rgba(0,0,0,.18);color:rgba(0,0,0,.6)}
+.nb-add-page-btn:hover{border-color:rgba(91,139,255,.55);color:#fff}
+body.light .nb-add-page-btn:hover{border-color:rgba(99,102,241,.6);color:#000}
+.nb-empty{color:rgba(255,255,255,.4);padding:30px;text-align:center;font-size:13px}
+body.light .nb-empty{color:rgba(0,0,0,.45)}
+#nb-toggle-btn.active{background:rgba(91,139,255,.35)!important;border-color:rgba(91,139,255,.7)!important;color:#fff!important}
 </style>
 </head>
 <body>
@@ -352,6 +406,8 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
     <span style="color:rgba(255,255,255,.45);font-size:12px">Untitled</span>
   </div>
   <div class="tb-center">
+    <button class="tb-btn" id="nb-toggle-btn" onclick="nbToggle()" title="עבור בין מפת חשיבה למחברת">📔 מחברת</button>
+    <div class="tb-div"></div>
     <button class="tb-btn" onclick="mmAddChild()">+ Branch</button>
     <button class="tb-btn" onclick="mmAddEquation()">∑ Equation</button>
     <button class="tb-btn" onclick="mmAddCanvas()">⬜ Canvas</button>
@@ -397,6 +453,18 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
     <div id="mm-h-scroll"><div class="sb-thumb" id="mm-h-thumb"></div></div>
     <div id="mm-v-scroll"><div class="sb-thumb" id="mm-v-thumb"></div></div>
   </div>
+</div>
+
+<!-- Notebook view (toggled with body.notebook-mode) -->
+<div id="notebook-panel">
+  <aside class="nb-tree" id="nb-tree">
+    <div class="nb-tree-header">
+      <span>תיקיות</span>
+      <button onclick="nbAddFolder()" title="תיקייה חדשה ברמה העליונה">+ תיקייה</button>
+    </div>
+    <div id="nb-tree-rows"></div>
+  </aside>
+  <section class="nb-content" id="nb-content"></section>
 </div>
 
 <!-- Navigator Minimap (fixed bottom-right, smaller + collapsible) -->
@@ -3657,6 +3725,305 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Wait for KaTeX auto-render to complete
   setTimeout(ftbInit,400);
 });
+
+// ═══════════════════════════════════════════════════════════
+// NOTEBOOK VIEW — folder/page rendering of the mind-map tree
+// Same data as MM (MM.nodes / MM.root). Folder = node with childIds,
+// Page = leaf. Every node has a `body` (free-form notes), lazily added.
+// ═══════════════════════════════════════════════════════════
+const NB = {
+  active: false,
+  currentId: null,           // selected node id
+  expanded: new Set(['root']),
+};
+
+function nbToggle(){
+  NB.active = !NB.active;
+  document.body.classList.toggle('notebook-mode', NB.active);
+  const btn = document.getElementById('nb-toggle-btn');
+  if(btn){
+    btn.classList.toggle('active', NB.active);
+    btn.textContent = NB.active ? '🧠 מפת חשיבה' : '📔 מחברת';
+    btn.title = NB.active ? 'חזור למפת החשיבה' : 'עבור למחברת';
+  }
+  if(NB.active){
+    if(!NB.currentId || !MM.nodes[NB.currentId]) NB.currentId = MM.root;
+    NB.expanded.add(MM.root);
+    nbRender();
+  }
+}
+
+function nbSave(){
+  clearTimeout(_mmSaveTimer);
+  _mmSaveTimer = setTimeout(()=>{ try{ localStorage.setItem(MM_SAVE_KEY, JSON.stringify(MM)); }catch(e){} }, 500);
+}
+
+function nbCommitHistory(){
+  // Snapshot for undo, same shape as mmPushHistory()
+  if(typeof mmPushHistory==='function') mmPushHistory();
+}
+
+function nbAncestors(id){
+  const out = [];
+  let cur = MM.nodes[id];
+  while(cur){
+    out.unshift(cur);
+    cur = cur.parentId ? MM.nodes[cur.parentId] : null;
+  }
+  return out;
+}
+
+function nbBody(node){ return (node && typeof node.body === 'string') ? node.body : ''; }
+
+function nbAddChild(parentId, label){
+  const parent = MM.nodes[parentId] || MM.nodes[MM.root];
+  nbCommitHistory();
+  // Place visually somewhere — keep mindmap layout sane
+  const px = parent.x + 200;
+  const py = parent.y + (parent.childIds.length * 60);
+  const color = (typeof mmPickColor==='function') ? mmPickColor(parent.id) : '#60a5fa';
+  const n = mmNode('topic', label || 'דף חדש', px, py, parent.id, color);
+  n.body = '';
+  NB.expanded.add(parent.id);
+  NB.currentId = n.id;
+  nbSave();
+  nbRender();
+  return n.id;
+}
+
+function nbAddFolder(){
+  // "Top-level folder" = child of root
+  nbAddChild(MM.root, 'תיקייה חדשה');
+}
+
+function nbDelete(id){
+  if(id === MM.root){ alert('לא ניתן למחוק את הדף הראשי'); return; }
+  const n = MM.nodes[id]; if(!n) return;
+  const cnt = nbCountDescendants(id);
+  const msg = cnt > 0
+    ? `למחוק את "${n.text}" ואת ${cnt} תתי-הדפים?`
+    : `למחוק את "${n.text}"?`;
+  if(!confirm(msg)) return;
+  nbCommitHistory();
+  // Recursively remove
+  function rm(nid){
+    const node = MM.nodes[nid]; if(!node) return;
+    [...node.childIds].forEach(rm);
+    if(node.parentId && MM.nodes[node.parentId]){
+      MM.nodes[node.parentId].childIds = MM.nodes[node.parentId].childIds.filter(c => c !== nid);
+    }
+    delete MM.nodes[nid];
+  }
+  const parentId = n.parentId;
+  rm(id);
+  NB.currentId = (parentId && MM.nodes[parentId]) ? parentId : MM.root;
+  nbSave();
+  nbRender();
+}
+
+function nbCountDescendants(id){
+  let n = 0;
+  const node = MM.nodes[id]; if(!node) return 0;
+  for(const c of node.childIds){ n += 1 + nbCountDescendants(c); }
+  return n;
+}
+
+function nbMove(id, dir){
+  const n = MM.nodes[id]; if(!n || !n.parentId) return;
+  const p = MM.nodes[n.parentId]; if(!p) return;
+  const i = p.childIds.indexOf(id);
+  const j = dir === 'up' ? i - 1 : i + 1;
+  if(j < 0 || j >= p.childIds.length) return;
+  nbCommitHistory();
+  [p.childIds[i], p.childIds[j]] = [p.childIds[j], p.childIds[i]];
+  nbSave();
+  nbRender();
+}
+
+function nbRenameInline(id){
+  const n = MM.nodes[id]; if(!n) return;
+  const v = prompt('שם חדש:', n.text);
+  if(v === null) return;
+  nbCommitHistory();
+  n.text = v.trim() || n.text;
+  nbSave();
+  nbRender();
+}
+
+function nbSelect(id){
+  if(!MM.nodes[id]) return;
+  NB.currentId = id;
+  // Auto-expand ancestors so the row is visible
+  for(const a of nbAncestors(id)) NB.expanded.add(a.id);
+  nbRender();
+}
+
+function nbToggleExpand(id, e){
+  if(e) e.stopPropagation();
+  if(NB.expanded.has(id)) NB.expanded.delete(id);
+  else NB.expanded.add(id);
+  nbRender();
+}
+
+// ── Rendering ─────────────────────────────────────────────────────────────────
+
+function nbRenderTreeRows(){
+  const wrap = document.getElementById('nb-tree-rows');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  function row(id, depth){
+    const n = MM.nodes[id]; if(!n) return;
+    const hasKids = n.childIds && n.childIds.length > 0;
+    const expanded = NB.expanded.has(id);
+    const isSel = id === NB.currentId;
+
+    const el = document.createElement('div');
+    el.className = 'nb-row' + (isSel ? ' selected' : '');
+    el.style.paddingRight = (depth * 14 + 6) + 'px';
+    el.onclick = () => nbSelect(id);
+
+    const chev = document.createElement('span');
+    chev.className = 'chev' + (hasKids ? '' : ' empty');
+    chev.textContent = expanded ? '▾' : '◂';   // RTL chevron
+    chev.onclick = (e) => nbToggleExpand(id, e);
+    el.appendChild(chev);
+
+    const icon = document.createElement('span');
+    icon.className = 'icon';
+    icon.textContent = hasKids ? (expanded ? '📂' : '📁') : '📄';
+    el.appendChild(icon);
+
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = n.text || '(ללא שם)';
+    el.appendChild(label);
+
+    const acts = document.createElement('span');
+    acts.className = 'row-actions';
+    const mkBtn = (label, title, fn) => {
+      const b = document.createElement('button');
+      b.textContent = label; b.title = title;
+      b.onclick = (e) => { e.stopPropagation(); fn(); };
+      return b;
+    };
+    acts.appendChild(mkBtn('+', 'הוסף תת-דף',     () => nbAddChild(id)));
+    acts.appendChild(mkBtn('✎', 'שנה שם',         () => nbRenameInline(id)));
+    acts.appendChild(mkBtn('▲', 'הזז למעלה',      () => nbMove(id, 'up')));
+    acts.appendChild(mkBtn('▼', 'הזז למטה',       () => nbMove(id, 'down')));
+    if(id !== MM.root){
+      acts.appendChild(mkBtn('🗑', 'מחק',          () => nbDelete(id)));
+    }
+    el.appendChild(acts);
+
+    wrap.appendChild(el);
+
+    if(expanded && hasKids){
+      for(const cid of n.childIds) row(cid, depth + 1);
+    }
+  }
+  row(MM.root, 0);
+}
+
+function nbRenderContent(){
+  const wrap = document.getElementById('nb-content');
+  if(!wrap) return;
+  const n = MM.nodes[NB.currentId];
+  if(!n){
+    wrap.innerHTML = '<div class="nb-empty">בחר דף מהתפריט בצד</div>';
+    return;
+  }
+  wrap.innerHTML = '';
+
+  // Breadcrumb
+  const crumbs = nbAncestors(n.id);
+  if(crumbs.length > 1){
+    const bc = document.createElement('div');
+    bc.className = 'nb-breadcrumb';
+    crumbs.forEach((c, i) => {
+      if(i > 0){
+        const sep = document.createElement('span');
+        sep.className = 'sep'; sep.textContent = '›';
+        bc.appendChild(sep);
+      }
+      const span = document.createElement('span');
+      span.className = 'crumb';
+      span.textContent = c.text || '(ללא שם)';
+      span.onclick = () => nbSelect(c.id);
+      bc.appendChild(span);
+    });
+    wrap.appendChild(bc);
+  }
+
+  // Title
+  const title = document.createElement('input');
+  title.className = 'nb-title-input';
+  title.value = n.text || '';
+  title.placeholder = 'כותרת הדף';
+  let titleTimer = null;
+  title.oninput = (e) => {
+    n.text = e.target.value;
+    clearTimeout(titleTimer);
+    titleTimer = setTimeout(() => {
+      // Update tree row label without full rebuild flicker
+      nbRenderTreeRows();
+      nbSave();
+    }, 200);
+  };
+  title.onblur = () => { nbCommitHistory(); nbSave(); };
+  wrap.appendChild(title);
+
+  // Body
+  const body = document.createElement('textarea');
+  body.className = 'nb-body';
+  body.placeholder = 'כתוב כאן את התוכן של הדף... (תומך בטקסט חופשי)';
+  body.value = nbBody(n);
+  let bodyTimer = null;
+  body.oninput = (e) => {
+    n.body = e.target.value;
+    clearTimeout(bodyTimer);
+    bodyTimer = setTimeout(nbSave, 400);
+  };
+  body.onblur = () => { nbCommitHistory(); nbSave(); };
+  wrap.appendChild(body);
+
+  // Subpages list
+  const sub = document.createElement('div');
+  sub.className = 'nb-subpages';
+  const h4 = document.createElement('h4');
+  h4.textContent = `תתי-דפים (${n.childIds.length})`;
+  sub.appendChild(h4);
+  if(n.childIds.length === 0){
+    const empty = document.createElement('div');
+    empty.style.cssText = 'color:rgba(255,255,255,.35);font-size:12px;padding:6px 10px';
+    empty.textContent = 'אין תתי-דפים עדיין.';
+    sub.appendChild(empty);
+  } else {
+    for(const cid of n.childIds){
+      const c = MM.nodes[cid]; if(!c) continue;
+      const card = document.createElement('div');
+      card.className = 'nb-subpage-card';
+      card.onclick = () => nbSelect(cid);
+      const icon = document.createElement('span');
+      icon.textContent = (c.childIds && c.childIds.length) ? '📁' : '📄';
+      const lbl = document.createElement('span');
+      lbl.textContent = c.text || '(ללא שם)';
+      card.appendChild(icon); card.appendChild(lbl);
+      sub.appendChild(card);
+    }
+  }
+  const addBtn = document.createElement('button');
+  addBtn.className = 'nb-add-page-btn';
+  addBtn.textContent = '＋ הוסף תת-דף';
+  addBtn.onclick = () => nbAddChild(n.id);
+  sub.appendChild(addBtn);
+  wrap.appendChild(sub);
+}
+
+function nbRender(){
+  if(!NB.active) return;
+  nbRenderTreeRows();
+  nbRenderContent();
+}
 
 </script>
 
