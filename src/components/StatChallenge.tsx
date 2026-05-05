@@ -4,10 +4,12 @@
  * Features: concept explanation, live distribution chart, parameter sliders, quiz.
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { TopicViz } from './TopicViz'
 import { playCorrectTone, playWrongTone } from './SoundManager'
 import { getQuestionsForBuilding } from '../hooks/useQuiz'
+import { useArsenalStore } from '../store/arsenalStore'
+import { useLearningStore } from '../store/learningStore'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -754,6 +756,20 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
     return bankQuestions.length > 0 ? bankQuestions : content.quiz
   }, [building.id, content.quiz])
 
+  // Potion store subscriptions (read-only; no quizIndex dependency yet)
+  const activePotion      = useArsenalStore(s => s.activePotion)
+  const potionActivatedAt = useArsenalStore(s => s.potionActivatedAt)
+  const clearActivePotion = useArsenalStore(s => s.clearActivePotion)
+  // Speed Tonic: snapshot whether tonic was active when this quiz modal opened
+  const speedTonicAtStart = useRef<boolean>(false)
+  useEffect(() => {
+    speedTonicAtStart.current =
+      activePotion === 'trick' &&
+      potionActivatedAt !== null &&
+      Date.now() - potionActivatedAt < 5 * 60 * 1000
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Quiz state
   const [quizIndex, setQuizIndex] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
@@ -828,6 +844,17 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
 
   const currentQ = questions[quizIndex]
 
+  // Insight Lens: pick one wrong option index to visually dim on each question.
+  // Only active while activePotion === 'gotcha'; recalculates per question.
+  const [lensHintIdx, setLensHintIdx] = useState<number | null>(null)
+  useEffect(() => {
+    if (activePotion !== 'gotcha' || !currentQ) { setLensHintIdx(null); return }
+    const wrong: number[] = currentQ.options
+      .map((_: string, i: number) => i)
+      .filter((i: number) => i !== currentQ.correct)
+    setLensHintIdx(wrong.length > 0 ? wrong[Math.floor(Math.random() * wrong.length)] : null)
+  }, [quizIndex, activePotion]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleAnswer = (idx: number) => {
     if (selected !== null) return
     const elapsedSec = Math.max(1, Math.round((Date.now() - questionStartTime) / 1000))
@@ -839,6 +866,8 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
       setConfettiBurst(true)
       setTimeout(() => setConfettiBurst(false), 900)
       if (soundEnabled) playCorrectTone()
+      // Insight Lens used — consume the potion after first correct answer with it active
+      if (lensHintIdx !== null) clearActivePotion()
       // Personal best time — only celebrate when there was a previous benchmark to beat.
       if (bestEverTime === null || elapsedSec < bestEverTime) {
         const hadPrevBest = bestEverTime !== null
@@ -875,6 +904,11 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
       localStorage.setItem(`wafflestack-reviewed-${building.id}`, new Date().toISOString())
       if (finalScore / questions.length >= 0.7) {
         onComplete?.(building.id)
+        // Speed Tonic: award bonus XP (50% on top of base 50) and clear potion
+        if (speedTonicAtStart.current) {
+          clearActivePotion()
+          useLearningStore.getState().recordAnswer(`speed-tonic-${building.id}`, true, 25)
+        }
       }
       // Persist best-ever streak per building
       if (peakStreak > bestEverStreak) {
@@ -1370,11 +1404,18 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                 {/* XP earned — only on perfect score */}
                 {score === questions.length && (
                   <div style={{
-                    background: 'rgba(255,215,0,0.12)', border: '1px solid rgba(255,215,0,0.3)',
+                    background: speedTonicAtStart.current ? 'rgba(124,58,237,0.12)' : 'rgba(255,215,0,0.12)',
+                    border: `1px solid ${speedTonicAtStart.current ? 'rgba(124,58,237,0.35)' : 'rgba(255,215,0,0.3)'}`,
                     borderRadius: 12, padding: '8px 20px', marginBottom: 20,
-                    fontSize: 14, color: '#FFD700', fontWeight: 700,
+                    fontSize: 14, color: speedTonicAtStart.current ? '#9f7aea' : '#FFD700', fontWeight: 700,
+                    display: 'flex', alignItems: 'center', gap: 8,
                   }}>
-                    ⭐ +50 XP Earned!
+                    <span>⭐ +{speedTonicAtStart.current ? 75 : 50} XP Earned!</span>
+                    {speedTonicAtStart.current && (
+                      <span style={{ fontSize: 11, background: 'rgba(124,58,237,0.15)', borderRadius: 6, padding: '2px 7px' }}>
+                        ⚗️ Speed Tonic ×1.5
+                      </span>
+                    )}
                   </div>
                 )}
 
@@ -1718,17 +1759,32 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   {currentQ.q}
                 </div>
 
+                {/* Insight Lens badge — shown above options when active */}
+                {lensHintIdx !== null && selected === null && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6,
+                    background: 'rgba(180,83,9,0.08)', border: '1px solid rgba(180,83,9,0.25)',
+                    borderRadius: 8, padding: '5px 10px', fontSize: 11,
+                    color: '#b45309', fontFamily: "'Rubik', sans-serif",
+                  }}>
+                    <span>🔮</span>
+                    <span>עדשת תובנה פעילה — תשובה אחת מוצללת</span>
+                  </div>
+                )}
+
                 {/* Options */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {currentQ.options.map((opt, idx) => {
                     const isCorrect = idx === currentQ.correct
                     const isSelected = idx === selected
-                    let bg = 'rgba(255,255,255,0.5)'
-                    let border = '1px solid rgba(31,62,108,0.12)'
-                    let textColor = '#254A9F'
+                    const isLensHinted = lensHintIdx === idx && selected === null
+                    let bg = isLensHinted ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.5)'
+                    let border = isLensHinted ? '1px dashed rgba(180,83,9,0.35)' : '1px solid rgba(31,62,108,0.12)'
+                    let textColor = isLensHinted ? 'rgba(37,74,159,0.3)' : '#254A9F'
                     if (selected !== null) {
                       if (isCorrect) { bg = 'rgba(31,122,110,0.12)'; border = '2px solid #1F7A6E'; textColor = '#1F7A6E' }
                       else if (isSelected) { bg = 'rgba(155,32,32,0.08)'; border = '1px solid #9B2020'; textColor = '#9B2020' }
+                      else if (isLensHinted) { bg = 'rgba(0,0,0,0.03)'; border = '1px dashed rgba(180,83,9,0.3)'; textColor = 'rgba(37,74,159,0.35)' }
                     }
                     return (
                       <button
@@ -1741,6 +1797,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                           color: textColor, fontSize: 13, textAlign: 'right',
                           direction: 'rtl', transition: 'all 0.2s',
                           display: 'flex', gap: 10, alignItems: 'center',
+                          opacity: isLensHinted && selected === null ? 0.4 : 1,
                         }}
                       >
                         <span style={{

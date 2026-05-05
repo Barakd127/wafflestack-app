@@ -27,17 +27,41 @@ export interface ArsenalEntry {
 interface ArsenalState {
   entries: ArsenalEntry[]
   currentUserId: string | null
+  potionsUsed: Record<ArsenalKind, number>
+  activePotion: ArsenalKind | null
+  potionActivatedAt: number | null
+  memoryTeaRemaining: number
   hydrate: (userId: string) => void
   addEntry: (input: Omit<ArsenalEntry, 'id' | 'createdAt' | 'pinned'>) => string
   removeEntry: (id: string) => void
   togglePin: (id: string) => void
   editEntry: (id: string, text: string) => void
+  activatePotion: (kind: ArsenalKind) => void
+  consumeMemoryTea: () => void
+  clearActivePotion: () => void
 }
 
 const KEY_PREFIX = 'wafflestack-arsenal-v1-'
+const POTION_KEY_PREFIX = 'wafflestack-potions-v1-'
 
 function storageKey(userId: string): string {
   return KEY_PREFIX + userId
+}
+
+function potionStorageKey(userId: string): string {
+  return POTION_KEY_PREFIX + userId
+}
+
+function loadPotionState(userId: string): { potionsUsed: Record<ArsenalKind, number> } {
+  try {
+    const raw = localStorage.getItem(potionStorageKey(userId))
+    if (!raw) return { potionsUsed: { gotcha: 0, trick: 0, tip: 0 } }
+    return JSON.parse(raw)
+  } catch { return { potionsUsed: { gotcha: 0, trick: 0, tip: 0 } } }
+}
+
+function savePotionState(userId: string, data: { potionsUsed: Record<ArsenalKind, number> }): void {
+  try { localStorage.setItem(potionStorageKey(userId), JSON.stringify(data)) } catch { /* quota */ }
 }
 
 function loadEntries(userId: string): ArsenalEntry[] {
@@ -63,9 +87,14 @@ function makeId(): string {
 export const useArsenalStore = create<ArsenalState>((set, get) => ({
   entries: [],
   currentUserId: null,
+  potionsUsed: { gotcha: 0, trick: 0, tip: 0 },
+  activePotion: null,
+  potionActivatedAt: null,
+  memoryTeaRemaining: 0,
 
   hydrate: (userId) => {
-    set({ entries: loadEntries(userId), currentUserId: userId })
+    const { potionsUsed } = loadPotionState(userId)
+    set({ entries: loadEntries(userId), currentUserId: userId, potionsUsed })
   },
 
   addEntry: (input) => {
@@ -110,11 +139,47 @@ export const useArsenalStore = create<ArsenalState>((set, get) => ({
       return { entries: next }
     })
   },
+
+  activatePotion: (kind) => {
+    const { entries, potionsUsed, currentUserId, activePotion } = get()
+    if (activePotion) return // one at a time
+    const earned = Math.floor(entries.filter(e => e.kind === kind).length / 3)
+    const available = Math.max(0, earned - (potionsUsed[kind] ?? 0))
+    if (available <= 0) return
+    const newUsed = { ...potionsUsed, [kind]: (potionsUsed[kind] ?? 0) + 1 }
+    if (currentUserId) savePotionState(currentUserId, { potionsUsed: newUsed })
+    set({
+      potionsUsed: newUsed,
+      activePotion: kind,
+      potionActivatedAt: Date.now(),
+      memoryTeaRemaining: kind === 'tip' ? 3 : 0,
+    })
+  },
+
+  consumeMemoryTea: () => {
+    set(state => {
+      const remaining = state.memoryTeaRemaining - 1
+      if (remaining <= 0) return { memoryTeaRemaining: 0, activePotion: null, potionActivatedAt: null }
+      return { memoryTeaRemaining: remaining }
+    })
+  },
+
+  clearActivePotion: () => {
+    set({ activePotion: null, potionActivatedAt: null, memoryTeaRemaining: 0 })
+  },
 }))
 
 /** Convenience helper for code outside React (e.g. quiz wrong-answer button). */
 export function quickAddArsenal(input: Omit<ArsenalEntry, 'id' | 'createdAt' | 'pinned'>): string {
   return useArsenalStore.getState().addEntry(input)
+}
+
+/** Hook: how many charges of this potion kind the user can still activate. */
+export function useAvailablePotion(kind: ArsenalKind): number {
+  const entries = useArsenalStore(s => s.entries)
+  const potionsUsed = useArsenalStore(s => s.potionsUsed)
+  const earned = Math.floor(entries.filter(e => e.kind === kind).length / 3)
+  return Math.max(0, earned - (potionsUsed[kind] ?? 0))
 }
 
 /** Hebrew labels, icons, accent colours, and the long-form description shown
@@ -161,4 +226,12 @@ export const KIND_META: Record<ArsenalKind, {
     border: 'rgba(99,102,241,0.35)',
     description: 'עצה כללית או דגש שכדאי לזכור — לא טעות ולא טריק, אלא הכוונה לדרך הנכונה לחשוב על הנושא.',
   },
+}
+
+export const POTION_META: Record<ArsenalKind, {
+  name: string; nameHe: string; effect: string; icon: string; color: string; threshold: number
+}> = {
+  gotcha: { name: 'Insight Lens', nameHe: 'עדשת תובנה',   effect: 'שאלת MCQ הבאה: תשובה שגויה אחת מסומנת', icon: '🔮', color: '#b45309', threshold: 3 },
+  trick:  { name: 'Speed Tonic',  nameHe: 'טוניק מהירות', effect: 'חידון בניין הבא: XP ×1.5 (5 דקות)',       icon: '⚗️', color: '#7c3aed', threshold: 3 },
+  tip:    { name: 'Memory Tea',   nameHe: 'תה זיכרון',    effect: '3 שאלות הבאות: XP ×2',                    icon: '🍵', color: '#1e40af', threshold: 3 },
 }

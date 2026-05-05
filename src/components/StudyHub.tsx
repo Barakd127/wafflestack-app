@@ -7,6 +7,7 @@ import LessonScreen from './LessonScreen'
 import { LESSON_CONTENT } from '../data/lesson-content'
 import ArsenalScreen from './ArsenalScreen'
 import { useArsenalStore, quickAddArsenal } from '../store/arsenalStore'
+import PotionInventory from './PotionInventory'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
@@ -951,6 +952,8 @@ function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
         }}>
           ⭐ {xp} XP
         </span>
+        {/* Potion inventory chips */}
+        <PotionInventory />
         <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_DARK }}>שלום, {userName}</span>
         {/* Logout button */}
         {onLogout && (
@@ -1345,7 +1348,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   }
 
   const handleSelfAssess = (correct: boolean) => {
-    const xpReward = correct ? q.xp : 0
+    let xpReward = correct ? q.xp : 0
+    // Memory Tea: double XP for the next 3 correct answers
+    if (correct && xpReward > 0 && useArsenalStore.getState().activePotion === 'tip') {
+      xpReward = xpReward * 2
+      useArsenalStore.getState().consumeMemoryTea()
+    }
     recordAnswer(`studyhub-q${q.id}`, correct, xpReward)
 
     const next = [...dotStates]
