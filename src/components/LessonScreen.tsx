@@ -257,29 +257,44 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
         </button>
       </div>
 
-      {/* Slide card */}
+      {/* Slide card — theory is the heart of the lesson, give it presence */}
       <div
         data-arsenal-source="slide"
         data-arsenal-topic={topicId}
-        style={{ ...glassCardStyle, padding: '26px 30px', marginBottom: 18 }}
+        style={{
+          ...glassCardStyle,
+          padding: '40px 48px',
+          marginBottom: 22,
+          minHeight: 260,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-start',
+        }}
       >
-        <h3 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 20, fontWeight: 700, color: TEXT_DARK, marginTop: 0, marginBottom: 14, textAlign: 'right' }}>
+        <h3 style={{
+          fontFamily: "'Rubik', sans-serif", fontSize: 30, fontWeight: 700,
+          color: TEXT_DARK, marginTop: 0, marginBottom: 22, textAlign: 'right',
+          lineHeight: 1.3, letterSpacing: '-0.01em',
+        }}>
           {slide.title}
         </h3>
-        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15.5, color: TEXT_MED, lineHeight: 1.8, textAlign: 'right', whiteSpace: 'pre-wrap' }}>
+        <div style={{
+          fontFamily: "'Assistant', sans-serif", fontSize: 18.5, color: TEXT_MED,
+          lineHeight: 1.95, textAlign: 'right', whiteSpace: 'pre-wrap', flex: 1,
+        }}>
           {slide.content}
         </div>
         {slide.formula && (
-          <div style={{ position: 'relative', marginTop: 18 }}>
+          <div style={{ position: 'relative', marginTop: 24 }}>
             <div style={{
               background: 'rgba(127,155,217,0.12)',
               border: '1px solid rgba(127,155,217,0.3)',
-              borderRadius: 12,
-              padding: '18px 18px',
+              borderRadius: 14,
+              padding: '24px 22px',
               direction: 'ltr',
               textAlign: 'center',
-              minHeight: 56,
-              fontSize: 19,
+              minHeight: 72,
+              fontSize: 22,
               color: TEXT_DARK,
             }}>
               <KatexFormula latex={slide.formula} />
