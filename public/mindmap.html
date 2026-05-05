@@ -429,7 +429,7 @@ body.light .nb-empty{color:rgba(0,0,0,.45)}
     <button class="tb-btn" onclick="mmExportJSON()">💾 Export</button>
     <button class="tb-btn" onclick="mmImportJSON()">📂 Import</button>
     <button class="tb-btn" onclick="mmExportPNG()">🖼 PNG</button>
-    <button class="tb-btn" onclick="if(confirm('Clear all nodes?'))initMM()">🗑 Clear</button>
+    <button class="tb-btn" onclick="mmClearAll()">🗑 Clear</button>
     <div class="tb-div"></div>
     <button class="tb-btn" id="pomo-topbar-btn" onclick="pomoToggleWidget()" title="Pomodoro Timer">🍅 Pomo</button>
   </div>
@@ -949,6 +949,9 @@ function mmAddChild(parentId){
   const sel=parentId||MM.sel||MM.root;
   const parent=MM.nodes[sel];
   if(!parent)return;
+  // Auto-expand the parent so the new child isn't immediately hidden by
+  // mmIsVisible() — root cause of the "+ Branch added but invisible" bug.
+  if(parent.collapsed) parent.collapsed=false;
   const baseY=mmNextChildY(parent);
   const n=mmNode('branch','New Branch',parent.x+MM_XSTEP,baseY,sel,mmPickColor(sel));
   mmFinishAdd(n,true);
@@ -2630,9 +2633,16 @@ function updateNodeEl(el, n) {
 
 function applyTemplate(name){
   const def=TEMPLATES[name];if(!def)return;
-  const pos=findNextTemplatePos();
+  // Anchor on the currently-selected node (or root) so the new template lands
+  // adjacent to what the user is looking at — not at maxX+120 which dropped
+  // it far off the edge of large maps.
+  const anchorId = (MM.sel && MM.nodes[MM.sel]) ? MM.sel : MM.root;
+  const anchor = MM.nodes[anchorId];
+  const pos = findNextTemplatePos(anchor);
   const topCount=MM.nodes[MM.root].childIds.length;
   const color=NODE_COLORS[topCount%NODE_COLORS.length];
+  // Templates always attach under root for now (canvas nodes are top-level),
+  // but visually placed near the anchor so they stay close to existing tree.
   const cn=mmNode('canvas',def.title,pos.x,pos.y,MM.root,color);
   try{if(def.sceneFn)cn.scene=def.sceneFn();}catch(e){console.warn('Template scene error:',e);}
   const branchSpacing=60;
@@ -2649,13 +2659,31 @@ function applyTemplate(name){
   setTimeout(()=>renderThumb(cn.id),60);
 }
 
-function findNextTemplatePos(){
-  // Place new template to the right of all existing nodes, at a comfortable offset
-  let maxX=-Infinity,maxY=-Infinity;
-  for(const id in MM.nodes){const n=MM.nodes[id];maxX=Math.max(maxX,n.x+(n.W||140));maxY=Math.max(maxY,n.y+(n.H||40));}
-  if(maxX===-Infinity){maxX=400;maxY=100;}
-  const existingCanvases=Object.values(MM.nodes).filter(n=>n.type==='canvas').length;
-  return{x:maxX+120,y:Math.max(0,maxY/2-72)+existingCanvases*240};
+function findNextTemplatePos(anchor){
+  // Place the new template just below the anchor node (selected or root) and
+  // step down for each existing canvas already in that area, so multiple
+  // templates stack in a column instead of flying off to the right.
+  if(!anchor){
+    let maxX=-Infinity,maxY=-Infinity;
+    for(const id in MM.nodes){const n=MM.nodes[id];maxX=Math.max(maxX,n.x+(n.W||140));maxY=Math.max(maxY,n.y+(n.H||40));}
+    if(maxX===-Infinity){maxX=400;maxY=100;}
+    return{x:maxX+120,y:maxY+40};
+  }
+  const baseX = anchor.x;
+  const baseY = anchor.y + (anchor.H||40) + 40;
+  // Step down past any canvas that already occupies a similar column.
+  let y = baseY;
+  let tries = 0;
+  while(tries++ < 40){
+    const overlap = Object.values(MM.nodes).some(n =>
+      n.type === 'canvas' &&
+      Math.abs(n.x - baseX) < 80 &&
+      Math.abs(n.y - y)    < (n.H||145) + 20
+    );
+    if(!overlap) break;
+    y += 240;
+  }
+  return { x: baseX, y };
 }
 
 function sceneVenn(){
@@ -2905,6 +2933,18 @@ document.addEventListener('keydown', e => {
     e.preventDefault(); mmRedo();
   } else if((e.ctrlKey||e.metaKey)&&e.key==='f'){
     e.preventDefault(); openSearch();
+  } else if((e.ctrlKey||e.metaKey)&&(e.key==='a'||e.key==='A')){
+    // Select all visible non-root nodes into multiSel
+    e.preventDefault();
+    const all = [];
+    for(const id in MM.nodes){
+      if(id === MM.root) continue;
+      if(typeof mmIsVisible==='function' && !mmIsVisible(id)) continue;
+      all.push(id);
+    }
+    MM.multiSel = all;
+    MM.sel = all[0] || null;
+    mmRender();
   } else if(e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='ArrowUp'||e.key==='ArrowDown'){
     // Arrow-key navigation between topics and side topics
     e.preventDefault();
@@ -3725,6 +3765,27 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Wait for KaTeX auto-render to complete
   setTimeout(ftbInit,400);
 });
+
+// ═══════════════════════════════════════════════════════════
+// CLEAR ALL — wipes both runtime state and persisted data
+// (the old "if(confirm)initMM()" silently reloaded from localStorage,
+//  so the user saw nothing change)
+// ═══════════════════════════════════════════════════════════
+function mmClearAll(){
+  if(!confirm('למחוק את כל המפה? הפעולה לא הפיכה.')) return;
+  try{ localStorage.removeItem(MM_SAVE_KEY); }catch(e){}
+  MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0};
+  MM.nodes.root = mmNode('root','Untitled',100,100,null,'#60a5fa');
+  MM_HISTORY=[cloneMMForHistory()];
+  MM_REDO=[];
+  if(typeof mmRender==='function') mmRender();
+  // If notebook is open, refresh it too so the empty state shows there.
+  if(typeof NB!=='undefined' && NB.active){
+    NB.currentId = MM.root;
+    NB.expanded = new Set([MM.root]);
+    if(typeof nbRender==='function') nbRender();
+  }
+}
 
 // ═══════════════════════════════════════════════════════════
 // NOTEBOOK VIEW — folder/page rendering of the mind-map tree
