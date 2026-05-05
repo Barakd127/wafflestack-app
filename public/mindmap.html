@@ -390,6 +390,91 @@ body.light .nb-add-page-btn:hover{border-color:rgba(99,102,241,.6);color:#000}
 .nb-empty{color:rgba(255,255,255,.4);padding:30px;text-align:center;font-size:13px}
 body.light .nb-empty{color:rgba(0,0,0,.45)}
 #nb-toggle-btn.active{background:rgba(91,139,255,.35)!important;border-color:rgba(91,139,255,.7)!important;color:#fff!important}
+
+/* ═══ Node note badge (X-Mind-style inline note) ═══ */
+.node-note-badge{
+  position:absolute; top:-8px; left:-8px;
+  width:18px; height:18px; border-radius:50%;
+  background:rgba(255,255,255,.85);
+  border:1px solid rgba(0,0,0,.18);
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; line-height:1; cursor:pointer;
+  opacity:0; transition:opacity .15s, transform .12s;
+  z-index:5; user-select:none;
+}
+.node-wrap:hover .node-note-badge{opacity:1}
+.node-note-badge:hover{transform:scale(1.15);background:#fff}
+.node-note-badge.has-note{
+  opacity:1; background:#fef3c7; border-color:#f59e0b;
+}
+body.light .node-note-badge{background:rgba(255,255,255,.95)}
+
+/* ═══ Note editor popover ═══ */
+#note-editor-overlay{
+  position:fixed; inset:0; z-index:9000;
+  background:rgba(0,0,0,.5); display:flex;
+  align-items:center; justify-content:center;
+  font-family:'Rubik','Inter',sans-serif;
+}
+#note-editor-panel{
+  width:min(560px,90vw); max-height:85vh;
+  background:#1e1e2e; color:#e9ecf3;
+  border:1px solid rgba(99,102,241,.4);
+  border-radius:14px; display:flex; flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,.7);
+  overflow:hidden;
+}
+body.light #note-editor-panel{background:#ffffff;color:#1a1f2e;border-color:rgba(99,102,241,.3)}
+#note-editor-header{
+  padding:14px 18px; border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+body.light #note-editor-header{border-bottom-color:rgba(0,0,0,.08)}
+#note-editor-title{
+  flex:1; font-size:14px; font-weight:600;
+  background:transparent; border:none; outline:none; color:inherit;
+  font-family:inherit; direction:rtl;
+}
+#note-editor-close{
+  background:transparent; border:none; color:rgba(255,255,255,.6);
+  font-size:22px; cursor:pointer; line-height:1; padding:0 4px;
+}
+body.light #note-editor-close{color:rgba(0,0,0,.55)}
+#note-editor-body{
+  flex:1; min-height:280px;
+  background:rgba(255,255,255,.03);
+  border:none; outline:none; resize:none;
+  padding:16px 18px; color:inherit;
+  font-family:inherit; font-size:14px; line-height:1.7;
+  direction:rtl;
+}
+body.light #note-editor-body{background:#fafbff;color:#1a1f2e}
+#note-editor-footer{
+  padding:10px 16px; border-top:1px solid rgba(255,255,255,.08);
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  font-size:11px; color:rgba(255,255,255,.5);
+}
+body.light #note-editor-footer{border-top-color:rgba(0,0,0,.08);color:rgba(0,0,0,.5)}
+#note-editor-footer button{
+  background:linear-gradient(135deg,#5b8bff,#6c63ff);
+  border:none; color:#fff; font-weight:600;
+  padding:7px 18px; border-radius:8px; cursor:pointer;
+  font-family:inherit; font-size:12px;
+}
+
+/* ═══ Summary node label ═══ */
+.summary-label{
+  position:absolute; padding:6px 14px;
+  border-radius:18px; font-size:11px; font-weight:600;
+  background:rgba(99,102,241,.12);
+  border:1.5px solid rgba(99,102,241,.5);
+  color:#1a1f2e; cursor:pointer;
+  font-family:'Rubik','Inter',sans-serif; direction:rtl;
+  user-select:none;
+  white-space:nowrap;
+}
+body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
+.summary-label.selected{outline:2.5px solid #D4AF37;outline-offset:2px}
 </style>
 </head>
 <body>
@@ -411,6 +496,7 @@ body.light .nb-empty{color:rgba(0,0,0,.45)}
     <button class="tb-btn" onclick="mmAddChild()">+ Branch</button>
     <button class="tb-btn" onclick="mmAddEquation()">∑ Equation</button>
     <button class="tb-btn" onclick="mmAddCanvas()">⬜ Canvas</button>
+    <button class="tb-btn" onclick="mmAddSummary()" title="סיכום קבוצת אחים נבחרים (Ctrl-click לסימון מרובה)">⎰ Summary</button>
     <div class="tb-div"></div>
     <select class="tb-select" onchange="applyTemplate(this.value);this.value=''">
       <option value="">📐 Templates…</option>
@@ -745,9 +831,41 @@ function mmRender(){
   Array.from(vp.children).forEach(c=>{if(c!==svg)c.remove();});
   svg.innerHTML='';
   let svgCode='';
+  // Pre-pass: position summary nodes next to their target groups so the
+  // node-wrap render below uses up-to-date coords for the label.
+  if(typeof mmRenderSummaries === 'function') mmRenderSummaries();
   for(const id in MM.nodes){
     const n=MM.nodes[id];
     if(!mmIsVisible(id)&&id!==MM.root)continue;
+    if(n.type === 'summary'){
+      // Render summary as a small label rect (the brace SVG was drawn by
+      // mmRenderSummaries above). Skip the normal node body.
+      const wrap = document.createElement('div');
+      wrap.className = 'node-wrap';
+      wrap.id = 'nw_' + id;
+      wrap.style.left = n.x + 'px'; wrap.style.top = n.y + 'px';
+      wrap.style.width = (n.W||100) + 'px'; wrap.style.height = (n.H||28) + 'px';
+      const lbl = document.createElement('div');
+      lbl.className = 'summary-label' + (id === MM.sel ? ' selected' : '');
+      lbl.textContent = n.text || 'סיכום';
+      lbl.onclick = (e)=>{ e.stopPropagation(); MM.sel = id; MM.multiSel = []; mmRender(); };
+      lbl.ondblclick = (e)=>{
+        e.stopPropagation();
+        const v = prompt('תווית הסיכום:', n.text || 'סיכום');
+        if(v !== null){ n.text = v.trim() || n.text; mmPushHistory(); mmRender(); }
+      };
+      lbl.oncontextmenu = (e)=>{
+        e.preventDefault();
+        if(confirm('למחוק את הסיכום?')){
+          delete MM.nodes[id];
+          if(MM.nodes[n.parentId]) MM.nodes[n.parentId].childIds = MM.nodes[n.parentId].childIds.filter(c=>c!==id);
+          mmPushHistory(); mmRender();
+        }
+      };
+      wrap.appendChild(lbl);
+      vp.appendChild(wrap);
+      continue;
+    }
     const x=n.x*MM.zoom+MM.panX,y=n.y*MM.zoom+MM.panY;
     const sel=id===MM.sel;
     const multiSel = MM.multiSel && MM.multiSel.indexOf(id) !== -1;
@@ -764,7 +882,19 @@ function mmRender(){
     if(n.type==='equation'){renderKatex(n.latex||'\\frac{x}{2}',nodeDiv);}
     else{nodeDiv.textContent=n.text;}
     nodeDiv.oncontextmenu=e=>{e.preventDefault();showNodeActions(e,n.id);};
-    nodeDiv.onclick=()=>{MM.sel=id;MM.multiSel=[];mmRender();};
+    nodeDiv.onclick=(e)=>{
+      if(e && (e.ctrlKey||e.metaKey||e.shiftKey)){
+        MM.multiSel = MM.multiSel || [];
+        const idx = MM.multiSel.indexOf(id);
+        if(idx>=0) MM.multiSel.splice(idx,1);
+        else MM.multiSel.push(id);
+        if(!MM.multiSel.includes(MM.sel)) MM.multiSel.unshift(MM.sel||id);
+        MM.sel = id;
+      } else {
+        MM.sel=id;MM.multiSel=[];
+      }
+      mmRender();
+    };
     if(n.type==='equation'){
       nodeDiv.title='Double-click to edit';
       nodeDiv.ondblclick=e=>{e.stopPropagation();openEquationModal(id,'edit');};
@@ -799,6 +929,19 @@ function mmRender(){
     }
     div.appendChild(nodeDiv);
 
+    // ── Inline note (📝) — X-Mind-style expandable note. Same field as
+    //    the notebook body, so editing here updates the notebook and
+    //    vice-versa. Only attached to non-summary nodes. ──
+    if(n.type !== 'summary'){
+      const hasNote = n.body && n.body.trim().length > 0;
+      const noteBtn = document.createElement('div');
+      noteBtn.className = 'node-note-badge' + (hasNote ? ' has-note' : '');
+      noteBtn.title = hasNote ? 'פתח הערה' : 'הוסף הערה';
+      noteBtn.textContent = hasNote ? '📝' : '＋';
+      noteBtn.onclick = (e)=>{ e.stopPropagation(); openNoteEditor(n.id); };
+      div.appendChild(noteBtn);
+    }
+
     // ── Node dragging (move nodes by dragging) ──
     (function(nodeObj,nodeEl){
       nodeEl.addEventListener('mousedown',ev=>{
@@ -827,7 +970,7 @@ function mmRender(){
     })(n,div);
 
     vp.appendChild(div);
-    if(id!==MM.root){
+    if(id!==MM.root && n.type!=='summary'){
       const p=MM.nodes[n.parentId];
       if(p){
         // v17: SVG is INSIDE #viewport — use pure model coords (no zoom/pan multiply needed)
@@ -3765,6 +3908,156 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Wait for KaTeX auto-render to complete
   setTimeout(ftbInit,400);
 });
+
+// ═══════════════════════════════════════════════════════════
+// INLINE NOTE EDITOR — X-Mind-style. Edits node.body, the same field
+// the notebook reads/writes, so the two views stay in sync.
+// ═══════════════════════════════════════════════════════════
+function openNoteEditor(nodeId){
+  const n = MM.nodes[nodeId]; if(!n) return;
+  // Close any existing editor
+  const existing = document.getElementById('note-editor-overlay');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'note-editor-overlay';
+  overlay.onclick = (e)=>{ if(e.target === overlay) closeNoteEditor(true); };
+
+  const panel = document.createElement('div');
+  panel.id = 'note-editor-panel';
+  panel.onclick = (e)=> e.stopPropagation();
+
+  const header = document.createElement('div');
+  header.id = 'note-editor-header';
+  const titleInput = document.createElement('input');
+  titleInput.id = 'note-editor-title';
+  titleInput.value = n.text || '';
+  titleInput.placeholder = 'כותרת';
+  const closeBtn = document.createElement('button');
+  closeBtn.id = 'note-editor-close';
+  closeBtn.textContent = '×';
+  closeBtn.onclick = ()=> closeNoteEditor(true);
+  header.appendChild(titleInput); header.appendChild(closeBtn);
+
+  const body = document.createElement('textarea');
+  body.id = 'note-editor-body';
+  body.value = n.body || '';
+  body.placeholder = 'כתוב כאן הערה מורחבת — תופיע גם בתצוגת המחברת.';
+
+  const footer = document.createElement('div');
+  footer.id = 'note-editor-footer';
+  const hint = document.createElement('span');
+  hint.textContent = 'Esc לסגירה • שינויים נשמרים אוטומטית';
+  const saveBtn = document.createElement('button');
+  saveBtn.textContent = 'סגור';
+  saveBtn.onclick = ()=> closeNoteEditor(true);
+  footer.appendChild(hint); footer.appendChild(saveBtn);
+
+  panel.appendChild(header); panel.appendChild(body); panel.appendChild(footer);
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+
+  setTimeout(()=> body.focus(), 30);
+
+  let dirty = false;
+  function commit(){
+    n.text = (titleInput.value || '').trim() || n.text;
+    n.body = body.value;
+    if(typeof nbSave === 'function') nbSave();
+    if(typeof mmRender === 'function') mmRender();
+    if(typeof NB !== 'undefined' && NB.active && typeof nbRender === 'function') nbRender();
+    dirty = false;
+  }
+  let saveTimer = null;
+  const onChange = ()=>{
+    dirty = true;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(commit, 350);
+  };
+  titleInput.oninput = onChange;
+  body.oninput = onChange;
+  titleInput.onkeydown = body.onkeydown = (e)=>{
+    if(e.key === 'Escape'){ e.preventDefault(); closeNoteEditor(true); }
+  };
+
+  function closeNoteEditor(persist){
+    if(persist && dirty){ clearTimeout(saveTimer); commit(); }
+    if(persist && !dirty){ /* one final commit anyway in case of timer race */
+      n.text = (titleInput.value || '').trim() || n.text;
+      n.body = body.value;
+      if(typeof nbSave === 'function') nbSave();
+      if(typeof mmRender === 'function') mmRender();
+    }
+    if(typeof mmPushHistory === 'function') mmPushHistory();
+    overlay.remove();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SUMMARY NODE — X-Mind-style curly brace grouping siblings.
+// MM.multiSel must contain 2+ siblings sharing a parent.
+// ═══════════════════════════════════════════════════════════
+function mmAddSummary(){
+  const sel = (MM.multiSel && MM.multiSel.length >= 2)
+    ? MM.multiSel.filter(id => MM.nodes[id])
+    : [];
+  if(sel.length < 2){
+    alert('בחר 2 או יותר אחים (Ctrl-click) ואז לחץ Summary');
+    return;
+  }
+  const parents = new Set(sel.map(id => MM.nodes[id].parentId));
+  if(parents.size !== 1){
+    alert('כל הצמתים שנבחרו צריכים להיות אחים (אותו צומת אב)');
+    return;
+  }
+  const parentId = sel[0] && MM.nodes[sel[0]].parentId;
+  if(!parentId){ alert('לא ניתן לסכם את צומת השורש'); return; }
+  // Position: just to the right of the rightmost target
+  const targets = sel.map(id => MM.nodes[id]);
+  const right = Math.max(...targets.map(t => t.x + (t.W||140)));
+  const cy = (Math.min(...targets.map(t => t.y)) + Math.max(...targets.map(t => t.y + (t.H||40)))) / 2;
+  const text = prompt('תווית הסיכום:', 'סיכום') || 'סיכום';
+  const s = mmNode('summary', text, right + 80, cy - 14, parentId, '#6366f1');
+  s.targetIds = sel.slice();
+  s.W = 100; s.H = 28;
+  mmPushHistory();
+  if(typeof mmRender === 'function') mmRender();
+}
+
+// Helper called from mmRender after the main loop draws the brace SVG path
+// for every summary node onto the existing svg-layer. Returns appended svg.
+function mmRenderSummaries(){
+  const svg = document.getElementById('svg-layer'); if(!svg) return;
+  const vp = document.getElementById('viewport'); if(!vp) return;
+  let extra = '';
+  for(const id in MM.nodes){
+    const s = MM.nodes[id];
+    if(s.type !== 'summary') continue;
+    if(!Array.isArray(s.targetIds) || s.targetIds.length < 2) continue;
+    const targets = s.targetIds.map(tid => MM.nodes[tid]).filter(Boolean);
+    if(targets.length < 2) continue;
+    const top    = Math.min(...targets.map(t => t.y));
+    const bot    = Math.max(...targets.map(t => t.y + (t.H||40)));
+    const right  = Math.max(...targets.map(t => t.x + (t.W||140)));
+    const braceX = right + 22;
+    const midY   = (top + bot) / 2;
+    const labelX = braceX + 30;
+    // Cubic-Bezier curly brace: two arms meeting at midY pointing inward
+    const armH = (bot - top) / 2;
+    const ctrl = Math.min(40, armH * 0.6);
+    const d = [
+      `M ${braceX-8},${top}`,
+      `C ${braceX-8},${top+ctrl} ${braceX},${top+ctrl} ${braceX},${midY-2}`,
+      `L ${braceX+10},${midY}`,
+      `L ${braceX},${midY+2}`,
+      `C ${braceX},${bot-ctrl} ${braceX-8},${bot-ctrl} ${braceX-8},${bot}`,
+    ].join(' ');
+    extra += `<path d="${d}" stroke="#6366f1" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.85"/>`;
+    // Update the summary node's runtime position so its label renders next to brace
+    s.x = labelX; s.y = midY - (s.H||28)/2;
+  }
+  if(extra) svg.innerHTML += extra;
+}
 
 // ═══════════════════════════════════════════════════════════
 // CLEAR ALL — wipes both runtime state and persisted data
