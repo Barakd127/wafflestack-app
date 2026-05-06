@@ -8,8 +8,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700&family=Rubik:wght@300;400;600;700&family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="preload" as="fetch" type="application/wasm" href="/godot/index.wasm" crossorigin>
-    <link rel="preload" as="fetch" href="/godot/index.pck" crossorigin>
+    <script>
+      if (!matchMedia('(max-width: 768px)').matches) {
+        var w=document.createElement('link');w.rel='preload';w.as='fetch';w.type='application/wasm';w.href='/godot/index.wasm';w.crossOrigin='anonymous';document.head.appendChild(w);
+        var p=document.createElement('link');p.rel='preload';p.as='fetch';p.href='/godot/index.pck';p.crossOrigin='anonymous';document.head.appendChild(p);
+      }
+    </script>
     <!-- KaTeX for math typesetting in lessons (matches mindmap.html). Loaded
          from the same CDN so it caches once across the app. -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
