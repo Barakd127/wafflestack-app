@@ -6,13 +6,14 @@
  * Available charges are shown; clicking a chip activates the next one.
  * Only one potion can be active at a time.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   useArsenalStore,
   useAvailablePotion,
   POTION_META,
   type ArsenalKind,
 } from '../store/arsenalStore'
+import { useTutorialStep } from '../hooks/useTutorialStep'
 
 const KINDS: ArsenalKind[] = ['gotcha', 'trick', 'tip']
 
@@ -120,6 +121,15 @@ export default function PotionInventory() {
   const availableT = useAvailablePotion('trick')
   const availableTi = useAvailablePotion('tip')
   const activePotion = useArsenalStore(s => s.activePotion)
+  const stripRef = useRef<HTMLDivElement>(null)
+
+  const totalAvailable = availableG + availableT + availableTi
+  useTutorialStep('potions-intro', stripRef, {
+    title: 'סיר הקסמים שלך',
+    body: 'אספת קאצ\'ים ומיינת אותם לפי סוג? תמורת כל 3 קאצ\'ים מאותו הסוג קיבלת מנת קסם — לחץ על הצ\'יפ כדי להפעיל אותה לפני החידון הבא.',
+    placement: 'bottom',
+    when: totalAvailable > 0 || !!activePotion,
+  })
 
   // Only render if at least one potion is available or active
   if (availableG === 0 && availableT === 0 && availableTi === 0 && !activePotion) return null
@@ -134,6 +144,7 @@ export default function PotionInventory() {
         }
       `}</style>
       <div
+        ref={stripRef}
         style={{ display: 'flex', alignItems: 'center', gap: 3 }}
         title="סיר הקסמים — מנות זמינות"
       >

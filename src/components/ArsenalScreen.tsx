@@ -5,8 +5,9 @@
  * All client-side; reads from arsenalStore. Animations use scoped CSS classes
  * defined in index.css (`arsenal-card-in`, `arsenal-pin-pulse`, `arsenal-card-out`).
  */
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useArsenalStore, KIND_META, type ArsenalEntry, type ArsenalKind } from '../store/arsenalStore'
+import { useTutorialStep } from '../hooks/useTutorialStep'
 
 // Keep in sync with HEBREW_LABELS in StudyHub.tsx
 const TOPIC_LABELS: Record<string, string> = {
@@ -104,6 +105,15 @@ export default function ArsenalScreen() {
     setEditingText('')
   }
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const arsenalIntroRef = useRef<HTMLHeadingElement>(null)
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useTutorialStep('arsenal-intro', arsenalIntroRef, {
+    title: 'הארסנל שלך',
+    body: 'כל קאצ\', טריק או טיפ שתופסים בלימוד נכנס לכאן. כל 3 פריטים מאותו סוג מזכים אותך במנת קסם — תראה אותן בסרגל העליון.',
+    placement: 'bottom',
+  })
+
   return (
     <div dir="rtl" style={{
       flex: 1, overflow: 'auto', padding: '32px 40px',
@@ -114,7 +124,7 @@ export default function ArsenalScreen() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, marginBottom: 22, flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{ fontSize: 30, fontWeight: 800, color: TEXT_DARK, margin: 0, letterSpacing: 0.3 }}>
+          <h1 ref={arsenalIntroRef} style={{ fontSize: 30, fontWeight: 800, color: TEXT_DARK, margin: 0, letterSpacing: 0.3 }}>
             🎯 הארסנל שלי
           </h1>
           <div style={{ fontSize: 14, color: TEXT_LIGHT, marginTop: 4 }}>

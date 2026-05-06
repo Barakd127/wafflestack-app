@@ -9,6 +9,7 @@ import ArsenalScreen from './ArsenalScreen'
 import { useArsenalStore, quickAddArsenal } from '../store/arsenalStore'
 import PotionInventory from './PotionInventory'
 import { useTutorialStep } from '../hooks/useTutorialStep'
+import { useTutorialStore } from '../store/tutorialStore'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d') => void
@@ -958,6 +959,21 @@ function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
         {/* Potion inventory chips */}
         <PotionInventory />
         <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_DARK }}>שלום, {userName}</span>
+        {/* Reset tutorials — re-enables and re-shows all coachmarks */}
+        <button
+          onClick={() => {
+            useTutorialStore.getState().setEnabled(true)
+            useTutorialStore.getState().reset()
+          }}
+          title="הפעל מחדש את הסיור המודרך"
+          style={{
+            background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.3)',
+            borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
+            color: '#6366f1', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
+          }}
+        >
+          🎓 סיור
+        </button>
         {/* Logout button */}
         {onLogout && (
           <button onClick={onLogout} title="התנתק" style={{
@@ -1266,6 +1282,13 @@ interface LearningScreenProps {
 function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userProgress, onProgressUpdate, userId }: LearningScreenProps) {
   const [currentQ, setCurrentQ] = useState(0)
   const [answer, setAnswer] = useState('')
+  // Coachmark anchor for the quiz card (first time the user sees a question)
+  const quizTutRef = useRef<HTMLTextAreaElement>(null)
+  useTutorialStep('quiz-intro', quizTutRef, {
+    title: 'איך עונים על שאלה',
+    body: 'כתוב את התשובה כאן (תומך בעברית RTL). אם המערכת מזהה מספר בתשובה היא תבדוק אוטומטית עם טווח סבילות של ±0.3. אפשר גם לנתק את הכרטיסייה לחלון צף עם ⤢.',
+    placement: 'top',
+  })
   const [phase, setPhase] = useState<'write' | 'review' | 'done'>('write')
   const [xpBurst, setXpBurst] = useState<number | null>(null)
   // Store each question's typed answer so users can navigate back and re-read
@@ -1736,6 +1759,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
 
               <div style={{ border: `2px solid ${answer.trim() ? '#3351CA' : '#C8D0E0'}`, borderRadius: 12, overflow: 'hidden', marginBottom: 18, transition: 'border-color 0.2s' }}>
                 <textarea
+                  ref={quizTutRef}
                   value={answer}
                   onChange={e => setAnswer(e.target.value)}
                   placeholder="כתוב/י את פתרונך כאן..."
