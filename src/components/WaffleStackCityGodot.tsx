@@ -143,7 +143,7 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
           // button (which sits inside the iframe at the top of the canvas).
           // Bottom-left is empty space in the city view. Top-right stays for
           // the dark-mode toggle.
-          className="absolute bottom-4 left-4 z-50 px-4 py-2 rounded-xl backdrop-blur-xl bg-white/10 border border-white/25 text-white text-sm hover:bg-white/25 transition-all shadow-lg"
+          className="absolute bottom-4 left-4 z-50 px-4 py-2 rounded-xl backdrop-blur-xl bg-white/10 border border-white/25 text-white text-sm hover:bg-white/25 transition-all shadow-lg ws-safe-bottom"
         >
           ← חזרה ללימוד
         </button>
