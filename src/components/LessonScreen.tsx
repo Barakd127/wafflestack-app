@@ -32,6 +32,12 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
   const mindmapRef = useRef<HTMLIFrameElement>(null)
   const draggingRef = useRef(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768)
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
   const slides = lesson?.slides ?? []
   const total = slides.length
@@ -459,8 +465,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
     </div>
   )
 
-  // ── Single-pane fallback (mind map closed) ──────────────────────────────────
-  if (!mindmapOpen) {
+  // ── Single-pane fallback (mind map closed or mobile) ────────────────────────
+  if (!mindmapOpen || isMobile) {
     return rightPane
   }
 

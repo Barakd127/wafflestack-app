@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import WaffleStackCity from './WaffleStackCityGodot'
 import StudyHub from './StudyHub'
 import MindMapCanvas from './MindMapCanvas'
@@ -21,6 +21,12 @@ export default function SplitLayout({ onBack, darkMode, initialRight = 'study' }
   const [rightTab, setRightTab] = useState<RightTab>(initialRight)
   const dragging = useRef(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768)
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     dragging.current = true
@@ -39,6 +45,17 @@ export default function SplitLayout({ onBack, darkMode, initialRight = 'study' }
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
   }, [])
+
+  if (isMobile) {
+    return (
+      <div style={{ width: '100%', height: '100%' }}>
+        <StudyHub
+          onViewChange={() => {}}
+          darkMode={darkMode}
+        />
+      </div>
+    )
+  }
 
   const tabBtnStyle = (active: boolean): React.CSSProperties => ({
     background: active ? 'rgba(99,102,241,0.30)' : 'rgba(255,255,255,0.05)',
