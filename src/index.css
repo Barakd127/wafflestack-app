@@ -115,3 +115,66 @@ html.dark :focus-visible {
 }
 .arsenal-card-in  { animation: arsenalCardIn  0.32s cubic-bezier(.22,1.36,.36,1) backwards; }
 .arsenal-card-out { animation: arsenalCardOut 0.22s ease-in forwards; pointer-events: none; }
+
+/* === Mobile-friendly base styles (Android phones, 360–430px portrait) === */
+@media (max-width: 768px) {
+  html, body {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
+  }
+  body {
+    /* Allow vertical scroll on mobile pages even though desktop hides overflow.
+       overflow-x stays hidden to prevent accidental horizontal scroll on RTL layouts. */
+    overflow-y: auto;
+  }
+  #root {
+    min-height: 100vh;
+    height: auto;
+  }
+
+  /* Hide split-screen trigger buttons on mobile — split layouts don't make
+     sense on a 400px-wide screen. The dark-mode toggle (no .ws-split-btn class)
+     stays visible. */
+  .ws-split-btn {
+    display: none !important;
+  }
+
+  /* Touch-friendly minimum tap target for buttons inside the app */
+  button, [role="button"] {
+    min-height: 44px;
+  }
+
+  /* Iframes (mindmap.html, godot/index.html) — never overflow horizontally */
+  iframe {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Reduce heavy paddings on mobile — desktop uses 32–48px which eats the
+     viewport on a 360px-wide screen. */
+  main {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* KaTeX formula blocks: allow horizontal scroll when an equation is wider
+     than the viewport, instead of overflowing the page and breaking layout. */
+  .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+  }
+  .katex-display > .katex {
+    white-space: nowrap;
+  }
+
+  /* Lesson and quiz cards: full-bleed on mobile */
+  [data-mobile-fullbleed],
+  .ws-card-fullbleed {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}

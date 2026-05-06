@@ -117,6 +117,7 @@ function App() {
               <button
                 onClick={() => setActiveView('split')}
                 aria-label="פצל מסך — עיר ולימוד"
+                className="ws-split-btn"
                 style={{
                   position: 'fixed', bottom: 24, left: 72, zIndex: 200,
                   background: 'rgba(51,81,202,0.85)',
@@ -202,6 +203,7 @@ function App() {
             <button
               onClick={() => setActiveView('split-mindmap')}
               aria-label="פצל מסך — עיר ומפת חשיבה"
+              className="ws-split-btn"
               style={{
                 position: 'fixed', bottom: 24, right: 24, zIndex: 1000,
                 background: 'rgba(51,81,202,0.9)',
@@ -225,6 +227,7 @@ function App() {
               <button
                 onClick={() => setActiveView('split')}
                 aria-label="פצל מסך — עיר ולימוד"
+                className="ws-split-btn"
                 style={{
                   background: 'rgba(51,81,202,0.85)',
                   backdropFilter: 'blur(12px)',

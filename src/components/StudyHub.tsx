@@ -1996,6 +1996,22 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
     loadProgress(initializeUser().userId)
   )
   const [sidebarWidth, setSidebarWidth] = useState(247)
+  // Mobile (<=768px): sidebar collapses entirely and is opened as a hamburger overlay.
+  const [isMobile, setIsMobile] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false
+  )
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mq = window.matchMedia('(max-width: 768px)')
+    const onChange = () => setIsMobile(mq.matches)
+    if (mq.addEventListener) mq.addEventListener('change', onChange)
+    else mq.addListener(onChange)
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener('change', onChange)
+      else mq.removeListener(onChange)
+    }
+  }, [])
   const sidebarDragging = useRef(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const sidebarTutRef = useRef<HTMLElement>(null)
@@ -2080,8 +2096,49 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
   return (
     <div ref={rootRef} style={{ width: '100%', height: '100%', display: 'flex', overflow: 'hidden', direction: 'rtl', background: PAGE_BG, fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
       <h1 style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>WaffleStack — דף הבית</h1>
-      {/* Sidebar — right side (RTL) */}
-      <nav ref={sidebarTutRef} aria-label="ניווט ראשי" style={{ width: sidebarWidth, flexShrink: 0, position: 'relative', display: 'flex' }}>
+      {/* Mobile hamburger button — only on small screens. Stays clear of the
+          dark-mode toggle (top-right) by anchoring to top-right with a left offset. */}
+      {isMobile && (
+        <button
+          onClick={() => setMobileSidebarOpen(o => !o)}
+          aria-label={mobileSidebarOpen ? 'סגור תפריט' : 'פתח תפריט'}
+          style={{
+            position: 'fixed', top: 12, right: 64, zIndex: 250,
+            width: 44, height: 44, borderRadius: 12,
+            background: 'rgba(51,81,202,0.85)',
+            border: '1px solid rgba(99,162,255,0.5)',
+            color: '#fff', fontSize: 22, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 16px rgba(51,81,202,0.4)',
+          }}
+        >
+          {mobileSidebarOpen ? '✕' : '☰'}
+        </button>
+      )}
+      {/* Mobile backdrop */}
+      {isMobile && mobileSidebarOpen && (
+        <div
+          onClick={() => setMobileSidebarOpen(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 240 }}
+        />
+      )}
+      {/* Sidebar — right side (RTL). On mobile becomes a slide-in overlay. */}
+      <nav
+        ref={sidebarTutRef}
+        aria-label="ניווט ראשי"
+        style={
+          isMobile
+            ? {
+                position: 'fixed', top: 0, right: 0, bottom: 0,
+                width: 260, zIndex: 245,
+                display: mobileSidebarOpen ? 'flex' : 'none',
+                transform: mobileSidebarOpen ? 'translateX(0)' : 'translateX(100%)',
+                transition: 'transform 0.25s ease',
+                boxShadow: '-4px 0 20px rgba(0,0,0,0.3)',
+              }
+            : { width: sidebarWidth, flexShrink: 0, position: 'relative', display: 'flex' }
+        }
+      >
         <Sidebar
           active={internalView}
           onNav={(view) => {
@@ -2090,11 +2147,12 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
             } else {
               setInternalView(view)
             }
+            if (isMobile) setMobileSidebarOpen(false)
           }}
-          onGoWorld={() => onViewChange('3d')}
-          onGoMindmap={() => onViewChange('mindmap')}
-          onGoDrawing={() => onViewChange('drawing')}
-          width={sidebarWidth}
+          onGoWorld={() => { onViewChange('3d'); if (isMobile) setMobileSidebarOpen(false) }}
+          onGoMindmap={() => { onViewChange('mindmap'); if (isMobile) setMobileSidebarOpen(false) }}
+          onGoDrawing={() => { onViewChange('drawing'); if (isMobile) setMobileSidebarOpen(false) }}
+          width={isMobile ? 260 : sidebarWidth}
         />
         {/* Sidebar resize handle — on the left edge (RTL: left is outer edge) */}
         <div
