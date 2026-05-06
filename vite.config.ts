@@ -51,6 +51,13 @@ export default defineConfig({
   // Vercel hosts at the domain root; GitHub Pages used /wafflestack-app/ so
   // we keep that path active for the legacy deploy via env var override.
   base: process.env.VITE_BASE_PATH ?? '/',
+  // Excalidraw 0.18 reads `process.env.IS_PREACT` at module init. Without
+  // this define, the lazy chunk crashes with "process is not defined" the
+  // moment the user opens the drawing screen — which is why "לוח הציור"
+  // appeared blank/never opened.
+  define: {
+    'process.env.IS_PREACT': JSON.stringify('false'),
+  },
   server: {
     port: 3000,
     open: true

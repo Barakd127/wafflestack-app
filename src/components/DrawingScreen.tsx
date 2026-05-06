@@ -68,7 +68,7 @@ export default function DrawingScreen({ userId, onBack }: DrawingScreenProps) {
   }, [userId, saveTimerRef])
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', background: '#1a1a1a' }}>
+    <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', background: '#1a1a1a', zIndex: 100 }}>
       <button
         onClick={onBack}
         style={{
