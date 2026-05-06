@@ -540,6 +540,7 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
     <button class="tb-btn" onclick="mmCollapseAll()">⊟ Collapse</button>
     <button class="tb-btn" onclick="mmFitView()">⊡ Fit</button>
     <button class="tb-btn" onclick="mmAutoLayout()" title="Auto-arrange tree layout">⊞ Layout</button>
+    <button class="tb-btn" id="mm-orient-btn" onclick="mmToggleOrientation()" title="החלף בין כיוון אנכי (X-Mind) לאופקי">↧ TB/LR</button>
     <button class="tb-btn" onclick="openSearch()" title="Search (Ctrl+F)">🔍 Search</button>
     <button class="tb-btn" onclick="mmExportJSON()">💾 Export</button>
     <button class="tb-btn" onclick="mmImportJSON()">📂 Import</button>
@@ -776,7 +777,10 @@ let _mmSaveTimer = null;
 // MIND MAP SYSTEM
 // ═══════════════════════════════════════════════════════════
 const NODE_COLORS=['#60a5fa','#34d399','#f59e0b','#f87171','#a78bfa','#22d3ee','#fb923c','#10b981','#e879f9','#facc15','#4ade80','#f472b6','#38bdf8','#c084fc','#fbbf24','#86efac'];
-let MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0};
+// `orientation` controls tree flow:
+//   'lr' = horizontal (parent left, kids spread vertically to the right) — original
+//   'tb' = vertical   (parent top, kids spread horizontally below)        — X-Mind brace
+let MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0,orientation:'tb'};
 let MM_HISTORY=[];
 let MM_REDO=[]; // FIX #9 support: redo stack for Ctrl+Y
 
@@ -822,12 +826,23 @@ function initMM(){
     }
   } catch(e) { /* fall through to fresh init */ }
 
-  MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0};
+  MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,orientation:'tb'};
   MM.nodes.root=mmNode('root','Untitled',100,100,null,'#60a5fa');
   MM_HISTORY=[cloneMMForHistory()];
 }
 
 function cloneMMForHistory(){return JSON.parse(JSON.stringify(MM));}
+
+// Convenience: 'tb' or 'lr'. Treat anything else as legacy 'lr'.
+function mmOrient(){ return MM.orientation === 'tb' ? 'tb' : 'lr'; }
+
+function mmToggleOrientation(){
+  MM.orientation = mmOrient() === 'tb' ? 'lr' : 'tb';
+  // Re-arrange the entire tree using the new direction so existing maps
+  // don't stay frozen in the old layout.
+  if(typeof mmAutoLayout === 'function') mmAutoLayout();
+  else if(typeof mmRender === 'function') mmRender();
+}
 
 function mmPushHistory(){
   MM_HISTORY.push(cloneMMForHistory());
@@ -928,6 +943,15 @@ function mmRender(){
     if(n.type==='equation'){
       nodeDiv.title='Double-click to edit';
       nodeDiv.ondblclick=e=>{e.stopPropagation();openEquationModal(id,'edit');};
+    } else if(n.type !== 'summary' && n.type !== 'canvas') {
+      // Plain text branch / root: double-click opens the inline text editor.
+      // (Was missing — only equations had this. Made the mindmap feel broken.)
+      nodeDiv.title = 'לחץ פעמיים לעריכה';
+      nodeDiv.ondblclick = e => {
+        e.stopPropagation();
+        const el = document.getElementById('nw_' + id);
+        if(el) startEditNode(n, el);
+      };
     }
     if(n.childIds.length>0){
       const tog=document.createElement('div');
@@ -1003,15 +1027,24 @@ function mmRender(){
     if(id!==MM.root && n.type!=='summary'){
       const p=MM.nodes[n.parentId];
       if(p){
-        // v17: SVG is INSIDE #viewport — use pure model coords (no zoom/pan multiply needed)
-        const childRight = n.x + n.W/2 < p.x + p.W/2;
-        const px = childRight ? p.x : p.x + p.W;
-        const py = p.y + p.H/2;
-        const nx = childRight ? n.x + n.W : n.x;
-        const ny = n.y + n.H/2;
         const lc = n.color||'#60a5fa';
-        const dx = (nx-px)*0.55;
-        svgCode+=`<path d="M${px},${py} C${px+dx},${py} ${nx-dx},${ny} ${nx},${ny}" stroke="${lc}" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.9"/>`;
+        if(mmOrient() === 'tb'){
+          // Vertical: from bottom-centre of parent to top-centre of child
+          const px = p.x + (p.W||140)/2;
+          const py = p.y + (p.H||40);
+          const nx = n.x + (n.W||140)/2;
+          const ny = n.y;
+          const dy = (ny - py) * 0.55;
+          svgCode+=`<path d="M${px},${py} C${px},${py+dy} ${nx},${ny-dy} ${nx},${ny}" stroke="${lc}" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.9"/>`;
+        } else {
+          const childRight = n.x + n.W/2 < p.x + p.W/2;
+          const px = childRight ? p.x : p.x + p.W;
+          const py = p.y + p.H/2;
+          const nx = childRight ? n.x + n.W : n.x;
+          const ny = n.y + n.H/2;
+          const dx = (nx-px)*0.55;
+          svgCode+=`<path d="M${px},${py} C${px+dx},${py} ${nx-dx},${ny} ${nx},${ny}" stroke="${lc}" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.9"/>`;
+        }
       }
     }
   }
@@ -1125,8 +1158,18 @@ function mmAddChild(parentId){
   // Auto-expand the parent so the new child isn't immediately hidden by
   // mmIsVisible() — root cause of the "+ Branch added but invisible" bug.
   if(parent.collapsed) parent.collapsed=false;
-  const baseY=mmNextChildY(parent);
-  const n=mmNode('branch','New Branch',parent.x+MM_XSTEP,baseY,sel,mmPickColor(sel));
+  let nx, ny;
+  if(mmOrient() === 'tb'){
+    // Stack new children to the right of existing siblings, all on the row below the parent.
+    const siblings = parent.childIds.map(c => MM.nodes[c]).filter(Boolean);
+    const rightmost = siblings.length ? Math.max(...siblings.map(s => s.x + (s.W||140))) : parent.x;
+    nx = siblings.length ? rightmost + MM_GAP : parent.x;
+    ny = parent.y + (parent.H||40) + 80;
+  } else {
+    nx = parent.x + MM_XSTEP;
+    ny = mmNextChildY(parent);
+  }
+  const n=mmNode('branch','New Branch',nx,ny,sel,mmPickColor(sel));
   mmFinishAdd(n,true);
   if(typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('add-branch');
 }
@@ -1261,21 +1304,49 @@ function mmCollapseAll(collapse=true){
 
 // Full subtree-aware auto-layout — positions every node so subtrees never collide
 function mmAutoLayout(){
-  function layoutSubtree(id,x,topY){
-    const n=MM.nodes[id];if(!n)return;
-    const sh=mmSubtreeH(id);
-    // Center this node vertically within its subtree band
-    n.x=x; n.y=topY+Math.round(sh/2-(n.H||40)/2);
-    if(!n.collapsed&&n.childIds.length){
-      let cy=topY;
-      n.childIds.forEach(cid=>{
-        if(!MM.nodes[cid])return;
-        layoutSubtree(cid,x+MM_XSTEP,cy);
-        cy+=mmSubtreeH(cid)+MM_GAP;
+  // Width along the cross-axis used to place subtrees. For top-down (tb)
+  // mode the cross-axis is horizontal so we measure each subtree's width
+  // (sum of leaf widths). For lr we keep the original height-based logic.
+  function subtreeSpan(id){
+    const n = MM.nodes[id]; if(!n) return 0;
+    const own = mmOrient() === 'tb' ? (n.W || 140) : (n.H || 40);
+    if(n.collapsed || !n.childIds.length) return own;
+    const visible = n.childIds.filter(c => MM.nodes[c]);
+    if(!visible.length) return own;
+    const childTotal = visible.reduce((s,cid)=> s + subtreeSpan(cid), 0) + (visible.length - 1) * MM_GAP;
+    return Math.max(own, childTotal);
+  }
+  function layoutTB(id, leftX, topY){
+    const n = MM.nodes[id]; if(!n) return;
+    const span = subtreeSpan(id);
+    // Centre this node horizontally within its subtree band
+    n.x = leftX + Math.round(span/2 - (n.W||140)/2);
+    n.y = topY;
+    if(!n.collapsed && n.childIds.length){
+      let cx = leftX;
+      const childY = topY + (n.H||40) + 80;
+      n.childIds.forEach(cid => {
+        if(!MM.nodes[cid]) return;
+        layoutTB(cid, cx, childY);
+        cx += subtreeSpan(cid) + MM_GAP;
       });
     }
   }
-  layoutSubtree(MM.root,100,100);
+  function layoutLR(id, x, topY){
+    const n = MM.nodes[id]; if(!n) return;
+    const sh = mmSubtreeH(id);
+    n.x = x; n.y = topY + Math.round(sh/2 - (n.H||40)/2);
+    if(!n.collapsed && n.childIds.length){
+      let cy = topY;
+      n.childIds.forEach(cid => {
+        if(!MM.nodes[cid]) return;
+        layoutLR(cid, x + MM_XSTEP, cy);
+        cy += mmSubtreeH(cid) + MM_GAP;
+      });
+    }
+  }
+  if(mmOrient() === 'tb') layoutTB(MM.root, 100, 80);
+  else                    layoutLR(MM.root, 100, 100);
   mmRender();
   mmFitView();
 }

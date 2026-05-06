@@ -11,6 +11,9 @@
  * type so each node can carry its own Excalidraw scene.
  */
 import { useEffect, useState, useCallback, lazy, Suspense } from 'react'
+// Excalidraw 0.18+ ships CSS separately — without this import the canvas
+// renders as a blank screen because the toolbar/sidebar styles never load.
+import '@excalidraw/excalidraw/index.css'
 
 const Excalidraw = lazy(() =>
   import('@excalidraw/excalidraw').then(m => ({ default: m.Excalidraw }))
