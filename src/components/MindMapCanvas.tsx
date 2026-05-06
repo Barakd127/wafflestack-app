@@ -86,7 +86,7 @@ const MindMapCanvas = ({ onViewChange }: MindMapCanvasProps) => {
         >
           ⊟ עיר + מפה
         </button>
-        <span style={{ color: '#6b7280', fontSize: 12, marginInlineStart: 8 }}>
+        <span className="hidden md:inline" style={{ color: '#6b7280', fontSize: 12, marginInlineStart: 8 }}>
           🧠 מפת חשיבה — קנבס מלא, משוואות וגרירה
         </span>
       </header>

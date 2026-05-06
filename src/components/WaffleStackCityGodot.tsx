@@ -66,7 +66,7 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
     // standalone full-screen mode AND split-pane mode without escaping the
     // panel boundary. Parent (App.tsx wafflecity wrapper or SplitLayout left
     // panel) provides position:relative.
-    <div className="absolute inset-0 z-0" style={{ background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f1f3f 100%)' }}>
+    <div className="absolute inset-0 z-0 ws-godot-shell" style={{ background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f1f3f 100%)' }}>
       {/* Custom Hebrew loading overlay — masks the Godot canvas until ready */}
       {!ready && (
         <div
@@ -80,7 +80,7 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
         >
           <div style={{ textAlign: 'center', maxWidth: 460, padding: 24 }}>
             {/* Animated stack of waffle / building icons */}
-            <div style={{ fontSize: 64, marginBottom: 8, animation: 'wsBuild 2.4s ease-in-out infinite' }}>🏙️</div>
+            <div className="ws-godot-emoji" style={{ fontSize: 64, marginBottom: 8, animation: 'wsBuild 2.4s ease-in-out infinite' }}>🏙️</div>
 
             <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 4, letterSpacing: 0.5 }}>
               טוען את העיר…

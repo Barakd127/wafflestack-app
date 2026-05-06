@@ -289,7 +289,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
       flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: 32, fontFamily: "'Rubik', 'Assistant', sans-serif",
     }}>
-      <div style={{
+      <div className="ws-quiz-intro" style={{
         width: '100%', maxWidth: 540,
         background: GLASS_CARD,
         backdropFilter: 'blur(20px)',
@@ -300,7 +300,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
         textAlign: 'center',
       }}>
         <div style={{ fontSize: 56, marginBottom: 12 }}>📝</div>
-        <h2 style={{ fontSize: 26, fontWeight: 700, color: TEXT_DARK, margin: '0 0 6px' }}>
+        <h2 className="ws-h2" style={{ fontSize: 26, fontWeight: 700, color: TEXT_DARK, margin: '0 0 6px' }}>
           תרגול: {hebrewName}
         </h2>
         <div style={{ fontSize: 14, color: TEXT_LIGHT, marginBottom: 22 }}>
@@ -487,7 +487,7 @@ interface TopicSelectorProps {
 
 function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorProps) {
   return (
-    <div style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }}>
+    <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }}>
       <button
         onClick={onBack}
         style={{
@@ -521,6 +521,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
           return (
             <div
               key={topic.id}
+              className="ws-topic-card"
               style={{
                 background: GLASS_CARD,
                 backdropFilter: 'blur(20px)',
@@ -778,7 +779,7 @@ function ActivityChart() {
           {total > 0 ? `+${total.toLocaleString()} XP` : 'אין פעילות עדיין'}
         </span>
       </div>
-      <svg width={W} height={H} style={{ overflow: 'visible', display: 'block' }}>
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" width="100%" style={{ maxWidth: W, display: 'block', height: 'auto', overflow: 'visible' }}>
         <defs>
           <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="rgba(212,175,55,0.45)" />
@@ -926,7 +927,7 @@ function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
   const userName = localStorage.getItem('userName') || 'Student'
   const xp = useLearningStore(state => state.xp)
   return (
-    <div style={{
+    <div className="ws-topbar" style={{
       background: 'var(--sh-topbar-bg)',
       backdropFilter: 'blur(12px)',
       borderBottom: '1px solid var(--sh-topbar-border)',
@@ -946,7 +947,7 @@ function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
         letterSpacing: '-0.5px',
         textShadow: '0 1px 4px rgba(255,255,255,0.8)',
       }}>{title}</h1>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }} dir="ltr">
+      <div className="ws-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 14 }} dir="ltr">
         {/* XP pill */}
         <span style={{
           background: 'rgba(212,175,55,0.15)',
@@ -961,7 +962,7 @@ function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
         </span>
         {/* Potion inventory chips */}
         <PotionInventory />
-        <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_DARK }}>שלום, {userName}</span>
+        <span className="hidden md:inline" style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_DARK }}>שלום, {userName}</span>
         {/* Reset tutorials — re-enables and re-shows all coachmarks */}
         <button
           onClick={() => {
@@ -1005,11 +1006,11 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
   const level = Math.floor(xp / XP_PER_LEVEL) + 1
   const xpInLevel = xp % XP_PER_LEVEL
   return (
-    <div style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
+    <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
       <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* ── ROW 1 ──────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'stretch' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'stretch' }}>
 
           {/* Card: כמעט שם! */}
           <div style={{
@@ -1174,10 +1175,10 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
         </div>
 
         {/* ── ROW 2 ──────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
 
           {/* Card: Activity chart */}
-          <div style={{
+          <div className="ws-card-pad" style={{
             background: GLASS_CARD,
             backdropFilter: 'blur(20px)',
             boxShadow: CARD_SHADOW,
@@ -1189,7 +1190,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
           </div>
 
           {/* Card: העולם שלי */}
-          <div style={{
+          <div className="ws-card-pad" style={{
             background: GLASS_CARD,
             backdropFilter: 'blur(20px)',
             boxShadow: CARD_SHADOW,
@@ -1508,7 +1509,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       {xpBurst !== null && <XpBurst amount={xpBurst} onDone={() => setXpBurst(null)} />}
 
       {/* Top bar */}
-      <div style={{ background: '#FFFFFF', boxShadow: '2px 2px 6px rgba(0,0,0,0.18)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12, zIndex: 10 }}>
+      <div className="ws-quiz-topbar" style={{ background: '#FFFFFF', boxShadow: '2px 2px 6px rgba(0,0,0,0.18)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12, zIndex: 10 }}>
         <img src={`${import.meta.env.BASE_URL}building-figma.png`} alt="" style={{ width: 34, height: 26, objectFit: 'cover', borderRadius: 5 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
         <div style={{ flex: 1 }}>
           <div style={{ height: 6, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
@@ -1518,7 +1519,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             {answeredCount} / {total} · {correctCount} ✓
           </div>
         </div>
-        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: TEXT_DARK }}>
+        <div className="ws-quiz-topic" style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: TEXT_DARK }}>
           <span style={{ fontWeight: 700 }}>סטטיסטיקה</span>{!isDone && ` | ${q.topic}`}
         </div>
       </div>

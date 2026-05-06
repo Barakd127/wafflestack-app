@@ -163,7 +163,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
 
   // ── Right-side content (slide + visualization + footer) ─────────────────────
   const rightPane = (
-    <div dir="rtl" style={{
+    <div dir="rtl" className="ws-lesson-rightpane" style={{
       flex: 1, overflow: 'auto', padding: '24px 28px',
       fontFamily: "'Rubik', 'Assistant', sans-serif",
     }}>
@@ -262,6 +262,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
       <div
         data-arsenal-source="slide"
         data-arsenal-topic={topicId}
+        className="ws-lesson-card"
         style={{
           ...glassCardStyle,
           padding: '40px 48px',
@@ -351,6 +352,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
               {parts.map((bullet, i) => (
                 <div
                   key={i}
+                  className="ws-lesson-bullet"
                   style={{
                     // Parent has dir="rtl"; flex-direction: row places the
                     // first child (the number badge) on the RIGHT — which is
@@ -392,7 +394,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
         })()}
         {slide.formula && (
           <div style={{ position: 'relative', marginTop: 24 }}>
-            <div style={{
+            <div className="ws-lesson-formula" style={{
               background: 'rgba(127,155,217,0.12)',
               border: '1px solid rgba(127,155,217,0.3)',
               borderRadius: 14,
