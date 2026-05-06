@@ -93,6 +93,39 @@ export function MeanVisual() {
   return (
     <div style={WRAP}>
       <div style={CAPTION}>🎯 ויזואליזציה — ממוצע</div>
+      {/* Prominent x̄ display — the answer first, story second. */}
+      <div style={{
+        display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 12,
+        marginBottom: 10,
+      }}>
+        <div style={{
+          fontFamily: "'Inter', sans-serif", fontSize: 14, color: '#6b7280',
+          letterSpacing: '0.04em', textTransform: 'uppercase',
+        }}>
+          ממוצע
+        </div>
+        <div style={{
+          fontFamily: "'Inter', serif",
+          fontSize: 56, fontWeight: 700, color: '#b91c1c',
+          letterSpacing: '-0.03em', lineHeight: 1,
+        }}>
+          x̄ = {mean.toFixed(2)}
+        </div>
+      </div>
+      {/* Color legend — yellow = below mean, blue = above */}
+      <div style={{
+        display: 'flex', gap: 14, justifyContent: 'center',
+        marginBottom: 10, fontSize: 11, color: '#475569',
+      }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(245,158,11,0.75)' }} />
+          מתחת לממוצע
+        </span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(99,102,241,0.75)' }} />
+          מעל לממוצע
+        </span>
+      </div>
       <div style={STORY}>
         <strong>ציוני המבחן של {values.length} חברים בכיתה.</strong> הזיזו את הסרגלים כדי לשנות את הציון של כל חבר וראו איך הממוצע (הקו האדום) מתנדנד.
       </div>

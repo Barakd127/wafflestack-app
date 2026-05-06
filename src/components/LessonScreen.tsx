@@ -326,12 +326,67 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
             </button>
           </div>
         </div>
-        <div style={{
-          fontFamily: "'Assistant', sans-serif", fontSize: 18.5, color: TEXT_MED,
-          lineHeight: 1.95, textAlign: 'right', whiteSpace: 'pre-wrap', flex: 1,
-        }}>
-          {slide.content}
-        </div>
+        {(() => {
+          // Auto-split prose into numbered bullets so every slide reads
+          // like a high-production-value card. Sentences are split on
+          // periods that are followed by whitespace; sequences shorter
+          // than ~12 chars (e.g. "x̄.") are merged with the previous one
+          // so we don't fragment formulas. Slides that are already short
+          // (< 80 chars) render as a single big bullet.
+          const raw = String(slide.content || '').trim()
+          const parts = raw.length < 80
+            ? [raw]
+            : raw.split(/(?<=[.!?])\s+/).reduce((acc: string[], s) => {
+                const t = s.trim(); if (!t) return acc
+                if (acc.length && t.length < 12) acc[acc.length - 1] += ' ' + t
+                else acc.push(t)
+                return acc
+              }, [])
+          return (
+            <div style={{
+              display: 'flex', flexDirection: 'column', gap: 14,
+              fontFamily: "'Assistant', sans-serif", textAlign: 'right',
+              flex: 1,
+            }}>
+              {parts.map((bullet, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex', flexDirection: 'row-reverse', gap: 16,
+                    alignItems: 'flex-start',
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.045), rgba(99,102,241,0.015))',
+                    border: '1px solid rgba(127,155,217,0.20)',
+                    borderRadius: 14, padding: '14px 18px',
+                    boxShadow: '0 2px 8px rgba(31,62,108,0.04)',
+                    transition: 'transform 0.15s, box-shadow 0.15s',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 14px rgba(31,62,108,0.08)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 8px rgba(31,62,108,0.04)' }}
+                >
+                  <div style={{
+                    flexShrink: 0,
+                    width: 34, height: 34, borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #5b8bff, #6c63ff)',
+                    color: '#fff', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center',
+                    fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 15,
+                    boxShadow: '0 2px 6px rgba(91,139,255,0.45)',
+                    marginTop: 1,
+                  }}>
+                    {i + 1}
+                  </div>
+                  <div style={{
+                    flex: 1, minWidth: 0,
+                    fontSize: 18.5, lineHeight: 1.85, color: TEXT_DARK,
+                    whiteSpace: 'pre-wrap',
+                  }}>
+                    {bullet}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        })()}
         {slide.formula && (
           <div style={{ position: 'relative', marginTop: 24 }}>
             <div style={{
