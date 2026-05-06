@@ -1281,9 +1281,10 @@ interface LearningScreenProps {
   userProgress: UserProgress
   onProgressUpdate: (progress: UserProgress) => void
   userId?: string
+  isMobile?: boolean
 }
 
-function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userProgress, onProgressUpdate, userId }: LearningScreenProps) {
+function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userProgress, onProgressUpdate, userId, isMobile = false }: LearningScreenProps) {
   const [currentQ, setCurrentQ] = useState(0)
   const [answer, setAnswer] = useState('')
   // Coachmark anchor for the quiz card (first time the user sees a question)
@@ -1670,7 +1671,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   הבא ←
                 </button>
               )}
-              {!isDone && (
+              {!isDone && !isMobile && (
                 <button
                   onClick={() => setFloatMode(v => !v)}
                   title={floatMode ? 'החזר לתצוגה רגילה' : 'נתק לחלון צף נגרר'}
@@ -2212,6 +2213,7 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
             userProgress={userProgress}
             onProgressUpdate={handleProgressUpdate}
             userId={currentUser?.userId}
+            isMobile={isMobile}
           />
         )}
       </main>
