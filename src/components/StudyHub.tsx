@@ -1571,7 +1571,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             onClick={() => setChipExpanded(true)}
             title="הצג שאלה"
             style={{
-              position: 'absolute', top: 14, insetInlineEnd: 14, zIndex: 50,
+              position: 'absolute',
+              ...(isMobile ? { bottom: 70, insetInlineEnd: 12 } : { top: 14, insetInlineEnd: 14 }),
+              zIndex: 50,
               background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
               border: '1px solid rgba(127,155,217,0.5)',
               borderRadius: 22, padding: '8px 16px',
