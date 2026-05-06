@@ -1278,6 +1278,34 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   //                     compact card with answer field + dots.
   const [tab, setTab] = useState<'none' | 'mindmap' | 'arsenal' | 'canvas'>('none')
   const [chipExpanded, setChipExpanded] = useState<boolean>(true)
+  // Pop-out + drag state for the question card. When floatMode is true the
+  // card detaches into a draggable floating panel positioned at floatPos.
+  const [floatMode, setFloatMode] = useState<boolean>(false)
+  const [floatPos, setFloatPos] = useState<{ x: number; y: number }>(() => ({
+    x: typeof window !== 'undefined' ? Math.max(20, window.innerWidth - 580) : 60,
+    y: 90,
+  }))
+  const floatDragRef = useRef<{ ox: number; oy: number; sx: number; sy: number } | null>(null)
+  const onFloatHeaderMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!floatMode) return
+    const target = e.target as HTMLElement
+    if (target.closest('button')) return // don't start drag from buttons
+    floatDragRef.current = { ox: floatPos.x, oy: floatPos.y, sx: e.clientX, sy: e.clientY }
+    const onMove = (ev: MouseEvent) => {
+      const d = floatDragRef.current; if (!d) return
+      setFloatPos({
+        x: Math.max(8, Math.min(window.innerWidth - 340, d.ox + (ev.clientX - d.sx))),
+        y: Math.max(8, Math.min(window.innerHeight - 100, d.oy + (ev.clientY - d.sy))),
+      })
+    }
+    const onUp = () => {
+      floatDragRef.current = null
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }, [floatMode, floatPos.x, floatPos.y])
   const contentRowRef = useRef<HTMLDivElement>(null)
   const recordAnswer = useLearningStore(s => s.recordAnswer)
 
@@ -1316,6 +1344,26 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     setUserAnswers(prev => ({ ...prev, [currentQ]: answer }))
     setPhase('review')
   }
+
+  // Auto-check numeric answers with ±0.3 tolerance. Returns {correct, expected}
+  // when the model answer contains a recognisable number, otherwise null and
+  // the UI falls back to manual self-assessment.
+  const autoCheckResult = (() => {
+    if (phase !== 'review' || !q) return null
+    const nums = (s: string): number[] => {
+      const matches = String(s ?? '').match(/-?\d+(?:[.,]\d+)?/g) || []
+      return matches.map(t => parseFloat(t.replace(',', '.'))).filter(n => !Number.isNaN(n))
+    }
+    const userNums = nums(answer)
+    const modelNums = nums(q.answer)
+    if (modelNums.length === 0 || userNums.length === 0) return null
+    // Last number in the model answer is almost always the final result
+    // ("...לכן הממוצע הוא 4.2" ends in 4.2). Compare the user's last number.
+    const expected = modelNums[modelNums.length - 1]
+    const got = userNums[userNums.length - 1]
+    const correct = Math.abs(got - expected) <= 0.3
+    return { correct, expected, got }
+  })()
 
   // Navigate to any question by clicking its dot
   const navigateToQuestion = (index: number) => {
@@ -1513,7 +1561,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         {/* ── Question card — calm-centered when tab='none', floating chip when tool active ── */}
         {(tab === 'none' || chipExpanded || isDone) && (
         <div style={
-          tab === 'none' || isDone
+          floatMode
+            ? { position: 'fixed', top: floatPos.y, left: floatPos.x, zIndex: 250, width: 'min(560px, calc(100vw - 24px))', maxHeight: 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.45)' }
+            : tab === 'none' || isDone
             ? { flexShrink: 0, padding: '18px 24px 12px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
             : { position: 'absolute', top: 14, insetInlineEnd: 14, zIndex: 60, width: 'min(420px, calc(100vw - 28px))', maxHeight: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }
         }>
@@ -1539,14 +1589,19 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 }
           }>
             {/* Card header strip — labeled prev/next buttons (same UX as
-                LessonScreen) + question counter + difficulty + chip-collapse. */}
-            <div style={{
-              background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
-              color: '#fff', padding: '10px 14px',
-              display: 'flex', alignItems: 'center', gap: 8,
-              fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
-              flexShrink: 0,
-            }}>
+                LessonScreen) + question counter + difficulty + chip-collapse.
+                Also serves as drag handle when floatMode is on. */}
+            <div
+              onMouseDown={onFloatHeaderMouseDown}
+              style={{
+                background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
+                color: '#fff', padding: '10px 14px',
+                display: 'flex', alignItems: 'center', gap: 8,
+                fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
+                flexShrink: 0,
+                cursor: floatMode ? 'move' : 'default',
+                userSelect: floatMode ? 'none' : undefined,
+              }}>
               {!isDone && (
                 <button
                   onClick={navPrev}
@@ -1586,6 +1641,23 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   }}
                 >
                   הבא ←
+                </button>
+              )}
+              {!isDone && (
+                <button
+                  onClick={() => setFloatMode(v => !v)}
+                  title={floatMode ? 'החזר לתצוגה רגילה' : 'נתק לחלון צף נגרר'}
+                  aria-label={floatMode ? 'החזר לתצוגה רגילה' : 'נתק לחלון צף'}
+                  style={{
+                    background: floatMode ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.12)',
+                    color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    borderRadius: 8, padding: '5px 10px',
+                    cursor: 'pointer',
+                    fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
+                  }}
+                >
+                  {floatMode ? '⊟' : '⤢'}
                 </button>
               )}
               {!isDone && tab !== 'none' && (
@@ -1788,11 +1860,33 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     )}
                   </div>
                 </div>
+              ) : autoCheckResult ? (
+                /* Fresh review — auto-checked numeric answer (±0.3 tolerance) */
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 10,
+                    padding: '10px 22px', borderRadius: 99, marginBottom: 14,
+                    background: autoCheckResult.correct ? 'rgba(52,168,83,0.12)' : 'rgba(234,67,53,0.10)',
+                    border: `1.5px solid ${autoCheckResult.correct ? 'rgba(52,168,83,0.4)' : 'rgba(234,67,53,0.35)'}`,
+                    fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 15,
+                    color: autoCheckResult.correct ? '#34A853' : '#EA4335',
+                  }}>
+                    {autoCheckResult.correct
+                      ? `✅ נכון! (התשובה: ${autoCheckResult.expected})`
+                      : `❌ לא נכון. התשובה: ${autoCheckResult.expected}  (טווח סבילות ±0.3)`}
+                  </div>
+                  <div>
+                    <button onClick={() => handleSelfAssess(autoCheckResult.correct)}
+                      style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '10px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px rgba(51,81,202,0.3)' }}>
+                      המשך →
+                    </button>
+                  </div>
+                </div>
               ) : (
-                /* Fresh review — self-assessment */
+                /* Fresh review — non-numeric, fall back to self-assessment */
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_MED, marginBottom: 14 }}>
-                    כמה הצלחת?
+                    כמה הצלחת? (לא ניתן היה לבדוק אוטומטית)
                   </div>
                   <div style={{ display: 'flex', gap: 14, justifyContent: 'center' }}>
                     <button onClick={() => handleSelfAssess(false)}

@@ -1006,7 +1006,7 @@ export function DistributionShapesVisual() {
         <line x1={20} y1={H - 18} x2={W - 20} y2={H - 18} stroke="#9ca3af" strokeWidth={1} />
         {/* mode marker */}
         <line x1={toX(mode)} y1={4} x2={toX(mode)} y2={H - 18} stroke="#10b981" strokeWidth={2} />
-        <text x={toX(mode)} y={3} fontSize={10} textAnchor="middle" fill="#10b981" fontWeight="bold">שכיח</text>
+        <text x={toX(mode)} y={12} fontSize={10} textAnchor="middle" fill="#10b981" fontWeight="bold">שכיח</text>
         {/* median */}
         <line x1={toX(median)} y1={4} x2={toX(median)} y2={H - 18} stroke="#f59e0b" strokeWidth={2} strokeDasharray="3,3" />
         <text x={toX(median)} y={14} fontSize={10} textAnchor="middle" fill="#b45309" fontWeight="bold">חציון</text>
@@ -1091,7 +1091,7 @@ export function ObservationChangesVisual() {
             fill={v === outlier && includeOutlier ? '#f59e0b' : 'rgba(99,102,241,0.7)'} stroke="#fff" strokeWidth={1.5} />
         ))}
         <line x1={toX(mean)} y1={4} x2={toX(mean)} y2={H - 18} stroke="#ef4444" strokeWidth={2} strokeDasharray="4,2" />
-        <text x={toX(mean)} y={3} fontSize={9} textAnchor="middle" fill="#b91c1c">ממוצע</text>
+        <text x={toX(mean)} y={12} fontSize={9} textAnchor="middle" fill="#b91c1c">ממוצע</text>
         <line x1={toX(median)} y1={H - 50} x2={toX(median)} y2={H - 18} stroke="#10b981" strokeWidth={2} />
         <text x={toX(median)} y={H - 54} fontSize={9} textAnchor="middle" fill="#065f46">חציון</text>
       </svg>
@@ -1283,8 +1283,8 @@ export function DiscreteRVVisual() {
         {(() => {
           const exX = PAD + ((ex - 1) / 4) * (W - PAD * 2 - barW) + barW / 2 + 4
           return <g>
-            <line x1={exX} y1={4} x2={exX} y2={H - 22} stroke="#ef4444" strokeWidth={2} strokeDasharray="4,3" />
-            <text x={exX} y={3} textAnchor="middle" fontSize={9} fill="#b91c1c" fontWeight="bold">E(X)</text>
+            <line x1={exX} y1={14} x2={exX} y2={H - 22} stroke="#ef4444" strokeWidth={2} strokeDasharray="4,3" />
+            <text x={exX} y={11} textAnchor="middle" fontSize={9} fill="#b91c1c" fontWeight="bold">E(X)</text>
           </g>
         })()}
       </svg>
