@@ -391,6 +391,35 @@ body.light .nb-add-page-btn:hover{border-color:rgba(99,102,241,.6);color:#000}
 body.light .nb-empty{color:rgba(0,0,0,.45)}
 #nb-toggle-btn.active{background:rgba(91,139,255,.35)!important;border-color:rgba(91,139,255,.7)!important;color:#fff!important}
 
+/* ═══ Mindmap guided tour ═══ */
+#mm-tour-card{
+  position:fixed; bottom:60px; left:50%; transform:translateX(-50%);
+  width:min(440px,90vw); z-index:9500;
+  background:linear-gradient(135deg,#1F3E6C,#2c4f8a);
+  color:#f1f5ff; border:1px solid rgba(99,162,255,.55);
+  border-radius:14px; padding:18px 22px;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);
+  font-family:'Rubik','Assistant','Inter',sans-serif;
+  direction:rtl;
+}
+#mm-tour-card .mt-step{font-size:11px;opacity:.7;letter-spacing:.05em;margin-bottom:6px}
+#mm-tour-card .mt-title{font-size:17px;font-weight:700;margin-bottom:8px;letter-spacing:-.01em}
+#mm-tour-card .mt-body{font-size:13.5px;line-height:1.65;color:#cbd5ff;margin-bottom:14px}
+#mm-tour-card .mt-actions{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#mm-tour-card .mt-skip{background:transparent;border:none;color:#9aa4c7;font-size:12px;cursor:pointer;font-family:inherit;padding:4px 6px}
+#mm-tour-card .mt-skip:hover{color:#fff}
+#mm-tour-card .mt-progress{display:flex;gap:5px}
+#mm-tour-card .mt-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.18)}
+#mm-tour-card .mt-dot.done{background:#34d399}
+#mm-tour-card .mt-dot.active{background:#5b8bff;box-shadow:0 0 0 3px rgba(91,139,255,.25)}
+.mm-tour-pulse{
+  animation:mm-tour-pulse 1.6s ease-in-out infinite;
+}
+@keyframes mm-tour-pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(91,139,255,.5)}
+  50%{box-shadow:0 0 0 8px rgba(91,139,255,0)}
+}
+
 /* ═══ Node note badge (X-Mind-style inline note) ═══ */
 .node-note-badge{
   position:absolute; top:-8px; left:-8px;
@@ -518,6 +547,7 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
     <button class="tb-btn" onclick="mmClearAll()">🗑 Clear</button>
     <div class="tb-div"></div>
     <button class="tb-btn" id="pomo-topbar-btn" onclick="pomoToggleWidget()" title="Pomodoro Timer">🍅 Pomo</button>
+    <button class="tb-btn" onclick="mmTourStart()" title="סיור מודרך — למד את המפה תוך כדי שימוש">🎓 Tour</button>
   </div>
   <div class="tb-right">
     <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:11px">B</div>
@@ -938,7 +968,7 @@ function mmRender(){
       noteBtn.className = 'node-note-badge' + (hasNote ? ' has-note' : '');
       noteBtn.title = hasNote ? 'פתח הערה' : 'הוסף הערה';
       noteBtn.textContent = hasNote ? '📝' : '＋';
-      noteBtn.onclick = (e)=>{ e.stopPropagation(); openNoteEditor(n.id); };
+      noteBtn.onclick = (e)=>{ e.stopPropagation(); openNoteEditor(n.id); if(typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('add-note'); };
       div.appendChild(noteBtn);
     }
 
@@ -962,7 +992,7 @@ function mmRender(){
         function onUp(){
           document.removeEventListener('mousemove',onMove);
           document.removeEventListener('mouseup',onUp);
-          if(moved)mmPushHistory();
+          if(moved){ mmPushHistory(); if(typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('drag-node'); }
         }
         document.addEventListener('mousemove',onMove);
         document.addEventListener('mouseup',onUp);
@@ -1098,6 +1128,7 @@ function mmAddChild(parentId){
   const baseY=mmNextChildY(parent);
   const n=mmNode('branch','New Branch',parent.x+MM_XSTEP,baseY,sel,mmPickColor(sel));
   mmFinishAdd(n,true);
+  if(typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('add-branch');
 }
 
 function mmAddEquation(){
@@ -1403,7 +1434,9 @@ function startEditNode(n,el){
   input.focus();input.select();
   input.onblur=()=>{
     const newText=input.value.trim()||n.text;
+    const changed = newText !== n.text;
     n.text=newText;mmPushHistory();input.remove();mmRender();
+    if(changed && typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('edit-text');
   };
   input.onkeydown=e=>{
     if(e.key==='Enter'){input.blur();return;}
@@ -4060,6 +4093,118 @@ function mmRenderSummaries(){
 }
 
 // ═══════════════════════════════════════════════════════════
+// MINDMAP GUIDED TOUR — interactive 5-step walkthrough.
+// Each step describes an action and waits for the user to perform it
+// (we hook into the existing call sites). When the action fires we
+// advance to the next step automatically — no "Next" button needed.
+// Click 🎓 Tour in the topbar to start. Persists "completed" so it
+// doesn't pop up unprompted on subsequent visits.
+// ═══════════════════════════════════════════════════════════
+const MM_TOUR_KEY = 'mm-tour-completed-v1';
+const MM_TOUR_STEPS = [
+  {
+    id: 'add-branch',
+    title: 'הוסף ענף ראשון',
+    body: 'לחץ על הכפתור "+ Branch" בסרגל למעלה כדי להוסיף צומת חדש מתחת לשורש. הניסיון שלך מתחיל כאן.',
+    highlight: 'button[onclick="mmAddChild()"]',
+  },
+  {
+    id: 'edit-text',
+    title: 'ערוך טקסט',
+    body: 'בחר את הצומת החדש (קליק) ולחץ F2, או לחץ פעמיים, כדי לשנות את הטקסט שלו. שמירה אוטומטית.',
+    highlight: null,
+  },
+  {
+    id: 'drag-node',
+    title: 'גרור כדי למקם',
+    body: 'גרור את הצומת בעכבר כדי לסדר את המפה. הקווים מתעדכנים אוטומטית.',
+    highlight: null,
+  },
+  {
+    id: 'add-note',
+    title: 'הערה מורחבת',
+    body: 'רחף מעל צומת ולחץ על הסמל ＋ שמופיע למעלה-שמאל. ייפתח עורך הערות שמסונכרן עם תצוגת המחברת.',
+    highlight: null,
+  },
+  {
+    id: 'open-notebook',
+    title: 'תצוגת מחברת',
+    body: 'לחץ על "📔 מחברת" בסרגל למעלה כדי לראות את כל המפה כתיקיות + דפים. אותם הנתונים, תצוגה אחרת.',
+    highlight: '#nb-toggle-btn',
+  },
+];
+let MM_TOUR = { active: false, step: 0 };
+
+function mmTourStart(){
+  MM_TOUR = { active: true, step: 0 };
+  mmTourRender();
+}
+function mmTourSkip(){
+  MM_TOUR.active = false;
+  const c = document.getElementById('mm-tour-card');
+  if(c) c.remove();
+  document.querySelectorAll('.mm-tour-pulse').forEach(el => el.classList.remove('mm-tour-pulse'));
+}
+function mmTourCompleteIfStep(stepId){
+  if(!MM_TOUR.active) return;
+  const cur = MM_TOUR_STEPS[MM_TOUR.step];
+  if(!cur || cur.id !== stepId) return;
+  MM_TOUR.step++;
+  if(MM_TOUR.step >= MM_TOUR_STEPS.length){
+    try{ localStorage.setItem(MM_TOUR_KEY, '1'); }catch(e){}
+    mmTourFinish();
+  } else {
+    mmTourRender();
+  }
+}
+function mmTourFinish(){
+  const card = document.getElementById('mm-tour-card');
+  if(card){
+    card.innerHTML = `
+      <div class="mt-title">🎉 סיימת את הסיור!</div>
+      <div class="mt-body">עכשיו אתה יודע את הפעולות הבסיסיות. הוסף ענפים, ערוך טקסט, גרור צמתים, רשום הערות, ועבור בין מפה למחברת.</div>
+      <div class="mt-actions"><span></span><button class="mt-skip" onclick="mmTourSkip()">סגור</button></div>
+    `;
+  }
+  document.querySelectorAll('.mm-tour-pulse').forEach(el => el.classList.remove('mm-tour-pulse'));
+  setTimeout(mmTourSkip, 4000);
+}
+
+function mmTourRender(){
+  let card = document.getElementById('mm-tour-card');
+  if(!card){
+    card = document.createElement('div');
+    card.id = 'mm-tour-card';
+    document.body.appendChild(card);
+  }
+  // Clear any previous pulse decoration
+  document.querySelectorAll('.mm-tour-pulse').forEach(el => el.classList.remove('mm-tour-pulse'));
+
+  const cur = MM_TOUR_STEPS[MM_TOUR.step];
+  if(!cur) return;
+  const dots = MM_TOUR_STEPS.map((_,i) => {
+    const cls = i < MM_TOUR.step ? 'done' : (i === MM_TOUR.step ? 'active' : '');
+    return `<span class="mt-dot ${cls}"></span>`;
+  }).join('');
+  card.innerHTML = `
+    <div class="mt-step">שלב ${MM_TOUR.step+1} / ${MM_TOUR_STEPS.length}</div>
+    <div class="mt-title">${cur.title}</div>
+    <div class="mt-body">${cur.body}</div>
+    <div class="mt-actions">
+      <button class="mt-skip" onclick="mmTourSkip()">דלג על הסיור</button>
+      <div class="mt-progress">${dots}</div>
+    </div>
+  `;
+  // Highlight relevant UI element with a pulse animation
+  if(cur.highlight){
+    try{
+      const el = document.querySelector(cur.highlight);
+      if(el) el.classList.add('mm-tour-pulse');
+    }catch(e){}
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
 // CLEAR ALL — wipes both runtime state and persisted data
 // (the old "if(confirm)initMM()" silently reloaded from localStorage,
 //  so the user saw nothing change)
@@ -4104,6 +4249,7 @@ function nbToggle(){
     if(!NB.currentId || !MM.nodes[NB.currentId]) NB.currentId = MM.root;
     NB.expanded.add(MM.root);
     nbRender();
+    if(typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('open-notebook');
   }
 }
 
