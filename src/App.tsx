@@ -233,7 +233,7 @@ function App() {
         {activeView === 'wafflecity' && (
           <div className="w-full h-full relative">
             <WaffleStackCity onBack={() => setActiveView('study')} />
-            <div className="absolute bottom-6 right-6 z-50 pointer-events-auto flex gap-2">
+            <div className="ws-godot-controls absolute bottom-6 right-6 z-50 pointer-events-auto flex gap-2">
               <button
                 onClick={() => setActiveView('split')}
                 aria-label="פצל מסך — עיר ולימוד"
@@ -253,6 +253,7 @@ function App() {
               <button
                 onClick={() => openMindMap('wafflecity')}
                 aria-label="פתח מפת חשיבה"
+                className="ws-godot-mindmap-btn"
                 style={{
                   background: 'rgba(109,40,217,0.85)',
                   backdropFilter: 'blur(12px)',

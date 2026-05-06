@@ -234,4 +234,30 @@ html.dark :focus-visible {
 
   /* Safe area bottom padding for absolute-positioned bottom buttons */
   .ws-safe-bottom { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+
+  /* Godot city overlay buttons — mobile-only sizing/positioning.
+     Desktop uses Tailwind/inline-style coordinates; mobile bumps the tap
+     target to 44px, increases padding, locks safe-area inset, and prevents
+     the back button + mindmap button from overlapping the iframe HUD. */
+  .ws-godot-back-btn {
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    left: 12px !important;
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    border-radius: 14px !important;
+  }
+  .ws-godot-controls {
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    right: 12px !important;
+    gap: 8px !important;
+  }
+  .ws-godot-mindmap-btn {
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    border-radius: 14px !important;
+  }
 }
