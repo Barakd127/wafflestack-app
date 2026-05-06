@@ -1,4 +1,6 @@
+import { Suspense } from 'react'
 import { motion } from 'framer-motion'
+import { HeroScene } from '../three/HeroScene'
 
 export function HeroSection() {
   return (
@@ -69,34 +71,29 @@ export function HeroSection() {
             </motion.div>
           </motion.div>
 
-          {/* RIGHT: 3D placeholder (replaced in Step 4) */}
+          {/* RIGHT: 3D scene */}
           <motion.div
             className="ls-hero-3d"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.7 }}
-            style={{
-              height: 500,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative',
-            }}
+            style={{ height: 500, position: 'relative' }}
           >
-            {/* Gold glow halo */}
             <div style={{
-              position: 'absolute',
-              width: 300,
-              height: 300,
+              position: 'absolute', width: 300, height: 300,
+              top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
               borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(245,158,11,0.25) 0%, transparent 70%)',
-              filter: 'blur(40px)',
+              filter: 'blur(60px)',
               pointerEvents: 'none',
             }} />
-            <div className="ls-glass" style={{ padding: 32, textAlign: 'center', width: 200 }}>
-              <div style={{ fontSize: 64 }}>🏙️</div>
-              <div style={{ marginTop: 12, color: 'var(--ls-text-muted)', fontSize: 13 }}>3D city loading...</div>
-            </div>
+            <Suspense fallback={
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94a3b8', fontSize: 13 }}>
+                Loading 3D...
+              </div>
+            }>
+              <HeroScene />
+            </Suspense>
           </motion.div>
 
         </div>
