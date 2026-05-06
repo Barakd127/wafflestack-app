@@ -177,4 +177,61 @@ html.dark :focus-visible {
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
+
+  /* === MOBILE ADDITIONS — Step 1 === */
+  /* Godot iframe iOS dvh fix */
+  @supports (height: 100dvh) {
+    .ws-godot-shell { height: 100dvh !important; min-height: 100dvh !important; }
+  }
+
+  /* Godot loading emoji — smaller on mobile */
+  .ws-godot-emoji { font-size: 48px !important; }
+
+  /* Spacing tokens */
+  .ws-screen-pad { padding: 16px 12px !important; }
+  .ws-card-pad   { padding: 16px !important; }
+  .ws-card-pad-lg { padding: 20px 16px !important; }
+  .ws-h2 { font-size: 20px !important; }
+  .ws-h3 { font-size: 18px !important; }
+
+  /* TopBar */
+  .ws-topbar { height: auto !important; padding: 8px 12px !important; flex-wrap: wrap !important; gap: 8px !important; }
+  .ws-topbar h1 { font-size: 18px !important; }
+  .ws-topbar .ws-topbar-actions { flex-wrap: wrap; gap: 6px !important; }
+  .ws-topbar-actions > span { font-size: 12px !important; }
+  .ws-topbar-actions button { padding: 4px 8px !important; }
+
+  /* Home screen grid */
+  .ws-home-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 14px !important; }
+  .ws-home-grid > div { padding: 18px !important; }
+
+  /* Topic cards */
+  .ws-topic-card { padding: 16px !important; }
+  .ws-topic-card h3 { font-size: 17px !important; }
+
+  /* Lesson screen */
+  .ws-lesson-rightpane { padding: 14px 12px !important; }
+  .ws-lesson-card { padding: 20px 16px !important; min-height: 0 !important; }
+  .ws-lesson-card h3 { font-size: 22px !important; }
+  .ws-lesson-bullet { padding: 10px 12px !important; gap: 10px !important; }
+  .ws-lesson-bullet > div:first-child { width: 28px !important; height: 28px !important; font-size: 13px !important; }
+  .ws-lesson-bullet > div:last-child { font-size: 16px !important; line-height: 1.7 !important; }
+  .ws-lesson-formula { padding: 14px 12px !important; font-size: 18px !important; }
+
+  /* Quiz TopBar */
+  .ws-quiz-topbar { padding: 0 10px !important; gap: 8px !important; }
+  .ws-quiz-topbar .ws-quiz-topic { display: none; }
+
+  /* QuizIntroCard */
+  .ws-quiz-intro { padding: 20px !important; }
+  .ws-quiz-intro h2 { font-size: 20px !important; }
+
+  /* StatChallenge */
+  .stat-progress-bar { max-width: min(280px, 100%) !important; }
+
+  /* Touch feedback */
+  :where(button):active { transform: scale(0.97); }
+
+  /* Safe area bottom padding for absolute-positioned bottom buttons */
+  .ws-safe-bottom { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
 }
