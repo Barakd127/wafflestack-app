@@ -10,8 +10,9 @@ import MissionControl from './components/MissionControl'
 import OnboardingFlow from './components/OnboardingFlow'
 import SplitLayout from './components/SplitLayout'
 import TutorialOverlay from './components/TutorialOverlay'
+import DrawingScreen from './components/DrawingScreen'
 
-type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap'
+type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing'
 
 function App() {
   const [activeView, setActiveView] = useState<View>(() => {
@@ -105,6 +106,7 @@ function App() {
               onViewChange={(v) => {
                 if (v === 'mindmap') openMindMap('study')
                 else if (v === '3d') setActiveView('wafflecity')
+                else if (v === 'drawing') setActiveView('drawing')
                 else setActiveView(v as View)
               }}
               darkMode={darkMode}
@@ -263,6 +265,13 @@ function App() {
 
       {activeView === 'onboarding' && (
         <OnboardingFlow onComplete={() => setActiveView('study')} />
+      )}
+
+      {activeView === 'drawing' && (
+        <DrawingScreen
+          userId={(typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default'}
+          onBack={() => setActiveView('study')}
+        />
       )}
 
       {loggedIn && <TutorialOverlay />}

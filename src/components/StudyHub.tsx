@@ -12,7 +12,7 @@ import { useTutorialStep } from '../hooks/useTutorialStep'
 import { useTutorialStore } from '../store/tutorialStore'
 
 interface StudyHubProps {
-  onViewChange: (view: 'study' | 'mindmap' | '3d') => void
+  onViewChange: (view: 'study' | 'mindmap' | '3d' | 'drawing') => void
   darkMode?: boolean
   onLoggedIn?: () => void
   onLoggedOut?: () => void
@@ -828,11 +828,12 @@ function ActivityChart() {
 }
 
 // ── Sidebar ────────────────────────────────────────────────────────────────────
-function Sidebar({ active, onNav, onGoWorld, onGoMindmap, width = 247 }: {
+function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, width = 247 }: {
   active: InternalView
   onNav: (v: InternalView) => void
   onGoWorld: () => void
   onGoMindmap: () => void
+  onGoDrawing: () => void
   width?: number
 }) {
   const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string }> = [
@@ -840,6 +841,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, width = 247 }: {
     { id: 'topics',   label: 'אזור למידה',   icon: '📖' },
     { id: 'arsenal',  label: 'הארסנל שלי',   icon: '🎯' },
     { id: null,       label: 'מפת לימוד',    icon: '◫', action: 'mindmap' },
+    { id: null,       label: 'לוח ציור',     icon: '🎨', action: 'drawing' },
     { id: null,       label: 'העולם שלי',    icon: '🌐', action: 'world' },
   ]
 
@@ -884,6 +886,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, width = 247 }: {
               onClick={() => {
                 if (item.action === 'world') { onGoWorld(); return }
                 if (item.action === 'mindmap') { onGoMindmap(); return }
+                if (item.action === 'drawing') { onGoDrawing(); return }
                 if (item.id !== null) onNav(item.id)
               }}
               title={collapsed ? item.label : undefined}
@@ -2090,6 +2093,7 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
           }}
           onGoWorld={() => onViewChange('3d')}
           onGoMindmap={() => onViewChange('mindmap')}
+          onGoDrawing={() => onViewChange('drawing')}
           width={sidebarWidth}
         />
         {/* Sidebar resize handle — on the left edge (RTL: left is outer edge) */}
