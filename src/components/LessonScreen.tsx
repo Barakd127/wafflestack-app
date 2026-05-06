@@ -352,7 +352,10 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
                 <div
                   key={i}
                   style={{
-                    display: 'flex', flexDirection: 'row-reverse', gap: 16,
+                    // Parent has dir="rtl"; flex-direction: row places the
+                    // first child (the number badge) on the RIGHT — which is
+                    // what we want in Hebrew. row-reverse would push it left.
+                    display: 'flex', flexDirection: 'row', gap: 16,
                     alignItems: 'flex-start',
                     background: 'linear-gradient(135deg, rgba(99,102,241,0.045), rgba(99,102,241,0.015))',
                     border: '1px solid rgba(127,155,217,0.20)',

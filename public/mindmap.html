@@ -809,6 +809,98 @@ function mmNode(type,text,x,y,parentId,color){
   return n;
 }
 
+// ── Pre-built course tree ──────────────────────────────────────────────────
+// 23 lesson topics organised under two pillars: סטטיסטיקה תיאורית (descriptive)
+// and סטטיסטיקה היסקית (inferential). Mirrors the curriculum so a student
+// who opens the mind map for the first time sees the whole landscape, not a
+// blank "Untitled" node. The seed only fires when no saved map exists or
+// when the existing map is essentially empty (root + 0 children).
+const COURSE_SEED = {
+  text: 'סטטיסטיקה',
+  color: '#312e81',
+  children: [
+    {
+      text: 'סטטיסטיקה תיאורית', color: '#1d4ed8',
+      children: [
+        { text: 'יסודות', color: '#3b82f6', children: [
+          { text: 'מבוא לסטטיסטיקה' },
+          { text: 'סוגי משתנים' },
+          { text: 'הצגת נתונים' },
+        ]},
+        { text: 'מדדי מרכז', color: '#0ea5e9', children: [
+          { text: 'ממוצע' },
+          { text: 'חציון' },
+          { text: 'צורות התפלגות' },
+        ]},
+        { text: 'מדדי פיזור', color: '#06b6d4', children: [
+          { text: 'סטיית תקן' },
+          { text: 'אחוזונים' },
+        ]},
+        { text: 'חישובי הרחבה', color: '#14b8a6', children: [
+          { text: 'ממוצע משוקלל ומשולב' },
+          { text: 'השפעת תצפיות' },
+          { text: 'טרנספורמציות ליניאריות' },
+        ]},
+        { text: 'מתאם ורגרסיה', color: '#10b981', children: [
+          { text: 'מתאם' },
+          { text: 'מתאם פירסון' },
+          { text: 'מתאם ספירמן' },
+          { text: 'מקדם קרמר' },
+          { text: 'רגרסיה ליניארית' },
+        ]},
+      ],
+    },
+    {
+      text: 'סטטיסטיקה היסקית', color: '#b91c1c',
+      children: [
+        { text: 'הסתברות', color: '#dc2626', children: [
+          { text: 'הסתברות' },
+          { text: 'קומבינטוריקה' },
+        ]},
+        { text: 'משתנים מקריים', color: '#ea580c', children: [
+          { text: 'משתנה מקרי בדיד' },
+          { text: 'התפלגות בינומית' },
+        ]},
+        { text: 'דגימה והסקה', color: '#f59e0b', children: [
+          { text: 'דגימה ושגיאת תקן' },
+          { text: 'רווחי סמך' },
+          { text: 'בדיקת השערות' },
+        ]},
+      ],
+    },
+  ],
+};
+
+function _seedNode(spec, parentId, depth, slot, totalSiblings) {
+  // Spread first-level branches horizontally; deeper levels stack vertically
+  // by cluster index. Auto-layout will refine positioning afterwards.
+  const px = MM.nodes[parentId] ? MM.nodes[parentId].x : 100;
+  const py = MM.nodes[parentId] ? MM.nodes[parentId].y : 100;
+  const x = px + 200 * Math.cos((slot / Math.max(1, totalSiblings)) * Math.PI * 2 + depth);
+  const y = py + 80 + slot * 56;
+  const color = spec.color || (parentId && MM.nodes[parentId] ? MM.nodes[parentId].color : '#60a5fa');
+  const node = mmNode('branch', spec.text, x, y, parentId, color);
+  if (spec.children && spec.children.length) {
+    spec.children.forEach((c, i) => _seedNode(c, node.id, depth + 1, i, spec.children.length));
+  }
+  return node;
+}
+
+function buildSeedMap() {
+  MM = { nodes: {}, root: 'root', sel: null, multiSel: [], zoom: 1, panX: 0, panY: 0, orientation: 'tb' };
+  // Root with id 'root' (not uid) so MM.root='root' lookup works.
+  MM.nodes.root = {
+    id: 'root', type: 'root', text: COURSE_SEED.text,
+    x: 100, y: 100, color: COURSE_SEED.color, parentId: null,
+    childIds: [], collapsed: false, W: 160, H: 46,
+  };
+  COURSE_SEED.children.forEach((c, i) => _seedNode(c, 'root', 1, i, COURSE_SEED.children.length));
+  // Auto-layout if available (defined later in file).
+  if (typeof mmAutoLayout === 'function') {
+    try { mmAutoLayout(); } catch(e) { /* layout will run on first render */ }
+  }
+}
+
 function initMM(){
   // Try to load saved mind map for this user
   try {
@@ -816,18 +908,28 @@ function initMM(){
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed && parsed.nodes && parsed.root) {
-        MM = parsed;
-        // Ensure required runtime fields exist
-        if (!MM.searchMatches) MM.searchMatches = [];
-        if (!MM.searchIdx) MM.searchIdx = 0;
-        MM_HISTORY = [cloneMMForHistory()];
-        return; // loaded successfully — skip fresh init
+        // Treat a map with only the root and no children as "empty" — seed it
+        // instead of leaving the user with a blank Untitled node.
+        const root = parsed.nodes[parsed.root];
+        const isEmpty = !root || !root.childIds || root.childIds.length === 0;
+        if (!isEmpty) {
+          MM = parsed;
+          if (!MM.searchMatches) MM.searchMatches = [];
+          if (!MM.searchIdx) MM.searchIdx = 0;
+          MM_HISTORY = [cloneMMForHistory()];
+          return; // loaded successfully — skip fresh init
+        }
       }
     }
   } catch(e) { /* fall through to fresh init */ }
 
-  MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,orientation:'tb'};
-  MM.nodes.root=mmNode('root','Untitled',100,100,null,'#60a5fa');
+  // Fresh / empty: seed the curriculum tree.
+  try { buildSeedMap(); }
+  catch(e) {
+    console.warn('seed failed, falling back to blank root', e);
+    MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,orientation:'tb'};
+    MM.nodes.root=mmNode('root','סטטיסטיקה',100,100,null,'#312e81');
+  }
   MM_HISTORY=[cloneMMForHistory()];
 }
 

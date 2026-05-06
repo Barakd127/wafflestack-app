@@ -991,8 +991,9 @@ export function DataPresentationVisual() {
 // ── 14. Distribution Shapes — סימטרי / נטוי ───────────────────────────────────
 export function DistributionShapesVisual() {
   const [shape, setShape] = useState<'sym' | 'left' | 'right'>('sym')
-  const W = 360, H = 130
-  // Build a histogram-like curve for each shape
+  // Taller chart + extra top room so marker chips sit above bars without
+  // overlapping each other. CHIP_TOP reserves a strip for the chips.
+  const W = 360, H = 180, CHIP_TOP = 38
   const data = useMemo(() => {
     const xs = Array.from({ length: 21 }, (_, i) => i)
     const f = (x: number): number => {
@@ -1003,7 +1004,6 @@ export function DistributionShapesVisual() {
     return xs.map(x => [x, f(x)] as [number, number])
   }, [shape])
   const maxV = Math.max(...data.map(d => d[1]))
-  // Compute mean / median / mode positions
   const total = data.reduce((s, [, v]) => s + v, 0)
   const mean = data.reduce((s, [x, v]) => s + x * v, 0) / total
   const cumNeeded = total / 2
@@ -1013,13 +1013,21 @@ export function DistributionShapesVisual() {
 
   const toX = (x: number) => 20 + (x / 20) * (W - 40)
 
+  // Stagger chip rows so the three labels never collide even when their
+  // x-positions coincide (symmetric distribution).
+  const chips = [
+    { name: 'שכיח', val: mode, color: '#10b981', bg: '#d1fae5', dash: undefined as string | undefined, row: 0 },
+    { name: 'חציון', val: median, color: '#b45309', bg: '#fef3c7', dash: '3,3', row: 1 },
+    { name: 'ממוצע', val: +mean.toFixed(1), color: '#b91c1c', bg: '#fee2e2', dash: undefined, row: 2 },
+  ]
+
   return (
     <div style={WRAP}>
       <div style={CAPTION}>🎯 ויזואליזציה — צורות התפלגות</div>
       <div style={STORY}>
         <strong>סדר הופעת ממוצע / חציון / שכיח חושף את הא-סימטריה.</strong> בהתפלגות סימטרית כולם חופפים. בנטויה ימינה: שכיח &lt; חציון &lt; ממוצע. בנטויה שמאלה: ממוצע &lt; חציון &lt; שכיח.
       </div>
-      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
         {[['sym', '⚖ סימטרי'], ['right', '↗ נטוי ימינה'], ['left', '↖ נטוי שמאלה']].map(([k, label]) => (
           <button key={k} onClick={() => setShape(k as 'sym' | 'left' | 'right')}
             style={{
@@ -1030,22 +1038,43 @@ export function DistributionShapesVisual() {
         ))}
       </div>
       <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
+        {/* Bars */}
         {data.map(([x, v], i) => {
           const barW = (W - 40) / 21 - 2
           const bx = toX(x) - barW / 2
-          const bh = (v / maxV) * (H - 30)
+          const bh = (v / maxV) * (H - CHIP_TOP - 18)
           return <rect key={i} x={bx} y={H - 18 - bh} width={barW} height={bh} fill="rgba(99,102,241,0.55)" rx={2} />
         })}
         <line x1={20} y1={H - 18} x2={W - 20} y2={H - 18} stroke="#9ca3af" strokeWidth={1} />
-        {/* mode marker */}
-        <line x1={toX(mode)} y1={4} x2={toX(mode)} y2={H - 18} stroke="#10b981" strokeWidth={2} />
-        <text x={toX(mode)} y={12} fontSize={10} textAnchor="middle" fill="#10b981" fontWeight="bold">שכיח</text>
-        {/* median */}
-        <line x1={toX(median)} y1={4} x2={toX(median)} y2={H - 18} stroke="#f59e0b" strokeWidth={2} strokeDasharray="3,3" />
-        <text x={toX(median)} y={14} fontSize={10} textAnchor="middle" fill="#b45309" fontWeight="bold">חציון</text>
-        {/* mean */}
-        <line x1={toX(mean)} y1={4} x2={toX(mean)} y2={H - 18} stroke="#ef4444" strokeWidth={2} />
-        <text x={toX(mean)} y={H - 4} fontSize={10} textAnchor="middle" fill="#b91c1c" fontWeight="bold">ממוצע</text>
+        {/* Vertical markers — extend from chip strip down to baseline */}
+        {chips.map((c, i) => (
+          <line key={`l${i}`}
+            x1={toX(c.val)} y1={CHIP_TOP - 2}
+            x2={toX(c.val)} y2={H - 18}
+            stroke={c.color} strokeWidth={2}
+            strokeDasharray={c.dash} />
+        ))}
+        {/* Chips — staggered rows so they never overlap each other */}
+        {chips.map((c, i) => {
+          const cx = toX(c.val)
+          const chipW = 64, chipH = 16
+          const cyTop = 4 + c.row * (chipH + 2)
+          // Clamp chip horizontally so it stays inside the SVG even at edges.
+          const clampedX = Math.max(20 + chipW / 2, Math.min(W - 20 - chipW / 2, cx))
+          return (
+            <g key={`c${i}`}>
+              <rect x={clampedX - chipW / 2} y={cyTop} width={chipW} height={chipH}
+                fill={c.bg} stroke={c.color} strokeWidth={1} rx={4} />
+              <text x={clampedX} y={cyTop + 11.5} fontSize={10} textAnchor="middle"
+                fill={c.color} fontWeight={700}>{c.name} = {c.val}</text>
+              {/* Tiny stem connecting the chip to its line, only when chip is offset */}
+              {Math.abs(clampedX - cx) > 0.5 && (
+                <line x1={clampedX} y1={cyTop + chipH} x2={cx} y2={CHIP_TOP - 2}
+                  stroke={c.color} strokeWidth={1} opacity={0.5} />
+              )}
+            </g>
+          )
+        })}
       </svg>
       <div style={{ marginTop: 4 }}>
         <span style={BADGE({ background: 'rgba(16,185,129,0.12)', color: '#065f46' })}>שכיח = {mode}</span>
@@ -1231,23 +1260,29 @@ export function PercentilesVisual() {
 }
 
 // ── 19. Combinatorics — תמורות וצירופים ──────────────────────────────────────
+// Code-point split so emojis stay intact (.split('') breaks surrogate pairs
+// and would render only half the fruit).
+const FRUIT_POOL = Array.from('🍎🍌🍇🍊🥝🍓🍑🍒🥭🍍')
+
 export function CombinatoricsVisual() {
   const [n, setN] = useState(5)
   const [k, setK] = useState(3)
   const [mode, setMode] = useState<'P' | 'C'>('P')
   const result = mode === 'P' ? factorial(n) / factorial(n - k) : binomCoeff(n, k)
-  const ITEMS = '🍎🍌🍇🍊🥝🍓🍑🍒🥭🍍'.split('').slice(0, n)
+  const pool = FRUIT_POOL.slice(0, n)
+  const picked = pool.slice(0, k)
+  const fruitWord = k === 1 ? 'פרי אחד' : `${k} פירות`
   return (
     <div style={WRAP}>
       <div style={CAPTION}>🎯 ויזואליזציה — תמורות וצירופים</div>
       <div style={STORY}>
-        <strong>בחירה של {k} פירות מתוך {n}.</strong> בתמורות הסדר חשוב (תפוח-בננה ≠ בננה-תפוח). בצירופים הסדר לא חשוב — לוקחים את אותו "סל".
+        <strong>בחירת {fruitWord} מתוך {n} זמינים.</strong> בתמורות הסדר חשוב (תפוח-בננה ≠ בננה-תפוח). בצירופים הסדר לא חשוב — לוקחים את אותו "סל".
       </div>
       <div style={ROW}>
-        <label style={LABEL_STYLE}>כמה זמינים n: <strong>{n}</strong><input type="range" min={2} max={10} value={n} onChange={e => { setN(+e.target.value); if (k > +e.target.value) setK(+e.target.value) }} style={SLIDER()} /></label>
+        <label style={LABEL_STYLE}>כמה זמינים n: <strong>{n}</strong><input type="range" min={2} max={10} value={n} onChange={e => { const nv = +e.target.value; setN(nv); if (k > nv) setK(nv) }} style={SLIDER()} /></label>
         <label style={LABEL_STYLE}>בוחרים k: <strong>{k}</strong><input type="range" min={1} max={n} value={k} onChange={e => setK(+e.target.value)} style={SLIDER('#f59e0b')} /></label>
       </div>
-      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
         <button onClick={() => setMode('P')} style={{
           background: mode === 'P' ? ACCENT : 'rgba(99,102,241,0.1)', color: mode === 'P' ? '#fff' : ACCENT,
           border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', fontSize: 12, fontWeight: 600,
@@ -1257,8 +1292,28 @@ export function CombinatoricsVisual() {
           border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', fontSize: 12, fontWeight: 600,
         }}>צירוף C(n,k) — הסדר לא משנה</button>
       </div>
-      <div style={{ fontSize: 28, textAlign: 'center', padding: 8, background: 'rgba(255,255,255,0.5)', borderRadius: 10, marginBottom: 8, letterSpacing: 6 }}>
-        {ITEMS.join('')}
+      {/* Pool — all n fruits available */}
+      <div style={{ background: 'rgba(255,255,255,0.55)', borderRadius: 10, padding: '10px 12px', marginBottom: 8 }}>
+        <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 6, textAlign: 'right' }}>📦 הפירות הזמינים (n = {n}):</div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {pool.map((f, i) => (
+            <div key={i} style={{
+              fontSize: 28, lineHeight: 1, padding: '4px 6px',
+              background: i < k ? 'rgba(245,158,11,0.18)' : 'rgba(99,102,241,0.06)',
+              border: `2px solid ${i < k ? '#f59e0b' : 'rgba(99,102,241,0.18)'}`,
+              borderRadius: 10, opacity: i < k ? 1 : 0.55, transition: 'all 0.18s',
+            }}>{f}</div>
+          ))}
+        </div>
+      </div>
+      {/* Picked — k highlighted */}
+      <div style={{ background: 'rgba(245,158,11,0.10)', border: '1px dashed rgba(245,158,11,0.45)', borderRadius: 10, padding: '10px 12px', marginBottom: 10 }}>
+        <div style={{ fontSize: 11, color: '#92400e', marginBottom: 6, textAlign: 'right' }}>🛒 הסל שלך (k = {k}):</div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', minHeight: 36 }}>
+          {picked.map((f, i) => (
+            <div key={i} style={{ fontSize: 28, lineHeight: 1, padding: '4px 6px' }}>{f}</div>
+          ))}
+        </div>
       </div>
       <div style={{ textAlign: 'center', padding: '14px 8px', background: 'rgba(99,102,241,0.12)', borderRadius: 10 }}>
         <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 4 }}>מספר אפשרויות:</div>
