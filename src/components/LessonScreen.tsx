@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { LESSON_CONTENT } from '../data/lesson-content'
 import { TOPIC_VISUALS } from './LessonVisuals'
 import ArsenalCapture from './ArsenalCapture'
+import { quickAddToMindmap } from '../lib/mindmapWriter'
 
 // Design tokens — keep in sync with StudyHub.tsx
 const GLASS_CARD  = 'var(--sh-glass-card)'
@@ -271,13 +272,60 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
           justifyContent: 'flex-start',
         }}
       >
-        <h3 style={{
-          fontFamily: "'Rubik', sans-serif", fontSize: 30, fontWeight: 700,
-          color: TEXT_DARK, marginTop: 0, marginBottom: 22, textAlign: 'right',
-          lineHeight: 1.3, letterSpacing: '-0.01em',
-        }}>
-          {slide.title}
-        </h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 14, marginBottom: 22 }}>
+          <h3 style={{
+            fontFamily: "'Rubik', sans-serif", fontSize: 30, fontWeight: 700,
+            color: TEXT_DARK, marginTop: 0, marginBottom: 0, textAlign: 'right',
+            lineHeight: 1.3, letterSpacing: '-0.01em', flex: 1,
+          }}>
+            {slide.title}
+          </h3>
+          <div style={{ display: 'flex', gap: 6, flexShrink: 0, marginTop: 6 }}>
+            <button
+              onClick={() => {
+                const ok = quickAddToMindmap({
+                  text: slide.title,
+                  body: typeof slide.content === 'string' ? slide.content : '',
+                  iframeWindow: mindmapRef.current?.contentWindow ?? null,
+                  userId,
+                })
+                if (ok) { setCopied('title-mm'); setTimeout(() => setCopied(null), 1500) }
+              }}
+              title="הוסף את הכותרת והתוכן למפת החשיבה"
+              style={{
+                background: copied === 'title-mm' ? 'rgba(52,168,83,0.18)' : 'rgba(99,102,241,0.10)',
+                border: `1.5px solid ${copied === 'title-mm' ? 'rgba(52,168,83,0.5)' : 'rgba(99,102,241,0.3)'}`,
+                color: copied === 'title-mm' ? '#34A853' : '#6366f1',
+                borderRadius: 10, padding: '6px 12px', fontSize: 12, fontWeight: 600,
+                fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+                whiteSpace: 'nowrap', transition: 'all 0.2s',
+              }}
+            >
+              {copied === 'title-mm' ? '✓ נוסף' : '🧠+ למפה'}
+            </button>
+            <button
+              onClick={() => {
+                const ok = quickAddToMindmap({
+                  text: slide.title,
+                  body: typeof slide.content === 'string' ? slide.content : '',
+                  userId,
+                })
+                if (ok) { setCopied('title-nb'); setTimeout(() => setCopied(null), 1500) }
+              }}
+              title="הוסף כדף חדש במחברת (אותו עץ, תצוגת מחברת)"
+              style={{
+                background: copied === 'title-nb' ? 'rgba(52,168,83,0.18)' : 'rgba(245,158,11,0.10)',
+                border: `1.5px solid ${copied === 'title-nb' ? 'rgba(52,168,83,0.5)' : 'rgba(245,158,11,0.35)'}`,
+                color: copied === 'title-nb' ? '#34A853' : '#b45309',
+                borderRadius: 10, padding: '6px 12px', fontSize: 12, fontWeight: 600,
+                fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+                whiteSpace: 'nowrap', transition: 'all 0.2s',
+              }}
+            >
+              {copied === 'title-nb' ? '✓ נוסף' : '📔+ למחברת'}
+            </button>
+          </div>
+        </div>
         <div style={{
           fontFamily: "'Assistant', sans-serif", fontSize: 18.5, color: TEXT_MED,
           lineHeight: 1.95, textAlign: 'right', whiteSpace: 'pre-wrap', flex: 1,
