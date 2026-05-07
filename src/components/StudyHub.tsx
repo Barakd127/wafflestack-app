@@ -10,6 +10,7 @@ import { useArsenalStore, quickAddArsenal } from '../store/arsenalStore'
 import PotionInventory from './PotionInventory'
 import { useTutorialStep } from '../hooks/useTutorialStep'
 import { useTutorialStore } from '../store/tutorialStore'
+import Tooltip from './Tooltip'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d' | 'drawing') => void
@@ -964,29 +965,32 @@ function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
         <PotionInventory />
         <span className="hidden md:inline" style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_DARK }}>שלום, {userName}</span>
         {/* Reset tutorials — re-enables and re-shows all coachmarks */}
-        <button
-          onClick={() => {
-            useTutorialStore.getState().setEnabled(true)
-            useTutorialStore.getState().reset()
-          }}
-          title="הפעל מחדש את הסיור המודרך"
-          style={{
-            background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.3)',
-            borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
-            color: '#6366f1', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
-          }}
-        >
-          🎓 סיור
-        </button>
+        <Tooltip label="סיור מודרך" description="הפעל מחדש את ההדרכה">
+          <button
+            onClick={() => {
+              useTutorialStore.getState().setEnabled(true)
+              useTutorialStore.getState().reset()
+            }}
+            style={{
+              background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.3)',
+              borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
+              color: '#6366f1', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
+            }}
+          >
+            🎓 סיור
+          </button>
+        </Tooltip>
         {/* Logout button */}
         {onLogout && (
-          <button onClick={onLogout} title="התנתק" style={{
-            background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.2)',
-            borderRadius: 8, padding: '5px 12px', cursor: 'pointer',
-            color: '#d32f2f', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
-          }}>
-            ↩ יציאה
-          </button>
+          <Tooltip label="יציאה" description="התנתק מהחשבון">
+            <button onClick={onLogout} style={{
+              background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.2)',
+              borderRadius: 8, padding: '5px 12px', cursor: 'pointer',
+              color: '#d32f2f', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
+            }}>
+              ↩ יציאה
+            </button>
+          </Tooltip>
         )}
       </div>
     </div>

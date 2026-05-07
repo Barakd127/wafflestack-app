@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import Tooltip from './Tooltip'
 
 // MindMapCanvas — wraps the full xmind-replica v18 mind map as an iframe.
 // The v18 HTML lives at /mindmap.html (WaffleStack public/ folder).
@@ -52,40 +53,44 @@ const MindMapCanvas = ({ onViewChange }: MindMapCanvasProps) => {
           boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
         }}
       >
-        <button
-          onClick={() => onViewChange('study')}
-          aria-label="חזרה לדף הבית"
-          style={{
-            background: 'rgba(108,99,255,0.22)',
-            border: '1px solid #6c63ff',
-            color: '#a5b4fc',
-            borderRadius: 8,
-            padding: '6px 16px',
-            cursor: 'pointer',
-            fontSize: 13,
-            fontWeight: 700,
-            fontFamily: 'inherit',
-          }}
-        >
-          ← דף הבית
-        </button>
-        <button
-          onClick={() => onViewChange('split-mindmap' as 'split-mindmap')}
-          aria-label="פצל מסך — עיר ומפת חשיבה"
-          style={{
-            background: 'rgba(51,81,202,0.22)',
-            border: '1px solid rgba(99,162,255,0.5)',
-            color: '#a5b4fc',
-            borderRadius: 8,
-            padding: '6px 16px',
-            cursor: 'pointer',
-            fontSize: 13,
-            fontWeight: 600,
-            fontFamily: 'inherit',
-          }}
-        >
-          ⊟ עיר + מפה
-        </button>
+        <Tooltip label="חזרה" description="חזור לדף הראשי">
+          <button
+            onClick={() => onViewChange('study')}
+            aria-label="חזרה לדף הבית"
+            style={{
+              background: 'rgba(108,99,255,0.22)',
+              border: '1px solid #6c63ff',
+              color: '#a5b4fc',
+              borderRadius: 8,
+              padding: '6px 16px',
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: 'inherit',
+            }}
+          >
+            ← דף הבית
+          </button>
+        </Tooltip>
+        <Tooltip label="מפה מפוצלת" description="צפה במפה ובעיר במקביל">
+          <button
+            onClick={() => onViewChange('split-mindmap' as 'split-mindmap')}
+            aria-label="פצל מסך — עיר ומפת חשיבה"
+            style={{
+              background: 'rgba(51,81,202,0.22)',
+              border: '1px solid rgba(99,162,255,0.5)',
+              color: '#a5b4fc',
+              borderRadius: 8,
+              padding: '6px 16px',
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 600,
+              fontFamily: 'inherit',
+            }}
+          >
+            ⊟ עיר + מפה
+          </button>
+        </Tooltip>
         <span className="hidden md:inline" style={{ color: '#6b7280', fontSize: 12, marginInlineStart: 8 }}>
           🧠 מפת חשיבה — קנבס מלא, משוואות וגרירה
         </span>

@@ -261,3 +261,23 @@ html.dark :focus-visible {
     border-radius: 14px !important;
   }
 }
+
+/* ── Tooltip ─────────────────────────────────────────────────────────────── */
+.ws-tooltip {
+  position: fixed;
+  z-index: 9500;
+  background: rgba(15,18,32,0.96);
+  border: 1px solid rgba(127,155,217,0.35);
+  color: #e5edff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.45);
+  backdrop-filter: blur(6px);
+  max-width: 240px;
+  pointer-events: none;
+  animation: wsTooltipFadeIn 60ms ease-out;
+}
+.ws-tooltip-desc { color: #9aa4c7; font-size: 11px; margin-top: 2px; }
+@keyframes wsTooltipFadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
