@@ -8,6 +8,8 @@
 import { useState, useMemo, useRef } from 'react'
 import { useArsenalStore, KIND_META, type ArsenalEntry, type ArsenalKind } from '../store/arsenalStore'
 import { useTutorialStep } from '../hooks/useTutorialStep'
+import CommunityArsenalTab from './CommunityArsenalTab'
+import { publishEntry, SUPABASE_CONFIGURED } from '../lib/communityArsenal'
 
 // Keep in sync with HEBREW_LABELS in StudyHub.tsx
 const TOPIC_LABELS: Record<string, string> = {
@@ -36,13 +38,18 @@ export default function ArsenalScreen() {
   const togglePin = useArsenalStore(s => s.togglePin)
   const editEntry = useArsenalStore(s => s.editEntry)
   const addEntry = useArsenalStore(s => s.addEntry)
+  const markPublished = useArsenalStore(s => s.markPublished)
 
+  const [view, setView] = useState<'mine' | 'community'>('mine')
   const [kindFilter, setKindFilter] = useState<FilterKind>('all')
   const [topicFilter, setTopicFilter] = useState<FilterTopic>('all')
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingText, setEditingText] = useState('')
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set())
+  const [confirmShareId, setConfirmShareId] = useState<string | null>(null)
+  const [shareError, setShareError] = useState<string | null>(null)
+  const [sharingId, setSharingId] = useState<string | null>(null)
   // Toggle for the explanatory hover tooltips on filter pills.
   // Persisted in localStorage so the user's choice survives reloads.
   const [showHints, setShowHints] = useState<boolean>(() => {
@@ -105,6 +112,21 @@ export default function ArsenalScreen() {
     setEditingText('')
   }
 
+  const handleShareConfirmed = async (id: string) => {
+    const entry = entries.find(e => e.id === id)
+    if (!entry) { setConfirmShareId(null); return }
+    setSharingId(id)
+    setShareError(null)
+    const res = await publishEntry({ kind: entry.kind, text: entry.text, topicId: entry.topicId })
+    setSharingId(null)
+    setConfirmShareId(null)
+    if (!res.ok) {
+      setShareError(res.error ?? 'שיתוף נכשל')
+      return
+    }
+    markPublished(id, Date.now())
+  }
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const arsenalIntroRef = useRef<HTMLHeadingElement>(null)
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -134,6 +156,32 @@ export default function ArsenalScreen() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* Tab toggle: my arsenal vs community */}
+          <div style={{
+            display: 'inline-flex', background: 'rgba(255,255,255,0.55)',
+            border: '1px solid rgba(127,155,217,0.4)', borderRadius: 22, padding: 3,
+          }}>
+            <button
+              onClick={() => setView('mine')}
+              style={{
+                background: view === 'mine' ? '#6366f1' : 'transparent',
+                color: view === 'mine' ? '#fff' : TEXT_MED,
+                border: 'none', borderRadius: 18, padding: '6px 14px',
+                cursor: 'pointer', fontFamily: "'Rubik', sans-serif",
+                fontSize: 13, fontWeight: 700,
+              }}
+            >האוסף שלי</button>
+            <button
+              onClick={() => setView('community')}
+              style={{
+                background: view === 'community' ? '#6366f1' : 'transparent',
+                color: view === 'community' ? '#fff' : TEXT_MED,
+                border: 'none', borderRadius: 18, padding: '6px 14px',
+                cursor: 'pointer', fontFamily: "'Rubik', sans-serif",
+                fontSize: 13, fontWeight: 700,
+              }}
+            >הקהילה</button>
+          </div>
           {/* Toggle: show explanatory hover tooltips on the filter pills */}
           <button
             onClick={toggleHints}
@@ -154,6 +202,19 @@ export default function ArsenalScreen() {
         </div>
       </div>
 
+      {shareError && (
+        <div style={{
+          background: 'rgba(239,68,68,0.12)', color: '#b91c1c',
+          border: '1px solid rgba(239,68,68,0.35)',
+          borderRadius: 12, padding: '10px 14px',
+          marginBottom: 12, fontSize: 13,
+          fontFamily: "'Rubik', sans-serif",
+        }}>⚠️ {shareError}</div>
+      )}
+
+      {view === 'community' ? (
+        <CommunityArsenalTab />
+      ) : (<>
       {/* Kind filter pills — labels + icons sourced from KIND_META so renames
           stay consistent across capture / list / cards. */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
@@ -224,9 +285,22 @@ export default function ArsenalScreen() {
               onTogglePin={() => togglePin(entry.id)}
               onDelete={() => handleDelete(entry.id)}
               removing={removingIds.has(entry.id)}
+              onShare={() => setConfirmShareId(entry.id)}
+              canShare={SUPABASE_CONFIGURED && !entry.publishedAt}
+              isPublished={!!entry.publishedAt}
+              sharing={sharingId === entry.id}
             />
           ))}
         </div>
+      )}
+      </>)}
+
+      {confirmShareId && (
+        <ConfirmShareDialog
+          onCancel={() => setConfirmShareId(null)}
+          onConfirm={() => handleShareConfirmed(confirmShareId)}
+          loading={sharingId === confirmShareId}
+        />
       )}
 
       {showAddModal && (
@@ -305,6 +379,7 @@ function FilterPill({ label, icon, count, selected, onClick, color, bg, tip }: {
 function ArsenalCard({
   entry, indexInList, isEditing, editingText, onEditingTextChange,
   onStartEdit, onCommitEdit, onCancelEdit, onTogglePin, onDelete, removing,
+  onShare, canShare, isPublished, sharing,
 }: {
   entry: ArsenalEntry
   indexInList: number
@@ -317,6 +392,10 @@ function ArsenalCard({
   onTogglePin: () => void
   onDelete: () => void
   removing: boolean
+  onShare: () => void
+  canShare: boolean
+  isPublished: boolean
+  sharing: boolean
 }) {
   const meta = KIND_META[entry.kind]
   const topicLabel = entry.topicId ? TOPIC_LABELS[entry.topicId] || entry.topicId : null
@@ -416,9 +495,82 @@ function ArsenalCard({
                 📌
               </button>
               <button onClick={onStartEdit} style={iconBtn('rgba(127,155,217,0.12)', TEXT_LIGHT)} title="ערוך">✏️</button>
+              {canShare && (
+                <button
+                  onClick={onShare}
+                  disabled={sharing}
+                  style={iconBtn('rgba(99,102,241,0.14)', '#4338ca')}
+                  title="🌐 שתף בקהילה"
+                >
+                  {sharing ? '…' : '🌐 שתף בקהילה'}
+                </button>
+              )}
+              {isPublished && (
+                <span
+                  style={{
+                    background: 'rgba(16,185,129,0.18)',
+                    border: '1px solid rgba(16,185,129,0.35)',
+                    color: '#065f46', borderRadius: 8, padding: '4px 8px',
+                    fontSize: 11, fontWeight: 700, fontFamily: "'Rubik', sans-serif",
+                  }}
+                  title="כבר משותף לקהילה"
+                >
+                  🌐 משותף
+                </span>
+              )}
               <button onClick={onDelete} style={iconBtn('rgba(239,68,68,0.12)', '#b91c1c')} title="מחק">🗑</button>
             </>
           )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Confirm share dialog ─────────────────────────────────────────────────────
+function ConfirmShareDialog({ onCancel, onConfirm, loading }: {
+  onCancel: () => void
+  onConfirm: () => void
+  loading: boolean
+}) {
+  return (
+    <div
+      dir="rtl"
+      onClick={onCancel}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 220,
+        background: 'rgba(15,15,35,0.55)', backdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        animation: 'wsFadeIn 0.18s ease',
+        fontFamily: "'Rubik', sans-serif",
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: 'min(420px, calc(100% - 32px))',
+          background: 'var(--sh-glass-card, #fff)',
+          borderRadius: 20,
+          boxShadow: '0 30px 80px rgba(0,0,0,0.4)',
+          border: '1px solid rgba(255,255,255,0.5)',
+          padding: 26,
+        }}
+      >
+        <h3 style={{ margin: '0 0 10px', color: TEXT_DARK, fontSize: 18, fontWeight: 700 }}>
+          🌐 שיתוף בקהילה
+        </h3>
+        <div style={{ color: TEXT_MED, fontSize: 14, lineHeight: 1.6, marginBottom: 18 }}>
+          לפרסם את הקאצ' לכל המשתמשים?
+        </div>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <button onClick={onCancel} disabled={loading} style={secondaryBtn}>ביטול</button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            style={{ ...primaryBtn, opacity: loading ? 0.6 : 1 }}
+          >
+            {loading ? '…מפרסם' : 'פרסם'}
+          </button>
         </div>
       </div>
     </div>

@@ -22,6 +22,8 @@ export interface ArsenalEntry {
   source?: 'slide' | 'quiz' | 'manual'
   createdAt: number
   pinned: boolean
+  /** Set once the entry has been published to the community feed. */
+  publishedAt?: number
 }
 
 interface ArsenalState {
@@ -36,6 +38,7 @@ interface ArsenalState {
   removeEntry: (id: string) => void
   togglePin: (id: string) => void
   editEntry: (id: string, text: string) => void
+  markPublished: (id: string, publishedAt: number) => void
   activatePotion: (kind: ArsenalKind) => void
   consumeMemoryTea: () => void
   clearActivePotion: () => void
@@ -135,6 +138,15 @@ export const useArsenalStore = create<ArsenalState>((set, get) => ({
     const userId = get().currentUserId
     set((state) => {
       const next = state.entries.map(e => e.id === id ? { ...e, text } : e)
+      if (userId) saveEntries(userId, next)
+      return { entries: next }
+    })
+  },
+
+  markPublished: (id, publishedAt) => {
+    const userId = get().currentUserId
+    set((state) => {
+      const next = state.entries.map(e => e.id === id ? { ...e, publishedAt } : e)
       if (userId) saveEntries(userId, next)
       return { entries: next }
     })
