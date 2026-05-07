@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react'
 import { Moon, Sun } from 'lucide-react'
 import StudyHub from './components/StudyHub'
 import MindMapCanvas from './components/MindMapCanvas'
+import Tooltip from './components/Tooltip'
 // Godot 3D city replaces the React-Three-Fiber WaffleStackCity. The iframe
 // (/godot/index.html in public/godot/) shares localStorage with the host app,
 // so progress (XP / coins / mastered) stays in sync without a postMessage bridge.
@@ -250,22 +251,24 @@ function App() {
               >
                 ⊟ מסך מפוצל
               </button>
-              <button
-                onClick={() => openMindMap('wafflecity')}
-                aria-label="פתח מפת חשיבה"
-                className="ws-godot-mindmap-btn"
-                style={{
-                  background: 'rgba(109,40,217,0.85)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(167,139,250,0.5)',
-                  borderRadius: 20, padding: '8px 18px',
-                  color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(109,40,217,0.4)',
-                  display: 'flex', alignItems: 'center', gap: 8,
-                }}
-              >
-                🧠 מפת חשיבה
-              </button>
+              <Tooltip label="מפת מושגים" description="פתח מפת הנושאים">
+                <button
+                  onClick={() => openMindMap('wafflecity')}
+                  aria-label="פתח מפת חשיבה"
+                  className="ws-godot-mindmap-btn"
+                  style={{
+                    background: 'rgba(109,40,217,0.85)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(167,139,250,0.5)',
+                    borderRadius: 20, padding: '8px 18px',
+                    color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                    boxShadow: '0 4px 16px rgba(109,40,217,0.4)',
+                    display: 'flex', alignItems: 'center', gap: 8,
+                  }}
+                >
+                  🧠 מפת חשיבה
+                </button>
+              </Tooltip>
             </div>
           </div>
         )}

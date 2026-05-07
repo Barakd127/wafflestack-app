@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import Tooltip from './Tooltip'
 
 /**
  * Godot-powered 3D city. Hosted at /godot/index.html and embedded in an
@@ -136,17 +137,19 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
       )}
 
       {onBack && (
-        <button
-          onClick={onBack}
-          aria-label="חזרה ללימוד"
-          // BOTTOM-left: top-left was overlapping the Godot HUD's "🏗️ Build"
-          // button (which sits inside the iframe at the top of the canvas).
-          // Bottom-left is empty space in the city view. Top-right stays for
-          // the dark-mode toggle.
-          className="ws-godot-back-btn absolute bottom-4 left-4 z-50 px-4 py-2 rounded-xl backdrop-blur-xl bg-white/10 border border-white/25 text-white text-sm hover:bg-white/25 transition-all shadow-lg ws-safe-bottom"
-        >
-          ← חזרה ללימוד
-        </button>
+        <Tooltip label="חזרה" description="חזור לאזור הלמידה" placement="top">
+          <button
+            onClick={onBack}
+            aria-label="חזרה ללימוד"
+            // BOTTOM-left: top-left was overlapping the Godot HUD's "🏗️ Build"
+            // button (which sits inside the iframe at the top of the canvas).
+            // Bottom-left is empty space in the city view. Top-right stays for
+            // the dark-mode toggle.
+            className="ws-godot-back-btn absolute bottom-4 left-4 z-50 px-4 py-2 rounded-xl backdrop-blur-xl bg-white/10 border border-white/25 text-white text-sm hover:bg-white/25 transition-all shadow-lg ws-safe-bottom"
+          >
+            ← חזרה ללימוד
+          </button>
+        </Tooltip>
       )}
 
       <iframe
