@@ -477,7 +477,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
       background: 'transparent',
     }}>
       {/* Mind map iframe — left side (LTR-first child) */}
-      <div style={{ width: `${splitPct}%`, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+      <div className="ws-lesson-mindmap-pane" style={{ width: `${splitPct}%`, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         <iframe
           ref={mindmapRef}
           src={`${import.meta.env.BASE_URL}mindmap.html?mode=mm&userId=${encodeURIComponent(userId)}`}
