@@ -20,9 +20,14 @@
   direction: ltr;
   font-family: 'Inter', 'Heebo', system-ui, sans-serif;
   background: radial-gradient(ellipse at top, #1e3a8a 0%, #0c1e4a 60%, #050b1f 100%);
-  min-height: 100vh;
-  color: var(--ls-text-primary);
+  /* The host page sets body { overflow: hidden } and #root { height: 100vh },
+     so we own our own scroll container. position:fixed + overflow-y:auto lets
+     the landing's full content scroll within the viewport. */
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
   overflow-x: hidden;
+  color: var(--ls-text-primary);
 }
 
 /* === Glass base === */

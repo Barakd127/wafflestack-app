@@ -8,7 +8,7 @@ import { CTAFooterSection } from './sections/CTAFooterSection'
 
 export default function LandingPage() {
   return (
-    <div className="landing-root" style={{ position: 'relative' }}>
+    <div className="landing-root">
       <ScrollProgressBar />
       <HeroSection />
       <HowItWorksSection />
