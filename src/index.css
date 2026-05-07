@@ -262,6 +262,16 @@ html.dark :focus-visible {
   }
 }
 
+/* ── Ribbon ──────────────────────────────────────────────────────────────── */
+.ws-ribbon { display: flex; flex-direction: column; gap: 2px; }
+.ws-ribbon-label { font-size: 10px; opacity: 0.55; letter-spacing: 0.3px; text-align: center; color: inherit; }
+.ws-ribbon-divider { width: 1px; height: 32px; background: rgba(31,62,108,0.18); align-self: center; flex-shrink: 0; }
+@media (max-width: 768px) {
+  .ws-ribbon-label { display: none; }
+  .ws-ribbon-divider { display: none; }
+  .ws-ribbon:not(:first-child) { display: none; }
+}
+
 /* ── Tooltip ─────────────────────────────────────────────────────────────── */
 .ws-tooltip {
   position: fixed;
