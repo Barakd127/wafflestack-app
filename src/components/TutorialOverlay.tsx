@@ -10,6 +10,7 @@
  */
 import { useEffect, useState } from 'react'
 import Coachmark, { type CoachmarkSpec } from './Coachmark'
+import CoachmarkTour from './CoachmarkTour'
 import { getRegistry, subscribeRegistry } from '../hooks/useTutorialStep'
 import { useTutorialStore } from '../store/tutorialStore'
 
@@ -49,7 +50,7 @@ export default function TutorialOverlay() {
     }
   }, [])
 
-  if (!enabled || isMobile) return null
+  if (!enabled || isMobile) return <CoachmarkTour />
 
   const registry = getRegistry()
 
@@ -80,7 +81,7 @@ export default function TutorialOverlay() {
     }
   }
 
-  if (!pick || !pick.ref.current) return null
+  if (!pick || !pick.ref.current) return <CoachmarkTour />
 
   const rect = pick.ref.current.getBoundingClientRect()
   const cm: CoachmarkSpec = {
@@ -90,5 +91,10 @@ export default function TutorialOverlay() {
     placement: pick.placement,
     rect,
   }
-  return <Coachmark spec={cm} />
+  return (
+    <>
+      <Coachmark spec={cm} />
+      <CoachmarkTour />
+    </>
+  )
 }
