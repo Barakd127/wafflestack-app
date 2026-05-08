@@ -1588,7 +1588,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             title="הצג שאלה"
             style={{
               position: 'absolute',
-              ...(isMobile ? { bottom: 70, insetInlineEnd: 12 } : { top: 14, insetInlineEnd: 14 }),
+              ...(isMobile ? { bottom: 70, insetInlineEnd: 12 } : { top: 66, insetInlineEnd: 14 }),
               zIndex: 50,
               background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
               border: '1px solid rgba(127,155,217,0.5)',
@@ -1611,7 +1611,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             ? { position: 'fixed', top: floatPos.y, left: floatPos.x, zIndex: 250, width: 'min(560px, calc(100vw - 24px))', maxHeight: 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.45)' }
             : tab === 'none' || isDone
             ? { flexShrink: 0, padding: '18px 24px 12px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
-            : { position: 'absolute', top: 14, insetInlineEnd: 14, zIndex: 60, width: 'min(420px, calc(100vw - 28px))', maxHeight: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }
+            : { position: 'absolute', top: 66, insetInlineEnd: 14, zIndex: 60, width: 'min(420px, calc(100vw - 28px))', maxHeight: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }
         }>
           <div style={
             tab === 'none' || isDone

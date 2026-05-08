@@ -35,6 +35,12 @@ body.light #search-input::placeholder{color:rgba(0,0,0,.4)}
 #topbar{height:52px;background:linear-gradient(135deg,#1F3E6C 0%,#1a3260 100%);display:flex;align-items:center;justify-content:space-between;padding:0 70px 0 14px;color:white;gap:8px;box-shadow:0 4px 16px rgba(31,62,108,.35);position:relative;z-index:200;backdrop-filter:blur(10px);overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap}
 #topbar::-webkit-scrollbar{height:4px}
 #topbar::-webkit-scrollbar-thumb{background:rgba(212,175,55,.4);border-radius:2px}
+/* ── Ribbon tabs (clustered toolbar) ── */
+.tb-ribbon-tab{height:28px;padding:0 11px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.88);border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:background .15s,border-color .15s;white-space:nowrap}
+.tb-ribbon-tab:hover{background:rgba(108,99,255,.3);border-color:rgba(108,99,255,.6)}
+.tb-ribbon-tab.active{background:rgba(108,99,255,.45);border-color:#6c63ff;color:#fff}
+#ribbon-panel{display:none;background:linear-gradient(135deg,#162244 0%,#1a2c55 100%);border-bottom:1px solid rgba(127,155,217,.2);padding:7px 14px;gap:6px;flex-wrap:wrap;align-items:center;flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,.3);position:relative;z-index:199}
+.ribbon-group{display:flex;gap:6px;align-items:center}
 .tb-left{display:flex;align-items:center;gap:8px;font-size:13px;flex-shrink:0}
 .tb-logo{font-size:18px;cursor:pointer;font-weight:700;letter-spacing:-.5px;color:#D4AF37}
 .tb-center{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;flex-shrink:0}
@@ -522,36 +528,47 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
   <div class="tb-center">
     <button class="tb-btn" id="nb-toggle-btn" onclick="nbToggle()" title="עבור בין מפת חשיבה למחברת">📔 מחברת</button>
     <div class="tb-div"></div>
-    <button class="tb-btn" onclick="mmAddChild()">+ Branch</button>
-    <button class="tb-btn" onclick="mmAddEquation()">∑ Equation</button>
-    <button class="tb-btn" onclick="mmAddCanvas()">⬜ Canvas</button>
-    <button class="tb-btn" onclick="mmAddSummary()" title="סיכום קבוצת אחים נבחרים (Ctrl-click לסימון מרובה)">⎰ Summary</button>
+    <button class="tb-ribbon-tab" id="rtab-add"       onclick="toggleRibbon('add')"       title="הוסף אלמנטים למפה">✏ הוסף ▾</button>
+    <button class="tb-ribbon-tab" id="rtab-view"      onclick="toggleRibbon('view')"      title="כלי תצוגה ופריסה">&#128065; תצוגה ▾</button>
+    <button class="tb-ribbon-tab" id="rtab-templates" onclick="toggleRibbon('templates')" title="תבניות סטטיסטיות">&#128208; תבניות ▾</button>
+    <button class="tb-ribbon-tab" id="rtab-files"     onclick="toggleRibbon('files')"     title="ייצוא, ייבוא, ניקוי">&#128193; קבצים ▾</button>
     <div class="tb-div"></div>
-    <select class="tb-select" onchange="applyTemplate(this.value);this.value=''">
-      <option value="">📐 Templates…</option>
-      <option value="normal">Normal Distribution</option>
-      <option value="venn">Venn Diagram</option>
-      <option value="matrix">2×2 Matrix</option>
-      <option value="timeline">Timeline</option>
-      <option value="freqtable">Frequency Table</option>
-      <option value="blank">Blank Canvas</option>
-    </select>
-    <div class="tb-div"></div>
-    <button class="tb-btn" onclick="mmCollapseAll()">⊟ Collapse</button>
-    <button class="tb-btn" onclick="mmFitView()">⊡ Fit</button>
-    <button class="tb-btn" onclick="mmAutoLayout()" title="Auto-arrange tree layout">⊞ Layout</button>
-    <button class="tb-btn" id="mm-orient-btn" onclick="mmToggleOrientation()" title="החלף בין כיוון אנכי (X-Mind) לאופקי">↧ TB/LR</button>
-    <button class="tb-btn" onclick="openSearch()" title="Search (Ctrl+F)">🔍 Search</button>
-    <button class="tb-btn" onclick="mmExportJSON()">💾 Export</button>
-    <button class="tb-btn" onclick="mmImportJSON()">📂 Import</button>
-    <button class="tb-btn" onclick="mmExportPNG()">🖼 PNG</button>
-    <button class="tb-btn" onclick="mmClearAll()">🗑 Clear</button>
-    <div class="tb-div"></div>
-    <button class="tb-btn" id="pomo-topbar-btn" onclick="pomoToggleWidget()" title="Pomodoro Timer">🍅 Pomo</button>
-    <button class="tb-btn" onclick="mmTourStart()" title="סיור מודרך — למד את המפה תוך כדי שימוש">🎓 Tour</button>
+    <button class="tb-btn" onclick="openSearch()" title="חיפוש (Ctrl+F)">&#128269;</button>
+    <button class="tb-btn" id="pomo-topbar-btn" onclick="pomoToggleWidget()" title="פומודורו">&#127813;</button>
+    <button class="tb-btn" onclick="mmTourStart()" title="סיור מודרך">&#127891;</button>
   </div>
-  <div class="tb-right">
+<div class="tb-right">
     <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:11px">B</div>
+  </div>
+</div>
+
+<!-- Ribbon panel — expands below topbar when a ribbon tab is active -->
+<div id="ribbon-panel">
+  <div class="ribbon-group" id="ribbon-add">
+    <button class="tb-btn" onclick="mmAddChild()">+ Branch</button>
+    <button class="tb-btn" onclick="mmAddEquation()">&#8721; Equation</button>
+    <button class="tb-btn" onclick="mmAddCanvas()">&#11036; Canvas</button>
+    <button class="tb-btn" onclick="mmAddSummary()" title="סיכום קבוצת אחים (Ctrl-click)">&#8944; Summary</button>
+  </div>
+  <div class="ribbon-group" id="ribbon-view" style="display:none">
+    <button class="tb-btn" onclick="mmCollapseAll()">&#8863; Collapse</button>
+    <button class="tb-btn" onclick="mmFitView()">&#8993; Fit</button>
+    <button class="tb-btn" onclick="mmAutoLayout()" title="Auto-arrange tree">&#8862; Layout</button>
+    <button class="tb-btn" id="mm-orient-btn" onclick="mmToggleOrientation()" title="TB / LR">&#10695; TB/LR</button>
+  </div>
+  <div class="ribbon-group" id="ribbon-templates" style="display:none">
+    <button class="tb-btn" onclick="applyTemplate('normal')">Normal Dist.</button>
+    <button class="tb-btn" onclick="applyTemplate('venn')">Venn</button>
+    <button class="tb-btn" onclick="applyTemplate('matrix')">2&#xD7;2 Matrix</button>
+    <button class="tb-btn" onclick="applyTemplate('timeline')">Timeline</button>
+    <button class="tb-btn" onclick="applyTemplate('freqtable')">Freq. Table</button>
+    <button class="tb-btn" onclick="applyTemplate('blank')">Blank Canvas</button>
+  </div>
+  <div class="ribbon-group" id="ribbon-files" style="display:none">
+    <button class="tb-btn" onclick="mmExportJSON()">&#128190; Export</button>
+    <button class="tb-btn" onclick="mmImportJSON()">&#128194; Import</button>
+    <button class="tb-btn" onclick="mmExportPNG()">&#128444; PNG</button>
+    <button class="tb-btn" onclick="mmClearAll()" style="color:#f87171">&#128465; Clear</button>
   </div>
 </div>
 
@@ -2980,6 +2997,26 @@ function updateNodeEl(el, n) {
   }
 }
 
+function toggleRibbon(name){
+  const groups=['add','view','templates','files'];
+  const panel=document.getElementById('ribbon-panel');
+  const tab=document.getElementById('rtab-'+name);
+  const isActive=tab.classList.contains('active');
+  groups.forEach(function(g){
+    var el=document.getElementById('ribbon-'+g);
+    var t=document.getElementById('rtab-'+g);
+    if(el)el.style.display='none';
+    if(t)t.classList.remove('active');
+  });
+  if(!isActive){
+    var el=document.getElementById('ribbon-'+name);
+    if(el)el.style.display='flex';
+    tab.classList.add('active');
+    if(panel)panel.style.display='flex';
+  }else{
+    if(panel)panel.style.display='none';
+  }
+}
 function applyTemplate(name){
   const def=TEMPLATES[name];if(!def)return;
   // Anchor on the currently-selected node (or root) so the new template lands
@@ -4731,6 +4768,7 @@ function nbRender(){
       ol.style.left='0';ol.style.top='0';
       ol.style.width='100%';ol.style.height='100%';
       ol.style.display='flex';
+      ol.classList.add('open');
     }
 
     // Hide the "Done" close button (there's nothing to return to)
