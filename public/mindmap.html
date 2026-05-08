@@ -210,7 +210,9 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 #wb-resize-handle{position:absolute;left:0;top:0;width:7px;height:100%;cursor:ew-resize;background:rgba(99,102,241,.12);transition:background .15s;z-index:10}
 #wb-resize-handle:hover,#wb-resize-handle.dragging{background:rgba(99,102,241,.45)}
 
-#wb-fs-bar{background:linear-gradient(135deg,#1F3E6C 0%,#1a3260 100%);padding:8px 14px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;border-bottom:1px solid rgba(127,155,217,.2);flex-shrink:0;min-height:52px;box-shadow:0 2px 12px rgba(31,62,108,.25)}
+#wb-fs-bar{background:linear-gradient(135deg,#1F3E6C 0%,#1a3260 100%);padding:0 10px;height:48px;display:flex;align-items:center;gap:4px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;border-bottom:1px solid rgba(127,155,217,.2);flex-shrink:0;box-shadow:0 2px 12px rgba(31,62,108,.25);scrollbar-width:thin;scrollbar-color:rgba(212,175,55,.35) transparent}
+#wb-fs-bar::-webkit-scrollbar{height:3px}
+#wb-fs-bar::-webkit-scrollbar-thumb{background:rgba(212,175,55,.35);border-radius:2px}
 #wb-node-title{color:rgba(255,255,255,.45);font-size:11px;margin-left:auto;flex-shrink:0}
 .wb-sep{width:1px;height:20px;background:rgba(255,255,255,.12);margin:0 2px;flex-shrink:0}
 
@@ -629,18 +631,18 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
 <div id="wb-overlay">
   <div id="wb-resize-handle"></div>
   <div id="wb-fs-bar">
-    <button class="wbt on" data-tool="select" onclick="wbTool('select')" title="Select [V]">↖ Select</button>
-    <button class="wbt" data-tool="pen"    onclick="wbTool('pen')"    title="Pen [P]">✏ Pen</button>
-    <button class="wbt" data-tool="rect"   onclick="wbTool('rect')"   title="Rect [R]">▭ Rect</button>
-    <button class="wbt" data-tool="circle" onclick="wbTool('circle')" title="Circle [C]">○ Circle</button>
-    <button class="wbt" data-tool="line"   onclick="wbTool('line')"   title="Line [L]">╱ Line</button>
-    <button class="wbt" data-tool="arrow"  onclick="wbTool('arrow')"  title="Arrow [A]">→ Arrow</button>
-    <button class="wbt" data-tool="connect" onclick="wbTool('connect')" title="Connect [K]">⟶ Connect</button>
-    <button class="wbt" data-tool="text"   onclick="wbTool('text')"   title="Text [T]">T Text</button>
-    <button class="wbt" data-tool="sticky" onclick="wbTool('sticky')" title="Sticky [S]">🗒 Sticky</button>
-    <button class="wbt" data-tool="table"  onclick="wbTool('table')"  title="Table">⊞ Table</button>
-    <button class="wbt" data-tool="eraser" onclick="wbTool('eraser')" title="Eraser [E]">⌫ Erase</button>
-    <button class="wbt" onclick="wbOpenEquationModal()">∑ Eq</button>
+    <button class="wbt on" data-tool="select" onclick="wbTool('select')" title="Select [V]">↖</button>
+    <button class="wbt" data-tool="pen"    onclick="wbTool('pen')"    title="Pen [P]">✏</button>
+    <button class="wbt" data-tool="rect"   onclick="wbTool('rect')"   title="Rect [R]">▭</button>
+    <button class="wbt" data-tool="circle" onclick="wbTool('circle')" title="Circle [C]">○</button>
+    <button class="wbt" data-tool="line"   onclick="wbTool('line')"   title="Line [L]">╱</button>
+    <button class="wbt" data-tool="arrow"  onclick="wbTool('arrow')"  title="Arrow [A]">→</button>
+    <button class="wbt" data-tool="connect" onclick="wbTool('connect')" title="Connect [K]">⟶</button>
+    <button class="wbt" data-tool="text"   onclick="wbTool('text')"   title="Text [T]">T</button>
+    <button class="wbt" data-tool="sticky" onclick="wbTool('sticky')" title="Sticky note [S]">🗒</button>
+    <button class="wbt" data-tool="table"  onclick="wbTool('table')"  title="Table">⊞</button>
+    <button class="wbt" data-tool="eraser" onclick="wbTool('eraser')" title="Eraser [E]">⌫</button>
+    <button class="wbt" onclick="wbOpenEquationModal()" title="Insert equation">∑</button>
     <div class="wb-sep"></div>
     <select class="wbt" onchange="wbApplyTemplate(this.value);this.value=''" style="padding:0 6px;min-width:106px;cursor:pointer" title="Load a template into the canvas">
       <option value="">📐 Templates</option>
