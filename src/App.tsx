@@ -26,7 +26,9 @@ function App() {
     if (h === '#split') return 'split'
     if (h === '#split-mindmap') return 'split-mindmap'
     if (h === '#mindmap') return 'mindmap'
-    return 'study'
+    // First-time / no-hash visitor → landing page. Returning users keep their
+    // hash route (#study, #mindmap, etc.) so refreshing stays in-app.
+    return 'landing'
   })
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     const stored = localStorage.getItem('wafflestack-dark-mode')
@@ -74,6 +76,24 @@ function App() {
     }
     window.addEventListener('message', onMessage)
     return () => window.removeEventListener('message', onMessage)
+  }, [])
+
+  // Hash-driven navigation: <a href="#study"> on the landing page (and
+  // anywhere else) needs to re-route activeView. Without this, clicking a
+  // CTA on the landing page only changes the URL — the React state stays
+  // on 'landing' and nothing visually moves.
+  useEffect(() => {
+    const onHashChange = () => {
+      const h = window.location.hash
+      if (h === '#landing') setActiveView('landing')
+      else if (h === '#mindmap') setActiveView('mindmap')
+      else if (h === '#split') setActiveView('split')
+      else if (h === '#split-mindmap') setActiveView('split-mindmap')
+      else if (h === '#view-wafflecity' || h === '#city' || h === '#topics' || h === '#score' || h.startsWith('#challenge/')) setActiveView('wafflecity')
+      else if (h === '#study' || h === '') setActiveView('study')
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
   useEffect(() => {
