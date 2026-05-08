@@ -142,12 +142,28 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
             onClick={onBack}
             aria-label="חזרה ללימוד"
             // BOTTOM-left: top-left was overlapping the Godot HUD's "🏗️ Build"
-            // button (which sits inside the iframe at the top of the canvas).
-            // Bottom-left is empty space in the city view. Top-right stays for
-            // the dark-mode toggle.
-            className="ws-godot-back-btn absolute bottom-4 left-4 z-50 px-4 py-2 rounded-xl backdrop-blur-xl bg-white/10 border border-white/25 text-white text-sm hover:bg-white/25 transition-all shadow-lg ws-safe-bottom"
+            // button. High-contrast solid pill so it doesn't blend into the
+            // glassy city HUD beneath it.
+            className="ws-godot-back-btn absolute bottom-4 left-4 z-50 ws-safe-bottom"
+            style={{
+              padding: '10px 18px',
+              borderRadius: 14,
+              background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
+              border: '2px solid #D4AF37',
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 700,
+              fontFamily: "'Rubik','Assistant',sans-serif",
+              boxShadow: '0 6px 20px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              backdropFilter: 'blur(8px)',
+            }}
           >
-            ← חזרה ללימוד
+            <span style={{ fontSize: 18 }}>←</span>
+            <span>חזרה ללימוד</span>
           </button>
         </Tooltip>
       )}

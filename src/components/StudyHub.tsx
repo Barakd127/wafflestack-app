@@ -1588,7 +1588,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             title="הצג שאלה"
             style={{
               position: 'absolute',
-              ...(isMobile || tab !== 'none' ? { bottom: 72, insetInlineEnd: 12 } : { top: 66, insetInlineEnd: 14 }),
+              bottom: 72,
+              insetInlineEnd: 12,
               zIndex: 50,
               background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
               border: '1px solid rgba(127,155,217,0.5)',
