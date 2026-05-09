@@ -1,11 +1,11 @@
-import { Suspense, useRef, useState, useEffect, useMemo } from 'react'
+import { Suspense, useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useGLTF, Sparkles } from '@react-three/drei'
 import * as THREE from 'three'
 import { SkeletonUtils } from 'three-stdlib'
 
-// Cycle through these buildings — after the user has seen 2 full rotations,
-// fade out, swap to the next model, fade in. Loops forever.
+// Cycle through these buildings — after every 2 full rotations, fade out,
+// swap to the next model, fade in. Loops forever.
 const BUILDINGS = [
   '/kenney/building-skyscraper-a.glb',
   '/kenney/building-skyscraper-c.glb',
@@ -17,21 +17,30 @@ const ROTATION_SPEED = 0.35   // rad/s — full rotation ≈ 18s
 const ROTATIONS_PER_BUILDING = 2
 const FADE_DURATION = 0.6     // seconds for crossfade
 
+// Preload at module scope so all 4 models are ready before the component
+// mounts. Avoids Suspense flashes when the model index changes.
+BUILDINGS.forEach(path => useGLTF.preload(path))
+
 function CyclingBuilding() {
   const group = useRef<THREE.Group>(null!)
-  const [index, setIndex] = useState(0)
-  const [opacity, setOpacity] = useState(1)
-  const cycleRef = useRef({ rotationsDone: 0, lastY: 0, fadeStart: 0, fading: false })
 
-  // Preload all models so swap is instant — no flash of empty.
-  BUILDINGS.forEach(path => useGLTF.preload(path))
+  // Load all 4 scenes up front (drei dedupes per-URL). Pre-clone + pre-glow
+  // each one so swapping is just toggling visibility — no Suspense, no
+  // re-clone, no React re-render per frame.
+  const scenes = [
+    useGLTF(BUILDINGS[0]).scene,
+    useGLTF(BUILDINGS[1]).scene,
+    useGLTF(BUILDINGS[2]).scene,
+    useGLTF(BUILDINGS[3]).scene,
+  ]
 
-  const { scene } = useGLTF(BUILDINGS[index])
-  const cloned = useMemo(() => {
-    const c = SkeletonUtils.clone(scene)
-    c.traverse((child: THREE.Object3D) => {
-      const mesh = child as THREE.Mesh
-      if (mesh.isMesh && mesh.material) {
+  const prepared = useMemo(() => {
+    return scenes.map(scene => {
+      const c = SkeletonUtils.clone(scene)
+      const materials: THREE.MeshStandardMaterial[] = []
+      c.traverse((child: THREE.Object3D) => {
+        const mesh = child as THREE.Mesh
+        if (!mesh.isMesh || !mesh.material) return
         const applyGlow = (mat: THREE.Material) => {
           const m = mat.clone() as THREE.MeshStandardMaterial
           if ('emissive' in m) {
@@ -39,81 +48,88 @@ function CyclingBuilding() {
             m.emissiveIntensity = 0.15
           }
           m.transparent = true
+          m.opacity = 1
+          materials.push(m)
           return m
         }
         mesh.material = Array.isArray(mesh.material)
           ? mesh.material.map(applyGlow)
           : applyGlow(mesh.material)
-      }
+      })
+      return { object: c, materials }
     })
-    return c
-  }, [scene, index])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  // Sync material opacity whenever it changes (for fade in/out)
-  useEffect(() => {
-    cloned.traverse((child: THREE.Object3D) => {
-      const mesh = child as THREE.Mesh
-      if (mesh.isMesh && mesh.material) {
-        const setOp = (mat: THREE.Material) => {
-          const m = mat as THREE.MeshStandardMaterial
-          m.opacity = opacity
-          m.transparent = true
-          m.needsUpdate = true
-        }
-        if (Array.isArray(mesh.material)) mesh.material.forEach(setOp)
-        else setOp(mesh.material)
-      }
-    })
-  }, [opacity, cloned])
+  // All driven imperatively in useFrame — no React state, no per-frame
+  // re-render. fading: -1 = not fading, otherwise = fadeStart timestamp.
+  const stateRef = useRef({
+    index: 0,
+    rotationsDone: 0,
+    lastFullRotY: 0,
+    fadeStart: -1,
+  })
+
+  // Set initial visibility — only model 0 visible
+  useMemo(() => {
+    prepared.forEach((p, i) => { p.object.visible = (i === 0) })
+  }, [prepared])
 
   useFrame((_, delta) => {
     if (!group.current) return
+    const s = stateRef.current
 
     // Bobbing
     group.current.position.y = Math.sin(performance.now() * 0.0008) * 0.08
 
-    const c = cycleRef.current
-
-    if (c.fading) {
-      // Fade out, swap model, fade in
-      const elapsed = (performance.now() / 1000) - c.fadeStart
-      const halfDur = FADE_DURATION / 2
-      if (elapsed < halfDur) {
+    if (s.fadeStart >= 0) {
+      const elapsed = (performance.now() / 1000) - s.fadeStart
+      const half = FADE_DURATION / 2
+      const cur = prepared[s.index]
+      if (elapsed < half) {
         // Fade out current
-        setOpacity(Math.max(0, 1 - (elapsed / halfDur)))
+        const op = Math.max(0, 1 - (elapsed / half))
+        cur.materials.forEach(m => { m.opacity = op })
       } else if (elapsed < FADE_DURATION) {
-        // Mid-fade: swap model + start fading in
-        if (opacity < 0.05) {
-          setIndex(i => (i + 1) % BUILDINGS.length)
-          c.lastY = 0
+        // Mid-fade: swap visible model + fade IN the next one
+        if (cur.object.visible) {
+          cur.object.visible = false
+          cur.materials.forEach(m => { m.opacity = 0 })
+          s.index = (s.index + 1) % prepared.length
           group.current.rotation.y = 0
+          s.lastFullRotY = 0
+          const next = prepared[s.index]
+          next.object.visible = true
+          next.materials.forEach(m => { m.opacity = 0 })
         }
-        setOpacity((elapsed - halfDur) / halfDur)
+        const next = prepared[s.index]
+        const op = (elapsed - half) / half
+        next.materials.forEach(m => { m.opacity = op })
       } else {
-        // Done fading
-        setOpacity(1)
-        c.fading = false
-        c.rotationsDone = 0
+        // Done
+        prepared[s.index].materials.forEach(m => { m.opacity = 1 })
+        s.fadeStart = -1
+        s.rotationsDone = 0
       }
       return
     }
 
     // Normal rotation
     group.current.rotation.y += delta * ROTATION_SPEED
-    const totalRot = group.current.rotation.y
-    if (totalRot - c.lastY >= Math.PI * 2) {
-      c.rotationsDone += 1
-      c.lastY = totalRot
-      if (c.rotationsDone >= ROTATIONS_PER_BUILDING) {
-        c.fading = true
-        c.fadeStart = performance.now() / 1000
+    if (group.current.rotation.y - s.lastFullRotY >= Math.PI * 2) {
+      s.rotationsDone += 1
+      s.lastFullRotY = group.current.rotation.y
+      if (s.rotationsDone >= ROTATIONS_PER_BUILDING) {
+        s.fadeStart = performance.now() / 1000
       }
     }
   })
 
   return (
     <group ref={group} scale={0.95} position={[0, -0.6, 0]}>
-      <primitive object={cloned} />
+      {prepared.map((p, i) => (
+        <primitive key={i} object={p.object} />
+      ))}
     </group>
   )
 }
