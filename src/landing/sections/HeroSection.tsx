@@ -86,7 +86,7 @@ export function HeroSection() {
               position: 'absolute', width: 280, height: 280,
               top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(212,175,55,0.30) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(51,81,202,0.18) 0%, transparent 70%)',
               filter: 'blur(60px)',
               pointerEvents: 'none',
             }} />

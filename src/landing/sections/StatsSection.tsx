@@ -4,19 +4,19 @@ import { FlaskConical, GraduationCap, Layers } from 'lucide-react'
 const trustSignals = [
   {
     Icon: FlaskConical,
-    color: '#E8C84A',
+    color: '#3351CA',
     label: 'גיימיפיקציה מוכחת מחקרית',
     sub: 'שיטות משחוק מבוססות פסיכולוגיה חינוכית — משפרות מוטיבציה ושימור ידע.',
   },
   {
     Icon: GraduationCap,
-    color: '#E8C84A',
+    color: '#3351CA',
     label: 'פותח ע״י פסיכולוג מחקרי ומורה פרטי',
     sub: 'שילוב של ידע אקדמי ומיומנות הוראה אמיתית — שמה שנלמד כאן עובד.',
   },
   {
     Icon: Layers,
-    color: '#E8C84A',
+    color: '#3351CA',
     label: 'תוכן שגדל כל הזמן',
     sub: 'עשרות מושגים בסטטיסטיקה ועוד בדרך — מהבסיס ועד לרמה המתקדמת.',
   },
@@ -44,7 +44,7 @@ export function StatsSection() {
                 <div style={{
                   fontSize: 'clamp(14px, 2vw, 16px)',
                   fontWeight: 700,
-                  color: 'var(--ls-gold-bright)',
+                  color: 'var(--ls-blue-darker)',
                   lineHeight: 1.35,
                   marginBottom: 8,
                   textWrap: 'balance',

@@ -1,33 +1,38 @@
-/* Landing page — CSS custom props & glass system */
+/* Landing page — light-mode palette matching the app's StudyHub */
 /* Scoped to .landing-root to avoid leaking into app */
 
 .landing-root {
-  --ls-blue-primary:  #3351CA;   /* exact app sidebar / StudyHub blue */
-  --ls-blue-mid:      #254A9F;   /* app sidebar-active */
-  --ls-blue-darker:   #122460;   /* app btn-color light */
-  --ls-blue-rim:      #4a69e0;   /* lighter tint for gradient top */
-  --ls-gold:          #D4AF37;   /* app topbar-border gold */
-  --ls-gold-bright:   #E8C84A;   /* brighter variant */
-  --ls-gold-soft:     #fdf8e1;
-  --ls-text-primary:  #f8fafc;
-  --ls-text-muted:    #cdd8f5;
-  --ls-text-dim:      #8fa4d8;
-  --ls-glass-bg:          rgba(255, 255, 255, 0.07);
-  --ls-glass-bg-strong:   rgba(255, 255, 255, 0.13);
-  --ls-glass-border:      rgba(255, 255, 255, 0.20);
-  --ls-glass-border-gold: rgba(212, 175, 55, 0.40);
+  /* Exact app colours from index.css light-mode vars */
+  --ls-blue-primary:  #3351CA;
+  --ls-blue-mid:      #254A9F;
+  --ls-blue-darker:   #122460;
+  --ls-blue-light:    #83B2F8;
+  --ls-blue-pale:     #D8E7FA;
+
+  /* Real gold — same rgba(212,175,55) from --sh-topbar-border */
+  --ls-gold:         #B8960C;   /* deep gold for small text on white */
+  --ls-gold-bright:  #D4AF37;   /* headline gradient */
+  --ls-gold-soft:    rgba(212,175,55,0.12);
+
+  /* Text — dark on light bg */
+  --ls-text-primary: #122460;
+  --ls-text-muted:   #1F3E6C;
+  --ls-text-dim:     #465CA5;
+
+  /* Glass — white/translucent, blue border */
+  --ls-glass-bg:          rgba(255, 255, 255, 0.60);
+  --ls-glass-bg-strong:   rgba(255, 255, 255, 0.82);
+  --ls-glass-border:      rgba(51, 81, 202, 0.18);
+  --ls-glass-border-gold: rgba(212, 175, 55, 0.55);
 
   direction: rtl;
   font-family: 'Heebo', 'Inter', system-ui, sans-serif;
-  /* Exact same gradient family as the app's StudyHub sidebar */
-  background: linear-gradient(
-    165deg,
-    #4a69e0 0%,
-    #3351CA 30%,
-    #254A9F 65%,
-    #122460 100%
-  );
-  /* Use document scroll — LandingPage.tsx flips body overflow:auto while mounted. */
+
+  /* Exact --sh-page-bg from index.css light mode */
+  background: linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 49.05%, #3351CA 136%);
+  background-attachment: fixed;
+
+  /* LandingPage.tsx flips body overflow:auto while mounted */
   position: relative;
   width: 100%;
   min-height: 100vh;
@@ -35,50 +40,36 @@
   color: var(--ls-text-primary);
 }
 
-/* === Glass base === */
+/* === Glass cards — white on light bg === */
 .ls-glass {
   background: var(--ls-glass-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid var(--ls-glass-border);
   border-radius: 20px;
   box-shadow:
-    0 8px 32px rgba(8, 20, 60, 0.35),
-    inset 0 1px 0 rgba(255,255,255,0.16),
-    inset 0 -1px 0 rgba(0,0,0,0.12);
+    0 4px 24px rgba(18, 36, 96, 0.10),
+    0 1px 4px  rgba(18, 36, 96, 0.06),
+    inset 0 1px 0 rgba(255,255,255,0.80);
   position: relative;
   overflow: hidden;
 }
 
-.ls-glass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg,
-    rgba(255,255,255,0.40) 0%,
-    rgba(255,255,255,0.04) 50%,
-    rgba(212,175,55,0.22) 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  pointer-events: none;
+.ls-glass--strong {
+  background: var(--ls-glass-bg-strong) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
 }
-
-.ls-glass--strong { background: var(--ls-glass-bg-strong) !important; backdrop-filter: blur(28px) saturate(200%) !important; }
-.ls-glass--gold   { border-color: var(--ls-glass-border-gold) !important; }
-.ls-glass--card   { border-radius: 24px; padding: 32px; }
+.ls-glass--gold { border-color: var(--ls-glass-border-gold) !important; }
+.ls-glass--card { border-radius: 24px; padding: 32px; }
 
 @supports not (backdrop-filter: blur(20px)) {
-  .ls-glass { background: rgba(30, 50, 140, 0.88) !important; }
+  .ls-glass { background: rgba(255,255,255,0.88) !important; }
 }
 
-/* === Gold CTA button === */
+/* === Primary (blue) CTA button === */
 .ls-cta-gold {
-  background: linear-gradient(135deg, #D4AF37 0%, #E8C84A 50%, #D4AF37 100%);
-  background-size: 200% 200%;
-  color: #1a1208;
+  background: var(--ls-blue-primary);
+  color: #ffffff;
   font-weight: 700;
   padding: 14px 28px;
   border-radius: 14px;
@@ -89,45 +80,42 @@
   gap: 8px;
   font-size: 15px;
   box-shadow:
-    0 0 0 1px rgba(212,175,55,0.5),
-    0 8px 24px rgba(212,175,55,0.38),
-    inset 0 1px 0 rgba(255,255,255,0.5);
+    0 0 0 1px rgba(51,81,202,0.5),
+    0 8px 24px rgba(51,81,202,0.35);
   transition: all 250ms cubic-bezier(0.4,0,0.2,1);
   text-decoration: none;
 }
 .ls-cta-gold:hover {
-  background-position: 100% 100%;
+  background: var(--ls-blue-mid);
   transform: translateY(-2px);
   box-shadow:
-    0 0 0 1px rgba(212,175,55,0.7),
-    0 12px 32px rgba(212,175,55,0.52),
-    inset 0 1px 0 rgba(255,255,255,0.6);
+    0 0 0 1px rgba(37,74,159,0.6),
+    0 12px 32px rgba(37,74,159,0.45);
 }
 
 /* === Ghost button === */
 .ls-cta-ghost {
   background: transparent;
-  color: var(--ls-text-primary);
+  color: var(--ls-blue-primary);
   font-weight: 600;
   padding: 14px 28px;
   border-radius: 14px;
-  border: 1px solid var(--ls-glass-border);
+  border: 1px solid rgba(51,81,202,0.35);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-size: 15px;
   transition: all 250ms ease;
-  backdrop-filter: blur(10px);
   text-decoration: none;
 }
 .ls-cta-ghost:hover {
-  background: var(--ls-glass-bg-strong);
-  border-color: rgba(255,255,255,0.38);
+  background: rgba(51,81,202,0.08);
+  border-color: var(--ls-blue-primary);
   transform: translateY(-1px);
 }
 
-/* === Eyebrow pill === */
+/* === Eyebrow pill — gold on white === */
 .ls-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -135,22 +123,16 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: var(--ls-gold-bright);
+  color: var(--ls-gold);
   padding: 6px 14px;
   border-radius: 100px;
   border: 1px solid var(--ls-glass-border-gold);
-  background: rgba(212,175,55,0.10);
+  background: var(--ls-gold-soft);
 }
 
 /* === Section layout === */
-.ls-section {
-  width: 100%;
-  padding: 80px 24px;
-}
-.ls-container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
+.ls-section { width: 100%; padding: 80px 24px; }
+.ls-container { max-width: 1200px; margin: 0 auto; }
 
 /* === Typography — text-wrap: balance prevents orphaned words === */
 .ls-h1 {
@@ -158,6 +140,7 @@
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.01em;
+  color: var(--ls-blue-darker);
   text-wrap: balance;
 }
 .ls-h2 {
@@ -165,12 +148,14 @@
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.01em;
+  color: var(--ls-blue-darker);
   text-wrap: balance;
 }
 .ls-h3 {
   font-size: 22px;
   font-weight: 600;
   line-height: 1.3;
+  color: var(--ls-blue-darker);
   text-wrap: balance;
 }
 .ls-body {
@@ -181,7 +166,7 @@
 }
 .ls-gold-text { color: var(--ls-gold); }
 .ls-gold-gradient {
-  background: linear-gradient(135deg, #D4AF37, #E8C84A);
+  background: linear-gradient(135deg, #B8960C, #D4AF37);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -189,8 +174,8 @@
 
 /* === Scroll progress bar === */
 .ls-progress-bar {
-  position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 100;
-  background: linear-gradient(90deg, #D4AF37, #E8C84A);
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 100;
+  background: linear-gradient(90deg, var(--ls-blue-primary), var(--ls-blue-light));
   transform-origin: right;
 }
 
@@ -203,6 +188,8 @@
   overflow: hidden;
   border-radius: 24px;
   pointer-events: none;
+  /* Subtle light shadow instead of glow */
+  box-shadow: 0 8px 40px rgba(51,81,202,0.15);
 }
 .ls-hero-3d canvas {
   max-width: 100% !important;
@@ -211,7 +198,7 @@
   pointer-events: none !important;
 }
 
-/* === Stats / trust bar grid === */
+/* === Stats / trust bar === */
 .ls-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -235,8 +222,11 @@
   .ls-hero-3d { height: 280px !important; }
   .ls-steps-grid { grid-template-columns: 1fr !important; }
   .ls-features-row { flex-direction: column !important; gap: 16px !important; }
-  .ls-features-row .ls-features-icon { flex: 0 0 auto !important; width: 100% !important; height: 110px !important; }
-
+  .ls-features-row .ls-features-icon {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: 110px !important;
+  }
   .ls-stats-grid { grid-template-columns: 1fr; }
   .ls-stats-cell {
     padding: 24px 20px;
@@ -244,7 +234,6 @@
     border-bottom: 1px solid var(--ls-glass-border);
   }
   .ls-stats-cell:last-child { border-bottom: none; }
-
   .ls-h1 { font-size: clamp(26px, 8vw, 38px); }
   .ls-h2 { font-size: clamp(22px, 6vw, 30px); }
 }
