@@ -13,9 +13,12 @@ const BUILDINGS = [
   '/kenney/building-j.glb',
 ] as const
 
-const ROTATION_SPEED = 0.35   // rad/s — full rotation ≈ 18s
+const ROTATION_SPEED = 0.7    // rad/s — full rotation ≈ 9s (2× previous)
 const ROTATIONS_PER_BUILDING = 2
 const FADE_DURATION = 0.6     // seconds for crossfade
+// Each building gets normalised so its largest dimension fits this many world
+// units. Keeps short and tall models visually consistent in the hero frame.
+const TARGET_FIT_SIZE = 2.6
 
 // Preload at module scope so all 4 models are ready before the component
 // mounts. Avoids Suspense flashes when the model index changes.
@@ -56,7 +59,21 @@ function CyclingBuilding() {
           ? mesh.material.map(applyGlow)
           : applyGlow(mesh.material)
       })
-      return { object: c, materials }
+      // Normalise: compute world-space bounding box, recentre origin,
+      // uniform-scale to TARGET_FIT_SIZE so tall and squat buildings render
+      // at the same visual height. Wrap in an outer Group so .scale and
+      // .position act on the whole subtree without fighting the model's
+      // internal transforms.
+      const bbox = new THREE.Box3().setFromObject(c)
+      const size = new THREE.Vector3(); bbox.getSize(size)
+      const center = new THREE.Vector3(); bbox.getCenter(center)
+      const maxDim = Math.max(size.x, size.y, size.z) || 1
+      const fitScale = TARGET_FIT_SIZE / maxDim
+      const wrapper = new THREE.Group()
+      c.position.set(-center.x, -bbox.min.y, -center.z)  // sit on Y=0, centred X/Z
+      wrapper.add(c)
+      wrapper.scale.setScalar(fitScale)
+      return { object: wrapper, materials }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -126,7 +143,7 @@ function CyclingBuilding() {
   })
 
   return (
-    <group ref={group} scale={0.95} position={[0, -0.6, 0]}>
+    <group ref={group} position={[0, -1.2, 0]}>
       {prepared.map((p, i) => (
         <primitive key={i} object={p.object} />
       ))}
@@ -137,7 +154,7 @@ function CyclingBuilding() {
 export function HeroScene() {
   return (
     <Canvas
-      camera={{ position: [4.2, 3.2, 7.2], fov: 38 }}
+      camera={{ position: [3.6, 2.8, 6.0], fov: 36 }}
       dpr={[1, 1.5]}
       style={{ width: '100%', height: '100%', background: 'transparent' }}
       gl={{ alpha: true, antialias: true }}

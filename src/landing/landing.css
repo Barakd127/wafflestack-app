@@ -180,19 +180,20 @@
 }
 
 /* === Hero 3D container ===
-   Sized proportional to the building asset (~420×420). The previous 500px-tall
-   full-width box wrapped a tiny model in a huge frame, making the hero look
-   sparse. Shadow softened so the box doesn't read as a solid card. */
+   Sized tight around the auto-fit building so neither short skyscrapers
+   leave a giant empty box nor tall ones get clipped at top/bottom.
+   Models are normalised in HeroScene.tsx via bbox auto-fit to a uniform
+   size, so frame can stay compact. */
 .ls-hero-3d {
   position: relative;
-  height: 420px;
+  height: 360px;
   width: 100%;
-  max-width: 460px;
+  max-width: 380px;
   margin: 0 auto;
   overflow: hidden;
-  border-radius: 32px;
+  border-radius: 28px;
   pointer-events: none;
-  box-shadow: 0 4px 32px rgba(51,81,202,0.10);
+  box-shadow: 0 4px 28px rgba(51,81,202,0.10);
 }
 .ls-hero-3d canvas {
   max-width: 100% !important;
