@@ -46,7 +46,7 @@ export function HeroScene() {
       <ambientLight intensity={0.55} color="#cfdfff" />
       <directionalLight intensity={1.3} position={[5, 8, 3]} color="#fff5d2" />
       <pointLight intensity={0.9} position={[-3, 4, -2]} color="#2b5ce6" />
-      <Sparkles count={40} scale={4} size={1.5} speed={0.3} color="#f5b800" opacity={0.6} />
+      <Sparkles count={40} scale={4} size={1.5} speed={0.3} color="#E8C84A" opacity={0.6} />
       <Suspense fallback={null}>
         <RotatingBuilding />
       </Suspense>

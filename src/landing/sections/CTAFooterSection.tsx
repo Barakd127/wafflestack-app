@@ -17,10 +17,10 @@ export function CTAFooterSection() {
             <Building2 size={48} color="var(--ls-gold-bright)" strokeWidth={1.5} />
           </div>
           <h2 className="ls-h2" style={{ marginBottom: 16 }}>
-            מוכן לבנות את קו הרקיע שלך?
+            מוכן לשלוט בסטטיסטיקה — ולבנות עיר תוך כדי?
           </h2>
           <p className="ls-body" style={{ marginBottom: 32, maxWidth: 440, marginLeft: 'auto', marginRight: 'auto' }}>
-            הצטרף ל־<span dir="ltr" style={{ display: 'inline-block' }}>WaffleStack</span> ושלוט בסטטיסטיקה תוך כדי בניית עיר.
+            הצטרף ל־<span dir="ltr" style={{ display: 'inline-block' }}>WaffleStack</span>, פלטפורמה מבוססת מחקר מפסיכולוגיה חינוכית, שהופכת את הסטטיסטיקה למשחק שבאמת עובד.
           </p>
           <a href="#study" className="ls-cta-gold" style={{ fontSize: 17, padding: '16px 36px' }}>
             התחל בחינם ←

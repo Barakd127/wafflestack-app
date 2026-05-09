@@ -26,8 +26,7 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              בנה את <span className="ls-gold-gradient">עיר הסטטיסטיקה</span> שלך.
-              <br />וואפל אחד בכל פעם.
+              בנה את <span className="ls-gold-gradient">עיר הסטטיסטיקה</span> שלך — וואפל אחד בכל פעם.
             </motion.h1>
 
             <motion.p
@@ -37,8 +36,7 @@ export function HeroSection() {
               transition={{ delay: 0.35 }}
               style={{ maxWidth: 480 }}
             >
-              <span dir="ltr" style={{ display: 'inline-block' }}>WaffleStack</span> הופך את הסטטיסטיקה לבונה ערים.
-              שלוט במושגים, צבור בניינים, וצפה בקו הרקיע שלך גדל — הכל בעברית.
+              <span dir="ltr" style={{ display: 'inline-block' }}>WaffleStack</span> הופך סטטיסטיקה לבונה ערים. שלוט במושגים, צבור בניינים, וראה את קו הרקיע שלך גדל — שיטה מוכחת מחקרית שפותחה ע״י פסיכולוג ומורה פרטי.
             </motion.p>
 
             <motion.div
@@ -64,15 +62,15 @@ export function HeroSection() {
               style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--ls-text-dim)', fontSize: 13, flexWrap: 'wrap' }}
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <Building2 size={14} /> 10 מושגים סטטיסטיים
+                <Building2 size={14} /> מושגים בסטטיסטיקה
               </span>
               <span>·</span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <BookOpen size={14} /> שיעורים בעברית
+                <BookOpen size={14} /> מבוסס מחקר
               </span>
               <span>·</span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <Gamepad2 size={14} /> גיימיפיקציה
+                <Gamepad2 size={14} /> גיימיפיקציה מוכחת
               </span>
             </motion.div>
           </motion.div>
@@ -88,7 +86,7 @@ export function HeroSection() {
               position: 'absolute', width: 280, height: 280,
               top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(240,165,0,0.28) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(212,175,55,0.30) 0%, transparent 70%)',
               filter: 'blur(60px)',
               pointerEvents: 'none',
             }} />

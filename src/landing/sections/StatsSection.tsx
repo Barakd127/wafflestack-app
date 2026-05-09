@@ -1,30 +1,25 @@
-import { motion, useInView, useMotionValue, animate } from 'framer-motion'
-import { useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { FlaskConical, GraduationCap, Layers } from 'lucide-react'
 
-function Counter({ from, to, suffix = '' }: { from: number; to: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null)
-  const inView = useInView(ref, { once: true })
-  const val = useMotionValue(from)
-
-  useEffect(() => {
-    if (!inView) return
-    const controls = animate(val, to, {
-      duration: 1.6,
-      ease: 'easeOut',
-      onUpdate: v => {
-        if (ref.current) ref.current.textContent = Math.round(v).toLocaleString() + suffix
-      },
-    })
-    return controls.stop
-  }, [inView, val, to, suffix])
-
-  return <span ref={ref}>{from}{suffix}</span>
-}
-
-const stats = [
-  { value: 10, suffix: '', label: 'מושגים סטטיסטיים', from: 0 },
-  { value: 31, suffix: '', label: 'מקורות NotebookLM', from: 0 },
-  { value: 100, suffix: '%', label: 'בעברית', from: 0 },
+const trustSignals = [
+  {
+    Icon: FlaskConical,
+    color: '#E8C84A',
+    label: 'גיימיפיקציה מוכחת מחקרית',
+    sub: 'שיטות משחוק מבוססות פסיכולוגיה חינוכית — משפרות מוטיבציה ושימור ידע.',
+  },
+  {
+    Icon: GraduationCap,
+    color: '#E8C84A',
+    label: 'פותח ע״י פסיכולוג מחקרי ומורה פרטי',
+    sub: 'שילוב של ידע אקדמי ומיומנות הוראה אמיתית — שמה שנלמד כאן עובד.',
+  },
+  {
+    Icon: Layers,
+    color: '#E8C84A',
+    label: 'תוכן שגדל כל הזמן',
+    sub: 'עשרות מושגים בסטטיסטיקה ועוד בדרך — מהבסיס ועד לרמה המתקדמת.',
+  },
 ]
 
 export function StatsSection() {
@@ -32,21 +27,36 @@ export function StatsSection() {
     <section className="ls-section" style={{ paddingTop: 0 }}>
       <div className="ls-container">
         <div className="ls-glass ls-glass--strong ls-stats-grid">
-          {stats.map((s, i) => (
-            <motion.div
-              key={i}
-              className="ls-stats-cell"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <div style={{ fontSize: 'clamp(36px, 8vw, 48px)', fontWeight: 800, color: 'var(--ls-gold-bright)', lineHeight: 1 }}>
-                <Counter from={s.from} to={s.value} suffix={s.suffix} />
-              </div>
-              <div style={{ marginTop: 8, color: 'var(--ls-text-muted)', fontSize: 14 }}>{s.label}</div>
-            </motion.div>
-          ))}
+          {trustSignals.map((s, i) => {
+            const Icon = s.Icon
+            return (
+              <motion.div
+                key={i}
+                className="ls-stats-cell"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.12 }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+                  <Icon size={32} color={s.color} strokeWidth={1.5} />
+                </div>
+                <div style={{
+                  fontSize: 'clamp(14px, 2vw, 16px)',
+                  fontWeight: 700,
+                  color: 'var(--ls-gold-bright)',
+                  lineHeight: 1.35,
+                  marginBottom: 8,
+                  textWrap: 'balance',
+                }}>
+                  {s.label}
+                </div>
+                <div style={{ color: 'var(--ls-text-muted)', fontSize: 13, lineHeight: 1.6, textWrap: 'pretty' }}>
+                  {s.sub}
+                </div>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
     </section>

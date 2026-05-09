@@ -2,26 +2,32 @@
 /* Scoped to .landing-root to avoid leaking into app */
 
 .landing-root {
-  --ls-blue-deep:    #2b5ce6;
-  --ls-blue-mid:     #1a3a8f;
-  --ls-blue-darker:  #0e2456;
-  --ls-blue-rim:     #3b6fe8;
-  --ls-gold:         #f0a500;
-  --ls-gold-bright:  #f5b800;
-  --ls-gold-soft:    #fff3c7;
-  --ls-text-primary: #f8fafc;
-  --ls-text-muted:   #d8e2f5;
-  --ls-text-dim:     #a3b3d4;
-  --ls-glass-bg:     rgba(255, 255, 255, 0.08);
-  --ls-glass-bg-strong: rgba(255, 255, 255, 0.14);
-  --ls-glass-border: rgba(255, 255, 255, 0.22);
-  --ls-glass-border-gold: rgba(240, 165, 0, 0.45);
+  --ls-blue-primary:  #3351CA;   /* exact app sidebar / StudyHub blue */
+  --ls-blue-mid:      #254A9F;   /* app sidebar-active */
+  --ls-blue-darker:   #122460;   /* app btn-color light */
+  --ls-blue-rim:      #4a69e0;   /* lighter tint for gradient top */
+  --ls-gold:          #D4AF37;   /* app topbar-border gold */
+  --ls-gold-bright:   #E8C84A;   /* brighter variant */
+  --ls-gold-soft:     #fdf8e1;
+  --ls-text-primary:  #f8fafc;
+  --ls-text-muted:    #cdd8f5;
+  --ls-text-dim:      #8fa4d8;
+  --ls-glass-bg:          rgba(255, 255, 255, 0.07);
+  --ls-glass-bg-strong:   rgba(255, 255, 255, 0.13);
+  --ls-glass-border:      rgba(255, 255, 255, 0.20);
+  --ls-glass-border-gold: rgba(212, 175, 55, 0.40);
 
   direction: rtl;
   font-family: 'Heebo', 'Inter', system-ui, sans-serif;
-  background: radial-gradient(ellipse at top, #3b6fe8 0%, #2b5ce6 35%, #1a3a8f 70%, #0e2456 100%);
-  /* Use document scroll. LandingPage temporarily flips body overflow to auto
-     while mounted so window-level scroll works for the whole landing page. */
+  /* Exact same gradient family as the app's StudyHub sidebar */
+  background: linear-gradient(
+    165deg,
+    #4a69e0 0%,
+    #3351CA 30%,
+    #254A9F 65%,
+    #122460 100%
+  );
+  /* Use document scroll — LandingPage.tsx flips body overflow:auto while mounted. */
   position: relative;
   width: 100%;
   min-height: 100vh;
@@ -37,9 +43,9 @@
   border: 1px solid var(--ls-glass-border);
   border-radius: 20px;
   box-shadow:
-    0 8px 32px rgba(10, 30, 80, 0.35),
-    inset 0 1px 0 rgba(255,255,255,0.18),
-    inset 0 -1px 0 rgba(0,0,0,0.15);
+    0 8px 32px rgba(8, 20, 60, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    inset 0 -1px 0 rgba(0,0,0,0.12);
   position: relative;
   overflow: hidden;
 }
@@ -51,9 +57,9 @@
   border-radius: inherit;
   padding: 1px;
   background: linear-gradient(135deg,
-    rgba(255,255,255,0.45) 0%,
-    rgba(255,255,255,0.05) 50%,
-    rgba(240,165,0,0.25) 100%);
+    rgba(255,255,255,0.40) 0%,
+    rgba(255,255,255,0.04) 50%,
+    rgba(212,175,55,0.22) 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
           mask-composite: exclude;
@@ -61,16 +67,16 @@
 }
 
 .ls-glass--strong { background: var(--ls-glass-bg-strong) !important; backdrop-filter: blur(28px) saturate(200%) !important; }
-.ls-glass--gold { border-color: var(--ls-glass-border-gold) !important; }
-.ls-glass--card { border-radius: 24px; padding: 32px; }
+.ls-glass--gold   { border-color: var(--ls-glass-border-gold) !important; }
+.ls-glass--card   { border-radius: 24px; padding: 32px; }
 
 @supports not (backdrop-filter: blur(20px)) {
-  .ls-glass { background: rgba(26, 58, 143, 0.85) !important; }
+  .ls-glass { background: rgba(30, 50, 140, 0.88) !important; }
 }
 
 /* === Gold CTA button === */
 .ls-cta-gold {
-  background: linear-gradient(135deg, #f0a500 0%, #f5b800 50%, #f0a500 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #E8C84A 50%, #D4AF37 100%);
   background-size: 200% 200%;
   color: #1a1208;
   font-weight: 700;
@@ -83,8 +89,8 @@
   gap: 8px;
   font-size: 15px;
   box-shadow:
-    0 0 0 1px rgba(240,165,0,0.5),
-    0 8px 24px rgba(240,165,0,0.4),
+    0 0 0 1px rgba(212,175,55,0.5),
+    0 8px 24px rgba(212,175,55,0.38),
     inset 0 1px 0 rgba(255,255,255,0.5);
   transition: all 250ms cubic-bezier(0.4,0,0.2,1);
   text-decoration: none;
@@ -93,8 +99,8 @@
   background-position: 100% 100%;
   transform: translateY(-2px);
   box-shadow:
-    0 0 0 1px rgba(240,165,0,0.7),
-    0 12px 32px rgba(240,165,0,0.55),
+    0 0 0 1px rgba(212,175,55,0.7),
+    0 12px 32px rgba(212,175,55,0.52),
     inset 0 1px 0 rgba(255,255,255,0.6);
 }
 
@@ -117,7 +123,7 @@
 }
 .ls-cta-ghost:hover {
   background: var(--ls-glass-bg-strong);
-  border-color: rgba(255,255,255,0.4);
+  border-color: rgba(255,255,255,0.38);
   transform: translateY(-1px);
 }
 
@@ -133,7 +139,7 @@
   padding: 6px 14px;
   border-radius: 100px;
   border: 1px solid var(--ls-glass-border-gold);
-  background: rgba(240,165,0,0.1);
+  background: rgba(212,175,55,0.10);
 }
 
 /* === Section layout === */
@@ -146,18 +152,45 @@
   margin: 0 auto;
 }
 
-/* === Typography === */
-.ls-h1 { font-size: clamp(32px, 6vw, 68px); font-weight: 800; line-height: 1.1; letter-spacing: -0.01em; }
-.ls-h2 { font-size: clamp(26px, 4vw, 48px); font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; }
-.ls-h3 { font-size: 22px; font-weight: 600; line-height: 1.3; }
-.ls-body { font-size: clamp(15px, 2vw, 18px); line-height: 1.7; color: var(--ls-text-muted); }
+/* === Typography — text-wrap: balance prevents orphaned words === */
+.ls-h1 {
+  font-size: clamp(32px, 6vw, 68px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.ls-h2 {
+  font-size: clamp(26px, 4vw, 48px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.ls-h3 {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.ls-body {
+  font-size: clamp(15px, 2vw, 18px);
+  line-height: 1.7;
+  color: var(--ls-text-muted);
+  text-wrap: pretty;
+}
 .ls-gold-text { color: var(--ls-gold); }
-.ls-gold-gradient { background: linear-gradient(135deg, #f0a500, #f5b800); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.ls-gold-gradient {
+  background: linear-gradient(135deg, #D4AF37, #E8C84A);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
 /* === Scroll progress bar === */
 .ls-progress-bar {
   position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 100;
-  background: linear-gradient(90deg, #f0a500, #f5b800);
+  background: linear-gradient(90deg, #D4AF37, #E8C84A);
   transform-origin: right;
 }
 
@@ -178,7 +211,7 @@
   pointer-events: none !important;
 }
 
-/* === Stats grid === */
+/* === Stats / trust bar grid === */
 .ls-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -186,11 +219,9 @@
   border-radius: 24px;
   overflow: hidden;
 }
-.ls-stats-grid > * {
-  min-width: 0;
-}
+.ls-stats-grid > * { min-width: 0; }
 .ls-stats-cell {
-  padding: 40px 24px;
+  padding: 40px 28px;
   text-align: center;
   border-inline-end: 1px solid var(--ls-glass-border);
 }
@@ -200,20 +231,20 @@
 @media (max-width: 768px) {
   .ls-section { padding: 48px 16px; }
   .ls-glass--card { padding: 20px; }
-  .ls-hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
-  .ls-hero-3d { height: 320px !important; }
+  .ls-hero-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
+  .ls-hero-3d { height: 280px !important; }
   .ls-steps-grid { grid-template-columns: 1fr !important; }
   .ls-features-row { flex-direction: column !important; gap: 16px !important; }
-  .ls-features-row .ls-features-icon { flex: 0 0 auto !important; width: 100% !important; height: 120px !important; }
+  .ls-features-row .ls-features-icon { flex: 0 0 auto !important; width: 100% !important; height: 110px !important; }
 
   .ls-stats-grid { grid-template-columns: 1fr; }
   .ls-stats-cell {
-    padding: 24px 16px;
+    padding: 24px 20px;
     border-inline-end: none;
     border-bottom: 1px solid var(--ls-glass-border);
   }
   .ls-stats-cell:last-child { border-bottom: none; }
 
-  .ls-h1 { font-size: clamp(28px, 8vw, 40px); }
-  .ls-h2 { font-size: clamp(22px, 6vw, 32px); }
+  .ls-h1 { font-size: clamp(26px, 8vw, 38px); }
+  .ls-h2 { font-size: clamp(22px, 6vw, 30px); }
 }
