@@ -179,17 +179,20 @@
   transform-origin: right;
 }
 
-/* === Hero 3D container === */
+/* === Hero 3D container ===
+   Sized proportional to the building asset (~420×420). The previous 500px-tall
+   full-width box wrapped a tiny model in a huge frame, making the hero look
+   sparse. Shadow softened so the box doesn't read as a solid card. */
 .ls-hero-3d {
   position: relative;
-  height: 500px;
+  height: 420px;
   width: 100%;
-  max-width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 32px;
   pointer-events: none;
-  /* Subtle light shadow instead of glow */
-  box-shadow: 0 8px 40px rgba(51,81,202,0.15);
+  box-shadow: 0 4px 32px rgba(51,81,202,0.10);
 }
 .ls-hero-3d canvas {
   max-width: 100% !important;
