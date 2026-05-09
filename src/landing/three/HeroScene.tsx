@@ -17,8 +17,9 @@ const ROTATION_SPEED = 0.7    // rad/s — full rotation ≈ 9s
 const ROTATIONS_PER_BUILDING = 2
 const FADE_DURATION = 0.6     // seconds for crossfade
 // Each building gets normalised so its largest dimension fits this many world
-// units. Tuned for the 380×360 frame + camera at [3.6,2.8,6.0] / fov 36.
-const TARGET_FIT_SIZE = 2.4
+// units. Tuned for the 260×300 (portrait) frame + camera at [3.6,2.8,6.0] /
+// fov 36. Smaller value because portrait aspect narrows horizontal FOV.
+const TARGET_FIT_SIZE = 2.0
 
 // Preload at module scope so all 4 GLBs are ready before mount.
 BUILDINGS.forEach(path => useGLTF.preload(path))

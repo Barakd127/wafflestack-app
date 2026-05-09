@@ -180,20 +180,20 @@
 }
 
 /* === Hero 3D container ===
-   Sized tight around the auto-fit building so neither short skyscrapers
-   leave a giant empty box nor tall ones get clipped at top/bottom.
-   Models are normalised in HeroScene.tsx via bbox auto-fit to a uniform
-   size, so frame can stay compact. */
+   Sized tight around the auto-fit building per user's yellow-highlighter
+   reference — minimal padding around the asset, no empty space.
+   Models are normalised in HeroScene.tsx via bbox auto-fit so any of the
+   4 cycling buildings fills the frame the same way. */
 .ls-hero-3d {
   position: relative;
-  height: 360px;
+  height: 300px;
   width: 100%;
-  max-width: 380px;
+  max-width: 260px;
   margin: 0 auto;
   overflow: hidden;
-  border-radius: 28px;
+  border-radius: 22px;
   pointer-events: none;
-  box-shadow: 0 4px 28px rgba(51,81,202,0.10);
+  box-shadow: 0 4px 24px rgba(51,81,202,0.10);
 }
 .ls-hero-3d canvas {
   max-width: 100% !important;
