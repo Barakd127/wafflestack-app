@@ -125,7 +125,7 @@ function App() {
       )}
 
       {activeView === 'landing' && (
-        <Suspense fallback={<div style={{background:'#050b1f',width:'100vw',height:'100vh'}}/>}>
+        <Suspense fallback={<div style={{background:'#1a237e',width:'100vw',height:'100vh'}}/>}>
           <LandingPage />
         </Suspense>
       )}
@@ -317,3 +317,4 @@ function App() {
 }
 
 export default App
+

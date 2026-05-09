@@ -27,7 +27,7 @@ export function HeroSection() {
               transition={{ delay: 0.2 }}
             >
               בנה את <span className="ls-gold-gradient">עיר הסטטיסטיקה</span> שלך.
-              <br />ופל אחד בכל פעם.
+              <br />וואפל אחד בכל פעם.
             </motion.h1>
 
             <motion.p
@@ -106,3 +106,4 @@ export function HeroSection() {
     </section>
   )
 }
+
