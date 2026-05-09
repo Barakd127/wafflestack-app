@@ -1,14 +1,15 @@
 import { Suspense } from 'react'
 import { motion } from 'framer-motion'
+import { Building2, BookOpen, Gamepad2 } from 'lucide-react'
 import { HeroScene } from '../three/HeroScene'
 
 export function HeroSection() {
   return (
-    <section className="ls-section" style={{ paddingTop: 120, paddingBottom: 80 }}>
+    <section className="ls-section" style={{ paddingTop: 96, paddingBottom: 64 }}>
       <div className="ls-container">
         <div className="ls-hero-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' }}>
 
-          {/* LEFT: copy */}
+          {/* RIGHT (in RTL) / first column: copy */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -16,7 +17,7 @@ export function HeroSection() {
             style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
           >
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <span className="ls-eyebrow">✦ Statistics, gamified</span>
+              <span className="ls-eyebrow">✦ סטטיסטיקה כמשחק</span>
             </motion.div>
 
             <motion.h1
@@ -25,9 +26,8 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              Build your{' '}
-              <span className="ls-gold-gradient">statistics city.</span>
-              <br />One waffle at a time.
+              בנה את <span className="ls-gold-gradient">עיר הסטטיסטיקה</span> שלך.
+              <br />ופל אחד בכל פעם.
             </motion.h1>
 
             <motion.p
@@ -37,8 +37,8 @@ export function HeroSection() {
               transition={{ delay: 0.35 }}
               style={{ maxWidth: 480 }}
             >
-              WaffleStack turns statistics into a city builder. Master concepts,
-              earn buildings, watch your skyline grow — in Hebrew.
+              <span dir="ltr" style={{ display: 'inline-block' }}>WaffleStack</span> הופך את הסטטיסטיקה לבונה ערים.
+              שלוט במושגים, צבור בניינים, וצפה בקו הרקיע שלך גדל — הכל בעברית.
             </motion.p>
 
             <motion.div
@@ -49,7 +49,7 @@ export function HeroSection() {
             >
               <a href="#study" className="ls-cta-gold">
                 <span>התחל עכשיו</span>
-                <span>→</span>
+                <span>←</span>
               </a>
               <a href="#study" className="ls-cta-ghost">
                 גלה עוד
@@ -61,35 +61,40 @@ export function HeroSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--ls-text-dim)', fontSize: 13 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--ls-text-dim)', fontSize: 13, flexWrap: 'wrap' }}
             >
-              <span>🏙️ 10 מושגים סטטיסטיים</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <Building2 size={14} /> 10 מושגים סטטיסטיים
+              </span>
               <span>·</span>
-              <span>📚 שיעורים בעברית</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <BookOpen size={14} /> שיעורים בעברית
+              </span>
               <span>·</span>
-              <span>🎮 גיימיפיקציה</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <Gamepad2 size={14} /> גיימיפיקציה
+              </span>
             </motion.div>
           </motion.div>
 
-          {/* RIGHT: 3D scene */}
+          {/* 3D scene */}
           <motion.div
             className="ls-hero-3d"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.7 }}
-            style={{ height: 500, position: 'relative' }}
           >
             <div style={{
-              position: 'absolute', width: 300, height: 300,
+              position: 'absolute', width: 280, height: 280,
               top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(245,158,11,0.25) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(240,165,0,0.28) 0%, transparent 70%)',
               filter: 'blur(60px)',
               pointerEvents: 'none',
             }} />
             <Suspense fallback={
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94a3b8', fontSize: 13 }}>
-                Loading 3D...
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#cbd5e1', fontSize: 13 }}>
+                טוען תלת-ממד...
               </div>
             }>
               <HeroScene />

@@ -4,24 +4,21 @@ import { BookOpen, Target, Building2 } from 'lucide-react'
 const steps = [
   {
     icon: BookOpen,
-    color: '#1a56db',
+    color: '#2b5ce6',
     title: 'למד',
-    subtitle: 'Learn',
-    desc: 'שיעורים קצרים ובהירים בעברית. כל נושא מסוים עם הסבר ויזואלי, נוסחאות, ודוגמאות.',
+    desc: 'שיעורים קצרים ובהירים בעברית. כל נושא מגיע עם הסבר ויזואלי, נוסחאות, ודוגמאות.',
   },
   {
     icon: Target,
-    color: '#f59e0b',
-    title: 'תתרגל',
-    subtitle: 'Practice',
-    desc: 'חידונים אדפטיביים שמתאימים את רמת הקושי לך. שאלות אמיתיות עם הסברים מפורטים.',
+    color: '#f0a500',
+    title: 'תרגל',
+    desc: 'חידונים אדפטיביים שמתאימים את רמת הקושי אליך. שאלות אמיתיות עם הסברים מפורטים.',
   },
   {
     icon: Building2,
     color: '#10b981',
     title: 'בנה',
-    subtitle: 'Build',
-    desc: 'כל נושא שתשלוט בו יפתח בניין חדש בעיר שלך. צפה בסקיילין שלך גדל.',
+    desc: 'כל נושא שתשלוט בו יפתח בניין חדש בעיר שלך. צפה בקו הרקיע שלך גדל.',
   },
 ]
 
@@ -67,7 +64,6 @@ export function HowItWorksSection() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
                   <h3 className="ls-h3">{step.title}</h3>
-                  <span style={{ color: 'var(--ls-text-dim)', fontSize: 13, fontWeight: 500 }}>{step.subtitle}</span>
                 </div>
                 <p className="ls-body" style={{ fontSize: 15 }}>{step.desc}</p>
               </motion.div>

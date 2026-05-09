@@ -15,8 +15,8 @@ function RotatingBuilding() {
       const applyGlow = (mat: THREE.Material) => {
         const m = mat.clone() as THREE.MeshStandardMaterial
         if ('emissive' in m) {
-          m.emissive = new THREE.Color('#1a56db')
-          m.emissiveIntensity = 0.12
+          m.emissive = new THREE.Color('#2b5ce6')
+          m.emissiveIntensity = 0.15
         }
         return m
       }
@@ -43,10 +43,10 @@ export function HeroScene() {
       style={{ width: '100%', height: '100%', background: 'transparent' }}
       gl={{ alpha: true, antialias: true }}
     >
-      <ambientLight intensity={0.4} color="#a8c5ff" />
-      <directionalLight intensity={1.2} position={[5, 8, 3]} color="#fff5d2" />
-      <pointLight intensity={0.8} position={[-3, 4, -2]} color="#1a56db" />
-      <Sparkles count={40} scale={4} size={1.5} speed={0.3} color="#f59e0b" opacity={0.5} />
+      <ambientLight intensity={0.55} color="#cfdfff" />
+      <directionalLight intensity={1.3} position={[5, 8, 3]} color="#fff5d2" />
+      <pointLight intensity={0.9} position={[-3, 4, -2]} color="#2b5ce6" />
+      <Sparkles count={40} scale={4} size={1.5} speed={0.3} color="#f5b800" opacity={0.6} />
       <Suspense fallback={null}>
         <RotatingBuilding />
       </Suspense>
