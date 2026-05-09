@@ -20,12 +20,11 @@
   direction: rtl;
   font-family: 'Heebo', 'Inter', system-ui, sans-serif;
   background: radial-gradient(ellipse at top, #3b6fe8 0%, #2b5ce6 35%, #1a3a8f 70%, #0e2456 100%);
-  /* The host page sets body { overflow: hidden } and #root { height: 100vh },
-     so we own our own scroll container. position:fixed + overflow-y:auto lets
-     the landing's full content scroll within the viewport. */
-  position: fixed;
-  inset: 0;
-  overflow-y: auto;
+  /* Use document scroll. LandingPage temporarily flips body overflow to auto
+     while mounted so window-level scroll works for the whole landing page. */
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
   overflow-x: hidden;
   color: var(--ls-text-primary);
 }
@@ -170,10 +169,13 @@
   max-width: 100%;
   overflow: hidden;
   border-radius: 24px;
+  pointer-events: none;
 }
 .ls-hero-3d canvas {
   max-width: 100% !important;
   display: block;
+  touch-action: pan-y !important;
+  pointer-events: none !important;
 }
 
 /* === Stats grid === */

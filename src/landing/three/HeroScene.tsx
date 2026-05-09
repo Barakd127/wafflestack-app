@@ -32,13 +32,13 @@ function RotatingBuilding() {
     group.current.position.y = Math.sin(clock.getElapsedTime() * 0.8) * 0.08
   })
 
-  return <group ref={group} scale={1.4}><primitive object={cloned} /></group>
+  return <group ref={group} scale={0.95} position={[0, -0.6, 0]}><primitive object={cloned} /></group>
 }
 
 export function HeroScene() {
   return (
     <Canvas
-      camera={{ position: [3, 2.5, 5], fov: 35 }}
+      camera={{ position: [4.2, 3.2, 7.2], fov: 38 }}
       dpr={[1, 1.5]}
       style={{ width: '100%', height: '100%', background: 'transparent' }}
       gl={{ alpha: true, antialias: true }}
