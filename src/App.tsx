@@ -72,6 +72,9 @@ function App() {
         setActiveView(prev => (prev === 'split' || prev === 'split-mindmap' || prev === 'split-study-mindmap') ? prev : 'split-mindmap')
       } else if (d.type === 'ws-split-study') {
         setActiveView(prev => (prev === 'split' || prev === 'split-mindmap' || prev === 'split-study-mindmap') ? prev : 'split-study-mindmap')
+      } else if (d.type === 'ws-go-drawing') {
+        // Iframe's "🎨 לוח ציור" button — full-screen Excalidraw drawing surface.
+        setActiveView('drawing')
       }
     }
     window.addEventListener('message', onMessage)

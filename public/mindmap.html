@@ -546,11 +546,12 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
     <button class="tb-btn" onclick="wsOpenSplitStudy()" title="הוסף את אזור הלימוד לצד המפה">📚 איזור הלמידה</button>
     <button class="tb-btn" onclick="wsOpenSplitStudy()" title="הוסף את הארסנל לצד המפה (זמין דרך אזור הלמידה)">🎯 הארסנל שלי</button>
   </div>
-  <div class="ribbon-group" id="ribbon-add"
+  <div class="ribbon-group" id="ribbon-add">
     <button class="tb-btn" onclick="mmAddChild()">+ Branch</button>
     <button class="tb-btn" onclick="mmAddEquation()">&#8721; Equation</button>
     <button class="tb-btn" onclick="mmAddCanvas()">&#11036; Canvas</button>
     <button class="tb-btn" onclick="mmAddSummary()" title="סיכום קבוצת אחים (Ctrl-click)">&#8944; Summary</button>
+    <button class="tb-btn" onclick="wsGoDrawing()" title="פתח לוח ציור (Excalidraw) במסך מלא">🎨 לוח ציור</button>
   </div>
   <div class="ribbon-group" id="ribbon-view" style="display:none">
     <button class="tb-btn" onclick="mmCollapseAll()">&#8863; Collapse</button>
@@ -4876,6 +4877,11 @@ function wsOpenSplit(){
 // distinct view without confusing the existing city-split logic.
 function wsOpenSplitStudy(){
   try { window.parent.postMessage({type:'ws-split-study'}, '*'); } catch(_){}
+}
+// Open the full-screen Excalidraw drawing surface in the React host.
+// App.tsx handles 'ws-go-drawing' by setActiveView('drawing').
+function wsGoDrawing(){
+  try { window.parent.postMessage({type:'ws-go-drawing'}, '*'); } catch(_){}
 }
 // Toggle the minimap between full (140×104) and collapsed (140×22 header only).
 function wsToggleMinimap(){
