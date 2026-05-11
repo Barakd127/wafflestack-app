@@ -2,22 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === App-wide accessibility tokens — mirror landing.css ===
-   Visible 3px gold focus ring on every interactive shell element so
-   keyboard navigation has a clear current-focus indicator (skill ux:
-   Focus States HIGH; WCAG 2.4.7). */
-button:focus-visible,
-a:focus-visible,
-[role="button"]:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-[tabindex]:focus-visible {
-  outline: 3px solid #C9A227;
-  outline-offset: 3px;
-  border-radius: 6px;
-}
-
 /* App-wide reduced-motion respect — mirror landing rule so users with
    vestibular sensitivity don't get app-shell motion either. */
 @media (prefers-reduced-motion: reduce) {
@@ -110,15 +94,17 @@ body {
   height: 100vh;
 }
 
-/* A11y: high-contrast focus ring on any keyboard-focused interactive element.
-   Uses :focus-visible so mouse clicks don't trigger the ring (only Tab/keyboard). */
+/* A11y: high-contrast gold focus ring on any keyboard-focused interactive element.
+   Uses :focus-visible so mouse clicks don't trigger the ring (only Tab/keyboard).
+   Gold #C9A227 matches landing CTAs — single token across the app
+   (skill ux: Focus States HIGH; WCAG 2.4.7). */
 :focus-visible {
-  outline: 3px solid #60a5fa;
-  outline-offset: 2px;
+  outline: 3px solid #C9A227;
+  outline-offset: 3px;
   border-radius: inherit;
 }
 html.dark :focus-visible {
-  outline-color: #93c5fd;
+  outline-color: #E8C547;
 }
 
 /* Arsenal הקאצ'ים — animations for ArsenalScreen / ArsenalCapture / ArsenalCard.
