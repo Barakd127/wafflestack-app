@@ -45,11 +45,11 @@ export function HeroSection() {
               transition={{ delay: 0.45 }}
               style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}
             >
-              <a href="#study" className="ls-cta-gold">
+              <a href="#study" className="ls-cta-gold" aria-label="התחל עכשיו — מעבר לדף הראשי של האפליקציה">
                 <span>התחל עכשיו</span>
-                <span>←</span>
+                <span aria-hidden="true">←</span>
               </a>
-              <a href="#study" className="ls-cta-ghost">
+              <a href="#study" className="ls-cta-ghost" aria-label="גלה עוד על האפליקציה">
                 גלה עוד
               </a>
             </motion.div>

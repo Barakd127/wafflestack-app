@@ -17,7 +17,7 @@
   /* Text — dark on light bg */
   --ls-text-primary: #122460;
   --ls-text-muted:   #1F3E6C;
-  --ls-text-dim:     #465CA5;
+  --ls-text-dim:     #2F4685;   /* bumped from #465CA5 — 4.5:1 contrast on pale-blue bg (skill ux: Color Contrast HIGH) */
 
   /* Glass — white/translucent, blue border */
   --ls-glass-bg:          rgba(255, 255, 255, 0.60);
@@ -77,12 +77,16 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-size: 15px;
+  /* 44×44px touch target floor (skill ux rule: Touch & Interaction CRITICAL) */
+  min-height: 48px;
+  min-width: 44px;
   box-shadow:
     0 0 0 1px rgba(51,81,202,0.5),
     0 8px 24px rgba(51,81,202,0.35);
-  transition: all 250ms cubic-bezier(0.4,0,0.2,1);
+  transition: background 200ms cubic-bezier(0.4,0,0.2,1), transform 200ms cubic-bezier(0.4,0,0.2,1), box-shadow 200ms cubic-bezier(0.4,0,0.2,1);
   text-decoration: none;
 }
 .ls-cta-gold:hover {
@@ -92,6 +96,11 @@
     0 0 0 1px rgba(37,74,159,0.6),
     0 12px 32px rgba(37,74,159,0.45);
 }
+/* Visible keyboard focus ring — skill ux rule HIGH: Focus States */
+.ls-cta-gold:focus-visible {
+  outline: 3px solid #FFD700;
+  outline-offset: 3px;
+}
 
 /* === Ghost button === */
 .ls-cta-ghost {
@@ -100,19 +109,41 @@
   font-weight: 600;
   padding: 14px 28px;
   border-radius: 14px;
-  border: 1px solid rgba(51,81,202,0.35);
+  border: 1.5px solid rgba(51,81,202,0.45);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-size: 15px;
-  transition: all 250ms ease;
+  min-height: 48px;
+  min-width: 44px;
+  transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
   text-decoration: none;
 }
 .ls-cta-ghost:hover {
   background: rgba(51,81,202,0.08);
   border-color: var(--ls-blue-primary);
   transform: translateY(-1px);
+}
+.ls-cta-ghost:focus-visible {
+  outline: 3px solid var(--ls-blue-primary);
+  outline-offset: 3px;
+}
+
+/* === Reduced motion: respect OS preference ===
+   skill ux rule HIGH: Animation / Reduced Motion. Disable all entrance
+   + hover translations + transitions site-wide for users with vestibular
+   sensitivity. The 3D hero is intrinsically motion (rotating building) —
+   keep it but stop bobbing/framer entrances. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ls-cta-gold:hover, .ls-cta-ghost:hover { transform: none !important; }
 }
 
 /* === Eyebrow pill — gold on white === */
