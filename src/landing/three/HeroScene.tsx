@@ -13,9 +13,10 @@ const BUILDINGS = [
   '/kenney/building-j.glb',
 ] as const
 
-const ROTATION_SPEED = 0.7    // rad/s — full rotation ≈ 9s
-const ROTATIONS_PER_BUILDING = 2
-const FADE_DURATION = 0.6     // seconds for crossfade
+const ROTATION_SPEED = 0.45                 // rad/s — full rotation ≈ 14s
+const ROTATIONS_PER_BUILDING = 2            // 2 rotations ≈ 28s per model
+const MIN_SECONDS_PER_BUILDING = 12.0       // hard floor — fade can't trigger sooner than this even if rotations finish (defensive against fast-rotation glitches)
+const FADE_DURATION = 1.0                   // seconds for crossfade (smoother)
 // Each building gets normalised so its largest dimension fits this many world
 // units. Tuned for the 640×520 frameless hero — building should dominate the
 // space, so TARGET_FIT_SIZE matches a large fraction of vertical viewport.
@@ -86,7 +87,8 @@ function CyclingBuilding() {
     index: 0,
     rotationsDone: 0,
     lastFullRotY: 0,
-    fadeStart: -1,   // -1 = not fading, otherwise timestamp seconds
+    fadeStart: -1,            // -1 = not fading, otherwise timestamp seconds
+    cycleStartTime: -1,       // timestamp the CURRENT model became visible (set on each fade swap)
   })
 
   // After mount: world matrices are valid → measure bbox → auto-fit each
@@ -112,6 +114,7 @@ function CyclingBuilding() {
     })
     // Reveal index 0 only after all 4 are measured + scaled.
     prepared[0].wrapper.visible = true
+    animRef.current.cycleStartTime = performance.now() / 1000
     setReady(true)
   }, [prepared])
 
@@ -144,6 +147,7 @@ function CyclingBuilding() {
           s.index = (s.index + 1) % prepared.length
           if (root.current) root.current.rotation.y = 0
           s.lastFullRotY = 0
+          s.cycleStartTime = performance.now() / 1000  // mark new model's start
           const next = prepared[s.index]
           next.wrapper.visible = true
           next.materials.forEach(m => { m.opacity = 0 })
@@ -165,7 +169,12 @@ function CyclingBuilding() {
     if (root.current.rotation.y - s.lastFullRotY >= Math.PI * 2) {
       s.rotationsDone += 1
       s.lastFullRotY = root.current.rotation.y
-      if (s.rotationsDone >= ROTATIONS_PER_BUILDING) {
+      // Hard time-floor: even if rotations finished (e.g. a tab returned
+      // from background with accumulated delta), only fade after this
+      // model has been visible for MIN_SECONDS_PER_BUILDING. Prevents
+      // the "all 4 buildings flash through in <1 second" glitch.
+      const elapsedSinceVisible = (performance.now() / 1000) - s.cycleStartTime
+      if (s.rotationsDone >= ROTATIONS_PER_BUILDING && elapsedSinceVisible >= MIN_SECONDS_PER_BUILDING) {
         s.fadeStart = performance.now() / 1000
       }
     }
