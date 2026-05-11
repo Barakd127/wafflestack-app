@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+/* === App-wide accessibility tokens — mirror landing.css ===
+   Visible 3px gold focus ring on every interactive shell element so
+   keyboard navigation has a clear current-focus indicator (skill ux:
+   Focus States HIGH; WCAG 2.4.7). */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #C9A227;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* App-wide reduced-motion respect — mirror landing rule so users with
+   vestibular sensitivity don't get app-shell motion either. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 :root {
   font-family: 'Heebo', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

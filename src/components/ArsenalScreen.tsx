@@ -754,9 +754,12 @@ const secondaryBtn: React.CSSProperties = {
 function iconBtn(bg: string, color: string): React.CSSProperties {
   return {
     background: bg, border: `1px solid ${color}30`, color,
-    borderRadius: 8, padding: '4px 8px', cursor: 'pointer',
-    fontSize: 12, fontFamily: "'Rubik', sans-serif",
-    display: 'inline-flex', alignItems: 'center', gap: 4,
+    borderRadius: 8, padding: '8px 12px', cursor: 'pointer',
+    fontSize: 13, fontFamily: "'Rubik', sans-serif",
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4,
     transition: 'all 0.12s',
+    // 44×44 touch target floor (skill ux Touch & Interaction CRITICAL).
+    // Visual icon stays small; we just ensure the click box meets minimum.
+    minWidth: 44, minHeight: 44,
   }
 }

@@ -71,14 +71,22 @@ export default function DrawingScreen({ userId, onBack }: DrawingScreenProps) {
     <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', background: '#1a1a1a', zIndex: 100 }}>
       <button
         onClick={onBack}
+        aria-label="חזרה לדף הבית — יציאה מלוח הציור"
+        // Moved to BOTTOM-LEFT so it doesn't overlap Excalidraw's top tool
+        // palette (which is where the hamburger/menu sits). Pointer-events
+        // explicit so the button always wins clicks on its own rect.
         style={{
-          position: 'absolute', top: 12, right: 12, zIndex: 50,
-          background: 'rgba(108,99,255,0.85)',
-          color: '#fff', border: '1px solid rgba(165,180,252,0.5)',
-          borderRadius: 10, padding: '8px 16px', fontSize: 13, fontWeight: 600,
+          position: 'absolute', bottom: 16, left: 16, zIndex: 50,
+          background: 'rgba(108,99,255,0.95)',
+          color: '#fff', border: '1.5px solid rgba(212,175,55,0.65)',
+          borderRadius: 12, padding: '10px 18px', fontSize: 14, fontWeight: 700,
           fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
-          boxShadow: '0 4px 14px rgba(108,99,255,0.45)',
+          boxShadow: '0 6px 18px rgba(108,99,255,0.5)',
+          pointerEvents: 'auto',
+          minWidth: 44, minHeight: 44,
         }}
+        onFocus={e => { (e.currentTarget as HTMLButtonElement).style.outline = '3px solid #D4AF37'; (e.currentTarget as HTMLButtonElement).style.outlineOffset = '3px' }}
+        onBlur={e => { (e.currentTarget as HTMLButtonElement).style.outline = 'none' }}
       >
         ← דף הבית
       </button>

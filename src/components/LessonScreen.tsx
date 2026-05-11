@@ -712,22 +712,38 @@ function KatexFormula({ latex }: { latex: string }) {
       if (cancelled) return
       if (window.katex) {
         try {
-          node.innerHTML = window.katex.renderToString(latex, {
+          const html = window.katex.renderToString(latex, {
             throwOnError: false,
             displayMode: true,
             output: 'html',
           })
+          // Empty result on bad LaTeX — fall back to readable text instead of
+          // a silent gap. Screen readers + sighted users both see something.
+          node.innerHTML = html && html.trim().length > 0
+            ? html
+            : `<span style="font-family:monospace;color:#9CA3AF" dir="ltr">${latex}</span>`
         } catch {
           node.textContent = latex
         }
       } else {
-        // KaTeX still loading from CDN — retry shortly
         setTimeout(tryRender, 80)
       }
     }
     tryRender()
     return () => { cancelled = true }
   }, [latex])
-  return <span ref={ref}>{latex}</span>
+  // role="img" + aria-label exposes the equation as a single AT-readable
+  // unit (skill ux Accessibility/Alt Text HIGH). LaTeX source is the best
+  // descriptor we have without a math-to-speech bridge.
+  return (
+    <span
+      ref={ref}
+      role="img"
+      aria-label={`נוסחה: ${latex}`}
+      style={{ overflowX: 'auto', maxWidth: '100%', display: 'inline-block' }}
+    >
+      {latex}
+    </span>
+  )
 }
 
