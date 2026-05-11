@@ -17,9 +17,9 @@ const ROTATION_SPEED = 0.7    // rad/s — full rotation ≈ 9s
 const ROTATIONS_PER_BUILDING = 2
 const FADE_DURATION = 0.6     // seconds for crossfade
 // Each building gets normalised so its largest dimension fits this many world
-// units. Tuned for the 260×300 (portrait) frame + camera at [3.6,2.8,6.0] /
-// fov 36. Smaller value because portrait aspect narrows horizontal FOV.
-const TARGET_FIT_SIZE = 2.0
+// units. Tuned for the 640×520 frameless hero — building should dominate the
+// space, so TARGET_FIT_SIZE matches a large fraction of vertical viewport.
+const TARGET_FIT_SIZE = 4.2
 
 // Preload at module scope so all 4 GLBs are ready before mount.
 BUILDINGS.forEach(path => useGLTF.preload(path))
@@ -125,8 +125,9 @@ function CyclingBuilding() {
     if (!root.current || !ready) return
     const s = animRef.current
 
-    // Bobbing
-    root.current.position.y = -1.0 + Math.sin(performance.now() * 0.0008) * 0.08
+    // Bobbing (recentred — TARGET_FIT_SIZE 4.2 means model is taller; pull
+    // down so it sits in the visual centre instead of overshooting upward)
+    root.current.position.y = -1.8 + Math.sin(performance.now() * 0.0008) * 0.08
 
     if (s.fadeStart >= 0) {
       const elapsed = (performance.now() / 1000) - s.fadeStart
@@ -182,7 +183,7 @@ function CyclingBuilding() {
 export function HeroScene() {
   return (
     <Canvas
-      camera={{ position: [3.6, 2.8, 6.0], fov: 36 }}
+      camera={{ position: [5.0, 3.6, 8.5], fov: 38 }}
       dpr={[1, 1.5]}
       style={{ width: '100%', height: '100%', background: 'transparent' }}
       gl={{ alpha: true, antialias: true }}

@@ -180,20 +180,19 @@
 }
 
 /* === Hero 3D container ===
-   Sized tight around the auto-fit building per user's yellow-highlighter
-   reference — minimal padding around the asset, no empty space.
-   Models are normalised in HeroScene.tsx via bbox auto-fit so any of the
-   4 cycling buildings fills the frame the same way. */
+   Big and frameless — user wants the rotating building to dominate the
+   hero (sized to the user's green box ~640×520). No card chrome, just
+   the model floating against the page gradient. */
 .ls-hero-3d {
   position: relative;
-  height: 300px;
+  height: 520px;
   width: 100%;
-  max-width: 260px;
+  max-width: 640px;
   margin: 0 auto;
-  overflow: hidden;
-  border-radius: 22px;
+  overflow: visible;
   pointer-events: none;
-  box-shadow: 0 4px 24px rgba(51,81,202,0.10);
+  /* No background / border-radius / shadow — building floats on page bg. */
+  background: transparent;
 }
 .ls-hero-3d canvas {
   max-width: 100% !important;
