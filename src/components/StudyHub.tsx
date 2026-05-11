@@ -781,7 +781,16 @@ function ActivityChart() {
           {total > 0 ? `+${total.toLocaleString()} XP` : 'אין פעילות עדיין'}
         </span>
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" width="100%" style={{ maxWidth: W, display: 'block', height: 'auto', overflow: 'visible' }}>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        preserveAspectRatio="xMidYMid meet"
+        width="100%"
+        role="img"
+        aria-label={total > 0
+          ? `תרשים פעילות השבוע — סה"כ ${total.toLocaleString()} XP על פני 7 ימים`
+          : 'תרשים פעילות השבוע — אין פעילות עדיין'}
+        style={{ maxWidth: W, display: 'block', height: 'auto', overflow: 'visible' }}>
+        <title>{total > 0 ? `+${total.toLocaleString()} XP בשבוע האחרון` : 'אין פעילות בשבוע האחרון'}</title>
         <defs>
           <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="rgba(212,175,55,0.45)" />

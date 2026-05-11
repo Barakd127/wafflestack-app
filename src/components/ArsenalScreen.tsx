@@ -242,8 +242,10 @@ export default function ArsenalScreen() {
         {/* Topic dropdown — pushed to the start (RTL: visually left) */}
         {presentTopics.length > 0 && (
           <select
+            dir="rtl"
             value={topicFilter}
             onChange={e => setTopicFilter(e.target.value as FilterTopic)}
+            aria-label="סינון לפי נושא"
             style={{
               marginInlineStart: 'auto',
               background: 'rgba(255,255,255,0.6)',
@@ -251,11 +253,13 @@ export default function ArsenalScreen() {
               borderRadius: 18, padding: '8px 14px',
               fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_DARK,
               cursor: 'pointer',
+              textAlign: 'right',
+              minHeight: 44,
             }}
           >
-            <option value="all">כל הנושאים</option>
+            <option value="all" dir="rtl">כל הנושאים</option>
             {presentTopics.map(t => (
-              <option key={t} value={t}>{TOPIC_LABELS[t] || t}</option>
+              <option key={t} value={t} dir="rtl">{TOPIC_LABELS[t] || t}</option>
             ))}
           </select>
         )}

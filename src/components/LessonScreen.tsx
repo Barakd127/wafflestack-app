@@ -81,7 +81,10 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
     const payload = kind === 'equation'
       ? { type: 'ws-add-node', kind, latex: text, text, connectMode }
       : { type: 'ws-add-node', kind, text, connectMode }
-    try { win.postMessage(payload, '*'); return true } catch { return false }
+    // Use window.location.origin instead of '*' so the postMessage only
+    // reaches our own iframe (same-origin /mindmap.html). Prevents leaking
+    // payload if iframe is ever swapped to a foreign URL.
+    try { win.postMessage(payload, window.location.origin); return true } catch { return false }
   }
 
   // Confirm the chooser: complete the pending insert with the user's choice.

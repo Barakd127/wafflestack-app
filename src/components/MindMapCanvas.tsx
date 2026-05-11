@@ -1,11 +1,14 @@
 import React, { useEffect, useRef } from 'react'
-import Tooltip from './Tooltip'
 import { registerTourRef } from './CoachmarkTour'
 
 // MindMapCanvas — wraps the full xmind-replica v18 mind map as an iframe.
 // The v18 HTML lives at /mindmap.html (WaffleStack public/ folder).
 // All features: equations (KaTeX), tables, sticky notes, SVG connections,
 // subtree-aware layout, collapsible nodes, pan/zoom, drag, themes.
+//
+// Header strip REMOVED in Phase 2.4 — the iframe's own topbar already
+// has "← דף הבית" so we no longer duplicate it here. Wrapper is now a
+// pure shell that hosts the iframe full-bleed.
 
 interface MindMapCanvasProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d' | 'split-mindmap') => void
@@ -17,20 +20,17 @@ const SR_ONLY: React.CSSProperties = {
   overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0,
 }
 
-const MindMapCanvas = ({ onViewChange }: MindMapCanvasProps) => {
+const MindMapCanvas = ({ onViewChange: _onViewChange }: MindMapCanvasProps) => {
   // ws-go-home / ws-split / ws-theme messages from inside the iframe are
-  // now handled by App.tsx (single global listener). Keeping MindMapCanvas
+  // handled by App.tsx (single global listener). Keeping MindMapCanvas
   // free of cross-frame coupling makes it work identically when embedded
   // in SplitLayout's right-tab pane.
-  useEffect(() => { /* listener moved to App.tsx */ }, [onViewChange])
-
-  const backBtnRef = useRef<HTMLButtonElement>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
-    const cleanups = [
-      registerTourRef('back-btn', backBtnRef as React.RefObject<HTMLElement | null>),
-    ]
-    return () => cleanups.forEach(c => c())
+    // Register iframe ref for tour anchoring (replaces previous back-btn ref).
+    const cleanup = registerTourRef('mindmap-frame', iframeRef as React.RefObject<HTMLElement | null>)
+    return () => cleanup()
   }, [])
 
   return (
@@ -46,47 +46,10 @@ const MindMapCanvas = ({ onViewChange }: MindMapCanvasProps) => {
       }}
     >
       <h1 style={SR_ONLY}>מפת חשיבה — WaffleStack</h1>
-      {/* Sticky back bar — z-index higher than iframe so it never gets hidden */}
-      <header
-        style={{
-          height: 44,
-          background: 'rgba(13,13,26,0.97)',
-          borderBottom: '1px solid #2a2a3d',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 14px',
-          gap: 12,
-          flexShrink: 0,
-          position: 'sticky',
-          top: 0,
-          zIndex: 1000,
-          boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
-        }}
-      >
-        <Tooltip label="חזרה" description="חזור לדף הראשי">
-          <button
-            ref={backBtnRef}
-            onClick={() => onViewChange('study')}
-            aria-label="חזרה לדף הבית"
-            style={{
-              background: 'rgba(108,99,255,0.22)',
-              border: '1px solid #6c63ff',
-              color: '#a5b4fc',
-              borderRadius: 8,
-              padding: '6px 16px',
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: 700,
-              fontFamily: 'inherit',
-            }}
-          >
-            ← דף הבית
-          </button>
-        </Tooltip>
-      </header>
 
-      {/* v18 mind map — full remaining height */}
+      {/* v18 mind map — full screen, header strip removed (iframe topbar has back button) */}
       <iframe
+        ref={iframeRef}
         src="mindmap.html"
         title="מפת חשיבה — קנבס אינטראקטיבי"
         style={{

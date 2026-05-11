@@ -164,6 +164,8 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 .node-toggle{position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(0,0,0,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:white;z-index:5;opacity:0;transition:opacity .15s;user-select:none}
 .node-wrap:hover .node-toggle{opacity:1}
 .node-wrap.collapsed .node-toggle{opacity:.8;background:rgba(212,175,55,.5)}
+/* Touch devices have no hover — surface the collapse handle by default (skill ux Touch HIGH) */
+@media (pointer:coarse){.node-toggle{opacity:.7}}
 
 /* ── Canvas Capsule (Study Hub glassmorphic style) ── */
 .cn-outer{position:absolute;z-index:1}
