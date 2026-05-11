@@ -1128,23 +1128,23 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
             {/* Connector line */}
             <div style={{ position: 'absolute', left: '10%', right: '10%', top: 28, height: 1, border: '1px solid #F4C52E', zIndex: 0 }} />
 
-            {/* Stage: ממוצע (הושלם) */}
+            {/* Stage: ממוצע (הושלם) — satisfying green check */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 1 }}>
               <div style={{
-                width: 35, height: 35,
-                background: 'rgba(22,41,70,0.4)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: 24,
-                transform: 'matrix(1,0,0,-1,0,0)',
-                boxShadow: '0px 3px 5.8px rgba(31,41,55,0.25)',
+                width: 38, height: 38,
+                background: 'linear-gradient(135deg, #34A853 0%, #22833F 100%)',
+                borderRadius: '50%',
+                boxShadow: '0 4px 12px rgba(52,168,83,0.4), inset 0 1px 0 rgba(255,255,255,0.25)',
+                border: '2px solid rgba(255,255,255,0.85)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M2 8l4 4 8-8" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                {/* Proper-orientation check ✓ (no Y-flip) */}
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8.5l3.2 3.2L13 4.5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 14, color: TEXT_DARK, textAlign: 'center' }}>ממוצע</div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT }}>(הושלם)</div>
+              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 14, color: TEXT_DARK, textAlign: 'center', fontWeight: 600 }}>ממוצע</div>
+              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: '#22833F', fontWeight: 600 }}>✓ הושלם</div>
             </div>
 
             {/* Stage: חציון ושכיח (עכשיו) */}

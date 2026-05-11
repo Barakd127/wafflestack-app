@@ -120,14 +120,17 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--ls-gold);
-  padding: 6px 14px;
+  /* Darker text + heavier weight + slightly larger so the badge reads
+     clearly against the pale blue gradient hero. Previous --ls-gold (#B8960C)
+     was washed out at this contrast ratio. */
+  color: #6B4E00;
+  padding: 7px 16px;
   border-radius: 100px;
-  border: 1px solid var(--ls-glass-border-gold);
-  background: var(--ls-gold-soft);
+  border: 1.5px solid rgba(184, 150, 12, 0.55);
+  background: rgba(255, 247, 220, 0.9);
 }
 
 /* === Section layout === */
