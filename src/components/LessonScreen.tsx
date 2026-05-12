@@ -116,21 +116,43 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
   const onMouseDown = (e: React.MouseEvent) => {
     draggingRef.current = true
     e.preventDefault()
-    const onMove = (ev: MouseEvent) => {
+    const updateFromClientX = (clientX: number) => {
       if (!draggingRef.current || !containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
       // RTL: the mind map is on the LEFT (visually) but in DOM order it's first child;
       // because the wrapper is dir="ltr" the percentage maps directly to clientX.
-      const pct = ((ev.clientX - rect.left) / rect.width) * 100
+      const pct = ((clientX - rect.left) / rect.width) * 100
       setSplitPct(Math.max(20, Math.min(70, pct)))
+    }
+    const onMove = (ev: MouseEvent) => updateFromClientX(ev.clientX)
+    const onTouchMove = (ev: TouchEvent) => {
+      if (ev.touches.length < 1) return
+      ev.preventDefault()
+      updateFromClientX(ev.touches[0].clientX)
     }
     const onUp = () => {
       draggingRef.current = false
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', onUp)
+      window.removeEventListener('touchcancel', onUp)
     }
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
+    window.addEventListener('touchmove', onTouchMove, { passive: false })
+    window.addEventListener('touchend', onUp)
+    window.addEventListener('touchcancel', onUp)
+  }
+
+  // Touch start handler for the splitter handle (mirrors onMouseDown).
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return
+    draggingRef.current = true
+    const startX = e.touches[0].clientX
+    // Bootstrap the move loop by synthesising an initial move
+    const evInit = { clientX: startX, preventDefault: () => {} } as React.MouseEvent
+    onMouseDown(evInit)
   }
 
   useEffect(() => {
@@ -493,9 +515,13 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
             own iframe, the user knows what they're looking at. */}
       </div>
 
-      {/* Resize handle */}
+      {/* Resize handle — mouse + touch */}
       <div
         onMouseDown={onMouseDown}
+        onTouchStart={onTouchStart}
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="גרור לשינוי רוחב פאנל המפה"
         title="גרור לשינוי הרוחב"
         style={{
           width: 5, flexShrink: 0,

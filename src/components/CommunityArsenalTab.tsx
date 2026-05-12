@@ -166,14 +166,39 @@ export default function CommunityArsenalTab() {
       </div>
 
       {error && (
-        <div style={{
-          background: 'rgba(239,68,68,0.12)', color: '#b91c1c',
-          border: '1px solid rgba(239,68,68,0.35)',
-          borderRadius: 12, padding: '10px 14px',
-          marginBottom: 12, fontSize: 13,
-          fontFamily: "'Rubik', sans-serif",
-        }}>
-          ⚠️ {error}
+        <div
+          role="alert"
+          style={{
+            background: 'rgba(239,68,68,0.12)', color: '#b91c1c',
+            border: '1px solid rgba(239,68,68,0.35)',
+            borderRadius: 12, padding: '10px 14px',
+            marginBottom: 12, fontSize: 13,
+            fontFamily: "'Rubik', sans-serif",
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
+          }}
+        >
+          <span>⚠️ {error}</span>
+          <button
+            onClick={() => {
+              // Re-fire the same fetch effect by bumping a no-op state (filter trio)
+              setError(null)
+              setLoading(true)
+              fetchFeed({
+                kind: kindFilter === 'all' ? undefined : kindFilter,
+                topicId: topicFilter === 'all' ? undefined : topicFilter,
+                sort,
+              }).then(res => { setEntries(res.entries); setError(res.error ?? null); setLoading(false) })
+            }}
+            style={{
+              background: '#fff', color: '#b91c1c',
+              border: '1.5px solid rgba(239,68,68,0.5)',
+              borderRadius: 999, padding: '6px 14px',
+              fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700,
+              cursor: 'pointer', minHeight: 36,
+            }}
+          >
+            ↻ נסה שוב
+          </button>
         </div>
       )}
 

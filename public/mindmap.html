@@ -1009,6 +1009,27 @@ function mmRender(){
   clearTimeout(_mmSaveTimer);
   _mmSaveTimer = setTimeout(function(){ try{ localStorage.setItem(MM_SAVE_KEY, JSON.stringify(MM)); }catch(e){} }, 600);
 
+  // Empty-state hint: when the map has only the root node (or fewer), show
+  // an onboarding tip so first-time users know what to do.
+  try {
+    const rootNode = MM.root && MM.nodes ? MM.nodes[MM.root] : null;
+    const childCount = rootNode && Array.isArray(rootNode.childIds) ? rootNode.childIds.length : 0;
+    let hint = document.getElementById('mm-empty-hint');
+    if (childCount === 0) {
+      if (!hint) {
+        hint = document.createElement('div');
+        hint.id = 'mm-empty-hint';
+        hint.setAttribute('role', 'status');
+        hint.setAttribute('aria-live', 'polite');
+        hint.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(31,62,108,.85);color:#fff;border:1.5px solid #D4AF37;border-radius:14px;padding:18px 26px;font-family:Rubik,sans-serif;font-size:14px;line-height:1.7;text-align:center;max-width:340px;z-index:400;box-shadow:0 8px 30px rgba(0,0,0,.4);pointer-events:none;backdrop-filter:blur(8px)';
+        hint.innerHTML = '<div style="font-size:24px;margin-bottom:8px">🗺️</div><div style="font-weight:700;margin-bottom:6px">המפה שלך ריקה</div><div style="opacity:.85;font-weight:400">לחץ על <b>הוסף ▾</b> בסרגל למעלה כדי להוסיף ענף ראשון</div>';
+        document.body.appendChild(hint);
+      }
+    } else if (hint) {
+      hint.remove();
+    }
+  } catch (e) { /* non-blocking */ }
+
   const vp=document.getElementById('viewport');
   const svg=document.getElementById('svg-layer');
   // v17: SVG is inside viewport — clear nodes but keep svg; then clear svg separately
@@ -1136,31 +1157,54 @@ function mmRender(){
       div.appendChild(noteBtn);
     }
 
-    // ── Node dragging (move nodes by dragging) ──
+    // ── Node dragging (move nodes by dragging) — mouse + touch parity ──
     (function(nodeObj,nodeEl){
-      nodeEl.addEventListener('mousedown',ev=>{
-        if(ev.button!==0)return;
-        if(ev.target.closest('.node-toggle,button,input'))return;
-        ev.stopPropagation();
+      function startDrag(sx, sy, isTouch){
         MM.sel=nodeObj.id;
-        const sx=ev.clientX,sy=ev.clientY;
         const ox=nodeObj.x,oy=nodeObj.y;
         let moved=false;
-        function onMove(me){
-          const dx=(me.clientX-sx)/MM.zoom,dy=(me.clientY-sy)/MM.zoom;
+        function applyMove(cx, cy){
+          const dx=(cx-sx)/MM.zoom,dy=(cy-sy)/MM.zoom;
           if(!moved&&Math.hypot(dx,dy)<4)return;
           moved=true;
           nodeObj.x=ox+dx;nodeObj.y=oy+dy;
           mmRender();
         }
+        function onMove(me){ applyMove(me.clientX, me.clientY); }
+        function onTouchMove(te){
+          if(te.touches.length<1)return;
+          te.preventDefault();
+          applyMove(te.touches[0].clientX, te.touches[0].clientY);
+        }
         function onUp(){
           document.removeEventListener('mousemove',onMove);
           document.removeEventListener('mouseup',onUp);
+          document.removeEventListener('touchmove',onTouchMove);
+          document.removeEventListener('touchend',onUp);
+          document.removeEventListener('touchcancel',onUp);
           if(moved){ mmPushHistory(); if(typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('drag-node'); }
         }
-        document.addEventListener('mousemove',onMove);
-        document.addEventListener('mouseup',onUp);
+        if(isTouch){
+          document.addEventListener('touchmove',onTouchMove,{passive:false});
+          document.addEventListener('touchend',onUp);
+          document.addEventListener('touchcancel',onUp);
+        } else {
+          document.addEventListener('mousemove',onMove);
+          document.addEventListener('mouseup',onUp);
+        }
+      }
+      nodeEl.addEventListener('mousedown',ev=>{
+        if(ev.button!==0)return;
+        if(ev.target.closest('.node-toggle,button,input'))return;
+        ev.stopPropagation();
+        startDrag(ev.clientX, ev.clientY, false);
       });
+      nodeEl.addEventListener('touchstart',ev=>{
+        if(ev.target.closest('.node-toggle,button,input'))return;
+        if(ev.touches.length!==1)return;
+        ev.stopPropagation();
+        startDrag(ev.touches[0].clientX, ev.touches[0].clientY, true);
+      },{passive:true});
     })(n,div);
 
     vp.appendChild(div);

@@ -410,8 +410,12 @@ function ArsenalCard({
       style={{
         background: 'var(--sh-glass-card, rgba(255,255,255,0.85))',
         borderRadius: 18,
-        boxShadow: 'var(--sh-card-shadow, 0 6px 22px rgba(31,62,108,0.15))',
-        border: `1px solid ${entry.pinned ? '#f59e0b80' : 'rgba(255,255,255,0.5)'}`,
+        // Pinned border: 2px gold ring with shadow so it stays visible in both
+        // light and dark mode (was a translucent #f59e0b80 invisible in dark).
+        border: entry.pinned ? '2px solid #D4AF37' : '1px solid rgba(255,255,255,0.5)',
+        boxShadow: entry.pinned
+          ? '0 6px 22px rgba(31,62,108,0.15), 0 0 0 3px rgba(212,175,55,0.18)'
+          : 'var(--sh-card-shadow, 0 6px 22px rgba(31,62,108,0.15))',
         padding: 16,
         position: 'relative',
         animationDelay: `${Math.min(indexInList * 50, 600)}ms`,
@@ -716,7 +720,7 @@ function EmptyState({ hasEntries }: { hasEntries: boolean }) {
       <div style={{ fontSize: 18, color: TEXT_DARK, fontWeight: 600, marginBottom: 8 }}>
         {hasEntries ? 'אין פריטים שתואמים את הסינון' : 'הארסנל שלך עדיין ריק'}
       </div>
-      <div style={{ fontSize: 14, lineHeight: 1.7, maxWidth: 460 }}>
+      <div style={{ fontSize: 14, lineHeight: 1.7, maxWidth: 'clamp(280px, 80vw, 460px)', textWrap: 'balance', textAlign: 'center' } as React.CSSProperties}>
         {hasEntries
           ? 'נסה לשנות את סוג הפריט או את הנושא, או הוסף פריט חדש.'
           : 'תפוס קאצ\'ים, טריקים וטיפים בזמן הלימוד —\nסמן טקסט בשיעור וייפתח כפתור "שמור לארסנל", או לחץ על "🎯 שמור כקאצ׳" אחרי שאלה שטעית בה.'}

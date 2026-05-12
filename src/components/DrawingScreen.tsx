@@ -60,15 +60,38 @@ export default function DrawingScreen({ userId, onBack }: DrawingScreenProps) {
 
   // Debounce save so we don't thrash localStorage on every brush-stroke.
   const saveTimerRef = useState<{ t: ReturnType<typeof setTimeout> | null }>(() => ({ t: null }))[0]
+  const [savedFlash, setSavedFlash] = useState(false)
   const onChange = useCallback((elements: readonly unknown[], appState: Record<string, unknown>) => {
     if (saveTimerRef.t) clearTimeout(saveTimerRef.t)
     saveTimerRef.t = setTimeout(() => {
       saveScene(userId, { elements: [...elements], appState: { viewBackgroundColor: appState?.viewBackgroundColor as string } })
+      setSavedFlash(true)
+      setTimeout(() => setSavedFlash(false), 1400)
     }, 600)
   }, [userId, saveTimerRef])
 
   return (
     <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', background: '#1a1a1a', zIndex: 100 }}>
+      {/* Auto-save toast — appears 0.6s after stroke commit, fades after 1.4s */}
+      {savedFlash && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            position: 'absolute', bottom: 20, right: 20, zIndex: 60,
+            background: 'rgba(52,168,83,0.95)', color: '#fff',
+            border: '1.5px solid rgba(255,255,255,0.3)',
+            borderRadius: 22, padding: '8px 18px',
+            fontSize: 14, fontWeight: 700, fontFamily: "'Rubik', sans-serif",
+            boxShadow: '0 6px 18px rgba(52,168,83,0.45)',
+            pointerEvents: 'none',
+            animation: 'savedFlashFade 1.4s ease-out',
+          }}
+        >
+          ✓ נשמר
+        </div>
+      )}
+      <style>{`@keyframes savedFlashFade{0%{opacity:0;transform:translateY(6px)}15%{opacity:1;transform:translateY(0)}80%{opacity:1}100%{opacity:0;transform:translateY(-4px)}}`}</style>
       <button
         onClick={onBack}
         aria-label="חזרה לדף הבית — יציאה מלוח הציור"
