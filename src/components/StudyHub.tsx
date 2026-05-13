@@ -1,5 +1,19 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react'
 import { useLearningStore } from '../store/learningStore'
+
+// Lazy-load interactive graph components (per-topic visualizations).
+// Each component is ~300-450 LOC of pure SVG + KaTeX; lazy keeps the bundle
+// lean and only ships the graph when the user actually opens that topic.
+const MeanInteractive = lazy(() => import('./graphs/MeanInteractive'))
+const StdDevInteractive = lazy(() => import('./graphs/StdDevInteractive'))
+const CLTInteractive = lazy(() => import('./graphs/CLTInteractive'))
+
+// building_id → interactive component map. Add entries as new graphs ship.
+const INTERACTIVE_GRAPH_BY_TOPIC: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
+  power: MeanInteractive,        // ממוצע (Mean)
+  traffic: StdDevInteractive,    // סטיית תקן (Std Dev)
+  clt: CLTInteractive,           // משפט הגבול המרכזי (CLT)
+}
 import { initializeUser, getCurrentUser, loginUser, registerUser, logoutUser, onAuthStateChange, type User } from '../stores/authStore'
 import { loadProgress, recordQuizSession, saveCanvasNotes, type QuizAnswer, type UserProgress } from '../stores/progressStore'
 import quizBankData from '../data/quiz-bank.json'
@@ -2217,12 +2231,22 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
           />
         )}
         {internalView === 'lesson' && selectedTopic && (
-          <LessonScreen
-            topicId={selectedTopic}
-            onStartQuiz={() => setInternalView('quiz-intro')}
-            onBack={() => setInternalView('topics')}
-            onComplete={(id) => useLearningStore.getState().completeLesson(id)}
-          />
+          <>
+            <LessonScreen
+              topicId={selectedTopic}
+              onStartQuiz={() => setInternalView('quiz-intro')}
+              onBack={() => setInternalView('topics')}
+              onComplete={(id) => useLearningStore.getState().completeLesson(id)}
+            />
+            {INTERACTIVE_GRAPH_BY_TOPIC[selectedTopic] && (
+              <Suspense fallback={<div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>טוען גרף אינטראקטיבי…</div>}>
+                {(() => {
+                  const GraphComponent = INTERACTIVE_GRAPH_BY_TOPIC[selectedTopic]
+                  return <GraphComponent />
+                })()}
+              </Suspense>
+            )}
+          </>
         )}
         {internalView === 'arsenal' && <ArsenalScreen />}
         {internalView === 'quiz-intro' && selectedTopic && (
