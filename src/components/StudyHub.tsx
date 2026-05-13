@@ -29,6 +29,11 @@ import { StreakCalendar } from './motivation/StreakCalendar'
 import { LeadMeasureCard } from './motivation/LeadMeasureCard'
 import { TwoMinChallengeCard } from './motivation/TwoMinChallengeCard'
 
+// Lazy-load the rotating 3D hero used on the landing page so we can reuse
+// it inside the home "כמעט שם" card instead of the static temple PNG.
+// HeroScene exports a Canvas; we wrap it in a Suspense + fixed-size div.
+const HeroScene = lazy(() => import('../landing/three/HeroScene').then(m => ({ default: m.HeroScene })))
+
 // building_id → interactive component map. Add entries as new graphs ship.
 const INTERACTIVE_GRAPH_BY_TOPIC: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
   power: MeanInteractive,                  // ממוצע (Mean)
@@ -1109,14 +1114,13 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
               נשארו לך רק 2 שאלות בקורס<br />סטטיסטיקה תיאורית
             </div>
-            {/* Building photo */}
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 16, minHeight: 120 }}>
-              <img
-                src={`${import.meta.env.BASE_URL}building-figma.png`}
-                alt="building"
-                style={{ maxHeight: 120, maxWidth: '100%', objectFit: 'contain', borderRadius: 12, filter: 'drop-shadow(0 4px 12px rgba(31,41,55,0.2))' }}
-                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
-              />
+            {/* Rotating 3D hero — same Kenney-building cycler as the landing
+                page, scaled to ~150px tall to fit the home card. Replaces the
+                old static temple PNG with the live cycling preview. */}
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 16, minHeight: 150, height: 150, borderRadius: 12, overflow: 'hidden' }}>
+              <Suspense fallback={<div style={{ color: 'rgba(31,41,55,0.4)', fontSize: 12 }}>טוען…</div>}>
+                <HeroScene />
+              </Suspense>
             </div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginBottom: 8, textAlign: 'right' }}>המבנה הבא בעירך</div>
             {/* Progress bar */}

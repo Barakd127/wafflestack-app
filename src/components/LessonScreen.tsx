@@ -386,11 +386,14 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
                   className="ws-lesson-bullet"
                   style={{
                     // Parent has dir="rtl"; flex-direction: row places the
-                    // first child (the number badge) on the RIGHT — which is
-                    // what we want in Hebrew. row-reverse would push it left.
-                    display: 'flex', flexDirection: 'row', gap: 16,
+                    // first child (the accent chevron) on the RIGHT in Hebrew.
+                    // No more numbered-circle chips — those read as multiple-
+                    // choice quiz options. A small gold ▸ + left-border accent
+                    // makes the bullet feel like a study-guide point.
+                    display: 'flex', flexDirection: 'row', gap: 14,
                     alignItems: 'flex-start',
                     background: 'linear-gradient(135deg, rgba(99,102,241,0.045), rgba(99,102,241,0.015))',
+                    borderInlineStart: '3px solid #FFD700',
                     border: '1px solid rgba(127,155,217,0.20)',
                     borderRadius: 14, padding: '14px 18px',
                     boxShadow: '0 2px 8px rgba(31,62,108,0.04)',
@@ -401,16 +404,13 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
                 >
                   <div style={{
                     flexShrink: 0,
-                    width: 34, height: 34, borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #5b8bff, #6c63ff)',
-                    color: '#fff', display: 'flex',
+                    width: 22, height: 22,
+                    color: '#FFD700', display: 'flex',
                     alignItems: 'center', justifyContent: 'center',
-                    fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 15,
-                    boxShadow: '0 2px 6px rgba(91,139,255,0.45)',
-                    marginTop: 1,
-                  }}>
-                    {i + 1}
-                  </div>
+                    fontSize: 18, fontWeight: 700,
+                    marginTop: 4,
+                    transform: 'rotate(180deg)',
+                  }} aria-hidden="true">▸</div>
                   <div style={{
                     flex: 1, minWidth: 0,
                     fontSize: 18.5, lineHeight: 1.85, color: TEXT_DARK,

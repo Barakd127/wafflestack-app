@@ -236,10 +236,11 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 #wb-fs-bar::-webkit-scrollbar{height:3px}
 #wb-fs-bar::-webkit-scrollbar-thumb{background:rgba(212,175,55,.35);border-radius:2px}
 #wb-node-title{color:rgba(255,255,255,.45);font-size:11px;margin-left:auto;flex-shrink:0}
-.wb-sep{width:1px;height:20px;background:rgba(255,255,255,.12);margin:0 2px;flex-shrink:0}
+.wb-sep{width:1px;height:18px;background:rgba(255,255,255,.18);margin:0 3px;flex-shrink:0}
 
 /* Tool buttons */
-.wbt{height:30px;padding:0 9px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.9);border-radius:5px;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:4px;flex-shrink:0;font-weight:500}
+.wbt{height:30px;padding:0 8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.9);border-radius:5px;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:4px;flex-shrink:0;font-weight:500;min-width:30px;box-sizing:border-box}
+@media (max-width:900px){.wbt{padding:0 6px;font-size:11px;min-width:26px;height:28px}.wb-sep{margin:0 2px}}
 .wbt:hover{background:rgba(212,175,55,.25);border-color:rgba(212,175,55,.5);color:#D4AF37}
 .wbt.on{background:rgba(37,74,159,.7);border-color:rgba(127,155,217,.6);color:#D4AF37;box-shadow:0 0 10px rgba(37,74,159,.35)}
 
@@ -666,7 +667,7 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
     <button class="wbt" data-tool="eraser" onclick="wbTool('eraser')" title="Eraser [E]">⌫</button>
     <button class="wbt" onclick="wbOpenEquationModal()" title="Insert equation">∑</button>
     <div class="wb-sep"></div>
-    <select class="wbt" onchange="wbApplyTemplate(this.value);this.value=''" style="padding:0 6px;min-width:106px;cursor:pointer" title="Load a template into the canvas">
+    <select class="wbt" onchange="wbApplyTemplate(this.value);this.value=''" style="padding:0 6px;min-width:90px;max-width:120px;cursor:pointer" title="Load a template into the canvas">
       <option value="">📐 Templates</option>
       <option value="venn">Venn Diagram</option>
       <option value="matrix">2×2 Matrix</option>
@@ -3099,12 +3100,11 @@ function applyTemplate(name){
   // but visually placed near the anchor so they stay close to existing tree.
   const cn=mmNode('canvas',def.title,pos.x,pos.y,MM.root,color);
   try{if(def.sceneFn)cn.scene=def.sceneFn();}catch(e){console.warn('Template scene error:',e);}
-  const branchSpacing=60;
-  (def.branches||[]).forEach((t,i)=>{
-    const bx=cn.x+cn.W+200;
-    const by=cn.y+cn.H/2+(i-(def.branches.length-1)/2)*branchSpacing;
-    mmNode('branch',t,bx,by,cn.id,mmPickColor(cn.id));
-  });
+  // v18: Auto-spawn of side-branch nodes ('μ = mean', 'Set A', etc.) removed.
+  // User flagged them as visual clutter — the template's canvas already shows
+  // the relevant labels in the diagram itself; spawning duplicate mindmap
+  // nodes was confusing. Branches list in TEMPLATES kept for documentation
+  // / future opt-in expansion.
   MM.sel=cn.id;mmPushHistory();mmRender();
   // Phase 2 follow-up: don't fit-all-nodes (which zooms out, hiding the new
   // template). Smooth-pan to the new canvas instead, bumping zoom up if
