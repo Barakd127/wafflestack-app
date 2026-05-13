@@ -14,8 +14,9 @@ import TutorialOverlay from './components/TutorialOverlay'
 import DrawingScreen from './components/DrawingScreen'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
+const UnifiedNotebook = lazy(() => import('./components/notebook/UnifiedNotebook'))
 
-type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing'
+type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook'
 
 function App() {
   const [activeView, setActiveView] = useState<View>(() => {
@@ -26,6 +27,7 @@ function App() {
     if (h === '#split') return 'split'
     if (h === '#split-mindmap') return 'split-mindmap'
     if (h === '#mindmap') return 'mindmap'
+    if (h === '#notebook') return 'notebook'
     // First-time / no-hash visitor → landing page. Returning users keep their
     // hash route (#study, #mindmap, etc.) so refreshing stays in-app.
     return 'landing'
@@ -90,6 +92,7 @@ function App() {
       const h = window.location.hash
       if (h === '#landing') setActiveView('landing')
       else if (h === '#mindmap') setActiveView('mindmap')
+      else if (h === '#notebook') setActiveView('notebook')
       else if (h === '#split') setActiveView('split')
       else if (h === '#split-mindmap') setActiveView('split-mindmap')
       else if (h === '#view-wafflecity' || h === '#city' || h === '#topics' || h === '#score' || h.startsWith('#challenge/')) setActiveView('wafflecity')
@@ -106,6 +109,7 @@ function App() {
     else if (activeView === 'split-mindmap') window.location.hash = '#split-mindmap'
     else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
+    else if (activeView === 'notebook') window.location.hash = '#notebook'
   }, [activeView])
 
   // Hide the floating dark-mode toggle in views where the iframe (mindmap or
@@ -312,6 +316,27 @@ function App() {
           userId={(typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default'}
           onBack={() => setActiveView('study')}
         />
+      )}
+
+      {activeView === 'notebook' && (
+        <Suspense fallback={<div style={{ background: '#0B1B3E', width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFD700' }}>טוען מחברת…</div>}>
+          <div style={{ position: 'fixed', inset: 0, background: 'linear-gradient(135deg, #0B1B3E 0%, #1E3A8A 100%)' }}>
+            <button
+              onClick={() => setActiveView('study')}
+              style={{
+                position: 'fixed', top: 16, insetInlineStart: 16, zIndex: 1000,
+                background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                color: '#0B1B3E', border: 'none', borderRadius: 20,
+                padding: '8px 18px', fontWeight: 700, fontSize: 14,
+                cursor: 'pointer', boxShadow: '0 4px 14px rgba(255,215,0,0.45)',
+              }}
+              aria-label="חזרה לדף הבית"
+            >
+              ← דף הבית
+            </button>
+            <UnifiedNotebook />
+          </div>
+        </Suspense>
       )}
 
       {loggedIn && <TutorialOverlay />}

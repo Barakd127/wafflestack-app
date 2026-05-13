@@ -7,12 +7,48 @@ import { useLearningStore } from '../store/learningStore'
 const MeanInteractive = lazy(() => import('./graphs/MeanInteractive'))
 const StdDevInteractive = lazy(() => import('./graphs/StdDevInteractive'))
 const CLTInteractive = lazy(() => import('./graphs/CLTInteractive'))
+const MedianInteractive = lazy(() => import('./graphs/MedianInteractive'))
+const ZScoreInteractive = lazy(() => import('./graphs/ZScoreInteractive'))
+const VarianceInteractive = lazy(() => import('./graphs/VarianceInteractive'))
+const NormalDistInteractive = lazy(() => import('./graphs/NormalDistributionInteractive'))
+const CorrelationInteractive = lazy(() => import('./graphs/CorrelationInteractive'))
+const IQRInteractive = lazy(() => import('./graphs/IQRInteractive'))
+const RegressionInteractive = lazy(() => import('./graphs/RegressionInteractive'))
+const ConfidenceIntervalInteractive = lazy(() => import('./graphs/ConfidenceIntervalInteractive'))
+const PValueInteractive = lazy(() => import('./graphs/PValueInteractive'))
+const TTestInteractive = lazy(() => import('./graphs/TTestInteractive'))
+const BinomialInteractive = lazy(() => import('./graphs/BinomialInteractive'))
+const HypothesisTestingInteractive = lazy(() => import('./graphs/HypothesisTestingInteractive'))
+const SamplingInteractive = lazy(() => import('./graphs/SamplingInteractive'))
+const ANOVAInteractive = lazy(() => import('./graphs/ANOVAInteractive'))
+const ChiSquareInteractive = lazy(() => import('./graphs/ChiSquareInteractive'))
+
+// Motivation AI components — Atomic Habits / Deep Work primitives.
+// Wired into the home screen so the streak + lead-measure are always visible.
+import { StreakCalendar } from './motivation/StreakCalendar'
+import { LeadMeasureCard } from './motivation/LeadMeasureCard'
+import { TwoMinChallengeCard } from './motivation/TwoMinChallengeCard'
 
 // building_id → interactive component map. Add entries as new graphs ship.
 const INTERACTIVE_GRAPH_BY_TOPIC: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
-  power: MeanInteractive,        // ממוצע (Mean)
-  traffic: StdDevInteractive,    // סטיית תקן (Std Dev)
-  clt: CLTInteractive,           // משפט הגבול המרכזי (CLT)
+  power: MeanInteractive,                  // ממוצע (Mean)
+  housing: MedianInteractive,              // חציון (Median)
+  traffic: StdDevInteractive,              // סטיית תקן (Std Dev)
+  hospital: NormalDistInteractive,         // התפלגות נורמלית
+  school: SamplingInteractive,             // מדגם (Sampling)
+  bank: RegressionInteractive,             // רגרסיה
+  market: CorrelationInteractive,          // קורלציה
+  'city-hall': BinomialInteractive,        // בינום (Binomial)
+  research: HypothesisTestingInteractive,  // מבחן השערות
+  news: ConfidenceIntervalInteractive,     // רווח סמך (CI)
+  zscore: ZScoreInteractive,               // ציון z
+  pvalue: PValueInteractive,               // ערך p
+  anova: ANOVAInteractive,                 // ANOVA
+  ttest: TTestInteractive,                 // T-Test
+  variance: VarianceInteractive,           // שונות
+  chisq: ChiSquareInteractive,             // χ² (Chi-Square)
+  iqr: IQRInteractive,                     // טווח רבעוני
+  clt: CLTInteractive,                     // משפט הגבול המרכזי
 }
 import { initializeUser, getCurrentUser, loginUser, registerUser, logoutUser, onAuthStateChange, type User } from '../stores/authStore'
 import { loadProgress, recordQuizSession, saveCanvasNotes, type QuizAnswer, type UserProgress } from '../stores/progressStore'
@@ -1044,9 +1080,17 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
   const XP_PER_LEVEL = 100
   const level = Math.floor(xp / XP_PER_LEVEL) + 1
   const xpInLevel = xp % XP_PER_LEVEL
+  const topicsMastered = useLearningStore(s => s.completedLessons.length)
   return (
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
       <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+        {/* ── ROW 0: Motivation widgets (streak + lead measure + 2-min) ── */}
+        <div className="ws-motivation-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, alignItems: 'stretch' }}>
+          <StreakCalendar />
+          <LeadMeasureCard topics_mastered={topicsMastered} />
+          <TwoMinChallengeCard topicId="power" onStart={() => onGoLearning()} />
+        </div>
 
         {/* ── ROW 1 ──────────────────────────────────── */}
         <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'stretch' }}>
