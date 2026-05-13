@@ -1,10 +1,14 @@
+/**
+ * LeadMeasureCard — two big numbers: weekly focus minutes + topics mastered.
+ * Light glassmorphism to match StudyHub home cards.
+ */
 import { useMotivationStore } from "../../store/motivationStore";
 
 interface LeadMeasureCardProps {
   topics_mastered: number;
 }
 
-const GOLD = "#FFD700";
+const GOLD = "#D4AF37";
 
 export const LeadMeasureCard = ({ topics_mastered }: LeadMeasureCardProps) => {
   const focusMinutesWeek = useMotivationStore((state) => state.focus_minutes_week);
@@ -15,38 +19,55 @@ export const LeadMeasureCard = ({ topics_mastered }: LeadMeasureCardProps) => {
       dir="rtl"
       aria-label="מדדי התקדמות מובילים"
       style={{
+        background: "var(--sh-glass-card)",
+        backdropFilter: "blur(20px)",
+        boxShadow: "var(--sh-card-shadow)",
         borderRadius: 24,
-        padding: 20,
-        color: "white",
-        background: "linear-gradient(145deg, #0B1B3E 0%, #142A5C 100%)",
-        boxShadow: "0 18px 45px rgba(0,0,0,0.28)",
+        border: "1px solid rgba(255,255,255,0.5)",
+        padding: "22px 22px 18px",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      <h2 style={{ margin: "0 0 16px", fontSize: 20 }}>מדדי השבוע</h2>
+      <h2 style={{
+        margin: "0 0 14px",
+        fontFamily: "'Rubik', sans-serif",
+        fontSize: 18,
+        fontWeight: 700,
+        color: "var(--sh-text-dark)",
+      }}>📊 מדדי השבוע</h2>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10, flex: 1 }}>
         <div
           style={{
-            borderRadius: 18,
-            padding: 16,
-            background: "rgba(255,255,255,0.09)",
-            border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: 16,
+            padding: "14px 12px",
+            background: "rgba(31,62,108,0.05)",
+            border: "1px solid rgba(31,62,108,0.10)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <div style={{ color: GOLD, fontSize: 34, fontWeight: 900 }}>{focusMinutesWeek}</div>
-          <div style={{ opacity: 0.82 }}>דקות פוקוס</div>
+          <div style={{ color: GOLD, fontSize: 32, fontWeight: 900, lineHeight: 1, fontFamily: "'Inter', sans-serif" }}>{focusMinutesWeek}</div>
+          <div style={{ fontSize: 12, color: "var(--sh-text-tip)", marginTop: 6, fontFamily: "'Assistant', sans-serif" }}>דקות פוקוס</div>
         </div>
 
         <div
           style={{
-            borderRadius: 18,
-            padding: 16,
-            background: "rgba(255,255,255,0.09)",
-            border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: 16,
+            padding: "14px 12px",
+            background: "rgba(31,62,108,0.05)",
+            border: "1px solid rgba(31,62,108,0.10)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <div style={{ color: GOLD, fontSize: 34, fontWeight: 900 }}>{safeTopicsMastered}</div>
-          <div style={{ opacity: 0.82 }}>נושאים שנשלחו</div>
+          <div style={{ color: GOLD, fontSize: 32, fontWeight: 900, lineHeight: 1, fontFamily: "'Inter', sans-serif" }}>{safeTopicsMastered}</div>
+          <div style={{ fontSize: 12, color: "var(--sh-text-tip)", marginTop: 6, fontFamily: "'Assistant', sans-serif" }}>נושאים שלמדת</div>
         </div>
       </div>
     </section>
