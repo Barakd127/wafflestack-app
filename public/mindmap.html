@@ -32,7 +32,11 @@ body.light #search-input::placeholder{color:rgba(0,0,0,.4)}
    weird vertical pile-up at narrow widths. Padding-right reserves space
    for the React dark-mode toggle (z-200, fixed top-right of host page)
    so it doesn't obscure tb-left buttons. */
-#topbar{height:52px;background:linear-gradient(135deg,#1F3E6C 0%,#1a3260 100%);display:flex;align-items:center;justify-content:space-between;padding:0 70px 0 14px;color:white;gap:8px;box-shadow:0 4px 16px rgba(31,62,108,.35);position:relative;z-index:200;backdrop-filter:blur(10px);overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap}
+#topbar{height:52px;background:linear-gradient(135deg,#0B1B3E 0%,#1E3A8A 100%);display:flex;align-items:center;justify-content:space-between;padding:0 70px 0 14px;color:white;gap:8px;box-shadow:0 4px 18px rgba(11,27,62,.55),inset 0 -2px 0 rgba(212,175,55,.35);position:relative;z-index:200;backdrop-filter:blur(10px);overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;border-bottom:1px solid rgba(212,175,55,.4)}
+/* Salient "back home" button — top-left UP corner */
+#back-home-btn.tb-btn{height:36px;padding:0 18px;background:linear-gradient(135deg,#FFD700,#FFA500)!important;border:1px solid #FFC107!important;color:#1a1a2e!important;font-weight:700!important;font-size:13px!important;box-shadow:0 4px 14px rgba(255,193,7,.55),0 0 0 2px rgba(255,215,0,.25);transition:transform .15s,box-shadow .15s;letter-spacing:.2px}
+#back-home-btn.tb-btn:hover{transform:scale(1.05);box-shadow:0 6px 22px rgba(255,193,7,.75),0 0 0 3px rgba(255,215,0,.4)}
+body.light #back-home-btn.tb-btn{background:linear-gradient(135deg,#FFD700,#FFA500)!important;color:#1a1a2e!important;border-color:#E6A800!important}
 #topbar::-webkit-scrollbar{height:4px}
 #topbar::-webkit-scrollbar-thumb{background:rgba(212,175,55,.4);border-radius:2px}
 /* ── Ribbon tabs (clustered toolbar) ── */
@@ -537,7 +541,7 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
 <!-- Top bar -->
 <div id="topbar">
   <div class="tb-left">
-    <button class="tb-btn" id="back-home-btn" onclick="wsGoHome()" title="חזרה לדף הבית" style="background:rgba(108,99,255,.25);border-color:rgba(108,99,255,.6);color:#a5b4fc;font-weight:600">← דף הבית</button>
+    <button class="tb-btn" id="back-home-btn" onclick="wsGoHome()" title="חזרה לדף הבית" aria-label="חזרה לדף הבית">← דף הבית</button>
   </div>
   <div class="tb-center">
     <button class="tb-btn" id="nb-toggle-btn" onclick="nbToggle()" title="עבור בין מפת חשיבה למחברת" aria-label="עבור בין מפת חשיבה למחברת">📔 מחברת</button>
@@ -548,13 +552,12 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
     <button class="tb-ribbon-tab" id="rtab-templates" onclick="toggleRibbon('templates')" title="תבניות סטטיסטיות" aria-label="תבניות סטטיסטיות">&#128208; תבניות ▾</button>
     <button class="tb-ribbon-tab" id="rtab-files"     onclick="toggleRibbon('files')"     title="ייצוא, ייבוא, ניקוי" aria-label="ייצוא, ייבוא וניקוי">&#128193; קבצים ▾</button>
     <div class="tb-div"></div>
+    <button class="tb-btn" id="tidy-layout-btn" onclick="mmAutoLayout();mmFitView&&mmFitView()" title="סדר מחדש את הצמתים" aria-label="סדר מחדש את הצמתים" style="background:linear-gradient(135deg,rgba(212,175,55,.85),rgba(255,193,7,.85));border-color:rgba(212,175,55,.9);color:#1a1a2e;font-weight:700">&#128208; סדר מחדש</button>
     <button class="tb-btn" onclick="openSearch()" title="חיפוש (Ctrl+F)" aria-label="חיפוש בצמתי המפה">&#128269;</button>
     <button class="tb-btn" id="pomo-topbar-btn" onclick="pomoToggleWidget()" title="פומודורו" aria-label="טיימר פומודורו">&#127813;</button>
     <button class="tb-btn" onclick="mmTourStart()" title="סיור מודרך" aria-label="התחל סיור מודרך">&#127891;</button>
   </div>
-<div class="tb-right">
-    <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:11px">B</div>
-  </div>
+<div class="tb-right" style="display:none"></div>
 </div>
 
 <!-- Ribbon panel — expands below topbar when a ribbon tab is active -->
