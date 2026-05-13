@@ -895,12 +895,13 @@ function ActivityChart() {
 }
 
 // ── Sidebar ────────────────────────────────────────────────────────────────────
-function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, width = 247 }: {
+function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNotebook, width = 247 }: {
   active: InternalView
   onNav: (v: InternalView) => void
   onGoWorld: () => void
   onGoMindmap: () => void
   onGoDrawing: () => void
+  onGoNotebook: () => void
   width?: number
 }) {
   const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string }> = [
@@ -908,6 +909,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, width = 2
     { id: 'topics',   label: 'אזור למידה',   icon: '📖' },
     { id: 'arsenal',  label: 'הארסנל שלי',   icon: '🎯' },
     { id: null,       label: 'מפת לימוד',    icon: '◫', action: 'mindmap' },
+    { id: null,       label: 'מחברת',        icon: '📓', action: 'notebook' },
     { id: null,       label: 'לוח ציור',     icon: '🎨', action: 'drawing' },
     { id: null,       label: 'העולם שלי',    icon: '🌐', action: 'world' },
   ]
@@ -954,6 +956,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, width = 2
                 if (item.action === 'world') { onGoWorld(); return }
                 if (item.action === 'mindmap') { onGoMindmap(); return }
                 if (item.action === 'drawing') { onGoDrawing(); return }
+                if (item.action === 'notebook') { onGoNotebook(); return }
                 if (item.id !== null) onNav(item.id)
               }}
               title={collapsed ? item.label : undefined}
@@ -2244,6 +2247,7 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
           onGoWorld={() => { onViewChange('3d'); if (isMobile) setMobileSidebarOpen(false) }}
           onGoMindmap={() => { onViewChange('mindmap'); if (isMobile) setMobileSidebarOpen(false) }}
           onGoDrawing={() => { onViewChange('drawing'); if (isMobile) setMobileSidebarOpen(false) }}
+          onGoNotebook={() => { window.location.hash = '#notebook'; if (isMobile) setMobileSidebarOpen(false) }}
           width={isMobile ? 260 : sidebarWidth}
         />
         {/* Sidebar resize handle — on the left edge (RTL: left is outer edge) */}
