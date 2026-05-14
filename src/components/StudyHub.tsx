@@ -1026,14 +1026,16 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
   onGoNotebook: () => void
   width?: number
 }) {
-  const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string }> = [
-    { id: 'home',     label: 'דף הבית',      icon: '⌂' },
-    { id: 'topics',   label: 'אזור למידה',   icon: '📖' },
-    { id: 'arsenal',  label: 'הארסנל שלי',   icon: '🎯' },
-    { id: null,       label: 'מפת לימוד',    icon: '◫', action: 'mindmap' },
-    { id: null,       label: 'מחברת',        icon: '📓', action: 'notebook' },
-    { id: null,       label: 'לוח ציור',     icon: '🎨', action: 'drawing' },
-    { id: null,       label: 'העולם שלי',    icon: '🌐', action: 'world' },
+  // EduCity-style icon chips: each item gets a gradient color theme.
+  // The emoji sits inside a soft rounded pill matching the brand palette.
+  const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string; chipBg: string }> = [
+    { id: 'home',     label: 'דף הבית',      icon: '🏠', chipBg: 'linear-gradient(135deg, #FFD86B 0%, #FF9966 100%)' },
+    { id: 'topics',   label: 'אזור למידה',   icon: '📚', chipBg: 'linear-gradient(135deg, #6EE7F9 0%, #3B82F6 100%)' },
+    { id: 'arsenal',  label: 'הארסנל שלי',   icon: '💎', chipBg: 'linear-gradient(135deg, #C084FC 0%, #7C3AED 100%)' },
+    { id: null,       label: 'מפת לימוד',    icon: '🗺️', chipBg: 'linear-gradient(135deg, #FCA5A5 0%, #EF4444 100%)', action: 'mindmap' },
+    { id: null,       label: 'מחברת',        icon: '📓', chipBg: 'linear-gradient(135deg, #FBBF24 0%, #D97706 100%)', action: 'notebook' },
+    { id: null,       label: 'לוח ציור',     icon: '🎨', chipBg: 'linear-gradient(135deg, #F472B6 0%, #DB2777 100%)', action: 'drawing' },
+    { id: null,       label: 'העולם שלי',    icon: '🌍', chipBg: 'linear-gradient(135deg, #34D399 0%, #059669 100%)', action: 'world' },
   ]
 
   const collapsed = width < 80
@@ -1103,7 +1105,18 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
               onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)' }}
               onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
             >
-              <span style={{ fontSize: 20, opacity: 0.85, width: 26, textAlign: 'center', flexShrink: 0 }}>{item.icon}</span>
+              <span style={{
+                width: 36, height: 36, flexShrink: 0,
+                background: item.chipBg,
+                borderRadius: 12,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 18,
+                boxShadow: isActive
+                  ? '0 4px 14px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4)'
+                  : '0 2px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3)',
+                transform: isActive ? 'scale(1.05)' : 'scale(1)',
+                transition: 'transform 0.15s, box-shadow 0.15s',
+              }}>{item.icon}</span>
               {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
             </button>
           )
