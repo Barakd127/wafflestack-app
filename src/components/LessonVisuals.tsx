@@ -798,7 +798,7 @@ export function ConfidenceIntervalVisual() {
               const x1 = toX(ci.lo), x2 = toX(ci.hi)
               return <rect key={i} x={x1} y={y} width={x2 - x1} height={BAR_H} fill={ci.hit ? 'rgba(99,102,241,0.6)' : 'rgba(239,68,68,0.6)'} rx={2} />
             })}
-            <text x={muX} y={H + 1} textAnchor="middle" fontSize={8} fill="#10b981">μ אמיתי</text>
+            <text x={muX} y={H - 4} textAnchor="middle" fontSize={9} fill="#10b981" fontWeight={700}>μ אמיתי</text>
           </svg>
           <div style={{ marginTop: 8 }}>
             <span style={BADGE()}>{hits}/{count} מכילים את μ</span>
