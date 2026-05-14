@@ -12,6 +12,8 @@ import OnboardingFlow from './components/OnboardingFlow'
 import SplitLayout from './components/SplitLayout'
 import TutorialOverlay from './components/TutorialOverlay'
 import DrawingScreen from './components/DrawingScreen'
+import { TutorFAB } from './components/AITutor/TutorFAB'
+import { TutorDrawer } from './components/AITutor/TutorDrawer'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
 const PageNotebook = lazy(() => import('./components/notebook/PageNotebook'))
@@ -325,6 +327,14 @@ function App() {
       )}
 
       {loggedIn && <TutorialOverlay />}
+
+      {/* AI Study Tutor — global FAB + slide-out drawer, available on every view */}
+      {activeView !== 'landing' && (
+        <>
+          <TutorFAB />
+          <TutorDrawer />
+        </>
+      )}
     </div>
   )
 }
