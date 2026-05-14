@@ -22,6 +22,10 @@ const HypothesisTestingInteractive = lazy(() => import('./graphs/HypothesisTesti
 const SamplingInteractive = lazy(() => import('./graphs/SamplingInteractive'))
 const ANOVAInteractive = lazy(() => import('./graphs/ANOVAInteractive'))
 const ChiSquareInteractive = lazy(() => import('./graphs/ChiSquareInteractive'))
+const MeanRunningAverage = lazy(() => import('./graphs/MeanRunningAverage'))
+const MeanVsMedianVsMode = lazy(() => import('./graphs/MeanVsMedianVsMode'))
+const StdDevTwoDistributions = lazy(() => import('./graphs/StdDevTwoDistributions'))
+const Normal68_95_99 = lazy(() => import('./graphs/Normal68_95_99'))
 
 // Motivation AI components — Atomic Habits / Deep Work primitives.
 // Wired into the home screen so the streak + lead-measure are always visible.
@@ -34,26 +38,95 @@ import { TwoMinChallengeCard } from './motivation/TwoMinChallengeCard'
 // HeroScene exports a Canvas; we wrap it in a Suspense + fixed-size div.
 const HeroScene = lazy(() => import('../landing/three/HeroScene').then(m => ({ default: m.HeroScene })))
 
-// building_id → interactive component map. Add entries as new graphs ship.
-const INTERACTIVE_GRAPH_BY_TOPIC: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
-  power: MeanInteractive,                  // ממוצע (Mean)
-  housing: MedianInteractive,              // חציון (Median)
-  traffic: StdDevInteractive,              // סטיית תקן (Std Dev)
-  hospital: NormalDistInteractive,         // התפלגות נורמלית
-  school: SamplingInteractive,             // מדגם (Sampling)
-  bank: RegressionInteractive,             // רגרסיה
-  market: CorrelationInteractive,          // קורלציה
-  'city-hall': BinomialInteractive,        // בינום (Binomial)
-  research: HypothesisTestingInteractive,  // מבחן השערות
-  news: ConfidenceIntervalInteractive,     // רווח סמך (CI)
-  zscore: ZScoreInteractive,               // ציון z
-  pvalue: PValueInteractive,               // ערך p
-  anova: ANOVAInteractive,                 // ANOVA
-  ttest: TTestInteractive,                 // T-Test
-  variance: VarianceInteractive,           // שונות
-  chisq: ChiSquareInteractive,             // χ² (Chi-Square)
-  iqr: IQRInteractive,                     // טווח רבעוני
-  clt: CLTInteractive,                     // משפט הגבול המרכזי
+// building_id → array of interactive components, each highlighting a DIFFERENT
+// mathematical aspect (not the same concept twice). Cycle button below the
+// active graph lets the user step through aspects. 3 hero topics ship with
+// 3 aspects each; the other 15 have one entry until more aspects build.
+type GraphEntry = {
+  Component: React.LazyExoticComponent<React.ComponentType>
+  title: string
+}
+const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
+  // ── Hero topics — 3 aspects each ──
+  power: [
+    { Component: MeanInteractive,        title: 'מהו ממוצע?' },
+    { Component: MeanRunningAverage,     title: 'התכנסות כש-n גדל' },
+    { Component: MeanVsMedianVsMode,     title: 'ממוצע · חציון · שכיח' },
+  ],
+  traffic: [
+    { Component: StdDevInteractive,      title: 'תחומי k·σ' },
+    { Component: VarianceInteractive,    title: 'ריבועי סטיות (שונות)' },
+    { Component: StdDevTwoDistributions, title: 'שתי התפלגויות' },
+  ],
+  hospital: [
+    { Component: NormalDistInteractive,  title: 'גרירת גבולות' },
+    { Component: ZScoreInteractive,      title: 'ציון z + אחוזון' },
+    { Component: Normal68_95_99,         title: 'כלל 68-95-99.7' },
+  ],
+  // ── Single-aspect topics (cycle button hidden) ──
+  housing:     [{ Component: MedianInteractive,           title: 'חציון מול ממוצע' }],
+  school:      [{ Component: SamplingInteractive,         title: 'מדגם אקראי' }],
+  bank:        [{ Component: RegressionInteractive,       title: 'רגרסיה OLS' }],
+  market:      [{ Component: CorrelationInteractive,      title: 'מקדם Pearson' }],
+  'city-hall': [{ Component: BinomialInteractive,         title: 'התפלגות בינומית' }],
+  research:    [{ Component: HypothesisTestingInteractive, title: 'α, β, עוצמה' }],
+  news:        [{ Component: ConfidenceIntervalInteractive, title: 'רווחי סמך' }],
+  zscore:      [{ Component: ZScoreInteractive,           title: 'ציון z' }],
+  pvalue:      [{ Component: PValueInteractive,           title: 'ערך p' }],
+  anova:       [{ Component: ANOVAInteractive,            title: 'F = MSB/MSW' }],
+  ttest:       [{ Component: TTestInteractive,            title: 'התפלגות t' }],
+  variance:    [{ Component: VarianceInteractive,         title: 'ריבועי סטיות' }],
+  chisq:       [{ Component: ChiSquareInteractive,        title: 'χ² נצפה מול צפוי' }],
+  iqr:         [{ Component: IQRInteractive,              title: 'Boxplot' }],
+  clt:         [{ Component: CLTInteractive,              title: 'משפט הגבול המרכזי' }],
+}
+
+// Carousel: shows one graph at a time + chip selector + "הבא ←" cycle button.
+// Resets graphIdx to 0 whenever selectedTopic changes.
+function InteractiveGraphCarousel({ selectedTopic }: { selectedTopic: string }) {
+  const graphs = INTERACTIVE_GRAPHS_BY_TOPIC[selectedTopic] || []
+  const [graphIdx, setGraphIdx] = useState(0)
+  useEffect(() => { setGraphIdx(0) }, [selectedTopic])
+  if (graphs.length === 0) return null
+  const Active = graphs[graphIdx]?.Component
+  if (!Active) return null
+  return (
+    <div dir="rtl" style={{ width: '100%' }}>
+      <Suspense fallback={<div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>טוען גרף אינטראקטיבי…</div>}>
+        <Active />
+      </Suspense>
+      {graphs.length > 1 && (
+        <div style={{
+          display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'center',
+          flexWrap: 'wrap', margin: '8px auto 24px', maxWidth: 700,
+        }}>
+          {graphs.map((g, i) => (
+            <button key={i} onClick={() => setGraphIdx(i)}
+              style={{
+                background: i === graphIdx ? 'linear-gradient(135deg, #F5C842, #D4AF37)' : 'rgba(31,62,108,0.08)',
+                color: i === graphIdx ? '#0B1B3E' : 'var(--sh-text-dark)',
+                border: '1px solid ' + (i === graphIdx ? '#D4AF37' : 'rgba(31,62,108,0.15)'),
+                padding: '6px 14px', borderRadius: 20,
+                fontWeight: i === graphIdx ? 700 : 500,
+                fontSize: 13, fontFamily: "'Rubik', sans-serif",
+                cursor: 'pointer', transition: 'all 0.15s',
+              }}>
+              {g.title}
+            </button>
+          ))}
+          <button onClick={() => setGraphIdx((graphIdx + 1) % graphs.length)}
+            style={{
+              background: 'var(--sh-btn-color)', color: '#fff', border: 0,
+              padding: '6px 16px', borderRadius: 20, fontWeight: 700, fontSize: 13,
+              fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+              boxShadow: '0 2px 6px #8DA7FF',
+            }}>
+            הבא ←
+          </button>
+        </div>
+      )}
+    </div>
+  )
 }
 import { initializeUser, getCurrentUser, loginUser, registerUser, logoutUser, onAuthStateChange, type User } from '../stores/authStore'
 import { loadProgress, recordQuizSession, saveCanvasNotes, type QuizAnswer, type UserProgress } from '../stores/progressStore'
@@ -2290,14 +2363,7 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
               onBack={() => setInternalView('topics')}
               onComplete={(id) => useLearningStore.getState().completeLesson(id)}
             />
-            {INTERACTIVE_GRAPH_BY_TOPIC[selectedTopic] && (
-              <Suspense fallback={<div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>טוען גרף אינטראקטיבי…</div>}>
-                {(() => {
-                  const GraphComponent = INTERACTIVE_GRAPH_BY_TOPIC[selectedTopic]
-                  return <GraphComponent />
-                })()}
-              </Suspense>
-            )}
+            <InteractiveGraphCarousel selectedTopic={selectedTopic} />
           </>
         )}
         {internalView === 'arsenal' && <ArsenalScreen />}
