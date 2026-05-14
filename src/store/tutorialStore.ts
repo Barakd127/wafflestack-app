@@ -50,10 +50,13 @@ function saveSeen(seen: Record<string, true>): void {
 }
 
 function loadEnabled(): boolean {
+  // Default: OFF. User flagged the cursor/coachmark as visual clutter (kanban
+  // B3). Tutorials still wire up; just hidden by default. Re-enable via store
+  // action setEnabled(true) when an explicit "tour" button is added.
   try {
     const raw = localStorage.getItem(ENABLED_KEY)
-    return raw === null ? true : raw === 'true'
-  } catch { return true }
+    return raw === null ? false : raw === 'true'
+  } catch { return false }
 }
 
 function markTourCompleted(id: string): void {
