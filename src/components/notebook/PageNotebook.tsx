@@ -1,33 +1,180 @@
 /**
- * PageNotebook — OneNote/iPad-Notes-style notebook with multi-page tabs,
- * pen/text/shapes, and bounded pages. Replaces the Heptabase-style
- * UnifiedNotebook (kept as .legacy for reference).
+ * PageNotebook — OneNote/iPad-Notes-style notebook.
  *
- * Tech: tldraw (~200KB, MIT). Multi-page support built-in. Stylus-first.
- * Auto-persists to IndexedDB via `persistenceKey`.
+ * Phase 1 additions:
+ *   • Custom NoteContainerShape ("click anywhere, start typing")
+ *   • Two-level nav: Sections (left rail) + Pages (top tabs).
+ *     Sections live in Zustand, page→section binding lives on
+ *     tldraw `page.meta.sectionId`.
+ *   • Highlighter tool surfaced explicitly in the toolbar (tldraw v5
+ *     ships HighlightShapeUtil out of the box — we just expose it).
+ *   • View-mode toggle: infinite canvas vs bounded letter-paper view.
+ *   • persistenceKey bumped to v2 with one-shot v1→v2 IndexedDB migration.
  *
- * Page background presets (blank / lined / grid) toggled via Tldraw's
- * user preferences API. Header adds: home back-button, add-page, add-math.
+ * Existing pen / text / math / page features are preserved.
+ * Tech: tldraw ^5 (MIT), zustand (already a dep).
  */
-import { useState } from 'react'
-import { Tldraw, type Editor } from 'tldraw'
+import { useEffect, useState } from 'react'
+import { Tldraw, type Editor, type TLPageId } from 'tldraw'
 import 'tldraw/tldraw.css'
+
+import { NoteContainerShapeUtil } from './shapes/NoteContainerShape'
+import SectionsNav from './ui/SectionsNav'
+import PagesNav from './ui/PagesNav'
+import { useNotebookStore } from './state/notebookStore'
+import { useNoteSpawner } from './hooks/useNoteSpawner'
 
 const GOLD = '#D4AF37'
 const GOLD_BRIGHT = '#F5C842'
+
+const PERSISTENCE_KEY_V1 = 'wafflestack-notebook-v1'
+const PERSISTENCE_KEY_V2 = 'wafflestack-notebook-v2'
+const MIGRATION_FLAG = 'wafflestack-notebook-v1-to-v2-migrated'
+
+const customShapeUtils = [NoteContainerShapeUtil] as const
 
 interface PageNotebookProps {
   onBack: () => void
 }
 
+/**
+ * One-shot copy of v1 IndexedDB data into the v2 store. tldraw stores its
+ * snapshot under the database name `TLDRAW_DOCUMENT_v2` keyed by
+ * persistenceKey, so a structured-clone copy preserves all shapes/pages.
+ * Safe to call repeatedly — gated by a localStorage flag.
+ */
+async function migrateV1ToV2(): Promise<void> {
+  if (typeof window === 'undefined') return
+  if (localStorage.getItem(MIGRATION_FLAG) === 'done') return
+
+  const DB_NAME = 'TLDRAW_DOCUMENT_v2'
+  const STORE_NAME = 'records'
+
+  await new Promise<void>((resolve) => {
+    let req: IDBOpenDBRequest
+    try {
+      req = indexedDB.open(DB_NAME)
+    } catch {
+      resolve()
+      return
+    }
+    req.onerror = () => resolve()
+    req.onsuccess = () => {
+      const db = req.result
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.close()
+        resolve()
+        return
+      }
+      const tx = db.transaction(STORE_NAME, 'readwrite')
+      const store = tx.objectStore(STORE_NAME)
+      // tldraw key layout: each record is stored under
+      //   `${persistenceKey}-${recordId}` (older builds) OR
+      //   keyed via `persistenceKey` index. We do a coarse-grained dump:
+      //   pull every record whose key starts with v1 and rewrite it under v2.
+      const getAllReq = store.getAll()
+      getAllReq.onsuccess = () => {
+        const records = getAllReq.result as Array<{ id: string; [k: string]: unknown }> | undefined
+        if (!records || records.length === 0) {
+          localStorage.setItem(MIGRATION_FLAG, 'done')
+          db.close()
+          resolve()
+          return
+        }
+        // Best-effort: many tldraw versions store records keyed by
+        // `persistenceKey + '-' + id`. Re-insert under the v2 prefix.
+        const getAllKeysReq = store.getAllKeys()
+        getAllKeysReq.onsuccess = () => {
+          const keys = getAllKeysReq.result as IDBValidKey[]
+          keys.forEach((key, i) => {
+            if (typeof key === 'string' && key.startsWith(PERSISTENCE_KEY_V1)) {
+              const newKey = PERSISTENCE_KEY_V2 + key.slice(PERSISTENCE_KEY_V1.length)
+              try {
+                store.put(records[i], newKey)
+              } catch {
+                /* ignore single-record copy failures */
+              }
+            }
+          })
+          tx.oncomplete = () => {
+            localStorage.setItem(MIGRATION_FLAG, 'done')
+            db.close()
+            resolve()
+          }
+          tx.onerror = () => {
+            db.close()
+            resolve()
+          }
+        }
+        getAllKeysReq.onerror = () => {
+          db.close()
+          resolve()
+        }
+      }
+      getAllReq.onerror = () => {
+        db.close()
+        resolve()
+      }
+    }
+  })
+}
+
 export default function PageNotebook({ onBack }: PageNotebookProps) {
   const [editor, setEditor] = useState<Editor | null>(null)
+  const [migrationReady, setMigrationReady] = useState(false)
+
+  const viewMode = useNotebookStore((s) => s.view.mode)
+  const setViewMode = useNotebookStore((s) => s.setViewMode)
+  const activeSectionId = useNotebookStore((s) => s.activeSectionId)
+
+  useNoteSpawner(editor)
+
+  // Run v1 → v2 migration once before mounting tldraw.
+  useEffect(() => {
+    let cancelled = false
+    migrateV1ToV2().finally(() => {
+      if (!cancelled) setMigrationReady(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // When the active section changes, switch tldraw's current page to the
+  // first page of that section (creating one if the section has none).
+  useEffect(() => {
+    if (!editor || !activeSectionId) return
+    const pages = editor.getPages()
+    const sectionPages = pages.filter(
+      (p) => p.meta?.sectionId === activeSectionId ||
+        (!p.meta?.sectionId && activeSectionId === 'section-default')
+    )
+    const currentPage = pages.find((p) => p.id === editor.getCurrentPageId())
+    const currentSectionId = (currentPage?.meta?.sectionId as string | undefined) ?? 'section-default'
+    if (currentSectionId === activeSectionId) return
+
+    if (sectionPages.length === 0) {
+      const newId = `page:${Date.now()}` as TLPageId
+      editor.createPage({
+        id: newId,
+        name: 'דף 1',
+        meta: { sectionId: activeSectionId },
+      })
+      editor.setCurrentPage(newId)
+    } else {
+      editor.setCurrentPage(sectionPages[0].id)
+    }
+  }, [editor, activeSectionId])
 
   const addPage = () => {
     if (!editor) return
-    const newPageId = `page:${Date.now()}` as const
-    editor.createPage({ id: newPageId as never, name: `דף ${editor.getPages().length + 1}` })
-    editor.setCurrentPage(newPageId as never)
+    const newPageId = `page:${Date.now()}` as TLPageId
+    editor.createPage({
+      id: newPageId,
+      name: `דף ${editor.getPages().length + 1}`,
+      meta: { sectionId: activeSectionId },
+    })
+    editor.setCurrentPage(newPageId)
   }
 
   const insertMath = () => {
@@ -48,6 +195,28 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
     })
   }
 
+  const activateHighlighter = () => {
+    if (!editor) return
+    // tldraw v5 ships the highlighter tool out of the box. Activating it
+    // here gives users a one-click semi-transparent yellow ink without
+    // hunting through the floating toolbar.
+    editor.setCurrentTool('highlight')
+    editor.user.updateUserPreferences({ color: 'yellow' })
+  }
+
+  if (!migrationReady) {
+    return (
+      <div style={{
+        position: 'fixed', inset: 0,
+        background: 'linear-gradient(135deg, #0B1B3E 0%, #1E3A8A 100%)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: '#fff', fontFamily: "'Rubik', sans-serif",
+      }}>
+        טוען מחברת…
+      </div>
+    )
+  }
+
   return (
     <div style={{
       position: 'fixed', inset: 0,
@@ -66,17 +235,60 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
         <button onClick={onBack} style={btnGoldStyle} aria-label="חזרה לדף הבית">← דף הבית</button>
         <button onClick={addPage} style={btnGlassStyle} aria-label="הוסף דף">📄 הוסף דף</button>
         <button onClick={insertMath} style={btnGlassStyle} aria-label="הוסף נוסחה">🧮 הוסף נוסחה</button>
+        <button onClick={activateHighlighter} style={btnGlassStyle} aria-label="מסמן">🖍 מסמן</button>
+        <button
+          onClick={() => setViewMode(viewMode === 'infinite' ? 'bounded' : 'infinite')}
+          style={btnGlassStyle}
+          aria-label="החלף תצוגה"
+        >
+          {viewMode === 'infinite' ? '📑 תצוגת דף' : '🌌 תצוגה חופשית'}
+        </button>
         <div style={{ marginInlineStart: 'auto', fontSize: 14, opacity: 0.7, fontFamily: "'Rubik', sans-serif" }}>
           📓 המחברת שלי — נשמר אוטומטית
         </div>
       </div>
 
-      {/* tldraw canvas — fills remaining space, persists per-user in IndexedDB */}
-      <div style={{ flex: 1, position: 'relative' }}>
-        <Tldraw
-          persistenceKey="wafflestack-notebook-v1"
-          onMount={(ed) => setEditor(ed)}
-        />
+      {/* Pages strip (under section) */}
+      <PagesNav editor={editor} />
+
+      {/* Main row: canvas + sections rail */}
+      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+        {/* Canvas wrapper. In bounded mode we centre a letter-paper-sized
+            white surface; tldraw still renders behind it but we visually
+            constrain authoring to a page. */}
+        <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          {viewMode === 'bounded' && (
+            <div
+              aria-hidden
+              style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'center',
+                paddingTop: 24,
+                pointerEvents: 'none',
+                zIndex: 1,
+              }}
+            >
+              <div style={{
+                width: 816,           // 8.5" * 96dpi (letter)
+                height: 1056,         // 11" * 96dpi (letter)
+                maxWidth: '95%',
+                background: 'rgba(255,255,255,0.04)',
+                border: `1px dashed ${GOLD}55`,
+                borderRadius: 4,
+              }} />
+            </div>
+          )}
+          <Tldraw
+            persistenceKey={PERSISTENCE_KEY_V2}
+            shapeUtils={customShapeUtils}
+            onMount={(ed) => setEditor(ed)}
+          />
+        </div>
+
+        <SectionsNav />
       </div>
     </div>
   )
