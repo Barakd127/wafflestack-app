@@ -1028,14 +1028,15 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
 }) {
   // EduCity-style icon chips: each item gets a gradient color theme.
   // The emoji sits inside a soft rounded pill matching the brand palette.
+  // Notebook + drawing removed from sidebar per user (kanban item #7) — they
+  // belong inside the mindmap iframe / mindmap-tab toggle, not as top-level
+  // sidebar peers. Label "מפת לימוד" renamed to "מפת הלמידה שלי".
   const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string; chipBg: string }> = [
-    { id: 'home',     label: 'דף הבית',      icon: '🏠', chipBg: 'linear-gradient(135deg, #FFD86B 0%, #FF9966 100%)' },
-    { id: 'topics',   label: 'אזור למידה',   icon: '📚', chipBg: 'linear-gradient(135deg, #6EE7F9 0%, #3B82F6 100%)' },
-    { id: 'arsenal',  label: 'הארסנל שלי',   icon: '💎', chipBg: 'linear-gradient(135deg, #C084FC 0%, #7C3AED 100%)' },
-    { id: null,       label: 'מפת לימוד',    icon: '🗺️', chipBg: 'linear-gradient(135deg, #FCA5A5 0%, #EF4444 100%)', action: 'mindmap' },
-    { id: null,       label: 'מחברת',        icon: '📓', chipBg: 'linear-gradient(135deg, #FBBF24 0%, #D97706 100%)', action: 'notebook' },
-    { id: null,       label: 'לוח ציור',     icon: '🎨', chipBg: 'linear-gradient(135deg, #F472B6 0%, #DB2777 100%)', action: 'drawing' },
-    { id: null,       label: 'העולם שלי',    icon: '🌍', chipBg: 'linear-gradient(135deg, #34D399 0%, #059669 100%)', action: 'world' },
+    { id: 'home',     label: 'דף הבית',           icon: '🏠', chipBg: 'linear-gradient(135deg, #FFD86B 0%, #FF9966 100%)' },
+    { id: 'topics',   label: 'אזור למידה',        icon: '📚', chipBg: 'linear-gradient(135deg, #6EE7F9 0%, #3B82F6 100%)' },
+    { id: 'arsenal',  label: 'הארסנל שלי',        icon: '💎', chipBg: 'linear-gradient(135deg, #C084FC 0%, #7C3AED 100%)' },
+    { id: null,       label: 'מפת הלמידה שלי',    icon: '🗺️', chipBg: 'linear-gradient(135deg, #FCA5A5 0%, #EF4444 100%)', action: 'mindmap' },
+    { id: null,       label: 'העולם שלי',         icon: '🌍', chipBg: 'linear-gradient(135deg, #34D399 0%, #059669 100%)', action: 'world' },
   ]
 
   const collapsed = width < 80

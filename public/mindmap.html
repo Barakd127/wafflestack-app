@@ -4036,72 +4036,72 @@ setTimeout(()=>pomoRenderUI(),100);
 // ∑ FORMULA TOOLBOX — Statistics Formula Library
 // ═══════════════════════════════════════════════════════════
 const FTB_DATA = [
-  {name:'Center',label:'Descriptive — Center',formulas:[
-    {id:'mean_raw',label:'Mean (raw)',latex:'\\bar{x}=\\frac{\\sum x_i}{n}',desc:'Arithmetic mean'},
-    {id:'mean_freq',label:'Mean (freq table)',latex:'\\bar{x}=\\frac{\\sum x_i f(x_i)}{n}',desc:'Weighted mean'},
-    {id:'grand_mean',label:'Grand Mean',latex:'\\bar{\\bar{x}}=\\frac{\\sum_j \\bar{x}_j n_j}{N}',desc:'Combined mean across groups'},
-    {id:'midrange',label:'Midrange',latex:'MR=\\frac{x_{max}+x_{min}}{2}',desc:'Average of extremes'},
+  {name:'Center',label:'תיאורית — מדדי מרכז',formulas:[
+    {id:'mean_raw',label:'ממוצע (גולמי)',latex:'\\bar{x}=\\frac{\\sum x_i}{n}',desc:'ממוצע אריתמטי'},
+    {id:'mean_freq',label:'ממוצע (טבלת שכיחויות)',latex:'\\bar{x}=\\frac{\\sum x_i f(x_i)}{n}',desc:'ממוצע משוקלל'},
+    {id:'grand_mean',label:'ממוצע כללי',latex:'\\bar{\\bar{x}}=\\frac{\\sum_j \\bar{x}_j n_j}{N}',desc:'ממוצע משולב בין קבוצות'},
+    {id:'midrange',label:'אמצע טווח',latex:'MR=\\frac{x_{max}+x_{min}}{2}',desc:'ממוצע הקצוות'},
   ]},
-  {name:'Dispersion',label:'Descriptive — Dispersion',formulas:[
-    {id:'var_raw',label:'Variance (raw)',latex:'s^2=\\frac{\\sum(x_i-\\bar{x})^2}{n}=\\frac{\\sum x_i^2}{n}-\\bar{x}^2',desc:'Population variance'},
-    {id:'var_freq',label:'Variance (freq)',latex:'s^2=\\frac{\\sum x_i^2 f(x_i)}{n}-\\bar{x}^2',desc:'Variance from freq table'},
-    {id:'std',label:'Std Deviation',latex:'s=\\sqrt{s^2}',desc:'Standard deviation'},
-    {id:'pooled_var',label:'Pooled Variance',latex:'s_c^2=\\frac{\\sum n_j s_j^2}{N}+\\frac{\\sum n_j(\\bar{x}_j-\\bar{\\bar{x}})^2}{N}',desc:'Within + between group variance'},
+  {name:'Dispersion',label:'תיאורית — מדדי פיזור',formulas:[
+    {id:'var_raw',label:'שונות (גולמי)',latex:'s^2=\\frac{\\sum(x_i-\\bar{x})^2}{n}=\\frac{\\sum x_i^2}{n}-\\bar{x}^2',desc:'שונות אוכלוסיה'},
+    {id:'var_freq',label:'שונות (שכיחויות)',latex:'s^2=\\frac{\\sum x_i^2 f(x_i)}{n}-\\bar{x}^2',desc:'שונות מטבלת שכיחויות'},
+    {id:'std',label:'סטיית תקן',latex:'s=\\sqrt{s^2}',desc:'סטיית תקן'},
+    {id:'pooled_var',label:'שונות משולבת',latex:'s_c^2=\\frac{\\sum n_j s_j^2}{N}+\\frac{\\sum n_j(\\bar{x}_j-\\bar{\\bar{x}})^2}{N}',desc:'שונות בתוך + בין קבוצות'},
   ]},
-  {name:'Transform',label:'Linear Transformations',formulas:[
-    {id:'tr_mean',label:'Transformed Mean',latex:"\\bar{x}'=b\\bar{x}+a",desc:"if x'=bx+a"},
-    {id:'tr_var',label:'Transformed Variance',latex:"s_{x'}^2=b^2 s_x^2",desc:'Variance scales by b²'},
-    {id:'tr_sd',label:'Transformed SD',latex:"s_{x'}=|b|\\cdot s_x",desc:'SD scales by |b|'},
-    {id:'zscore',label:'Z-score',latex:'Z=\\frac{x-\\bar{x}}{s}',desc:'Standard score'},
+  {name:'Transform',label:'טרנספורמציות לינאריות',formulas:[
+    {id:'tr_mean',label:'ממוצע אחרי טרנספורמציה',latex:"\\bar{x}'=b\\bar{x}+a",desc:"אם x'=bx+a"},
+    {id:'tr_var',label:'שונות אחרי טרנספורמציה',latex:"s_{x'}^2=b^2 s_x^2",desc:'שונות מוכפלת ב-b²'},
+    {id:'tr_sd',label:'סטיית תקן אחרי טרנספורמציה',latex:"s_{x'}=|b|\\cdot s_x",desc:'SD מוכפלת ב-|b|'},
+    {id:'zscore',label:'ציון z',latex:'Z=\\frac{x-\\bar{x}}{s}',desc:'ציון תקני'},
   ]},
-  {name:'Normal',label:'Normal Distribution',formulas:[
-    {id:'norm_cdf',label:'CDF Φ(z)',latex:'P(Z\\leq z)=\\Phi(z)',desc:'Standard normal CDF'},
-    {id:'norm_right',label:'Right tail',latex:'P(Z>z)=1-\\Phi(z)',desc:'Right-tail probability'},
-    {id:'norm_interval',label:'Interval P',latex:'P(z_1<Z\\leq z_2)=\\Phi(z_2)-\\Phi(z_1)',desc:'Between two z-values'},
-    {id:'norm_pdf',label:'PDF',latex:'f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{1}{2}\\left(\\frac{x-\\mu}{\\sigma}\\right)^2}',desc:'Normal PDF'},
+  {name:'Normal',label:'התפלגות נורמלית',formulas:[
+    {id:'norm_cdf',label:'CDF — Φ(z)',latex:'P(Z\\leq z)=\\Phi(z)',desc:'פונקציית התפלגות מצטברת'},
+    {id:'norm_right',label:'זנב ימני',latex:'P(Z>z)=1-\\Phi(z)',desc:'הסתברות זנב ימני'},
+    {id:'norm_interval',label:'הסתברות בתוך תחום',latex:'P(z_1<Z\\leq z_2)=\\Phi(z_2)-\\Phi(z_1)',desc:'בין שני ערכי z'},
+    {id:'norm_pdf',label:'PDF — צפיפות',latex:'f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{1}{2}\\left(\\frac{x-\\mu}{\\sigma}\\right)^2}',desc:'פונקציית צפיפות נורמלית'},
   ]},
-  {name:'Correlation',label:'Correlation',formulas:[
-    {id:'pearson',label:'Pearson r',latex:'r=\\frac{\\mathrm{cov}(x,y)}{s_x\\cdot s_y}',desc:'Linear correlation [-1,1]'},
-    {id:'cov',label:'Covariance',latex:'\\mathrm{cov}(x,y)=\\frac{\\sum x_i y_i}{n}-\\bar{x}\\bar{y}',desc:'Joint variability'},
-    {id:'spearman',label:'Spearman rₛ',latex:'r_s=1-\\frac{6\\sum d_i^2}{n(n^2-1)}',desc:'Rank correlation'},
-    {id:'chi2',label:'Chi-squared',latex:'\\chi^2=\\sum\\frac{(O_i-E_i)^2}{E_i}',desc:'Observed vs expected'},
-    {id:'phi',label:'Phi coefficient',latex:'\\phi=\\sqrt{\\frac{\\chi^2}{n}}',desc:'Association in 2×2 table'},
-    {id:'rc',label:'Contingency rᴄ',latex:'r_c=\\sqrt{\\frac{\\chi^2}{n(L-1)}}',desc:'L=min(rows,cols)'},
+  {name:'Correlation',label:'קורלציה',formulas:[
+    {id:'pearson',label:'מקדם Pearson',latex:'r=\\frac{\\mathrm{cov}(x,y)}{s_x\\cdot s_y}',desc:'קורלציה לינארית [1-,1]'},
+    {id:'cov',label:'שונות משותפת',latex:'\\mathrm{cov}(x,y)=\\frac{\\sum x_i y_i}{n}-\\bar{x}\\bar{y}',desc:'שונות בין X ל-Y'},
+    {id:'spearman',label:'מקדם Spearman',latex:'r_s=1-\\frac{6\\sum d_i^2}{n(n^2-1)}',desc:'קורלציה לפי דירוג'},
+    {id:'chi2',label:'χ² (חי בריבוע)',latex:'\\chi^2=\\sum\\frac{(O_i-E_i)^2}{E_i}',desc:'נצפה מול צפוי'},
+    {id:'phi',label:'מקדם Phi',latex:'\\phi=\\sqrt{\\frac{\\chi^2}{n}}',desc:'קישור בטבלה 2×2'},
+    {id:'rc',label:'מקדם תיאום rᴄ',latex:'r_c=\\sqrt{\\frac{\\chi^2}{n(L-1)}}',desc:'L=min(שורות, עמודות)'},
   ]},
-  {name:'Regression',label:'Regression',formulas:[
-    {id:'reg_line',label:'Regression Line',latex:'\\tilde{y}=bx+a',desc:'Predicted Y from X'},
-    {id:'slope',label:'Slope b',latex:'b=\\frac{r\\cdot s_y}{s_x}',desc:'Regression slope Y on X'},
-    {id:'intercept',label:'Intercept a',latex:'a=\\bar{y}-b\\bar{x}',desc:'Regression intercept'},
-    {id:'r2',label:'R² (determination)',latex:'r^2=\\frac{s_{\\tilde{y}}^2}{s_y^2}',desc:'Proportion variance explained'},
-    {id:'var_decomp',label:'Variance decomp',latex:'s_y^2=s_{\\tilde{y}}^2+s_{y-\\tilde{y}}^2',desc:'Total = explained + error'},
+  {name:'Regression',label:'רגרסיה',formulas:[
+    {id:'reg_line',label:'קו הרגרסיה',latex:'\\tilde{y}=bx+a',desc:'חיזוי Y מתוך X'},
+    {id:'slope',label:'שיפוע b',latex:'b=\\frac{r\\cdot s_y}{s_x}',desc:'שיפוע רגרסיה Y על X'},
+    {id:'intercept',label:'חיתוך a',latex:'a=\\bar{y}-b\\bar{x}',desc:'חיתוך רגרסיה'},
+    {id:'r2',label:'R² — קביעה',latex:'r^2=\\frac{s_{\\tilde{y}}^2}{s_y^2}',desc:'אחוז השונות המוסבר'},
+    {id:'var_decomp',label:'פירוק שונות',latex:'s_y^2=s_{\\tilde{y}}^2+s_{y-\\tilde{y}}^2',desc:'סה"כ = מוסבר + שגיאה'},
   ]},
-  {name:'Combinatorics',label:'Combinatorics',formulas:[
-    {id:'perm',label:'Permutations',latex:'(n)_k=\\frac{n!}{(n-k)!}',desc:'Ordered, no replacement'},
-    {id:'comb',label:'Combinations',latex:'\\binom{n}{k}=\\frac{n!}{(n-k)!\\,k!}',desc:'Unordered, no replacement'},
-    {id:'ordered_rep',label:'Ordered w/ replacement',latex:'n^k',desc:'Sequences with repetition'},
-    {id:'factorial',label:'Factorial',latex:'n!=n\\cdot(n-1)\\cdots 1,\\;0!=1',desc:'Product of integers to n'},
+  {name:'Combinatorics',label:'קומבינטוריקה',formulas:[
+    {id:'perm',label:'תמורות',latex:'(n)_k=\\frac{n!}{(n-k)!}',desc:'מסודר, ללא חזרות'},
+    {id:'comb',label:'צירופים',latex:'\\binom{n}{k}=\\frac{n!}{(n-k)!\\,k!}',desc:'בלי סדר, ללא חזרות'},
+    {id:'ordered_rep',label:'מסודר עם חזרות',latex:'n^k',desc:'סדרות עם חזרה'},
+    {id:'factorial',label:'עצרת',latex:'n!=n\\cdot(n-1)\\cdots 1,\\;0!=1',desc:'מכפלת השלמים עד n'},
   ]},
-  {name:'Probability',label:'Probability Rules',formulas:[
-    {id:'addition',label:'Addition rule',latex:'P(A\\cup B)=P(A)+P(B)-P(A\\cap B)',desc:'Inclusion-exclusion'},
-    {id:'complement',label:'Complement',latex:'P(A^c)=1-P(A)',desc:'Probability of NOT A'},
-    {id:'conditional',label:'Conditional P',latex:'P(B|A)=\\frac{P(A\\cap B)}{P(A)}',desc:'Given A occurred'},
-    {id:'multiplication',label:'Multiplication',latex:'P(A\\cap B)=P(A)\\cdot P(B|A)',desc:'Joint probability'},
-    {id:'independence',label:'Independence',latex:'P(A\\cap B)=P(A)\\cdot P(B)',desc:'A and B independent'},
-    {id:'total_prob',label:'Total Probability',latex:'P(B)=\\sum_i P(B|A_i)P(A_i)',desc:'Partition of sample space'},
-    {id:'bayes',label:"Bayes' Theorem",latex:"P(A_i|B)=\\frac{P(B|A_i)P(A_i)}{\\sum_j P(B|A_j)P(A_j)}",desc:'Posterior probability'},
+  {name:'Probability',label:'כללי הסתברות',formulas:[
+    {id:'addition',label:'כלל החיבור',latex:'P(A\\cup B)=P(A)+P(B)-P(A\\cap B)',desc:'הכלה-הוצאה'},
+    {id:'complement',label:'משלים',latex:'P(A^c)=1-P(A)',desc:'הסתברות "לא A"'},
+    {id:'conditional',label:'הסתברות מותנית',latex:'P(B|A)=\\frac{P(A\\cap B)}{P(A)}',desc:'בהינתן A'},
+    {id:'multiplication',label:'כלל הכפל',latex:'P(A\\cap B)=P(A)\\cdot P(B|A)',desc:'הסתברות משותפת'},
+    {id:'independence',label:'אי-תלות',latex:'P(A\\cap B)=P(A)\\cdot P(B)',desc:'A ו-B בלתי תלויים'},
+    {id:'total_prob',label:'הסתברות שלמה',latex:'P(B)=\\sum_i P(B|A_i)P(A_i)',desc:'חלוקה למרחב מדגם'},
+    {id:'bayes',label:'משפט בייס',latex:"P(A_i|B)=\\frac{P(B|A_i)P(A_i)}{\\sum_j P(B|A_j)P(A_j)}",desc:'הסתברות פוסטריורית'},
   ]},
-  {name:'RV',label:'Random Variables',formulas:[
-    {id:'ev',label:'Expected Value E(X)',latex:'E(X)=\\sum_i x_i P(x_i)=\\mu',desc:'Weighted average of outcomes'},
-    {id:'var_rv',label:'Variance V(X)',latex:'V(X)=\\sum_i x_i^2 P(x_i)-\\mu^2=\\sigma^2',desc:'Expected squared deviation'},
-    {id:'ev_linear',label:'E(bX+a)',latex:'E(bX+a)=bE(X)+a',desc:'Linearity of expectation'},
-    {id:'var_linear',label:'V(bX+a)',latex:'V(bX+a)=b^2 V(X)',desc:'Variance of linear transform'},
-    {id:'ev_sum',label:'E(X₁+…+Xₙ)',latex:'E\\left(\\sum X_i\\right)=\\sum E(X_i)',desc:'Additivity of expectation'},
-    {id:'var_sum_ind',label:'V(X₁+…+Xₙ) indep.',latex:'V\\left(\\sum X_i\\right)=\\sum V(X_i)',desc:'For independent variables'},
+  {name:'RV',label:'משתנים אקראיים',formulas:[
+    {id:'ev',label:'תוחלת E(X)',latex:'E(X)=\\sum_i x_i P(x_i)=\\mu',desc:'ממוצע משוקלל של תוצאות'},
+    {id:'var_rv',label:'שונות V(X)',latex:'V(X)=\\sum_i x_i^2 P(x_i)-\\mu^2=\\sigma^2',desc:'תוחלת ריבוע הסטייה'},
+    {id:'ev_linear',label:'E(bX+a)',latex:'E(bX+a)=bE(X)+a',desc:'לינאריות התוחלת'},
+    {id:'var_linear',label:'V(bX+a)',latex:'V(bX+a)=b^2 V(X)',desc:'שונות אחרי טרנספ׳ לינארית'},
+    {id:'ev_sum',label:'E(X₁+…+Xₙ)',latex:'E\\left(\\sum X_i\\right)=\\sum E(X_i)',desc:'אדיטיביות התוחלת'},
+    {id:'var_sum_ind',label:'V(X₁+…+Xₙ) באי-תלות',latex:'V\\left(\\sum X_i\\right)=\\sum V(X_i)',desc:'עבור משתנים בלתי תלויים'},
   ]},
-  {name:'Binomial',label:'Binomial Distribution',formulas:[
-    {id:'binom_pmf',label:'B(n,p) PMF',latex:'P(X=k)=\\binom{n}{k}p^k(1-p)^{n-k}',desc:'k successes in n trials'},
-    {id:'binom_mean',label:'Binomial E(X)',latex:'E(X)=np',desc:'Expected successes'},
-    {id:'binom_var',label:'Binomial V(X)',latex:'V(X)=np(1-p)=npq',desc:'Variance of binomial'},
+  {name:'Binomial',label:'התפלגות בינומית',formulas:[
+    {id:'binom_pmf',label:'B(n,p) — PMF',latex:'P(X=k)=\\binom{n}{k}p^k(1-p)^{n-k}',desc:'k הצלחות מתוך n ניסויים'},
+    {id:'binom_mean',label:'תוחלת בינומית E(X)',latex:'E(X)=np',desc:'מספר הצלחות צפוי'},
+    {id:'binom_var',label:'שונות בינומית V(X)',latex:'V(X)=np(1-p)=npq',desc:'שונות בינומית'},
   ]},
 ];
 
