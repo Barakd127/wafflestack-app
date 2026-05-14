@@ -654,18 +654,18 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
 <div id="wb-overlay">
   <div id="wb-resize-handle"></div>
   <div id="wb-fs-bar">
-    <button class="wbt on" data-tool="select" onclick="wbTool('select')" title="Select [V]">↖</button>
-    <button class="wbt" data-tool="pen"    onclick="wbTool('pen')"    title="Pen [P]">✏</button>
-    <button class="wbt" data-tool="rect"   onclick="wbTool('rect')"   title="Rect [R]">▭</button>
-    <button class="wbt" data-tool="circle" onclick="wbTool('circle')" title="Circle [C]">○</button>
-    <button class="wbt" data-tool="line"   onclick="wbTool('line')"   title="Line [L]">╱</button>
-    <button class="wbt" data-tool="arrow"  onclick="wbTool('arrow')"  title="Arrow [A]">→</button>
-    <button class="wbt" data-tool="connect" onclick="wbTool('connect')" title="Connect [K]">⟶</button>
-    <button class="wbt" data-tool="text"   onclick="wbTool('text')"   title="Text [T]">T</button>
-    <button class="wbt" data-tool="sticky" onclick="wbTool('sticky')" title="Sticky note [S]">🗒</button>
-    <button class="wbt" data-tool="table"  onclick="wbTool('table')"  title="Table">⊞</button>
-    <button class="wbt" data-tool="eraser" onclick="wbTool('eraser')" title="Eraser [E]">⌫</button>
-    <button class="wbt" onclick="wbOpenEquationModal()" title="Insert equation">∑</button>
+    <button class="wbt on" data-tool="select" onclick="wbTool('select')" title="Select [V]" aria-label="Select"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.5 18 2.4-7.7L21 11z"/></svg></button>
+    <button class="wbt" data-tool="pen"    onclick="wbTool('pen')"    title="Pen [P]" aria-label="Pen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 3.3a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L7.5 22.5 2 22.5l0-5.5z"/><path d="M13.5 4.5l6 6"/></svg></button>
+    <button class="wbt" data-tool="rect"   onclick="wbTool('rect')"   title="Rect [R]" aria-label="Rectangle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/></svg></button>
+    <button class="wbt" data-tool="circle" onclick="wbTool('circle')" title="Circle [C]" aria-label="Circle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg></button>
+    <button class="wbt" data-tool="line"   onclick="wbTool('line')"   title="Line [L]" aria-label="Line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="20" x2="20" y2="4"/></svg></button>
+    <button class="wbt" data-tool="arrow"  onclick="wbTool('arrow')"  title="Arrow [A]" aria-label="Arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14,6 20,12 14,18"/></svg></button>
+    <button class="wbt" data-tool="connect" onclick="wbTool('connect')" title="Connect [K]" aria-label="Connect"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/><line x1="7.5" y1="12" x2="16.5" y2="12"/></svg></button>
+    <button class="wbt" data-tool="text"   onclick="wbTool('text')"   title="Text [T]" aria-label="Text"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5,6 5,4 19,4 19,6"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="9" y1="20" x2="15" y2="20"/></svg></button>
+    <button class="wbt" data-tool="sticky" onclick="wbTool('sticky')" title="Sticky note [S]" aria-label="Sticky note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><polyline points="16,4 16,8 20,8"/></svg></button>
+    <button class="wbt" data-tool="table"  onclick="wbTool('table')"  title="Table" aria-label="Table"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="4" x2="9" y2="20"/><line x1="15" y1="4" x2="15" y2="20"/></svg></button>
+    <button class="wbt" data-tool="eraser" onclick="wbTool('eraser')" title="Eraser [E]" aria-label="Eraser"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14L9 4 3 10l10 10h8z"/><line x1="13" y1="20" x2="20" y2="20"/><line x1="7" y1="8" x2="15" y2="16"/></svg></button>
+    <button class="wbt" onclick="wbOpenEquationModal()" title="Insert equation" aria-label="Equation"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14L11 12l8 8H5"/></svg></button>
     <div class="wb-sep"></div>
     <select class="wbt" onchange="wbApplyTemplate(this.value);this.value=''" style="padding:0 6px;min-width:90px;max-width:120px;cursor:pointer" title="Load a template into the canvas">
       <option value="">📐 Templates</option>
@@ -699,8 +699,8 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
     </div>
     <div class="wb-sep"></div>
 
-    <button class="wbt" onclick="wbUndo()" title="Undo Ctrl+Z">↩</button>
-    <button class="wbt" onclick="wbRedo()" title="Redo Ctrl+Y">↪</button>
+    <button class="wbt" onclick="wbUndo()" title="Undo Ctrl+Z" aria-label="Undo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg></button>
+    <button class="wbt" onclick="wbRedo()" title="Redo Ctrl+Y" aria-label="Redo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 15-6.7L21 13"/></svg></button>
 
     <span id="wb-node-title">Canvas</span>
     <button id="wb-done" onclick="closeWB()">✓ Done</button>
