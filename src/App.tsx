@@ -14,7 +14,7 @@ import TutorialOverlay from './components/TutorialOverlay'
 import DrawingScreen from './components/DrawingScreen'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
-const UnifiedNotebook = lazy(() => import('./components/notebook/UnifiedNotebook'))
+const PageNotebook = lazy(() => import('./components/notebook/PageNotebook'))
 
 type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook'
 
@@ -320,22 +320,7 @@ function App() {
 
       {activeView === 'notebook' && (
         <Suspense fallback={<div style={{ background: '#0B1B3E', width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFD700' }}>טוען מחברת…</div>}>
-          <div style={{ position: 'fixed', inset: 0, background: 'linear-gradient(135deg, #0B1B3E 0%, #1E3A8A 100%)' }}>
-            <button
-              onClick={() => setActiveView('study')}
-              style={{
-                position: 'fixed', top: 16, insetInlineStart: 16, zIndex: 1000,
-                background: 'linear-gradient(135deg, #FFD700, #FFA500)',
-                color: '#0B1B3E', border: 'none', borderRadius: 20,
-                padding: '8px 18px', fontWeight: 700, fontSize: 14,
-                cursor: 'pointer', boxShadow: '0 4px 14px rgba(255,215,0,0.45)',
-              }}
-              aria-label="חזרה לדף הבית"
-            >
-              ← דף הבית
-            </button>
-            <UnifiedNotebook />
-          </div>
+          <PageNotebook onBack={() => setActiveView('study')} />
         </Suspense>
       )}
 
