@@ -12,7 +12,6 @@
     "tripo:regenerate": "node scripts/tripo/generate.mjs --force"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.30.1",
     "@excalidraw/excalidraw": "^0.18.1",
     "@react-spring/three": "^10.0.3",
     "@react-three/drei": "^9.96.0",
@@ -24,6 +23,7 @@
     "axios": "^1.6.5",
     "framer-motion": "^11.0.3",
     "lucide-react": "^0.323.0",
+    "openai": "^6.37.0",
     "postprocessing": "^6.38.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

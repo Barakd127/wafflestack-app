@@ -1,22 +1,27 @@
 /**
  * Vercel Edge Function: /api/tutor/chat
  *
- * Streams Claude responses as Server-Sent Events.
- * Reads ANTHROPIC_API_KEY from environment.
+ * Streams OpenAI responses as Server-Sent Events.
+ * Reads OPENAI_API_KEY from environment.
  *
  * Wire protocol:
  *   POST { messages, profile, msv, turn }
  *   Response: text/event-stream, frames `data: {"type":"delta","delta":"..."}`
  *
  * Hard cap: 4096 output tokens.
+ * OpenAI auto-caches stable prompt prefixes (>=1024 tokens), so we flatten
+ * the 6-section prompt into a single system message — the API handles caching
+ * transparently. Stable sections (persona/curriculum/tools/profile) come first;
+ * volatile sections (MSV/turn) come last so the cache hits.
  */
 
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import {
   buildSystemPrompt,
   DEFAULT_MSV,
   DEFAULT_PROFILE,
   DEFAULT_TURN,
+  flattenSystemPrompt,
   type TutorMSV,
   type TutorProfile,
   type TutorTurnContext,
@@ -24,7 +29,7 @@ import {
 
 export const config = { runtime: 'edge' }
 
-const MODEL = 'claude-sonnet-4-5'
+const MODEL = 'gpt-4o-mini'
 const MAX_OUTPUT_TOKENS = 4096
 
 interface ChatBody {
@@ -44,9 +49,9 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   const apiKey = (globalThis as unknown as { process?: { env?: Record<string, string> } })
-    .process?.env?.ANTHROPIC_API_KEY
+    .process?.env?.OPENAI_API_KEY
   if (!apiKey) {
-    return new Response('Missing ANTHROPIC_API_KEY', { status: 500 })
+    return new Response('Missing OPENAI_API_KEY', { status: 500 })
   }
 
   let body: ChatBody
@@ -69,26 +74,28 @@ export default async function handler(req: Request): Promise<Response> {
   const msv: TutorMSV = { ...DEFAULT_MSV, ...(body.msv ?? {}) }
   const turn: TutorTurnContext = { ...DEFAULT_TURN, ...(body.turn ?? {}) }
 
-  const system = buildSystemPrompt(profile, msv, turn)
+  // Flatten to single system string. Order preserved: stable prefix → volatile suffix.
+  const system = flattenSystemPrompt(buildSystemPrompt(profile, msv, turn))
 
-  const client = new Anthropic({ apiKey })
+  const client = new OpenAI({ apiKey })
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
-        const response = await client.messages.stream({
+        const response = await client.chat.completions.create({
           model: MODEL,
           max_tokens: MAX_OUTPUT_TOKENS,
-          system,
-          messages: wireMessages,
+          stream: true,
+          messages: [
+            { role: 'system', content: system },
+            ...wireMessages.map((m) => ({ role: m.role, content: m.content })),
+          ],
         })
 
-        for await (const event of response) {
-          if (
-            event.type === 'content_block_delta' &&
-            event.delta.type === 'text_delta'
-          ) {
-            controller.enqueue(sse({ type: 'delta', delta: event.delta.text }))
+        for await (const chunk of response) {
+          const delta = chunk.choices?.[0]?.delta?.content
+          if (typeof delta === 'string' && delta.length > 0) {
+            controller.enqueue(sse({ type: 'delta', delta }))
           }
         }
         controller.enqueue(sse({ type: 'done' }))
