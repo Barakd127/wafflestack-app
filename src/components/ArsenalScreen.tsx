@@ -5,7 +5,7 @@
  * All client-side; reads from arsenalStore. Animations use scoped CSS classes
  * defined in index.css (`arsenal-card-in`, `arsenal-pin-pulse`, `arsenal-card-out`).
  */
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { useArsenalStore, KIND_META, type ArsenalEntry, type ArsenalKind } from '../store/arsenalStore'
 import { useTutorialStep } from '../hooks/useTutorialStep'
 import CommunityArsenalTab from './CommunityArsenalTab'
@@ -478,7 +478,7 @@ function ArsenalCard({
             unicodeBidi: 'plaintext' as React.CSSProperties['unicodeBidi'],
           }}
         >
-          {entry.text}
+          <ArsenalEntryBody text={entry.text} />
         </div>
       )}
 
@@ -533,6 +533,61 @@ function ArsenalCard({
       </div>
     </div>
   )
+}
+
+// ── Entry body with inline math rendering ────────────────────────────────────
+// Renders entry text with KaTeX-rendered $..$ segments inline. Falls back to
+// plain text if window.katex isn't loaded yet. Splits on dollar pairs so prose
+// like "הנוסחה היא $\bar{x} = \frac{\sum x}{n}$ בקיצור" reads naturally.
+function ArsenalEntryBody({ text }: { text: string }) {
+  // Tokenize: alternate plain / math segments via $...$ pairs. Escape \\$ as literal.
+  const segments = useMemo(() => {
+    const out: Array<{ type: 'text' | 'math'; value: string }> = []
+    let i = 0
+    let buf = ''
+    while (i < text.length) {
+      const ch = text[i]
+      if (ch === '\\' && text[i + 1] === '$') { buf += '$'; i += 2; continue }
+      if (ch === '$') {
+        // find closing $
+        const end = text.indexOf('$', i + 1)
+        if (end === -1) { buf += text.slice(i); break }
+        if (buf) { out.push({ type: 'text', value: buf }); buf = '' }
+        out.push({ type: 'math', value: text.slice(i + 1, end) })
+        i = end + 1
+        continue
+      }
+      buf += ch
+      i++
+    }
+    if (buf) out.push({ type: 'text', value: buf })
+    return out
+  }, [text])
+
+  return (
+    <>
+      {segments.map((seg, idx) =>
+        seg.type === 'text'
+          ? <span key={idx}>{seg.value}</span>
+          : <MathInline key={idx} latex={seg.value} />,
+      )}
+    </>
+  )
+}
+
+function MathInline({ latex }: { latex: string }) {
+  const ref = useRef<HTMLSpanElement | null>(null)
+  useEffect(() => {
+    if (!ref.current) return
+    const w = window as unknown as { katex?: { render: (s: string, el: HTMLElement, opts: object) => void } }
+    if (!w.katex) { ref.current.textContent = latex; return }
+    try {
+      w.katex.render(latex, ref.current, { throwOnError: false, displayMode: false, output: 'html' })
+    } catch {
+      if (ref.current) ref.current.textContent = latex
+    }
+  }, [latex])
+  return <span ref={ref} dir="ltr" style={{ unicodeBidi: 'isolate' as React.CSSProperties['unicodeBidi'], display: 'inline-block', verticalAlign: 'middle', margin: '0 2px' }} />
 }
 
 // ── Confirm share dialog ─────────────────────────────────────────────────────

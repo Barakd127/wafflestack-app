@@ -1038,17 +1038,15 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
   onGoNotebook: () => void
   width?: number
 }) {
-  // EduCity-style icon chips: each item gets a gradient color theme.
-  // The emoji sits inside a soft rounded pill matching the brand palette.
-  // Notebook + drawing removed from sidebar per user (kanban item #7) — they
-  // belong inside the mindmap iframe / mindmap-tab toggle, not as top-level
-  // sidebar peers. Label "מפת לימוד" renamed to "מפת הלמידה שלי".
-  const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string; chipBg: string }> = [
-    { id: 'home',     label: 'דף הבית',           icon: '🏠', chipBg: 'linear-gradient(135deg, #FFD86B 0%, #FF9966 100%)' },
-    { id: 'topics',   label: 'אזור למידה',        icon: '📚', chipBg: 'linear-gradient(135deg, #6EE7F9 0%, #3B82F6 100%)' },
-    { id: 'arsenal',  label: 'הארסנל שלי',        icon: '💎', chipBg: 'linear-gradient(135deg, #C084FC 0%, #7C3AED 100%)' },
-    { id: null,       label: 'מפת הלמידה שלי',    icon: '🗺️', chipBg: 'linear-gradient(135deg, #FCA5A5 0%, #EF4444 100%)', action: 'mindmap' },
-    { id: null,       label: 'העולם שלי',         icon: '🌍', chipBg: 'linear-gradient(135deg, #34D399 0%, #059669 100%)', action: 'world' },
+  // Minimal sidebar icons (reverted to pre-2026-05-14 style per user).
+  // Notebook + drawing remain off sidebar (kanban #7). Label "מפת לימוד"
+  // kept renamed to "מפת הלמידה שלי".
+  const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string }> = [
+    { id: 'home',     label: 'דף הבית',           icon: '⌂' },
+    { id: 'topics',   label: 'אזור למידה',        icon: '📖' },
+    { id: 'arsenal',  label: 'הארסנל שלי',        icon: '🎯' },
+    { id: null,       label: 'מפת הלמידה שלי',    icon: '◫', action: 'mindmap' },
+    { id: null,       label: 'העולם שלי',         icon: '🌐', action: 'world' },
   ]
 
   const collapsed = width < 80
@@ -1118,18 +1116,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
               onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)' }}
               onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
             >
-              <span style={{
-                width: 36, height: 36, flexShrink: 0,
-                background: item.chipBg,
-                borderRadius: 12,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 18,
-                boxShadow: isActive
-                  ? '0 4px 14px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4)'
-                  : '0 2px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3)',
-                transform: isActive ? 'scale(1.05)' : 'scale(1)',
-                transition: 'transform 0.15s, box-shadow 0.15s',
-              }}>{item.icon}</span>
+              <span style={{ fontSize: 20, opacity: 0.85, width: 26, textAlign: 'center', flexShrink: 0 }}>{item.icon}</span>
               {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
             </button>
           )

@@ -404,13 +404,27 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
                 >
                   <div style={{
                     flexShrink: 0,
-                    width: 22, height: 22,
-                    color: '#FFD700', display: 'flex',
+                    width: 20, height: 20,
+                    display: 'flex',
                     alignItems: 'center', justifyContent: 'center',
-                    fontSize: 18, fontWeight: 700,
-                    marginTop: 4,
-                    transform: 'rotate(180deg)',
-                  }} aria-hidden="true">▸</div>
+                    marginTop: 5,
+                    opacity: 0.85,
+                  }} aria-hidden="true">
+                    {/* Golden waffle bullet — mini 3×3 grid, brand-matched */}
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <defs>
+                        <linearGradient id="waffle-bullet-grad" x1="0" y1="0" x2="16" y2="16" gradientUnits="userSpaceOnUse">
+                          <stop offset="0" stopColor="#FFE066"/>
+                          <stop offset="1" stopColor="#D4A017"/>
+                        </linearGradient>
+                      </defs>
+                      <rect x="1" y="1" width="14" height="14" rx="3" fill="url(#waffle-bullet-grad)" stroke="rgba(127,90,12,0.35)" strokeWidth="0.7"/>
+                      <line x1="1" y1="6" x2="15" y2="6" stroke="rgba(127,90,12,0.45)" strokeWidth="0.7"/>
+                      <line x1="1" y1="10" x2="15" y2="10" stroke="rgba(127,90,12,0.45)" strokeWidth="0.7"/>
+                      <line x1="6" y1="1" x2="6" y2="15" stroke="rgba(127,90,12,0.45)" strokeWidth="0.7"/>
+                      <line x1="10" y1="1" x2="10" y2="15" stroke="rgba(127,90,12,0.45)" strokeWidth="0.7"/>
+                    </svg>
+                  </div>
                   <div style={{
                     flex: 1, minWidth: 0,
                     fontSize: 18.5, lineHeight: 1.85, color: TEXT_DARK,

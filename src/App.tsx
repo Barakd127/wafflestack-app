@@ -159,7 +159,7 @@ function App() {
                 aria-label="פצל מסך — עיר ולימוד"
                 className="ws-split-btn"
                 style={{
-                  position: 'fixed', bottom: 24, left: 72, zIndex: 200,
+                  position: 'fixed', bottom: 96, left: 20, zIndex: 200,
                   background: 'rgba(51,81,202,0.85)',
                   backdropFilter: 'blur(12px)',
                   border: '1px solid rgba(99,162,255,0.5)',

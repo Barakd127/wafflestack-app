@@ -1535,8 +1535,56 @@ function mmAutoLayout(){
   }
   if(mmOrient() === 'tb') layoutTB(MM.root, 100, 80);
   else                    layoutLR(MM.root, 100, 100);
+  mmResolveCollisions();
   mmRender();
   mmFitView();
+}
+
+// Anti-collision: scan all nodes, find axis-aligned-rect overlaps, push the
+// later/lower-z node along the cross-axis until clear. Runs a few iterations
+// since pushing one node may create new overlaps. Operates on every node type
+// (rect, equation, canvas, etc.) so canvas+text overlaps are caught too.
+// Tunable PADDING gives breathing room beyond strict zero-overlap.
+function mmResolveCollisions(){
+  const PADDING = 14;
+  const MAX_ITER = 6;
+  const ids = Object.keys(MM.nodes);
+  const isTB = mmOrient() === 'tb';
+  for(let iter = 0; iter < MAX_ITER; iter++){
+    let moved = false;
+    for(let i = 0; i < ids.length; i++){
+      const a = MM.nodes[ids[i]]; if(!a) continue;
+      const aw = (a.W || 140), ah = (a.H || 40);
+      for(let j = i + 1; j < ids.length; j++){
+        const b = MM.nodes[ids[j]]; if(!b) continue;
+        if(a === MM.nodes[MM.root] || b === MM.nodes[MM.root]) continue;
+        const bw = (b.W || 140), bh = (b.H || 40);
+        // AABB overlap test with padding
+        const overlapX = (a.x - PADDING) < (b.x + bw + PADDING) && (b.x - PADDING) < (a.x + aw + PADDING);
+        const overlapY = (a.y - PADDING) < (b.y + bh + PADDING) && (b.y - PADDING) < (a.y + ah + PADDING);
+        if(!overlapX || !overlapY) continue;
+        // Push along cross-axis (perpendicular to layout flow)
+        if(isTB){
+          // cross-axis = x; push the one with larger x further right
+          const push = ((a.x + aw + PADDING) - b.x);
+          if(push > 0){
+            if(b.x >= a.x) b.x += push;
+            else            a.x += push;
+            moved = true;
+          }
+        } else {
+          // cross-axis = y; push the one with larger y further down
+          const push = ((a.y + ah + PADDING) - b.y);
+          if(push > 0){
+            if(b.y >= a.y) b.y += push;
+            else            a.y += push;
+            moved = true;
+          }
+        }
+      }
+    }
+    if(!moved) break;
+  }
 }
 
 function mmSetupMinimapNav(){
