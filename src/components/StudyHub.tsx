@@ -63,22 +63,71 @@ const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
     { Component: ZScoreInteractive,      title: 'ציון z + אחוזון' },
     { Component: Normal68_95_99,         title: 'כלל 68-95-99.7' },
   ],
-  // ── Single-aspect topics (cycle button hidden) ──
-  housing:     [{ Component: MedianInteractive,           title: 'חציון מול ממוצע' }],
-  school:      [{ Component: SamplingInteractive,         title: 'מדגם אקראי' }],
-  bank:        [{ Component: RegressionInteractive,       title: 'רגרסיה OLS' }],
-  market:      [{ Component: CorrelationInteractive,      title: 'מקדם Pearson' }],
-  'city-hall': [{ Component: BinomialInteractive,         title: 'התפלגות בינומית' }],
-  research:    [{ Component: HypothesisTestingInteractive, title: 'α, β, עוצמה' }],
-  news:        [{ Component: ConfidenceIntervalInteractive, title: 'רווחי סמך' }],
-  zscore:      [{ Component: ZScoreInteractive,           title: 'ציון z' }],
-  pvalue:      [{ Component: PValueInteractive,           title: 'ערך p' }],
-  anova:       [{ Component: ANOVAInteractive,            title: 'F = MSB/MSW' }],
-  ttest:       [{ Component: TTestInteractive,            title: 'התפלגות t' }],
-  variance:    [{ Component: VarianceInteractive,         title: 'ריבועי סטיות' }],
-  chisq:       [{ Component: ChiSquareInteractive,        title: 'χ² נצפה מול צפוי' }],
-  iqr:         [{ Component: IQRInteractive,              title: 'Boxplot' }],
-  clt:         [{ Component: CLTInteractive,              title: 'משפט הגבול המרכזי' }],
+  // ── Complex topics — multi-aspect via reuse of related components ──
+  housing: [
+    { Component: MedianInteractive,        title: 'חציון מול ממוצע' },
+    { Component: IQRInteractive,           title: 'טווח רבעוני (IQR)' },
+  ],
+  school: [
+    { Component: SamplingInteractive,      title: 'מדגם אקראי' },
+    { Component: MeanRunningAverage,       title: 'התכנסות הממוצע' },
+    { Component: CLTInteractive,           title: 'מ-מדגם ל-CLT' },
+  ],
+  bank: [
+    { Component: RegressionInteractive,    title: 'רגרסיה OLS' },
+    { Component: CorrelationInteractive,   title: 'קורלציה (Pearson)' },
+    { Component: ConfidenceIntervalInteractive, title: 'אמינות הקו' },
+  ],
+  market: [
+    { Component: CorrelationInteractive,   title: 'מקדם Pearson' },
+    { Component: RegressionInteractive,    title: 'מקורלציה לרגרסיה' },
+  ],
+  'city-hall': [
+    { Component: BinomialInteractive,      title: 'התפלגות בינומית' },
+    { Component: NormalDistInteractive,    title: 'קירוב נורמלי לבינומית' },
+  ],
+  research: [
+    { Component: HypothesisTestingInteractive, title: 'α · β · עוצמה' },
+    { Component: PValueInteractive,        title: 'ערך p — אזורי דחייה' },
+    { Component: ConfidenceIntervalInteractive, title: 'CI ↔ מבחן השערה' },
+  ],
+  news: [
+    { Component: ConfidenceIntervalInteractive, title: 'רווחי סמך' },
+    { Component: Normal68_95_99,           title: 'כלל 68-95-99.7' },
+  ],
+  zscore: [
+    { Component: ZScoreInteractive,        title: 'ציון z + אחוזון' },
+    { Component: Normal68_95_99,           title: 'איפה z נופל בעקומה?' },
+  ],
+  pvalue: [
+    { Component: PValueInteractive,        title: 'ערך p — שטח מתחת לעקומה' },
+    { Component: HypothesisTestingInteractive, title: 'p לעומת α' },
+  ],
+  anova: [
+    { Component: ANOVAInteractive,         title: 'F = MSB / MSW' },
+    { Component: TTestInteractive,         title: 't² = F (2 קבוצות)' },
+  ],
+  ttest: [
+    { Component: TTestInteractive,         title: 'התפלגות t' },
+    { Component: ZScoreInteractive,        title: 't → z (df גדול)' },
+  ],
+  variance: [
+    { Component: VarianceInteractive,      title: 'ריבועי סטיות' },
+    { Component: StdDevInteractive,        title: 'σ² → σ (שורש)' },
+  ],
+  chisq: [
+    { Component: ChiSquareInteractive,     title: 'χ² נצפה מול צפוי' },
+    { Component: HypothesisTestingInteractive, title: 'χ² בתוך מבחן השערה' },
+  ],
+  iqr: [
+    { Component: IQRInteractive,           title: 'Boxplot + חריגות' },
+    { Component: MedianInteractive,        title: 'חציון בליבה של IQR' },
+  ],
+  clt: [
+    { Component: CLTInteractive,           title: 'משפט הגבול המרכזי' },
+    { Component: SamplingInteractive,      title: 'מדגום ל-CLT' },
+    { Component: MeanRunningAverage,       title: 'LLN — חוק המספרים הגדולים' },
+  ],
 }
 
 // Carousel: shows one graph at a time + chip selector + "הבא ←" cycle button.
@@ -1166,12 +1215,10 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
       <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-        {/* ── ROW 0: Motivation widgets (streak + lead measure + 2-min) ── */}
-        <div className="ws-motivation-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, alignItems: 'stretch' }}>
-          <StreakCalendar />
-          <LeadMeasureCard topics_mastered={topicsMastered} />
-          <TwoMinChallengeCard topicId="power" onStart={() => onGoLearning()} />
-        </div>
+        {/* Motivation widgets row removed per user feedback (kanban B7) —
+            home was too crowded. The 2-min challenge card (leftmost) stays
+            accessible via the TwoMinChallengeCard preserved in motivation/,
+            ready to be wired into a dedicated motivation tab in the future. */}
 
         {/* ── ROW 1 ──────────────────────────────────── */}
         <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'stretch' }}>
