@@ -26,6 +26,12 @@ const MeanRunningAverage = lazy(() => import('./graphs/MeanRunningAverage'))
 const MeanVsMedianVsMode = lazy(() => import('./graphs/MeanVsMedianVsMode'))
 const StdDevTwoDistributions = lazy(() => import('./graphs/StdDevTwoDistributions'))
 const Normal68_95_99 = lazy(() => import('./graphs/Normal68_95_99'))
+const ResidualPlotInteractive = lazy(() => import('./graphs/ResidualPlotInteractive'))
+const EffectSizeInteractive = lazy(() => import('./graphs/EffectSizeInteractive'))
+const PoissonInteractive = lazy(() => import('./graphs/PoissonInteractive'))
+const PercentileInteractive = lazy(() => import('./graphs/PercentileInteractive'))
+const BoxplotComparisonInteractive = lazy(() => import('./graphs/BoxplotComparisonInteractive'))
+const SimpsonsParadoxInteractive = lazy(() => import('./graphs/SimpsonsParadoxInteractive'))
 
 // Motivation AI components — Atomic Habits / Deep Work primitives.
 // Wired into the home screen so the streak + lead-measure are always visible.
@@ -62,6 +68,7 @@ const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
     { Component: NormalDistInteractive,  title: 'גרירת גבולות' },
     { Component: ZScoreInteractive,      title: 'ציון z + אחוזון' },
     { Component: Normal68_95_99,         title: 'כלל 68-95-99.7' },
+    { Component: PercentileInteractive,  title: 'אחוזונים' },
   ],
   // ── Complex topics — multi-aspect via reuse of related components ──
   housing: [
@@ -77,19 +84,23 @@ const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
     { Component: RegressionInteractive,    title: 'רגרסיה OLS' },
     { Component: CorrelationInteractive,   title: 'קורלציה (Pearson)' },
     { Component: ConfidenceIntervalInteractive, title: 'אמינות הקו' },
+    { Component: ResidualPlotInteractive,  title: 'תרשים שאריות' },
   ],
   market: [
     { Component: CorrelationInteractive,   title: 'מקדם Pearson' },
     { Component: RegressionInteractive,    title: 'מקורלציה לרגרסיה' },
+    { Component: SimpsonsParadoxInteractive, title: 'פרדוקס סימפסון' },
   ],
   'city-hall': [
     { Component: BinomialInteractive,      title: 'התפלגות בינומית' },
     { Component: NormalDistInteractive,    title: 'קירוב נורמלי לבינומית' },
+    { Component: PoissonInteractive,       title: 'פואסון — λ גדל' },
   ],
   research: [
     { Component: HypothesisTestingInteractive, title: 'α · β · עוצמה' },
     { Component: PValueInteractive,        title: 'ערך p — אזורי דחייה' },
     { Component: ConfidenceIntervalInteractive, title: 'CI ↔ מבחן השערה' },
+    { Component: EffectSizeInteractive,    title: 'גודל אפקט — Cohen d' },
   ],
   news: [
     { Component: ConfidenceIntervalInteractive, title: 'רווחי סמך' },
@@ -122,6 +133,7 @@ const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
   iqr: [
     { Component: IQRInteractive,           title: 'Boxplot + חריגות' },
     { Component: MedianInteractive,        title: 'חציון בליבה של IQR' },
+    { Component: BoxplotComparisonInteractive, title: 'השוואת קבוצות' },
   ],
   clt: [
     { Component: CLTInteractive,           title: 'משפט הגבול המרכזי' },
