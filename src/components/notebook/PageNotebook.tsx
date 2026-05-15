@@ -15,13 +15,20 @@
  * Tech: tldraw ^5 (MIT), zustand (already a dep).
  */
 import { useEffect, useState } from 'react'
-import { Tldraw, type Editor, type TLPageId } from 'tldraw'
+import { Tldraw, type Editor, type TLPageId, type TLShapeId } from 'tldraw'
 import 'tldraw/tldraw.css'
 
 import { NoteContainerShapeUtil } from './shapes/NoteContainerShape'
+import { EquationShapeUtil } from './shapes/EquationShape'
 import SectionsNav from './ui/SectionsNav'
 import PagesNav from './ui/PagesNav'
-import { useNotebookStore } from './state/notebookStore'
+import PaperStyleSelector, {
+  PaperBackground,
+  readPaperStyle,
+} from './ui/PaperStyleSelector'
+import TagsFilter from './ui/TagsFilter'
+import TemplatesMenu from './ui/TemplatesMenu'
+import { useNotebookStore, type PaperStyle } from './state/notebookStore'
 import { useNoteSpawner } from './hooks/useNoteSpawner'
 
 const GOLD = '#D4AF37'
@@ -31,7 +38,7 @@ const PERSISTENCE_KEY_V1 = 'wafflestack-notebook-v1'
 const PERSISTENCE_KEY_V2 = 'wafflestack-notebook-v2'
 const MIGRATION_FLAG = 'wafflestack-notebook-v1-to-v2-migrated'
 
-const customShapeUtils = [NoteContainerShapeUtil] as const
+const customShapeUtils = [NoteContainerShapeUtil, EquationShapeUtil] as const
 
 interface PageNotebookProps {
   onBack: () => void
@@ -122,12 +129,23 @@ async function migrateV1ToV2(): Promise<void> {
 export default function PageNotebook({ onBack }: PageNotebookProps) {
   const [editor, setEditor] = useState<Editor | null>(null)
   const [migrationReady, setMigrationReady] = useState(false)
+  const [paperStyle, setPaperStyle] = useState<PaperStyle>('blank')
 
   const viewMode = useNotebookStore((s) => s.view.mode)
   const setViewMode = useNotebookStore((s) => s.setViewMode)
   const activeSectionId = useNotebookStore((s) => s.activeSectionId)
 
   useNoteSpawner(editor)
+
+  // Track the current page's paperStyle so PaperBackground re-renders when
+  // the user switches pages or picks a different rule style.
+  useEffect(() => {
+    if (!editor) return
+    const read = () => setPaperStyle(readPaperStyle(editor))
+    read()
+    const unsub = editor.store.listen(read, { scope: 'document' })
+    return () => unsub()
+  }, [editor])
 
   // Run v1 → v2 migration once before mounting tldraw.
   useEffect(() => {
@@ -179,20 +197,19 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
 
   const insertMath = () => {
     if (!editor) return
-    const latex = window.prompt('הקלד נוסחת LaTeX (למשל: \\bar{x} = \\frac{1}{n}\\sum x_i):')
-    if (!latex || !latex.trim()) return
+    // Phase 2: spawn an editable EquationShape; the shape will lazy-load
+    // MathLive and open its <math-field> editor on first edit.
     const { x, y } = editor.getViewportPageBounds().center
+    const id = `shape:eq${Date.now().toString(36)}` as TLShapeId
     editor.createShape({
-      type: 'text',
-      x: x - 100,
-      y: y - 20,
-      props: {
-        richText: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: `[KaTeX] ${latex}` }] }] },
-        color: 'orange',
-        size: 'l',
-        autoSize: true,
-      },
+      id,
+      type: 'equation',
+      x: x - 120,
+      y: y - 30,
+      props: { w: 240, h: 60, latex: '', fontSize: 20 },
     })
+    editor.setEditingShape(id)
+    editor.setSelectedShapes([id])
   }
 
   const activateHighlighter = () => {
@@ -234,8 +251,10 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
       }} dir="rtl">
         <button onClick={onBack} style={btnGoldStyle} aria-label="חזרה לדף הבית">← דף הבית</button>
         <button onClick={addPage} style={btnGlassStyle} aria-label="הוסף דף">📄 הוסף דף</button>
-        <button onClick={insertMath} style={btnGlassStyle} aria-label="הוסף נוסחה">🧮 הוסף נוסחה</button>
+        <button onClick={insertMath} style={btnGlassStyle} aria-label="הוסף משוואה">🧮 משוואה</button>
         <button onClick={activateHighlighter} style={btnGlassStyle} aria-label="מסמן">🖍 מסמן</button>
+        <PaperStyleSelector editor={editor} />
+        <TemplatesMenu editor={editor} />
         <button
           onClick={() => setViewMode(viewMode === 'infinite' ? 'bounded' : 'infinite')}
           style={btnGlassStyle}
@@ -248,6 +267,9 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
         </div>
       </div>
 
+      {/* Tag filter strip (Phase 2) */}
+      <TagsFilter editor={editor} />
+
       {/* Pages strip (under section) */}
       <PagesNav editor={editor} />
 
@@ -257,6 +279,8 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
             white surface; tldraw still renders behind it but we visually
             constrain authoring to a page. */}
         <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          {/* Phase 2: paper-rule SVG layer (behind tldraw). */}
+          <PaperBackground style={paperStyle} />
           {viewMode === 'bounded' && (
             <div
               aria-hidden

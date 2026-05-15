@@ -21,10 +21,14 @@ export interface NotebookViewState {
   mode: 'infinite' | 'bounded'
 }
 
+export type PaperStyle = 'blank' | 'ruled' | 'grid' | 'dots'
+
 interface NotebookStore {
   sections: NotebookSection[]
   activeSectionId: string | null
   view: NotebookViewState
+  /** Phase 2: active tag filter ('' = show all). */
+  tagFilter: string
 
   addSection: (name: string) => NotebookSection
   renameSection: (id: string, name: string) => void
@@ -32,6 +36,7 @@ interface NotebookStore {
   setActiveSection: (id: string | null) => void
 
   setViewMode: (mode: NotebookViewState['mode']) => void
+  setTagFilter: (tag: string) => void
 }
 
 const DEFAULT_SECTION_COLORS = [
@@ -63,6 +68,7 @@ export const useNotebookStore = create<NotebookStore>()(
       ],
       activeSectionId: 'section-default',
       view: { mode: 'infinite' },
+      tagFilter: '',
 
       addSection: (name) => {
         const section: NotebookSection = {
@@ -97,6 +103,7 @@ export const useNotebookStore = create<NotebookStore>()(
       setActiveSection: (id) => set({ activeSectionId: id }),
 
       setViewMode: (mode) => set({ view: { mode } }),
+      setTagFilter: (tag) => set({ tagFilter: tag }),
     }),
     {
       name: 'wafflestack-notebook-sections-v2',

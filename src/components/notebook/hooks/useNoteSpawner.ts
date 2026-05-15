@@ -46,7 +46,7 @@ export function useNoteSpawner(editor: Editor | null) {
         type: 'note-container',
         x: pagePoint.x,
         y: pagePoint.y,
-        props: { w: 200, h: 40, text: '', fontSize: 16 },
+        props: { w: 200, h: 40, text: '', fontSize: 16, tags: [] },
       })
       editor.setEditingShape(id)
       editor.setSelectedShapes([id])

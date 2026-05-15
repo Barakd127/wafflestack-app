@@ -19,6 +19,8 @@ export interface NoteContainerProps {
   h: number
   text: string
   fontSize: number
+  /** Phase 2: free-form `#tags` attached to this container. */
+  tags: string[]
 }
 
 export type NoteContainerShape = TLBaseShape<'note-container', NoteContainerProps>
@@ -37,6 +39,9 @@ const noteContainerProps: RecordProps<NoteContainerShape> = {
   h: { validate: (v: unknown) => v as number },
   text: { validate: (v: unknown) => v as string },
   fontSize: { validate: (v: unknown) => v as number },
+  tags: {
+    validate: (v: unknown) => (Array.isArray(v) ? (v as string[]) : []),
+  },
 }
 
 export const NOTE_CONTAINER_MIN_W = 120
@@ -54,6 +59,7 @@ export class NoteContainerShapeUtil extends ShapeUtil<NoteContainerShape> {
       h: 40,
       text: '',
       fontSize: NOTE_CONTAINER_DEFAULT_FONT,
+      tags: [],
     }
   }
 
@@ -83,7 +89,28 @@ export class NoteContainerShapeUtil extends ShapeUtil<NoteContainerShape> {
 
   component(shape: NoteContainerShape) {
     const isEditing = this.editor.getEditingShapeId() === shape.id
-    const { text, fontSize, w, h } = shape.props
+    const { text, fontSize, w, h, tags } = shape.props
+
+    const addTagPrompt = () => {
+      const raw = window.prompt('הוסף תגית (ללא #):')
+      if (!raw) return
+      const tag = raw.replace(/^#/, '').trim()
+      if (!tag) return
+      const next = Array.from(new Set([...(tags ?? []), tag]))
+      this.editor.updateShape<NoteContainerShape>({
+        id: shape.id,
+        type: 'note-container',
+        props: { ...shape.props, tags: next },
+      })
+    }
+
+    const removeTag = (t: string) => {
+      this.editor.updateShape<NoteContainerShape>({
+        id: shape.id,
+        type: 'note-container',
+        props: { ...shape.props, tags: (tags ?? []).filter((x) => x !== t) },
+      })
+    }
 
     const onInput = (e: React.FormEvent<HTMLDivElement>) => {
       const el = e.currentTarget
@@ -134,6 +161,56 @@ export class NoteContainerShapeUtil extends ShapeUtil<NoteContainerShape> {
         >
           {text}
         </div>
+        {/* Tag chips strip — visible at the bottom of the container. */}
+        {(isEditing || (tags && tags.length > 0)) && (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 4,
+              marginTop: 6,
+              direction: 'rtl',
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            {(tags ?? []).map((t) => (
+              <span
+                key={t}
+                onDoubleClick={() => removeTag(t)}
+                title="לחיצה כפולה להסרה"
+                style={{
+                  background: 'rgba(212,175,55,0.18)',
+                  color: '#7A5C00',
+                  border: '1px solid rgba(212,175,55,0.5)',
+                  borderRadius: 10,
+                  padding: '1px 8px',
+                  fontSize: 11,
+                  fontFamily: "'Rubik', sans-serif",
+                  cursor: 'pointer',
+                }}
+              >
+                #{t}
+              </span>
+            ))}
+            {isEditing && (
+              <button
+                onClick={addTagPrompt}
+                style={{
+                  background: 'transparent',
+                  border: '1px dashed rgba(212,175,55,0.5)',
+                  borderRadius: 10,
+                  color: '#7A5C00',
+                  padding: '0 8px',
+                  fontSize: 11,
+                  fontFamily: "'Rubik', sans-serif",
+                  cursor: 'pointer',
+                }}
+              >
+                + תגית
+              </button>
+            )}
+          </div>
+        )}
       </HTMLContainer>
     )
   }

@@ -23,6 +23,7 @@
     "axios": "^1.6.5",
     "framer-motion": "^11.0.3",
     "lucide-react": "^0.323.0",
+    "mathlive": "^0.105.0",
     "openai": "^6.37.0",
     "postprocessing": "^6.38.2",
     "react": "^18.2.0",
