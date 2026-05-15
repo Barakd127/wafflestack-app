@@ -152,7 +152,29 @@ function InteractiveGraphCarousel({ selectedTopic }: { selectedTopic: string }) 
   const Active = graphs[graphIdx]?.Component
   if (!Active) return null
   return (
-    <div dir="rtl" style={{ width: '100%' }}>
+    <div dir="rtl" style={{ width: '100%', marginTop: 24 }}>
+      {/* Prominent section header — makes the carousel feel like its own block,
+          not a continuation of the lesson. Addresses 5x repeated "where are
+          the new graphs?" — they were buried below LessonScreen. */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        margin: '0 auto 14px', maxWidth: 720,
+        padding: '12px 18px',
+        background: 'linear-gradient(135deg, rgba(245,200,66,0.18), rgba(212,175,55,0.10))',
+        border: '1px solid rgba(212,175,55,0.5)',
+        borderRadius: 14,
+        boxShadow: '0 2px 12px rgba(212,175,55,0.18)',
+      }}>
+        <span style={{ fontSize: 22 }}>📊</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 16, fontWeight: 700, fontFamily: "'Rubik', sans-serif", color: 'var(--sh-text-dark)' }}>
+            גרפים אינטראקטיביים — {graphs.length} {graphs.length === 1 ? 'היבט' : 'היבטים'}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--sh-text-med)', marginTop: 2 }}>
+            לחץ על הצ'יפים מטה כדי לעבור בין היבטי הנושא
+          </div>
+        </div>
+      </div>
       <Suspense fallback={<div style={{ padding: 24, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>טוען גרף אינטראקטיבי…</div>}>
         <Active />
       </Suspense>

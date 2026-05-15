@@ -137,35 +137,68 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
       )}
 
       {onBack && (
-        <Tooltip label="חזרה" description="חזור לאזור הלמידה" placement="top">
-          <button
-            onClick={onBack}
-            aria-label="חזרה ללימוד"
-            // BOTTOM-left: top-left was overlapping the Godot HUD's "🏗️ Build"
-            // button. High-contrast solid pill so it doesn't blend into the
-            // glassy city HUD beneath it.
-            className="ws-godot-back-btn absolute bottom-4 left-4 z-50 ws-safe-bottom"
-            style={{
-              padding: '10px 18px',
-              borderRadius: 14,
-              background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
-              border: '2px solid #D4AF37',
-              color: '#fff',
-              fontSize: 14,
-              fontWeight: 700,
-              fontFamily: "'Rubik','Assistant',sans-serif",
-              boxShadow: '0 6px 20px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              backdropFilter: 'blur(8px)',
-            }}
-          >
-            <span style={{ fontSize: 18 }}>←</span>
-            <span>חזרה ללימוד</span>
-          </button>
-        </Tooltip>
+        <>
+          {/* Bottom-left back-to-learning button (existing) */}
+          <Tooltip label="חזרה ללימוד" description="חזור לאזור הלמידה" placement="top">
+            <button
+              onClick={onBack}
+              aria-label="חזרה ללימוד"
+              className="ws-godot-back-btn absolute bottom-4 left-4 z-50 ws-safe-bottom"
+              style={{
+                padding: '10px 18px',
+                borderRadius: 14,
+                background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
+                border: '2px solid #D4AF37',
+                color: '#fff',
+                fontSize: 14,
+                fontWeight: 700,
+                fontFamily: "'Rubik','Assistant',sans-serif",
+                boxShadow: '0 6px 20px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              <span style={{ fontSize: 18 }}>←</span>
+              <span>חזרה ללימוד</span>
+            </button>
+          </Tooltip>
+
+          {/* Top-left HOME button (new). Routes to study-hub home via the same
+              onBack callback. Distinct visual treatment (gold gradient + house
+              icon) so it reads as "home" not "back". */}
+          <Tooltip label="דף הבית" description="חזרה למסך הראשי" placement="bottom">
+            <button
+              onClick={onBack}
+              aria-label="דף הבית"
+              className="ws-godot-home-btn absolute top-4 left-4 z-50"
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+                border: '2px solid rgba(255,255,255,0.5)',
+                color: '#0B1B3E',
+                fontSize: 24,
+                fontWeight: 700,
+                fontFamily: "'Rubik','Assistant',sans-serif",
+                boxShadow: '0 6px 20px rgba(212,175,55,0.55), 0 0 0 1px rgba(255,255,255,0.15) inset',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backdropFilter: 'blur(8px)',
+                transition: 'transform 0.15s, box-shadow 0.15s',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.08)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)' }}
+            >
+              🏠
+            </button>
+          </Tooltip>
+        </>
       )}
 
       <iframe
