@@ -1165,16 +1165,35 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
   onGoNotebook: () => void
   width?: number
 }) {
-  // Minimal sidebar icons (reverted to pre-2026-05-14 style per user).
-  // Notebook + drawing remain off sidebar (kanban #7). Label "מפת לימוד"
-  // kept renamed to "מפת הלמידה שלי".
-  const items: Array<{ id: InternalView | null; label: string; icon: string; action?: string }> = [
-    { id: 'home',     label: 'דף הבית',           icon: '⌂' },
-    { id: 'topics',   label: 'אזור למידה',        icon: '📖' },
-    { id: 'arsenal',  label: 'הארסנל שלי',        icon: '🎯' },
-    { id: null,       label: 'מפת הלמידה שלי',    icon: '◫', action: 'mindmap' },
-    { id: null,       label: 'העולם שלי',         icon: '🌐', action: 'world' },
+  // EduCity-style clean line icons. SVG with stroke-currentColor so the
+  // active-state gold tint applies uniformly. No emoji, no gradient chips.
+  // Each icon is a 22x22 viewBox 24, 1.8 stroke, rounded line caps.
+  type IconKey = 'home' | 'book' | 'trophy' | 'map' | 'globe'
+  const items: Array<{ id: InternalView | null; label: string; iconKey: IconKey; action?: string }> = [
+    { id: 'home',     label: 'דף הבית',           iconKey: 'home' },
+    { id: 'topics',   label: 'אזור למידה',        iconKey: 'book' },
+    { id: 'arsenal',  label: 'הארסנל שלי',        iconKey: 'trophy' },
+    { id: null,       label: 'מפת הלמידה שלי',    iconKey: 'map',   action: 'mindmap' },
+    { id: null,       label: 'העולם שלי',         iconKey: 'globe', action: 'world' },
   ]
+  const renderIcon = (k: IconKey) => {
+    const stroke = 'currentColor'
+    const sw = 1.8
+    const lc = 'round' as const
+    const lj = 'round' as const
+    switch (k) {
+      case 'home':
+        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M3 11.5L12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+      case 'book':
+        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h11"/></svg>
+      case 'trophy':
+        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M5 6H3v2a3 3 0 0 0 3 3"/><path d="M19 6h2v2a3 3 0 0 1-3 3"/><path d="M9 19h6"/><path d="M12 14v5"/></svg>
+      case 'map':
+        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v16"/><path d="M15 6v16"/></svg>
+      case 'globe':
+        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 0 1 0 18"/><path d="M12 3a13 13 0 0 0 0 18"/></svg>
+    }
+  }
 
   const collapsed = width < 80
   return (
@@ -1243,7 +1262,16 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
               onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)' }}
               onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
             >
-              <span style={{ fontSize: 20, opacity: 0.85, width: 26, textAlign: 'center', flexShrink: 0 }}>{item.icon}</span>
+              <span style={{
+                width: 32, height: 32, flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: isActive ? '#FFD700' : 'rgba(255,255,255,0.92)',
+                background: isActive ? 'rgba(255,215,0,0.12)' : 'rgba(255,255,255,0.08)',
+                borderRadius: 10,
+                border: '1px solid ' + (isActive ? 'rgba(255,215,0,0.35)' : 'rgba(255,255,255,0.14)'),
+                transition: 'color 0.15s, background 0.15s, transform 0.15s',
+                transform: isActive ? 'scale(1.06)' : 'scale(1)',
+              }}>{renderIcon(item.iconKey)}</span>
               {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
             </button>
           )
