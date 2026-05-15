@@ -32,6 +32,13 @@ const PoissonInteractive = lazy(() => import('./graphs/PoissonInteractive'))
 const PercentileInteractive = lazy(() => import('./graphs/PercentileInteractive'))
 const BoxplotComparisonInteractive = lazy(() => import('./graphs/BoxplotComparisonInteractive'))
 const SimpsonsParadoxInteractive = lazy(() => import('./graphs/SimpsonsParadoxInteractive'))
+const BayesTheoremInteractive = lazy(() => import('./graphs/BayesTheoremInteractive'))
+const ConditionalProbTreeInteractive = lazy(() => import('./graphs/ConditionalProbTreeInteractive'))
+const TypeIErrorInteractive = lazy(() => import('./graphs/TypeIErrorInteractive'))
+const RSquaredDecompositionInteractive = lazy(() => import('./graphs/RSquaredDecompositionInteractive'))
+const CombinationsVsPermutationsInteractive = lazy(() => import('./graphs/CombinationsVsPermutationsInteractive'))
+const LinearTransformationInteractive = lazy(() => import('./graphs/LinearTransformationInteractive'))
+const SkewnessKurtosisInteractive = lazy(() => import('./graphs/SkewnessKurtosisInteractive'))
 
 // Motivation AI components — Atomic Habits / Deep Work primitives.
 // Wired into the home screen so the streak + lead-measure are always visible.
@@ -139,6 +146,104 @@ const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
     { Component: CLTInteractive,           title: 'משפט הגבול המרכזי' },
     { Component: SamplingInteractive,      title: 'מדגום ל-CLT' },
     { Component: MeanRunningAverage,       title: 'LLN — חוק המספרים הגדולים' },
+  ],
+
+  // ── Topic-ID keys (match quiz-bank.json / lesson-content.ts IDs). The
+  // LessonScreen / InteractiveGraphCarousel receives a TOPIC ID (e.g. "mean",
+  // "regression"), NOT a building ID. Without these entries the carousel was
+  // looking up "mean" against a map keyed by "power" and finding nothing —
+  // that's why users repeatedly asked "where are the graphs?". Each topic-id
+  // key reuses the corresponding building-id list, then adds new deep-dive
+  // components for hard topics (Bayes, Type-I/II, R² decomposition, etc.).
+  // ──────────────────────────────────────────────────────────────────────
+  mean: [
+    { Component: MeanInteractive,        title: 'מהו ממוצע?' },
+    { Component: MeanRunningAverage,     title: 'התכנסות כש-n גדל' },
+    { Component: MeanVsMedianVsMode,     title: 'ממוצע · חציון · שכיח' },
+  ],
+  median: [
+    { Component: MedianInteractive,      title: 'חציון מול ממוצע' },
+    { Component: IQRInteractive,         title: 'טווח רבעוני (IQR)' },
+    { Component: MeanVsMedianVsMode,     title: 'ממוצע · חציון · שכיח' },
+  ],
+  'std-dev': [
+    { Component: StdDevInteractive,      title: 'תחומי k·σ' },
+    { Component: VarianceInteractive,    title: 'ריבועי סטיות (שונות)' },
+    { Component: StdDevTwoDistributions, title: 'שתי התפלגויות' },
+  ],
+  probability: [
+    { Component: BayesTheoremInteractive,        title: 'משפט בייס' },
+    { Component: ConditionalProbTreeInteractive, title: 'הסתברות מותנית — עץ' },
+    { Component: BinomialInteractive,             title: 'התפלגות בינומית' },
+  ],
+  binomial: [
+    { Component: BinomialInteractive,    title: 'התפלגות בינומית' },
+    { Component: NormalDistInteractive,  title: 'קירוב נורמלי לבינומית' },
+    { Component: PoissonInteractive,     title: 'פואסון — λ גדל' },
+  ],
+  correlation: [
+    { Component: CorrelationInteractive,     title: 'מקדם Pearson' },
+    { Component: RegressionInteractive,      title: 'מקורלציה לרגרסיה' },
+    { Component: SimpsonsParadoxInteractive, title: 'פרדוקס סימפסון' },
+  ],
+  regression: [
+    { Component: RegressionInteractive,           title: 'רגרסיה OLS' },
+    { Component: RSquaredDecompositionInteractive, title: 'R² — פירוק SST=SSE+SSR' },
+    { Component: ResidualPlotInteractive,         title: 'תרשים שאריות' },
+    { Component: ConfidenceIntervalInteractive,   title: 'אמינות הקו' },
+  ],
+  'hypothesis-testing': [
+    { Component: HypothesisTestingInteractive, title: 'α · β · עוצמה' },
+    { Component: TypeIErrorInteractive,        title: 'שגיאה I/II + Power' },
+    { Component: PValueInteractive,            title: 'ערך p — אזורי דחייה' },
+    { Component: EffectSizeInteractive,        title: 'גודל אפקט — Cohen d' },
+  ],
+  // X'd by user: sampling, confidence-intervals, intro, variable-types — no
+  // carousel for those topics.
+  'data-presentation': [
+    { Component: BoxplotComparisonInteractive, title: 'Boxplot — השוואת קבוצות' },
+    { Component: IQRInteractive,               title: 'IQR + חריגות' },
+  ],
+  'distribution-shapes': [
+    { Component: SkewnessKurtosisInteractive, title: 'Skew & Kurtosis' },
+    { Component: NormalDistInteractive,       title: 'התפלגות נורמלית' },
+    { Component: MeanVsMedianVsMode,          title: 'מיקום מדדים בהתפלגויות אסימטריות' },
+  ],
+  'weighted-combined': [
+    { Component: MeanInteractive,    title: 'ממוצע משוקלל' },
+    { Component: VarianceInteractive, title: 'שונות מצורפת' },
+  ],
+  'observation-changes': [
+    { Component: MeanInteractive,    title: 'השפעת תצפית בודדת על הממוצע' },
+    { Component: MedianInteractive,  title: 'חוסן החציון' },
+  ],
+  'linear-transformations': [
+    { Component: LinearTransformationInteractive, title: 'Y = aX + b' },
+    { Component: ZScoreInteractive,               title: 'תקנון Z — מקרה פרטי' },
+  ],
+  percentiles: [
+    { Component: PercentileInteractive, title: 'אחוזונים' },
+    { Component: ZScoreInteractive,     title: 'ציון z + אחוזון' },
+    { Component: Normal68_95_99,        title: 'אחוזונים במונחי σ' },
+  ],
+  combinatorics: [
+    { Component: CombinationsVsPermutationsInteractive, title: 'צירופים מול חליפות' },
+    { Component: BinomialInteractive,                   title: 'נוסחת הבינום בפעולה' },
+  ],
+  'discrete-rv': [
+    { Component: BinomialInteractive, title: 'בינומית — דוגמה לבדיד' },
+    { Component: PoissonInteractive,  title: 'פואסון — λ' },
+  ],
+  pearson: [
+    { Component: CorrelationInteractive,     title: 'Pearson r' },
+    { Component: RegressionInteractive,      title: 'r → b (שיפוע)' },
+    { Component: SimpsonsParadoxInteractive, title: 'פרדוקס סימפסון' },
+  ],
+  spearman: [
+    { Component: CorrelationInteractive, title: 'מתאם דרגות' },
+  ],
+  cramer: [
+    { Component: ChiSquareInteractive, title: 'χ² — בסיס ל-Cramér' },
   ],
 }
 
