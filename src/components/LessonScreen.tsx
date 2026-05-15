@@ -18,9 +18,10 @@ interface LessonScreenProps {
   onStartQuiz: () => void
   onBack: () => void
   onComplete: (topicId: string) => void
+  graphCarousel?: React.ReactNode
 }
 
-export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete }: LessonScreenProps) {
+export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete, graphCarousel }: LessonScreenProps) {
   const lesson = LESSON_CONTENT.find(t => t.id === topicId)
   const [currentSlide, setCurrentSlide] = useState(0)
   // Theory defaults to FULL-SCREEN. User opens the side mind map explicitly
@@ -193,8 +194,12 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
   const Visual = TOPIC_VISUALS[slide.visualId ?? topicId] as React.FC | undefined
 
   // ── Right-side content (slide + visualization + footer) ─────────────────────
+  const rightPaneRef = useRef<HTMLDivElement>(null)
+  // Scroll to top whenever the slide changes so slide card is always visible first
+  useEffect(() => { rightPaneRef.current?.scrollTo({ top: 0 }) }, [currentSlide])
+
   const rightPane = (
-    <div dir="rtl" className="ws-lesson-rightpane" style={{
+    <div ref={rightPaneRef} dir="rtl" className="ws-lesson-rightpane" style={{
       flex: 1, overflow: 'auto', padding: '24px 28px',
       fontFamily: "'Rubik', 'Assistant', sans-serif",
     }}>
@@ -469,6 +474,9 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete 
 
       {/* Interactive visualization */}
       {Visual && (<div><Visual /></div>)}
+
+      {/* Graph carousel — rendered inside scroll container so it doesn't push slide cards off-screen */}
+      {graphCarousel}
 
       {/* Footer controls — dot navigation only (prev/next moved to floating arrows) */}
       <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>

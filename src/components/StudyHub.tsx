@@ -2543,15 +2543,13 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
           />
         )}
         {internalView === 'lesson' && selectedTopic && (
-          <>
-            <LessonScreen
-              topicId={selectedTopic}
-              onStartQuiz={() => setInternalView('quiz-intro')}
-              onBack={() => setInternalView('topics')}
-              onComplete={(id) => useLearningStore.getState().completeLesson(id)}
-            />
-            <InteractiveGraphCarousel selectedTopic={selectedTopic} />
-          </>
+          <LessonScreen
+            topicId={selectedTopic}
+            onStartQuiz={() => setInternalView('quiz-intro')}
+            onBack={() => setInternalView('topics')}
+            onComplete={(id) => useLearningStore.getState().completeLesson(id)}
+            graphCarousel={<InteractiveGraphCarousel selectedTopic={selectedTopic} />}
+          />
         )}
         {internalView === 'arsenal' && <ArsenalScreen />}
         {internalView === 'quiz-intro' && selectedTopic && (
