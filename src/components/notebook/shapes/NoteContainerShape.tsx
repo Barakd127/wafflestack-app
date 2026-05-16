@@ -134,20 +134,25 @@ export class NoteContainerShapeUtil extends ShapeUtil<NoteContainerShape> {
           width: w,
           height: h,
           pointerEvents: 'all',
-          fontFamily: "'Rubik', 'Segoe UI', sans-serif",
+          // Phase B.2 polish — calm, neat typography per "neat & inviting writing field" brief
+          fontFamily: "'Assistant', 'Rubik', 'Segoe UI', sans-serif",
           fontSize,
-          lineHeight: 1.4,
-          padding: NOTE_CONTAINER_PAD,
+          lineHeight: 1.55,
+          padding: NOTE_CONTAINER_PAD + 4, // 16 → 20
           boxSizing: 'border-box',
-          background: 'transparent',
-          border: `1px dashed ${isEditing ? '#D4AF37' : 'transparent'}`,
-          borderRadius: 4,
-          color: '#0B1B3E',
+          background: isEditing ? 'rgba(255,255,255,0.65)' : 'transparent',
+          border: `1px ${isEditing ? 'solid' : 'solid'} ${isEditing ? 'rgba(212,175,55,0.45)' : 'rgba(0,0,0,0.04)'}`,
+          borderRadius: 6,
+          color: '#1F2640', // soft gray ink, not pure black
           direction: 'rtl',
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
           overflow: 'hidden',
           cursor: isEditing ? 'text' : 'move',
+          // Focus glow — soft gold ring when editing
+          boxShadow: isEditing ? '0 0 0 3px rgba(212,175,55,0.18), 0 4px 14px rgba(0,0,0,0.06)' : 'none',
+          transform: isEditing ? 'scale(1.005)' : 'scale(1)',
+          transition: 'box-shadow 180ms ease, transform 180ms ease, background 180ms ease, border-color 180ms ease',
         }}
       >
         <div

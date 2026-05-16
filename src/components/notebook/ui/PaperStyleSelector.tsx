@@ -128,47 +128,41 @@ export default function PaperStyleSelector({ editor }: PaperStyleSelectorProps) 
  * Patterns are pure SVG (no images) so they zoom cleanly and stay crisp.
  */
 export function PaperBackground({ style }: { style: PaperStyle }) {
-  if (style === 'blank') return null
+  // ALL styles render a warm-paper base color so the canvas never looks like
+  // a cold tech surface. Phase B.2 — "neat & inviting writing field".
+  // Per-style adds rule lines / grid / dots on top of the paper base.
+  const PAPER_BASE = style === 'ruled' ? '#FBF8F1' : '#FAF7EE'
 
-  // Three patterns share a viewport-anchored SVG so the rule lines are fixed
-  // in screen space — they don't pan with the canvas (matches OneNote/Word).
+  const ruledMarginX = 56 // dashed red margin position (RTL: from right edge)
+
   const defs =
     style === 'ruled' ? (
-      <pattern
-        id="paper-ruled"
-        width="40"
-        height="32"
-        patternUnits="userSpaceOnUse"
-      >
-        <line x1="0" y1="31" x2="40" y2="31" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
+      <pattern id="paper-ruled" width="40" height="28" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="27" x2="40" y2="27" stroke="#A8B8D6" strokeWidth="0.6" opacity="0.55" />
       </pattern>
     ) : style === 'grid' ? (
-      <pattern
-        id="paper-grid"
-        width="32"
-        height="32"
-        patternUnits="userSpaceOnUse"
-      >
-        <path
-          d="M 32 0 L 0 0 0 32"
-          fill="none"
-          stroke="rgba(255,255,255,0.14)"
-          strokeWidth="1"
-        />
+      <pattern id="paper-grid" width="24" height="24" patternUnits="userSpaceOnUse">
+        <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#D8D2C0" strokeWidth="0.7" opacity="0.65" />
+      </pattern>
+    ) : style === 'dots' ? (
+      <pattern id="paper-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="1" fill="#C3B8A0" opacity="0.55" />
       </pattern>
     ) : (
-      <pattern
-        id="paper-dots"
-        width="24"
-        height="24"
-        patternUnits="userSpaceOnUse"
-      >
-        <circle cx="2" cy="2" r="1.4" fill="rgba(255,255,255,0.25)" />
+      // 'blank' — subtle paper-grain noise (very faint), still feels like paper
+      <pattern id="paper-grain" width="160" height="160" patternUnits="userSpaceOnUse">
+        <rect width="160" height="160" fill={PAPER_BASE} />
+        <circle cx="40" cy="60" r="0.8" fill="#000" opacity="0.02" />
+        <circle cx="110" cy="30" r="0.6" fill="#000" opacity="0.02" />
+        <circle cx="70" cy="120" r="0.7" fill="#000" opacity="0.02" />
+        <circle cx="130" cy="100" r="0.5" fill="#000" opacity="0.02" />
       </pattern>
     )
 
   const patternId =
-    style === 'ruled' ? 'paper-ruled' : style === 'grid' ? 'paper-grid' : 'paper-dots'
+    style === 'ruled' ? 'paper-ruled' :
+    style === 'grid' ? 'paper-grid' :
+    style === 'dots' ? 'paper-dots' : 'paper-grain'
 
   return (
     <svg
@@ -183,7 +177,23 @@ export function PaperBackground({ style }: { style: PaperStyle }) {
       }}
     >
       <defs>{defs}</defs>
+      {/* Paper base color */}
+      <rect width="100%" height="100%" fill={PAPER_BASE} />
+      {/* Pattern overlay */}
       <rect width="100%" height="100%" fill={`url(#${patternId})`} />
+      {/* Ruled-paper margin line (RTL: dashed red on the RIGHT side) */}
+      {style === 'ruled' && (
+        <line
+          x1={`calc(100% - ${ruledMarginX}px)`}
+          y1="0"
+          x2={`calc(100% - ${ruledMarginX}px)`}
+          y2="100%"
+          stroke="#E07474"
+          strokeWidth="1"
+          strokeDasharray="2 4"
+          opacity="0.5"
+        />
+      )}
     </svg>
   )
 }

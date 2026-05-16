@@ -19,6 +19,8 @@ export interface NotebookSection {
 export interface NotebookViewState {
   /** 'infinite' = classic tldraw, 'bounded' = letter-paper bounded canvas */
   mode: 'infinite' | 'bounded'
+  /** 'notebook' = tldraw, 'mindmap' = embedded mindmap.html iframe */
+  kind: 'notebook' | 'mindmap'
 }
 
 export type PaperStyle = 'blank' | 'ruled' | 'grid' | 'dots'
@@ -36,6 +38,7 @@ interface NotebookStore {
   setActiveSection: (id: string | null) => void
 
   setViewMode: (mode: NotebookViewState['mode']) => void
+  setViewKind: (kind: NotebookViewState['kind']) => void
   setTagFilter: (tag: string) => void
 }
 
@@ -67,7 +70,7 @@ export const useNotebookStore = create<NotebookStore>()(
         },
       ],
       activeSectionId: 'section-default',
-      view: { mode: 'infinite' },
+      view: { mode: 'infinite', kind: 'notebook' },
       tagFilter: '',
 
       addSection: (name) => {
@@ -102,7 +105,8 @@ export const useNotebookStore = create<NotebookStore>()(
 
       setActiveSection: (id) => set({ activeSectionId: id }),
 
-      setViewMode: (mode) => set({ view: { mode } }),
+      setViewMode: (mode) => set({ view: { ...get().view, mode } }),
+      setViewKind: (kind) => set({ view: { ...get().view, kind } }),
       setTagFilter: (tag) => set({ tagFilter: tag }),
     }),
     {

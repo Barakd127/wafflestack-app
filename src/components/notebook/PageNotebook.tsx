@@ -133,6 +133,9 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
 
   const viewMode = useNotebookStore((s) => s.view.mode)
   const setViewMode = useNotebookStore((s) => s.setViewMode)
+  const viewKind = useNotebookStore((s) => s.view.kind)
+  const setViewKind = useNotebookStore((s) => s.setViewKind)
+  const userId = (typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default'
   const activeSectionId = useNotebookStore((s) => s.activeSectionId)
 
   useNoteSpawner(editor)
@@ -262,6 +265,17 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
         >
           {viewMode === 'infinite' ? '📑 תצוגת דף' : '🌌 תצוגה חופשית'}
         </button>
+        {/* Notebook ↔ Mind Map toggle. Renders the existing /mindmap.html in
+            an iframe with ?embed=1 to hide its duplicate chrome. Section +
+            page rails stay so the user can still navigate. */}
+        <button
+          onClick={() => setViewKind(viewKind === 'notebook' ? 'mindmap' : 'notebook')}
+          style={viewKind === 'mindmap' ? btnGoldStyle : btnGlassStyle}
+          aria-label="עבור בין מחברת למפת חשיבה"
+          title="עבור בין מחברת למפת חשיבה"
+        >
+          {viewKind === 'notebook' ? '🧠 מפת חשיבה' : '📓 מחברת'}
+        </button>
         <div style={{ marginInlineStart: 'auto', fontSize: 14, opacity: 0.7, fontFamily: "'Rubik', sans-serif" }}>
           📓 המחברת שלי — נשמר אוטומטית
         </div>
@@ -305,11 +319,26 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
               }} />
             </div>
           )}
-          <Tldraw
-            persistenceKey={PERSISTENCE_KEY_V2}
-            shapeUtils={customShapeUtils}
-            onMount={(ed) => setEditor(ed)}
-          />
+          {viewKind === 'notebook' ? (
+            <Tldraw
+              persistenceKey={PERSISTENCE_KEY_V2}
+              shapeUtils={customShapeUtils}
+              onMount={(ed) => setEditor(ed)}
+            />
+          ) : (
+            <iframe
+              src={`/mindmap.html?userId=${encodeURIComponent(userId)}&embed=1`}
+              title="WaffleStack mindmap (embedded)"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                border: 0,
+                background: '#FBF8F1',
+              }}
+            />
+          )}
         </div>
 
         <SectionsNav />

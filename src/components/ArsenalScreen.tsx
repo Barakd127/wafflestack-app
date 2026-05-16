@@ -564,30 +564,59 @@ function ArsenalEntryBody({ text }: { text: string }) {
     return out
   }, [text])
 
+  // Group adjacent text segments separated only by math into a single line;
+  // promote math segments to BLOCK equation cards (displayMode) so equations
+  // read as objects, not inline-formatted text. Per user: "I want equations
+  // to be equations, like in the mind map / study zone."
   return (
     <>
       {segments.map((seg, idx) =>
         seg.type === 'text'
           ? <span key={idx}>{seg.value}</span>
-          : <MathInline key={idx} latex={seg.value} />,
+          : <EquationCard key={idx} latex={seg.value} />,
       )}
     </>
   )
 }
 
-function MathInline({ latex }: { latex: string }) {
-  const ref = useRef<HTMLSpanElement | null>(null)
+function EquationCard({ latex }: { latex: string }) {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const [failed, setFailed] = useState(false)
   useEffect(() => {
     if (!ref.current) return
     const w = window as unknown as { katex?: { render: (s: string, el: HTMLElement, opts: object) => void } }
-    if (!w.katex) { ref.current.textContent = latex; return }
+    if (!w.katex) { setFailed(true); return }
     try {
-      w.katex.render(latex, ref.current, { throwOnError: false, displayMode: false, output: 'html' })
+      w.katex.render(latex, ref.current, { throwOnError: false, displayMode: true, output: 'html' })
+      setFailed(false)
     } catch {
-      if (ref.current) ref.current.textContent = latex
+      setFailed(true)
     }
   }, [latex])
-  return <span ref={ref} dir="ltr" style={{ unicodeBidi: 'isolate' as React.CSSProperties['unicodeBidi'], display: 'inline-block', verticalAlign: 'middle', margin: '0 2px' }} />
+  return (
+    <div
+      dir="ltr"
+      style={{
+        display: 'block',
+        margin: '10px 0',
+        padding: '12px 16px',
+        background: 'rgba(255,255,255,0.92)',
+        borderInlineStart: '3px solid #D4AF37',
+        border: '1px solid rgba(212,175,55,0.25)',
+        borderRadius: 8,
+        boxShadow: '0 1px 4px rgba(31,62,108,0.05)',
+        unicodeBidi: 'isolate' as React.CSSProperties['unicodeBidi'],
+      }}
+    >
+      {failed ? (
+        <span style={{ color: 'var(--sh-text-light)', fontSize: 12, fontStyle: 'italic' }}>
+          לא ניתן להציג את המשוואה
+        </span>
+      ) : (
+        <div ref={ref} style={{ overflow: 'auto' }} />
+      )}
+    </div>
+  )
 }
 
 // ── Confirm share dialog ─────────────────────────────────────────────────────

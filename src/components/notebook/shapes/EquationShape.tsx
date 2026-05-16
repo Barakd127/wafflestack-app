@@ -20,17 +20,31 @@ function createMathField(
   fontSize: number,
   refCb: (el: HTMLElement | null) => void
 ) {
+  // User-facing setting: NEVER show raw LaTeX source.
+  //   mathVirtualKeyboardPolicy="manual" + virtual-keyboard-mode "onfocus" —
+  //     on-screen math keyboard appears, LaTeX source bar stays hidden.
+  //   smartMode=true — typing "sin x" auto-converts to \sin x without user
+  //     needing to know LaTeX.
+  //   readOnly is off; user edits rendered math directly.
   return createElement(
     'math-field' as unknown as 'div',
     {
       ref: refCb as unknown as React.Ref<HTMLDivElement>,
+      'math-virtual-keyboard-policy': 'manual',
+      'virtual-keyboard-mode': 'onfocus',
+      'smart-mode': 'true',
+      'default-mode': 'math',
       style: {
         minWidth: '100%',
         fontSize,
         border: 0,
         outline: 'none',
         background: 'transparent',
-      },
+        // Hide MathLive's default LaTeX-source caret + popover so user only
+        // sees the rendered math.
+        '--keystroke-caret-color': 'transparent',
+        '--latex-color': 'transparent',
+      } as React.CSSProperties,
     },
     latex
   )
