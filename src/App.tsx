@@ -16,10 +16,10 @@ import { TutorFAB } from './components/AITutor/TutorFAB'
 import { TutorDrawer } from './components/AITutor/TutorDrawer'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
-// PageNotebook uses tldraw v5 (commercial); without a license key the
-// production canvas is blocked. Per user, we revert to the free legacy
-// UnifiedNotebook (pure SVG, MIT-equivalent, no license needed).
-const PageNotebook = lazy(() => import('./components/notebook/UnifiedNotebook.legacy'))
+// PageNotebook: OneNote-style writing surface (MIT only, no tldraw license
+// required). Sections rail + pages strip + warm-paper canvas with draggable
+// text/math containers. See components/notebook/OneNoteSurface.tsx.
+const PageNotebook = lazy(() => import('./components/notebook/OneNoteSurface'))
 
 type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook'
 
