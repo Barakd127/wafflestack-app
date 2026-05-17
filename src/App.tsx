@@ -324,9 +324,11 @@ function App() {
       )}
 
       {activeView === 'notebook' && (
-        <Suspense fallback={<div style={{ background: '#0B1B3E', width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFD700' }}>טוען מחברת…</div>}>
-          <PageNotebook onBack={() => setActiveView('study')} />
-        </Suspense>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#0B1B3E' }}>
+          <Suspense fallback={<div style={{ background: '#0B1B3E', width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFD700' }}>טוען מחברת…</div>}>
+            <PageNotebook onBack={() => setActiveView('study')} />
+          </Suspense>
+        </div>
       )}
 
       {loggedIn && <TutorialOverlay />}
