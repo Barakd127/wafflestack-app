@@ -327,6 +327,11 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
               persistenceKey={PERSISTENCE_KEY_V2}
               shapeUtils={customShapeUtils}
               onMount={(ed) => setEditor(ed)}
+              // tldraw v5 commercial license. Free hobby key obtained at
+              // https://tldraw.dev/get-a-license/hobby — paste in .env as
+              // VITE_TLDRAW_LICENSE_KEY=tldraw-xxx. Without a key tldraw
+              // blocks canvas rendering in production deployments.
+              licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
             />
           ) : (
             <iframe
