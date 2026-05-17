@@ -383,7 +383,11 @@ const NotebookCard: React.FC<NotebookCardProps> = ({
   );
 };
 
-const UnifiedNotebook: React.FC = () => {
+interface UnifiedNotebookProps {
+  onBack?: () => void;
+}
+
+const UnifiedNotebook: React.FC<UnifiedNotebookProps> = ({ onBack }) => {
   const initialNotebook = useMemo(loadNotebook, []);
   const svgRef = useRef<SVGSVGElement>(null);
   const dragRef = useRef<DragState | null>(null);
@@ -658,6 +662,16 @@ const UnifiedNotebook: React.FC = () => {
       <style>{styles}</style>
 
       <div className="unified-notebook__toolbar">
+        {onBack && (
+          <button
+            type="button"
+            className="unified-notebook__toolbar-button"
+            onClick={onBack}
+            style={{ background: 'linear-gradient(135deg,#F5C842,#D4AF37)', color: '#0B1B3E', fontWeight: 700 }}
+          >
+            ← דף הבית
+          </button>
+        )}
         <button
           type="button"
           className="unified-notebook__toolbar-button"

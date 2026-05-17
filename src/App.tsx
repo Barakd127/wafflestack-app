@@ -16,7 +16,10 @@ import { TutorFAB } from './components/AITutor/TutorFAB'
 import { TutorDrawer } from './components/AITutor/TutorDrawer'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
-const PageNotebook = lazy(() => import('./components/notebook/PageNotebook'))
+// PageNotebook uses tldraw v5 (commercial); without a license key the
+// production canvas is blocked. Per user, we revert to the free legacy
+// UnifiedNotebook (pure SVG, MIT-equivalent, no license needed).
+const PageNotebook = lazy(() => import('./components/notebook/UnifiedNotebook.legacy'))
 
 type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook'
 
