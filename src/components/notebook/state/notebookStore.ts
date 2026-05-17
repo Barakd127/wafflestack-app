@@ -111,7 +111,23 @@ export const useNotebookStore = create<NotebookStore>()(
     }),
     {
       name: 'wafflestack-notebook-sections-v2',
-      version: 2,
+      version: 3,
+      // Migration: older persisted states (v2) had `view = { mode }` without
+      // `kind`. Add the default so the PageNotebook ternary renders Tldraw
+      // instead of falling through to the iframe.
+      migrate: (persisted, fromVersion) => {
+        const p = persisted as Partial<NotebookStore> & { view?: Partial<NotebookViewState> }
+        if (fromVersion < 3) {
+          return {
+            ...p,
+            view: {
+              mode: p.view?.mode ?? 'infinite',
+              kind: p.view?.kind ?? 'notebook',
+            },
+          } as NotebookStore
+        }
+        return p as NotebookStore
+      },
     }
   )
 )

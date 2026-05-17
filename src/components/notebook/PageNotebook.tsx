@@ -133,7 +133,10 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
 
   const viewMode = useNotebookStore((s) => s.view.mode)
   const setViewMode = useNotebookStore((s) => s.setViewMode)
-  const viewKind = useNotebookStore((s) => s.view.kind)
+  // Default to 'notebook' when persisted state from before this field existed
+  // lacks `view.kind` — otherwise the ternary falls through to the iframe
+  // branch and the user sees nothing.
+  const viewKind = useNotebookStore((s) => s.view.kind) ?? 'notebook'
   const setViewKind = useNotebookStore((s) => s.setViewKind)
   const userId = (typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default'
   const activeSectionId = useNotebookStore((s) => s.activeSectionId)
