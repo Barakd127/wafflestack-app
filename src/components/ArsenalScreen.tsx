@@ -5,11 +5,67 @@
  * All client-side; reads from arsenalStore. Animations use scoped CSS classes
  * defined in index.css (`arsenal-card-in`, `arsenal-pin-pulse`, `arsenal-card-out`).
  */
-import { useState, useMemo, useRef, useEffect } from 'react'
+import { createElement, useState, useMemo, useRef, useEffect } from 'react'
 import { useArsenalStore, KIND_META, type ArsenalEntry, type ArsenalKind } from '../store/arsenalStore'
 import { useTutorialStep } from '../hooks/useTutorialStep'
 import CommunityArsenalTab from './CommunityArsenalTab'
 import { publishEntry, SUPABASE_CONFIGURED } from '../lib/communityArsenal'
+
+// MathLive ships ~400 KB; load it on first equation edit and cache the promise.
+let mathliveLoader: Promise<unknown> | null = null
+function loadMathLive(): Promise<unknown> {
+  if (mathliveLoader) return mathliveLoader
+  mathliveLoader = import(/* @vite-ignore */ 'mathlive').catch((err: unknown) => {
+    mathliveLoader = null
+    console.warn('[ArsenalScreen] MathLive failed to load:', err)
+    return null
+  })
+  return mathliveLoader
+}
+
+// Shared $...$ tokenizer used by both render (ArsenalEntryBody) and the
+// in-place equation editor — keeping a single source of truth means a segment
+// index is stable between the two so we can replace exactly one occurrence.
+type ArsenalSegment = { type: 'text' | 'math'; value: string }
+function tokenizeEntry(text: string): ArsenalSegment[] {
+  const out: ArsenalSegment[] = []
+  let i = 0
+  let buf = ''
+  while (i < text.length) {
+    const ch = text[i]
+    if (ch === '\\' && text[i + 1] === '$') { buf += '$'; i += 2; continue }
+    if (ch === '$') {
+      const end = text.indexOf('$', i + 1)
+      if (end === -1) { buf += text.slice(i); break }
+      if (buf) { out.push({ type: 'text', value: buf }); buf = '' }
+      out.push({ type: 'math', value: text.slice(i + 1, end) })
+      i = end + 1
+      continue
+    }
+    buf += ch
+    i++
+  }
+  if (buf) out.push({ type: 'text', value: buf })
+  return out
+}
+
+/** Recompose tokens back to source. Plain text dollar signs are escaped so a
+ *  later tokenize round-trips cleanly. */
+function detokenize(segments: ArsenalSegment[]): string {
+  return segments
+    .map(s => (s.type === 'math' ? `$${s.value}$` : s.value.replace(/\$/g, '\\$')))
+    .join('')
+}
+
+/** Replace the math segment at `segmentIndex` with new LaTeX, then return the
+ *  recomposed entry text. No-op when the index doesn't point at a math seg. */
+function replaceMathSegment(text: string, segmentIndex: number, newLatex: string): string {
+  const segs = tokenizeEntry(text)
+  const target = segs[segmentIndex]
+  if (!target || target.type !== 'math') return text
+  segs[segmentIndex] = { type: 'math', value: newLatex }
+  return detokenize(segs)
+}
 
 // Keep in sync with HEBREW_LABELS in StudyHub.tsx
 const TOPIC_LABELS: Record<string, string> = {
@@ -293,6 +349,9 @@ export default function ArsenalScreen() {
               canShare={SUPABASE_CONFIGURED && !entry.publishedAt}
               isPublished={!!entry.publishedAt}
               sharing={sharingId === entry.id}
+              onEditEquation={(segIdx, newLatex) => {
+                editEntry(entry.id, replaceMathSegment(entry.text, segIdx, newLatex))
+              }}
             />
           ))}
         </div>
@@ -383,7 +442,7 @@ function FilterPill({ label, icon, count, selected, onClick, color, bg, tip }: {
 function ArsenalCard({
   entry, indexInList, isEditing, editingText, onEditingTextChange,
   onStartEdit, onCommitEdit, onCancelEdit, onTogglePin, onDelete, removing,
-  onShare, canShare, isPublished, sharing,
+  onShare, canShare, isPublished, sharing, onEditEquation,
 }: {
   entry: ArsenalEntry
   indexInList: number
@@ -400,6 +459,8 @@ function ArsenalCard({
   canShare: boolean
   isPublished: boolean
   sharing: boolean
+  /** Edits the math segment at `segmentIndex` of entry.text via MathLive. */
+  onEditEquation: (segmentIndex: number, newLatex: string) => void
 }) {
   const meta = KIND_META[entry.kind]
   const topicLabel = entry.topicId ? TOPIC_LABELS[entry.topicId] || entry.topicId : null
@@ -478,7 +539,7 @@ function ArsenalCard({
             unicodeBidi: 'plaintext' as React.CSSProperties['unicodeBidi'],
           }}
         >
-          <ArsenalEntryBody text={entry.text} />
+          <ArsenalEntryBody text={entry.text} onEditEquation={onEditEquation} />
         </div>
       )}
 
@@ -539,50 +600,47 @@ function ArsenalCard({
 // Renders entry text with KaTeX-rendered $..$ segments inline. Falls back to
 // plain text if window.katex isn't loaded yet. Splits on dollar pairs so prose
 // like "הנוסחה היא $\bar{x} = \frac{\sum x}{n}$ בקיצור" reads naturally.
-function ArsenalEntryBody({ text }: { text: string }) {
-  // Tokenize: alternate plain / math segments via $...$ pairs. Escape \\$ as literal.
-  const segments = useMemo(() => {
-    const out: Array<{ type: 'text' | 'math'; value: string }> = []
-    let i = 0
-    let buf = ''
-    while (i < text.length) {
-      const ch = text[i]
-      if (ch === '\\' && text[i + 1] === '$') { buf += '$'; i += 2; continue }
-      if (ch === '$') {
-        // find closing $
-        const end = text.indexOf('$', i + 1)
-        if (end === -1) { buf += text.slice(i); break }
-        if (buf) { out.push({ type: 'text', value: buf }); buf = '' }
-        out.push({ type: 'math', value: text.slice(i + 1, end) })
-        i = end + 1
-        continue
-      }
-      buf += ch
-      i++
-    }
-    if (buf) out.push({ type: 'text', value: buf })
-    return out
-  }, [text])
+//
+// Each math segment is a BLOCK equation card (displayMode) AND independently
+// editable via a hover pencil — the user edits the rendered formula through
+// MathLive (`<math-field>`), never the LaTeX source.
+function ArsenalEntryBody({
+  text,
+  onEditEquation,
+}: {
+  text: string
+  /** Called with the segment index and the new LaTeX after the user commits a
+   *  per-equation edit. Optional: when omitted, equations stay read-only. */
+  onEditEquation?: (segmentIndex: number, newLatex: string) => void
+}) {
+  const segments = useMemo(() => tokenizeEntry(text), [text])
 
-  // Group adjacent text segments separated only by math into a single line;
-  // promote math segments to BLOCK equation cards (displayMode) so equations
-  // read as objects, not inline-formatted text. Per user: "I want equations
-  // to be equations, like in the mind map / study zone."
   return (
     <>
       {segments.map((seg, idx) =>
         seg.type === 'text'
           ? <span key={idx}>{seg.value}</span>
-          : <EquationCard key={idx} latex={seg.value} />,
+          : (
+            <EquationCard
+              key={idx}
+              latex={seg.value}
+              onCommit={onEditEquation ? (newLatex) => onEditEquation(idx, newLatex) : undefined}
+            />
+          ),
       )}
     </>
   )
 }
 
-function EquationCard({ latex }: { latex: string }) {
+function EquationCard({ latex, onCommit }: { latex: string; onCommit?: (newLatex: string) => void }) {
   const ref = useRef<HTMLDivElement | null>(null)
   const [failed, setFailed] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [hovering, setHovering] = useState(false)
+  const canEdit = !!onCommit
+
   useEffect(() => {
+    if (editing) return // skip preview render while the math-field owns the cell
     if (!ref.current) return
     const w = window as unknown as { katex?: { render: (s: string, el: HTMLElement, opts: object) => void } }
     if (!w.katex) { setFailed(true); return }
@@ -592,29 +650,150 @@ function EquationCard({ latex }: { latex: string }) {
     } catch {
       setFailed(true)
     }
-  }, [latex])
+  }, [latex, editing])
+
   return (
     <div
       dir="ltr"
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
       style={{
+        position: 'relative',
         display: 'block',
         margin: '10px 0',
         padding: '12px 16px',
         background: 'rgba(255,255,255,0.92)',
-        borderInlineStart: '3px solid #D4AF37',
-        border: '1px solid rgba(212,175,55,0.25)',
+        borderInlineStart: editing ? '3px solid #6366f1' : '3px solid #D4AF37',
+        border: editing ? '1px solid rgba(99,102,241,0.45)' : '1px solid rgba(212,175,55,0.25)',
         borderRadius: 8,
         boxShadow: '0 1px 4px rgba(31,62,108,0.05)',
         unicodeBidi: 'isolate' as React.CSSProperties['unicodeBidi'],
       }}
     >
-      {failed ? (
+      {editing && canEdit ? (
+        <EquationEditor
+          initial={latex}
+          onCancel={() => setEditing(false)}
+          onSave={(next) => {
+            onCommit!(next)
+            setEditing(false)
+          }}
+        />
+      ) : failed ? (
         <span style={{ color: 'var(--sh-text-light)', fontSize: 12, fontStyle: 'italic' }}>
           לא ניתן להציג את המשוואה
         </span>
       ) : (
         <div ref={ref} style={{ overflow: 'auto' }} />
       )}
+
+      {/* Hover-pencil overlay: lets the user edit just THIS equation via
+          MathLive, not the LaTeX source. Hidden while editing or when the
+          parent didn't pass an onCommit (read-only contexts). */}
+      {canEdit && !editing && hovering && (
+        <button
+          aria-label="ערוך משוואה"
+          title="ערוך משוואה"
+          onClick={(e) => { e.stopPropagation(); setEditing(true) }}
+          style={{
+            position: 'absolute',
+            top: 4,
+            insetInlineEnd: 4,
+            background: 'rgba(99,102,241,0.16)',
+            border: '1px solid rgba(99,102,241,0.4)',
+            color: '#4338ca',
+            borderRadius: 6,
+            padding: '2px 6px',
+            cursor: 'pointer',
+            fontSize: 12,
+            lineHeight: 1,
+            fontFamily: "'Rubik', sans-serif",
+          }}
+        >
+          ✏️
+        </button>
+      )}
+    </div>
+  )
+}
+
+/** In-place MathLive editor used inside EquationCard. Renders a `<math-field>`
+ *  custom element with the LaTeX preloaded; commit / cancel buttons return the
+ *  edited LaTeX (or discard the change). The virtual-keyboard popover stays
+ *  hidden so the user only sees rendered math — never the source code. */
+function EquationEditor({
+  initial,
+  onSave,
+  onCancel,
+}: {
+  initial: string
+  onSave: (latex: string) => void
+  onCancel: () => void
+}) {
+  const fieldRef = useRef<HTMLElement | null>(null)
+  const [ready, setReady] = useState(false)
+  const [draft, setDraft] = useState(initial)
+
+  useEffect(() => {
+    let active = true
+    loadMathLive().then(() => { if (active) setReady(true) })
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
+    if (!ready) return
+    const el = fieldRef.current
+    if (!el) return
+    const handler = () => {
+      const value = (el as unknown as { value: string }).value
+      setDraft(value)
+    }
+    el.addEventListener('input', handler)
+    ;(el as unknown as { focus: () => void }).focus()
+    return () => el.removeEventListener('input', handler)
+  }, [ready])
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {ready
+          ? createElement(
+              'math-field' as unknown as 'div',
+              {
+                ref: (el: HTMLElement | null): void => { fieldRef.current = el },
+                'math-virtual-keyboard-policy': 'manual',
+                'virtual-keyboard-mode': 'onfocus',
+                'smart-mode': 'true',
+                'default-mode': 'math',
+                style: {
+                  width: '100%',
+                  fontSize: 18,
+                  border: 0,
+                  outline: 'none',
+                  background: 'transparent',
+                  // Hide MathLive's default LaTeX-source caret + popover so the
+                  // user only sees the rendered math.
+                  '--keystroke-caret-color': 'transparent',
+                  '--latex-color': 'transparent',
+                } as React.CSSProperties,
+              },
+              initial,
+            )
+          : <span style={{ fontSize: 12, color: '#666' }}>טוען עורך נוסחאות…</span>
+        }
+      </div>
+      <button
+        onClick={(e) => { e.stopPropagation(); onSave(draft) }}
+        style={iconBtn('rgba(16,185,129,0.18)', '#065f46')}
+        title="שמור"
+        aria-label="שמור משוואה"
+      >✓</button>
+      <button
+        onClick={(e) => { e.stopPropagation(); onCancel() }}
+        style={iconBtn('rgba(127,155,217,0.18)', TEXT_DARK)}
+        title="בטל"
+        aria-label="בטל"
+      >✕</button>
     </div>
   )
 }
