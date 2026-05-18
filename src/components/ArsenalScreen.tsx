@@ -23,6 +23,57 @@ function loadMathLive(): Promise<unknown> {
   return mathliveLoader
 }
 
+// Convert Unicode math glyphs to LaTeX so KaTeX renders them properly.
+//   f₆ → f_{6}, ¹⁰ → ^{10}, · → \cdot, etc.
+const UNICODE_SUBSCRIPTS: Record<string, string> = {
+  '₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9',
+  '₊':'+','₋':'-','₌':'=','₍':'(','₎':')','ₐ':'a','ₑ':'e','ᵢ':'i','ⱼ':'j','ₖ':'k','ₗ':'l','ₘ':'m','ₙ':'n','ₒ':'o','ₚ':'p','ₛ':'s','ₜ':'t','ᵤ':'u','ᵥ':'v','ₓ':'x',
+}
+const UNICODE_SUPERSCRIPTS: Record<string, string> = {
+  '⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9',
+  '⁺':'+','⁻':'-','⁼':'=','⁽':'(','⁾':')','ⁿ':'n','ⁱ':'i',
+}
+function normalizeMathGlyphs(s: string): string {
+  // f₆₇ → f_{67}, x² → x^{2}, etc. Run on contiguous sub/super sequences.
+  let out = s
+  out = out.replace(/([₀-₉₊₋₌₍₎ₐₑᵢⱼₖₗₘₙₒₚₛₜᵤᵥₓ]+)/g,
+    m => '_{' + m.split('').map(c => UNICODE_SUBSCRIPTS[c] ?? c).join('') + '}')
+  out = out.replace(/([⁰-⁹⁺⁻⁼⁽⁾ⁿⁱ]+)/g,
+    m => '^{' + m.split('').map(c => UNICODE_SUPERSCRIPTS[c] ?? c).join('') + '}')
+  out = out.replace(/·/g, ' \\cdot ')
+  out = out.replace(/×/g, ' \\times ')
+  out = out.replace(/÷/g, ' \\div ')
+  out = out.replace(/≤/g, ' \\le ').replace(/≥/g, ' \\ge ').replace(/≠/g, ' \\ne ')
+  out = out.replace(/±/g, ' \\pm ').replace(/∞/g, ' \\infty ')
+  out = out.replace(/Σ/g, '\\Sigma ').replace(/Π/g, '\\Pi ')
+  out = out.replace(/μ/g, '\\mu ').replace(/σ/g, '\\sigma ')
+  out = out.replace(/π/g, '\\pi ').replace(/α/g, '\\alpha ').replace(/β/g, '\\beta ').replace(/θ/g, '\\theta ')
+  out = out.replace(/√/g, '\\sqrt')
+  out = out.replace(/→/g, ' \\to ').replace(/⇒/g, ' \\Rightarrow ')
+  return out
+}
+
+// Auto-detect math-like substrings in mixed Hebrew/math prose and wrap them
+// in $...$ delimiters before tokenizing. A "math run" is a maximal contiguous
+// sequence of non-Hebrew characters that contains at least one math operator
+// (=, +, -, *, /, ^, _, \, parens) and at least one digit or backslash, and
+// is at least 3 chars long. This catches `(90+82)/2 = 86`, `Σxf=7.533·150`,
+// `\bar{x}`, `f_6+f_9=60`, etc. without false-positive wrapping plain words.
+const HEBREW_RE = /[֐-׿]/
+const MATHRUN_RE = /[^\s֐-׿][^֐-׿]*?(?=$|[\s֐-׿])/g
+function autoWrapMath(text: string): string {
+  if (text.includes('$')) return text // user already wrapped — trust them
+  return text.replace(MATHRUN_RE, (run) => {
+    if (HEBREW_RE.test(run)) return run
+    // Must have a math operator AND a digit-or-backslash to count as math.
+    const hasOp = /[=+\-*/^_(){}\\]/.test(run)
+    const hasNumOrCmd = /[0-9\\]/.test(run) || /[₀-₉⁰-⁹Σμσπ√∞±·×÷≤≥≠]/.test(run)
+    if (!hasOp || !hasNumOrCmd) return run
+    if (run.replace(/\s+/g, '').length < 3) return run
+    return '$' + normalizeMathGlyphs(run) + '$'
+  })
+}
+
 // Shared $...$ tokenizer used by both render (ArsenalEntryBody) and the
 // in-place equation editor — keeping a single source of truth means a segment
 // index is stable between the two so we can replace exactly one occurrence.
@@ -613,7 +664,10 @@ function ArsenalEntryBody({
    *  per-equation edit. Optional: when omitted, equations stay read-only. */
   onEditEquation?: (segmentIndex: number, newLatex: string) => void
 }) {
-  const segments = useMemo(() => tokenizeEntry(text), [text])
+  // Pre-process: auto-detect math-like substrings and wrap them in $...$
+  // before tokenizing. Users who entered math without $ delimiters (the vast
+  // majority of existing arsenal entries) still get rendered KaTeX cards.
+  const segments = useMemo(() => tokenizeEntry(autoWrapMath(text)), [text])
 
   return (
     <>
