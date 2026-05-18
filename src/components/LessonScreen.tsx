@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { LESSON_CONTENT } from '../data/lesson-content'
 import { TOPIC_VISUALS } from './LessonVisuals'
 import ArsenalCapture from './ArsenalCapture'
@@ -18,10 +18,10 @@ interface LessonScreenProps {
   onStartQuiz: () => void
   onBack: () => void
   onComplete: (topicId: string) => void
-  graphCarousel?: React.ReactNode
+  graphSlides?: Array<{ Component: React.ComponentType; title: string }>
 }
 
-export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete, graphCarousel }: LessonScreenProps) {
+export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete, graphSlides }: LessonScreenProps) {
   const lesson = LESSON_CONTENT.find(t => t.id === topicId)
   const [currentSlide, setCurrentSlide] = useState(0)
   // Theory defaults to FULL-SCREEN. User opens the side mind map explicitly
@@ -41,9 +41,13 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   }, [])
 
   const slides = lesson?.slides ?? []
-  const total = slides.length
+  const lessonTotal = slides.length
+  const graphCount = graphSlides?.length ?? 0
+  const total = lessonTotal + graphCount
   const isFirst = currentSlide === 0
   const isLast = total > 0 && currentSlide === total - 1
+  const isGraphSlide = lessonTotal > 0 && currentSlide >= lessonTotal
+  const graphIdx = isGraphSlide ? currentSlide - lessonTotal : -1
 
   // userId for the mindmap iframe — keeps each profile's map separate
   const userId = (typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default'
@@ -188,10 +192,10 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
     )
   }
 
-  const slide = slides[currentSlide]
+  const slide = slides[Math.min(currentSlide, Math.max(0, lessonTotal - 1))]
   // Slides may override the topic-level visual via `visualId` — used by the
   // probability lesson to attach distinct Venn variants to specific slides.
-  const Visual = TOPIC_VISUALS[slide.visualId ?? topicId] as React.FC | undefined
+  const Visual = (!isGraphSlide && slide) ? TOPIC_VISUALS[slide.visualId ?? topicId] as React.FC | undefined : undefined
 
   // ── Right-side content (slide + visualization + footer) ─────────────────────
   const rightPaneRef = useRef<HTMLDivElement>(null)
@@ -271,7 +275,9 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           → הקודם
         </button>
         <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600, color: TEXT_DARK }}>
-          שקופית {currentSlide + 1} מתוך {total}
+          {isGraphSlide && graphSlides
+            ? `📊 ${graphSlides[graphIdx]?.title ?? 'גרף'}`
+            : `שקופית ${currentSlide + 1} מתוך ${total}`}
         </div>
         <button
           onClick={handleNext}
@@ -294,7 +300,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
         </button>
       </div>
 
-      {/* Slide card — theory is the heart of the lesson, give it presence */}
+      {!isGraphSlide && (
+      <>{/* Slide card — theory is the heart of the lesson, give it presence */}
       <div
         data-arsenal-source="slide"
         data-arsenal-topic={topicId}
@@ -472,26 +479,38 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
         )}
       </div>
 
-      {/* Interactive visualization */}
+      {/* Interactive visualization — only for lesson slides */}
       {Visual && (<div><Visual /></div>)}
+      </>)}
 
-      {/* Graph carousel — rendered inside scroll container so it doesn't push slide cards off-screen */}
-      {graphCarousel}
+      {/* Graph slide — rendered when currentSlide >= lessonTotal */}
+      {isGraphSlide && graphSlides && graphSlides[graphIdx] && (
+        <Suspense fallback={<div style={{ padding: 32, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>טוען גרף אינטראקטיבי…</div>}>
+          {(() => { const G = graphSlides[graphIdx].Component; return <G /> })()}
+        </Suspense>
+      )}
 
-      {/* Footer controls — dot navigation only (prev/next moved to floating arrows) */}
+      {/* Footer controls — dots for ALL slides (lesson + graph) */}
       <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
-        {slides.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrentSlide(idx)}
-            aria-label={`עבור לשקופית ${idx + 1}`}
-            style={{
-              width: idx === currentSlide ? 14 : 10, height: idx === currentSlide ? 14 : 10, borderRadius: '50%',
-              background: idx === currentSlide ? BUTTON_COLOR : 'rgba(127,155,217,0.35)',
-              border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.2s',
-            }}
-          />
-        ))}
+        {Array.from({ length: total }).map((_, idx) => {
+          const isGraph = idx >= lessonTotal
+          return (
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              aria-label={`עבור לשקופית ${idx + 1}`}
+              style={{
+                width: idx === currentSlide ? 14 : 10,
+                height: idx === currentSlide ? 14 : 10,
+                borderRadius: '50%',
+                background: idx === currentSlide
+                  ? (isGraph ? '#D4AF37' : BUTTON_COLOR)
+                  : (isGraph ? 'rgba(212,175,55,0.4)' : 'rgba(127,155,217,0.35)'),
+                border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.2s',
+              }}
+            />
+          )
+        })}
       </div>
 
       {/* Floating side-arrows removed — replaced by labeled prev/next buttons

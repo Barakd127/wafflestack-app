@@ -156,25 +156,6 @@ function App() {
               onLoggedIn={() => setLoggedIn(true)}
               onLoggedOut={() => setLoggedIn(false)}
             />
-            {loggedIn && (
-              <button
-                onClick={() => setActiveView('split')}
-                aria-label="פצל מסך — עיר ולימוד"
-                className="ws-split-btn"
-                style={{
-                  position: 'fixed', bottom: 96, left: 20, zIndex: 200,
-                  background: 'rgba(51,81,202,0.85)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(99,162,255,0.5)',
-                  borderRadius: 20, padding: '8px 18px',
-                  color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(51,81,202,0.4)',
-                  display: 'flex', alignItems: 'center', gap: 8,
-                }}
-              >
-                ⊟ עיר + לימוד
-              </button>
-            )}
           </div>
         )}
 

@@ -2574,7 +2574,7 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
             onStartQuiz={() => setInternalView('quiz-intro')}
             onBack={() => setInternalView('topics')}
             onComplete={(id) => useLearningStore.getState().completeLesson(id)}
-            graphCarousel={<InteractiveGraphCarousel selectedTopic={selectedTopic} />}
+            graphSlides={INTERACTIVE_GRAPHS_BY_TOPIC[selectedTopic] ?? []}
           />
         )}
         {internalView === 'arsenal' && <ArsenalScreen />}
