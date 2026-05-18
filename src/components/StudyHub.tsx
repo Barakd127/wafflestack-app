@@ -58,6 +58,8 @@ const HeroScene = lazy(() => import('../landing/three/HeroScene').then(m => ({ d
 type GraphEntry = {
   Component: React.LazyExoticComponent<React.ComponentType>
   title: string
+  /** 0-indexed lesson slide to insert AFTER. Undefined/invalid → appended at end. */
+  afterSlide?: number
 }
 const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
   // ── Hero topics — 3 aspects each ──
@@ -155,9 +157,7 @@ const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
   // components for hard topics (Bayes, Type-I/II, R² decomposition, etc.).
   // ──────────────────────────────────────────────────────────────────────
   mean: [
-    { Component: MeanInteractive,        title: 'מהו ממוצע?' },
-    { Component: MeanRunningAverage,     title: 'התכנסות כש-n גדל' },
-    { Component: MeanVsMedianVsMode,     title: 'ממוצע · חציון · שכיח' },
+    { Component: MeanInteractive,        title: 'מהו ממוצע?', afterSlide: 1 },
   ],
   median: [
     { Component: MedianInteractive,      title: 'חציון מול ממוצע' },

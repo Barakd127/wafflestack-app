@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense, useMemo } from 'react'
 import { LESSON_CONTENT } from '../data/lesson-content'
 import { TOPIC_VISUALS } from './LessonVisuals'
 import ArsenalCapture from './ArsenalCapture'
@@ -18,7 +18,7 @@ interface LessonScreenProps {
   onStartQuiz: () => void
   onBack: () => void
   onComplete: (topicId: string) => void
-  graphSlides?: Array<{ Component: React.ComponentType; title: string }>
+  graphSlides?: Array<{ Component: React.ComponentType; title: string; afterSlide?: number }>
 }
 
 export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete, graphSlides }: LessonScreenProps) {
@@ -42,12 +42,33 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
 
   const slides = lesson?.slides ?? []
   const lessonTotal = slides.length
-  const graphCount = graphSlides?.length ?? 0
-  const total = lessonTotal + graphCount
+  const [graphScale, setGraphScale] = useState(0.7)
+
+  // Build merged sequence: lesson slide → optional graph(s) inserted after it.
+  // Graphs with no `afterSlide` (or out-of-range index) are appended at the end.
+  type SlideRef = { kind: 'lesson'; lessonIdx: number } | { kind: 'graph'; graphIdx: number }
+  const mergedSequence: SlideRef[] = useMemo(() => {
+    const out: SlideRef[] = []
+    slides.forEach((_, i) => {
+      out.push({ kind: 'lesson', lessonIdx: i })
+      graphSlides?.forEach((g, gi) => {
+        if (g.afterSlide === i) out.push({ kind: 'graph', graphIdx: gi })
+      })
+    })
+    graphSlides?.forEach((g, gi) => {
+      if (g.afterSlide == null || g.afterSlide < 0 || g.afterSlide >= lessonTotal) {
+        out.push({ kind: 'graph', graphIdx: gi })
+      }
+    })
+    return out
+  }, [lessonTotal, graphSlides])
+
+  const total = mergedSequence.length
+  const currentRef = mergedSequence[currentSlide]
+  const isGraphSlide = currentRef?.kind === 'graph'
   const isFirst = currentSlide === 0
   const isLast = total > 0 && currentSlide === total - 1
-  const isGraphSlide = lessonTotal > 0 && currentSlide >= lessonTotal
-  const graphIdx = isGraphSlide ? currentSlide - lessonTotal : -1
+  const graphIdx = isGraphSlide ? (currentRef as { kind: 'graph'; graphIdx: number }).graphIdx : -1
 
   // userId for the mindmap iframe — keeps each profile's map separate
   const userId = (typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default'
@@ -192,7 +213,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
     )
   }
 
-  const slide = slides[Math.min(currentSlide, Math.max(0, lessonTotal - 1))]
+  const lessonIdx = currentRef?.kind === 'lesson' ? currentRef.lessonIdx : 0
+  const slide = slides[lessonIdx] ?? slides[0]
   // Slides may override the topic-level visual via `visualId` — used by the
   // probability lesson to attach distinct Venn variants to specific slides.
   const Visual = (!isGraphSlide && slide) ? TOPIC_VISUALS[slide.visualId ?? topicId] as React.FC | undefined : undefined
@@ -483,17 +505,82 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       {Visual && (<div><Visual /></div>)}
       </>)}
 
-      {/* Graph slide — rendered when currentSlide >= lessonTotal */}
+      {/* Graph slide — rendered for graph entries in the merged sequence */}
       {isGraphSlide && graphSlides && graphSlides[graphIdx] && (
-        <Suspense fallback={<div style={{ padding: 32, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>טוען גרף אינטראקטיבי…</div>}>
-          {(() => { const G = graphSlides[graphIdx].Component; return <G /> })()}
-        </Suspense>
+        <div style={{
+          background: 'rgba(255,255,255,0.6)',
+          border: '1px solid rgba(212,175,55,0.4)',
+          borderRadius: 18,
+          padding: '20px 18px',
+          marginTop: 12,
+          boxShadow: '0 4px 18px rgba(31,62,108,0.10)',
+        }}>
+          {/* Zoom controls */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            gap: 12, marginBottom: 10, paddingBottom: 10,
+            borderBottom: '1px solid rgba(212,175,55,0.25)',
+          }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#1F3E6C', fontFamily: "'Rubik', sans-serif" }}>
+              📊 {graphSlides[graphIdx].title}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button
+                onClick={() => setGraphScale(s => Math.max(0.4, +(s - 0.1).toFixed(2)))}
+                aria-label="הקטן גרף"
+                title="הקטן"
+                style={{
+                  background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.25)',
+                  color: '#1F3E6C', borderRadius: 8, width: 30, height: 30,
+                  cursor: 'pointer', fontWeight: 700, fontSize: 16, lineHeight: 1,
+                }}
+              >−</button>
+              <span style={{ fontSize: 12, color: '#1F3E6C', minWidth: 40, textAlign: 'center', fontFamily: "'Assistant', sans-serif" }}>
+                {Math.round(graphScale * 100)}%
+              </span>
+              <button
+                onClick={() => setGraphScale(s => Math.min(1.4, +(s + 0.1).toFixed(2)))}
+                aria-label="הגדל גרף"
+                title="הגדל"
+                style={{
+                  background: 'rgba(212,160,23,0.15)', border: '1px solid rgba(212,160,23,0.5)',
+                  color: '#1F3E6C', borderRadius: 8, width: 30, height: 30,
+                  cursor: 'pointer', fontWeight: 700, fontSize: 16, lineHeight: 1,
+                }}
+              >+</button>
+              <button
+                onClick={() => setGraphScale(0.7)}
+                aria-label="ברירת מחדל"
+                title="גודל ברירת מחדל"
+                style={{
+                  background: 'transparent', border: '1px solid rgba(31,62,108,0.25)',
+                  color: '#1F3E6C', borderRadius: 8, padding: '4px 10px',
+                  cursor: 'pointer', fontSize: 11, fontFamily: "'Assistant', sans-serif",
+                  marginInlineStart: 4,
+                }}
+              >איפוס</button>
+            </div>
+          </div>
+          {/* Scaled graph container */}
+          <div style={{ overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
+            <div style={{
+              transform: `scale(${graphScale})`,
+              transformOrigin: 'top center',
+              width: `${100 / graphScale}%`,
+              height: 'auto',
+            }}>
+              <Suspense fallback={<div style={{ padding: 32, textAlign: 'center', color: 'rgba(127,155,217,0.7)' }}>טוען גרף אינטראקטיבי…</div>}>
+                {(() => { const G = graphSlides[graphIdx].Component; return <G /> })()}
+              </Suspense>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Footer controls — dots for ALL slides (lesson + graph) */}
       <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
         {Array.from({ length: total }).map((_, idx) => {
-          const isGraph = idx >= lessonTotal
+          const isGraph = mergedSequence[idx]?.kind === 'graph'
           return (
             <button
               key={idx}
