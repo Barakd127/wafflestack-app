@@ -1,13 +1,11 @@
 /**
- * OneNoteSurface — a free, MIT-only OneNote-style notebook.
+ * OneNoteSurface — Light-mode OneNote-style notebook with document-flow writing.
  *
- * Replaces the legacy UnifiedNotebook. No tldraw, no paid deps.
- * - Sections rail (left), pages strip (top), warm-paper writing surface.
- * - Click empty paper to spawn a draggable text container.
- * - Math containers use MathLive's <math-field> (MIT) when available;
- *   falls back to a textarea + KaTeX preview (window.katex from CDN).
- * - Zustand `persist` middleware keeps everything in localStorage.
- * - Full RTL Hebrew, accessible from the keyboard.
+ * - One big contentEditable per page (no per-click spawning of boxes).
+ * - Light cream/white theme by default; dark mode toggle in the corner.
+ * - Mind-map style ribbon toolbar (most buttons stub a "בקרוב" toast).
+ * - Auto-save HTML body of each page into the persisted Zustand store.
+ * - Equations: MathLive lazy-imported, rendered inline via KaTeX (inline-block).
  */
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { create } from 'zustand'
@@ -18,24 +16,13 @@ import { persist } from 'zustand/middleware'
 // ─────────────────────────────────────────────────────────────────────────────
 
 type PaperStyle = 'blank' | 'ruled' | 'grid' | 'dots'
-type ContainerKind = 'text' | 'math'
-
-interface NoteContainer {
-  id: string
-  x: number
-  y: number
-  w: number
-  h: number
-  kind: ContainerKind
-  body: string
-}
 
 interface NotebookPage {
   id: string
   title: string
   sectionId: string
-  containers: NoteContainer[]
   paperStyle: PaperStyle
+  body: string // HTML content
 }
 
 interface NotebookSection {
@@ -51,6 +38,7 @@ interface OneNoteState {
   activeSectionId: string
   activePageId: string
   lastSavedAt: number
+  themeMode: 'light' | 'dark'
   // mutators
   addSection: (name: string) => void
   renameSection: (id: string, name: string) => void
@@ -61,16 +49,18 @@ interface OneNoteState {
   deletePage: (id: string) => void
   setActivePage: (id: string) => void
   setPaperStyle: (pageId: string, style: PaperStyle) => void
-  addContainer: (pageId: string, c: NoteContainer) => void
-  updateContainer: (pageId: string, id: string, patch: Partial<NoteContainer>) => void
-  deleteContainer: (pageId: string, id: string) => void
+  setPageBody: (pageId: string, html: string) => void
+  setThemeMode: (mode: 'light' | 'dark') => void
 }
 
 const SECTION_COLORS = ['#F5C842', '#7BB6F7', '#8EE7A8', '#E58FB8', '#C7A6F2', '#F39A6B']
 
 const uid = () => Math.random().toString(36).slice(2, 10)
 
-function makeStarter(): Pick<OneNoteState, 'sections' | 'pages' | 'activeSectionId' | 'activePageId' | 'lastSavedAt'> {
+function makeStarter(): Pick<
+  OneNoteState,
+  'sections' | 'pages' | 'activeSectionId' | 'activePageId' | 'lastSavedAt' | 'themeMode'
+> {
   const sectionId = uid()
   const pageId = uid()
   return {
@@ -80,13 +70,14 @@ function makeStarter(): Pick<OneNoteState, 'sections' | 'pages' | 'activeSection
         id: pageId,
         title: 'דף חדש',
         sectionId,
-        containers: [],
         paperStyle: 'ruled',
+        body: '',
       },
     },
     activeSectionId: sectionId,
     activePageId: pageId,
     lastSavedAt: Date.now(),
+    themeMode: 'light',
   }
 }
 
@@ -103,7 +94,7 @@ const useOneNoteStore = create<OneNoteState>()(
           sections: [...s.sections, { id, name: name || 'קטע חדש', color, pageIds: [pageId] }],
           pages: {
             ...s.pages,
-            [pageId]: { id: pageId, title: 'דף חדש', sectionId: id, containers: [], paperStyle: 'ruled' },
+            [pageId]: { id: pageId, title: 'דף חדש', sectionId: id, paperStyle: 'ruled', body: '' },
           },
           activeSectionId: id,
           activePageId: pageId,
@@ -139,10 +130,7 @@ const useOneNoteStore = create<OneNoteState>()(
       setActiveSection: (id) => {
         const sec = get().sections.find((s) => s.id === id)
         if (!sec) return
-        set({
-          activeSectionId: id,
-          activePageId: sec.pageIds[0] ?? '',
-        })
+        set({ activeSectionId: id, activePageId: sec.pageIds[0] ?? '' })
       },
 
       addPage: (sectionId, title) => {
@@ -153,13 +141,7 @@ const useOneNoteStore = create<OneNoteState>()(
           ),
           pages: {
             ...s.pages,
-            [id]: {
-              id,
-              title: title || 'דף חדש',
-              sectionId,
-              containers: [],
-              paperStyle: 'ruled',
-            },
+            [id]: { id, title: title || 'דף חדש', sectionId, paperStyle: 'ruled', body: '' },
           },
           activePageId: id,
           activeSectionId: sectionId,
@@ -197,80 +179,139 @@ const useOneNoteStore = create<OneNoteState>()(
 
       setPaperStyle: (pageId, style) =>
         set((s) => ({
-          pages: s.pages[pageId] ? { ...s.pages, [pageId]: { ...s.pages[pageId]!, paperStyle: style } } : s.pages,
+          pages: s.pages[pageId]
+            ? { ...s.pages, [pageId]: { ...s.pages[pageId]!, paperStyle: style } }
+            : s.pages,
           lastSavedAt: Date.now(),
         })),
 
-      addContainer: (pageId, c) =>
-        set((s) => {
-          const p = s.pages[pageId]
-          if (!p) return s
-          return {
-            pages: { ...s.pages, [pageId]: { ...p, containers: [...p.containers, c] } },
-            lastSavedAt: Date.now(),
-          }
-        }),
+      setPageBody: (pageId, html) =>
+        set((s) => ({
+          pages: s.pages[pageId]
+            ? { ...s.pages, [pageId]: { ...s.pages[pageId]!, body: html } }
+            : s.pages,
+          lastSavedAt: Date.now(),
+        })),
 
-      updateContainer: (pageId, id, patch) =>
-        set((s) => {
-          const p = s.pages[pageId]
-          if (!p) return s
-          return {
-            pages: {
-              ...s.pages,
-              [pageId]: {
-                ...p,
-                containers: p.containers.map((c) => (c.id === id ? { ...c, ...patch } : c)),
-              },
-            },
-            lastSavedAt: Date.now(),
-          }
-        }),
-
-      deleteContainer: (pageId, id) =>
-        set((s) => {
-          const p = s.pages[pageId]
-          if (!p) return s
-          return {
-            pages: {
-              ...s.pages,
-              [pageId]: { ...p, containers: p.containers.filter((c) => c.id !== id) },
-            },
-            lastSavedAt: Date.now(),
-          }
-        }),
+      setThemeMode: (mode) => set({ themeMode: mode }),
     }),
-    { name: 'wafflestack-onenote-v1' },
+    {
+      name: 'wafflestack-onenote-v1',
+      // safe defaults for older persisted shape (no body field)
+      migrate: (state: unknown) => {
+        const s = state as Partial<OneNoteState> & {
+          pages?: Record<string, Partial<NotebookPage> & { body?: string }>
+        }
+        if (s && s.pages) {
+          const fixed: Record<string, NotebookPage> = {}
+          Object.entries(s.pages).forEach(([id, p]) => {
+            fixed[id] = {
+              id: p.id ?? id,
+              title: p.title ?? 'דף',
+              sectionId: p.sectionId ?? '',
+              paperStyle: (p.paperStyle as PaperStyle) ?? 'ruled',
+              body: typeof p.body === 'string' ? p.body : '',
+            }
+          })
+          s.pages = fixed
+        }
+        if (!s.themeMode) s.themeMode = 'light'
+        return s as OneNoteState
+      },
+    },
   ),
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MathLive: lazy-load on first need so the bundle isn't bloated
+// MathLive lazy-load
 // ─────────────────────────────────────────────────────────────────────────────
 
-let mathLiveLoadPromise: Promise<boolean> | null = null
+let mathLivePromise: Promise<boolean> | null = null
 function ensureMathLive(): Promise<boolean> {
   if (typeof window === 'undefined') return Promise.resolve(false)
   if ((window as unknown as { __mathliveReady?: boolean }).__mathliveReady) return Promise.resolve(true)
-  if (mathLiveLoadPromise) return mathLiveLoadPromise
-  mathLiveLoadPromise = import('mathlive')
+  if (mathLivePromise) return mathLivePromise
+  mathLivePromise = import('mathlive')
     .then(() => {
       ;(window as unknown as { __mathliveReady?: boolean }).__mathliveReady = true
       return true
     })
-    .catch((e: unknown) => {
-      console.warn('mathlive load failed; falling back to KaTeX preview', e)
-      return false
-    })
-  return mathLiveLoadPromise
+    .catch(() => false)
+  return mathLivePromise
+}
+
+declare global {
+  interface Window {
+    katex?: { renderToString: (latex: string, opts?: object) => string }
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PaperBackground (copied verbatim from PaperStyleSelector concept)
+// Theme tokens
 // ─────────────────────────────────────────────────────────────────────────────
 
-function PaperBackground({ style }: { style: PaperStyle }) {
-  const PAPER_BASE = style === 'ruled' ? '#FBF8F1' : '#FAF7EE'
+interface ThemeTokens {
+  bg: string
+  toolbarBg: string
+  railBg: string
+  pagesStripBg: string
+  paperBg: string
+  ink: string
+  inkMuted: string
+  divider: string
+  btnBg: string
+  btnBorder: string
+  btnHoverBg: string
+  accent: string
+  accentBg: string
+  accentBorder: string
+  dropdownBg: string
+  shadow: string
+}
+
+const LIGHT: ThemeTokens = {
+  bg: '#FBF8F1',
+  toolbarBg: '#FBF8F1',
+  railBg: '#F5F4EE',
+  pagesStripBg: '#F5F4EE',
+  paperBg: '#FBF8F1',
+  ink: '#1F2640',
+  inkMuted: 'rgba(31,38,64,0.6)',
+  divider: 'rgba(31,38,64,0.12)',
+  btnBg: '#FFFFFF',
+  btnBorder: 'rgba(31,38,64,0.14)',
+  btnHoverBg: '#F0EEE5',
+  accent: '#D4AF37',
+  accentBg: 'linear-gradient(180deg, #F5C842 0%, #D4AF37 100%)',
+  accentBorder: 'rgba(212,175,55,0.55)',
+  dropdownBg: '#FFFFFF',
+  shadow: '0 2px 8px rgba(31,38,64,0.08)',
+}
+
+const DARK: ThemeTokens = {
+  bg: '#0B1B3E',
+  toolbarBg: '#0B1B3E',
+  railBg: '#0F2350',
+  pagesStripBg: '#0F2350',
+  paperBg: '#FBF8F1',
+  ink: '#fff',
+  inkMuted: 'rgba(255,255,255,0.6)',
+  divider: 'rgba(255,255,255,0.12)',
+  btnBg: 'rgba(255,255,255,0.06)',
+  btnBorder: 'rgba(255,255,255,0.14)',
+  btnHoverBg: 'rgba(255,255,255,0.1)',
+  accent: '#F5C842',
+  accentBg: 'rgba(212,175,55,0.2)',
+  accentBorder: 'rgba(212,175,55,0.5)',
+  dropdownBg: '#0B1B3E',
+  shadow: '0 12px 30px rgba(0,0,0,0.45)',
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Paper background
+// ─────────────────────────────────────────────────────────────────────────────
+
+function PaperBackground({ style, base }: { style: PaperStyle; base: string }) {
   const ruledMarginX = 56
   const defs =
     style === 'ruled' ? (
@@ -287,24 +328,18 @@ function PaperBackground({ style }: { style: PaperStyle }) {
       </pattern>
     ) : (
       <pattern id="paper-grain" width="160" height="160" patternUnits="userSpaceOnUse">
-        <rect width="160" height="160" fill={PAPER_BASE} />
-        <circle cx="40" cy="60" r="0.8" fill="#000" opacity="0.02" />
-        <circle cx="110" cy="30" r="0.6" fill="#000" opacity="0.02" />
-        <circle cx="70" cy="120" r="0.7" fill="#000" opacity="0.02" />
-        <circle cx="130" cy="100" r="0.5" fill="#000" opacity="0.02" />
+        <rect width="160" height="160" fill={base} />
       </pattern>
     )
   const patternId =
-    style === 'ruled' ? 'paper-ruled' :
-    style === 'grid' ? 'paper-grid' :
-    style === 'dots' ? 'paper-dots' : 'paper-grain'
+    style === 'ruled' ? 'paper-ruled' : style === 'grid' ? 'paper-grid' : style === 'dots' ? 'paper-dots' : 'paper-grain'
   return (
     <svg
       aria-hidden
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}
     >
       <defs>{defs}</defs>
-      <rect width="100%" height="100%" fill={PAPER_BASE} />
+      <rect width="100%" height="100%" fill={base} />
       <rect width="100%" height="100%" fill={`url(#${patternId})`} />
       {style === 'ruled' && (
         <line
@@ -315,7 +350,7 @@ function PaperBackground({ style }: { style: PaperStyle }) {
           stroke="#E07474"
           strokeWidth="1"
           strokeDasharray="2 4"
-          opacity="0.5"
+          opacity="0.45"
         />
       )}
     </svg>
@@ -323,324 +358,30 @@ function PaperBackground({ style }: { style: PaperStyle }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MathField — uses <math-field> when MathLive is loaded; else KaTeX preview.
+// Toast (portal-less, fixed-position div managed by parent)
 // ─────────────────────────────────────────────────────────────────────────────
 
-declare global {
-  interface Window {
-    katex?: { renderToString: (latex: string, opts?: object) => string }
-  }
-  // <math-field> is a custom element from MathLive
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace JSX {
-    interface IntrinsicElements {
-      'math-field': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
-        'virtual-keyboard-mode'?: string
-        'smart-mode'?: string
-        'default-mode'?: string
-      }
-    }
-  }
-}
-
-function MathField({
-  value,
-  editing,
-  onChange,
-  onDoneEditing,
-}: {
-  value: string
-  editing: boolean
-  onChange: (v: string) => void
-  onDoneEditing: () => void
-}) {
-  const [mlReady, setMlReady] = useState<boolean>(
-    typeof window !== 'undefined' && !!(window as unknown as { __mathliveReady?: boolean }).__mathliveReady,
-  )
-  const fieldRef = useRef<HTMLElement | null>(null)
-  const previewRef = useRef<HTMLDivElement | null>(null)
-
-  // Trigger MathLive load only when we actually need a math field
-  useEffect(() => {
-    let cancelled = false
-    void ensureMathLive().then((ok) => {
-      if (!cancelled) setMlReady(ok)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  // Wire <math-field> input events (custom element doesn't go through React's synthetic system reliably)
-  useEffect(() => {
-    if (!editing || !mlReady) return
-    const el = fieldRef.current
-    if (!el) return
-    const handler = () => {
-      const v = (el as HTMLElement & { value?: string }).value ?? ''
-      onChange(v)
-    }
-    el.addEventListener('input', handler)
-    // Ensure value applied
-    ;(el as HTMLElement & { value?: string }).value = value
-    // Focus shortly after mount
-    requestAnimationFrame(() => (el as HTMLElement).focus())
-    return () => el.removeEventListener('input', handler)
-  }, [editing, mlReady, onChange, value])
-
-  // Render KaTeX preview (used both as fallback and as "view" mode)
-  useEffect(() => {
-    if (editing && mlReady) return // <math-field> handles rendering itself
-    const el = previewRef.current
-    if (!el || !window.katex) {
-      if (el) el.textContent = value || ''
-      return
-    }
-    try {
-      el.innerHTML = window.katex.renderToString(value || '\\;', { throwOnError: false, displayMode: true })
-    } catch {
-      el.textContent = value
-    }
-  }, [value, editing, mlReady])
-
-  if (editing && mlReady) {
-    return (
-      <math-field
-        ref={(node: HTMLElement | null) => {
-          fieldRef.current = node
-        }}
-        virtual-keyboard-mode="onfocus"
-        smart-mode="on"
-        default-mode="math"
-        style={{
-          display: 'block',
-          minWidth: 80,
-          minHeight: 40,
-          fontSize: 22,
-          padding: '6px 8px',
-          background: 'transparent',
-          outline: 'none',
-        }}
-        onBlur={onDoneEditing}
-      />
-    )
-  }
-
-  if (editing && !mlReady) {
-    // Fallback editor: textarea + live KaTeX preview
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <textarea
-          autoFocus
-          value={value}
-          dir="ltr"
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={onDoneEditing}
-          placeholder="LaTeX, e.g.  \\frac{a}{b}"
-          style={{
-            border: '1px solid rgba(0,0,0,0.12)',
-            borderRadius: 4,
-            padding: 6,
-            fontFamily: 'monospace',
-            fontSize: 14,
-            minHeight: 56,
-            outline: 'none',
-            background: 'rgba(255,255,255,0.85)',
-            resize: 'vertical',
-          }}
-        />
-        <div
-          ref={previewRef}
-          dir="ltr"
-          style={{ minHeight: 30, color: '#1F2640', fontSize: 20, padding: '2px 6px' }}
-        />
-      </div>
-    )
-  }
-
+function Toast({ message }: { message: string | null }) {
+  if (!message) return null
   return (
     <div
-      ref={previewRef}
-      dir="ltr"
-      style={{ minHeight: 36, color: '#1F2640', fontSize: 22, padding: '4px 6px', cursor: 'text' }}
-    />
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// NoteContainerView — draggable text/math card
-// ─────────────────────────────────────────────────────────────────────────────
-
-function NoteContainerView({
-  c,
-  pageId,
-}: {
-  c: NoteContainer
-  pageId: string
-}) {
-  const updateContainer = useOneNoteStore((s) => s.updateContainer)
-  const deleteContainer = useOneNoteStore((s) => s.deleteContainer)
-  const [editing, setEditing] = useState(c.body === '' && c.kind === 'text')
-  const [hover, setHover] = useState(false)
-  const textRef = useRef<HTMLDivElement | null>(null)
-  const dragStateRef = useRef<{ startX: number; startY: number; baseX: number; baseY: number } | null>(null)
-
-  const onPointerDownHandle = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      e.preventDefault()
-      e.stopPropagation()
-      ;(e.target as Element).setPointerCapture(e.pointerId)
-      dragStateRef.current = { startX: e.clientX, startY: e.clientY, baseX: c.x, baseY: c.y }
-    },
-    [c.x, c.y],
-  )
-
-  const onPointerMoveHandle = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      const s = dragStateRef.current
-      if (!s) return
-      const dx = e.clientX - s.startX
-      const dy = e.clientY - s.startY
-      updateContainer(pageId, c.id, { x: Math.max(0, s.baseX + dx), y: Math.max(0, s.baseY + dy) })
-    },
-    [c.id, pageId, updateContainer],
-  )
-
-  const onPointerUpHandle = useCallback(() => {
-    dragStateRef.current = null
-  }, [])
-
-  // Text autofocus when entering edit mode
-  useEffect(() => {
-    if (editing && c.kind === 'text' && textRef.current) {
-      const el = textRef.current
-      el.focus()
-      // Move caret to end
-      const range = document.createRange()
-      range.selectNodeContents(el)
-      range.collapse(false)
-      const sel = window.getSelection()
-      sel?.removeAllRanges()
-      sel?.addRange(range)
-    }
-  }, [editing, c.kind])
-
-  return (
-    <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+      role="status"
       style={{
-        position: 'absolute',
-        left: c.x,
-        top: c.y,
-        minWidth: 160,
-        maxWidth: 640,
-        background: 'rgba(255,255,255,0.78)',
-        backdropFilter: 'blur(2px)',
-        border: editing ? '1.5px solid #D4AF37' : hover ? '1px solid rgba(31,38,64,0.18)' : '1px solid rgba(31,38,64,0.08)',
-        borderRadius: 6,
-        boxShadow: editing ? '0 0 0 4px rgba(212,175,55,0.18)' : '0 1px 2px rgba(0,0,0,0.04)',
-        padding: '6px 10px 8px 10px',
-        zIndex: editing ? 5 : 2,
-      }}
-      onDoubleClick={(e) => {
-        e.stopPropagation()
-        setEditing(true)
+        position: 'fixed',
+        bottom: 28,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'rgba(31,38,64,0.92)',
+        color: '#fff',
+        padding: '10px 18px',
+        borderRadius: 22,
+        fontSize: 14,
+        fontFamily: "'Assistant', sans-serif",
+        zIndex: 9999,
+        boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
       }}
     >
-      {/* Drag handle (top-right since RTL — but spec said top-left; we honor RTL by using inset-inline-start) */}
-      <div
-        onPointerDown={onPointerDownHandle}
-        onPointerMove={onPointerMoveHandle}
-        onPointerUp={onPointerUpHandle}
-        title="גרור כדי להזיז"
-        style={{
-          position: 'absolute',
-          top: 4,
-          insetInlineStart: 4,
-          width: 18,
-          height: 18,
-          borderRadius: 3,
-          background: hover || editing ? 'rgba(31,38,64,0.12)' : 'transparent',
-          cursor: 'grab',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 11,
-          color: '#1F2640',
-          userSelect: 'none',
-        }}
-      >
-        ⠿
-      </div>
-
-      {/* Delete button (shows on hover) */}
-      {(hover || editing) && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            deleteContainer(pageId, c.id)
-          }}
-          title="מחק"
-          style={{
-            position: 'absolute',
-            top: 4,
-            insetInlineEnd: 4,
-            width: 18,
-            height: 18,
-            borderRadius: 3,
-            background: 'transparent',
-            border: 0,
-            cursor: 'pointer',
-            fontSize: 12,
-            color: '#9A3B3B',
-            lineHeight: 1,
-          }}
-        >
-          ×
-        </button>
-      )}
-
-      <div style={{ paddingTop: 14 }}>
-        {c.kind === 'text' ? (
-          <div
-            ref={textRef}
-            contentEditable={editing}
-            suppressContentEditableWarning
-            onBlur={(e) => {
-              updateContainer(pageId, c.id, { body: (e.currentTarget as HTMLDivElement).innerText })
-              setEditing(false)
-              // delete empty
-              if (!(e.currentTarget as HTMLDivElement).innerText.trim()) {
-                deleteContainer(pageId, c.id)
-              }
-            }}
-            onClick={(e) => e.stopPropagation()}
-            dir="rtl"
-            style={{
-              fontFamily: "'Assistant', system-ui, sans-serif",
-              fontSize: 18,
-              lineHeight: 1.55,
-              color: '#1F2640',
-              outline: 'none',
-              whiteSpace: 'pre-wrap',
-              minHeight: 24,
-              cursor: editing ? 'text' : 'default',
-            }}
-            data-placeholder="כתוב כאן…"
-          >
-            {/* contentEditable doesn't take controlled prop — set initial only */}
-            {!editing ? c.body : undefined}
-          </div>
-        ) : (
-          <MathField
-            value={c.body}
-            editing={editing}
-            onChange={(v) => updateContainer(pageId, c.id, { body: v })}
-            onDoneEditing={() => setEditing(false)}
-          />
-        )}
-      </div>
+      {message}
     </div>
   )
 }
@@ -666,6 +407,7 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
   const activeSectionId = useOneNoteStore((s) => s.activeSectionId)
   const activePageId = useOneNoteStore((s) => s.activePageId)
   const lastSavedAt = useOneNoteStore((s) => s.lastSavedAt)
+  const themeMode = useOneNoteStore((s) => s.themeMode)
   const addSection = useOneNoteStore((s) => s.addSection)
   const setActiveSection = useOneNoteStore((s) => s.setActiveSection)
   const deleteSection = useOneNoteStore((s) => s.deleteSection)
@@ -675,13 +417,19 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
   const deletePage = useOneNoteStore((s) => s.deletePage)
   const renamePage = useOneNoteStore((s) => s.renamePage)
   const setPaperStyle = useOneNoteStore((s) => s.setPaperStyle)
-  const addContainer = useOneNoteStore((s) => s.addContainer)
+  const setPageBody = useOneNoteStore((s) => s.setPageBody)
+  const setThemeMode = useOneNoteStore((s) => s.setThemeMode)
 
-  const [paperMenuOpen, setPaperMenuOpen] = useState(false)
-  const [templateMenuOpen, setTemplateMenuOpen] = useState(false)
+  const t = themeMode === 'light' ? LIGHT : DARK
+
+  const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [savedFlash, setSavedFlash] = useState(false)
-  const [zoom, setZoom] = useState(1)
-  const surfaceRef = useRef<HTMLDivElement | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
+  const toastTimer = useRef<number | null>(null)
+
+  const editorRef = useRef<HTMLDivElement | null>(null)
+  const idleSaveTimer = useRef<number | null>(null)
+  const lastSetPageId = useRef<string | null>(null)
 
   const activeSection = useMemo(
     () => sections.find((s) => s.id === activeSectionId) ?? sections[0],
@@ -689,169 +437,325 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
   )
   const activePage = activePageId ? pages[activePageId] : undefined
   const sectionPages = useMemo(
-    () => (activeSection ? activeSection.pageIds.map((id) => pages[id]).filter(Boolean) as NotebookPage[] : []),
+    () =>
+      activeSection
+        ? (activeSection.pageIds.map((id) => pages[id]).filter(Boolean) as NotebookPage[])
+        : [],
     [activeSection, pages],
   )
+
+  const showToast = useCallback((msg: string) => {
+    setToast(msg)
+    if (toastTimer.current) window.clearTimeout(toastTimer.current)
+    toastTimer.current = window.setTimeout(() => setToast(null), 1500)
+  }, [])
+
+  const stub = useCallback(() => showToast('בקרוב'), [showToast])
 
   // Auto-save flash
   useEffect(() => {
     setSavedFlash(true)
-    const t = setTimeout(() => setSavedFlash(false), 900)
-    return () => clearTimeout(t)
+    const tt = window.setTimeout(() => setSavedFlash(false), 900)
+    return () => window.clearTimeout(tt)
   }, [lastSavedAt])
 
-  // Paper click → spawn text container
-  const onSurfaceClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!activePage) return
-      if (e.target !== e.currentTarget) return // only direct clicks on the paper
-      const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
-      const x = (e.clientX - rect.left) / zoom
-      const y = (e.clientY - rect.top) / zoom
-      addContainer(activePage.id, {
-        id: uid(),
-        x: Math.max(8, x - 12),
-        y: Math.max(8, y - 12),
-        w: 220,
-        h: 60,
-        kind: 'text',
-        body: '',
-      })
-    },
-    [activePage, addContainer, zoom],
-  )
-
-  const insertEquation = useCallback(() => {
-    if (!activePage) return
-    const rect = surfaceRef.current?.getBoundingClientRect()
-    const cx = rect ? rect.width / 2 / zoom - 100 : 200
-    const cy = rect ? Math.min(rect.height / 2, 220) : 120
-    addContainer(activePage.id, {
-      id: uid(),
-      x: Math.max(20, cx),
-      y: Math.max(20, cy),
-      w: 240,
-      h: 80,
-      kind: 'math',
-      body: '',
+  // Set innerHTML once per page-switch to avoid React fighting contentEditable.
+  useEffect(() => {
+    if (!editorRef.current || !activePage) return
+    if (lastSetPageId.current === activePage.id) return
+    editorRef.current.innerHTML = activePage.body || ''
+    lastSetPageId.current = activePage.id
+    // place caret at end on mount
+    const el = editorRef.current
+    requestAnimationFrame(() => {
+      el.focus()
+      const range = document.createRange()
+      range.selectNodeContents(el)
+      range.collapse(false)
+      const sel = window.getSelection()
+      sel?.removeAllRanges()
+      sel?.addRange(range)
     })
-  }, [activePage, addContainer, zoom])
+  }, [activePage])
+
+  const queueSave = useCallback(() => {
+    if (!activePage) return
+    if (idleSaveTimer.current) window.clearTimeout(idleSaveTimer.current)
+    idleSaveTimer.current = window.setTimeout(() => {
+      if (editorRef.current && activePage) {
+        setPageBody(activePage.id, editorRef.current.innerHTML)
+      }
+    }, 800)
+  }, [activePage, setPageBody])
+
+  const flushSave = useCallback(() => {
+    if (editorRef.current && activePage) {
+      setPageBody(activePage.id, editorRef.current.innerHTML)
+    }
+  }, [activePage, setPageBody])
+
+  // ── Inline equation insertion ──────────────────────────────────────────────
+  const insertEquationInline = useCallback(async () => {
+    if (!editorRef.current) return
+    const latex = window.prompt('הזן ביטוי LaTeX (לדוגמה: \\frac{a}{b})', '')
+    if (!latex || !latex.trim()) return
+    await ensureMathLive().catch(() => false)
+    let html = latex
+    if (window.katex) {
+      try {
+        html = window.katex.renderToString(latex, { throwOnError: false, displayMode: false })
+      } catch {
+        /* keep raw */
+      }
+    }
+    const span = document.createElement('span')
+    span.contentEditable = 'false'
+    span.setAttribute('data-latex', latex)
+    span.style.display = 'inline-block'
+    span.style.padding = '0 4px'
+    span.style.margin = '0 2px'
+    span.style.verticalAlign = 'middle'
+    span.style.background = 'rgba(212,175,55,0.08)'
+    span.style.borderRadius = '4px'
+    span.innerHTML = html
+    editorRef.current.focus()
+    const sel = window.getSelection()
+    if (sel && sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0)
+      range.deleteContents()
+      range.insertNode(span)
+      // move caret after the node
+      range.setStartAfter(span)
+      range.setEndAfter(span)
+      sel.removeAllRanges()
+      sel.addRange(range)
+    } else {
+      editorRef.current.appendChild(span)
+    }
+    flushSave()
+  }, [flushSave])
+
+  const insertHighlight = useCallback(() => {
+    if (!editorRef.current) return
+    editorRef.current.focus()
+    document.execCommand('hiliteColor', false, '#FFF1A8')
+    queueSave()
+  }, [queueSave])
 
   const insertTemplate = useCallback(
     (kind: 'problem' | 'definition' | 'proof') => {
-      if (!activePage) return
-      const labelMap: Record<string, string> = {
-        problem: 'שאלה:\n\n',
-        definition: 'הגדרה:\n\n',
-        proof: 'הוכחה:\n\n',
+      if (!editorRef.current) return
+      const labels: Record<string, string> = {
+        problem: 'שאלה:',
+        definition: 'הגדרה:',
+        proof: 'הוכחה:',
       }
-      addContainer(activePage.id, {
-        id: uid(),
-        x: 40 + Math.random() * 40,
-        y: 40 + Math.random() * 40,
-        w: 320,
-        h: 120,
-        kind: 'text',
-        body: labelMap[kind] ?? '',
-      })
-      setTemplateMenuOpen(false)
+      const label = labels[kind] ?? ''
+      const html = `<p><strong>${label}</strong></p><p><br/></p>`
+      editorRef.current.focus()
+      document.execCommand('insertHTML', false, html)
+      setOpenMenu(null)
+      queueSave()
     },
-    [activePage, addContainer],
+    [queueSave],
   )
 
   const paperStyle: PaperStyle = activePage?.paperStyle ?? 'ruled'
 
+  // ── Toolbar button helpers ─────────────────────────────────────────────────
+  const tb = (opts: { accent?: boolean; active?: boolean } = {}): React.CSSProperties => ({
+    background: opts.accent ? t.accentBg : opts.active ? t.accentBg : t.btnBg,
+    color: opts.accent ? '#1F2640' : t.ink,
+    border: `1px solid ${opts.accent || opts.active ? t.accentBorder : t.btnBorder}`,
+    borderRadius: 16,
+    padding: '6px 12px',
+    fontFamily: "'Assistant', 'Rubik', sans-serif",
+    fontWeight: 600,
+    fontSize: 13,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+  })
+
+  const dropdownStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '110%',
+    insetInlineStart: 0,
+    background: t.dropdownBg,
+    border: `1px solid ${t.divider}`,
+    borderRadius: 8,
+    padding: 6,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+    minWidth: 160,
+    zIndex: 200,
+    boxShadow: t.shadow,
+  }
+
+  const dropdownItemStyle: React.CSSProperties = {
+    background: 'transparent',
+    color: t.ink,
+    border: 0,
+    borderRadius: 4,
+    padding: '7px 10px',
+    textAlign: 'right',
+    fontFamily: "'Assistant', 'Rubik', sans-serif",
+    fontSize: 13,
+    cursor: 'pointer',
+  }
+
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div
       dir="rtl"
       style={{
         position: 'absolute',
         inset: 0,
-        background: '#0B1B3E',
+        background: t.bg,
         fontFamily: "'Assistant', 'Rubik', system-ui, sans-serif",
-        color: '#fff',
+        color: t.ink,
         display: 'grid',
-        gridTemplateRows: '56px 38px 1fr',
-        gridTemplateColumns: '240px 1fr',
+        gridTemplateRows: 'auto 38px 1fr',
+        gridTemplateColumns: '1fr 240px',
         overflow: 'hidden',
       }}
+      onClick={() => setOpenMenu(null)}
     >
-      {/* Toolbar */}
+      {/* ── Toolbar ──────────────────────────────────────────────────────── */}
       <div
         style={{
           gridRow: '1',
           gridColumn: '1 / span 2',
-          height: 56,
           display: 'flex',
           alignItems: 'center',
-          padding: '0 18px',
-          gap: 10,
-          background: '#0B1B3E',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          flexWrap: 'wrap',
+          padding: '10px 18px',
+          gap: 8,
+          background: t.toolbarBg,
+          borderBottom: `1px solid ${t.divider}`,
+          boxShadow: themeMode === 'light' ? t.shadow : 'none',
         }}
+        onClick={(e) => e.stopPropagation()}
       >
-        <button
-          onClick={() => onBack?.()}
-          style={toolbarBtn({ accent: true })}
-          title="חזרה לדף הבית"
-        >
+        <button onClick={() => onBack?.()} style={tb({ accent: true })} title="חזרה לדף הבית">
           ← דף הבית
         </button>
-        <div style={{ width: 1, height: 26, background: 'rgba(255,255,255,0.12)', margin: '0 4px' }} />
+        <div style={{ width: 1, height: 24, background: t.divider, margin: '0 2px' }} />
+
+        {/* Mind-map ribbon stubs */}
+        <button onClick={stub} style={tb()} title="סדר מחדש">סדר מחדש</button>
+        <button onClick={stub} style={tb()} title="חיפוש">🔍</button>
+        <button onClick={stub} style={tb()} title="פומודורו">🍅</button>
+        <button onClick={stub} style={tb()} title="סיור">🎓</button>
+
         <button
-          onClick={() => activeSection && addPage(activeSection.id)}
-          style={toolbarBtn()}
-          title="הוסף דף חדש"
+          onClick={() => window.postMessage({ type: 'ws-split' }, '*')}
+          style={tb()}
+          title="פצל תצוגה"
         >
-          📄 הוסף דף
+          פצל ▾
         </button>
-        <button onClick={insertEquation} style={toolbarBtn()} title="הוסף משוואה">
-          🧮 משוואה
-        </button>
-        <button
-          onClick={() => {
-            if (!activePage) return
-            // toggle "highlighter" feel by inserting a yellow-tinted note
-            addContainer(activePage.id, {
-              id: uid(),
-              x: 60,
-              y: 80,
-              w: 260,
-              h: 60,
-              kind: 'text',
-              body: '✎ הערה צהובה',
-            })
-          }}
-          style={toolbarBtn()}
-          title="מסמן/הערה"
-        >
-          🖍 מסמן
-        </button>
+
+        {/* Add ▾ */}
         <div style={{ position: 'relative' }}>
-          <button onClick={() => setTemplateMenuOpen((v) => !v)} style={toolbarBtn()} title="הוסף תבנית">
-            📋 תבנית
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setOpenMenu(openMenu === 'add' ? null : 'add')
+            }}
+            style={tb()}
+            title="הוסף"
+          >
+            הוסף ▾
           </button>
-          {templateMenuOpen && (
-            <div style={dropdownStyle}>
+          {openMenu === 'add' && (
+            <div style={dropdownStyle} onClick={(e) => e.stopPropagation()}>
+              <button
+                style={dropdownItemStyle}
+                onClick={() => {
+                  if (activeSection) addPage(activeSection.id)
+                  setOpenMenu(null)
+                }}
+              >
+                📄 דף חדש
+              </button>
+              <button
+                style={dropdownItemStyle}
+                onClick={() => {
+                  insertEquationInline()
+                  setOpenMenu(null)
+                }}
+              >
+                🧮 משוואה
+              </button>
+              <button
+                style={dropdownItemStyle}
+                onClick={() => {
+                  insertHighlight()
+                  setOpenMenu(null)
+                }}
+              >
+                🖍 מסמן
+              </button>
+            </div>
+          )}
+        </div>
+
+        <button onClick={stub} style={tb()} title="תצוגה">תצוגה ▾</button>
+
+        {/* Templates ▾ */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setOpenMenu(openMenu === 'tpl' ? null : 'tpl')
+            }}
+            style={tb()}
+            title="תבניות"
+          >
+            תבניות ▾
+          </button>
+          {openMenu === 'tpl' && (
+            <div style={dropdownStyle} onClick={(e) => e.stopPropagation()}>
               <button style={dropdownItemStyle} onClick={() => insertTemplate('problem')}>שאלה</button>
               <button style={dropdownItemStyle} onClick={() => insertTemplate('definition')}>הגדרה</button>
               <button style={dropdownItemStyle} onClick={() => insertTemplate('proof')}>הוכחה</button>
             </div>
           )}
         </div>
+
+        <button onClick={stub} style={tb()} title="קבצים">קבצים ▾</button>
+
+        <div style={{ width: 1, height: 24, background: t.divider, margin: '0 2px' }} />
+
+        {/* Legacy explicit buttons */}
+        <button onClick={insertEquationInline} style={tb()} title="הוסף משוואה">🧮 משוואה</button>
+        <button onClick={insertHighlight} style={tb()} title="מסמן">🖍 מסמן</button>
+
+        {/* Paper style ▾ */}
         <div style={{ position: 'relative' }}>
-          <button onClick={() => setPaperMenuOpen((v) => !v)} style={toolbarBtn()} title="סגנון נייר">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setOpenMenu(openMenu === 'paper' ? null : 'paper')
+            }}
+            style={tb()}
+            title="סגנון נייר"
+          >
             📐 נייר: {PAPER_OPTIONS.find((o) => o.id === paperStyle)?.label}
           </button>
-          {paperMenuOpen && (
-            <div style={dropdownStyle}>
+          {openMenu === 'paper' && (
+            <div style={dropdownStyle} onClick={(e) => e.stopPropagation()}>
               {PAPER_OPTIONS.map((o) => (
                 <button
                   key={o.id}
-                  style={{ ...dropdownItemStyle, background: o.id === paperStyle ? 'rgba(245,200,66,0.15)' : 'transparent' }}
+                  style={{
+                    ...dropdownItemStyle,
+                    background: o.id === paperStyle ? 'rgba(212,175,55,0.18)' : 'transparent',
+                  }}
                   onClick={() => {
                     if (activePage) setPaperStyle(activePage.id, o.id)
-                    setPaperMenuOpen(false)
+                    setOpenMenu(null)
                   }}
                 >
                   {o.icon} {o.label}
@@ -861,26 +765,153 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
           )}
         </div>
 
-        <div style={{ flex: 1 }} />
+        <button
+          onClick={() => activeSection && addPage(activeSection.id)}
+          style={tb()}
+          title="הוסף דף חדש"
+        >
+          📄 הוסף דף
+        </button>
+
+        <div style={{ width: 1, height: 24, background: t.divider, margin: '0 2px' }} />
+
+        {/* Hub buttons (real handlers) */}
+        <button
+          onClick={() => window.postMessage({ type: 'ws-split' }, '*')}
+          style={tb()}
+          title="העיר שלי"
+        >
+          🏙️ העיר שלי
+        </button>
+        <button
+          onClick={() => window.postMessage({ type: 'ws-split-study' }, '*')}
+          style={tb()}
+          title="איזור הלמידה"
+        >
+          📚 איזור הלמידה
+        </button>
+        <button
+          onClick={() => window.postMessage({ type: 'ws-split-study' }, '*')}
+          style={tb()}
+          title="הארסנל שלי"
+        >
+          🎯 הארסנל שלי
+        </button>
+
+        <div style={{ flex: 1, minWidth: 8 }} />
 
         <div
           style={{
             fontSize: 12,
-            color: savedFlash ? '#8EE7A8' : 'rgba(255,255,255,0.55)',
+            color: savedFlash ? '#2F8F4A' : t.inkMuted,
             transition: 'color 200ms',
+            minWidth: 110,
+            textAlign: 'left',
           }}
         >
           {savedFlash ? '✓ נשמר אוטומטית' : 'שמירה אוטומטית'}
         </div>
+
+        {/* Light/dark toggle */}
+        <button
+          onClick={() => setThemeMode(themeMode === 'light' ? 'dark' : 'light')}
+          style={tb()}
+          title="החלף מצב תצוגה"
+        >
+          {themeMode === 'light' ? '🌙' : '☀️'}
+        </button>
       </div>
 
-      {/* Sections rail */}
+      {/* ── Pages strip ──────────────────────────────────────────────────── */}
+      <div
+        style={{
+          gridRow: '2',
+          gridColumn: '1',
+          height: 38,
+          background: t.pagesStripBg,
+          borderBottom: `1px solid ${t.divider}`,
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 14px',
+          gap: 6,
+          overflowX: 'auto',
+        }}
+      >
+        {sectionPages.map((p) => {
+          const isActive = p.id === activePageId
+          return (
+            <div
+              key={p.id}
+              onClick={() => {
+                flushSave()
+                setActivePage(p.id)
+              }}
+              onDoubleClick={() => {
+                const next = window.prompt('שם הדף', p.title)
+                if (next && next.trim()) renamePage(p.id, next.trim())
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '5px 12px',
+                borderRadius: 14,
+                background: isActive ? t.btnBg : 'transparent',
+                color: t.ink,
+                cursor: 'pointer',
+                fontSize: 13,
+                userSelect: 'none',
+                border: `1px solid ${isActive ? t.accentBorder : 'transparent'}`,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <span>{p.title}</span>
+              {sectionPages.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (window.confirm(`למחוק את "${p.title}"?`)) deletePage(p.id)
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 0,
+                    color: t.inkMuted,
+                    cursor: 'pointer',
+                    fontSize: 13,
+                    padding: 0,
+                    lineHeight: 1,
+                  }}
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          )
+        })}
+        <button
+          onClick={() => activeSection && addPage(activeSection.id)}
+          style={{
+            background: 'transparent',
+            border: `1px dashed ${t.divider}`,
+            color: t.inkMuted,
+            borderRadius: 14,
+            padding: '5px 12px',
+            cursor: 'pointer',
+            fontSize: 13,
+            fontFamily: 'inherit',
+          }}
+        >
+          + דף חדש
+        </button>
+      </div>
+
+      {/* ── Sections rail (right) ────────────────────────────────────────── */}
       <div
         style={{
           gridRow: '2 / span 2',
-          gridColumn: '1',
-          background: '#0F2350',
-          borderInlineEnd: '1px solid rgba(255,255,255,0.06)',
+          gridColumn: '2',
+          background: t.railBg,
+          borderInlineStart: `1px solid ${t.divider}`,
           padding: '14px 12px',
           overflowY: 'auto',
           display: 'flex',
@@ -891,7 +922,7 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
         <div
           style={{
             fontSize: 12,
-            color: 'rgba(255,255,255,0.55)',
+            color: t.inkMuted,
             textTransform: 'uppercase',
             letterSpacing: 1,
             padding: '0 4px 4px 4px',
@@ -904,7 +935,10 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
           return (
             <div
               key={sec.id}
-              onClick={() => setActiveSection(sec.id)}
+              onClick={() => {
+                flushSave()
+                setActiveSection(sec.id)
+              }}
               onDoubleClick={() => {
                 const next = window.prompt('שם הקטע', sec.name)
                 if (next && next.trim()) renameSection(sec.id, next.trim())
@@ -916,7 +950,7 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
                 padding: '8px 10px',
                 borderRadius: 6,
                 background: isActive ? 'rgba(212,175,55,0.16)' : 'transparent',
-                border: isActive ? '1px solid rgba(212,175,55,0.4)' : '1px solid transparent',
+                border: `1px solid ${isActive ? t.accentBorder : 'transparent'}`,
                 cursor: 'pointer',
                 userSelect: 'none',
               }}
@@ -931,7 +965,7 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
                   flexShrink: 0,
                 }}
               />
-              <span style={{ flex: 1, fontSize: 14, color: '#fff' }}>{sec.name}</span>
+              <span style={{ flex: 1, fontSize: 14, color: t.ink }}>{sec.name}</span>
               {sections.length > 1 && (
                 <button
                   onClick={(e) => {
@@ -941,7 +975,7 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
                   style={{
                     background: 'transparent',
                     border: 0,
-                    color: 'rgba(255,255,255,0.4)',
+                    color: t.inkMuted,
                     cursor: 'pointer',
                     fontSize: 14,
                   }}
@@ -960,9 +994,9 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
           }}
           style={{
             marginTop: 6,
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px dashed rgba(255,255,255,0.2)',
-            color: 'rgba(255,255,255,0.8)',
+            background: t.btnBg,
+            border: `1px dashed ${t.divider}`,
+            color: t.ink,
             borderRadius: 6,
             padding: '8px 10px',
             cursor: 'pointer',
@@ -974,226 +1008,70 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
         </button>
       </div>
 
-      {/* Pages strip */}
-      <div
-        style={{
-          gridRow: '2',
-          gridColumn: '2',
-          height: 38,
-          background: '#0F2350',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 14px',
-          gap: 6,
-          overflowX: 'auto',
-        }}
-      >
-        {sectionPages.map((p) => {
-          const isActive = p.id === activePageId
-          return (
-            <div
-              key={p.id}
-              onClick={() => setActivePage(p.id)}
-              onDoubleClick={() => {
-                const next = window.prompt('שם הדף', p.title)
-                if (next && next.trim()) renamePage(p.id, next.trim())
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '5px 12px',
-                borderRadius: 14,
-                background: isActive ? '#FBF8F1' : 'rgba(255,255,255,0.06)',
-                color: isActive ? '#1F2640' : 'rgba(255,255,255,0.85)',
-                cursor: 'pointer',
-                fontSize: 13,
-                userSelect: 'none',
-                border: isActive ? '1px solid rgba(212,175,55,0.5)' : '1px solid transparent',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <span>{p.title}</span>
-              {sectionPages.length > 1 && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    if (window.confirm(`למחוק את "${p.title}"?`)) deletePage(p.id)
-                  }}
-                  style={{
-                    background: 'transparent',
-                    border: 0,
-                    color: isActive ? 'rgba(31,38,64,0.5)' : 'rgba(255,255,255,0.4)',
-                    cursor: 'pointer',
-                    fontSize: 13,
-                    padding: 0,
-                    lineHeight: 1,
-                  }}
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          )
-        })}
-        <button
-          onClick={() => activeSection && addPage(activeSection.id)}
-          style={{
-            background: 'transparent',
-            border: '1px dashed rgba(255,255,255,0.2)',
-            color: 'rgba(255,255,255,0.7)',
-            borderRadius: 14,
-            padding: '5px 12px',
-            cursor: 'pointer',
-            fontSize: 13,
-            fontFamily: 'inherit',
-          }}
-        >
-          + דף חדש
-        </button>
-      </div>
-
-      {/* Writing surface */}
+      {/* ── Writing surface (document flow) ─────────────────────────────── */}
       <div
         style={{
           gridRow: '3',
-          gridColumn: '2',
+          gridColumn: '1',
           position: 'relative',
           overflow: 'auto',
-          background: '#0B1B3E',
+          background: t.bg,
         }}
       >
         <div
-          ref={surfaceRef}
-          onClick={onSurfaceClick}
           style={{
             position: 'relative',
-            width: `${100 / zoom}%`,
-            minHeight: `${100 / zoom}%`,
-            transform: `scale(${zoom})`,
-            transformOrigin: 'top right',
+            width: '100%',
+            minHeight: '100%',
           }}
         >
-          {/* Paper canvas */}
+          <PaperBackground style={paperStyle} base={t.paperBg} />
+
           <div
-            onClick={onSurfaceClick}
+            ref={editorRef}
+            contentEditable
+            suppressContentEditableWarning
+            dir="rtl"
+            spellCheck={false}
+            data-placeholder={
+              activePage && !activePage.body ? 'התחל לכתוב…' : ''
+            }
+            onInput={queueSave}
+            onBlur={flushSave}
+            onKeyDown={(e) => {
+              // Default Enter = <p>; Shift+Enter = <br>. Browsers handle this; just queue save.
+              if (e.key === 'Enter' && !e.shiftKey) {
+                // Let the browser insert paragraph
+              }
+            }}
             style={{
               position: 'relative',
-              width: '100%',
-              minHeight: '100vh',
-              cursor: 'text',
+              zIndex: 1,
+              minHeight: 'calc(100vh - 120px)',
+              outline: 'none',
+              padding: '40px 64px 80px 80px',
+              fontFamily: "'Assistant', 'Rubik', system-ui, sans-serif",
+              fontSize: 18,
+              lineHeight: '28px',
+              color: t.ink,
+              whiteSpace: 'pre-wrap',
+              caretColor: t.accent,
             }}
-          >
-            <PaperBackground style={paperStyle} />
-
-            {/* Empty-state hint */}
-            {activePage && activePage.containers.length === 0 && (
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  pointerEvents: 'none',
-                  color: 'rgba(31,38,64,0.35)',
-                  fontSize: 18,
-                  fontFamily: "'Assistant', sans-serif",
-                  zIndex: 1,
-                }}
-              >
-                לחץ כדי להתחיל לכתוב
-              </div>
-            )}
-
-            {/* Containers */}
-            {activePage?.containers.map((c) => (
-              <NoteContainerView key={c.id} c={c} pageId={activePage.id} />
-            ))}
-          </div>
-        </div>
-
-        {/* Zoom controls */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 16,
-            insetInlineStart: 16,
-            display: 'flex',
-            gap: 4,
-            background: 'rgba(11,27,62,0.85)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: 16,
-            padding: 4,
-            backdropFilter: 'blur(4px)',
-          }}
-        >
-          <button onClick={() => setZoom((z) => Math.max(0.6, +(z - 0.1).toFixed(2)))} style={zoomBtn}>−</button>
-          <div style={{ alignSelf: 'center', color: '#fff', fontSize: 12, minWidth: 36, textAlign: 'center' }}>
-            {Math.round(zoom * 100)}%
-          </div>
-          <button onClick={() => setZoom((z) => Math.min(1.6, +(z + 0.1).toFixed(2)))} style={zoomBtn}>+</button>
-          <button onClick={() => setZoom(1)} style={zoomBtn} title="איפוס">⤾</button>
+          />
         </div>
       </div>
+
+      <Toast message={toast} />
+
+      {/* Placeholder styling for empty contentEditable */}
+      <style>{`
+        [contenteditable][data-placeholder]:empty:before {
+          content: attr(data-placeholder);
+          color: ${t.inkMuted};
+          pointer-events: none;
+          display: block;
+        }
+      `}</style>
     </div>
   )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// styles helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-function toolbarBtn({ accent }: { accent?: boolean } = {}): React.CSSProperties {
-  return {
-    background: accent ? 'rgba(212,175,55,0.16)' : 'rgba(255,255,255,0.06)',
-    color: accent ? '#F5C842' : '#fff',
-    border: `1px solid ${accent ? 'rgba(212,175,55,0.5)' : 'rgba(255,255,255,0.14)'}`,
-    borderRadius: 18,
-    padding: '7px 14px',
-    fontFamily: "'Assistant', 'Rubik', sans-serif",
-    fontWeight: 500,
-    fontSize: 13,
-    cursor: 'pointer',
-  }
-}
-
-const dropdownStyle: React.CSSProperties = {
-  position: 'absolute',
-  top: '110%',
-  insetInlineStart: 0,
-  background: '#0B1B3E',
-  border: '1px solid rgba(212,175,55,0.4)',
-  borderRadius: 8,
-  padding: 6,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 2,
-  minWidth: 140,
-  zIndex: 200,
-  boxShadow: '0 12px 30px rgba(0,0,0,0.45)',
-}
-
-const dropdownItemStyle: React.CSSProperties = {
-  background: 'transparent',
-  color: '#fff',
-  border: 0,
-  borderRadius: 4,
-  padding: '6px 10px',
-  textAlign: 'right',
-  fontFamily: "'Assistant', 'Rubik', sans-serif",
-  fontSize: 13,
-  cursor: 'pointer',
-}
-
-const zoomBtn: React.CSSProperties = {
-  background: 'transparent',
-  border: 0,
-  color: '#fff',
-  cursor: 'pointer',
-  fontSize: 16,
-  width: 26,
-  height: 26,
-  borderRadius: 13,
 }
