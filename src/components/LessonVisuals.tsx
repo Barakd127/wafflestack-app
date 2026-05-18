@@ -7,11 +7,12 @@
  */
 import React, { useState, useCallback, useMemo } from 'react'
 
-// ── Shared tokens ─────────────────────────────────────────────────────────────
-const ACCENT = '#6366f1'
+// ── Shared tokens — Navy + Gold brand palette ─────────────────────────────────
+const ACCENT = '#1F3E6C'        // navy (was indigo #6366f1)
+const GOLD  = '#D4A017'         // gold accent
 const WRAP: React.CSSProperties = {
-  background: 'rgba(99,102,241,0.06)',
-  border: '1px solid rgba(99,102,241,0.2)',
+  background: 'rgba(31,62,108,0.06)',
+  border: '1px solid rgba(31,62,108,0.2)',
   borderRadius: 16,
   padding: '16px 20px',
   marginTop: 20,
@@ -20,20 +21,20 @@ const WRAP: React.CSSProperties = {
 }
 const BADGE = (extra?: React.CSSProperties): React.CSSProperties => ({
   display: 'inline-block',
-  background: 'rgba(99,102,241,0.12)',
+  background: 'rgba(212,160,23,0.12)',
   borderRadius: 8,
   padding: '3px 10px',
   fontSize: 13,
   fontWeight: 600,
-  color: '#4338ca',
+  color: '#1F3E6C',
   margin: '0 3px',
   ...extra,
 })
 const ROW: React.CSSProperties = { display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }
 const LABEL_STYLE: React.CSSProperties = { fontSize: 13, color: '#374151', display: 'flex', alignItems: 'center', gap: 6 }
-const SLIDER = (color = ACCENT): React.CSSProperties => ({ width: 110, accentColor: color, marginRight: 6 } as React.CSSProperties)
-const CAPTION: React.CSSProperties = { fontSize: 11, color: '#6366f1', fontWeight: 600, marginBottom: 4 }
-const STORY: React.CSSProperties = { fontSize: 13, color: '#374151', lineHeight: 1.6, marginBottom: 12, padding: '8px 12px', background: 'rgba(255,255,255,0.5)', borderRight: `3px solid ${ACCENT}`, borderRadius: 8 }
+const SLIDER = (color = GOLD): React.CSSProperties => ({ width: 110, accentColor: color, marginRight: 6 } as React.CSSProperties)
+const CAPTION: React.CSSProperties = { fontSize: 11, color: '#1F3E6C', fontWeight: 600, marginBottom: 4 }
+const STORY: React.CSSProperties = { fontSize: 13, color: '#374151', lineHeight: 1.6, marginBottom: 12, padding: '8px 12px', background: 'rgba(255,255,255,0.5)', borderRight: `3px solid ${GOLD}`, borderRadius: 8 }
 
 // ── Math helpers ──────────────────────────────────────────────────────────────
 function normalPDF(x: number, mu: number, sigma: number) {
@@ -118,11 +119,11 @@ export function MeanVisual() {
         marginBottom: 10, fontSize: 11, color: '#475569',
       }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(245,158,11,0.75)' }} />
+          <span style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(212,160,23,0.85)' }} />
           מתחת לממוצע
         </span>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(99,102,241,0.75)' }} />
+          <span style={{ width: 14, height: 14, borderRadius: 3, background: 'rgba(31,62,108,0.75)' }} />
           מעל לממוצע
         </span>
       </div>
@@ -147,7 +148,7 @@ export function MeanVisual() {
           return (
             <g key={i}>
               <rect x={x} y={H - 16 - bh} width={barW} height={bh}
-                fill={v > mean ? 'rgba(99,102,241,0.75)' : 'rgba(245,158,11,0.75)'} rx={3} />
+                fill={v > mean ? 'rgba(31,62,108,0.75)' : 'rgba(212,160,23,0.85)'} rx={3} />
               <text x={x + barW / 2} y={H - 18 - bh} textAnchor="middle" fontSize={11} fill="#374151">{v}</text>
               <text x={x + barW / 2} y={H - 4} textAnchor="middle" fontSize={9} fill="#6b7280">{FRIENDS[i]}</text>
             </g>
@@ -166,7 +167,7 @@ export function MeanVisual() {
           − הסר חבר
         </button>
         <button onClick={() => values.length < 10 && setValues(v => [...v, Math.round(mean)])}
-          style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: ACCENT, fontWeight: 600, fontSize: 12 }}>
+          style={{ background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.25)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: ACCENT, fontWeight: 600, fontSize: 12 }}>
           + הוסף חבר
         </button>
       </div>
@@ -199,15 +200,15 @@ export function MedianVisual() {
           const origIdx = values.indexOf(v)
           return (
             <div key={i} style={{ textAlign: 'center', position: 'relative' }}>
-              {isMed && <div style={{ position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)', fontSize: 10, color: '#b45309', fontWeight: 700, whiteSpace: 'nowrap' }}>
+              {isMed && <div style={{ position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)', fontSize: 10, color: '#1F3E6C', fontWeight: 700, whiteSpace: 'nowrap' }}>
                 {isEven ? 'מרכז' : 'חציון'}
               </div>}
               <div style={{
                 width: 48, height: 48, borderRadius: 12,
-                background: isMed ? '#f59e0b' : 'rgba(99,102,241,0.15)',
-                border: `2px solid ${isMed ? '#f59e0b' : 'rgba(99,102,241,0.4)'}`,
+                background: isMed ? '#D4A017' : 'rgba(31,62,108,0.12)',
+                border: `2px solid ${isMed ? '#D4A017' : 'rgba(31,62,108,0.3)'}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 14, fontWeight: 700, color: isMed ? '#fff' : '#4338ca',
+                fontSize: 14, fontWeight: 700, color: isMed ? '#fff' : '#1F3E6C',
               }}>{v}K</div>
               <div style={{ fontSize: 10, color: '#6b7280', marginTop: 3 }}>{TEAM[origIdx >= 0 ? origIdx % TEAM.length : i]}</div>
             </div>
@@ -217,16 +218,16 @@ export function MedianVisual() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <div>
           <span style={BADGE()}>n = {n} {isEven ? '(זוגי)' : '(אי-זוגי)'}</span>
-          <span style={BADGE({ background: 'rgba(245,158,11,0.12)', color: '#b45309' })}>חציון = {median}K</span>
-          <span style={BADGE({ background: 'rgba(239,68,68,0.1)', color: '#b91c1c' })}>ממוצע = {mean.toFixed(1)}K</span>
+          <span style={BADGE({ background: 'rgba(31,62,108,0.10)', color: '#1F3E6C' })}>חציון = {median}K</span>
+          <span style={BADGE({ background: 'rgba(212,160,23,0.15)', color: '#1F3E6C' })}>ממוצע = {mean.toFixed(1)}K</span>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
           <button onClick={() => values.length > 2 && setValues(v => v.slice(0, -1))}
-            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: '#ef4444', fontWeight: 600, fontSize: 12 }}>− עובד</button>
+            style={{ background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: '#1F3E6C', fontWeight: 600, fontSize: 12 }}>− עובד</button>
           <button onClick={() => values.length < 9 && setValues(v => [...v, Math.floor(Math.random() * 35) + 10])}
-            style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: ACCENT, fontWeight: 600, fontSize: 12 }}>+ עובד</button>
+            style={{ background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: ACCENT, fontWeight: 600, fontSize: 12 }}>+ עובד</button>
           <button onClick={() => setValues(v => [...v, 200])}
-            style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: '#b45309', fontWeight: 600, fontSize: 12 }}>+ מנכ״ל</button>
+            style={{ background: 'rgba(212,160,23,0.12)', border: '1px solid rgba(212,160,23,0.35)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: '#1F3E6C', fontWeight: 600, fontSize: 12 }}>+ מנכ״ל</button>
         </div>
       </div>
     </div>
