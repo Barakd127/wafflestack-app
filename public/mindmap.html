@@ -4274,15 +4274,49 @@ function nbEscHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;
 function nbRenderMathWidget(latex){
   let rendered = '';
   try{
-    if(window.katex){
+    if(window.katex && typeof katex.renderToString === 'function'){
       rendered = katex.renderToString(latex, {throwOnError:false, displayMode:false, output:'html'});
     } else {
+      // KaTeX not yet loaded — emit raw LaTeX placeholder, sweep will retry.
       rendered = nbEscHtml(latex);
     }
   } catch(e){ rendered = nbEscHtml(latex); }
   return '<span class="nb-math-widget" data-math-widget="true" contenteditable="false" data-latex="'
        + nbEscAttr(latex) + '" title="לחץ לעריכה"><span class="nb-math-render">' + rendered + '</span></span>';
 }
+
+// Sweep the active page body and (re)render every .nb-math-widget via KaTeX.
+// Idempotent — replaces .nb-math-render innerHTML each time. Used after the
+// initial render in case KaTeX wasn't ready yet, and after KaTeX finishes
+// loading via the global readiness poller below.
+function nbRerenderMathWidgets(){
+  if(!window.katex || typeof katex.renderToString !== 'function') return;
+  const body = document.getElementById('nb-body-active');
+  if(!body) return;
+  body.querySelectorAll('.nb-math-widget').forEach(w => {
+    const latex = w.getAttribute('data-latex') || '';
+    const target = w.querySelector('.nb-math-render');
+    if(!target) return;
+    try {
+      target.innerHTML = katex.renderToString(latex, {throwOnError:false, displayMode:false, output:'html'});
+    } catch(e) { target.textContent = latex; }
+  });
+}
+
+// Poll for KaTeX to finish loading (CDN script may resolve after first
+// nbRender). Once available, sweep widgets once and stop polling.
+(function nbWaitForKatex(){
+  let tries = 0;
+  const id = setInterval(() => {
+    tries++;
+    if(window.katex && typeof katex.renderToString === 'function'){
+      clearInterval(id);
+      nbRerenderMathWidgets();
+    } else if(tries > 60){ // 30s safety stop
+      clearInterval(id);
+    }
+  }, 500);
+})();
 
 // Convert a legacy plain-text body (with $...$ math markers) to widget HTML.
 // If body already looks like HTML (has tags or our widget markers), return as-is.
@@ -5158,6 +5192,10 @@ function nbRender(){
   if(!NB.active) return;
   nbRenderTreeRows();
   nbRenderContent();
+  // Sweep + retry KaTeX render on every render. The first pass during page
+  // load may run before katex.min.js finishes downloading from CDN, so this
+  // catches any widgets that fell back to raw LaTeX text.
+  requestAnimationFrame(() => nbRerenderMathWidgets());
 }
 
 </script>
