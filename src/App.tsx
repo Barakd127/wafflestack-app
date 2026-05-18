@@ -333,8 +333,9 @@ function App() {
 
       {loggedIn && <TutorialOverlay />}
 
-      {/* AI Study Tutor — global FAB + slide-out drawer, available on every view */}
-      {activeView !== 'landing' && (
+      {/* AI Study Tutor — global FAB + slide-out drawer, shown on study views only
+          (hidden in wafflecity so the city back button sits cleanly at bottom-left) */}
+      {activeView !== 'landing' && activeView !== 'wafflecity' && (
         <>
           <TutorFAB />
           <TutorDrawer />

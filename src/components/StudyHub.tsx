@@ -63,8 +63,6 @@ const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
   // ── Hero topics — 3 aspects each ──
   power: [
     { Component: MeanInteractive,        title: 'מהו ממוצע?' },
-    { Component: MeanRunningAverage,     title: 'התכנסות כש-n גדל' },
-    { Component: MeanVsMedianVsMode,     title: 'ממוצע · חציון · שכיח' },
   ],
   traffic: [
     { Component: StdDevInteractive,      title: 'תחומי k·σ' },

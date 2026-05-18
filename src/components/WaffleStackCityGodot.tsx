@@ -138,14 +138,14 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
 
       {onBack && (
         <>
-          {/* Bottom-left back-to-learning button (existing) */}
+          {/* Bottom-left back-to-learning button */}
           <Tooltip label="חזרה ללימוד" description="חזור לאזור הלמידה" placement="top">
             <button
               onClick={onBack}
               aria-label="חזרה ללימוד"
               className="ws-godot-back-btn absolute left-4 z-50"
               style={{
-                bottom: 88,
+                bottom: 20,
                 padding: '10px 18px',
                 borderRadius: 14,
                 background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
@@ -167,38 +167,6 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
             </button>
           </Tooltip>
 
-          {/* Top-left HOME button (new). Routes to study-hub home via the same
-              onBack callback. Distinct visual treatment (gold gradient + house
-              icon) so it reads as "home" not "back". */}
-          <Tooltip label="דף הבית" description="חזרה למסך הראשי" placement="bottom">
-            <button
-              onClick={onBack}
-              aria-label="דף הבית"
-              className="ws-godot-home-btn absolute top-4 left-4 z-50"
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
-                border: '2px solid rgba(255,255,255,0.5)',
-                color: '#0B1B3E',
-                fontSize: 24,
-                fontWeight: 700,
-                fontFamily: "'Rubik','Assistant',sans-serif",
-                boxShadow: '0 6px 20px rgba(212,175,55,0.55), 0 0 0 1px rgba(255,255,255,0.15) inset',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backdropFilter: 'blur(8px)',
-                transition: 'transform 0.15s, box-shadow 0.15s',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.08)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)' }}
-            >
-              🏠
-            </button>
-          </Tooltip>
         </>
       )}
 
