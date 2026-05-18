@@ -4347,17 +4347,26 @@ function nbPlaceCaretAtEnd(el){
   const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
 }
 
-// Insert raw HTML at the current caret (or append if focus is outside the body).
+// Insert raw HTML at the current caret. Restores NB._savedRange (set by the
+// body's keyup/mouseup/blur snapshot) so that pickers which steal focus
+// (formula library, equation modal) still insert at the user's last caret
+// position — not at the end of the page.
 function nbInsertHtmlAtCaret(html){
   const body = document.getElementById('nb-body-active');
   if(!body) return;
   body.focus();
   const sel = window.getSelection();
-  // Ensure the selection is inside the body
-  if(!sel.rangeCount || !body.contains(sel.anchorNode)){
+  const inBody = sel && sel.rangeCount && body.contains(sel.anchorNode);
+  if(!inBody && NB._savedRange && body.contains(NB._savedRange.startContainer)){
+    sel.removeAllRanges();
+    sel.addRange(NB._savedRange);
+  } else if(!inBody){
     nbPlaceCaretAtEnd(body);
   }
   document.execCommand('insertHTML', false, html + '&nbsp;');
+  // Refresh saved range to live just after the inserted content
+  const fresh = window.getSelection();
+  if(fresh && fresh.rangeCount) NB._savedRange = fresh.getRangeAt(0).cloneRange();
   const n = MM.nodes[NB.currentId]; if(n) n.body = body.innerHTML;
   if(typeof nbCommitHistory === 'function') nbCommitHistory();
   if(typeof nbSave === 'function') nbSave();
@@ -5141,7 +5150,21 @@ function nbRenderContent(){
     clearTimeout(bodyTimer);
     bodyTimer = setTimeout(nbSave, 400);
   };
-  body.onblur = () => { n.body = body.innerHTML; nbCommitHistory(); nbSave(); };
+  // Save the active selection range whenever it changes inside the body, so
+  // when the user opens the formula library / equation modal (which steals
+  // focus), we can restore the caret to where they were typing on insert.
+  const snapshot = () => {
+    const sel = window.getSelection();
+    if(sel && sel.rangeCount && body.contains(sel.anchorNode)){
+      NB._savedRange = sel.getRangeAt(0).cloneRange();
+    }
+  };
+  body.addEventListener('keyup', snapshot);
+  body.addEventListener('mouseup', snapshot);
+  body.onblur = () => {
+    snapshot();
+    n.body = body.innerHTML; nbCommitHistory(); nbSave();
+  };
   // Click on inline math/canvas widget → open editor.
   body.addEventListener('click', (e) => {
     const mw = e.target.closest('.nb-math-widget');
