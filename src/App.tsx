@@ -266,7 +266,7 @@ function App() {
         {activeView === 'wafflecity' && (
           <div className="w-full h-full relative">
             <WaffleStackCity onBack={() => setActiveView('study')} />
-            <div className="ws-godot-controls absolute bottom-6 right-6 z-50 pointer-events-auto flex gap-2">
+            <div className="ws-godot-controls absolute bottom-6 right-6 z-50 pointer-events-auto flex gap-2 flex-wrap justify-end" style={{ maxWidth: 'calc(100vw - 120px)' }}>
               <button
                 onClick={() => setActiveView('split')}
                 aria-label="פצל מסך — עיר ולימוד"

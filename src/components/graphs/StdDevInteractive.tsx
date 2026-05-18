@@ -242,13 +242,13 @@ export default function StdDevInteractive() {
           y1={30}
           x2={meanPx}
           y2={AXIS_Y}
-          stroke="#FF6B35"
+          stroke="#D4A017"
           strokeWidth={2}
         />
         <text
           x={meanPx}
           y={24}
-          fill="#FF6B35"
+          fill="#D4A017"
           fontSize={13}
           fontWeight={700}
           textAnchor="middle"

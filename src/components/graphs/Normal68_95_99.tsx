@@ -44,8 +44,8 @@ export default function Normal68_95_99() {
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>כלל 68-95-99.7</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>בהתפלגות נורמלית: ±1σ מכיל 68% מהאוכלוסיה, ±2σ מכיל 95%, ±3σ מכיל 99.7%.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <path d={shadeBand(-3, 3)} fill="rgba(239,68,68,0.25)" />
-        <path d={shadeBand(-2, 2)} fill="rgba(249,115,22,0.30)" />
+        <path d={shadeBand(-3, 3)} fill="rgba(212,160,23,0.25)" />
+        <path d={shadeBand(-2, 2)} fill="rgba(255,107,53,0.30)" />
         <path d={shadeBand(-1, 1)} fill="rgba(255,215,0,0.45)" />
         <path d={curvePath} stroke="#fff" strokeWidth={2.5} fill="none" />
         <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(255,255,255,0.4)" />
@@ -56,8 +56,8 @@ export default function Normal68_95_99() {
           </g>
         ))}
         <text x={toPx(mu)} y={Y0 + 16} fill="#FFD700" fontSize={14} textAnchor="middle" fontWeight={700}>68%</text>
-        <text x={toPx(mu - 1.5 * sigma)} y={Y0 + 60} fill="#f97316" fontSize={12} textAnchor="middle" fontWeight={700}>95%</text>
-        <text x={toPx(mu - 2.5 * sigma)} y={Y0 + 100} fill="#ef4444" fontSize={11} textAnchor="middle" fontWeight={700}>99.7%</text>
+        <text x={toPx(mu - 1.5 * sigma)} y={Y0 + 60} fill="#FF6B35" fontSize={12} textAnchor="middle" fontWeight={700}>95%</text>
+        <text x={toPx(mu - 2.5 * sigma)} y={Y0 + 100} fill="#D4A017" fontSize={11} textAnchor="middle" fontWeight={700}>99.7%</text>
       </svg>
       <div id="rule-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>

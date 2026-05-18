@@ -106,8 +106,8 @@ export function MeanVisual() {
         </div>
         <div style={{
           fontFamily: "'Inter', serif",
-          fontSize: 56, fontWeight: 700, color: '#b91c1c',
-          letterSpacing: '-0.03em', lineHeight: 1,
+          fontSize: 36, fontWeight: 700, color: '#1F3E6C',
+          letterSpacing: '-0.02em', lineHeight: 1,
         }}>
           x̄ = {mean.toFixed(2)}
         </div>
@@ -127,7 +127,7 @@ export function MeanVisual() {
         </span>
       </div>
       <div style={STORY}>
-        <strong>ציוני המבחן של {values.length} חברים בכיתה.</strong> הזיזו את הסרגלים כדי לשנות את הציון של כל חבר וראו איך הממוצע (הקו האדום) מתנדנד.
+        <strong>ציוני המבחן של {values.length} חברים בכיתה.</strong> הזיזו את הסרגלים כדי לשנות את הציון של כל חבר וראו איך הממוצע (הקו הזהוב) מתנדנד.
       </div>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
         {values.map((v, i) => (
@@ -154,15 +154,15 @@ export function MeanVisual() {
           )
         })}
         <line x1={PAD} y1={H - 16 - mean * scaleH} x2={W - PAD} y2={H - 16 - mean * scaleH}
-          stroke="#ef4444" strokeWidth={2} strokeDasharray="6,3" />
-        <text x={W - PAD + 2} y={H - 16 - mean * scaleH + 4} fontSize={10} fill="#ef4444" fontWeight="bold">x̄</text>
+          stroke="#D4A017" strokeWidth={2} strokeDasharray="6,3" />
+        <text x={W - PAD + 2} y={H - 16 - mean * scaleH + 4} fontSize={10} fill="#D4A017" fontWeight="bold">x̄</text>
       </svg>
       <div style={{ marginTop: 6 }}>
         <span style={BADGE()}>n = {values.length}</span>
         <span style={BADGE()}>Σ = {values.reduce((s, v) => s + v, 0)}</span>
-        <span style={BADGE({ background: 'rgba(239,68,68,0.1)', color: '#b91c1c' })}>ממוצע = {mean.toFixed(2)}</span>
+        <span style={BADGE({ background: 'rgba(212,160,23,0.12)', color: '#1F3E6C' })}>ממוצע = {mean.toFixed(2)}</span>
         <button onClick={() => values.length > 2 && setValues(v => v.slice(0, -1))}
-          style={{ marginRight: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: '#ef4444', fontWeight: 600, fontSize: 12 }}>
+          style={{ marginRight: 8, background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: '#1F3E6C', fontWeight: 600, fontSize: 12 }}>
           − הסר חבר
         </button>
         <button onClick={() => values.length < 10 && setValues(v => [...v, Math.round(mean)])}

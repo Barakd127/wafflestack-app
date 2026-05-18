@@ -143,8 +143,9 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
             <button
               onClick={onBack}
               aria-label="חזרה ללימוד"
-              className="ws-godot-back-btn absolute bottom-4 left-4 z-50 ws-safe-bottom"
+              className="ws-godot-back-btn absolute left-4 z-50"
               style={{
+                bottom: 88,
                 padding: '10px 18px',
                 borderRadius: 14,
                 background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',

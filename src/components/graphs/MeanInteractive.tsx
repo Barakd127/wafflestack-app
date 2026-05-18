@@ -210,18 +210,18 @@ export default function MeanInteractive() {
           y1={30}
           x2={meanPx}
           y2={AXIS_Y}
-          stroke="#FF6B35"
+          stroke="#D4A017"
           strokeWidth={2}
           strokeDasharray="4 3"
         />
         <polygon
           points={`${meanPx - 10},${AXIS_Y + 30} ${meanPx + 10},${AXIS_Y + 30} ${meanPx},${AXIS_Y + 8}`}
-          fill="#FF6B35"
+          fill="#D4A017"
         />
         <text
           x={meanPx}
           y={24}
-          fill="#FF6B35"
+          fill="#D4A017"
           fontSize={14}
           fontWeight={700}
           textAnchor="middle"

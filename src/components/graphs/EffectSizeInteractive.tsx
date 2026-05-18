@@ -33,7 +33,7 @@ function interpret(d: number) {
   if (ad < 0.5) return { label: 'קטן (Small)', color: '#60a5fa' }
   if (ad < 0.8) return { label: 'בינוני (Medium)', color: '#FFD700' }
   if (ad < 1.2) return { label: 'גדול (Large)', color: '#f59e0b' }
-  return { label: 'גדול מאוד (Very Large)', color: '#ef4444' }
+  return { label: 'גדול מאוד (Very Large)', color: '#D4A017' }
 }
 
 export default function EffectSizeInteractive() {

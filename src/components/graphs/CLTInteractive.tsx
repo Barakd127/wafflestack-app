@@ -308,7 +308,7 @@ export default function CLTInteractive() {
               y={H_SAMPLE - h}
               width={Math.max(1, binWidth - 1)}
               height={h}
-              fill="#FF6B35"
+              fill="#D4A017"
               opacity={0.85}
             />
           )
@@ -360,10 +360,10 @@ export default function CLTInteractive() {
           }}
         >
           <span>
-            ממוצע ממוצעי המדגם: <b style={{ color: '#FF6B35' }}>{sampleStats.mean.toFixed(3)}</b>
+            ממוצע ממוצעי המדגם: <b style={{ color: '#D4A017' }}>{sampleStats.mean.toFixed(3)}</b>
           </span>
           <span>
-            סטיית תקן בפועל: <b style={{ color: '#FF6B35' }}>{sampleStats.sd.toFixed(3)}</b>
+            סטיית תקן בפועל: <b style={{ color: '#D4A017' }}>{sampleStats.sd.toFixed(3)}</b>
           </span>
           <span>
             תיאוריה σ/√n: <b style={{ color: '#27AE60' }}>{(parentSd / Math.sqrt(n)).toFixed(3)}</b>

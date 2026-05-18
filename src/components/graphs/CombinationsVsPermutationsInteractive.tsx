@@ -6,7 +6,7 @@
 import { useState, useMemo, useEffect } from 'react'
 
 const W = 640, H = 360
-const COLORS = ['#FFD700', '#60a5fa', '#34A853', '#ef4444', '#a855f7', '#f97316', '#06b6d4', '#ec4899', '#84cc16', '#94a3b8']
+const COLORS = ['#FFD700', '#60a5fa', '#34A853', '#D4A017', '#a855f7', '#FF6B35', '#06b6d4', '#ec4899', '#84cc16', '#94a3b8']
 
 function fact(n: number): number {
   let s = 1
