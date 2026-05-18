@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<!-- MathLive is lazy-loaded on demand from openMathEditor(); CSS preloaded so the keyboard appears instantly. -->
+<link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1a1a}
@@ -406,7 +408,7 @@ body.light .nb-breadcrumb{color:rgba(0,0,0,.55)}
 .nb-title-input{width:100%;background:transparent;border:none;outline:none;color:inherit;font-size:36px;font-weight:700;padding:0;margin-bottom:20px;font-family:inherit;direction:rtl;letter-spacing:-0.015em;line-height:1.2}
 /* Ruled cream paper: 28px rule spacing matches line-height so text sits ON the line.
    background-attachment: local makes the rules scroll with the text. */
-.nb-body{width:100%;min-height:calc(100vh - 260px);resize:vertical;
+.nb-body{width:100%;min-height:calc(100vh - 260px);
   background-color:#FBF8F1;
   background-image:linear-gradient(to bottom, transparent 0, transparent 27px, rgba(31,38,64,0.18) 27px, rgba(31,38,64,0.18) 28px);
   background-size:100% 28px;
@@ -418,10 +420,33 @@ body.light .nb-breadcrumb{color:rgba(0,0,0,.55)}
   font-size:16px;line-height:28px;
   font-family:'Assistant','Rubik',sans-serif;
   outline:none;direction:rtl;text-align:right;
-  caret-color:#D4AF37;
+  caret-color:#D4AF37;cursor:text;white-space:pre-wrap;word-wrap:break-word;
   transition:border-color .2s,box-shadow .2s}
 body.light .nb-body{background-color:#FBF8F1;border-color:rgba(31,38,64,0.12);color:#1F2640}
 .nb-body:focus{border-color:rgba(91,139,255,.55);box-shadow:0 0 0 3px rgba(91,139,255,.12)}
+.nb-body:empty::before{content:attr(data-placeholder);color:rgba(31,38,64,.30);pointer-events:none}
+/* Inline math widget (KaTeX-rendered, opens MathLive on click) */
+.nb-math-widget{display:inline-block;vertical-align:middle;padding:2px 6px;margin:0 2px;
+  background:rgba(255,255,255,0.65);border:1px solid rgba(212,175,55,0.4);border-radius:6px;
+  cursor:pointer;user-select:none;direction:ltr;font-size:15px;line-height:1.2}
+.nb-math-widget:hover{box-shadow:0 0 0 2px rgba(212,175,55,0.35)}
+.nb-math-widget .katex{font-size:1em}
+/* Inline canvas thumbnail widget */
+.nb-canvas-widget{display:inline-block;max-width:300px;max-height:200px;
+  border:1px solid rgba(212,175,55,0.4);border-radius:6px;cursor:pointer;
+  vertical-align:middle;margin:2px 4px;background:#fff;user-select:none}
+.nb-canvas-widget:hover{box-shadow:0 0 0 2px rgba(212,175,55,0.35)}
+/* Math editor modal (MathLive popup) */
+#nb-math-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10500;display:none;align-items:center;justify-content:center}
+#nb-math-modal.open{display:flex}
+#nb-math-modal .mm-panel{background:#1a1f2e;border:1px solid rgba(212,175,55,.45);border-radius:12px;padding:18px;min-width:420px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.6);direction:ltr}
+#nb-math-modal h3{color:#e9edf7;font-size:13px;font-weight:600;margin-bottom:10px;font-family:Inter,sans-serif}
+#nb-math-modal math-field{display:block;width:100%;min-height:54px;background:#fff;color:#1F2640;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px;font-size:18px}
+#nb-math-modal .mm-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+#nb-math-modal .mm-btn{padding:7px 14px;border:none;border-radius:6px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer}
+#nb-math-modal .mm-btn.primary{background:#6366f1;color:#fff}
+#nb-math-modal .mm-btn.secondary{background:rgba(255,255,255,.10);color:#e9edf7}
+#nb-math-modal .mm-btn.danger{background:rgba(220,80,80,.65);color:#fff;margin-right:auto}
 .nb-subpages{margin-top:30px}
 .nb-subpages h4{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);margin:0 0 8px 0;font-weight:600}
 body.light .nb-subpages h4{color:rgba(0,0,0,.5)}
@@ -666,6 +691,19 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
 </div>
 
 <!-- Half-Screen Whiteboard Panel -->
+<!-- Notebook math editor modal (MathLive). Opened by openMathEditor(widget). -->
+<div id="nb-math-modal" onclick="if(event.target===this)nbCloseMathEditor(false)">
+  <div class="mm-panel">
+    <h3>Edit Equation</h3>
+    <div id="nb-math-field-host"></div>
+    <div class="mm-actions">
+      <button class="mm-btn danger" onclick="nbDeleteMathWidget()">Delete</button>
+      <button class="mm-btn secondary" onclick="nbCloseMathEditor(false)">Cancel</button>
+      <button class="mm-btn primary" onclick="nbCloseMathEditor(true)">Done</button>
+    </div>
+  </div>
+</div>
+
 <div id="wb-overlay">
   <div id="wb-resize-handle"></div>
   <div id="wb-fs-bar">
@@ -1424,7 +1462,7 @@ function openMMFormulaLibrary(parentId){
     // page body so adding from the formula library mutates the notebook
     // view too (data is shared with the mindmap).
     if(typeof NB !== 'undefined' && NB.active){
-      nbInsertAtCaret('$' + latex + '$');
+      nbInsertMathWidget(latex);
       overlay.remove();
       return;
     }
@@ -1500,6 +1538,13 @@ function openMMFormulaLibrary(parentId){
 }
 
 function mmAddCanvas(){
+  // Notebook mode: insert an inline canvas widget at the caret instead of
+  // creating a sibling mindmap node. Opens the WB overlay on a fresh scene;
+  // closeWB() will export the result via nbFinishCanvasEditor().
+  if(typeof NB !== 'undefined' && NB.active){
+    nbOpenCanvasEditor(null);
+    return;
+  }
   const sel=MM.sel||MM.root;
   const parent=MM.nodes[sel];
   if(!parent)return;
@@ -1946,6 +1991,11 @@ function wbRedo(){if(WB.histIdx>=WB.history.length-1)return;WB.histIdx++;WB.scen
 
 function closeWB(){
   document.getElementById('wb-overlay').classList.remove('open');
+  // Notebook-embedded canvas widget: export back into the widget, skip mindmap mutation.
+  if(typeof NB !== 'undefined' && NB.active && (NB_CANVAS_TARGET !== null || NB_CANVAS_PREV_MM_SEL !== null)){
+    try { nbFinishCanvasEditor(); } catch(e){ console.warn('nbFinishCanvasEditor failed', e); }
+    return;
+  }
   const cn=MM.nodes[MM.sel];
   if(cn&&cn.type==='canvas')cn.scene=WB.scene;
   mmRender();
@@ -4193,10 +4243,9 @@ function ftbStar(id,btn){
 }
 
 function ftbInsert(latex){
-  // Notebook mode: insert LaTeX inline at caret in the active page body
-  // (wrapped in $...$ delimiters so it round-trips as KaTeX).
+  // Notebook mode: insert a live KaTeX-rendered math widget at the caret.
   if(typeof NB !== 'undefined' && NB.active){
-    nbInsertAtCaret('$' + latex + '$');
+    nbInsertMathWidget(latex);
     return;
   }
   // Mindmap/canvas mode: insert as equation into center of whiteboard canvas
@@ -4212,29 +4261,219 @@ function ftbInsert(latex){
   wbRedrawEquationLayer();
 }
 
-// Insert text at the caret of the active notebook body textarea and flush
-// the change back to MM.nodes[currentId].body so it persists immediately.
-// Used by ftbInsert, mmAddEquation, mmAddCanvas to make those mindmap-side
-// actions ALSO mutate the notebook view when NB.active.
-function nbInsertAtCaret(text){
+// ═══════════════════════════════════════════════════════════
+// Notebook body — rich contentEditable helpers
+// (legacy textarea has been replaced by a contentEditable div)
+// ═══════════════════════════════════════════════════════════
+
+// Escape attribute / HTML special chars
+function nbEscAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function nbEscHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Build the HTML for a math widget given LaTeX. Renders via KaTeX (string mode).
+function nbRenderMathWidget(latex){
+  let rendered = '';
+  try{
+    if(window.katex){
+      rendered = katex.renderToString(latex, {throwOnError:false, displayMode:false, output:'html'});
+    } else {
+      rendered = nbEscHtml(latex);
+    }
+  } catch(e){ rendered = nbEscHtml(latex); }
+  return '<span class="nb-math-widget" data-math-widget="true" contenteditable="false" data-latex="'
+       + nbEscAttr(latex) + '" title="לחץ לעריכה"><span class="nb-math-render">' + rendered + '</span></span>';
+}
+
+// Convert a legacy plain-text body (with $...$ math markers) to widget HTML.
+// If body already looks like HTML (has tags or our widget markers), return as-is.
+function nbBodyAsHtml(node){
+  const raw = (node && node.body) || '';
+  if(!raw) return '';
+  const trimmed = raw.trim();
+  if(trimmed.startsWith('<') || raw.includes('data-math-widget') || raw.includes('data-canvas-widget')){
+    return raw;
+  }
+  // Walk: split out $...$ segments, escape plaintext, render math segments as widgets.
+  let out = '';
+  const re = /\$([^$\n]+?)\$/g;
+  let last = 0, m;
+  while((m = re.exec(raw)) !== null){
+    out += nbEscHtml(raw.slice(last, m.index)).replace(/\n/g, '<br>');
+    out += nbRenderMathWidget(m[1]);
+    last = m.index + m[0].length;
+  }
+  out += nbEscHtml(raw.slice(last)).replace(/\n/g, '<br>');
+  return out;
+}
+
+// Place caret at the very end of a contentEditable node.
+function nbPlaceCaretAtEnd(el){
+  const r = document.createRange();
+  r.selectNodeContents(el); r.collapse(false);
+  const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+}
+
+// Insert raw HTML at the current caret (or append if focus is outside the body).
+function nbInsertHtmlAtCaret(html){
   const body = document.getElementById('nb-body-active');
-  if(!body || typeof NB === 'undefined') return;
-  const n = MM.nodes[NB.currentId]; if(!n) return;
-  const start = body.selectionStart ?? body.value.length;
-  const end   = body.selectionEnd   ?? body.value.length;
-  const before = body.value.slice(0, start);
-  const after  = body.value.slice(end);
-  // Add newlines around block-like inserts so they don't squash into prose
-  const sep = (before.length && !before.endsWith('\n')) ? '\n' : '';
-  const trail = (after.length && !after.startsWith('\n')) ? '\n' : '';
-  const insert = sep + text + trail;
-  body.value = before + insert + after;
-  const caret = start + insert.length;
-  body.setSelectionRange(caret, caret);
+  if(!body) return;
   body.focus();
-  n.body = body.value;
+  const sel = window.getSelection();
+  // Ensure the selection is inside the body
+  if(!sel.rangeCount || !body.contains(sel.anchorNode)){
+    nbPlaceCaretAtEnd(body);
+  }
+  document.execCommand('insertHTML', false, html + '&nbsp;');
+  const n = MM.nodes[NB.currentId]; if(n) n.body = body.innerHTML;
   if(typeof nbCommitHistory === 'function') nbCommitHistory();
   if(typeof nbSave === 'function') nbSave();
+}
+
+// Insert a math widget at the caret (replaces the old `$...$` plaintext insert).
+function nbInsertMathWidget(latex){
+  nbInsertHtmlAtCaret(nbRenderMathWidget(latex));
+}
+
+// Backwards-compatible shim — some legacy callers (mmAddEquation etc.) still use this name.
+// In contentEditable mode we insert as a widget when the payload looks like `$...$` math,
+// otherwise we drop the raw text in as plaintext.
+function nbInsertAtCaret(text){
+  const body = document.getElementById('nb-body-active');
+  if(!body || typeof NB === 'undefined' || !NB.active) return;
+  const m = /^\s*\$([\s\S]+)\$\s*$/.exec(text);
+  if(m){ nbInsertMathWidget(m[1]); return; }
+  // Plain text: escape & convert \n → <br>
+  nbInsertHtmlAtCaret(nbEscHtml(text).replace(/\n/g, '<br>'));
+}
+
+// ─── Math widget editor (lazy MathLive) ─────────────────────
+let NB_MATH_LOADED = false;
+let NB_MATH_TARGET = null; // currently-edited widget element (or null when inserting new)
+async function nbEnsureMathLive(){
+  if(NB_MATH_LOADED) return;
+  // Try ESM first; fall back to script tag if the import fails (older browsers / CSP).
+  try {
+    await import('https://unpkg.com/mathlive?module');
+    NB_MATH_LOADED = true;
+  } catch(e){
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://unpkg.com/mathlive';
+      s.onload = () => { NB_MATH_LOADED = true; resolve(); };
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+}
+
+async function openMathEditor(widget){
+  await nbEnsureMathLive();
+  NB_MATH_TARGET = widget || null;
+  const host = document.getElementById('nb-math-field-host');
+  host.innerHTML = '';
+  const mf = document.createElement('math-field');
+  mf.setAttribute('virtual-keyboard-mode', 'onfocus');
+  mf.setAttribute('default-mode', 'math');
+  mf.value = widget ? (widget.dataset.latex || '') : '';
+  mf.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); nbCloseMathEditor(true); }
+    else if(e.key === 'Escape'){ e.preventDefault(); nbCloseMathEditor(false); }
+  });
+  host.appendChild(mf);
+  document.getElementById('nb-math-modal').classList.add('open');
+  setTimeout(() => { try { mf.focus(); } catch {} }, 30);
+}
+
+function nbCloseMathEditor(commit){
+  const modal = document.getElementById('nb-math-modal');
+  if(commit){
+    const mf = modal.querySelector('math-field');
+    const latex = mf ? (mf.value || '').trim() : '';
+    if(latex){
+      const html = nbRenderMathWidget(latex);
+      if(NB_MATH_TARGET){
+        // Replace existing widget in-place
+        const tmp = document.createElement('div'); tmp.innerHTML = html;
+        NB_MATH_TARGET.replaceWith(tmp.firstChild);
+      } else {
+        nbInsertHtmlAtCaret(html);
+      }
+      const body = document.getElementById('nb-body-active');
+      if(body){
+        const n = MM.nodes[NB.currentId]; if(n) n.body = body.innerHTML;
+        if(typeof nbCommitHistory === 'function') nbCommitHistory();
+        if(typeof nbSave === 'function') nbSave();
+      }
+    }
+  }
+  modal.classList.remove('open');
+  NB_MATH_TARGET = null;
+}
+
+function nbDeleteMathWidget(){
+  if(NB_MATH_TARGET){
+    NB_MATH_TARGET.remove();
+    const body = document.getElementById('nb-body-active');
+    if(body){
+      const n = MM.nodes[NB.currentId]; if(n) n.body = body.innerHTML;
+      if(typeof nbCommitHistory === 'function') nbCommitHistory();
+      if(typeof nbSave === 'function') nbSave();
+    }
+  }
+  document.getElementById('nb-math-modal').classList.remove('open');
+  NB_MATH_TARGET = null;
+}
+
+// ─── Inline canvas widget ────────────────────────────────────
+// Reuses the existing WB whiteboard overlay. When opened from notebook
+// mode (NB_CANVAS_TARGET is non-null), closeWB() will export the scene
+// back into the active widget instead of writing to a mindmap node.
+let NB_CANVAS_TARGET = null; // current widget element being edited (null when inserting new)
+let NB_CANVAS_PREV_MM_SEL = null; // save MM.sel so we don't disturb the mindmap selection
+
+function nbOpenCanvasEditor(widget){
+  NB_CANVAS_TARGET = widget || null;
+  NB_CANVAS_PREV_MM_SEL = (typeof MM !== 'undefined') ? MM.sel : null;
+  // Hydrate WB state from the widget's stored scene (if any).
+  let scene = [];
+  if(widget && widget.dataset.scene){
+    try { scene = JSON.parse(widget.dataset.scene); } catch {}
+  }
+  WB.scene = scene;
+  WB.histIdx = -1; WB.history = []; WB.selId = null;
+  WB.tableCell = null; WB.labelObj = null; WB.textObj = null;
+  if(typeof wbPush === 'function') wbPush();
+  document.getElementById('wb-node-title').textContent = widget ? 'Edit Canvas' : 'New Canvas';
+  document.getElementById('wb-overlay').classList.add('open');
+  const cnvs = document.getElementById('wb-canvas');
+  cnvs.width = window.innerWidth; cnvs.height = window.innerHeight;
+  if(typeof wbRedraw === 'function') wbRedraw();
+}
+
+// Called from the patched closeWB() when NB_CANVAS_TARGET is set.
+function nbFinishCanvasEditor(){
+  const cnvs = document.getElementById('wb-canvas');
+  let dataUrl = '';
+  try { dataUrl = cnvs.toDataURL('image/png'); } catch(e){ dataUrl = ''; }
+  const sceneJson = JSON.stringify(WB.scene || []);
+  if(NB_CANVAS_TARGET){
+    NB_CANVAS_TARGET.src = dataUrl;
+    NB_CANVAS_TARGET.dataset.scene = sceneJson;
+  } else {
+    const html = '<img class="nb-canvas-widget" data-canvas-widget="true" contenteditable="false" src="'
+               + nbEscAttr(dataUrl) + '" data-scene="' + nbEscAttr(sceneJson) + '" title="לחץ לעריכה" />';
+    nbInsertHtmlAtCaret(html);
+  }
+  const body = document.getElementById('nb-body-active');
+  if(body){
+    const n = MM.nodes[NB.currentId]; if(n) n.body = body.innerHTML;
+    if(typeof nbCommitHistory === 'function') nbCommitHistory();
+    if(typeof nbSave === 'function') nbSave();
+  }
+  NB_CANVAS_TARGET = null;
+  // Restore prior MM selection
+  if(NB_CANVAS_PREV_MM_SEL !== null && typeof MM !== 'undefined') MM.sel = NB_CANVAS_PREV_MM_SEL;
+  NB_CANVAS_PREV_MM_SEL = null;
 }
 
 function ftbMakeItem(f,showStar=true){
@@ -4852,23 +5091,34 @@ function nbRenderContent(){
   title.onblur = () => { nbCommitHistory(); nbSave(); };
   wrap.appendChild(title);
 
-  // Body — bigger, no placeholder text. Auto-focus so a blinking cursor
-  // appears in the empty page (OneNote-style "just start typing").
-  const body = document.createElement('textarea');
+  // Body — rich contentEditable with inline KaTeX math widgets + canvas thumbnails.
+  // (OneNote-style "just start typing". Legacy `$...$` plaintext bodies are auto-migrated.)
+  const body = document.createElement('div');
   body.className = 'nb-body';
   body.id = 'nb-body-active';
-  body.value = nbBody(n);
+  body.contentEditable = 'true';
+  body.spellcheck = false;
+  body.dir = 'rtl';
+  body.setAttribute('data-placeholder', '');
+  body.innerHTML = nbBodyAsHtml(n);
   let bodyTimer = null;
-  body.oninput = (e) => {
-    n.body = e.target.value;
+  body.oninput = () => {
+    n.body = body.innerHTML;
     clearTimeout(bodyTimer);
     bodyTimer = setTimeout(nbSave, 400);
   };
-  body.onblur = () => { nbCommitHistory(); nbSave(); };
+  body.onblur = () => { n.body = body.innerHTML; nbCommitHistory(); nbSave(); };
+  // Click on inline math/canvas widget → open editor.
+  body.addEventListener('click', (e) => {
+    const mw = e.target.closest('.nb-math-widget');
+    if(mw){ e.preventDefault(); openMathEditor(mw); return; }
+    const cw = e.target.closest('.nb-canvas-widget');
+    if(cw){ e.preventDefault(); nbOpenCanvasEditor(cw); return; }
+  });
   wrap.appendChild(body);
   // Place caret at end + focus on next tick so layout finishes
   setTimeout(() => {
-    try { body.focus(); const len = body.value.length; body.setSelectionRange(len, len); } catch {}
+    try { body.focus(); nbPlaceCaretAtEnd(body); } catch {}
   }, 0);
 
   // Subpages list
