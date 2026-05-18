@@ -404,8 +404,22 @@ body.light .nb-breadcrumb{color:rgba(0,0,0,.55)}
 .nb-breadcrumb span.crumb:hover{text-decoration:underline}
 .nb-breadcrumb .sep{margin:0 6px;color:rgba(255,255,255,.3)}
 .nb-title-input{width:100%;background:transparent;border:none;outline:none;color:inherit;font-size:36px;font-weight:700;padding:0;margin-bottom:20px;font-family:inherit;direction:rtl;letter-spacing:-0.015em;line-height:1.2}
-.nb-body{width:100%;min-height:300px;resize:vertical;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px 22px;color:#d6dcec;font-size:16px;line-height:1.85;font-family:inherit;outline:none;direction:rtl;transition:border-color .2s,box-shadow .2s}
-body.light .nb-body{background:#fff;border-color:rgba(0,0,0,.08);color:#1a1f2e}
+/* Ruled cream paper: 28px rule spacing matches line-height so text sits ON the line.
+   background-attachment: local makes the rules scroll with the text. */
+.nb-body{width:100%;min-height:300px;resize:vertical;
+  background-color:#FBF8F1;
+  background-image:linear-gradient(to bottom, transparent 0, transparent 27px, rgba(31,38,64,0.18) 27px, rgba(31,38,64,0.18) 28px);
+  background-size:100% 28px;
+  background-attachment:local;
+  background-repeat:repeat-y;
+  border:1px solid rgba(31,38,64,0.12);border-radius:12px;
+  padding:0 22px;
+  color:#1F2640;
+  font-size:16px;line-height:28px;
+  font-family:'Assistant','Rubik',sans-serif;
+  outline:none;direction:rtl;text-align:right;
+  transition:border-color .2s,box-shadow .2s}
+body.light .nb-body{background-color:#FBF8F1;border-color:rgba(31,38,64,0.12);color:#1F2640}
 .nb-body:focus{border-color:rgba(91,139,255,.55);box-shadow:0 0 0 3px rgba(91,139,255,.12)}
 .nb-subpages{margin-top:30px}
 .nb-subpages h4{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);margin:0 0 8px 0;font-weight:600}
@@ -5054,6 +5068,23 @@ window.addEventListener('load', wsUpdateTopbarHeight);
     hide('#back-home-btn');
     hide('#bottom-bar');
     document.documentElement.classList.add('ws-embed-mode');
+  } catch {}
+})();
+
+// ?view=notebook — open the page directly in notebook mode (used by the
+// React App when activeView === 'notebook'). Calls nbToggle() after the
+// mindmap data has loaded so NB.currentId resolves to a real node.
+(function wsApplyViewParam(){
+  try {
+    const view = new URLSearchParams(location.search).get('view');
+    if (view !== 'notebook') return;
+    const tryOpen = () => {
+      if (typeof nbToggle !== 'function' || typeof MM === 'undefined' || !MM.nodes || !MM.root) {
+        return setTimeout(tryOpen, 50);
+      }
+      if (typeof NB !== 'undefined' && !NB.active) nbToggle();
+    };
+    tryOpen();
   } catch {}
 })();
 setTimeout(wsUpdateTopbarHeight, 50);

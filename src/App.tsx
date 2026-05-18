@@ -16,10 +16,10 @@ import { TutorFAB } from './components/AITutor/TutorFAB'
 import { TutorDrawer } from './components/AITutor/TutorDrawer'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
-// PageNotebook: OneNote-style writing surface (MIT only, no tldraw license
-// required). Sections rail + pages strip + warm-paper canvas with draggable
-// text/math containers. See components/notebook/OneNoteSurface.tsx.
-const PageNotebook = lazy(() => import('./components/notebook/OneNoteSurface'))
+// Notebook view is now a different render-mode of mindmap.html (loaded as an
+// iframe with ?view=notebook). The OneNoteSurface React component is no longer
+// wired here — kept on disk for reference. Unified data source: notebook and
+// mindmap share the same MM.nodes[id].body field inside mindmap.html.
 
 type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook'
 
@@ -305,10 +305,13 @@ function App() {
       )}
 
       {activeView === 'notebook' && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#0B1B3E' }}>
-          <Suspense fallback={<div style={{ background: '#0B1B3E', width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFD700' }}>טוען מחברת…</div>}>
-            <PageNotebook onBack={() => setActiveView('study')} />
-          </Suspense>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#FBF8F1' }}>
+          <iframe
+            src={`/mindmap.html?view=notebook&embed=1&userId=${encodeURIComponent((typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default')}`}
+            title="WaffleStack notebook"
+            allow="autoplay; clipboard-write"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
+          />
         </div>
       )}
 
