@@ -406,7 +406,7 @@ body.light .nb-breadcrumb{color:rgba(0,0,0,.55)}
 .nb-title-input{width:100%;background:transparent;border:none;outline:none;color:inherit;font-size:36px;font-weight:700;padding:0;margin-bottom:20px;font-family:inherit;direction:rtl;letter-spacing:-0.015em;line-height:1.2}
 /* Ruled cream paper: 28px rule spacing matches line-height so text sits ON the line.
    background-attachment: local makes the rules scroll with the text. */
-.nb-body{width:100%;min-height:300px;resize:vertical;
+.nb-body{width:100%;min-height:calc(100vh - 260px);resize:vertical;
   background-color:#FBF8F1;
   background-image:linear-gradient(to bottom, transparent 0, transparent 27px, rgba(31,38,64,0.18) 27px, rgba(31,38,64,0.18) 28px);
   background-size:100% 28px;
@@ -418,6 +418,7 @@ body.light .nb-breadcrumb{color:rgba(0,0,0,.55)}
   font-size:16px;line-height:28px;
   font-family:'Assistant','Rubik',sans-serif;
   outline:none;direction:rtl;text-align:right;
+  caret-color:#D4AF37;
   transition:border-color .2s,box-shadow .2s}
 body.light .nb-body{background-color:#FBF8F1;border-color:rgba(31,38,64,0.12);color:#1F2640}
 .nb-body:focus{border-color:rgba(91,139,255,.55);box-shadow:0 0 0 3px rgba(91,139,255,.12)}
@@ -1419,6 +1420,14 @@ function openMMFormulaLibrary(parentId){
   listWrap.style.scrollbarWidth='thin';
 
   function insertAndClose(latex){
+    // Notebook mode: append the LaTeX inline at the caret of the active
+    // page body so adding from the formula library mutates the notebook
+    // view too (data is shared with the mindmap).
+    if(typeof NB !== 'undefined' && NB.active){
+      nbInsertAtCaret('$' + latex + '$');
+      overlay.remove();
+      return;
+    }
     const baseY=mmNextChildY(parent);
     const n=mmNode('equation','Equation',parent.x+MM_XSTEP,baseY,parentId,mmPickColor(parentId));
     n.latex=latex;
@@ -4184,7 +4193,13 @@ function ftbStar(id,btn){
 }
 
 function ftbInsert(latex){
-  // Insert as equation into center of whiteboard canvas
+  // Notebook mode: insert LaTeX inline at caret in the active page body
+  // (wrapped in $...$ delimiters so it round-trips as KaTeX).
+  if(typeof NB !== 'undefined' && NB.active){
+    nbInsertAtCaret('$' + latex + '$');
+    return;
+  }
+  // Mindmap/canvas mode: insert as equation into center of whiteboard canvas
   const cnvs=document.getElementById('wb-canvas');
   if(!cnvs)return;
   const cx=(cnvs.width/2-WB.vp.x)/WB.vp.s;
@@ -4195,6 +4210,31 @@ function ftbInsert(latex){
   WB.scene.push(o);WB.selId=o.id;wbPush();wbRedraw();
   // Show equation layer element
   wbRedrawEquationLayer();
+}
+
+// Insert text at the caret of the active notebook body textarea and flush
+// the change back to MM.nodes[currentId].body so it persists immediately.
+// Used by ftbInsert, mmAddEquation, mmAddCanvas to make those mindmap-side
+// actions ALSO mutate the notebook view when NB.active.
+function nbInsertAtCaret(text){
+  const body = document.getElementById('nb-body-active');
+  if(!body || typeof NB === 'undefined') return;
+  const n = MM.nodes[NB.currentId]; if(!n) return;
+  const start = body.selectionStart ?? body.value.length;
+  const end   = body.selectionEnd   ?? body.value.length;
+  const before = body.value.slice(0, start);
+  const after  = body.value.slice(end);
+  // Add newlines around block-like inserts so they don't squash into prose
+  const sep = (before.length && !before.endsWith('\n')) ? '\n' : '';
+  const trail = (after.length && !after.startsWith('\n')) ? '\n' : '';
+  const insert = sep + text + trail;
+  body.value = before + insert + after;
+  const caret = start + insert.length;
+  body.setSelectionRange(caret, caret);
+  body.focus();
+  n.body = body.value;
+  if(typeof nbCommitHistory === 'function') nbCommitHistory();
+  if(typeof nbSave === 'function') nbSave();
 }
 
 function ftbMakeItem(f,showStar=true){
@@ -4812,10 +4852,11 @@ function nbRenderContent(){
   title.onblur = () => { nbCommitHistory(); nbSave(); };
   wrap.appendChild(title);
 
-  // Body
+  // Body — bigger, no placeholder text. Auto-focus so a blinking cursor
+  // appears in the empty page (OneNote-style "just start typing").
   const body = document.createElement('textarea');
   body.className = 'nb-body';
-  body.placeholder = 'כתוב כאן את התוכן של הדף... (תומך בטקסט חופשי)';
+  body.id = 'nb-body-active';
   body.value = nbBody(n);
   let bodyTimer = null;
   body.oninput = (e) => {
@@ -4825,6 +4866,10 @@ function nbRenderContent(){
   };
   body.onblur = () => { nbCommitHistory(); nbSave(); };
   wrap.appendChild(body);
+  // Place caret at end + focus on next tick so layout finishes
+  setTimeout(() => {
+    try { body.focus(); const len = body.value.length; body.setSelectionRange(len, len); } catch {}
+  }, 0);
 
   // Subpages list
   const sub = document.createElement('div');
