@@ -59,7 +59,7 @@ export default function CorrelationInteractive() {
   const lineY1 = slope * lineX1 + intercept, lineY2 = slope * lineX2 + intercept
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(0,0,0,0.4)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>קורלציה (Correlation) — מקדם Pearson</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור נקודות. r מתעדכן בזמן אמת. צבע כל נקודה לפי הרבע שלה ביחס לממוצעים.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}

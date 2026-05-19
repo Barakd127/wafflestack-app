@@ -49,7 +49,7 @@ export default function ConditionalProbTreeInteractive() {
   const wNBN = Math.max(1.2, (1 - pBN) * 6)
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(0,0,0,0.4)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>הסתברות מותנית — עץ A → B</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
         רוחב הענפים פרופורציוני להסתברות. שלוש המחוונים שולטים בכל ההסתברויות המותנות.

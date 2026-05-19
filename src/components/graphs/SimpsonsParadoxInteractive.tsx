@@ -84,7 +84,7 @@ export default function SimpsonsParadoxInteractive() {
   const yTicks = [0, 2, 4, 6, 8, 10, 12]
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(0,0,0,0.4)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>פרדוקס סימפסון — קורלציה מוסתרת</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
         בסקירה הכוללת — הקשר חיובי (ככל ש-x גדל, y גדל). אך בתוך כל תת-קבוצה — הקשר הפוך! הסר את ההסתרה כדי לחשוף את האמת.

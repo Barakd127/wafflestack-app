@@ -61,7 +61,7 @@ export default function RSquaredDecompositionInteractive() {
   }, [sse, sst, r2])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(0,0,0,0.4)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>פירוק R² — SST = SSE + SSR</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>הזז שיפוע וחיתוך — שמ הסכימים מתחלפים. SST קבוע. R² גדל ככל ש-SSE קטן.</p>
 

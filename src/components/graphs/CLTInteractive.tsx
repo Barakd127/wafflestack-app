@@ -192,7 +192,7 @@ export default function CLTInteractive() {
     <div
       dir="rtl"
       style={{
-        background: 'rgba(0,0,0,0.4)',
+        background: 'rgba(31,62,108,0.92)',
         borderRadius: 16,
         padding: 20,
         color: '#fff',

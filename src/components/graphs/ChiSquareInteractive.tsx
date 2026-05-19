@@ -27,7 +27,7 @@ export default function ChiSquareInteractive() {
   }, [chi2])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(0,0,0,0.4)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>מבחן χ² (Chi-Square) — נצפה מול צפוי</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>זהב = נצפה (O), כחול = צפוי (E). χ² גדל כשהפער בין O ל-E גדל.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>

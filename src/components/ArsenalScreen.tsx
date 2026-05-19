@@ -687,7 +687,7 @@ function ArsenalEntryBody({
 }
 
 function EquationCard({ latex, onCommit }: { latex: string; onCommit?: (newLatex: string) => void }) {
-  const ref = useRef<HTMLDivElement | null>(null)
+  const ref = useRef<HTMLSpanElement | null>(null)
   const [failed, setFailed] = useState(false)
   const [editing, setEditing] = useState(false)
   const [hovering, setHovering] = useState(false)
@@ -699,7 +699,7 @@ function EquationCard({ latex, onCommit }: { latex: string; onCommit?: (newLatex
     const w = window as unknown as { katex?: { render: (s: string, el: HTMLElement, opts: object) => void } }
     if (!w.katex) { setFailed(true); return }
     try {
-      w.katex.render(latex, ref.current, { throwOnError: false, displayMode: true, output: 'html' })
+      w.katex.render(latex, ref.current, { throwOnError: false, displayMode: false, output: 'html' })
       setFailed(false)
     } catch {
       setFailed(true)
@@ -707,21 +707,22 @@ function EquationCard({ latex, onCommit }: { latex: string; onCommit?: (newLatex
   }, [latex, editing])
 
   return (
-    <div
+    <span
       dir="ltr"
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
       style={{
         position: 'relative',
-        display: 'block',
-        margin: '10px 0',
-        padding: '12px 16px',
+        display: 'inline-block',
+        margin: '2px 3px',
+        padding: '2px 6px',
         background: 'rgba(255,255,255,0.92)',
-        borderInlineStart: editing ? '3px solid #6366f1' : '3px solid #D4AF37',
+        borderInlineStart: editing ? '2px solid #6366f1' : '2px solid #D4AF37',
         border: editing ? '1px solid rgba(99,102,241,0.45)' : '1px solid rgba(212,175,55,0.25)',
-        borderRadius: 8,
-        boxShadow: '0 1px 4px rgba(31,62,108,0.05)',
+        borderRadius: 5,
+        boxShadow: '0 1px 2px rgba(31,62,108,0.04)',
         unicodeBidi: 'isolate' as React.CSSProperties['unicodeBidi'],
+        verticalAlign: 'middle',
       }}
     >
       {editing && canEdit ? (
@@ -738,7 +739,7 @@ function EquationCard({ latex, onCommit }: { latex: string; onCommit?: (newLatex
           לא ניתן להציג את המשוואה
         </span>
       ) : (
-        <div ref={ref} style={{ overflow: 'auto' }} />
+        <span ref={ref} style={{ display: 'inline-block', overflow: 'visible' }} />
       )}
 
       {/* Hover-pencil overlay: lets the user edit just THIS equation via
@@ -767,7 +768,7 @@ function EquationCard({ latex, onCommit }: { latex: string; onCommit?: (newLatex
           ✏️
         </button>
       )}
-    </div>
+    </span>
   )
 }
 
