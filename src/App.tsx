@@ -319,7 +319,7 @@ function App() {
 
       {/* AI Study Tutor — global FAB + slide-out drawer, shown on study views only
           (hidden in wafflecity so the city back button sits cleanly at bottom-left) */}
-      {activeView !== 'landing' && activeView !== 'wafflecity' && (
+      {activeView !== 'landing' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'split-study-mindmap' && activeView !== 'mindmap' && (
         <>
           <TutorFAB />
           <TutorDrawer />
