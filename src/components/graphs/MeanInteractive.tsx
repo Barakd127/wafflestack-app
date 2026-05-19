@@ -204,24 +204,26 @@ export default function MeanInteractive() {
           </g>
         ))}
 
-        {/* Mean indicator: vertical line + triangular fulcrum */}
+        {/* Mean indicator: vertical line + triangular fulcrum (navy + white) */}
         <line
           x1={meanPx}
           y1={30}
           x2={meanPx}
           y2={AXIS_Y}
-          stroke="#D4A017"
+          stroke="#ffffff"
           strokeWidth={2}
           strokeDasharray="4 3"
         />
         <polygon
           points={`${meanPx - 10},${AXIS_Y + 30} ${meanPx + 10},${AXIS_Y + 30} ${meanPx},${AXIS_Y + 8}`}
-          fill="#D4A017"
+          fill="#1F3E6C"
+          stroke="#ffffff"
+          strokeWidth={1.5}
         />
         <text
           x={meanPx}
           y={24}
-          fill="#D4A017"
+          fill="#ffffff"
           fontSize={14}
           fontWeight={700}
           textAnchor="middle"
@@ -285,18 +287,18 @@ export default function MeanInteractive() {
         <button
           onClick={addPoint}
           disabled={points.length >= 12}
-          style={btnStyle('#27AE60')}
+          style={btnStyle('#1F3E6C')}
         >
           הוסף נקודה
         </button>
         <button
           onClick={removePoint}
           disabled={points.length <= 1}
-          style={btnStyle('#E74C3C')}
+          style={btnStyle('#1F3E6C')}
         >
           הסר אחרונה
         </button>
-        <button onClick={reset} style={btnStyle('#7B5EA7')}>
+        <button onClick={reset} style={btnStyle('#D4A017')}>
           איפוס
         </button>
         <span style={{ alignSelf: 'center', marginInlineStart: 'auto', opacity: 0.7, fontSize: 13 }}>

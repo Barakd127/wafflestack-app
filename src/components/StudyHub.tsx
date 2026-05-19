@@ -56,7 +56,7 @@ const HeroScene = lazy(() => import('../landing/three/HeroScene').then(m => ({ d
 // active graph lets the user step through aspects. 3 hero topics ship with
 // 3 aspects each; the other 15 have one entry until more aspects build.
 type GraphEntry = {
-  Component: React.LazyExoticComponent<React.ComponentType>
+  Component: React.LazyExoticComponent<React.ComponentType> | React.ComponentType
   title: string
   /** 0-indexed lesson slide to insert AFTER. Undefined/invalid → appended at end. */
   afterSlide?: number
@@ -157,7 +157,8 @@ const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
   // components for hard topics (Bayes, Type-I/II, R² decomposition, etc.).
   // ──────────────────────────────────────────────────────────────────────
   mean: [
-    { Component: MeanInteractive,        title: 'מהו ממוצע?', afterSlide: 1 },
+    { Component: MeanInteractive,        title: 'מהו ממוצע? (גרור נקודות)', afterSlide: 1 },
+    { Component: MeanVisual, title: 'משחק כיתה — סרגלי ציון', afterSlide: 2 },
   ],
   median: [
     { Component: MedianInteractive,      title: 'חציון מול ממוצע' },
@@ -319,6 +320,7 @@ import { loadProgress, recordQuizSession, saveCanvasNotes, type QuizAnswer, type
 import quizBankData from '../data/quiz-bank.json'
 import LessonScreen from './LessonScreen'
 import { LESSON_CONTENT } from '../data/lesson-content'
+import { MeanVisual } from './LessonVisuals'
 import ArsenalScreen from './ArsenalScreen'
 import { useArsenalStore, quickAddArsenal } from '../store/arsenalStore'
 import PotionInventory from './PotionInventory'

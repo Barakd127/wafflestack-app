@@ -1500,7 +1500,7 @@ export function CramerVisual() {
 // ── Topic → visual map ────────────────────────────────────────────────────────
 export const TOPIC_VISUALS: Record<string, React.FC> = {
   // existing topics
-  'mean': MeanVisual,
+  // 'mean': MeanVisual,  // moved to INTERACTIVE_GRAPHS_BY_TOPIC.mean — now a standalone carousel card, not a per-slide visual
   'median': MedianVisual,
   'std-dev': StdDevVisual,
   'probability': ProbabilityVisual,
