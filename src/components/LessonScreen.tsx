@@ -44,6 +44,21 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   const lessonTotal = slides.length
   const [graphScale, setGraphScale] = useState(0.7)
 
+  // Auto-inject TOPIC_VISUALS[topicId] as a synthetic graph card so every
+  // topic's "lesson visual" becomes a standalone carousel slide instead of
+  // an appendix rendered below every lesson card. Matches the mean topic
+  // pattern. Appended to the explicit graphSlides; auto-positioned by the
+  // distribution logic below (no afterSlide).
+  const effectiveGraphs = useMemo(() => {
+    const TopicVisual = TOPIC_VISUALS[topicId] as React.FC | undefined
+    const base = graphSlides ?? []
+    if (!TopicVisual) return base
+    // Skip if user already added this Visual as an explicit graph entry
+    const alreadyIncluded = base.some(g => g.Component === TopicVisual)
+    if (alreadyIncluded) return base
+    return [...base, { Component: TopicVisual as React.ComponentType, title: 'ויזואליזציה' }]
+  }, [graphSlides, topicId])
+
   // Build merged sequence: lesson slide → optional graph(s) inserted after it.
   // Graphs with explicit `afterSlide` are placed exactly there. Graphs without
   // are auto-distributed evenly across the lesson so every topic gets the same
@@ -57,8 +72,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
     // after slide (k+1)*step. Last graph clamped to lesson end so it never
     // falls past the last lesson slide.
     const autoPositions = new Map<number, number[]>()
-    if (graphSlides && lessonTotal > 0) {
-      const unpositioned = graphSlides
+    if (effectiveGraphs && lessonTotal > 0) {
+      const unpositioned = effectiveGraphs
         .map((g, gi) => ({ g, gi }))
         .filter(x => x.g.afterSlide == null || x.g.afterSlide < 0 || x.g.afterSlide >= lessonTotal)
       if (unpositioned.length > 0) {
@@ -73,7 +88,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
     slides.forEach((_, i) => {
       out.push({ kind: 'lesson', lessonIdx: i })
       // Explicit afterSlide entries
-      graphSlides?.forEach((g, gi) => {
+      effectiveGraphs?.forEach((g, gi) => {
         if (g.afterSlide === i) out.push({ kind: 'graph', graphIdx: gi })
       })
       // Auto-positioned entries
@@ -82,7 +97,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       })
     })
     return out
-  }, [lessonTotal, graphSlides])
+  }, [lessonTotal, effectiveGraphs])
 
   const total = mergedSequence.length
   const currentRef = mergedSequence[currentSlide]
@@ -238,7 +253,11 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   const slide = slides[lessonIdx] ?? slides[0]
   // Slides may override the topic-level visual via `visualId` — used by the
   // probability lesson to attach distinct Venn variants to specific slides.
-  const Visual = (!isGraphSlide && slide) ? TOPIC_VISUALS[slide.visualId ?? topicId] as React.FC | undefined : undefined
+  // Per-slide Visual: only when slide explicitly sets visualId (e.g. probability
+  // Venn variants). Topic-level visual moved to effectiveGraphs as carousel card.
+  const SlideVisual = (!isGraphSlide && slide && slide.visualId)
+    ? TOPIC_VISUALS[slide.visualId] as React.FC | undefined
+    : undefined
 
   // ── Right-side content (slide + visualization + footer) ─────────────────────
   const rightPaneRef = useRef<HTMLDivElement>(null)
@@ -318,8 +337,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           → הקודם
         </button>
         <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600, color: TEXT_DARK }}>
-          {isGraphSlide && graphSlides
-            ? `📊 ${graphSlides[graphIdx]?.title ?? 'גרף'}`
+          {isGraphSlide && effectiveGraphs
+            ? `📊 ${effectiveGraphs[graphIdx]?.title ?? 'גרף'}`
             : `שקופית ${currentSlide + 1} מתוך ${total}`}
         </div>
         <button
@@ -522,12 +541,15 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
         )}
       </div>
 
-      {/* Interactive visualization — only for lesson slides */}
-      {Visual && (<div><Visual /></div>)}
+      {/* Per-slide Visual auto-render REMOVED — TOPIC_VISUALS[topicId] now
+          injected as a standalone carousel card via effectiveGraphs (matches
+          mean topic pattern). Visuals tied to specific slides via slide.visualId
+          (e.g. probability Venn variants) still render via that path below. */}
+      {SlideVisual && (<div><SlideVisual /></div>)}
       </>)}
 
       {/* Graph slide — rendered for graph entries in the merged sequence */}
-      {isGraphSlide && graphSlides && graphSlides[graphIdx] && (
+      {isGraphSlide && effectiveGraphs && effectiveGraphs[graphIdx] && (
         <div style={{
           background: 'rgba(255,255,255,0.6)',
           border: '1px solid rgba(212,175,55,0.4)',
@@ -543,7 +565,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             borderBottom: '1px solid rgba(212,175,55,0.25)',
           }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#1F3E6C', fontFamily: "'Rubik', sans-serif" }}>
-              📊 {graphSlides[graphIdx].title}
+              📊 {effectiveGraphs[graphIdx].title}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <button
@@ -591,7 +613,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               height: 'auto',
             }}>
               <Suspense fallback={<div style={{ padding: 32, textAlign: 'center', color: 'rgba(127,155,217,0.7)' }}>טוען גרף אינטראקטיבי…</div>}>
-                {(() => { const G = graphSlides[graphIdx].Component; return <G /> })()}
+                {(() => { const G = effectiveGraphs[graphIdx].Component; return <G /> })()}
               </Suspense>
             </div>
           </div>
