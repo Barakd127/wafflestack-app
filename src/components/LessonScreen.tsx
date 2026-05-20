@@ -45,20 +45,41 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   const [graphScale, setGraphScale] = useState(0.7)
 
   // Build merged sequence: lesson slide → optional graph(s) inserted after it.
-  // Graphs with no `afterSlide` (or out-of-range index) are appended at the end.
+  // Graphs with explicit `afterSlide` are placed exactly there. Graphs without
+  // are auto-distributed evenly across the lesson so every topic gets the same
+  // "graph-as-its-own-card, woven between lesson slides" treatment without
+  // requiring per-topic afterSlide config.
   type SlideRef = { kind: 'lesson'; lessonIdx: number } | { kind: 'graph'; graphIdx: number }
   const mergedSequence: SlideRef[] = useMemo(() => {
     const out: SlideRef[] = []
+    // Auto-position: distribute unpositioned graphs evenly through the lesson.
+    // For N graphs and M lesson slides, step = floor(M / (N+1)); graph k goes
+    // after slide (k+1)*step. Last graph clamped to lesson end so it never
+    // falls past the last lesson slide.
+    const autoPositions = new Map<number, number[]>()
+    if (graphSlides && lessonTotal > 0) {
+      const unpositioned = graphSlides
+        .map((g, gi) => ({ g, gi }))
+        .filter(x => x.g.afterSlide == null || x.g.afterSlide < 0 || x.g.afterSlide >= lessonTotal)
+      if (unpositioned.length > 0) {
+        const step = Math.max(1, Math.floor(lessonTotal / (unpositioned.length + 1)))
+        unpositioned.forEach((x, k) => {
+          const pos = Math.min(lessonTotal - 1, (k + 1) * step)
+          if (!autoPositions.has(pos)) autoPositions.set(pos, [])
+          autoPositions.get(pos)!.push(x.gi)
+        })
+      }
+    }
     slides.forEach((_, i) => {
       out.push({ kind: 'lesson', lessonIdx: i })
+      // Explicit afterSlide entries
       graphSlides?.forEach((g, gi) => {
         if (g.afterSlide === i) out.push({ kind: 'graph', graphIdx: gi })
       })
-    })
-    graphSlides?.forEach((g, gi) => {
-      if (g.afterSlide == null || g.afterSlide < 0 || g.afterSlide >= lessonTotal) {
+      // Auto-positioned entries
+      autoPositions.get(i)?.forEach(gi => {
         out.push({ kind: 'graph', graphIdx: gi })
-      }
+      })
     })
     return out
   }, [lessonTotal, graphSlides])
@@ -860,10 +881,13 @@ declare global {
   interface Window { katex?: { renderToString: (latex: string, opts?: object) => string } }
 }
 function KatexFormula({ latex }: { latex: string }) {
-  const ref = useRef<HTMLSpanElement>(null)
+  const wrapRef = useRef<HTMLSpanElement>(null)
+  const innerRef = useRef<HTMLSpanElement>(null)
+  const [scale, setScale] = useState(1)
+
   useEffect(() => {
-    const node = ref.current
-    if (!node) return
+    const inner = innerRef.current
+    if (!inner) return
     let cancelled = false
     const tryRender = () => {
       if (cancelled) return
@@ -874,13 +898,24 @@ function KatexFormula({ latex }: { latex: string }) {
             displayMode: true,
             output: 'html',
           })
-          // Empty result on bad LaTeX — fall back to readable text instead of
-          // a silent gap. Screen readers + sighted users both see something.
-          node.innerHTML = html && html.trim().length > 0
+          inner.innerHTML = html && html.trim().length > 0
             ? html
             : `<span style="font-family:monospace;color:#9CA3AF" dir="ltr">${latex}</span>`
+          // Fit-to-width: measure rendered formula vs container, scale down if overflow.
+          requestAnimationFrame(() => {
+            if (cancelled) return
+            const wrap = wrapRef.current
+            if (!wrap || !inner) return
+            const parentW = wrap.clientWidth
+            const innerW = inner.scrollWidth
+            if (innerW > parentW && parentW > 0) {
+              setScale(Math.max(0.5, parentW / innerW))
+            } else {
+              setScale(1)
+            }
+          })
         } catch {
-          node.textContent = latex
+          inner.textContent = latex
         }
       } else {
         setTimeout(tryRender, 80)
@@ -889,17 +924,43 @@ function KatexFormula({ latex }: { latex: string }) {
     tryRender()
     return () => { cancelled = true }
   }, [latex])
-  // role="img" + aria-label exposes the equation as a single AT-readable
-  // unit (skill ux Accessibility/Alt Text HIGH). LaTeX source is the best
-  // descriptor we have without a math-to-speech bridge.
+
+  // Also recalc on window resize so formula refits when carousel/pane resizes.
+  useEffect(() => {
+    const onResize = () => {
+      const wrap = wrapRef.current
+      const inner = innerRef.current
+      if (!wrap || !inner) return
+      const parentW = wrap.clientWidth
+      const innerW = inner.scrollWidth / scale  // unscaled width
+      if (innerW > parentW && parentW > 0) {
+        setScale(Math.max(0.5, parentW / innerW))
+      } else {
+        setScale(1)
+      }
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [scale])
+
   return (
     <span
-      ref={ref}
+      ref={wrapRef}
       role="img"
       aria-label={`נוסחה: ${latex}`}
-      style={{ overflowX: 'auto', maxWidth: '100%', display: 'inline-block' }}
+      style={{ display: 'block', width: '100%', textAlign: 'center', overflow: 'visible' }}
     >
-      {latex}
+      <span
+        ref={innerRef}
+        style={{
+          display: 'inline-block',
+          transform: `scale(${scale})`,
+          transformOrigin: 'center top',
+          transition: 'transform 0.12s ease-out',
+        }}
+      >
+        {latex}
+      </span>
     </span>
   )
 }
