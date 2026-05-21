@@ -836,6 +836,20 @@ interface TopicSelectorProps {
 function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
   const [comingSoon, setComingSoon] = useState<CourseDef | null>(null)
   const [embedded, setEmbedded] = useState<CourseDef | null>(null)
+  // ESC dismisses whichever modal is open. Click-outside is already wired via
+  // the backdrop's onClick. Without ESC, keyboard users had no exit short of
+  // hunting for the small "ביטול" / "סגור" button — fails WAI-ARIA dialog
+  // pattern (Escape must close).
+  useEffect(() => {
+    if (!comingSoon && !embedded) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (embedded) setEmbedded(null)
+      else if (comingSoon) setComingSoon(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [comingSoon, embedded])
   const pickCourse = (c: CourseDef) => {
     if(!c.active) { setComingSoon(c); return }
     if(c.embedUrl) {
