@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react'
 import { useLearningStore } from '../store/learningStore'
+import { FEATURE_UNLOCKS_BY_ID, type FeatureId } from '../config/featureUnlocks'
+import PomodoroTimer from './PomodoroTimer'
+import FeatureGate from './FeatureGate'
 
 // Lazy-load interactive graph components (per-topic visualizations).
 // Each component is ~300-450 LOC of pure SVG + KaTeX; lazy keeps the bundle
@@ -1375,13 +1378,22 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
   // active-state gold tint applies uniformly. No emoji, no gradient chips.
   // Each icon is a 22x22 viewBox 24, 1.8 stroke, rounded line caps.
   type IconKey = 'home' | 'book' | 'trophy' | 'map' | 'globe'
-  const items: Array<{ id: InternalView | null; label: string; iconKey: IconKey; action?: string }> = [
+  const items: Array<{ id: InternalView | null; label: string; iconKey: IconKey; action?: string; feature?: FeatureId }> = [
     { id: 'home',     label: 'דף הבית',           iconKey: 'home' },
     { id: 'courses', label: 'אזור למידה',        iconKey: 'book' },
-    { id: 'arsenal',  label: 'הארסנל שלי',        iconKey: 'trophy' },
-    { id: null,       label: 'מפת הלמידה שלי',    iconKey: 'map',   action: 'mindmap' },
+    { id: 'arsenal',  label: 'הארסנל שלי',        iconKey: 'trophy', feature: 'arsenal' },
+    { id: null,       label: 'מפת הלמידה שלי',    iconKey: 'map',   action: 'mindmap', feature: 'mindmap-view' },
     { id: null,       label: 'העולם שלי',         iconKey: 'globe', action: 'world' },
   ]
+  // Subscribe to gating state once per render so each row knows lock status.
+  const _adminMode = useLearningStore(s => s.adminMode)
+  const _unlockedFeatures = useLearningStore(s => s.unlockedFeatures)
+  const isLocked = (f?: FeatureId) => {
+    if (!f) return false
+    if (_adminMode) return false
+    if (!FEATURE_UNLOCKS_BY_ID[f]) return false
+    return !_unlockedFeatures.includes(f)
+  }
   const renderIcon = (k: IconKey) => {
     const stroke = 'currentColor'
     const sw = 1.8
@@ -1437,16 +1449,20 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
       <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
         {items.map((item, i) => {
           const isActive = item.id !== null && item.id === active
+          const locked = isLocked(item.feature)
+          const lockTip = locked && item.feature ? FEATURE_UNLOCKS_BY_ID[item.feature]?.descriptionHe : undefined
           return (
             <button key={i}
+              disabled={locked}
               onClick={() => {
+                if (locked) return
                 if (item.action === 'world') { onGoWorld(); return }
                 if (item.action === 'mindmap') { onGoMindmap(); return }
                 if (item.action === 'drawing') { onGoDrawing(); return }
                 if (item.action === 'notebook') { onGoNotebook(); return }
                 if (item.id !== null) onNav(item.id)
               }}
-              title={collapsed ? item.label : undefined}
+              title={locked ? lockTip : (collapsed ? item.label : undefined)}
               style={{
                 background: isActive ? SIDEBAR_ACTIVE : 'transparent',
                 borderRadius: 32,
@@ -1457,16 +1473,19 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
                 gap: 12,
                 direction: 'rtl',
                 border: 'none',
-                cursor: 'pointer',
+                cursor: locked ? 'not-allowed' : 'pointer',
                 width: '100%',
                 fontFamily: "'Rubik', sans-serif",
                 fontSize: 17,
                 fontWeight: isActive ? 600 : 400,
                 color: '#FFFFFF',
+                opacity: locked ? 0.5 : 1,
+                filter: locked ? 'grayscale(0.7)' : 'none',
                 transition: 'background 0.15s',
+                position: 'relative',
               }}
-              onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)' }}
-              onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+              onMouseEnter={e => { if (!isActive && !locked) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)' }}
+              onMouseLeave={e => { if (!isActive && !locked) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
             >
               <span style={{
                 width: 32, height: 32, flexShrink: 0,
@@ -1479,10 +1498,24 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
                 transform: isActive ? 'scale(1.06)' : 'scale(1)',
               }}>{renderIcon(item.iconKey)}</span>
               {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
+              {locked && (
+                <span aria-hidden="true" style={{
+                  position: 'absolute',
+                  top: 6, insetInlineEnd: 8,
+                  background: 'linear-gradient(135deg, #1a237e, #0d1656)',
+                  color: '#FFD700',
+                  fontSize: 10, fontWeight: 700,
+                  borderRadius: 999, padding: '2px 6px',
+                  border: '1px solid rgba(255,215,0,0.5)',
+                  lineHeight: 1,
+                }}>🔒</span>
+              )}
             </button>
           )
         })}
         <AdminToggle collapsed={collapsed} />
+        {/* Pomodoro mounted in sidebar bottom; gated by feature unlock */}
+        <FeatureGate id="pomodoro" mode="hide"><PomodoroTimer /></FeatureGate>
       </nav>
     </div>
   )

@@ -14,6 +14,9 @@ import TutorialOverlay from './components/TutorialOverlay'
 import DrawingScreen from './components/DrawingScreen'
 import { TutorFAB } from './components/AITutor/TutorFAB'
 import { TutorDrawer } from './components/AITutor/TutorDrawer'
+import FeatureGate from './components/FeatureGate'
+import UnlockToast from './components/UnlockToast'
+import { useLearningStore } from './store/learningStore'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
 // Notebook view is now a different render-mode of mindmap.html (loaded as an
@@ -305,14 +308,16 @@ function App() {
       )}
 
       {activeView === 'notebook' && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#FBF8F1' }}>
-          <iframe
-            src={`/mindmap.html?view=notebook&embed=1&userId=${encodeURIComponent((typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default')}`}
-            title="WaffleStack notebook"
-            allow="autoplay; clipboard-write"
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
-          />
-        </div>
+        <FeatureGate id="notebook" mode="hide">
+          <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#FBF8F1' }}>
+            <iframe
+              src={`/mindmap.html?view=notebook&embed=1&userId=${encodeURIComponent((typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default')}`}
+              title="WaffleStack notebook"
+              allow="autoplay; clipboard-write"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
+            />
+          </div>
+        </FeatureGate>
       )}
 
       {loggedIn && <TutorialOverlay />}
@@ -321,12 +326,31 @@ function App() {
           (hidden in wafflecity so the city back button sits cleanly at bottom-left) */}
       {activeView !== 'landing' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'split-study-mindmap' && activeView !== 'mindmap' && (
         <>
-          <TutorFAB />
+          <FeatureGate id="ai-tutor" mode="hide"><TutorFAB /></FeatureGate>
           <TutorDrawer />
         </>
       )}
+
+      {/* Global unlock celebration toast (drains learningStore.newlyUnlocked). */}
+      <UnlockToast />
     </div>
   )
+}
+
+// Expose unlocked-features map on window so vanilla-JS iframes (mindmap.html,
+// xmind-replica.html) can read gate state via window.parent.__wsFeatures.
+// PR 2 caveat: whiteboard clusters inside mindmap.html still need to opt-in
+// to reading this — gating of those vanilla-JS buttons is a future task.
+if (typeof window !== 'undefined') {
+  const sync = () => {
+    const s = useLearningStore.getState()
+    ;(window as unknown as { __wsFeatures: { adminMode: boolean; unlocked: string[] } }).__wsFeatures = {
+      adminMode: s.adminMode,
+      unlocked: s.unlockedFeatures,
+    }
+  }
+  sync()
+  useLearningStore.subscribe(sync)
 }
 
 export default App

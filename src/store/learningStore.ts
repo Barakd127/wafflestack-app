@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { evaluateUnlocks, ALL_FEATURE_IDS, FEATURE_UNLOCKS_BY_ID, type FeatureId } from '../config/featureUnlocks'
 
 // ── SM-2 Spaced Repetition ────────────────────────────────────────────────────
 
@@ -373,6 +374,12 @@ interface LearningState {
   // survives reloads.
   adminMode: boolean
 
+  // Feature progression (see src/config/featureUnlocks.ts).
+  // unlockedFeatures: ids the user has unlocked (persisted string[]).
+  // newlyUnlocked: queue of ids that just unlocked → UnlockToast drains.
+  unlockedFeatures: string[]
+  newlyUnlocked: string[]
+
   // Actions
   recordAnswer: (questionId: string, correct: boolean, xpReward: number) => void
   recordSM2Answer: (questionId: string, quality: number, xpReward: number) => void
@@ -387,6 +394,16 @@ interface LearningState {
   setExamDate: (date: string | null) => void
   recordErrorTag: (questionId: string, tag: string) => void
   toggleAdminMode: () => void
+  unlockFeature: (id: FeatureId) => void
+  clearNewlyUnlocked: (id?: string) => void
+}
+
+// Helper: is a feature unlocked? Admin wins. Features with no rule are
+// considered tier 0 (always available).
+export function isFeatureUnlocked(state: LearningState, featureId: FeatureId): boolean {
+  if (state.adminMode) return true
+  if (!FEATURE_UNLOCKS_BY_ID[featureId]) return true
+  return state.unlockedFeatures.includes(featureId)
 }
 
 // Helper: is a building unlocked for the current user? Admin mode wins.
@@ -424,6 +441,8 @@ export const useLearningStore = create<LearningState>()(
       adminMode: false,
       errorTags: {},
       errorTagCounts: {},
+      unlockedFeatures: [],
+      newlyUnlocked: [],
 
       recordAnswer: (questionId, correct, xpReward) => {
         const state = get()
@@ -477,6 +496,11 @@ export const useLearningStore = create<LearningState>()(
           return a
         })
 
+        // Evaluate feature unlocks against the NEW xp / completedLessons.
+        const evalState = { xp: newXp, completedLessons: state.completedLessons }
+        const earnedFeatures = evaluateUnlocks(evalState)
+        const freshFeatures = earnedFeatures.filter(f => !state.unlockedFeatures.includes(f))
+
         set({
           xp: newXp,
           streak: newStreak,
@@ -490,6 +514,12 @@ export const useLearningStore = create<LearningState>()(
           lastSessionDate: newLastSessionDate,
           currentStreak: newCurrentStreak,
           longestStreak: newLongestStreak,
+          unlockedFeatures: freshFeatures.length
+            ? [...state.unlockedFeatures, ...freshFeatures]
+            : state.unlockedFeatures,
+          newlyUnlocked: freshFeatures.length
+            ? [...state.newlyUnlocked, ...freshFeatures]
+            : state.newlyUnlocked,
         })
       },
 
@@ -587,10 +617,22 @@ export const useLearningStore = create<LearningState>()(
             return a
           })
 
+          // Feature-unlock evaluation (state hasn't changed XP here, but a
+          // building quiz often runs alongside answers; still re-check in case
+          // unlockedFeatures drifted from current state).
+          const earnedFeatures = evaluateUnlocks({ xp: state.xp, completedLessons: state.completedLessons })
+          const freshFeatures = earnedFeatures.filter(f => !state.unlockedFeatures.includes(f))
+
           return {
             buildingProgress: updated,
             achievements: updatedAchievements,
             newAchievements: [...state.newAchievements, ...newlyUnlocked],
+            unlockedFeatures: freshFeatures.length
+              ? [...state.unlockedFeatures, ...freshFeatures]
+              : state.unlockedFeatures,
+            newlyUnlocked: freshFeatures.length
+              ? [...state.newlyUnlocked, ...freshFeatures]
+              : state.newlyUnlocked,
           }
         })
       },
@@ -598,9 +640,19 @@ export const useLearningStore = create<LearningState>()(
       completeLesson: (topicId) => {
         const state = get()
         if (state.completedLessons.includes(topicId)) return
+        const newCompleted = [...state.completedLessons, topicId]
+        const newXp = state.xp + 5
+        const earnedFeatures = evaluateUnlocks({ xp: newXp, completedLessons: newCompleted })
+        const freshFeatures = earnedFeatures.filter(f => !state.unlockedFeatures.includes(f))
         set({
-          completedLessons: [...state.completedLessons, topicId],
-          xp: state.xp + 5,
+          completedLessons: newCompleted,
+          xp: newXp,
+          unlockedFeatures: freshFeatures.length
+            ? [...state.unlockedFeatures, ...freshFeatures]
+            : state.unlockedFeatures,
+          newlyUnlocked: freshFeatures.length
+            ? [...state.newlyUnlocked, ...freshFeatures]
+            : state.newlyUnlocked,
         })
       },
 
@@ -632,10 +684,23 @@ export const useLearningStore = create<LearningState>()(
           for(const [id, p] of Object.entries(get().buildingProgress)) {
             next[id] = { ...p, level: Math.max(p.level, 1) as 0 | 1 | 2 }
           }
-          set({ adminMode: true, buildingProgress: next })
+          set({ adminMode: true, buildingProgress: next, unlockedFeatures: [...ALL_FEATURE_IDS] })
         } else {
           set({ adminMode: false })
         }
+      },
+      unlockFeature: (id) => {
+        const state = get()
+        if (state.unlockedFeatures.includes(id)) return
+        set({
+          unlockedFeatures: [...state.unlockedFeatures, id],
+          newlyUnlocked: [...state.newlyUnlocked, id],
+        })
+      },
+      clearNewlyUnlocked: (id) => {
+        const state = get()
+        if (id === undefined) { set({ newlyUnlocked: [] }); return }
+        set({ newlyUnlocked: state.newlyUnlocked.filter(x => x !== id) })
       },
     }),
     {
