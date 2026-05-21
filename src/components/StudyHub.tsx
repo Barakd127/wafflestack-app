@@ -1731,16 +1731,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   const handleSetTab = useCallback((newTab: typeof tab) => {
     setTab(newTab)
     setChipExpanded(true)
-    if (newTab !== 'none' && !isMobile) {
-      setFloatMode(true)
-      setFloatPos({
-        x: Math.max(16, (typeof window !== 'undefined' ? window.innerWidth : 900) - 436),
-        y: 72,
-      })
-    } else if (newTab === 'none') {
+    if (newTab === 'none') {
       setFloatMode(false)
     }
-  }, [isMobile])
+  }, [])
 
   // Load questions from selected topic, sorted progressively easy → medium → hard.
   // XP scales with difficulty so harder questions feel more rewarding.
@@ -1945,11 +1939,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         {/* ── Companion tool (renders FIRST so the chip sits on top of it) ── */}
         {!isDone && tab !== 'none' && (
           <div style={{
-            position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 1,
-            // Only use the dark navy fallback for iframe-based tools (mindmap /
-            // canvas) where it sits behind the loading iframe. The arsenal is a
-            // React component with its own theme — let it inherit from the page
-            // so it tracks light/dark mode correctly.
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: !isMobile ? 420 : 0,
+            overflow: 'hidden', zIndex: 1,
             background: tab === 'arsenal' ? 'var(--sh-page-bg)' : '#0d1628',
           }}>
             {tab === 'mindmap' && (
@@ -1978,8 +1973,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           </div>
         )}
 
-        {/* ── Floating mini-pill (only when chip is collapsed in tool mode) ── */}
-        {!isDone && tab !== 'none' && !chipExpanded && (
+        {/* ── Floating mini-pill (mobile only — desktop uses the split panel) ── */}
+        {!isDone && tab !== 'none' && !chipExpanded && isMobile && (
           <button
             onClick={() => setChipExpanded(true)}
             title="הצג שאלה"
@@ -2005,14 +2000,16 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         {/* ── Question card ──────────────────────────────────────────────────
              • tab='none'          → centered in the page (normal flow)
              • tab active, mobile  → bottom sheet (fixed, 50 vh, rounded top)
-             • tab active, desktop → draggable float (top-right, auto-placed)
+             • tab active, desktop → right-side split panel (420 px wide)
         ─────────────────────────────────────────────────────────────────── */}
-        {(tab === 'none' || chipExpanded || isDone || isMobile) && (
+        {(isDone || tab === 'none' || !isMobile || chipExpanded) && (
         <div style={
           isMobile && tab !== 'none' && !isDone
             ? { position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 250, display: 'flex', flexDirection: 'column' }
             : floatMode
             ? { position: 'fixed', top: floatPos.y, left: floatPos.x, zIndex: 250, width: 'min(420px, calc(100vw - 24px))', maxHeight: 'calc(100vh - 88px)', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.45)' }
+            : !isMobile && tab !== 'none' && !isDone
+            ? { position: 'absolute', top: 0, right: 0, bottom: 0, width: 420, zIndex: 60, display: 'flex', flexDirection: 'column' }
             : tab === 'none' || isDone
             ? { flexShrink: 0, padding: '18px 24px 12px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
             : { position: 'absolute', bottom: 72, insetInlineEnd: 14, zIndex: 60, width: 'min(420px, calc(100vw - 28px))', maxHeight: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }
@@ -2029,6 +2026,19 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   overflow: 'hidden',
                   display: 'flex', flexDirection: 'column',
                   maxHeight: '52vh',
+                }
+              : !isMobile && tab !== 'none' && !isDone
+              ? {
+                  width: '100%',
+                  height: '100%',
+                  background: 'var(--sh-q-card-bg, #ffffff)',
+                  borderRadius: 0,
+                  borderInlineEnd: 'none',
+                  borderTop: 'none',
+                  borderBottom: 'none',
+                  borderInlineStart: '1px solid rgba(127,155,217,0.25)',
+                  overflow: 'hidden',
+                  display: 'flex', flexDirection: 'column',
                 }
               : tab === 'none' || isDone
               ? {
@@ -2064,8 +2074,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 cursor: (floatMode && !isMobile) ? 'move' : 'default',
                 userSelect: (floatMode && !isMobile) ? 'none' : undefined,
               }}>
-              {/* Drag handle pill — visible hint when card is floating */}
-              {floatMode && !isMobile && (
+              {/* Drag handle pill — only when floating (not in split mode) */}
+              {floatMode && !isMobile && tab === 'none' && (
                 <span style={{ width: 28, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.35)', flexShrink: 0, marginLeft: -4, marginRight: 4 }} aria-hidden="true" />
               )}
               {/* Mobile bottom-sheet drag pill at very top */}
@@ -2142,8 +2152,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   ✕
                 </button>
               )}
-              {/* Desktop collapse chip — only when tab active and NOT mobile */}
-              {!isDone && tab !== 'none' && !isMobile && (
+              {/* Desktop collapse chip — only when floating (not in split panel) */}
+              {!isDone && tab !== 'none' && !isMobile && floatMode && (
                 <button
                   onClick={() => setChipExpanded(false)}
                   title="כווץ"
@@ -2158,7 +2168,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             {/* Card body — height/scroll scales with mode */}
             <div style={{
               padding: '20px 22px 18px',
-              maxHeight: tab !== 'none' && !isDone ? 'calc(100vh - 280px)' : 'min(60vh, 520px)',
+              maxHeight: (!isMobile && tab !== 'none' && !isDone) ? 'unset' : tab !== 'none' && !isDone ? 'calc(100vh - 280px)' : 'min(60vh, 520px)',
               overflowY: 'auto',
               flex: tab !== 'none' && !isDone ? 1 : 'unset',
             }}>
@@ -2405,7 +2415,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             position: tab !== 'none' ? 'absolute' : 'relative',
             bottom: tab !== 'none' ? 0 : undefined,
             left: tab !== 'none' ? 0 : undefined,
-            right: tab !== 'none' ? 0 : undefined,
+            right: tab !== 'none' ? (!isMobile ? 420 : 0) : undefined,
             zIndex: 40,
             background: tab !== 'none' ? 'linear-gradient(180deg, rgba(13,22,40,0) 0%, rgba(13,22,40,0.82) 60%, rgba(13,22,40,0.95) 100%)' : 'transparent',
           }}>
