@@ -5217,7 +5217,10 @@ function nbRenderContent(){
   body.contentEditable = 'true';
   body.spellcheck = false;
   body.dir = 'rtl';
-  body.setAttribute('data-placeholder', '');
+  // Empty-page hint. Visible via .nb-body:empty::before (pointer-events:none
+  // so it never blocks the caret). Empty string previously gave the user no
+  // signal that the area was editable.
+  body.setAttribute('data-placeholder', 'התחל להקליד…');
   body.innerHTML = nbBodyAsHtml(n);
   let bodyTimer = null;
   body.oninput = () => {
