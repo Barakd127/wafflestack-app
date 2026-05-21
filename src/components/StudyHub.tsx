@@ -1946,9 +1946,12 @@ interface LearningScreenProps {
   onProgressUpdate: (progress: UserProgress) => void
   userId?: string
   isMobile?: boolean
+  /** Distraction-free mode: parent hides sidebar+topbar when true. */
+  fullscreen?: boolean
+  onToggleFullscreen?: () => void
 }
 
-function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userProgress, onProgressUpdate, userId, isMobile = false }: LearningScreenProps) {
+function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userProgress, onProgressUpdate, userId, isMobile = false, fullscreen = false, onToggleFullscreen }: LearningScreenProps) {
   const [currentQ, setCurrentQ] = useState(0)
   const [answer, setAnswer] = useState('')
   // Coachmark anchor for the quiz card (first time the user sees a question)
@@ -2026,6 +2029,19 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       setFloatMode(false)
     }
   }, [])
+
+  // Esc to exit fullscreen (don't hijack when editing inside a textarea)
+  useEffect(() => {
+    if (!fullscreen || !onToggleFullscreen) return
+    const h = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      const tag = (document.activeElement as HTMLElement | null)?.tagName
+      if (tag === 'TEXTAREA' || tag === 'INPUT') return
+      onToggleFullscreen()
+    }
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [fullscreen, onToggleFullscreen])
 
   // Load questions from selected topic, sorted progressively easy → medium → hard.
   // XP scales with difficulty so harder questions feel more rewarding.
@@ -2221,11 +2237,34 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         <div className="ws-quiz-topic" style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: TEXT_DARK }}>
           <span style={{ fontWeight: 700 }}>סטטיסטיקה</span>{!isDone && ` | ${q.topic}`}
         </div>
+        {/* Fullscreen toggle — distraction-free practice; parent hides sidebar+topbar */}
+        {onToggleFullscreen && !isMobile && (
+          <button
+            onClick={onToggleFullscreen}
+            aria-label={fullscreen ? 'יציאה ממסך מלא' : 'מסך מלא — ללא הסחות דעת'}
+            title={fullscreen ? 'יציאה ממסך מלא (Esc)' : 'מסך מלא'}
+            style={{
+              background: fullscreen ? 'rgba(212,175,55,0.18)' : 'rgba(127,155,217,0.10)',
+              border: '1px solid ' + (fullscreen ? 'rgba(212,175,55,0.55)' : 'rgba(127,155,217,0.30)'),
+              color: fullscreen ? '#7A5C00' : TEXT_DARK,
+              borderRadius: 8, padding: '6px 10px',
+              cursor: 'pointer', fontFamily: "'Rubik', sans-serif",
+              fontSize: 12, fontWeight: 700,
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}
+          >
+            {fullscreen ? '↘ צא ממסך מלא' : '⛶ מסך מלא'}
+          </button>
+        )}
       </div>
 
       {/* Two-mode layout — calm focus when tab='none', tool-fullscreen with
-          docked chip when a companion tool is active. */}
-      <div ref={contentRowRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0, background: 'var(--sh-page-bg)', position: 'relative' }}>
+          docked chip when a companion tool is active.
+          Per user: when desktop split is active, the QUESTION card renders
+          at the TOP (so it's immediately readable + room for the answer
+          textarea), and the companion tool fills the remaining space BELOW.
+          That mirrors textbook-style problem→workspace layout. */}
+      <div ref={contentRowRef} style={{ flex: 1, display: 'flex', flexDirection: 'column-reverse', overflow: 'hidden', minHeight: 0, background: 'var(--sh-page-bg)', position: 'relative' }}>
 
         {/* ── Companion tool ── */}
         {!isDone && tab !== 'none' && (
@@ -2754,6 +2793,9 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
     loadProgress(initializeUser().userId)
   )
   const [sidebarWidth, setSidebarWidth] = useState(247)
+  // Distraction-free fullscreen for the practice/learning view. When true,
+  // sidebar + topbar are hidden so only the quiz + companion tool remain.
+  const [learningFullscreen, setLearningFullscreen] = useState(false)
   // Mobile (<=768px): sidebar collapses entirely and is opened as a hamburger overlay.
   const [isMobile, setIsMobile] = useState<boolean>(() =>
     typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false
@@ -2884,12 +2926,15 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 240 }}
         />
       )}
-      {/* Sidebar — right side (RTL). On mobile becomes a slide-in overlay. */}
+      {/* Sidebar — right side (RTL). On mobile becomes a slide-in overlay.
+          Hidden entirely in learning-fullscreen mode for distraction-free practice. */}
       <nav
         ref={sidebarTutRef}
         aria-label="ניווט ראשי"
         style={
-          isMobile
+          learningFullscreen && internalView === 'learning'
+            ? { display: 'none' }
+            : isMobile
             ? {
                 position: 'fixed', top: 0, right: 0, bottom: 0,
                 width: 260, zIndex: 245,
@@ -2934,7 +2979,9 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
 
       {/* Main */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <header ref={topbarTutRef}><TopBar title={title} onLogout={handleLogout} /></header>
+        {!(learningFullscreen && internalView === 'learning') && (
+          <header ref={topbarTutRef}><TopBar title={title} onLogout={handleLogout} /></header>
+        )}
         {internalView === 'home' && (
           <HomeScreen
             onGoLearning={() => setInternalView('topics')}
@@ -2975,13 +3022,15 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
         )}
         {internalView === 'learning' && (
           <LearningScreen
-            onBack={() => setInternalView('topics')}
+            onBack={() => { setLearningFullscreen(false); setInternalView('topics') }}
             selectedTopic={selectedTopic}
             difficultyFilter={quizDifficulty}
             userProgress={userProgress}
             onProgressUpdate={handleProgressUpdate}
             userId={currentUser?.userId}
             isMobile={isMobile}
+            fullscreen={learningFullscreen}
+            onToggleFullscreen={() => setLearningFullscreen(f => !f)}
           />
         )}
       </main>
