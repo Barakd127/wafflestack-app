@@ -1965,6 +1965,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   const [xpBurst, setXpBurst] = useState<number | null>(null)
   // Store each question's typed answer so users can navigate back and re-read
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({})
+  // MC-mode: tracks which option index the user clicked for the current question.
+  // Null while unanswered; reset on question change. Used for green/red feedback.
+  const [mcSelected, setMcSelected] = useState<number | null>(null)
   // Two-mode layout:
   //   tab === 'none'  → calm centered card, tabs row is the LAUNCHER.
   //   tab !== 'none'  → companion tool fills the screen; question becomes a
@@ -2058,6 +2061,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           answer: q.explanation,
           xp: DIFFICULTY_XP[q.difficulty] ?? 15,
           difficulty: q.difficulty as 'easy' | 'medium' | 'hard' | undefined,
+          // MC schema (v1) — preserved for the multiple-choice render path
+          format: q.format as 'mc' | undefined,
+          options: Array.isArray(q.options) ? (q.options as string[]) : undefined,
+          correctIndex: typeof q.correctIndex === 'number' ? q.correctIndex : undefined,
+          correctAnswer: q.correct_answer as string | undefined,
         }))
     : QUESTIONS
 
@@ -2106,6 +2114,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     if (answer.trim()) setUserAnswers(prev => ({ ...prev, [currentQ]: answer }))
     setCurrentQ(index)
     setAnswer(userAnswers[index] || '')
+    // Reset MC selection — for already-answered MC questions we let the user
+    // pick again rather than locking the buttons; the dot state stays correct/wrong.
+    setMcSelected(null)
     if (state === 'correct' || state === 'wrong') {
       setPhase('review')
     } else {
@@ -2207,14 +2218,54 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     setDotStates(next)
     setCurrentQ(ni)
     setAnswer('')
+    setMcSelected(null)
     setPhase('write')
   }
 
   const handleReset = () => {
     setCurrentQ(0)
     setAnswer('')
+    setMcSelected(null)
     setPhase('write')
     setDotStates(QUESTIONS.map((_, i) => i === 0 ? 'current' : 'empty'))
+  }
+
+  // MC click handler — commits the answer immediately, shows green/red feedback,
+  // then advances. Mirrors handleSelfAssess but skips the textarea/review flow.
+  const handleMcChoose = (idx: number) => {
+    if (mcSelected !== null || !q) return
+    const opts: string[] | undefined = (q as any).options
+    const correctIdx: number | undefined = (q as any).correctIndex
+    if (!opts || typeof correctIdx !== 'number') return
+
+    setMcSelected(idx)
+    const chosenText = opts[idx]
+    setAnswer(chosenText)
+    setUserAnswers(prev => ({ ...prev, [currentQ]: chosenText }))
+
+    const correct = idx === correctIdx
+    let xpReward = correct ? q.xp : 0
+    if (correct && xpReward > 0 && useArsenalStore.getState().activePotion === 'tip') {
+      xpReward = xpReward * 2
+      useArsenalStore.getState().consumeMemoryTea()
+    }
+    recordAnswer(`studyhub-q${q.id}`, correct, xpReward)
+
+    const nextDots = [...dotStates]
+    nextDots[currentQ] = correct ? 'correct' : 'wrong'
+    setDotStates(nextDots)
+
+    if (correct && xpReward > 0) setXpBurst(xpReward)
+
+    if (correct) {
+      setTimeout(() => goNext(nextDots), 900)
+    } else {
+      // Wrong — keep feedback visible briefly, then open Mistake Autopsy
+      setTimeout(() => {
+        setAutopsyDots(nextDots)
+        setAutopsyOpen(true)
+      }, 900)
+    }
   }
 
   const isDone = phase === 'done'
@@ -2337,7 +2388,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             : floatMode
             ? { position: 'fixed', top: floatPos.y, left: floatPos.x, zIndex: 250, width: 'min(420px, calc(100vw - 24px))', maxHeight: 'calc(100vh - 88px)', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.45)' }
             : !isMobile && tab !== 'none' && !isDone
-            ? { flexShrink: 0, zIndex: 2, display: 'flex', flexDirection: 'column' }
+            // Desktop split: question card capped to ~25vh so the canvas /
+            // mindmap below gets the remaining ~75vh for meaningful
+            // interaction. Internal scroll if question is long.
+            ? { flexShrink: 0, zIndex: 2, display: 'flex', flexDirection: 'column', maxHeight: '25vh', overflow: 'hidden' }
             : tab === 'none' || isDone
             ? { flexShrink: 0, padding: '18px 24px 12px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
             : { position: 'absolute', bottom: 72, insetInlineEnd: 14, zIndex: 60, width: 'min(420px, calc(100vw - 28px))', maxHeight: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }
@@ -2361,8 +2415,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   background: 'var(--sh-q-card-bg, #ffffff)',
                   borderRadius: 0,
                   borderBottom: '1px solid rgba(127,155,217,0.22)',
-                  overflow: 'hidden',
+                  overflow: 'auto',           // scroll if question + MC options exceed 25vh
                   display: 'flex', flexDirection: 'column',
+                  maxHeight: '25vh',
                 }
               : tab === 'none' || isDone
               ? {
@@ -2551,25 +2606,108 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 {q.text}
               </div>
 
-              <div style={{ border: `2px solid ${answer.trim() ? '#3351CA' : '#C8D0E0'}`, borderRadius: 12, overflow: 'hidden', marginBottom: 18, transition: 'border-color 0.2s' }}>
-                <textarea
-                  ref={quizTutRef}
-                  value={answer}
-                  onChange={e => setAnswer(e.target.value)}
-                  placeholder="כתוב/י את פתרונך כאן..."
-                  dir="rtl"
-                  style={{
-                    width: '100%', minHeight: 110,
-                    border: 'none', outline: 'none',
-                    padding: '14px 18px',
-                    fontSize: 18, color: TEXT_DARK,
-                    background: 'transparent',
-                    fontFamily: "'Assistant', sans-serif",
-                    resize: 'vertical', direction: 'rtl',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
+              {((q as any).format === 'mc' && Array.isArray((q as any).options)) ? (
+                /* ── Multiple-choice render — 4 buttons, RTL, gold A/B/C/D pill ── */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }} dir="rtl">
+                  {((q as any).options as string[]).map((opt: string, idx: number) => {
+                    const correctIdx: number = (q as any).correctIndex
+                    const isChosen = mcSelected === idx
+                    const isCorrect = idx === correctIdx
+                    const revealed = mcSelected !== null
+                    // Color logic: green for correct (when revealed), red for chosen-wrong,
+                    // dimmed for non-chosen-incorrect. Default neutral white before click.
+                    let bg = '#FFFFFF'
+                    let border = '#C8D0E0'
+                    let color = TEXT_DARK
+                    let marker: string | null = null
+                    if (revealed) {
+                      if (isCorrect) {
+                        bg = 'rgba(52,168,83,0.12)'
+                        border = '#34A853'
+                        color = '#1E7E34'
+                        marker = '✓'
+                      } else if (isChosen) {
+                        bg = 'rgba(234,67,53,0.12)'
+                        border = '#EA4335'
+                        color = '#B92E22'
+                        marker = '✗'
+                      } else {
+                        bg = '#F4F6FA'
+                        border = '#D8E0F0'
+                        color = TEXT_LIGHT
+                      }
+                    }
+                    const letter = String.fromCharCode(0x41 + idx) // A, B, C, D
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => handleMcChoose(idx)}
+                        disabled={revealed}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 14,
+                          minHeight: 56, // ≥44px tap target + padding
+                          padding: '12px 16px',
+                          background: bg,
+                          border: `2px solid ${border}`,
+                          borderRadius: 12,
+                          color,
+                          fontFamily: "'Assistant', sans-serif",
+                          fontSize: 18,
+                          fontWeight: 500,
+                          cursor: revealed ? 'default' : 'pointer',
+                          textAlign: 'right',
+                          direction: 'rtl',
+                          transition: 'all 0.18s',
+                          boxShadow: isChosen && revealed ? '0 2px 8px rgba(0,0,0,0.12)' : 'none',
+                        }}
+                        onMouseEnter={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = '#F4F6FA' }}
+                        onMouseLeave={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = '#FFFFFF' }}
+                      >
+                        {/* RTL primary corner = right side → letter pill comes FIRST in DOM */}
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                          minWidth: 32, height: 32, borderRadius: 16,
+                          background: '#D4AF37', color: '#fff',
+                          fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 15,
+                          flexShrink: 0,
+                        }}>
+                          {letter}
+                        </span>
+                        <span style={{ flex: 1, lineHeight: 1.5 }}>{opt}</span>
+                        {marker && (
+                          <span style={{
+                            fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20,
+                            color: marker === '✓' ? '#34A853' : '#EA4335',
+                            flexShrink: 0,
+                          }}>
+                            {marker}
+                          </span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div style={{ border: `2px solid ${answer.trim() ? '#3351CA' : '#C8D0E0'}`, borderRadius: 12, overflow: 'hidden', marginBottom: 18, transition: 'border-color 0.2s' }}>
+                  <textarea
+                    ref={quizTutRef}
+                    value={answer}
+                    onChange={e => setAnswer(e.target.value)}
+                    placeholder="כתוב/י את פתרונך כאן..."
+                    dir="rtl"
+                    style={{
+                      width: '100%', minHeight: 110,
+                      border: 'none', outline: 'none',
+                      padding: '14px 18px',
+                      fontSize: 18, color: TEXT_DARK,
+                      background: 'transparent',
+                      fontFamily: "'Assistant', sans-serif",
+                      resize: 'vertical', direction: 'rtl',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              )}
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_LIGHT, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleSkip}>דלג</span>
@@ -2606,10 +2744,15 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   })}
                 </div>
 
-                <button onClick={handleReveal} disabled={!answer.trim()}
-                  style={{ background: answer.trim() ? BUTTON_COLOR : '#C8D0E0', color: '#fff', border: 'none', borderRadius: 24, padding: '10px 28px', fontFamily: "'Rubik', sans-serif", fontSize: 16, fontWeight: 700, cursor: answer.trim() ? 'pointer' : 'not-allowed', boxShadow: answer.trim() ? '0px 2px 6px #8DA7FF' : 'none', transition: 'all 0.2s' }}>
-                  בדוק תשובה ←
-                </button>
+                {(q as any).format === 'mc' ? (
+                  /* MC mode: clicking an option commits — no separate reveal button */
+                  <div style={{ width: 120 }} />
+                ) : (
+                  <button onClick={handleReveal} disabled={!answer.trim()}
+                    style={{ background: answer.trim() ? BUTTON_COLOR : '#C8D0E0', color: '#fff', border: 'none', borderRadius: 24, padding: '10px 28px', fontFamily: "'Rubik', sans-serif", fontSize: 16, fontWeight: 700, cursor: answer.trim() ? 'pointer' : 'not-allowed', boxShadow: answer.trim() ? '0px 2px 6px #8DA7FF' : 'none', transition: 'all 0.2s' }}>
+                    בדוק תשובה ←
+                  </button>
+                )}
               </div>
             </>
 
