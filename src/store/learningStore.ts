@@ -711,6 +711,19 @@ export const useLearningStore = create<LearningState>()(
     }),
     {
       name: 'wafflestack-learning',
+      // After rehydrating, auto-heal stale unlockedFeatures: if admin is OFF
+      // but the persisted list contains features the user shouldn't have
+      // earned yet (left over from a previous admin-ON session), recompute
+      // from real xp + completedLessons. Fixes "locks not engaging after
+      // turning admin off" without forcing a re-toggle.
+      onRehydrateStorage: () => (state) => {
+        if (!state) return
+        if (state.adminMode) return
+        const earned = evaluateUnlocks({ xp: state.xp, completedLessons: state.completedLessons })
+        // Only mutate if persisted list contains something it shouldn't.
+        const stale = state.unlockedFeatures.some(id => !earned.includes(id as FeatureId))
+        if (stale) state.unlockedFeatures = earned
+      },
     }
   )
 )

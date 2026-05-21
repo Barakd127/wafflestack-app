@@ -13,6 +13,10 @@ export interface QuizBankQuestion {
   question: string
   options: string[]
   correct_answer: string
+  /** New MC schema (v1). Index of the correct option in `options`. */
+  correctIndex?: number
+  /** New MC schema (v1). 'mc' means options + correctIndex are authoritative. */
+  format?: 'mc'
   explanation: string
 }
 
@@ -60,7 +64,11 @@ function getRawQuestions(topic: QuizBankTopic): QuizBankQuestion[] {
 
 /** Convert quiz-bank format to StatChallenge format (correct as index). */
 function toStatChallengeFormat(q: QuizBankQuestion): StatChallengeQuestion {
-  const idx = q.options.indexOf(q.correct_answer)
+  // Prefer the new MC schema (correctIndex) when present; fall back to
+  // string lookup for any legacy entries that haven't been migrated yet.
+  const idx = typeof q.correctIndex === 'number'
+    ? q.correctIndex
+    : q.options.indexOf(q.correct_answer)
   return {
     q: q.question,
     options: q.options,
