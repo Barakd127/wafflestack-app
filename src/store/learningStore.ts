@@ -686,7 +686,13 @@ export const useLearningStore = create<LearningState>()(
           }
           set({ adminMode: true, buildingProgress: next, unlockedFeatures: [...ALL_FEATURE_IDS] })
         } else {
-          set({ adminMode: false })
+          // Turning admin OFF: recompute unlockedFeatures from REAL XP +
+          // completed-lessons state so gates re-engage. Otherwise the array
+          // stays at [...ALL_FEATURE_IDS] from when admin was turned on and
+          // every feature stays unlocked.
+          const s = get()
+          const earned = evaluateUnlocks({ xp: s.xp, completedLessons: s.completedLessons })
+          set({ adminMode: false, unlockedFeatures: earned })
         }
       },
       unlockFeature: (id) => {
