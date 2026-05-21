@@ -350,10 +350,12 @@ interface CourseDef {
   desc: string
   active: boolean
   bg: string                     // tile gradient
+  /** If set, course opens an external page in a fullscreen iframe. */
+  embedUrl?: string
 }
 const COURSES: CourseDef[] = [
   { id: 'stat-a',  label: "סטטיסטיקה א'",        icon: '📊', desc: 'מבוא, מדדים, התפלגויות, רגרסיה, הסתברות',  active: true,  bg: 'linear-gradient(135deg,#F5C842,#D4AF37)' },
-  { id: 'stat-b',  label: "סטטיסטיקה ב'",        icon: '📈', desc: 'הסקה סטטיסטית, מבחני השערות, מדגם, רווחי סמך', active: false, bg: 'linear-gradient(135deg,#7CB7F8,#4A90E2)' },
+  { id: 'stat-b',  label: "סטטיסטיקה ב'",        icon: '📈', desc: 'הסקה סטטיסטית, מבחני השערות, מדגם, רווחי סמך', active: true,  bg: 'linear-gradient(135deg,#7CB7F8,#4A90E2)', embedUrl: 'https://stats-viz-mata.vercel.app/' },
   { id: 'methods', label: 'שיטות מחקר',          icon: '🔬', desc: 'תכנון מחקר, מדידה, מהימנות ותקפות',         active: false, bg: 'linear-gradient(135deg,#A78BFA,#7C3AED)' },
   { id: 'anova',   label: 'ניתוח שונות / רב-משתנית', icon: '📐', desc: 'ANOVA, MANOVA, רגרסיה מרובה, מודלים מורכבים', active: false, bg: 'linear-gradient(135deg,#67C29E,#229E69)' },
 ]
@@ -830,6 +832,36 @@ interface TopicSelectorProps {
  */
 function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
   const [comingSoon, setComingSoon] = useState<CourseDef | null>(null)
+  const [embedded, setEmbedded] = useState<CourseDef | null>(null)
+  const pickCourse = (c: CourseDef) => {
+    if(!c.active) { setComingSoon(c); return }
+    if(c.embedUrl) { setEmbedded(c); return }
+    onSelectActive()
+  }
+  // Fullscreen embed view — renders an iframe + back button
+  if(embedded) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, zIndex: 150, background: '#0B1B3E' }} dir="rtl">
+        <button
+          onClick={() => setEmbedded(null)}
+          style={{
+            position: 'absolute', top: 14, insetInlineStart: 14, zIndex: 2,
+            background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+            color: '#0B1B3E', border: 0, borderRadius: 12,
+            padding: '8px 16px', fontFamily: "'Rubik', sans-serif",
+            fontWeight: 700, fontSize: 13, cursor: 'pointer',
+            boxShadow: '0 6px 20px rgba(0,0,0,0.4)',
+          }}
+        >← חזרה לקורסים</button>
+        <iframe
+          src={embedded.embedUrl}
+          title={embedded.label}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0, background: '#fff' }}
+          allow="autoplay; clipboard-write; fullscreen"
+        />
+      </div>
+    )
+  }
   return (
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
       <div style={{ marginBottom: 22 }}>
@@ -845,7 +877,7 @@ function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
         {COURSES.map(c => (
           <button
             key={c.id}
-            onClick={() => c.active ? onSelectActive() : setComingSoon(c)}
+            onClick={() => pickCourse(c)}
             style={{
               position: 'relative',
               border: 0,
@@ -1408,8 +1440,51 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
             </button>
           )
         })}
+        <AdminToggle collapsed={collapsed} />
       </nav>
     </div>
+  )
+}
+
+/**
+ * AdminToggle — small pill at the bottom of the sidebar that flips the
+ * global adminMode flag in learningStore. When ON, gating helpers report
+ * everything unlocked + every BuildingProgress.level is hoisted to >=1
+ * (mastered stays mastered).
+ */
+function AdminToggle({ collapsed }: { collapsed: boolean }) {
+  const adminMode = useLearningStore(s => s.adminMode)
+  const toggle = useLearningStore(s => s.toggleAdminMode)
+  return (
+    <button
+      onClick={toggle}
+      aria-pressed={adminMode}
+      title={adminMode ? 'אדמין: פתוח — לחץ לכיבוי' : 'אדמין: סגור — לחץ לפתיחת הכל'}
+      style={{
+        marginTop: 'auto', alignSelf: 'stretch',
+        display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start',
+        gap: 10, padding: collapsed ? '8px' : '8px 12px',
+        background: adminMode ? 'rgba(245,200,66,0.18)' : 'rgba(255,255,255,0.06)',
+        border: '1px solid ' + (adminMode ? 'rgba(245,200,66,0.55)' : 'rgba(255,255,255,0.18)'),
+        color: adminMode ? '#FFD700' : 'rgba(255,255,255,0.85)',
+        borderRadius: 10, cursor: 'pointer',
+        fontFamily: "'Rubik', sans-serif", fontSize: 12, fontWeight: 700,
+        direction: 'rtl', transition: 'all 0.15s',
+      }}
+    >
+      <span style={{
+        width: 24, height: 24, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        background: adminMode ? '#FFD700' : 'transparent',
+        color: adminMode ? '#0B1B3E' : 'currentColor',
+        border: '1px solid currentColor',
+        borderRadius: 6, fontSize: 14, flexShrink: 0,
+      }}>{adminMode ? '🔓' : '🔒'}</span>
+      {!collapsed && (
+        <span style={{ whiteSpace: 'nowrap' }}>
+          {adminMode ? 'אדמין פעיל' : 'מצב אדמין'}
+        </span>
+      )}
+    </button>
   )
 }
 
