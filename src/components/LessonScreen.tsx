@@ -970,15 +970,24 @@ function KatexFormula({ latex }: { latex: string }) {
       ref={wrapRef}
       role="img"
       aria-label={`נוסחה: ${latex}`}
-      style={{ display: 'block', width: '100%', textAlign: 'center', overflow: 'visible' }}
+      dir="ltr"
+      style={{
+        display: 'block', width: '100%', textAlign: 'center', overflow: 'visible',
+        // Math is direction-neutral; force LTR + bidi isolation so KaTeX
+        // children (subscripts, fractions, operators) don't get mirrored
+        // by ancestor `dir="rtl"` Hebrew containers.
+        direction: 'ltr', unicodeBidi: 'isolate',
+      }}
     >
       <span
         ref={innerRef}
+        dir="ltr"
         style={{
           display: 'inline-block',
           transform: `scale(${scale})`,
           transformOrigin: 'center top',
           transition: 'transform 0.12s ease-out',
+          direction: 'ltr', unicodeBidi: 'isolate',
         }}
       >
         {latex}
