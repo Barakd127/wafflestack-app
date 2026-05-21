@@ -1726,8 +1726,21 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   const [autopsyOpen, setAutopsyOpen] = useState(false)
   const [autopsyDots, setAutopsyDots] = useState<Array<'empty' | 'current' | 'correct' | 'wrong' | 'future'> | null>(null)
 
-  // (Old draggable-card code removed — quiz card is now centered + fixed,
-  //  matching LessonScreen's theory layout. See `tab` state above.)
+  // When any companion tool opens → auto-float the question card on desktop,
+  // or switch to bottom-sheet mode on mobile. Closing tool → back to normal.
+  const handleSetTab = useCallback((newTab: typeof tab) => {
+    setTab(newTab)
+    setChipExpanded(true)
+    if (newTab !== 'none' && !isMobile) {
+      setFloatMode(true)
+      setFloatPos({
+        x: Math.max(16, (typeof window !== 'undefined' ? window.innerWidth : 900) - 436),
+        y: 72,
+      })
+    } else if (newTab === 'none') {
+      setFloatMode(false)
+    }
+  }, [isMobile])
 
   // Load questions from selected topic, sorted progressively easy → medium → hard.
   // XP scales with difficulty so harder questions feel more rewarding.
@@ -1989,17 +2002,35 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           </button>
         )}
 
-        {/* ── Question card — calm-centered when tab='none', floating chip when tool active ── */}
-        {(tab === 'none' || chipExpanded || isDone) && (
+        {/* ── Question card ──────────────────────────────────────────────────
+             • tab='none'          → centered in the page (normal flow)
+             • tab active, mobile  → bottom sheet (fixed, 50 vh, rounded top)
+             • tab active, desktop → draggable float (top-right, auto-placed)
+        ─────────────────────────────────────────────────────────────────── */}
+        {(tab === 'none' || chipExpanded || isDone || isMobile) && (
         <div style={
-          floatMode
-            ? { position: 'fixed', top: floatPos.y, left: floatPos.x, zIndex: 250, width: 'min(560px, calc(100vw - 24px))', maxHeight: 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.45)' }
+          isMobile && tab !== 'none' && !isDone
+            ? { position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 250, display: 'flex', flexDirection: 'column' }
+            : floatMode
+            ? { position: 'fixed', top: floatPos.y, left: floatPos.x, zIndex: 250, width: 'min(420px, calc(100vw - 24px))', maxHeight: 'calc(100vh - 88px)', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.45)' }
             : tab === 'none' || isDone
             ? { flexShrink: 0, padding: '18px 24px 12px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
             : { position: 'absolute', bottom: 72, insetInlineEnd: 14, zIndex: 60, width: 'min(420px, calc(100vw - 28px))', maxHeight: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }
         }>
           <div style={
-            tab === 'none' || isDone
+            isMobile && tab !== 'none' && !isDone
+              ? {
+                  width: '100%',
+                  background: 'var(--sh-q-card-bg, rgba(255,255,255,0.97))',
+                  borderRadius: '20px 20px 0 0',
+                  boxShadow: '0 -4px 32px rgba(31,62,108,0.18)',
+                  border: '1px solid rgba(127,155,217,0.3)',
+                  borderBottom: 'none',
+                  overflow: 'hidden',
+                  display: 'flex', flexDirection: 'column',
+                  maxHeight: '52vh',
+                }
+              : tab === 'none' || isDone
               ? {
                   width: 'min(720px, 100%)',
                   background: 'var(--sh-q-card-bg, #ffffff)',
@@ -2010,9 +2041,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 }
               : {
                   width: '100%',
-                  background: 'var(--sh-q-card-bg, #ffffff)',
-                  borderRadius: 14,
-                  boxShadow: '0 16px 48px rgba(0,0,0,0.35)',
+                  background: 'var(--sh-q-card-bg, rgba(255,255,255,0.97))',
+                  borderRadius: 16,
+                  boxShadow: '0 16px 48px rgba(0,0,0,0.32)',
                   border: '1px solid rgba(127,155,217,0.45)',
                   overflow: 'hidden',
                   display: 'flex', flexDirection: 'column',
@@ -2030,9 +2061,17 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 display: 'flex', alignItems: 'center', gap: 8,
                 fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
                 flexShrink: 0,
-                cursor: floatMode ? 'move' : 'default',
-                userSelect: floatMode ? 'none' : undefined,
+                cursor: (floatMode && !isMobile) ? 'move' : 'default',
+                userSelect: (floatMode && !isMobile) ? 'none' : undefined,
               }}>
+              {/* Drag handle pill — visible hint when card is floating */}
+              {floatMode && !isMobile && (
+                <span style={{ width: 28, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.35)', flexShrink: 0, marginLeft: -4, marginRight: 4 }} aria-hidden="true" />
+              )}
+              {/* Mobile bottom-sheet drag pill at very top */}
+              {isMobile && tab !== 'none' && !isDone && (
+                <span style={{ position: 'absolute', top: 7, left: '50%', transform: 'translateX(-50%)', width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.4)' }} aria-hidden="true" />
+              )}
               {!isDone && (
                 <button
                   onClick={navPrev}
@@ -2074,13 +2113,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   הבא ←
                 </button>
               )}
-              {!isDone && !isMobile && (
+              {/* ⤢ button: only show when tab=none (manual float toggle) */}
+              {!isDone && !isMobile && tab === 'none' && (
                 <button
                   onClick={() => setFloatMode(v => !v)}
                   title={floatMode ? 'החזר לתצוגה רגילה' : 'נתק לחלון צף נגרר'}
                   aria-label={floatMode ? 'החזר לתצוגה רגילה' : 'נתק לחלון צף'}
                   style={{
-                    background: floatMode ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.12)',
+                    background: 'rgba(255,255,255,0.12)',
                     color: '#fff',
                     border: '1px solid rgba(255,255,255,0.25)',
                     borderRadius: 8, padding: '5px 10px',
@@ -2088,10 +2128,22 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
                   }}
                 >
-                  {floatMode ? '⊟' : '⤢'}
+                  ⤢
                 </button>
               )}
-              {!isDone && tab !== 'none' && (
+              {/* Mobile: close-tool button instead of collapse chip */}
+              {!isDone && isMobile && tab !== 'none' && (
+                <button
+                  onClick={() => handleSetTab('none')}
+                  title="סגור כלי"
+                  aria-label="סגור כלי וחזור לשאלה"
+                  style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 12, marginRight: 'auto' }}
+                >
+                  ✕
+                </button>
+              )}
+              {/* Desktop collapse chip — only when tab active and NOT mobile */}
+              {!isDone && tab !== 'none' && !isMobile && (
                 <button
                   onClick={() => setChipExpanded(false)}
                   title="כווץ"
@@ -2343,8 +2395,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         {/* ── Spacer (only in calm mode) so the tab row sits at the bottom ── */}
         {tab === 'none' && !isDone && <div style={{ flex: 1, minHeight: 0 }} />}
 
-        {/* ── Tab row: tool launcher / switcher (always visible, sticky bottom) ── */}
-        {!isDone && (
+        {/* ── Tab row: tool launcher / switcher ──────────────────────────────
+             Hidden on mobile when a tool is open (bottom sheet covers it).
+             On desktop it sits below the canvas with a dark gradient. */}
+        {!isDone && !(isMobile && tab !== 'none') && (
           <div style={{
             flexShrink: 0, padding: '12px 24px 16px',
             display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap',
@@ -2366,7 +2420,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               return (
                 <button
                   key={key}
-                  onClick={() => setTab(key as typeof tab)}
+                  onClick={() => handleSetTab(key as typeof tab)}
                   title={hint}
                   style={{
                     background: active ? BUTTON_COLOR : (onTool ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.5)'),
