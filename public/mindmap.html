@@ -1655,6 +1655,9 @@ function mmAutoLayout(){
   if(mmOrient() === 'tb') layoutTB(MM.root, 100, 80);
   else                    layoutLR(MM.root, 100, 100);
   mmResolveCollisions();
+  // Snapshot the new layout so Ctrl+Z restores the previous node positions.
+  // Without this, "סדר מחדש" silently rearranged the canvas with no way back.
+  if(typeof mmPushHistory === 'function') mmPushHistory();
   mmRender();
   mmFitView();
 }
