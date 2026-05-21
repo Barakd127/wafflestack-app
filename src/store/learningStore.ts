@@ -368,6 +368,11 @@ interface LearningState {
   errorTags: Record<string, string>
   errorTagCounts: Record<string, number>
 
+  // Admin override: when true, gating helpers report all features unlocked
+  // regardless of XP / mastery / prerequisite state. Persisted so toggle
+  // survives reloads.
+  adminMode: boolean
+
   // Actions
   recordAnswer: (questionId: string, correct: boolean, xpReward: number) => void
   recordSM2Answer: (questionId: string, quality: number, xpReward: number) => void
@@ -381,6 +386,15 @@ interface LearningState {
   completeOnboarding: (name: string) => void
   setExamDate: (date: string | null) => void
   recordErrorTag: (questionId: string, tag: string) => void
+  toggleAdminMode: () => void
+}
+
+// Helper: is a building unlocked for the current user? Admin mode wins.
+// Read-only — does not mutate state.
+export function isBuildingUnlocked(state: LearningState, buildingId: string): boolean {
+  if(state.adminMode) return true
+  const prog = state.buildingProgress?.[buildingId]
+  return !!prog && prog.level >= 1
 }
 
 export const useLearningStore = create<LearningState>()(
@@ -407,6 +421,7 @@ export const useLearningStore = create<LearningState>()(
       buildingProgress: INITIAL_BUILDING_PROGRESS,
       completedLessons: [],
       examDate: null,
+      adminMode: false,
       errorTags: {},
       errorTagCounts: {},
 
@@ -606,6 +621,21 @@ export const useLearningStore = create<LearningState>()(
           errorTags: { ...errorTags, [questionId]: tag },
           errorTagCounts: { ...errorTagCounts, [tag]: (errorTagCounts[tag] ?? 0) + 1 },
         })
+      },
+      toggleAdminMode: () => {
+        const wasAdmin = get().adminMode
+        // When turning admin ON, hoist every locked building (level 0) to
+        // level 1 so the city + topic gates render unlocked immediately.
+        // Existing mastery (level 2) is preserved.
+        if(!wasAdmin) {
+          const next: Record<string, BuildingProgress> = {}
+          for(const [id, p] of Object.entries(get().buildingProgress)) {
+            next[id] = { ...p, level: Math.max(p.level, 1) as 0 | 1 | 2 }
+          }
+          set({ adminMode: true, buildingProgress: next })
+        } else {
+          set({ adminMode: false })
+        }
       },
     }),
     {
