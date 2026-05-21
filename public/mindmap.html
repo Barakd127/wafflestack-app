@@ -451,6 +451,10 @@ body.light .nb-body{background-color:#FBF8F1;border-color:rgba(31,38,64,0.12);co
   cursor:pointer;user-select:none;direction:ltr;font-size:15px;line-height:1.2}
 .nb-math-widget:hover{box-shadow:0 0 0 2px rgba(212,175,55,0.35)}
 .nb-math-widget .katex{font-size:1em}
+/* RTL safety: every KaTeX render inside the notebook (and anywhere in the
+   mindmap host) must stay LTR + bidi-isolated, even when the surrounding
+   body is dir="rtl". Mirrors the global rule shipped app-side in PR #5. */
+.nb-body .katex, .nb-body .katex-display, .nb-body .katex-html, .nb-body .katex-mathml{direction:ltr !important;unicode-bidi:isolate !important;text-align:left}
 /* Inline canvas thumbnail widget */
 .nb-canvas-widget{display:inline-block;max-width:300px;max-height:200px;
   border:1px solid rgba(212,175,55,0.4);border-radius:6px;cursor:pointer;
