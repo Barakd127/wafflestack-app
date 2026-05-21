@@ -328,6 +328,7 @@ import { useTutorialStep } from '../hooks/useTutorialStep'
 import { useTutorialStore } from '../store/tutorialStore'
 import Tooltip from './Tooltip'
 import Ribbon from './Ribbon'
+import { RiskBoard } from './RiskBoard'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d' | 'drawing') => void
@@ -1367,10 +1368,11 @@ function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
 }
 
 // ── Home screen ────────────────────────────────────────────────────────────────
-function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
+function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
   onGoLearning: () => void
   onGoWorld: () => void
   onGoMindmap: () => void
+  onSelectTopic: (topicId: string) => void
 }) {
   const xp = useLearningStore(s => s.xp)
   const totalCorrect = useLearningStore(s => s.totalCorrect)
@@ -1551,6 +1553,9 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
             </div>
           </div>
         </div>
+
+        {/* ── RISK BOARD ─────────────────────────────── */}
+        <RiskBoard onSelectTopic={onSelectTopic} />
 
         {/* ── ROW 2 ──────────────────────────────────── */}
         <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
@@ -2561,6 +2566,7 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
             onGoLearning={() => setInternalView('topics')}
             onGoWorld={() => onViewChange('3d')}
             onGoMindmap={() => onViewChange('mindmap')}
+            onSelectTopic={(topicId) => handleSelectTopic(topicId, 'quiz')}
           />
         )}
         {internalView === 'topics' && (
