@@ -59,7 +59,12 @@ export default function FeatureGate({ id, children, mode = 'silhouette', lockedT
   return (
     <button
       type="button"
-      disabled
+      // aria-disabled (not the boolean `disabled` attribute): keeps the button
+      // in the tab order so keyboard / screen-reader users can DISCOVER what's
+      // locked. `disabled` elements are skipped by Tab and don't announce
+      // their tooltip — they're invisible to AT.
+      aria-disabled="true"
+      onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
       title={tooltip}
       aria-label={tooltip}
       className={className}
