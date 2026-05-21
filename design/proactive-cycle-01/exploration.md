@@ -1,502 +1,222 @@
-# Proactive Vision Builder — Cycle 01: Gameplay Loop Exploration
+# WaffleStack — Gameplay Exploration
+## Proactive Cycle 01 | 2026-05-21
 
-**Date:** 2026-05-21  
-**Branch:** `proactive/exploration/games-design-space`  
-**Cycle type:** EXPLORATION ONLY — no code changes  
-**Analyst model:** claude-sonnet-4-6  
-**Design decision model:** claude-opus-4-7 (delegated inline via prompt)
-
----
-
-## Context: Current State of WaffleStack's Core Loop
-
-WaffleStack is a statistics-learning platform for MA-level psychology students. The current core loop is:
-
-1. Student opens **Study Hub** → sees a grid of topic buildings (mean, SD, normal dist., etc.)
-2. Student clicks a building → **StatChallenge** modal opens → quizzes them on that topic
-3. Correct answers → XP awarded → SM-2 algorithm schedules next review
-4. XP gates unlock new buildings in the 3D city
-5. Session ends when student closes the modal
-
-**Anti-patterns diagnosed in the current loop:**
-- **No in-session player decision.** Once a building is selected, the student is purely reactive: question appears, student answers, repeat. The only "choice" is "which building to click," which is cosmetic (SM-2 should be driving this anyway).
-- **SM-2 is passive/invisible.** The spaced repetition algorithm picks what needs reviewing, but the student never sees or influences it. There's no metacognitive engagement ("do I actually know this?").
-- **No stakes, no tension, no risk.** Every question is equivalent. A correct answer on a concept you mastered a month ago earns the same XP as one you're seeing for the first time. No urgency.
-- **Session structure is flat.** Five questions, each identical in structure. No arc, no climax, no ending ritual.
-- **No replayability driver.** Once a student has answered the daily SM-2 cards, there's nothing that makes them want to do another session for intrinsic reasons.
+**Branch:** `proactive/exploration/games-design-space`
+**Cycle type:** Exploration only — no code changes.
+**NotebookLM:** SKIP — MCP connector not available in this container. VISION.md catalogue + design judgment used instead.
 
 ---
 
-## Vision Alignment Table
-
-| Criterion | Source |
-|-----------|--------|
-| Statistics first — every session advances education | PROJECT.md vision |
-| Visual/spatial progress that feels emotionally satisfying | PROJECT.md pillar 2 (3D city) |
-| Collection + completion mechanics | PROJECT.md pillar 4 (gamification) |
-| 5–10 min meaningful sessions | PROJECT.md success criteria |
-| Mobile-aware (375px+) | PROJECT.md design principle 4 |
-| Glassmorphism / frosted glass UI | PROJECT.md design principle 2 |
-| Hebrew + English bilingual | PROJECT.md design principle 3 |
-| No regressions to existing features | PROJECT.md design principle 5 |
+### 1. Candidate Gameplay Loops
 
 ---
 
-## Scoring Rubric (per candidate, /10 each axis)
-
-| Axis | What it measures |
-|------|------------------|
-| **Agency** | Does this change what the player *decides*? (0 = cosmetic, 10 = fundamentally new decision) |
-| **Anti-pattern fix** | Does this directly address a diagnosed anti-pattern? |
-| **Stats-first** | Does every interaction advance statistical understanding? |
-| **Emotion** | Does it create satisfaction, tension, or pride visible to the student? |
-| **Session fit** | Does it work in 5–10 min without requiring heavy setup? |
-| **Mobile** | Can it be used one-handed on a 375px screen? |
-| **Buildability** | Can it ship in ≤3 development cycles without a rewrite? |
-| **Distinctiveness** | Is it not already in the app, and not a Duolingo clone? |
-
----
-
-## The 8 Candidate Gameplay Loops
+#### Candidate A: Cafe Forecaster (קפה ניבוי) — ☕📈
+- **One-line concept:** Run a Tel Aviv cafe where you predict daily customer demand from sample data, then stock inventory under uncertainty.
+- **Core mechanic:** Engine-building + push-your-luck (Seize the Bean × Quacks of Quedlinburg).
+- **The player's decision:** Given a sample of past-day demand, decide a confidence interval for tomorrow's traffic and stock accordingly — over-stock wastes capital, under-stock loses customers. Player chooses both the point estimate AND the interval width (risk tolerance).
+- **Decision interval:** ~20s per stocking decision; 4–6 decisions per "day"; ~8 days per session.
+- **Stats concepts used:** sampling distributions, confidence intervals, mean/median, standard deviation, normal distribution, z-scores (for interval width).
+- **Compounding mechanism:** Profit funds equipment (espresso machine = lower variance, marketing = higher mean), staff (more samples per day = tighter CIs), and cafe expansion (new locations = new distributions to learn). Better instruments literally shrink the sigma you're estimating against.
+- **Failure mode:** Bankrupt day = lose one location, not the run. Sample data preserved. Player sees ex-post which interval would have caught the true demand — explicit calibration feedback.
+- **Mobile feasibility:** Excellent. One-handed; slider for CI width sits in bottom third; histogram of past demand sits top. Hebrew RTL friendly.
+- **Decoration risk:** LOW. Every cosmetic upgrade is a statistical parameter (μ, σ, n). Cannot drift cosmetic without breaking the loop.
+- **Score: 28/30** — Decision Quality 10, Wonder 8, Stats Fit 10.
 
 ---
 
-### Candidate 1 — Curriculum Tree (Directed Skill Graph)
-
-**Concept:** Replace the free-pick building grid with a directed acyclic skill graph where nodes are concept clusters. Player traverses the tree and chooses which branch to take at each fork (e.g., "go to t-test OR ANOVA next"). SM-2 is retained but only operates within the branch the student is currently on.
-
-**What the player decides:** Which learning path to walk — sequence of topics, not just "which one today."
-
-**Board game inspiration:** *Pandemic Legacy* — players must decide which crisis to address first; the choice of ordering matters strategically.  
-**Mobile game inspiration:** *Duolingo* (skill tree path) + *Slay the Spire* (branch selection on the map, each path offers different encounters).  
-**UI inspiration:** Slay the Spire map screen — vertical nodes, branching paths, visible future states.
-
-**Anti-patterns fixed:** Removes the "click any building randomly" anti-pattern; makes learning sequence a strategic player decision.
-
-| Axis | Score | Notes |
-|------|-------|-------|
-| Agency | 9 | Fork decisions change entire learning trajectory |
-| Anti-pattern fix | 8 | Fixes free-pick; doesn't fix flat session structure |
-| Stats-first | 9 | Concept dependencies map to real statistical prerequisites |
-| Emotion | 8 | Seeing path progress is satisfying; "I chose this route" ownership |
-| Session fit | 8 | One node = one session, clean boundary |
-| Mobile | 8 | Vertical tree maps naturally to scroll |
-| Buildability | 7 | Requires DAG data model + new UI — 2-3 cycles |
-| Distinctiveness | 8 | Not in app; less clone-y than raw Duolingo |
-| **TOTAL** | **73** | |
+#### Candidate B: Creature Hypothesis Lab (מעבדת היצורים) — 🦕🔬
+- **One-line concept:** Collect mysterious creatures; test hypotheses about their hidden traits via experiments you fund.
+- **Core mechanic:** Set-collection + boss-encounter (Stuffed Fables × Pokémon).
+- **The player's decision:** Allocate a limited testing budget across creatures, choosing sample size and significance threshold per experiment to confirm/reject trait hypotheses before a "field exam."
+- **Decision interval:** ~25s per experiment design; 6–8 experiments per session.
+- **Stats concepts used:** hypothesis testing, p-values, t-tests, effect size, sample size / power, type I/II errors.
+- **Compounding mechanism:** Confirmed creatures join your roster and grant lab upgrades (cheaper sampling, higher power). Wrong rejections leave permanent "?" cards reminding you of past type II errors.
+- **Failure mode:** A false confirmation in the field exam reveals the truth visually — the creature literally fails its predicted behavior. Recoverable: re-test with bigger n.
+- **Mobile feasibility:** Good. Creature cards swipe-stack; budget allocation is tap-and-hold. Some risk of cramped UI with 4+ variables on screen.
+- **Decoration risk:** MEDIUM. The creature collection layer can drift toward pure Pokédex if the experiment math gets bypassed. Must enforce: no creature joins roster without a passed hypothesis test.
+- **Score: 26/30** — Decision Quality 9, Wonder 9, Stats Fit 8.
 
 ---
 
-### Candidate 2 — Exam Gauntlet (Roguelite Session Run)
-
-**Concept:** Each session is a discrete "run" — 10 questions drawn from mixed topics, styled as an exam scenario with a narrative wrapper ("Your professor has assigned a surprise quiz..."). Player sees the 10 question *topics* (but not the questions) before beginning, and must decide the order in which to tackle them. A "boss question" at position 10 is always a complex multi-step problem requiring synthesis across 2+ topics.
-
-**What the player decides:** Order of questions within the run; pacing (can skip and return to a question once).
-
-**Board game inspiration:** *Spirit Island* — players must triage and sequence responses to escalating crises; order of operations determines outcomes.  
-**Mobile game inspiration:** *Alto's Odyssey* — each run has a clear arc (start → flow → obstacle → landing); sessions feel complete in themselves.  
-**UI inspiration:** *Slay the Spire* — the "run" framing; discrete sessions that feel like episodes.
-
-**Anti-patterns fixed:** Flat session structure (adds arc + boss moment); no stakes (run completion is binary win/fail).
-
-| Axis | Score | Notes |
-|------|-------|-------|
-| Agency | 8 | Question ordering is genuine strategic choice |
-| Anti-pattern fix | 7 | Adds arc; doesn't fix SM-2 passivity |
-| Stats-first | 8 | Cross-topic boss question is educationally strong |
-| Emotion | 9 | Run structure creates clear tension/resolution |
-| Session fit | 9 | 10 questions ≈ 8 min; perfect |
-| Mobile | 9 | Vertical card stack works on phone |
-| Buildability | 8 | Boss question requires some new question data |
-| Distinctiveness | 9 | Roguelite framing for education is rare |
-| **TOTAL** | **77** | |
+#### Candidate C: Signal in the Static (אות ברעש) — 📡🎛️
+- **One-line concept:** Zen puzzle: tune dials to extract a true signal from increasingly noisy data streams.
+- **Core mechanic:** Spatial puzzle + real-time dexterity (Two Dots × Mini Metro).
+- **The player's decision:** Adjust three dials (sample size, smoothing window, threshold) to maximize true-positive detection while data streams in. Choose when to commit a reading.
+- **Decision interval:** ~10–15s per commit; continuous micro-adjustments.
+- **Stats concepts used:** mean vs median (robustness), standard deviation, z-scores, signal-to-noise, sampling.
+- **Compounding mechanism:** Unlocked dials add new dimensions (correlation filter, regression detrender). Levels remix prior noise profiles, rewarding learned intuition.
+- **Failure mode:** Missed signal = level retry with same data; you see what dial setting would have worked. Strong calibration feedback.
+- **Mobile feasibility:** Excellent. Dials are radial sliders, perfect for thumb. Beautiful at small screens.
+- **Decoration risk:** MEDIUM. Risk of becoming "pretty waveform game" if dials don't map 1:1 to named statistical operations.
+- **Score: 24/30** — Decision Quality 8, Wonder 9, Stats Fit 7.
 
 ---
 
-### Candidate 3 — Research Project Mode (Narrative Wrapper)
-
-**Concept:** Student plays the role of a researcher publishing a paper. They must "collect data points" (answer questions correctly on specific topics) to unlock analysis phases: Intro → Hypothesis → Data Collection → Analysis → Conclusion. Each phase requires mastery of specific concepts. The paper PDF assembles as the student progresses.
-
-**What the player decides:** Which data to collect and in what order to assemble their "paper."
-
-**Board game inspiration:** *Ticket to Ride* — collecting route cards and fulfilling them to complete a journey; resource collection toward a goal.  
-**Mobile game inspiration:** *Monument Valley* — structured, purposeful puzzle progression with a narrative payoff.  
-**UI inspiration:** *Notion* task-board — dependency unlocks, kanban phases.
-
-**Anti-patterns fixed:** Gives context/meaning to why statistics topics matter (research framing).
-
-| Axis | Score | Notes |
-|------|-------|-------|
-| Agency | 7 | Collecting sequence is strategic |
-| Anti-pattern fix | 6 | Doesn't fix session flatness or SM-2 passivity |
-| Stats-first | 9 | Research framing is pedagogically grounded |
-| Emotion | 7 | Paper assembly is satisfying but slow |
-| Session fit | 6 | Phases may take multiple sessions — unclear boundaries |
-| Mobile | 6 | Paper UI complex on small screen |
-| Buildability | 5 | High content cost: must write narrative copy |
-| Distinctiveness | 7 | Not novel enough vs. existing "quests" in edtech |
-| **TOTAL** | **63** | |
+#### Candidate D: Election Night (ליל בחירות) — 🗳️📊
+- **One-line concept:** You're a pollster on election night; allocate field teams to sample districts and call races before rivals.
+- **Core mechanic:** Worker-placement + push-your-luck (Viticulture × Quacks of Quedlinburg).
+- **The player's decision:** Where to send pollsters (which districts), how large a sample to take, when to "call" a race based on current CI. Calling early scores big but wrong calls cost reputation.
+- **Decision interval:** ~20s per allocation; ~10 districts per night.
+- **Stats concepts used:** sampling, margin of error, confidence intervals, sample size effects, stratified sampling.
+- **Compounding mechanism:** Reputation buys more pollsters next night; correctly-called districts become "known" demographics, transferring priors to similar districts.
+- **Failure mode:** Wrong call shown on a giant map with the ex-post true result and CI overlay. Recoverable next election.
+- **Mobile feasibility:** Good but map-heavy — risks small tap targets on small screens. Israel map is small enough though.
+- **Decoration risk:** LOW-MEDIUM. The map is the gameplay; hard to make purely cosmetic.
+- **Score: 25/30** — Decision Quality 9, Wonder 7, Stats Fit 9.
 
 ---
 
-### Candidate 4 — Concept Constellation (Player-Drawn Knowledge Graph)
-
-**Concept:** As the student masters concepts, they appear as stars in a constellation canvas. The student's job is to draw **connections** between them — edge labels explain the relationship ("t-test uses mean and SD"). Each valid connection earns bonus XP; invalid connections (misunderstood relationships) decay. The constellation becomes their personalized knowledge graph, distinct from the pre-built mind map.
-
-**What the player decides:** What to connect, and what relationship label to use.
-
-**Board game inspiration:** *Codenames* — players must form meaningful associations between words; quality of associations reveals conceptual understanding.  
-**Mobile game inspiration:** *Threes!* — merging cells into larger meaningful units; spatial relationship building.  
-**UI inspiration:** *Obsidian* graph view — emergent web of connected notes; personal knowledge architecture.
-
-**Anti-patterns fixed:** Passive mind-map (currently pre-built) becomes active construction by the player.
-
-| Axis | Score | Notes |
-|------|-------|-------|
-| Agency | 7 | Connection drawing is creative and personal |
-| Anti-pattern fix | 8 | Mind map was passive; this makes it active |
-| Stats-first | 8 | Relationship labeling deepens conceptual understanding |
-| Emotion | 9 | "My constellation" creates ownership and beauty |
-| Session fit | 7 | Could work in 5 min but depth rewards longer play |
-| Mobile | 5 | Graph drawing on phone is painful |
-| Buildability | 5 | Relationship validation is hard (NLP? pre-defined edges?) |
-| Distinctiveness | 9 | Beautiful and novel |
-| **TOTAL** | **68** | |
+#### Candidate E: Correlation Detective (בלש המתאם) — 🔍🕵️
+- **One-line concept:** Narrative mystery: examine scatterplots to identify spurious vs real correlations and accuse suspects.
+- **Core mechanic:** Narrative branching + set-collection (Reigns × Sushi Go).
+- **The player's decision:** Choose which variables to investigate next, decide whether observed correlations imply a real effect or confounding, accuse a suspect when confident.
+- **Decision interval:** ~30–45s per evidence card (slower).
+- **Stats concepts used:** correlation, confounding, regression, effect size, scatterplot reading.
+- **Compounding mechanism:** Solved cases unlock new datasets and detective tools (partial correlation, control variables). Weak.
+- **Failure mode:** Wrong accusation reveals confounder visually. Story can continue with reputation loss.
+- **Mobile feasibility:** Excellent for narrative; charts can be pinch-zoomed.
+- **Decoration risk:** HIGH. The narrative wrapper threatens to overshadow the math.
+- **Score: 20/30** — Decision Quality 6, Wonder 8, Stats Fit 6.
 
 ---
 
-### Candidate 5 — Daily Triage (Calibration Board, fixing passive SM-2)
-
-**Concept:** Instead of SM-2 silently picking questions, each session starts with a "triage board": 5 SM-2-due cards are shown as topic tiles. Before answering, the student **sorts them** into difficulty buckets (Easy / Medium / Hard) using drag-and-drop. After answering all 5, a Calibration Score shows how accurately the student predicted their own performance. Metacognitive accuracy itself earns a bonus multiplier.
-
-**What the player decides:** Pre-answer difficulty estimation; the metacognitive prediction.
-
-**Board game inspiration:** *Hanabi* — players must reason about their own knowledge under uncertainty; estimation and communication of confidence.  
-**Mobile game inspiration:** *Photomath* — step-by-step confidence check; knowing whether you understand each step.  
-**UI inspiration:** *Trello* — drag-and-drop kanban; tactile card sorting on mobile.
-
-**Anti-patterns fixed:** SM-2 is currently invisible/passive — this surfaces it and adds metacognitive layer.
-
-| Axis | Score | Notes |
-|------|-------|-------|
-| Agency | 9 | Pre-answer sorting is a genuine new decision |
-| Anti-pattern fix | 9 | Directly fixes "SM-2 passive/invisible" anti-pattern |
-| Stats-first | 8 | Metacognition is an evidence-backed learning technique |
-| Emotion | 6 | Calibration score is satisfying to power users; less flashy |
-| Session fit | 9 | Board setup + 5 answers + calibration score ≈ 6 min |
-| Mobile | 9 | Drag-and-drop card sort works great on touch |
-| Buildability | 8 | Mostly UI work on top of existing SM-2 |
-| Distinctiveness | 8 | Metacognition in edtech is validated but not common |
-| **TOTAL** | **74** | |
+#### Candidate F: Distribution Tetris (טטריס התפלגויות) — 🧩📐
+- **One-line concept:** Spatial puzzle where you place distribution-shaped tiles onto a grid; tiles must satisfy mean/median/sd constraints per row.
+- **Core mechanic:** Spatial puzzle (Patchwork × Azul).
+- **The player's decision:** Choose which distribution tile to draft from a market and where to place it so row constraints (e.g., "this row's mean ≤ 50, sd ≥ 10") are met.
+- **Decision interval:** ~15s per tile placement.
+- **Stats concepts used:** descriptive statistics, shape of distributions, mean/median/mode interplay, std dev.
+- **Compounding mechanism:** Locked-in tiles constrain future rows — engine-building via prior placements. Strong compounding.
+- **Failure mode:** Unsatisfiable board = remove one tile at a cost. Recoverable.
+- **Mobile feasibility:** Excellent. Drag-and-drop is native to touch.
+- **Decoration risk:** LOW. Tiles must show their parameters; pure abstraction keeps it math-first.
+- **Score: 23/30** — Decision Quality 8, Wonder 6, Stats Fit 9.
 
 ---
 
-### Candidate 6 — Waffle Stack Challenge (Press-Your-Luck Depth System) ⭐ TOP PICK
-
-**Concept:** Each question "chain" is a **stack** of 3 questions on the same statistical concept, scaling in difficulty (Recognition → Application → Transfer). After each *correct* answer, the player faces a binary decision: **"Bank It"** (collect tentative XP and move to the next stack) or **"Push the Stack"** (risk the tentative XP for a 2.5× multiplier if the next layer is also correct). A wrong answer mid-stack causes the stack to *collapse*, losing all tentative XP for that stack. The "waffle stack" metaphor is literal: each answered layer adds a waffle to the visual stack; collapse knocks them off.
-
-**What the player decides:** Risk management — how deep to push based on perceived mastery. This is a genuine, repeated, statistically-interesting decision.
-
-**Board game inspiration:** *Push* (Stronghold Games) — eponymous press-your-luck mechanic; push the pile or take the safe payout.  
-**Board game 2:** *Blackjack* — hit or stand decision; known probabilities, player calibrates risk against self-assessed confidence.  
-**Mobile game inspiration:** *Alto's Odyssey* — combo chains that multiply reward; breaking the chain loses the multiplier, incentivizing careful extension.  
-**Mobile game 2:** *Hearthstone Battlegrounds* — deciding when to upgrade vs. fight; risk/reward tradeoff at every turn.  
-**UI inspiration:** *Duolingo Hearts* — XP-on-the-line creates stakes; the tentative-XP visualization model.
-
-**Anti-patterns fixed:**
-1. **No in-session player decision** — Push/Bank is a decision after every correct answer.
-2. **No stakes, no tension** — Losing a stack's tentative XP creates real tension.
-3. **Session flatness** — Each of the 5 stacks has its own arc (build → bank/collapse → next).
-4. **SM-2 passivity** — Depth reached (L1/L2/L3) becomes the SM-2 quality rating, surfacing the algorithm's logic.
-
-| Axis | Score | Notes |
-|------|-------|-------|
-| Agency | 8 | Push/Bank decision changes per-stack outcome |
-| Anti-pattern fix | 7 | Fixes stakes + session arc; SM-2 still partially hidden |
-| Stats-first | 8 | Layer 3 (Transfer) questions require real application |
-| Emotion | 8 | Stack collapse is dramatic; successful L3 is euphoric |
-| Session fit | 9 | 5 stacks ≈ 5–15 min depending on depth |
-| Mobile | 9 | Two big buttons (Bank / Push) are phone-perfect |
-| Buildability | 9 | Builds on StatChallenge; 3 difficulty levels already exist in quiz-bank |
-| Distinctiveness | 9 | WaffleStack = stacking; this is the most thematically native mechanic |
-| **TOTAL** | **77** | |
+#### Candidate G: ANOVA Arena (זירת ANOVA) — ⚔️🏟️
+- **One-line concept:** Roster-management combat: send "fighters" (samples from groups) into arena trials; compare group means to win.
+- **Core mechanic:** Deck-building + asymmetric factions (Dominion × Cry Havoc).
+- **The player's decision:** Recruit fighters into groups, decide which groups to enter into multi-way comparisons, choose sample size per group.
+- **Decision interval:** ~20s.
+- **Stats concepts used:** ANOVA, t-tests, effect size, variance within/between groups.
+- **Compounding mechanism:** Winning groups gain stat boosts; losing groups can be retrained.
+- **Failure mode:** Lost trial shows F-statistic breakdown of within vs between variance. Recoverable.
+- **Mobile feasibility:** Good but combat metaphor may feel juvenile to BA students.
+- **Decoration risk:** MEDIUM-HIGH. Easy to drift into combat-game where stats are flavor text.
+- **Score: 19/30** — Decision Quality 7, Wonder 5, Stats Fit 7.
 
 ---
 
-### Candidate 7 — Study Group Voting (Argument Evaluation)
+### 2. Top-3 Ranking
 
-**Concept:** Each question presents 4 AI "student" personas who each argue for a different answer option. The player must identify which argument is statistically sound (and which are flawed). Wrong arguments are seeded with common misconceptions (e.g., "confusing correlation with causation"). XP scales with how well the player *explains* why the others are wrong (multiple-choice explanation selection, not free text).
+**#1 — Cafe Forecaster (28/30).** The strongest stats-decision marriage: every business decision IS a statistical decision, and the "run your own cool place" daydream gives natural wonder. Decoration risk is structurally low because cosmetic upgrades are math parameters (σ, μ, n). Covers the broadest intro-stats topic range and maps cleanly onto the existing Israeli BA curriculum.
 
-**What the player decides:** Which argument to trust; evaluation of statistical reasoning quality, not just the answer.
+**#2 — Creature Hypothesis Lab (26/30).** High wonder via the childlike-collection emotional pull; hypothesis testing is a notoriously hard topic that maps naturally onto creature confirmation. Ranks second because of medium decoration risk and the need for strict math gates; a strong Cycle 3 candidate once Cafe Forecaster has proved the engine pattern.
 
-**Board game inspiration:** *The Resistance / Avalon* — social deduction; identifying who is trustworthy requires reasoning about arguments and motives.  
-**Mobile game inspiration:** *QuizUp* — competitive Q&A with persona framing.  
-**UI inspiration:** *Reddit/HackerNews* voting thread — argument evaluation as a familiar UI.
-
-**Anti-patterns fixed:** Students often know the "right" answer without understanding why others are wrong; this forces deeper engagement with common misconceptions.
-
-| Axis | Score | Notes |
-|------|-------|-------|
-| Agency | 8 | Evaluating arguments requires deeper engagement |
-| Anti-pattern fix | 7 | Fixes surface-level answering; doesn't fix session structure |
-| Stats-first | 8 | Misconception exposure is pedagogically validated |
-| Emotion | 6 | Voting thread aesthetic may feel academic not playful |
-| Session fit | 7 | Each question takes longer; may feel slow |
-| Mobile | 8 | Chat bubble UI works on phone |
-| Buildability | 7 | Requires writing 3 wrong-argument explanations per question |
-| Distinctiveness | 8 | Argument evaluation is rare in stats education apps |
-| **TOTAL** | **69** | |
+**#3 — Election Night (25/30).** Cleanest pure-stats fit for sampling and margin of error; the map metaphor makes the decision spatial and visible. Loses to Cafe Forecaster on emotional pull and session-arc warmth; political theming needs careful neutral re-skinning for the Israeli cohort.
 
 ---
 
-### Candidate 8 — Deadline Pressure (Timer Sprint Mode)
+### 3. #1 Detailed Spec — Cafe Forecaster
 
-**Concept:** Student chooses their time pressure before each session: 1-min blitz (3 questions), 3-min focus (5 questions), or 5-min deep work (8 questions). XP is multiplied by time efficiency — finishing early within a time window grants a bonus. Questions adapt to the chosen duration: 1-min sessions draw from easier recall questions; 5-min sessions include multi-step problems. The 3D city building for that session glows while the timer runs.
+#### Title and Hebrew subtitle
+**Cafe Forecaster** — *הקפה של הסטטיסטיקאי* ("The Statistician's Cafe")
 
-**What the player decides:** How much time pressure to accept; implicit difficulty selection.
+#### Premise
+You inherit a struggling neighborhood cafe in south Tel Aviv. Every morning you see yesterday's customer log — a histogram of demand — and must decide today's stock: pastries, beans, milk, staff hours. Stock too little and customers walk; stock too much and inventory spoils. The only way to survive is to think in distributions: estimate tomorrow's mean demand, choose a confidence interval wide enough to be safe but tight enough to be profitable, then commit. As profits accumulate, you buy equipment that literally narrows the variance of your demand, hire baristas who give you more samples per day, and eventually open a second location with its own unknown distribution to learn. The fantasy is "run your own cool place" — but the engine is statistical reasoning under uncertainty.
 
-**Board game inspiration:** *Boggle* / *Codenames Duet* (timed variant) — time pressure as a mechanic that changes strategy.  
-**Mobile game inspiration:** *Tetris Effect* — flow state under time pressure; music synchronizes with urgency.  
-**UI inspiration:** *Duolingo Timer Challenge* — countdown creates urgency without penalizing too harshly.
+#### Core loop
 
-**Anti-patterns fixed:** Current loop has no urgency, no pacing, no reason to engage quickly.
+1. **Morning briefing:** see histogram of last N days demand, with current sample mean and sample sd annotated.
+2. **Forecast:** drag a confidence interval slider (50%/80%/95%/99%) over the demand distribution. UI shows the implied stock quantity.
+3. **Commit stock:** lock the order. Cash deducted. Player sees expected cost and expected waste.
+4. **Day plays out (5s animation):** true demand drawn from underlying distribution; customers served until stock runs out OR closing time.
+5. **Day report:** actual demand vs. your CI overlaid; profit calculated; "calibration streak" updated (did the true value fall in your interval?).
+6. **Decision — upgrade or expand:** spend earnings on (a) equipment that reduces σ, (b) staff that grows n, (c) marketing that shifts μ, or (d) a new location with a fresh unknown distribution.
+7. **Next morning:** repeat with updated samples. Every ~5 days a "market event" perturbs the distribution (a festival, a rainstorm) — player must detect the shift.
+8. **Session end:** at day 8 or 12, a season-close screen scores total profit, calibration score, and detection-of-shift score.
 
-| Axis | Score | Notes |
-|------|-------|-------|
-| Agency | 7 | Duration selection is a real choice |
-| Anti-pattern fix | 8 | Fixes no-urgency anti-pattern |
-| Stats-first | 7 | Harder questions in longer sessions is good |
-| Emotion | 7 | Timer creates stress — good for some, bad for anxious students |
-| Session fit | 9 | Cleanly bounded by the timer |
-| Mobile | 9 | Simple timer UI, big buttons |
-| Buildability | 9 | Timer + question-count parameter change only |
-| Distinctiveness | 7 | Duolingo already does this |
-| **TOTAL** | **73** | |
+#### Stats concepts mapped to mechanics
 
----
+| Concept | Game mechanic | What the player decides |
+|---|---|---|
+| Sample mean / median | Yesterday's demand summary card | Whether to trust mean (low-skew days) or median (festival outliers) |
+| Standard deviation | Width of histogram + slider feedback | Interval width — wider σ → wider needed CI |
+| Confidence interval | The CI slider itself | What confidence level matches today's risk |
+| Normal distribution | Overlay curve on histogram | Whether to model as normal or empirical |
+| Sampling / sample size | "Hire barista" upgrade (more samples/day) | When to invest in n vs μ vs σ upgrades |
+| Z-scores | Stock-quantity readout | Reading off the z to back out the stock level |
+| Hypothesis testing | "Market shift detected?" weekly check | When to reject the null that distribution is unchanged |
+| Effect size | Marketing upgrade preview | Is the μ shift worth the cost? |
+| t-test / two-sample | Compare two cafes' demands | Is location B genuinely better than A, or just lucky? |
 
-## Score Summary
+#### Session structure
+A session is one **season** (8–12 in-game days), approximately 10–15 real minutes. Arc: cautious early days with wide CIs and small profits → mid-season equipment upgrades narrow σ → late-season expansion adds a new distribution to learn → season-close report with three scores (profit, calibration, shift-detection). Sessions chain via persistent cafe upgrades; player chooses next season's neighborhood (= next distribution type) — branching agency.
 
-| Rank | Candidate | Score |
-|------|-----------|-------|
-| 🥇 1 | **Waffle Stack Challenge** | **77** |
-| 🥈 2 | **Exam Gauntlet** | **77** |
-| 🥉 3 | **Daily Triage** | **74** |
-| 4 | Curriculum Tree | 73 |
-| 5 | Deadline Pressure | 73 |
-| 6 | Study Group Voting | 69 |
-| 7 | Concept Constellation | 68 |
-| 8 | Research Project Mode | 63 |
+#### Compounding engine
+- **Session 1:** estimating one distribution with n=7 samples, wide CIs, frequent stock-outs.
+- **Session 3:** same cafe has σ-reduction gear; player learns to anticipate weekend bumps and reads skew at a glance.
+- **Session 5:** two cafes, three pieces of equipment, a "regression dashboard" upgrade unlocks letting you predict demand from temperature data. Player isn't memorizing — they've internalized the feel of distributions and now reasons about covariates.
 
-**Tiebreaker — #1 vs #2 (both 77):**
-- **Waffle Stack Challenge** wins because:
-  1. The app is literally called "WaffleStack" — stacking waffle layers IS the visual metaphor, making this the most thematically native mechanic possible
-  2. It changes player decisions at a *higher frequency* (once per correct answer, not once per session) — more agency per minute
-  3. It directly exposes the SM-2 quality scale to the player through the Push/Bank decision
-  4. It builds on top of existing StatChallenge code with minimal new UI (just two buttons per correct answer)
-  5. The 3 difficulty levels (`easy/medium/hard`) already exist in `quiz-bank.json` — Layer 1/2/3 maps directly
+The goal: by session 5, the player thinks in σ.
 
----
+#### Failure design
+Three failure modes, all informative and recoverable:
 
-## Detailed Spec: Waffle Stack Challenge (#1 Pick)
+- **Stock-out day:** screen shows the true demand exceeded your CI. Overlay: "a 95% CI would have caught this — you chose 80%." No cash penalty beyond opportunity cost. Teaches: interval width tradeoff.
+- **Waste day:** unused stock spoils. Overlay shows how much narrower a CI would have sufficed. Teaches: over-confidence cost.
+- **Bankruptcy:** lose one location, keep your equipment and samples. Restart with a smaller cafe. Never a wall.
 
-### The Problem It Solves
+Calibration streak (out of 10): how often did the true demand fall in your stated CI? A well-calibrated player at 80% CI should hit ~8/10. This is the deepest pedagogical signal — direct feedback on probabilistic intuition.
 
-Current StatChallenge session: student sees Q1, answers, sees Q2, answers, sees Q3... There is zero player agency during the session. SM-2 picks the topic, the question is shown, the answer is submitted. This is **passive consumption**, not active learning. The student's only "decision" is whether to open the app.
+#### Mobile UX sketch
+- **Top third (non-interactive):** histogram of past demand with current μ̂, σ̂, and n labeled. Hebrew labels right-aligned. Bars in teal `#10b981`, mean marker in gold `#FFD700`.
+- **Middle third:** the CI slider — a horizontal bar overlaid on the histogram showing the chosen interval. Drag handles at left and right edges, or a single "confidence %" slider that symmetrically widens. Z-score and implied stock quantity update live in a small readout.
+- **Bottom third (thumb zone):** primary CTA button "אשר הזמנה" (gold) and secondary "הרץ סימולציה" (blue) which previews 10 hypothetical days. Upgrade shop accessed via a bottom tab.
+- **On tap of histogram bar:** drill into that day's detail (was it a Tuesday? was it raining?).
+- **RTL note:** slider direction reverses; readout numbers stay LTR per Hebrew typography convention; cash flows display with ₪ symbol.
 
-The Waffle Stack Challenge introduces a **press-your-luck mechanic** that puts a meaningful binary decision after every correct answer, turning the session from a passive quiz into an active risk-management game.
+#### First 10 decisions
+1. **Day 1 stock:** see 5 days of past demand, mean ≈ 60, sd ≈ 12. Choose a CI width — most players pick 80%, stock ~75 units.
+2. **Day 1 reaction:** demand was 68; comfortably in CI. Choose to spend ₪20 on a "data-board" upgrade (shows σ explicitly) or save.
+3. **Day 2 stock:** with σ now visible, choose 80% vs 95%. Decide whether to trust the slight downtrend (regression-to-mean intuition).
+4. **Day 2 surprise:** demand was 92 — an outlier. Stock-out screen shows the day was a holiday. Decision: tag holiday days separately or treat as one population?
+5. **Day 3 stock:** smaller n if holiday tagged. Choose: wider CI to compensate, or trust the cleaner non-holiday subsample?
+6. **Day 4 upgrade choice:** ₪50 for a "barista" (n+1/day) vs ₪50 for "espresso machine" (σ × 0.9). First real engine-building decision.
+7. **Day 5 stock:** apply your upgrade choice. See the histogram tighten or widen accordingly.
+8. **Day 5 market event:** a notice says "construction starts next week." Decision: pre-emptively shift μ estimate down, or wait for data?
+9. **Day 6 hypothesis check:** game asks "do you think the distribution has shifted?" — two-sample t-test framing. Player rejects or fails to reject.
+10. **Day 7 expansion offer:** open a second cafe in a new neighborhood with no prior data. Decision: accept the cold-start uncertainty for higher ceiling, or stay and master the known distribution?
 
----
+#### Open design questions
+1. **Calibration math vs intuition:** do we show p-values and z-scores explicitly from day 1, or unlock them progressively? Risk: too much notation early scares non-quant BA students; too little defeats the pedagogy.
+2. **Quiz integration:** how does the existing SM-2 quiz engine plug in? Proposal — between days, an optional "study card" (the SM-2 item) grants a small bonus next day if answered correctly. Needs prototyping for balance.
+3. **Distribution diversity:** how many distribution archetypes per session feel rich without overwhelming? Three? Five? Affects content authoring.
+4. **Hebrew terminology consistency:** intervals, σ, μ — do we use Hebrew translations (סטיית תקן, ממוצע) consistently or anglicize statistical symbols? Needs user testing with target BA cohort.
+5. **3D city tie-in:** the existing Three.js city — does each cafe location appear there as a building? Cosmetic-only is acceptable here because the gameplay decisions live in 2D screens; the city becomes the "save file you can see" rather than the gameplay surface.
 
-### Core Mechanic
-
-#### The Stack
-
-Each "stack" is a set of 3 questions on the *same statistical concept*, drawn from the existing quiz bank's 3 difficulty tiers:
-
-| Layer | Difficulty | Question type | Example |
-|-------|-----------|--------------|----------|
-| Layer 1 (Base) | `easy` | Recognition / Definition | "What is the standard deviation?" |
-| Layer 2 (Middle) | `medium` | Application / Computation | "Given these data points, which set has higher SD?" |
-| Layer 3 (Top) | `hard` | Transfer / Real-world judgment | "A researcher reports SD=0.5 in both groups. What does this imply for effect size?" |
-
-#### The Push/Bank Decision
-
-After each *correct* answer, the player sees their tentative XP and two buttons:
-
-```
-┌──────────────────────────────────────────┐
-│  ✓ Correct! You earned 10 tentative XP   │
-│                                           │
-│  [🏦 Bank It (+10 XP)]  [⬆ Push! → 2.5×] │
-└──────────────────────────────────────────┘
-```
-
-- **Bank It** — Collect all tentative XP for this stack, move to the next stack.
-- **Push the Stack** — Attempt the next layer. If correct, tentative XP is multiplied. If wrong, entire tentative XP for this stack is lost (stack collapses).
-
-#### XP Table
-
-| Action | Tentative XP accumulation |
-|--------|---------------------------|
-| Layer 1 correct + Bank | 10 XP collected |
-| Layer 1 correct + Push → Layer 2 correct + Bank | 35 XP collected (10 + 25) |
-| Layer 1 correct + Push → Layer 2 correct + Push → Layer 3 correct | 85 XP collected (10 + 25 + 50) — auto-banked |
-| Layer 2 wrong (mid-push) | 0 XP collected (lose the 10 tentative) |
-| Layer 3 wrong (mid-push) | 0 XP collected (lose the 35 tentative) |
-
-The expected-value math rewards players who are *correctly calibrated* about their mastery:
-- If you know the concept cold: push all 3 layers → 8.5× base XP
-- If you're uncertain: bank at Layer 1 → 1× base XP
-- If you misjudge (push when shaky): 0 XP and a harder SM-2 interval
-
-#### Session Structure
-
-Each session: **5 stacks** (not 5 individual questions).
-
-```
-Session Progress: [■■□□□] Stack 2 of 5
-```
-
-- Each stack takes 1–3 questions depending on Push/Bank decisions
-- A session where the player pushes all 5 stacks to Layer 3 = 15 questions ≈ 12 min
-- A session where the player banks all 5 at Layer 1 = 5 questions ≈ 4 min
-- The player controls session length through their risk decisions
-
-#### SM-2 Integration
-
-The existing SM-2 `quality` rating (0–5) is replaced with the depth-based rating:
-
-| Stack result | SM-2 quality |
-|-------------|-------------|
-| Layer 3 completed | 5 (highest; very well known) |
-| Layer 2 banked | 4 |
-| Layer 1 banked | 3 |
-| Layer 2 collapse | 2 (knew L1, not L2; needs review) |
-| Layer 3 collapse | 1 (knew L1+L2, not application; review harder) |
-| Layer 1 wrong | 0 (reset interval; review soon) |
-
-This means the SM-2 *quality* is now directly observable by the student — "I pushed to Layer 2 and collapsed, so this concept needs review soon" is visible cause-and-effect.
+#### Citations
+- **Board game inspiration:** Seize the Bean (cafe operations + deck-building) and Quacks of Quedlinburg (push-your-luck on a known-but-noisy distribution).
+- **Mobile game inspiration:** Mini Metro — minimal UI, every visual element is a gameplay variable, color-coded scarcity, no decorative chrome.
+- **UI source:** Linear — dark theme with single accent color, dense numeric readouts that stay readable, keyboard-style command emphasis adapted as touch-zone hierarchy.
 
 ---
 
-### 3D City Integration
+### 4. What was rejected and why
 
-- **Layer 1 banked** → building shows a partial progress ring (1/3 lit)
-- **Layer 2 banked** → building shows 2/3 ring lit
-- **Layer 3 completed** → building receives a golden crown particle effect
-- **Stack collapse** → building flickers once (visual feedback, no lasting punishment)
-- Session end → Post-session "Stack Report" panel showing all 5 stacks, depths reached, and XP earned
+**Signal in the Static (C)** was rejected despite a strong wonder score because the dials risk becoming abstract knobs whose statistical names are decorative labels rather than load-bearing concepts. A player can succeed by feel alone — turning dials until the waveform looks clean — without ever forming a model of mean-vs-median robustness or z-thresholds. The decoration risk is structural: the prettier the waveform UI, the more it pulls toward dexterity-juicing and away from explicit statistical reasoning. Could be salvaged as a mini-game inside Cafe Forecaster (a "tuning the espresso grind" micro-puzzle), not as the spine.
 
----
+**Election Night (D)** was rejected for the #1 slot — though it ranked #3 — because the worker-placement allocation pattern, while statistically pure, gives less emotional pull than the cafe daydream and risks political-fatigue with the Israeli student cohort even with neutral re-skinning. It also concentrates all stats concepts around sampling/CI and leaves hypothesis testing and effect size as bolt-ons. Strong contender for a Cycle 2 module once players have internalized the basics.
 
-### Visual Design: The Waffle Stack UI
+**Correlation Detective (E)** was rejected because the narrative wrapper is a known decoration-risk pattern: players succeed by reading story cues and ignoring the scatterplots. The compounding mechanism is also weak — solved cases don't change the next case's math, they just unlock content. Reigns works because every choice reshapes the same kingdom; here, cases are episodic. Could become an end-of-session "detective episode" rather than the core loop.
 
-The in-session UI shows a **literal waffle** that grows layer by layer:
+**Distribution Tetris (F)** was rejected because despite excellent decoration-resistance and compounding, the wonder score is low. It feels like a math worksheet with drag-and-drop. The "run your own cool place" emotional pull is absent. It is the strongest candidate for a focused practice mode — perhaps the SM-2 quiz engine's spatial replacement — but not as the gameplay spine that draws students back daily.
 
-```
-Layer 3 → [🧇🧇🧇]   ← shows when actively on Layer 3
-Layer 2 → [🧇🧇  ]   ← lit after Layer 2 correct
-Layer 1 → [🧇    ]   ← lit after Layer 1 correct
-```
-
-On collapse, the stack animates falling apart. On successful Layer 3 completion, the waffle gets a golden syrup drizzle (CSS animation, no external assets).
+**ANOVA Arena (G)** was rejected on tone and decoration risk. The combat metaphor will read as juvenile to BA social-science students who are the target cohort, and within-vs-between variance — while it maps cleanly onto faction-vs-faction combat — risks becoming pure flavor text once the player learns which fighter types win. The asymmetric-faction pattern is powerful but better deployed in a later module focused on group comparisons specifically (e.g., a "research lab" theme), not as the first impression of WaffleStack gameplay.
 
 ---
 
-### Feature Flag
-
-All new code behind:
-```
-VITE_FEATURE_WAFFLE_STACK=true
-```
-
-Feature flag defaults to `false`; existing StatChallenge behavior unchanged when flag is off.
-
----
-
-### Files to Create/Modify (Cycles 2–4)
-
-| File | Change |
-|------|--------|
-| `src/components/StatChallenge.tsx` | Add `stackDepth` state, Push/Bank buttons, tentative XP display |
-| `src/store/learningStore.ts` | Add `recordStackAnswer(depth, collapsed)` action; depth-based SM-2 quality |
-| `src/hooks/useQuiz.ts` | Add `getStackForTopic(topic)` returning `[easy, medium, hard]` question triple |
-| `src/components/WaffleStackProgress.tsx` | New component — session progress + waffle visual |
-| `src/config/featureFlags.ts` | New file — `WAFFLE_STACK` flag |
-
----
-
-### Session-End Screen Design
-
-```
-┌─────────────────────────────────────────┐
-│  Session Complete! 🧇                    │
-│                                         │
-│  Stack 1 (Normal Dist.)  |||  85 XP    │
-│  Stack 2 (Mean)          |    10 XP    │
-│  Stack 3 (T-Test)        COLLAPSE  0 XP│
-│  Stack 4 (SD)            ||   35 XP    │
-│  Stack 5 (Correlation)   |||  85 XP    │
-│                                         │
-│  Total: 215 XP                          │
-│  Master Stacker! (4/5 stacks positive)  │
-└─────────────────────────────────────────┘
-```
-
----
-
-### Risk and Calibration Psychology
-
-The Push/Bank decision mirrors the *illusion of knowing* phenomenon — a well-documented issue in statistics education where students believe they understand a concept at the definition level but fail at application. The mechanic:
-
-1. **Layer 1 easy → student feels confident → pushes**
-2. **Layer 2 application reveals the gap → collapse**
-3. **Student learns: "I knew the definition but not the application"**
-4. **SM-2 quality = 2 → concept scheduled for earlier review**
-
-This is *metacognitive calibration* disguised as a game mechanic. Students get feedback not just on whether they answered correctly, but on how accurately they assessed their own mastery depth.
-
----
-
-### Sources Cited
-
-**Board games:**
-- *Push* (Stronghold Games, 2016) — press-your-luck mechanic; exact inspiration for the Push/Bank binary decision after each layer
-- *Blackjack* — hit-or-stand under incomplete information about your own performance; risk calibration against confidence
-- *Pandemic* (Z-Man Games, 2008) — session structure with 5 distinct crises (stacks), each requiring attention and sequencing
-
-**Mobile games:**
-- *Alto's Odyssey* (Snowman, 2018) — combo system where extending a trick combo multiplies score; breaking combo loses multiplier; exact analogue for the Push chain
-- *Hearthstone Battlegrounds* (Blizzard, 2019) — deciding to upgrade tavern vs. fight each turn; risk/reward decision with observable consequences each turn
-
-**UI design sources:**
-- *Duolingo* Hearts system — XP-on-the-line visualization creates stakes without punishing the student permanently
-- *Slay the Spire* combat UI (MegaCrit, 2019) — tentative resource visualization before commitment; cards in hand vs. committed plays
-- *Alto's Odyssey* scoring UI — combo multiplier shown as a growing number with visual emphasis, creating "don't break it" psychology
-
----
-
-## Top-3 Ranking Summary
-
-| # | Name | Score | Why |
-|---|------|-------|-----|
-| 🥇 | Waffle Stack Challenge | 77 | Most thematically native to app name + brand; highest agency per minute; builds directly on existing code; maps to real metacognition research; mobile-perfect Push/Bank UX |
-| 🥈 | Exam Gauntlet | 77 | Strong emotional arc; roguelite session framing is novel in edtech; cross-topic boss questions force synthesis |
-| 🥉 | Daily Triage | 74 | Best anti-pattern fix for SM-2 passivity; drag-and-drop triage has highest mobile UX quality; metacognition backed by learning science |
-
-**Cycle 2 will implement #1: Waffle Stack Challenge.**
-
----
-
-## Cycle 2 Entry Conditions
-
-Before Cycle 2 starts, the following must be true:
-- [ ] `quiz-bank.json` has been audited to confirm `easy/medium/hard` tags exist per topic
-- [ ] `StatChallenge.tsx` has been read in full
-- [ ] Feature flag infrastructure is in place (`src/config/featureFlags.ts`)
-- [ ] Build passes (`npm run build`) on the `proactive/exploration/games-design-space` branch after any changes
-
----
-
-*Generated by proactive-vision-builder Cycle 01 — exploration only, no code changes.*
+*Generated by proactive-vision-builder cycle 01 on 2026-05-21.*
+*NotebookLM: SKIP — MCP connector not available in this container.*
