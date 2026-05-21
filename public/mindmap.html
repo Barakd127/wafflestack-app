@@ -5133,6 +5133,10 @@ function nbRenderTreeRows(){
     const label = document.createElement('span');
     label.className = 'label';
     label.textContent = n.text || '(ללא שם)';
+    // Tooltip exposes full label when CSS truncation hides it.
+    label.title = n.text || '(ללא שם)';
+    // Double-click label → inline rename (conventional file-tree UX).
+    label.ondblclick = (e) => { e.stopPropagation(); nbRenameInline(id); };
     el.appendChild(label);
 
     const acts = document.createElement('span');
@@ -5140,6 +5144,8 @@ function nbRenderTreeRows(){
     const mkBtn = (label, title, fn) => {
       const b = document.createElement('button');
       b.textContent = label; b.title = title;
+      // Emoji-only button needs an explicit aria-label for screen readers.
+      b.setAttribute('aria-label', title);
       b.onclick = (e) => { e.stopPropagation(); fn(); };
       return b;
     };
