@@ -361,6 +361,9 @@ interface LearningState {
   // Lesson reading progress (one entry per topic id read at least once)
   completedLessons: string[]
 
+  // Triage Mode — exam date for risk score computation (ws_triage_mode_v1)
+  examDate: string | null  // YYYY-MM-DD; null = no exam date set
+
   // Actions
   recordAnswer: (questionId: string, correct: boolean, xpReward: number) => void
   recordSM2Answer: (questionId: string, quality: number, xpReward: number) => void
@@ -372,6 +375,7 @@ interface LearningState {
   clearNewAchievements: () => void
   resetProgress: () => void
   completeOnboarding: (name: string) => void
+  setExamDate: (date: string | null) => void
 }
 
 export const useLearningStore = create<LearningState>()(
@@ -397,6 +401,7 @@ export const useLearningStore = create<LearningState>()(
       dailyChallengeProgress: 0,
       buildingProgress: INITIAL_BUILDING_PROGRESS,
       completedLessons: [],
+      examDate: null,
 
       recordAnswer: (questionId, correct, xpReward) => {
         const state = get()
@@ -584,8 +589,10 @@ export const useLearningStore = create<LearningState>()(
         dailyChallengeDate: null, dailyChallengeProgress: 0,
         buildingProgress: INITIAL_BUILDING_PROGRESS,
         completedLessons: [],
+        // examDate intentionally not reset — it is real-world metadata, not learning progress
       }),
       completeOnboarding: (name: string) => set({ userName: name, onboardingCompleted: true }),
+      setExamDate: (date: string | null) => set({ examDate: date }),
     }),
     {
       name: 'wafflestack-learning',
