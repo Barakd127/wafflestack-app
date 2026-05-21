@@ -338,7 +338,25 @@ interface StudyHubProps {
   onLoggedOut?: () => void
 }
 
-type InternalView = 'home' | 'learning' | 'topics' | 'lesson' | 'quiz-intro' | 'arsenal' | 'complete'
+type InternalView = 'home' | 'learning' | 'courses' | 'topics' | 'lesson' | 'quiz-intro' | 'arsenal' | 'complete'
+
+// 4 stat courses for the gate screen. Only 'stat-a' is active right now;
+// the rest show a "Coming soon" splash. The folder labels live here as the
+// single source of truth — UI + future analytics can reference COURSES[].
+interface CourseDef {
+  id: 'stat-a' | 'stat-b' | 'methods' | 'anova'
+  label: string
+  icon: string                   // emoji shown on the card
+  desc: string
+  active: boolean
+  bg: string                     // tile gradient
+}
+const COURSES: CourseDef[] = [
+  { id: 'stat-a',  label: "סטטיסטיקה א'",        icon: '📊', desc: 'מבוא, מדדים, התפלגויות, רגרסיה, הסתברות',  active: true,  bg: 'linear-gradient(135deg,#F5C842,#D4AF37)' },
+  { id: 'stat-b',  label: "סטטיסטיקה ב'",        icon: '📈', desc: 'הסקה סטטיסטית, מבחני השערות, מדגם, רווחי סמך', active: false, bg: 'linear-gradient(135deg,#7CB7F8,#4A90E2)' },
+  { id: 'methods', label: 'שיטות מחקר',          icon: '🔬', desc: 'תכנון מחקר, מדידה, מהימנות ותקפות',         active: false, bg: 'linear-gradient(135deg,#A78BFA,#7C3AED)' },
+  { id: 'anova',   label: 'ניתוח שונות / רב-משתנית', icon: '📐', desc: 'ANOVA, MANOVA, רגרסיה מרובה, מודלים מורכבים', active: false, bg: 'linear-gradient(135deg,#67C29E,#229E69)' },
+]
 
 // Hebrew labels for each topic (quiz-bank concept field is English)
 const HEBREW_LABELS: Record<string, string> = {
@@ -805,6 +823,118 @@ interface TopicSelectorProps {
   onBack: () => void
 }
 
+/**
+ * CourseGate — 4-tile course picker shown when user clicks "אזור למידה" in
+ * the sidebar. Active course (Stat-A) routes into the topic grid. Inactive
+ * courses (Stat-B / Methods / ANOVA) open a "Coming soon" splash overlay.
+ */
+function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
+  const [comingSoon, setComingSoon] = useState<CourseDef | null>(null)
+  return (
+    <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
+      <div style={{ marginBottom: 22 }}>
+        <h2 style={{ fontFamily: "'Rubik', sans-serif", color: TEXT_DARK, fontSize: 26, fontWeight: 700, margin: 0 }}>הקורסים שלי</h2>
+        <p style={{ color: TEXT_MED, fontSize: 14, margin: '6px 0 0' }}>בחר את הקורס בו ברצונך להתחיל ללמוד</p>
+      </div>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        gap: 22,
+        maxWidth: 1200,
+      }}>
+        {COURSES.map(c => (
+          <button
+            key={c.id}
+            onClick={() => c.active ? onSelectActive() : setComingSoon(c)}
+            style={{
+              position: 'relative',
+              border: 0,
+              borderRadius: 22,
+              padding: '28px 24px',
+              background: GLASS_CARD,
+              boxShadow: CARD_SHADOW,
+              cursor: 'pointer',
+              textAlign: 'right',
+              fontFamily: "'Rubik', sans-serif",
+              direction: 'rtl',
+              transition: 'transform 0.18s, box-shadow 0.18s',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 12px 32px rgba(31,62,108,0.18)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = CARD_SHADOW }}
+          >
+            {/* Icon chip */}
+            <div style={{
+              width: 56, height: 56, borderRadius: 14,
+              background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 30, marginBottom: 14,
+              boxShadow: '0 6px 18px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.4)',
+            }}>{c.icon}</div>
+            <div style={{ fontSize: 19, fontWeight: 700, color: TEXT_DARK, marginBottom: 4 }}>{c.label}</div>
+            <div style={{ fontSize: 13, color: TEXT_MED, lineHeight: 1.45 }}>{c.desc}</div>
+            {!c.active && (
+              <div style={{
+                position: 'absolute', top: 14, insetInlineStart: 14,
+                background: 'rgba(127,155,217,0.18)',
+                color: '#1f3e6c', border: '1px solid rgba(127,155,217,0.45)',
+                borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700, letterSpacing: 0.2,
+              }}>בקרוב</div>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Coming soon splash */}
+      {comingSoon && (
+        <div
+          onClick={() => setComingSoon(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 200,
+            background: 'rgba(11,27,62,0.55)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: '#fff',
+              borderRadius: 22,
+              padding: '36px 40px',
+              maxWidth: 460, textAlign: 'center',
+              boxShadow: '0 24px 70px rgba(0,0,0,0.3)',
+              fontFamily: "'Rubik', sans-serif",
+            }}
+            dir="rtl"
+          >
+            <div style={{
+              width: 80, height: 80, borderRadius: 20,
+              background: comingSoon.bg,
+              margin: '0 auto 18px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 44,
+              boxShadow: '0 10px 28px rgba(0,0,0,0.15)',
+            }}>{comingSoon.icon}</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#0B1B3E', marginBottom: 6 }}>{comingSoon.label}</div>
+            <div style={{ fontSize: 14, color: TEXT_MED, marginBottom: 4 }}>{comingSoon.desc}</div>
+            <div style={{
+              display: 'inline-block', marginTop: 18,
+              background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+              color: '#0B1B3E', borderRadius: 999,
+              padding: '6px 16px', fontSize: 13, fontWeight: 700,
+            }}>בקרוב — בפיתוח</div>
+            <div style={{ marginTop: 22 }}>
+              <button onClick={() => setComingSoon(null)} style={{
+                background: 'transparent', border: '1px solid rgba(31,62,108,0.2)',
+                borderRadius: 10, padding: '8px 22px', cursor: 'pointer',
+                fontFamily: 'inherit', fontSize: 13, color: TEXT_DARK,
+              }}>סגור</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorProps) {
   return (
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }}>
@@ -1173,7 +1303,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
   type IconKey = 'home' | 'book' | 'trophy' | 'map' | 'globe'
   const items: Array<{ id: InternalView | null; label: string; iconKey: IconKey; action?: string }> = [
     { id: 'home',     label: 'דף הבית',           iconKey: 'home' },
-    { id: 'topics',   label: 'אזור למידה',        iconKey: 'book' },
+    { id: 'courses', label: 'אזור למידה',        iconKey: 'book' },
     { id: 'arsenal',  label: 'הארסנל שלי',        iconKey: 'trophy' },
     { id: null,       label: 'מפת הלמידה שלי',    iconKey: 'map',   action: 'mindmap' },
     { id: null,       label: 'העולם שלי',         iconKey: 'globe', action: 'world' },
@@ -2534,7 +2664,11 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
     window.addEventListener('mouseup', onUp)
   }, [])
 
-  const title = internalView === 'home' ? 'דף הבית' : internalView === 'topics' ? 'Study Zone' : 'Study Zone'
+  const title =
+    internalView === 'home' ? 'דף הבית' :
+    internalView === 'courses' ? 'הקורסים שלי' :
+    internalView === 'topics' ? "סטטיסטיקה א' — בחר נושא" :
+    'Study Zone'
 
   const handleSelectTopic = (topicId: string, mode: 'lesson' | 'quiz' = 'lesson') => {
     setSelectedTopic(topicId)
@@ -2659,11 +2793,16 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
             onSelectTopic={(topicId) => handleSelectTopic(topicId, 'quiz')}
           />
         )}
+        {internalView === 'courses' && (
+          <CourseGate
+            onSelectActive={() => setInternalView('topics')}
+          />
+        )}
         {internalView === 'topics' && (
           <TopicSelector
             userProgress={userProgress}
             onSelectTopic={handleSelectTopic}
-            onBack={() => setInternalView('home')}
+            onBack={() => setInternalView('courses')}
           />
         )}
         {internalView === 'lesson' && selectedTopic && (
