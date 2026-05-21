@@ -364,6 +364,10 @@ interface LearningState {
   // Exam date for risk score calculation (ISO date string YYYY-MM-DD or null)
   examDate: string | null
 
+  // Mistake Autopsy: latest error tag per question id + aggregate counts
+  errorTags: Record<string, string>
+  errorTagCounts: Record<string, number>
+
   // Actions
   recordAnswer: (questionId: string, correct: boolean, xpReward: number) => void
   recordSM2Answer: (questionId: string, quality: number, xpReward: number) => void
@@ -376,6 +380,7 @@ interface LearningState {
   resetProgress: () => void
   completeOnboarding: (name: string) => void
   setExamDate: (date: string | null) => void
+  recordErrorTag: (questionId: string, tag: string) => void
 }
 
 export const useLearningStore = create<LearningState>()(
@@ -402,6 +407,8 @@ export const useLearningStore = create<LearningState>()(
       buildingProgress: INITIAL_BUILDING_PROGRESS,
       completedLessons: [],
       examDate: null,
+      errorTags: {},
+      errorTagCounts: {},
 
       recordAnswer: (questionId, correct, xpReward) => {
         const state = get()
@@ -593,6 +600,13 @@ export const useLearningStore = create<LearningState>()(
       completeOnboarding: (name: string) => set({ userName: name, onboardingCompleted: true }),
       // examDate is NOT reset on resetProgress — it's real-world metadata, not learning state
       setExamDate: (date: string | null) => set({ examDate: date }),
+      recordErrorTag: (questionId: string, tag: string) => {
+        const { errorTags, errorTagCounts } = get()
+        set({
+          errorTags: { ...errorTags, [questionId]: tag },
+          errorTagCounts: { ...errorTagCounts, [tag]: (errorTagCounts[tag] ?? 0) + 1 },
+        })
+      },
     }),
     {
       name: 'wafflestack-learning',
