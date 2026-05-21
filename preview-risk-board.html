@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WaffleStack — Risk Board Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700&family=Assistant:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Assistant', 'Rubik', system-ui, sans-serif;
+    background: linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 49.05%, #3351CA 136%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    gap: 28px;
+  }
+
+  .page-title {
+    font-family: 'Rubik', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(31,62,108,0.55);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── Risk Board card ── */
+  .risk-board {
+    background: rgba(255,255,255,0.45);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(31,62,108,0.10);
+    border-radius: 24px;
+    padding: 22px 24px 18px;
+    border: 1px solid rgba(255,255,255,0.55);
+    width: 100%;
+    max-width: 420px;
+  }
+
+  /* ── Header ── */
+  .board-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .board-title {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: #1F3E6C;
+    line-height: 1.3;
+  }
+  .board-subtitle {
+    font-size: 12px;
+    color: #3351CA;
+    margin-top: 3px;
+    font-weight: 600;
+  }
+  .board-subtitle.calm { color: rgba(31,62,108,0.50); font-weight: 400; }
+
+  .date-btn {
+    background: transparent;
+    border: 1px solid rgba(212,175,55,0.40);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: #D4AF37;
+    cursor: pointer;
+    font-family: 'Rubik', sans-serif;
+    white-space: nowrap;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .date-btn:hover { border-color: #D4AF37; background: rgba(212,175,55,0.06); }
+
+  /* ── Risk cards list ── */
+  .risk-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .risk-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 14px;
+    padding: 11px 14px;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease, transform 0.12s ease;
+    user-select: none;
+  }
+  .risk-card:hover { transform: translateY(-1px); }
+  .risk-card:focus-visible { outline: 2px solid #3351CA; outline-offset: 2px; }
+
+  .risk-card.high {
+    background: linear-gradient(135deg, rgba(51,81,202,0.09), rgba(51,81,202,0.04));
+    border: 1px solid rgba(51,81,202,0.22);
+    box-shadow: 0 2px 12px rgba(51,81,202,0.10);
+  }
+  .risk-card.high:hover { box-shadow: 0 4px 20px rgba(51,81,202,0.18); }
+
+  .risk-card.medium {
+    background: rgba(255,255,255,0.60);
+    border: 1px solid rgba(212,175,55,0.20);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .risk-card.medium:hover { box-shadow: 0 4px 16px rgba(212,175,55,0.15); }
+
+  .rank {
+    width: 20px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(31,62,108,0.50);
+    flex-shrink: 0;
+  }
+  .icon { font-size: 20px; flex-shrink: 0; }
+
+  .card-text { flex: 1; min-width: 0; }
+  .card-name {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: #1F3E6C;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .card-meta {
+    font-size: 11px;
+    color: rgba(31,62,108,0.50);
+    margin-top: 3px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .card-meta .weight-high { color: #254A9F; font-weight: 600; }
+
+  /* ── SVG Risk Ring ── */
+  .risk-ring { flex-shrink: 0; }
+
+  /* ── Footer ── */
+  .board-footer {
+    margin-top: 12px;
+    font-size: 11px;
+    color: rgba(31,62,108,0.50);
+    text-align: center;
+  }
+
+  /* ── Scenario tabs ── */
+  .scenario-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .scenario-btn {
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-family: 'Rubik', sans-serif;
+    font-weight: 600;
+    color: #254A9F;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .scenario-btn.active, .scenario-btn:hover {
+    background: rgba(255,255,255,0.85);
+    box-shadow: 0 2px 10px rgba(51,81,202,0.12);
+  }
+
+  /* ── Flag badge ── */
+  .flag-badge {
+    background: rgba(255,255,255,0.50);
+    border: 1px solid rgba(212,175,55,0.35);
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-size: 11px;
+    color: rgba(31,62,108,0.65);
+    text-align: center;
+    max-width: 420px;
+    width: 100%;
+    backdrop-filter: blur(8px);
+    font-family: 'Assistant', monospace;
+  }
+  .flag-badge code {
+    font-family: 'Courier New', monospace;
+    background: rgba(51,81,202,0.08);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #3351CA;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">preview/risk-board — ws_triage_mode_v1</div>
+
+<!-- Scenario switcher -->
+<div class="scenario-bar">
+  <button class="scenario-btn active" onclick="loadScenario('new')">סטודנט חדש</button>
+  <button class="scenario-btn" onclick="loadScenario('exam3')">3 ימים לבחינה</button>
+  <button class="scenario-btn" onclick="loadScenario('mixed')">למידה מעורבת</button>
+</div>
+
+<!-- The RiskBoard -->
+<div class="risk-board" id="board">
+  <!-- injected by JS -->
+</div>
+
+<div class="flag-badge">
+  מופעל מאחורי feature flag: <code>ws_triage_mode_v1 = false</code> ב-production.<br/>
+  בסביבת dev — פעיל אוטומטית. ניתן לשנות דרך: <code>localStorage.setItem('ws_flag_ws_triage_mode_v1', 'true')</code>
+</div>
+
+<script>
+// ── Mock data scenarios ────────────────────────────────────────────────────
+const SCENARIOS = {
+  new: {
+    title: 'סטודנט חדש (אף נושא לא נלמד)',
+    daysToExam: 14,
+    subtitle: '14 ימים לבחינה',
+    subtitleClass: '',
+    topics: [
+      { name: 'מבחן השערות', icon: '🔬', score: 78, weight: 'גבוה', lastSeen: null },
+      { name: 'רגרסיה', icon: '🏦', score: 74, weight: 'גבוה', lastSeen: null },
+      { name: 'רווח סמך', icon: '📰', score: 72, weight: 'גבוה', lastSeen: null },
+      { name: 'התפלגות נורמלית', icon: '🏥', score: 68, weight: 'גבוה', lastSeen: null },
+      { name: 'קורלציה', icon: '🏪', score: 51, weight: 'בינוני', lastSeen: null },
+    ]
+  },
+  exam3: {
+    title: '3 ימים לבחינה — לחץ גבוה',
+    daysToExam: 3,
+    subtitle: '3 ימים לבחינה — 3 נושאים קריטיים',
+    subtitleClass: '',
+    topics: [
+      { name: 'מבחן השערות', icon: '🔬', score: 96, weight: 'גבוה', lastSeen: 8 },
+      { name: 'רגרסיה', icon: '🏦', score: 91, weight: 'גבוה', lastSeen: 12 },
+      { name: 'רווח סמך', icon: '📰', score: 88, weight: 'גבוה', lastSeen: 6 },
+      { name: 'ממוצע', icon: '⚡', score: 42, weight: 'בינוני', lastSeen: 2 },
+      { name: 'חציון', icon: '🏠', score: 31, weight: 'בינוני', lastSeen: 1 },
+    ]
+  },
+  mixed: {
+    title: 'למידה מעורבת — חלקם בסדר',
+    daysToExam: 7,
+    subtitle: '7 ימים לבחינה — 2 נושאים קריטיים',
+    subtitleClass: '',
+    topics: [
+      { name: 'בינום', icon: '🏛️', score: 82, weight: 'בינוני', lastSeen: 9 },
+      { name: 'מדגם', icon: '🏫', score: 71, weight: 'בינוני', lastSeen: 7 },
+      { name: 'קורלציה', icon: '🏪', score: 44, weight: 'בינוני', lastSeen: 3 },
+      { name: 'סטיית תקן', icon: '🚦', score: 29, weight: 'בינוני', lastSeen: 1 },
+      { name: 'ממוצע', icon: '⚡', score: 18, weight: 'בינוני', lastSeen: 0 },
+    ]
+  }
+}
+
+// ── SVG Risk Ring ────────────────────────────────────────────────────────────
+function riskColor(score) {
+  if (score >= 60) return '#3351CA'
+  if (score >= 30) return '#D4AF37'
+  return 'rgba(212,175,55,0.40)'
+}
+
+function renderRing(score) {
+  const r = 21, cx = 25, cy = 25
+  const circ = 2 * Math.PI * r
+  const filled = (score / 100) * circ
+  const color = riskColor(score)
+  return `
+    <svg class="risk-ring" width="50" height="50" viewBox="0 0 50 50" aria-hidden="true">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(212,175,55,0.30)" stroke-width="4"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+        stroke="${color}" stroke-width="4"
+        stroke-dasharray="${filled} ${circ - filled}"
+        stroke-dashoffset="${circ * 0.25}"
+        stroke-linecap="round"/>
+      <text x="${cx}" y="${cy + 5}" text-anchor="middle"
+        font-size="11" font-weight="700" fill="${color}"
+        font-family="'Inter', system-ui, sans-serif">${score}</text>
+    </svg>`
+}
+
+// ── Render board ──────────────────────────────────────────────────────────────
+function renderBoard(scenarioKey) {
+  const s = SCENARIOS[scenarioKey]
+  const board = document.getElementById('board')
+
+  const cards = s.topics.map((t, i) => {
+    const isHigh = t.score >= 60
+    const lastSeenText = t.lastSeen === null
+      ? 'לא נלמד עדיין'
+      : t.lastSeen === 0
+        ? 'נלמד היום'
+        : `נלמד לפני ${t.lastSeen}ד`
+    const weightClass = t.weight === 'גבוה' ? 'weight-high' : ''
+    return `
+      <div class="risk-card ${isHigh ? 'high' : 'medium'}" role="button" tabindex="0"
+           aria-label="${t.name}, רמת סיכון ${t.score}">
+        <span class="rank">#${i + 1}</span>
+        <span class="icon">${t.icon}</span>
+        <div class="card-text">
+          <div class="card-name">${t.name}</div>
+          <div class="card-meta">
+            <span>משקל: <b class="${weightClass}">${t.weight}</b></span>
+            <span>${lastSeenText}</span>
+          </div>
+        </div>
+        ${renderRing(t.score)}
+      </div>`
+  }).join('')
+
+  const subtitleClass = s.daysToExam <= 3 ? '' : 'calm'
+
+  board.innerHTML = `
+    <div class="board-header">
+      <div>
+        <div class="board-title">🎯 לוח סיכונים</div>
+        <div class="board-subtitle ${subtitleClass}">${s.subtitle}</div>
+      </div>
+      <button class="date-btn">שנה תאריך</button>
+    </div>
+    <div class="risk-list">${cards}</div>
+    <div class="board-footer">הציון מבוסס על SM-2, ימים מאז לימוד אחרון, ואחוז שגיאות</div>
+  `
+}
+
+function loadScenario(key) {
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'))
+  event.target.classList.add('active')
+  renderBoard(key)
+}
+
+renderBoard('new')
+</script>
+</body>
+</html>
