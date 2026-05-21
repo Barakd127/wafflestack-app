@@ -329,6 +329,7 @@ import { useTutorialStore } from '../store/tutorialStore'
 import Tooltip from './Tooltip'
 import Ribbon from './Ribbon'
 import { RiskBoard } from './RiskBoard'
+import MistakeAutopsy, { type ErrorTag } from './MistakeAutopsy'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d' | 'drawing') => void
@@ -1719,6 +1720,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   }, [floatMode, floatPos.x, floatPos.y])
   const contentRowRef = useRef<HTMLDivElement>(null)
   const recordAnswer = useLearningStore(s => s.recordAnswer)
+  const recordErrorTag = useLearningStore(s => s.recordErrorTag)
+
+  // Mistake Autopsy: shown after a wrong self-assessment before advancing
+  const [autopsyOpen, setAutopsyOpen] = useState(false)
+  const [autopsyDots, setAutopsyDots] = useState<Array<'empty' | 'current' | 'correct' | 'wrong' | 'future'> | null>(null)
 
   // (Old draggable-card code removed — quiz card is now centered + fixed,
   //  matching LessonScreen's theory layout. See `tab` state above.)
@@ -1826,8 +1832,19 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       setXpBurst(xpReward)
     }
 
-    // auto advance after a moment
-    setTimeout(() => goNext(next), correct ? 900 : 600)
+    if (correct) {
+      setTimeout(() => goNext(next), 900)
+    } else {
+      // Wrong answer — open Mistake Autopsy before advancing
+      setAutopsyDots(next)
+      setAutopsyOpen(true)
+    }
+  }
+
+  const handleAutopsyDone = (tag: ErrorTag | null) => {
+    setAutopsyOpen(false)
+    if (tag && q) recordErrorTag(q.id, tag)
+    setTimeout(() => goNext(autopsyDots ?? dotStates), 500)
   }
 
   const handleQuizComplete = () => {
@@ -2370,6 +2387,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         )}
 
       </div>{/* end content wrap */}
+
+      {/* Mistake Autopsy overlay — shown after wrong self-assessment */}
+      {autopsyOpen && <MistakeAutopsy onDone={handleAutopsyDone} />}
+
     </div>
   )
 }
