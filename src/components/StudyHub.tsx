@@ -1699,10 +1699,21 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   }))
   const floatDragRef = useRef<{ ox: number; oy: number; sx: number; sy: number } | null>(null)
   const onFloatHeaderMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!floatMode) return
+    if (isMobile || tab === 'none') return
     const target = e.target as HTMLElement
-    if (target.closest('button')) return // don't start drag from buttons
-    floatDragRef.current = { ox: floatPos.x, oy: floatPos.y, sx: e.clientX, sy: e.clientY }
+    if (target.closest('button')) return
+    let ox = floatPos.x
+    let oy = floatPos.y
+    if (!floatMode) {
+      // Card is stacked — grab its current rect and initiate float from there
+      const cardEl = (e.currentTarget as HTMLElement).parentElement
+      const rect = cardEl?.getBoundingClientRect()
+      ox = rect ? rect.left : Math.max(20, window.innerWidth - 460)
+      oy = rect ? rect.top : 90
+      setFloatMode(true)
+      setFloatPos({ x: ox, y: oy })
+    }
+    floatDragRef.current = { ox, oy, sx: e.clientX, sy: e.clientY }
     const onMove = (ev: MouseEvent) => {
       const d = floatDragRef.current; if (!d) return
       setFloatPos({
@@ -1717,7 +1728,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     }
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
-  }, [floatMode, floatPos.x, floatPos.y])
+  }, [floatMode, floatPos.x, floatPos.y, isMobile, tab])
   const contentRowRef = useRef<HTMLDivElement>(null)
   const recordAnswer = useLearningStore(s => s.recordAnswer)
   const recordErrorTag = useLearningStore(s => s.recordErrorTag)
@@ -1936,17 +1947,15 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           docked chip when a companion tool is active. */}
       <div ref={contentRowRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0, background: 'var(--sh-page-bg)', position: 'relative' }}>
 
-        {/* ── Companion tool (renders FIRST so the chip sits on top of it) ── */}
+        {/* ── Companion tool ── */}
         {!isDone && tab !== 'none' && (
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: !isMobile ? 420 : 0,
-            overflow: 'hidden', zIndex: 1,
-            background: tab === 'arsenal' ? 'var(--sh-page-bg)' : '#0d1628',
-          }}>
+          <div style={
+            !isMobile && !floatMode
+              ? { flex: 1, minHeight: 0, position: 'relative', overflow: 'hidden', zIndex: 1,
+                  background: tab === 'arsenal' ? 'var(--sh-page-bg)' : '#0d1628' }
+              : { position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 1,
+                  background: tab === 'arsenal' ? 'var(--sh-page-bg)' : '#0d1628' }
+          }>
             {tab === 'mindmap' && (
               <iframe
                 key="quiz-mm"
@@ -2009,7 +2018,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             : floatMode
             ? { position: 'fixed', top: floatPos.y, left: floatPos.x, zIndex: 250, width: 'min(420px, calc(100vw - 24px))', maxHeight: 'calc(100vh - 88px)', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.45)' }
             : !isMobile && tab !== 'none' && !isDone
-            ? { position: 'absolute', top: 0, right: 0, bottom: 0, width: 420, zIndex: 60, display: 'flex', flexDirection: 'column' }
+            ? { flexShrink: 0, zIndex: 2, display: 'flex', flexDirection: 'column' }
             : tab === 'none' || isDone
             ? { flexShrink: 0, padding: '18px 24px 12px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
             : { position: 'absolute', bottom: 72, insetInlineEnd: 14, zIndex: 60, width: 'min(420px, calc(100vw - 28px))', maxHeight: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }
@@ -2030,13 +2039,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               : !isMobile && tab !== 'none' && !isDone
               ? {
                   width: '100%',
-                  height: '100%',
                   background: 'var(--sh-q-card-bg, #ffffff)',
                   borderRadius: 0,
-                  borderInlineEnd: 'none',
-                  borderTop: 'none',
-                  borderBottom: 'none',
-                  borderInlineStart: '1px solid rgba(127,155,217,0.25)',
+                  borderBottom: '1px solid rgba(127,155,217,0.22)',
                   overflow: 'hidden',
                   display: 'flex', flexDirection: 'column',
                 }
@@ -2071,12 +2076,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 display: 'flex', alignItems: 'center', gap: 8,
                 fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
                 flexShrink: 0,
-                cursor: (floatMode && !isMobile) ? 'move' : 'default',
-                userSelect: (floatMode && !isMobile) ? 'none' : undefined,
+                cursor: (tab !== 'none' && !isMobile) ? 'move' : 'default',
+                userSelect: (tab !== 'none' && !isMobile) ? 'none' : undefined,
               }}>
-              {/* Drag handle pill — only when floating (not in split mode) */}
-              {floatMode && !isMobile && tab === 'none' && (
-                <span style={{ width: 28, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.35)', flexShrink: 0, marginLeft: -4, marginRight: 4 }} aria-hidden="true" />
+              {/* Drag handle pill — visible when tool is active on desktop */}
+              {tab !== 'none' && !isMobile && (
+                <span title={floatMode ? 'גרור' : 'גרור לחלון צף'} style={{ width: 28, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.35)', flexShrink: 0, marginLeft: -4, marginRight: 4 }} aria-hidden="true" />
               )}
               {/* Mobile bottom-sheet drag pill at very top */}
               {isMobile && tab !== 'none' && !isDone && (
@@ -2168,9 +2173,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             {/* Card body — height/scroll scales with mode */}
             <div style={{
               padding: '20px 22px 18px',
-              maxHeight: (!isMobile && tab !== 'none' && !isDone) ? 'unset' : tab !== 'none' && !isDone ? 'calc(100vh - 280px)' : 'min(60vh, 520px)',
+              maxHeight: (!isMobile && !floatMode && tab !== 'none' && !isDone) ? 'min(44vh, 360px)' : (floatMode || (isMobile && tab !== 'none' && !isDone)) ? 'calc(100vh - 280px)' : 'min(60vh, 520px)',
               overflowY: 'auto',
-              flex: tab !== 'none' && !isDone ? 1 : 'unset',
+              flex: (floatMode || (isMobile && tab !== 'none' && !isDone)) ? 1 : 'unset',
             }}>
 
           {isDone ? (
@@ -2412,12 +2417,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           <div style={{
             flexShrink: 0, padding: '12px 24px 16px',
             display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap',
-            position: tab !== 'none' ? 'absolute' : 'relative',
-            bottom: tab !== 'none' ? 0 : undefined,
-            left: tab !== 'none' ? 0 : undefined,
-            right: tab !== 'none' ? (!isMobile ? 420 : 0) : undefined,
+            position: (tab !== 'none' && (isMobile || floatMode)) ? 'absolute' : 'relative',
+            bottom: (tab !== 'none' && (isMobile || floatMode)) ? 0 : undefined,
+            left: (tab !== 'none' && (isMobile || floatMode)) ? 0 : undefined,
+            right: (tab !== 'none' && (isMobile || floatMode)) ? 0 : undefined,
             zIndex: 40,
-            background: tab !== 'none' ? 'linear-gradient(180deg, rgba(13,22,40,0) 0%, rgba(13,22,40,0.82) 60%, rgba(13,22,40,0.95) 100%)' : 'transparent',
+            background: (tab !== 'none' && floatMode) ? 'linear-gradient(180deg, rgba(13,22,40,0) 0%, rgba(13,22,40,0.82) 60%, rgba(13,22,40,0.95) 100%)' : 'transparent',
           }}>
             {([
               ['none',    '🚫 ללא',         'התמקדו רק בשאלה'],
