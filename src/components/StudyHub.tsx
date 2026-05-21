@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react'
 import { useLearningStore } from '../store/learningStore'
+import { RiskBoard } from './RiskBoard'
 
 // Lazy-load interactive graph components (per-topic visualizations).
 // Each component is ~300-450 LOC of pure SVG + KaTeX; lazy keeps the bundle
@@ -1367,10 +1368,11 @@ function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
 }
 
 // ── Home screen ────────────────────────────────────────────────────────────────
-function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
+function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
   onGoLearning: () => void
   onGoWorld: () => void
   onGoMindmap: () => void
+  onSelectTopic?: (topicId: string) => void
 }) {
   const xp = useLearningStore(s => s.xp)
   const totalCorrect = useLearningStore(s => s.totalCorrect)
@@ -1387,6 +1389,9 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
             home was too crowded. The 2-min challenge card (leftmost) stays
             accessible via the TwoMinChallengeCard preserved in motivation/,
             ready to be wired into a dedicated motivation tab in the future. */}
+
+        {/* ── TRIAGE RISK BOARD (ws_triage_mode_v1) — renders null when flag off ── */}
+        <RiskBoard onSelectTopic={onSelectTopic} />
 
         {/* ── ROW 1 ──────────────────────────────────── */}
         <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'stretch' }}>
@@ -2561,6 +2566,7 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
             onGoLearning={() => setInternalView('topics')}
             onGoWorld={() => onViewChange('3d')}
             onGoMindmap={() => onViewChange('mindmap')}
+            onSelectTopic={(topicId) => { setSelectedTopic(topicId); setInternalView('quiz-intro') }}
           />
         )}
         {internalView === 'topics' && (
