@@ -49,7 +49,7 @@ export default function ConditionalProbTreeInteractive() {
   const wNBN = Math.max(1.2, (1 - pBN) * 6)
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>הסתברות מותנית — עץ A → B</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
         רוחב הענפים פרופורציוני להסתברות. שלוש המחוונים שולטים בכל ההסתברויות המותנות.
@@ -65,21 +65,21 @@ export default function ConditionalProbTreeInteractive() {
         <line x1={L1NA.x + 30} y1={L1NA.y} x2={L2(L1NA, -40).x} y2={L2(L1NA, -40).y} stroke="#60a5fa" strokeWidth={wBN} opacity={0.6} />
         <line x1={L1NA.x + 30} y1={L1NA.y} x2={L2(L1NA, 40).x} y2={L2(L1NA, 40).y} stroke="rgba(96,165,250,0.4)" strokeWidth={wNBN} opacity={0.6} />
 
-        <circle cx={ROOT.x} cy={ROOT.y} r={6} fill="#fff" />
+        <circle cx={ROOT.x} cy={ROOT.y} r={6} fill="#1F3E6C" />
         {lab(ROOT.x - 22, ROOT.y + 4, '·', '#fff')}
 
         <rect x={L1A.x} y={L1A.y - 16} width={60} height={32} rx={6} fill="rgba(255,215,0,0.18)" stroke="#FFD700" />
         {lab(L1A.x + 4, L1A.y - 2, `A: ${pA.toFixed(2)}`, '#FFD700')}
-        {lab(L1A.x + 4, L1A.y + 12, `P(B|A)=${pBA.toFixed(2)}`, 'rgba(255,255,255,0.7)', 9)}
+        {lab(L1A.x + 4, L1A.y + 12, `P(B|A)=${pBA.toFixed(2)}`, 'rgba(31,62,108,0.7)', 9)}
 
         <rect x={L1NA.x} y={L1NA.y - 16} width={60} height={32} rx={6} fill="rgba(96,165,250,0.18)" stroke="#60a5fa" />
         {lab(L1NA.x + 4, L1NA.y - 2, `¬A: ${(1 - pA).toFixed(2)}`, '#60a5fa')}
-        {lab(L1NA.x + 4, L1NA.y + 12, `P(B|¬A)=${pBN.toFixed(2)}`, 'rgba(255,255,255,0.7)', 9)}
+        {lab(L1NA.x + 4, L1NA.y + 12, `P(B|¬A)=${pBN.toFixed(2)}`, 'rgba(31,62,108,0.7)', 9)}
 
         {lab(L2(L1A, -40).x, L2(L1A, -40).y, `A∩B: ${pAB.toFixed(3)}`, '#FFD700')}
-        {lab(L2(L1A, 40).x, L2(L1A, 40).y, `A∩¬B: ${pANB.toFixed(3)}`, 'rgba(255,255,255,0.5)')}
+        {lab(L2(L1A, 40).x, L2(L1A, 40).y, `A∩¬B: ${pANB.toFixed(3)}`, 'rgba(31,62,108,0.5)')}
         {lab(L2(L1NA, -40).x, L2(L1NA, -40).y, `¬A∩B: ${pNAB.toFixed(3)}`, '#60a5fa')}
-        {lab(L2(L1NA, 40).x, L2(L1NA, 40).y, `¬A∩¬B: ${pNANB.toFixed(3)}`, 'rgba(255,255,255,0.5)')}
+        {lab(L2(L1NA, 40).x, L2(L1NA, 40).y, `¬A∩¬B: ${pNANB.toFixed(3)}`, 'rgba(31,62,108,0.5)')}
       </svg>
 
       <div id="cond-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
@@ -88,7 +88,7 @@ export default function ConditionalProbTreeInteractive() {
       <SliderRow label={`P(B|A) = ${pBA.toFixed(2)}`} value={pBA} onChange={setPBA} />
       <SliderRow label={`P(B|¬A) = ${pBN.toFixed(2)}`} value={pBN} onChange={setPBN} />
 
-      <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-between' }}>
+      <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-between' }}>
         <span>P(B) = <b>{pB.toFixed(3)}</b></span>
         <span>P(A∩B) = <b>{pAB.toFixed(3)}</b></span>
         <span style={{ color: '#FFD700' }}>P(A|B) = <b>{pAgB.toFixed(3)}</b></span>

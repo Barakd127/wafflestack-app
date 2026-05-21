@@ -62,7 +62,7 @@ export default function NormalDistributionInteractive() {
   }, [prob, z1, z2])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>התפלגות נורמלית — גרור גבולות</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור את הקווים הצהובים לצדדים וצפה בהסתברות {`P(z₁ ≤ X ≤ z₂)`} מתעדכנת בזמן אמת.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
@@ -70,10 +70,10 @@ export default function NormalDistributionInteractive() {
         style={{ touchAction: 'none' }}>
         <path d={shade} fill="rgba(255,215,0,0.3)" />
         <path d={path} stroke="#FFD700" strokeWidth={2.5} fill="none" />
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(255,255,255,0.4)" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
         {[z1, z2].map((zv, i) => (
           <g key={i}>
-            <line x1={toPx(zv)} y1={Y0} x2={toPx(zv)} y2={Y1} stroke="#fff" strokeWidth={2} />
+            <line x1={toPx(zv)} y1={Y0} x2={toPx(zv)} y2={Y1} stroke="#1F3E6C" strokeWidth={2} />
             <rect x={toPx(zv) - 8} y={Y1 - 12} width={16} height={24} fill="#FFD700"
               onPointerDown={e => { setDrag((i + 1) as 1 | 2); (e.target as Element).setPointerCapture(e.pointerId) }}
               style={{ cursor: 'ew-resize' }} />

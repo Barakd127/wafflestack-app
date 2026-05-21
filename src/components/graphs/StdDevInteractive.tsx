@@ -146,10 +146,10 @@ export default function StdDevInteractive() {
     <div
       dir="rtl"
       style={{
-        background: 'rgba(31,62,108,0.92)',
+        background: 'rgba(255,255,255,0.92)',
         borderRadius: 16,
         padding: 20,
-        color: '#fff',
+        color: '#1F3E6C',
         fontFamily: 'system-ui, sans-serif',
       }}
     >
@@ -211,7 +211,7 @@ export default function StdDevInteractive() {
           y1={AXIS_Y}
           x2={W - PAD_X}
           y2={AXIS_Y}
-          stroke="rgba(255,255,255,0.4)"
+          stroke="rgba(31,62,108,0.4)"
           strokeWidth={2}
         />
         {ticks.map(t => (
@@ -221,13 +221,13 @@ export default function StdDevInteractive() {
               y1={AXIS_Y - 4}
               x2={xToPx(t)}
               y2={AXIS_Y + 4}
-              stroke="rgba(255,255,255,0.4)"
+              stroke="rgba(31,62,108,0.4)"
               strokeWidth={1}
             />
             <text
               x={xToPx(t)}
               y={AXIS_Y + 20}
-              fill="rgba(255,255,255,0.6)"
+              fill="rgba(31,62,108,0.6)"
               fontSize={12}
               textAnchor="middle"
             >
@@ -295,7 +295,7 @@ export default function StdDevInteractive() {
                 cy={AXIS_Y}
                 r={DOT_RADIUS}
                 fill={inside ? '#4A90D9' : '#E74C3C'}
-                stroke="#fff"
+                stroke="#1F3E6C"
                 strokeWidth={2}
                 onPointerDown={e => {
                   e.currentTarget.setPointerCapture(e.pointerId)
@@ -312,7 +312,7 @@ export default function StdDevInteractive() {
         style={{
           marginTop: 12,
           padding: 12,
-          background: 'rgba(255,255,255,0.06)',
+          background: 'rgba(31,62,108,0.06)',
           borderRadius: 8,
           minHeight: 50,
         }}
@@ -369,8 +369,8 @@ export default function StdDevInteractive() {
           onClick={reset}
           style={{
             background: 'transparent',
-            border: '1px solid rgba(255,255,255,0.3)',
-            color: '#fff',
+            border: '1px solid rgba(31,62,108,0.3)',
+            color: '#1F3E6C',
             borderRadius: 8,
             padding: '4px 10px',
             cursor: 'pointer',

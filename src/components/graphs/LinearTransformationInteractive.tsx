@@ -67,13 +67,13 @@ export default function LinearTransformationInteractive() {
   }, [a, b, sNew.mu, sNew.sd])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>טרנספורמציה ליניארית — Y = aX + b</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>שינוי קנה־מידה a ←→ מעבר b. צורת ההתפלגות נשמרת — רק מיקום ופיזור משתנים.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <text x={PAD} y={20} fill="#60a5fa" fontSize={12} fontWeight={700}>X (original)  μ={sOrig.mu.toFixed(2)}  σ={sOrig.sd.toFixed(2)}</text>
-        <line x1={PAD} y1={baseTop} x2={W - PAD} y2={baseTop} stroke="rgba(255,255,255,0.4)" />
+        <line x1={PAD} y1={baseTop} x2={W - PAD} y2={baseTop} stroke="rgba(31,62,108,0.4)" />
         {hOrig.map((c, i) => {
           const h = (HALF_H * c) / maxC
           return <rect key={i} x={PAD + i * barW + 1} y={baseTop - h} width={barW - 2} height={h} fill="#60a5fa" opacity={0.7} />
@@ -81,7 +81,7 @@ export default function LinearTransformationInteractive() {
         <line x1={toX(sOrig.mu)} y1={30} x2={toX(sOrig.mu)} y2={baseTop} stroke="#60a5fa" strokeDasharray="3 3" />
 
         <text x={PAD} y={baseTop + 20} fill="#FFD700" fontSize={12} fontWeight={700}>Y = aX + b   μ={sNew.mu.toFixed(2)}  σ={sNew.sd.toFixed(2)}</text>
-        <line x1={PAD} y1={baseBot} x2={W - PAD} y2={baseBot} stroke="rgba(255,255,255,0.4)" />
+        <line x1={PAD} y1={baseBot} x2={W - PAD} y2={baseBot} stroke="rgba(31,62,108,0.4)" />
         {hNew.map((c, i) => {
           const h = (HALF_H * c) / maxC
           return <rect key={i} x={PAD + i * barW + 1} y={baseBot - h} width={barW - 2} height={h} fill="#FFD700" opacity={0.7} />
@@ -89,7 +89,7 @@ export default function LinearTransformationInteractive() {
         <line x1={toX(sNew.mu)} y1={baseTop + 30} x2={toX(sNew.mu)} y2={baseBot} stroke="#FFD700" strokeDasharray="3 3" />
 
         {[0, 5, 10, 15, 20, 25, 30].filter(t => t >= xMin && t <= xMax).map(t => (
-          <text key={t} x={toX(t)} y={H - 8} fill="rgba(255,255,255,0.6)" fontSize={11} textAnchor="middle">{t}</text>
+          <text key={t} x={toX(t)} y={H - 8} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{t}</text>
         ))}
       </svg>
 

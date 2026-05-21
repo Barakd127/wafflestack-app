@@ -52,22 +52,22 @@ export default function MeanRunningAverage() {
   }, [mu])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>חוק המספרים הגדולים — התכנסות הממוצע</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>ככל ש-n גדל, הממוצע המדגמי מתקרב לממוצע האוכלוסיה האמיתי μ.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(255,255,255,0.4)" />
-        <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke="rgba(255,255,255,0.4)" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
+        <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke="rgba(31,62,108,0.4)" />
         <line x1={X0} y1={toY(mu)} x2={X1} y2={toY(mu)} stroke="#60a5fa" strokeWidth={1.5} strokeDasharray="6 4" />
         <text x={X1 - 6} y={toY(mu) - 4} fill="#60a5fa" fontSize={12} textAnchor="end">μ = {mu}</text>
         {series.samples.map((v, i) => (
-          <circle key={i} cx={toX(i)} cy={toY(v)} r={3} fill="rgba(255,255,255,0.25)" />
+          <circle key={i} cx={toX(i)} cy={toY(v)} r={3} fill="rgba(31,62,108,0.25)" />
         ))}
         <path d={runningPath} stroke="#FFD700" strokeWidth={2.5} fill="none" />
         {[0, 10, 20, 30, 40, 49].map(i => (
-          <text key={i} x={toX(i)} y={Y1 + 18} fill="rgba(255,255,255,0.6)" fontSize={11} textAnchor="middle">{i + 1}</text>
+          <text key={i} x={toX(i)} y={Y1 + 18} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{i + 1}</text>
         ))}
-        <text x={X0 - 24} y={Y0 + 8} fill="rgba(255,255,255,0.6)" fontSize={11} textAnchor="middle" transform={`rotate(-90 ${X0 - 24} ${Y0 + 8})`}>ערך</text>
+        <text x={X0 - 24} y={Y0 + 8} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle" transform={`rotate(-90 ${X0 - 24} ${Y0 + 8})`}>ערך</text>
       </svg>
       <div id="lln-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>

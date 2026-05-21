@@ -57,7 +57,7 @@ export default function ConfidenceIntervalInteractive() {
   }, [conf, halfWidth])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>רווח סמך (Confidence Interval)</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 8 }}>{ROWS} מדגמים שונים, μ אמיתי = 100. רווחים מכסים את μ: {covered}/{ROWS} ({((covered / ROWS) * 100).toFixed(0)}%)</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H} style={{ touchAction: 'none' }}>
@@ -66,7 +66,7 @@ export default function ConfidenceIntervalInteractive() {
         {samples.map((s, i) => (
           <g key={i}>
             <line x1={toX(s.lo)} y1={PAD + i * ROW_H + 6} x2={toX(s.hi)} y2={PAD + i * ROW_H + 6} stroke={s.covers ? '#10b981' : '#ef4444'} strokeWidth={2.5} />
-            <circle cx={toX(s.mean)} cy={PAD + i * ROW_H + 6} r={3} fill="#fff" />
+            <circle cx={toX(s.mean)} cy={PAD + i * ROW_H + 6} r={3} fill="#1F3E6C" />
           </g>
         ))}
       </svg>
@@ -75,12 +75,12 @@ export default function ConfidenceIntervalInteractive() {
         <label style={{ fontSize: 12 }}>n: {n}<input type="range" min={5} max={200} value={n} onChange={e => setN(+e.target.value)} style={{ width: '100%' }} /></label>
         <label style={{ fontSize: 12 }}>σ: {sigma}<input type="range" min={5} max={40} value={sigma} onChange={e => setSigma(+e.target.value)} style={{ width: '100%' }} /></label>
         <label style={{ fontSize: 12 }}>סמך %: {conf}
-          <select value={conf} onChange={e => setConf(+e.target.value)} style={{ width: '100%', background: 'rgba(0,0,0,0.6)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, padding: 4 }}>
+          <select value={conf} onChange={e => setConf(+e.target.value)} style={{ width: '100%', background: 'rgba(0,0,0,0.6)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 6, padding: 4 }}>
             <option value={80}>80%</option><option value={90}>90%</option><option value={95}>95%</option><option value={99}>99%</option>
           </select>
         </label>
       </div>
-      <button onClick={() => setSeed(s => s + 1)} style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, marginTop: 8 }}>דגום מחדש</button>
+      <button onClick={() => setSeed(s => s + 1)} style={{ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, marginTop: 8 }}>דגום מחדש</button>
     </div>
   )
 }

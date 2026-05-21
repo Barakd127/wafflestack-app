@@ -70,27 +70,27 @@ export default function PoissonInteractive() {
   const xTicks = [0, 5, 10, 15, 20, 25, 30]
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>התפלגות פואסון — קירוב לבינומית</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
         פואסון מתארת מספר אירועים נדירים בפרק זמן קבוע. הזז את λ — ככל שהוא גדל, ההתפלגות מתקרבת לנורמלית עם μ = σ² = λ.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke="rgba(255,255,255,0.4)" />
-        <line x1={PAD_X} y1={PAD_Y} x2={PAD_X} y2={AXIS_Y} stroke="rgba(255,255,255,0.4)" />
+        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" />
+        <line x1={PAD_X} y1={PAD_Y} x2={PAD_X} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" />
 
         {/* X ticks */}
         {xTicks.map(t => (
           <g key={t}>
-            <line x1={toX(t)} y1={AXIS_Y - 3} x2={toX(t)} y2={AXIS_Y + 3} stroke="rgba(255,255,255,0.4)" />
-            <text x={toX(t)} y={AXIS_Y + 16} fill="rgba(255,255,255,0.6)" fontSize={11} textAnchor="middle">{t}</text>
+            <line x1={toX(t)} y1={AXIS_Y - 3} x2={toX(t)} y2={AXIS_Y + 3} stroke="rgba(31,62,108,0.4)" />
+            <text x={toX(t)} y={AXIS_Y + 16} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{t}</text>
           </g>
         ))}
 
         {/* Y ticks */}
         {[0.25, 0.5, 0.75, 1].map(f => (
-          <text key={f} x={PAD_X - 6} y={toY(yMax * f) + 4} fill="rgba(255,255,255,0.6)" fontSize={10} textAnchor="end">
+          <text key={f} x={PAD_X - 6} y={toY(yMax * f) + 4} fill="rgba(31,62,108,0.6)" fontSize={10} textAnchor="end">
             {(yMax * f).toFixed(2)}
           </text>
         ))}
@@ -140,9 +140,9 @@ export default function PoissonInteractive() {
           onClick={() => setShowNormal(!showNormal)}
           disabled={!normalAvailable}
           style={{
-            background: showNormal && normalAvailable ? '#FFD700' : 'rgba(255,255,255,0.1)',
+            background: showNormal && normalAvailable ? '#FFD700' : 'rgba(31,62,108,0.1)',
             color: showNormal && normalAvailable ? '#0B1B3E' : '#fff',
-            border: '1px solid rgba(255,255,255,0.2)',
+            border: '1px solid rgba(31,62,108,0.2)',
             borderRadius: 8,
             padding: '8px 16px',
             cursor: normalAvailable ? 'pointer' : 'not-allowed',

@@ -40,7 +40,7 @@ export default function VarianceInteractive() {
   const pxPerUnit = (X1 - X0) / (max - min)
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>שונות (Variance) — ריבועי הסטיות</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>כל ריבוע מציג את (xᵢ − מ̄)². השונות = שטח ממוצע של הריבועים.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
@@ -55,21 +55,21 @@ export default function VarianceInteractive() {
               fill="rgba(255,99,99,0.2)" stroke="#ff6363" strokeWidth={1.5} />
           )
         })}
-        <line x1={X0} y1={AXIS_Y} x2={X1} y2={AXIS_Y} stroke="rgba(255,255,255,0.4)" strokeWidth={2} />
+        <line x1={X0} y1={AXIS_Y} x2={X1} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" strokeWidth={2} />
         <line x1={toX(mean)} y1={AXIS_Y - 100} x2={toX(mean)} y2={AXIS_Y + 40} stroke="#FFD700" strokeWidth={2} strokeDasharray="6 4" />
         <text x={toX(mean)} y={AXIS_Y + 60} fill="#FFD700" fontSize={13} textAnchor="middle" fontWeight={700}>מ̄ = {mean.toFixed(2)}</text>
         {values.map((v, i) => (
-          <circle key={`d${i}`} cx={toX(v)} cy={AXIS_Y} r={10} fill="#60a5fa" stroke="#fff" strokeWidth={2}
+          <circle key={`d${i}`} cx={toX(v)} cy={AXIS_Y} r={10} fill="#60a5fa" stroke="#1F3E6C" strokeWidth={2}
             onPointerDown={e => { setDrag(i); (e.target as Element).setPointerCapture(e.pointerId) }}
             style={{ cursor: 'grab' }} />
         ))}
         {[0, 2, 4, 6, 8, 10, 12, 14].map(t => (
-          <text key={t} x={toX(t)} y={AXIS_Y + 22} fill="rgba(255,255,255,0.6)" fontSize={11} textAnchor="middle">{t}</text>
+          <text key={t} x={toX(t)} y={AXIS_Y + 22} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{t}</text>
         ))}
       </svg>
       <div id="var-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <button onClick={() => setValues([3, 5, 6, 7, 9])} style={{
-        background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)',
+        background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)',
         borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13,
       }}>איפוס</button>
     </div>

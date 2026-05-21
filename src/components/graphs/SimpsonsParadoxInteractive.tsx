@@ -84,7 +84,7 @@ export default function SimpsonsParadoxInteractive() {
   const yTicks = [0, 2, 4, 6, 8, 10, 12]
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>פרדוקס סימפסון — קורלציה מוסתרת</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
         בסקירה הכוללת — הקשר חיובי (ככל ש-x גדל, y גדל). אך בתוך כל תת-קבוצה — הקשר הפוך! הסר את ההסתרה כדי לחשוף את האמת.
@@ -92,18 +92,18 @@ export default function SimpsonsParadoxInteractive() {
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         {/* Axes */}
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(255,255,255,0.4)" />
-        <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke="rgba(255,255,255,0.4)" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
+        <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke="rgba(31,62,108,0.4)" />
         {xTicks.map(t => (
           <g key={`x${t}`}>
-            <line x1={toX(t)} y1={Y1 - 3} x2={toX(t)} y2={Y1 + 3} stroke="rgba(255,255,255,0.4)" />
-            <text x={toX(t)} y={Y1 + 16} fill="rgba(255,255,255,0.6)" fontSize={11} textAnchor="middle">{t}</text>
+            <line x1={toX(t)} y1={Y1 - 3} x2={toX(t)} y2={Y1 + 3} stroke="rgba(31,62,108,0.4)" />
+            <text x={toX(t)} y={Y1 + 16} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{t}</text>
           </g>
         ))}
         {yTicks.map(t => (
           <g key={`y${t}`}>
-            <line x1={X0 - 3} y1={toY(t)} x2={X0 + 3} y2={toY(t)} stroke="rgba(255,255,255,0.4)" />
-            <text x={X0 - 8} y={toY(t) + 4} fill="rgba(255,255,255,0.6)" fontSize={11} textAnchor="end">{t}</text>
+            <line x1={X0 - 3} y1={toY(t)} x2={X0 + 3} y2={toY(t)} stroke="rgba(31,62,108,0.4)" />
+            <text x={X0 - 8} y={toY(t) + 4} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="end">{t}</text>
           </g>
         ))}
 
@@ -139,7 +139,7 @@ export default function SimpsonsParadoxInteractive() {
             key={i}
             cx={toX(p.x)} cy={toY(p.y)} r={7}
             fill={showGroups ? (p.group === 0 ? '#60a5fa' : '#f59e0b') : '#94a3b8'}
-            stroke="#fff"
+            stroke="#1F3E6C"
             strokeWidth={1.2}
           />
         ))}
@@ -166,9 +166,9 @@ export default function SimpsonsParadoxInteractive() {
         <button
           onClick={() => setShowGroups(!showGroups)}
           style={{
-            background: showGroups ? '#FFD700' : 'rgba(255,255,255,0.1)',
+            background: showGroups ? '#FFD700' : 'rgba(31,62,108,0.1)',
             color: showGroups ? '#0B1B3E' : '#fff',
-            border: '1px solid rgba(255,255,255,0.2)',
+            border: '1px solid rgba(31,62,108,0.2)',
             borderRadius: 8,
             padding: '8px 16px',
             cursor: 'pointer',

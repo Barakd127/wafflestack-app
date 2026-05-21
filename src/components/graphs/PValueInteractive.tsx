@@ -57,7 +57,7 @@ export default function PValueInteractive() {
   }, [p, zStat])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>ערך p (P-Value)</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור את z*. p = שטח הצל מתחת לעקומה — הסתברות לראות תוצאה קיצונית כזו תחת H₀.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
@@ -66,15 +66,15 @@ export default function PValueInteractive() {
         {twoTail && <path d={shadeFor(xMin, -absZ)} fill="rgba(239,68,68,0.4)" />}
         <path d={shadeFor(absZ, xMax)} fill="rgba(239,68,68,0.4)" />
         <path d={path} stroke="#FFD700" strokeWidth={2.5} fill="none" />
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(255,255,255,0.4)" />
-        <line x1={toPx(zStat)} y1={Y0} x2={toPx(zStat)} y2={Y1} stroke="#fff" strokeWidth={2} />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
+        <line x1={toPx(zStat)} y1={Y0} x2={toPx(zStat)} y2={Y1} stroke="#1F3E6C" strokeWidth={2} />
         <rect x={toPx(zStat) - 8} y={Y1 - 12} width={16} height={24} fill="#FFD700"
           onPointerDown={e => { setDrag(true); (e.target as Element).setPointerCapture(e.pointerId) }}
           style={{ cursor: 'ew-resize' }} />
         <text x={toPx(zStat)} y={Y1 + 30} fill="#FFD700" fontSize={13} textAnchor="middle" fontWeight={700}>z* = {zStat.toFixed(2)}</text>
       </svg>
       <div id="p-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
-      <button onClick={() => setTwoTail(!twoTail)} style={{ background: twoTail ? '#FFD700' : 'rgba(255,255,255,0.1)', color: twoTail ? '#0B1B3E' : '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: twoTail ? 700 : 400 }}>{twoTail ? 'מבחן דו-זנבי' : 'מבחן חד-זנבי'}</button>
+      <button onClick={() => setTwoTail(!twoTail)} style={{ background: twoTail ? '#FFD700' : 'rgba(31,62,108,0.1)', color: twoTail ? '#0B1B3E' : '#fff', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: twoTail ? 700 : 400 }}>{twoTail ? 'מבחן דו-זנבי' : 'מבחן חד-זנבי'}</button>
     </div>
   )
 }

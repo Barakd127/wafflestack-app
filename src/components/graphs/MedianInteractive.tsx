@@ -45,17 +45,17 @@ export default function MedianInteractive() {
   }, [median, mean])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>חציון מול ממוצע — גרור נקודה והשווה</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור נקודה אחת לקצה הציר וצפה כיצד הממוצע "נמשך" אחריה בעוד החציון נשאר יציב.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerUp}
         style={{ touchAction: 'none' }}>
-        <line x1={X0} y1={AXIS_Y} x2={X1} y2={AXIS_Y} stroke="rgba(255,255,255,0.4)" strokeWidth={2} />
+        <line x1={X0} y1={AXIS_Y} x2={X1} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" strokeWidth={2} />
         {[0, 5, 10, 15, 20].map(t => (
           <g key={t}>
-            <line x1={toX(t)} y1={AXIS_Y - 4} x2={toX(t)} y2={AXIS_Y + 4} stroke="rgba(255,255,255,0.4)" />
-            <text x={toX(t)} y={AXIS_Y + 22} fill="rgba(255,255,255,0.6)" fontSize={12} textAnchor="middle">{t}</text>
+            <line x1={toX(t)} y1={AXIS_Y - 4} x2={toX(t)} y2={AXIS_Y + 4} stroke="rgba(31,62,108,0.4)" />
+            <text x={toX(t)} y={AXIS_Y + 22} fill="rgba(31,62,108,0.6)" fontSize={12} textAnchor="middle">{t}</text>
           </g>
         ))}
         {values.map((v, i) => {
@@ -63,7 +63,7 @@ export default function MedianInteractive() {
           return (
             <circle key={i} cx={toX(v)} cy={AXIS_Y} r={DOT_R}
               fill={isMed ? '#FFD700' : '#60a5fa'}
-              stroke="#fff" strokeWidth={2}
+              stroke="#1F3E6C" strokeWidth={2}
               onPointerDown={onPointerDown(i)}
               style={{ cursor: 'grab' }} />
           )
@@ -75,7 +75,7 @@ export default function MedianInteractive() {
       </svg>
       <div id="median-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <button onClick={reset} style={{
-        background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)',
+        background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)',
         borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13,
       }}>איפוס</button>
     </div>
