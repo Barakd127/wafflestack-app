@@ -80,12 +80,12 @@ export default function TypeIErrorInteractive() {
   }, [alpha, beta, power])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>שגיאה מסוג I ו-II — α · β · עוצמה</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>אדום = α (Type I), כחול = β (Type II). העלאת n מקטינה את σ → β קטן → עוצמה עולה.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke="rgba(255,255,255,0.4)" />
+        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" />
         <path d={betaPath} fill="rgba(96,165,250,0.4)" />
         <path d={alphaPath} fill="rgba(239,68,68,0.5)" />
         <path d={path0} stroke="#94a3b8" strokeWidth={2.5} fill="none" />
@@ -102,7 +102,7 @@ export default function TypeIErrorInteractive() {
       <Slider label={`α = ${alpha.toFixed(3)}`} value={alpha} min={0.001} max={0.2} step={0.001} onChange={setAlpha} />
       <Slider label={`n = ${n}`} value={n} min={5} max={200} step={1} onChange={v => setN(Math.round(v))} />
 
-      <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-around' }}>
+      <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-around' }}>
         <span style={{ color: '#ef4444' }}>α = {alpha.toFixed(3)}</span>
         <span style={{ color: '#60a5fa' }}>β = {beta.toFixed(3)}</span>
         <span style={{ color: '#FFD700', fontWeight: 700 }}>Power = {power.toFixed(3)}</span>

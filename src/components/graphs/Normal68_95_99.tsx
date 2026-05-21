@@ -40,19 +40,19 @@ export default function Normal68_95_99() {
   }, [])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>כלל 68-95-99.7</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>בהתפלגות נורמלית: ±1σ מכיל 68% מהאוכלוסיה, ±2σ מכיל 95%, ±3σ מכיל 99.7%.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <path d={shadeBand(-3, 3)} fill="rgba(212,160,23,0.25)" />
         <path d={shadeBand(-2, 2)} fill="rgba(255,107,53,0.30)" />
         <path d={shadeBand(-1, 1)} fill="rgba(255,215,0,0.45)" />
-        <path d={curvePath} stroke="#fff" strokeWidth={2.5} fill="none" />
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(255,255,255,0.4)" />
+        <path d={curvePath} stroke="#1F3E6C" strokeWidth={2.5} fill="none" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
         {[-3, -2, -1, 0, 1, 2, 3].map(k => (
           <g key={k}>
-            <line x1={toPx(mu + k * sigma)} y1={Y1} x2={toPx(mu + k * sigma)} y2={Y1 + 5} stroke="rgba(255,255,255,0.5)" />
-            <text x={toPx(mu + k * sigma)} y={Y1 + 20} fill="rgba(255,255,255,0.75)" fontSize={11} textAnchor="middle">{k === 0 ? 'μ' : `${k > 0 ? '+' : ''}${k}σ`}</text>
+            <line x1={toPx(mu + k * sigma)} y1={Y1} x2={toPx(mu + k * sigma)} y2={Y1 + 5} stroke="rgba(31,62,108,0.5)" />
+            <text x={toPx(mu + k * sigma)} y={Y1 + 20} fill="rgba(31,62,108,0.75)" fontSize={11} textAnchor="middle">{k === 0 ? 'μ' : `${k > 0 ? '+' : ''}${k}σ`}</text>
           </g>
         ))}
         <text x={toPx(mu)} y={Y0 + 16} fill="#FFD700" fontSize={14} textAnchor="middle" fontWeight={700}>68%</text>

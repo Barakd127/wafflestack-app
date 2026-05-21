@@ -75,7 +75,7 @@ export default function BoxplotComparisonInteractive() {
   const yTicks = [0, 20, 40, 60, 80, 100]
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>השוואת Boxplots — בין קבוצות</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
         גרור את הידיות הצהובות (Q₁, חציון, Q₃) ואת הקצוות (min, max) של כל קבוצה. השוו חציונים, IQR וטווחים.
@@ -92,12 +92,12 @@ export default function BoxplotComparisonInteractive() {
         style={{ touchAction: 'none', userSelect: 'none' }}
       >
         {/* Y axis */}
-        <line x1={AXIS_X} y1={Y_TOP} x2={AXIS_X} y2={Y_BOT} stroke="rgba(255,255,255,0.4)" />
+        <line x1={AXIS_X} y1={Y_TOP} x2={AXIS_X} y2={Y_BOT} stroke="rgba(31,62,108,0.4)" />
         {yTicks.map(t => (
           <g key={t}>
-            <line x1={AXIS_X - 4} y1={toY(t)} x2={AXIS_X} y2={toY(t)} stroke="rgba(255,255,255,0.4)" />
-            <line x1={AXIS_X} y1={toY(t)} x2={W - PAD_X / 2} y2={toY(t)} stroke="rgba(255,255,255,0.06)" />
-            <text x={AXIS_X - 8} y={toY(t) + 4} fill="rgba(255,255,255,0.6)" fontSize={11} textAnchor="end">{t}</text>
+            <line x1={AXIS_X - 4} y1={toY(t)} x2={AXIS_X} y2={toY(t)} stroke="rgba(31,62,108,0.4)" />
+            <line x1={AXIS_X} y1={toY(t)} x2={W - PAD_X / 2} y2={toY(t)} stroke="rgba(31,62,108,0.06)" />
+            <text x={AXIS_X - 8} y={toY(t) + 4} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="end">{t}</text>
           </g>
         ))}
 
@@ -112,13 +112,13 @@ export default function BoxplotComparisonInteractive() {
           return (
             <g key={gi}>
               {/* Whisker line top */}
-              <line x1={cx} y1={yMax_} x2={cx} y2={yQ3} stroke="#fff" strokeWidth={1.5} />
+              <line x1={cx} y1={yMax_} x2={cx} y2={yQ3} stroke="#1F3E6C" strokeWidth={1.5} />
               {/* Whisker top cap */}
-              <line x1={cx - 20} y1={yMax_} x2={cx + 20} y2={yMax_} stroke="#fff" strokeWidth={1.5} />
+              <line x1={cx - 20} y1={yMax_} x2={cx + 20} y2={yMax_} stroke="#1F3E6C" strokeWidth={1.5} />
               {/* Whisker line bottom */}
-              <line x1={cx} y1={yQ1} x2={cx} y2={yMin_} stroke="#fff" strokeWidth={1.5} />
+              <line x1={cx} y1={yQ1} x2={cx} y2={yMin_} stroke="#1F3E6C" strokeWidth={1.5} />
               {/* Whisker bottom cap */}
-              <line x1={cx - 20} y1={yMin_} x2={cx + 20} y2={yMin_} stroke="#fff" strokeWidth={1.5} />
+              <line x1={cx - 20} y1={yMin_} x2={cx + 20} y2={yMin_} stroke="#1F3E6C" strokeWidth={1.5} />
 
               {/* Box */}
               <rect
@@ -154,7 +154,7 @@ export default function BoxplotComparisonInteractive() {
               })}
 
               {/* Group label */}
-              <text x={cx} y={Y_BOT + 20} fill="#fff" fontSize={14} fontWeight={700} textAnchor="middle">{b.name}</text>
+              <text x={cx} y={Y_BOT + 20} fill="#1F3E6C" fontSize={14} fontWeight={700} textAnchor="middle">{b.name}</text>
             </g>
           )
         })}
@@ -171,7 +171,7 @@ export default function BoxplotComparisonInteractive() {
               key={i}
               style={{
                 padding: 10,
-                background: 'rgba(255,255,255,0.06)',
+                background: 'rgba(31,62,108,0.06)',
                 borderRadius: 8,
                 borderInlineStart: `3px solid ${b.color}`,
                 fontSize: 12,
@@ -189,7 +189,7 @@ export default function BoxplotComparisonInteractive() {
       <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
         <button
           onClick={() => setBoxes(INITIAL)}
-          style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
+          style={{ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
         >
           איפוס
         </button>

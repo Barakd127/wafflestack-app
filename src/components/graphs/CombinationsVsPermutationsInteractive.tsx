@@ -70,7 +70,7 @@ export default function CombinationsVsPermutationsInteractive() {
   )
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>צירופים מול חליפות — Combinations vs Permutations</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>אותם {r} אסימונים — כצירוף (ללא סדר) זה אחד, כחליפות (עם סדר) זה {r}! סדרים.</p>
 
@@ -98,7 +98,7 @@ export default function CombinationsVsPermutationsInteractive() {
       <Slider label={`n = ${n}`} value={n} min={1} max={10} step={1} onChange={v => setN(Math.round(v))} />
       <Slider label={`r = ${r}`} value={r} min={0} max={n} step={1} onChange={v => setR(Math.round(v))} />
 
-      <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-around' }}>
+      <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-around' }}>
         <span style={{ color: '#FFD700', fontWeight: 700 }}>nCr = {C}</span>
         <span style={{ color: '#60a5fa', fontWeight: 700 }}>nPr = {P}</span>
         <span>יחס = r! = {fact(r)}</span>

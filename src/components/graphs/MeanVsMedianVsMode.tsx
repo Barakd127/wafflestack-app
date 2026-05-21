@@ -54,13 +54,13 @@ export default function MeanVsMedianVsMode() {
   }, [meanX, medianX, modeX])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>ממוצע מול חציון ושכיח — מתי הם נפרדים</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור עמודות מעלה ומטה. כשההתפלגות סימטרית — שלושת המדדים שווים. כשהיא מוטה — הם מתפצלים.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(255,255,255,0.4)" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
         {heights.map((h, i) => (
           <rect key={i} x={X0 + i * binW + 2} y={toY(h)} width={binW - 4} height={Y1 - toY(h)}
             fill="rgba(96,165,250,0.55)" stroke="#60a5fa" strokeWidth={1.5}
@@ -76,7 +76,7 @@ export default function MeanVsMedianVsMode() {
       </svg>
       <div id="mmm-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <button onClick={() => setHeights(INITIAL_HEIGHTS)} style={{
-        background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)',
+        background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)',
         borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13,
       }}>איפוס לסימטריה</button>
     </div>

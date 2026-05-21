@@ -56,7 +56,7 @@ export default function HypothesisTestingInteractive() {
   }, [alpha, beta, power])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>מבחן השערות — α, β ועוצמה</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>אזור אדום = α (טעות סוג I). אזור כתום = β (טעות סוג II). שטח ירוק = עוצמת המבחן.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
@@ -65,9 +65,9 @@ export default function HypothesisTestingInteractive() {
         <path d={shade(delta, zCrit, xMax)} fill="rgba(16,185,129,0.35)" />
         <path d={path(0)} stroke="#60a5fa" strokeWidth={2.5} fill="none" />
         <path d={path(delta)} stroke="#FFD700" strokeWidth={2.5} fill="none" />
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(255,255,255,0.4)" />
-        <line x1={toPx(zCrit)} y1={Y0} x2={toPx(zCrit)} y2={Y1} stroke="#fff" strokeWidth={1.5} strokeDasharray="4 4" />
-        <text x={toPx(zCrit)} y={Y0 - 4} fill="#fff" fontSize={11} textAnchor="middle">קריטי</text>
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
+        <line x1={toPx(zCrit)} y1={Y0} x2={toPx(zCrit)} y2={Y1} stroke="#1F3E6C" strokeWidth={1.5} strokeDasharray="4 4" />
+        <text x={toPx(zCrit)} y={Y0 - 4} fill="#1F3E6C" fontSize={11} textAnchor="middle">קריטי</text>
         <text x={toPx(0)} y={Y0 + 14} fill="#60a5fa" fontSize={11} textAnchor="middle">H₀</text>
         <text x={toPx(delta)} y={Y0 + 14} fill="#FFD700" fontSize={11} textAnchor="middle">H₁</text>
       </svg>

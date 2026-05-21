@@ -62,7 +62,7 @@ export default function ZScoreInteractive() {
   }, [x, mu, sigma, z])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>ציון z (Z-Score) — גרור נקודה על הציר</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>הציון שלך עומד מעל {pct.toFixed(1)}% מהאוכלוסיה</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
@@ -70,10 +70,10 @@ export default function ZScoreInteractive() {
         style={{ touchAction: 'none' }}>
         <path d={shadePath} fill="rgba(255,215,0,0.3)" />
         <path d={path} stroke="#FFD700" strokeWidth={2.5} fill="none" />
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(255,255,255,0.4)" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
         <line x1={toPx(mu)} y1={Y0} x2={toPx(mu)} y2={Y1} stroke="#60a5fa" strokeWidth={1.5} strokeDasharray="4 4" />
         <text x={toPx(mu)} y={Y0 - 6} fill="#60a5fa" fontSize={12} textAnchor="middle">μ = {mu}</text>
-        <circle cx={toPx(x)} cy={yScale(toPx(x))} r={10} fill="#fff" stroke="#FFD700" strokeWidth={3}
+        <circle cx={toPx(x)} cy={yScale(toPx(x))} r={10} fill="#1F3E6C" stroke="#FFD700" strokeWidth={3}
           onPointerDown={e => { setDrag(true); (e.target as Element).setPointerCapture(e.pointerId) }}
           style={{ cursor: 'grab' }} />
         <text x={toPx(x)} y={Y1 + 22} fill="#FFD700" fontSize={13} textAnchor="middle" fontWeight={700}>x = {x.toFixed(1)}</text>

@@ -82,19 +82,19 @@ export default function EffectSizeInteractive() {
   const info = interpret(d)
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>גודל אפקט — Cohen's d</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
         הזז את d וצפה כיצד שתי ההתפלגויות מתרחקות. ככל ש-d גדול יותר — חפיפה קטנה יותר ↔ אפקט חזק יותר.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} style={{ touchAction: 'none' }}>
-        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke="rgba(255,255,255,0.4)" />
+        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" />
         {/* Tick labels */}
         {[-3, -2, -1, 0, 1, 2, 3, 4].map(t => (
           <g key={t}>
-            <line x1={toX(t)} y1={AXIS_Y - 3} x2={toX(t)} y2={AXIS_Y + 3} stroke="rgba(255,255,255,0.4)" />
-            <text x={toX(t)} y={AXIS_Y + 16} fill="rgba(255,255,255,0.6)" fontSize={11} textAnchor="middle">{t}</text>
+            <line x1={toX(t)} y1={AXIS_Y - 3} x2={toX(t)} y2={AXIS_Y + 3} stroke="rgba(31,62,108,0.4)" />
+            <text x={toX(t)} y={AXIS_Y + 16} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{t}</text>
           </g>
         ))}
 
@@ -135,7 +135,7 @@ export default function EffectSizeInteractive() {
         style={{
           marginTop: 10,
           padding: '10px 14px',
-          background: 'rgba(255,255,255,0.06)',
+          background: 'rgba(31,62,108,0.06)',
           borderRadius: 8,
           fontSize: 13,
           display: 'flex',
@@ -150,7 +150,7 @@ export default function EffectSizeInteractive() {
 
       <table style={{ width: '100%', marginTop: 12, fontSize: 13, borderCollapse: 'collapse' }}>
         <thead>
-          <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+          <tr style={{ background: 'rgba(31,62,108,0.05)' }}>
             <th style={{ textAlign: 'start', padding: '6px 10px', fontWeight: 600 }}>d</th>
             <th style={{ textAlign: 'start', padding: '6px 10px', fontWeight: 600 }}>פירוש (Cohen, 1988)</th>
           </tr>

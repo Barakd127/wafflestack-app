@@ -87,7 +87,7 @@ export default function ResidualPlotInteractive() {
   }, [slope, intercept])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>תרשים שאריות — בדיקת התאמת המודל</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
         גרור נקודות. שאריות צריכות להתפזר אקראית סביב 0. צורת מניפה ↦ heteroscedasticity.
@@ -103,9 +103,9 @@ export default function ResidualPlotInteractive() {
         style={{ touchAction: 'none' }}
       >
         {/* Top: scatter + regression */}
-        <text x={W / 2} y={20} fill="rgba(255,255,255,0.7)" fontSize={12} textAnchor="middle">תרשים פיזור + קו רגרסיה</text>
-        <line x1={X0} y1={Y1_TOP} x2={X1} y2={Y1_TOP} stroke="rgba(255,255,255,0.4)" />
-        <line x1={X0} y1={Y0_TOP} x2={X0} y2={Y1_TOP} stroke="rgba(255,255,255,0.4)" />
+        <text x={W / 2} y={20} fill="rgba(31,62,108,0.7)" fontSize={12} textAnchor="middle">תרשים פיזור + קו רגרסיה</text>
+        <line x1={X0} y1={Y1_TOP} x2={X1} y2={Y1_TOP} stroke="rgba(31,62,108,0.4)" />
+        <line x1={X0} y1={Y0_TOP} x2={X0} y2={Y1_TOP} stroke="rgba(31,62,108,0.4)" />
         <line
           x1={toX(xMin)} y1={toYTop(yhat(xMin))}
           x2={toX(xMax)} y2={toYTop(yhat(xMax))}
@@ -123,16 +123,16 @@ export default function ResidualPlotInteractive() {
           <circle
             key={i}
             cx={toX(p.x)} cy={toYTop(p.y)} r={9}
-            fill="#60a5fa" stroke="#fff" strokeWidth={1.5}
+            fill="#60a5fa" stroke="#1F3E6C" strokeWidth={1.5}
             onPointerDown={e => { setDrag(i); (e.target as Element).setPointerCapture(e.pointerId) }}
             style={{ cursor: 'grab' }}
           />
         ))}
 
         {/* Bottom: residual plot */}
-        <text x={W / 2} y={H_TOP + 30} fill="rgba(255,255,255,0.7)" fontSize={12} textAnchor="middle">תרשים שאריות (e = y - ŷ)</text>
-        <line x1={X0} y1={Y1_BOT} x2={X1} y2={Y1_BOT} stroke="rgba(255,255,255,0.4)" />
-        <line x1={X0} y1={Y0_BOT} x2={X0} y2={Y1_BOT} stroke="rgba(255,255,255,0.4)" />
+        <text x={W / 2} y={H_TOP + 30} fill="rgba(31,62,108,0.7)" fontSize={12} textAnchor="middle">תרשים שאריות (e = y - ŷ)</text>
+        <line x1={X0} y1={Y1_BOT} x2={X1} y2={Y1_BOT} stroke="rgba(31,62,108,0.4)" />
+        <line x1={X0} y1={Y0_BOT} x2={X0} y2={Y1_BOT} stroke="rgba(31,62,108,0.4)" />
         {/* Zero reference line */}
         <line
           x1={X0} y1={toYBot(0)} x2={X1} y2={toYBot(0)}
@@ -151,14 +151,14 @@ export default function ResidualPlotInteractive() {
               <circle
                 cx={toX(p.x)} cy={toYBot(r)} r={6}
                 fill={Math.abs(r) > 2 ? '#f59e0b' : '#60a5fa'}
-                stroke="#fff" strokeWidth={1}
+                stroke="#1F3E6C" strokeWidth={1}
               />
             </g>
           )
         })}
         {/* Y axis ticks for residual */}
         {[-4, -2, 0, 2, 4].map(t => (
-          <text key={t} x={X0 - 6} y={toYBot(t) + 4} fill="rgba(255,255,255,0.6)" fontSize={10} textAnchor="end">{t}</text>
+          <text key={t} x={X0 - 6} y={toYBot(t) + 4} fill="rgba(31,62,108,0.6)" fontSize={10} textAnchor="end">{t}</text>
         ))}
       </svg>
 
@@ -182,7 +182,7 @@ export default function ResidualPlotInteractive() {
       <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
         <button
           onClick={() => setPts(base)}
-          style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
+          style={{ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
         >
           איפוס
         </button>

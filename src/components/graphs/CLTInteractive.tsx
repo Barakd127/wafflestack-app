@@ -192,10 +192,10 @@ export default function CLTInteractive() {
     <div
       dir="rtl"
       style={{
-        background: 'rgba(31,62,108,0.92)',
+        background: 'rgba(255,255,255,0.92)',
         borderRadius: 16,
         padding: 20,
-        color: '#fff',
+        color: '#1F3E6C',
         fontFamily: 'system-ui, sans-serif',
       }}
     >
@@ -220,7 +220,7 @@ export default function CLTInteractive() {
             onClick={() => changeParent(opt.k)}
             style={{
               background: parent === opt.k ? '#1ABC9C' : 'transparent',
-              color: '#fff',
+              color: '#1F3E6C',
               border: '1px solid #1ABC9C',
               borderRadius: 8,
               padding: '6px 14px',
@@ -259,7 +259,7 @@ export default function CLTInteractive() {
           y1={H_PARENT - 0.5}
           x2={W - PAD_X}
           y2={H_PARENT - 0.5}
-          stroke="rgba(255,255,255,0.4)"
+          stroke="rgba(31,62,108,0.4)"
           strokeWidth={1}
         />
         {/* PDF overlay just to hint at shape; visual aid only */}
@@ -283,7 +283,7 @@ export default function CLTInteractive() {
             }
             return pts.join(' ')
           })()}
-          stroke="rgba(255,255,255,0.5)"
+          stroke="rgba(31,62,108,0.5)"
           strokeWidth={1.5}
           fill="none"
           strokeDasharray="4 3"
@@ -317,7 +317,7 @@ export default function CLTInteractive() {
         {normalPath && (
           <path
             d={normalPath}
-            stroke="#fff"
+            stroke="#1F3E6C"
             strokeWidth={2}
             fill="none"
             strokeDasharray="6 4"
@@ -329,7 +329,7 @@ export default function CLTInteractive() {
           y1={H_SAMPLE - 0.5}
           x2={W - PAD_X}
           y2={H_SAMPLE - 0.5}
-          stroke="rgba(255,255,255,0.4)"
+          stroke="rgba(31,62,108,0.4)"
           strokeWidth={1}
         />
         {/* x-axis ticks */}
@@ -338,7 +338,7 @@ export default function CLTInteractive() {
             key={t}
             x={xToPx(t)}
             y={H_SAMPLE - 4}
-            fill="rgba(255,255,255,0.6)"
+            fill="rgba(31,62,108,0.6)"
             fontSize={11}
             textAnchor="middle"
           >
@@ -408,7 +408,7 @@ export default function CLTInteractive() {
           onClick={draw}
           style={{
             background: '#1ABC9C',
-            color: '#fff',
+            color: '#1F3E6C',
             border: 'none',
             borderRadius: 8,
             padding: '10px 18px',
@@ -424,8 +424,8 @@ export default function CLTInteractive() {
           onClick={reset}
           style={{
             background: 'transparent',
-            color: '#fff',
-            border: '1px solid rgba(255,255,255,0.3)',
+            color: '#1F3E6C',
+            border: '1px solid rgba(31,62,108,0.3)',
             borderRadius: 8,
             padding: '10px 18px',
             fontSize: 15,

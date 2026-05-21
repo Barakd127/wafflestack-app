@@ -43,7 +43,7 @@ export default function BayesTheoremInteractive() {
     <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth={1.5} />
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>משפט בייס — Bayes' Theorem</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
         הזז את ההסתברות הקודמת P(H), את הסבירות P(E|H), ואת התראת השווא P(E|¬H). הפוסטריור P(H|E) מחושב חי.
@@ -59,32 +59,32 @@ export default function BayesTheoremInteractive() {
         {branch(lvl1X + 40, yNH + 30, lvl2X, yNENH + 12, '#60a5fa')}
 
         {/* Root */}
-        <text x={rootX} y={rootY + 78} fill="#fff" fontSize={13} fontWeight={700} textAnchor="end">התחלה</text>
+        <text x={rootX} y={rootY + 78} fill="#1F3E6C" fontSize={13} fontWeight={700} textAnchor="end">התחלה</text>
 
         {/* Level 1 */}
         <rect x={lvl1X} y={yH} width={80} height={36} rx={6} fill="rgba(255,215,0,0.18)" stroke="#FFD700" />
         <text x={lvl1X + 40} y={yH + 16} fill="#FFD700" fontSize={12} textAnchor="middle">H</text>
-        <text x={lvl1X + 40} y={yH + 30} fill="#fff" fontSize={11} textAnchor="middle">{prior.toFixed(2)}</text>
+        <text x={lvl1X + 40} y={yH + 30} fill="#1F3E6C" fontSize={11} textAnchor="middle">{prior.toFixed(2)}</text>
 
         <rect x={lvl1X} y={yNH} width={80} height={36} rx={6} fill="rgba(96,165,250,0.18)" stroke="#60a5fa" />
         <text x={lvl1X + 40} y={yNH + 16} fill="#60a5fa" fontSize={12} textAnchor="middle">¬H</text>
-        <text x={lvl1X + 40} y={yNH + 30} fill="#fff" fontSize={11} textAnchor="middle">{(1 - prior).toFixed(2)}</text>
+        <text x={lvl1X + 40} y={yNH + 30} fill="#1F3E6C" fontSize={11} textAnchor="middle">{(1 - prior).toFixed(2)}</text>
 
         {/* Level 2 */}
         <text x={lvl2X} y={yEH + 12} fill="#FFD700" fontSize={11}>E · {pHE.toFixed(3)}</text>
-        <text x={lvl2X} y={yNEH + 12} fill="rgba(255,255,255,0.6)" fontSize={11}>¬E · {(prior * (1 - likely)).toFixed(3)}</text>
+        <text x={lvl2X} y={yNEH + 12} fill="rgba(31,62,108,0.6)" fontSize={11}>¬E · {(prior * (1 - likely)).toFixed(3)}</text>
         <text x={lvl2X} y={yENH + 12} fill="#60a5fa" fontSize={11}>E · {pNHE.toFixed(3)}</text>
-        <text x={lvl2X} y={yNENH + 12} fill="rgba(255,255,255,0.6)" fontSize={11}>¬E · {((1 - prior) * (1 - fp)).toFixed(3)}</text>
+        <text x={lvl2X} y={yNENH + 12} fill="rgba(31,62,108,0.6)" fontSize={11}>¬E · {((1 - prior) * (1 - fp)).toFixed(3)}</text>
 
         {/* Posterior bar */}
-        <text x={PAD} y={H - 60} fill="rgba(255,255,255,0.8)" fontSize={12}>Prior P(H)</text>
+        <text x={PAD} y={H - 60} fill="rgba(31,62,108,0.8)" fontSize={12}>Prior P(H)</text>
         <rect x={PAD + 90} y={H - 72} width={400 * prior} height={16} fill="#94a3b8" />
-        <rect x={PAD + 90} y={H - 72} width={400} height={16} fill="none" stroke="rgba(255,255,255,0.3)" />
-        <text x={PAD + 90 + 405} y={H - 60} fill="#fff" fontSize={12}>{prior.toFixed(3)}</text>
+        <rect x={PAD + 90} y={H - 72} width={400} height={16} fill="none" stroke="rgba(31,62,108,0.3)" />
+        <text x={PAD + 90 + 405} y={H - 60} fill="#1F3E6C" fontSize={12}>{prior.toFixed(3)}</text>
 
         <text x={PAD} y={H - 30} fill="#FFD700" fontSize={12} fontWeight={700}>Posterior P(H|E)</text>
         <rect x={PAD + 90} y={H - 42} width={400 * post} height={16} fill="#FFD700" />
-        <rect x={PAD + 90} y={H - 42} width={400} height={16} fill="none" stroke="rgba(255,255,255,0.3)" />
+        <rect x={PAD + 90} y={H - 42} width={400} height={16} fill="none" stroke="rgba(31,62,108,0.3)" />
         <text x={PAD + 90 + 405} y={H - 30} fill="#FFD700" fontSize={12} fontWeight={700}>{post.toFixed(3)}</text>
       </svg>
 
@@ -94,7 +94,7 @@ export default function BayesTheoremInteractive() {
       <SliderRow label={`P(E|H) likelihood = ${likely.toFixed(2)}`} value={likely} min={0.01} max={0.99} step={0.01} onChange={setLikely} />
       <SliderRow label={`P(E|¬H) false-alarm = ${fp.toFixed(2)}`} value={fp} min={0.01} max={0.99} step={0.01} onChange={setFp} />
 
-      <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.06)', borderRadius: 8, fontSize: 13 }}>
+      <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13 }}>
         P(E) = P(E|H)·P(H) + P(E|¬H)·P(¬H) = <b>{pE.toFixed(3)}</b>
       </div>
     </div>

@@ -35,11 +35,11 @@ export default function BinomialInteractive() {
   }, [n, p, mean, std])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>התפלגות בינומית — B(n, p)</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>n ניסויים בלתי תלויים, הסתברות הצלחה p. ככל ש-n גדל, הצורה מתקרבת לנורמלית.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(255,255,255,0.4)" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
         {probs.map((pr, k) => {
           const h = (pr / maxP) * (Y1 - Y0)
           return <rect key={k} x={X0 + k * barW + 2} y={Y1 - h} width={barW - 4} height={h} fill="rgba(255,215,0,0.7)" stroke="#FFD700" strokeWidth={1} />

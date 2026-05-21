@@ -42,7 +42,7 @@ export default function IQRInteractive() {
   }, [Q1, Q2, Q3, iqr])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(31,62,108,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#fff' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>טווח רבעוני (IQR) — Boxplot</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור נקודות. נקודות מחוץ ל-1.5·IQR מסומנות באדום (חריגות).</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
@@ -56,7 +56,7 @@ export default function IQRInteractive() {
           const outlier = v < fenceLo || v > fenceHi
           return (
             <circle key={i} cx={toX(v)} cy={Y_BOX + BOX_H + 30} r={9}
-              fill={outlier ? '#ef4444' : '#60a5fa'} stroke="#fff" strokeWidth={1.5}
+              fill={outlier ? '#ef4444' : '#60a5fa'} stroke="#1F3E6C" strokeWidth={1.5}
               onPointerDown={e => { setDrag(i); (e.target as Element).setPointerCapture(e.pointerId) }}
               style={{ cursor: 'grab' }} />
           )
@@ -67,7 +67,7 @@ export default function IQRInteractive() {
       </svg>
       <div id="iqr-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <button onClick={() => setValues([2, 4, 5, 6, 7, 8, 9, 10, 11, 13])} style={{
-        background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)',
+        background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)',
         borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13,
       }}>איפוס</button>
     </div>

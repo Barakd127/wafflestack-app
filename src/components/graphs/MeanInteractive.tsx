@@ -149,11 +149,13 @@ export default function MeanInteractive() {
     <div
       dir="rtl"
       style={{
-        background: 'rgba(31,62,108,0.92)',
+        background: 'rgba(255,255,255,0.92)',
+        border: '1px solid rgba(31,62,108,0.15)',
         borderRadius: 16,
         padding: 20,
-        color: '#fff',
+        color: '#1F3E6C',
         fontFamily: 'system-ui, sans-serif',
+        boxShadow: '0 2px 10px rgba(31,62,108,0.06)',
       }}
     >
       <h3 style={{ margin: 0, marginBottom: 8, fontSize: 20 }}>
@@ -178,7 +180,7 @@ export default function MeanInteractive() {
           y1={AXIS_Y}
           x2={W - PAD_X}
           y2={AXIS_Y}
-          stroke="rgba(255,255,255,0.4)"
+          stroke="rgba(31,62,108,0.4)"
           strokeWidth={2}
         />
         {/* Tick marks and labels */}
@@ -189,13 +191,13 @@ export default function MeanInteractive() {
               y1={AXIS_Y - 4}
               x2={xToPx(t)}
               y2={AXIS_Y + 4}
-              stroke="rgba(255,255,255,0.4)"
+              stroke="rgba(31,62,108,0.4)"
               strokeWidth={1}
             />
             <text
               x={xToPx(t)}
               y={AXIS_Y + 20}
-              fill="rgba(255,255,255,0.6)"
+              fill="rgba(31,62,108,0.6)"
               fontSize={12}
               textAnchor="middle"
             >
@@ -204,26 +206,26 @@ export default function MeanInteractive() {
           </g>
         ))}
 
-        {/* Mean indicator: vertical line + triangular fulcrum (navy + white) */}
+        {/* Mean indicator: gold dashed line + navy triangle fulcrum + navy label (light theme) */}
         <line
           x1={meanPx}
           y1={30}
           x2={meanPx}
           y2={AXIS_Y}
-          stroke="#ffffff"
+          stroke="#D4A017"
           strokeWidth={2}
           strokeDasharray="4 3"
         />
         <polygon
           points={`${meanPx - 10},${AXIS_Y + 30} ${meanPx + 10},${AXIS_Y + 30} ${meanPx},${AXIS_Y + 8}`}
-          fill="#1F3E6C"
-          stroke="#ffffff"
+          fill="#D4A017"
+          stroke="#1F3E6C"
           strokeWidth={1.5}
         />
         <text
           x={meanPx}
           y={24}
-          fill="#ffffff"
+          fill="#1F3E6C"
           fontSize={14}
           fontWeight={700}
           textAnchor="middle"
@@ -246,7 +248,7 @@ export default function MeanInteractive() {
                 cy={AXIS_Y}
                 r={DOT_RADIUS}
                 fill="#4A90D9"
-                stroke="#fff"
+                stroke="#1F3E6C"
                 strokeWidth={2}
                 onPointerDown={e => {
                   e.currentTarget.setPointerCapture(e.pointerId)
@@ -256,7 +258,7 @@ export default function MeanInteractive() {
               <text
                 x={cx}
                 y={AXIS_Y + 4}
-                fill="#fff"
+                fill="#1F3E6C"
                 fontSize={11}
                 fontWeight={600}
                 textAnchor="middle"
@@ -274,7 +276,7 @@ export default function MeanInteractive() {
         style={{
           marginTop: 12,
           padding: 12,
-          background: 'rgba(255,255,255,0.06)',
+          background: 'rgba(31,62,108,0.06)',
           borderRadius: 8,
           minHeight: 50,
         }}
@@ -312,7 +314,7 @@ export default function MeanInteractive() {
 function btnStyle(bg: string): React.CSSProperties {
   return {
     background: bg,
-    color: '#fff',
+    color: '#1F3E6C',
     border: 'none',
     borderRadius: 8,
     padding: '8px 14px',
