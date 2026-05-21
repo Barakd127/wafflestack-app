@@ -18,6 +18,15 @@
   line-height: 1.5;
   font-weight: 400;
 
+  /* Bottom-left FAB slot tokens — shared between TutorFAB (fixed) and the
+     sidebar's PomodoroTimer (absolute). Keep these in sync if you move one. */
+  --ws-bottom-fab-inset: 20px;          /* matches Tailwind `bottom-5 left-5` */
+  --ws-bottom-fab-size: 56px;           /* TutorFAB 14*4 = 56 */
+  --ws-bottom-fab-gap:  12px;
+  /* Sidebar Pomodoro pill sits just to the right of the TutorFAB column.
+     Tutor sits at left:20 + 56 wide = consumes 0..76; pill starts at 90px. */
+  --ws-pomodoro-left: 90px;
+
   /* Mind map canvas CSS variables (light mode) */
   --mm-canvas-bg-start: #f5f7fa;
   --mm-canvas-bg-end: #c3cfe2;
