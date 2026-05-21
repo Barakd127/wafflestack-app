@@ -835,30 +835,72 @@ function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
   const [embedded, setEmbedded] = useState<CourseDef | null>(null)
   const pickCourse = (c: CourseDef) => {
     if(!c.active) { setComingSoon(c); return }
-    if(c.embedUrl) { setEmbedded(c); return }
+    if(c.embedUrl) {
+      // stats-viz-mata.vercel.app + most modern apps set X-Frame-Options
+      // DENY or CSP frame-ancestors 'none' which blocks iframe embedding.
+      // Show a small launcher overlay that opens the site in a new tab.
+      setEmbedded(c); return
+    }
     onSelectActive()
   }
-  // Fullscreen embed view — renders an iframe + back button
+  // External-course launcher overlay — opens the site in a new tab on click.
   if(embedded) {
+    const openExternal = () => {
+      if(embedded.embedUrl) window.open(embedded.embedUrl, '_blank', 'noopener,noreferrer')
+    }
     return (
-      <div style={{ position: 'fixed', inset: 0, zIndex: 150, background: '#0B1B3E' }} dir="rtl">
-        <button
-          onClick={() => setEmbedded(null)}
+      <div
+        onClick={() => setEmbedded(null)}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 150,
+          background: 'rgba(11,27,62,0.55)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+      >
+        <div
+          onClick={e => e.stopPropagation()}
           style={{
-            position: 'absolute', top: 14, insetInlineStart: 14, zIndex: 2,
-            background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
-            color: '#0B1B3E', border: 0, borderRadius: 12,
-            padding: '8px 16px', fontFamily: "'Rubik', sans-serif",
-            fontWeight: 700, fontSize: 13, cursor: 'pointer',
-            boxShadow: '0 6px 20px rgba(0,0,0,0.4)',
+            background: '#fff', borderRadius: 22, padding: '36px 40px',
+            maxWidth: 480, textAlign: 'center',
+            boxShadow: '0 24px 70px rgba(0,0,0,0.3)',
+            fontFamily: "'Rubik', sans-serif",
           }}
-        >← חזרה לקורסים</button>
-        <iframe
-          src={embedded.embedUrl}
-          title={embedded.label}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0, background: '#fff' }}
-          allow="autoplay; clipboard-write; fullscreen"
-        />
+          dir="rtl"
+        >
+          <div style={{
+            width: 80, height: 80, borderRadius: 20,
+            background: embedded.bg, margin: '0 auto 18px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 44, boxShadow: '0 10px 28px rgba(0,0,0,0.15)',
+          }}>{embedded.icon}</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#0B1B3E', marginBottom: 6 }}>{embedded.label}</div>
+          <div style={{ fontSize: 14, color: 'var(--sh-text-med)', marginBottom: 18 }}>{embedded.desc}</div>
+          <div style={{ fontSize: 12, color: 'var(--sh-text-light)', marginBottom: 4, direction: 'ltr' }}>
+            {embedded.embedUrl}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--sh-text-light)', marginBottom: 18 }}>
+            הקורס מתארח באתר חיצוני ויפתח בכרטיסיה חדשה
+          </div>
+          <button
+            onClick={openExternal}
+            style={{
+              background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+              color: '#0B1B3E', border: 0, borderRadius: 12,
+              padding: '10px 24px', fontFamily: "'Rubik', sans-serif",
+              fontWeight: 700, fontSize: 14, cursor: 'pointer',
+              boxShadow: '0 6px 18px rgba(212,175,55,0.45)',
+            }}
+          >פתח את הקורס ↗</button>
+          <button
+            onClick={() => setEmbedded(null)}
+            style={{
+              background: 'transparent', border: '1px solid rgba(31,62,108,0.2)',
+              borderRadius: 10, padding: '8px 18px', cursor: 'pointer',
+              fontFamily: 'inherit', fontSize: 13, color: 'var(--sh-text-dark)',
+              marginInlineStart: 10,
+            }}
+          >ביטול</button>
+        </div>
       </div>
     )
   }
