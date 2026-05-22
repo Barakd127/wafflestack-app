@@ -168,8 +168,12 @@ html.dark :focus-visible {
     display: none !important;
   }
 
-  /* Touch-friendly minimum tap target for buttons inside the app */
-  button, [role="button"] {
+  /* Touch-friendly minimum tap target for buttons inside the app.
+     Scoped to skip icon-only / explicitly-sized controls so 22x22 close (✕)
+     buttons, drag handles and inline pills aren't stretched to 44px tall.
+     Opt out per-element with `data-icon-btn` or `data-no-touch-target`. */
+  button:not([data-icon-btn]):not([data-no-touch-target]):not([aria-label*="סגור"]):not([aria-label*="close" i]),
+  [role="button"]:not([data-icon-btn]):not([data-no-touch-target]) {
     min-height: 44px;
   }
 
