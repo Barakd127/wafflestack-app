@@ -129,6 +129,21 @@ html.dark :focus-visible {
 .arsenal-card-in  { animation: arsenalCardIn  0.32s cubic-bezier(.22,1.36,.36,1) backwards; }
 .arsenal-card-out { animation: arsenalCardOut 0.22s ease-in forwards; pointer-events: none; }
 
+/* === KaTeX RTL isolation (applies at every viewport) ============================
+   Math is direction-neutral. Inside Hebrew `dir="rtl"` containers the KaTeX
+   root spans inherit RTL, which flips subscripts/superscripts, mis-orders
+   operators (a - b → b - a visually), and breaks fractions. Force LTR +
+   bidi isolation on every KaTeX root so they always render left-to-right
+   regardless of the surrounding Hebrew layout. */
+.katex,
+.katex-display,
+.katex-html,
+.katex-mathml {
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  text-align: initial;
+}
+
 /* === Mobile-friendly base styles (Android phones, 360–430px portrait) === */
 @media (max-width: 768px) {
   html, body {
@@ -181,6 +196,7 @@ html.dark :focus-visible {
   .katex-display > .katex {
     white-space: nowrap;
   }
+
 
   /* Lesson and quiz cards: full-bleed on mobile */
   [data-mobile-fullbleed],
