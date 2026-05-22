@@ -2142,13 +2142,20 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
 
   // When any companion tool opens → auto-float the question card on desktop,
   // or switch to bottom-sheet mode on mobile. Closing tool → back to normal.
+  // Also auto-enter fullscreen (hides sidebar + topbar) on tab activation so
+  // the canvas + question get full viewport. Closing tab → exit fullscreen.
   const handleSetTab = useCallback((newTab: typeof tab) => {
     setTab(newTab)
     setChipExpanded(true)
     if (newTab === 'none') {
       setFloatMode(false)
+      // Tab cleared → restore chrome
+      if (fullscreen && onToggleFullscreen) onToggleFullscreen()
+    } else {
+      // Tab opened → auto-hide chrome if not already
+      if (!fullscreen && onToggleFullscreen) onToggleFullscreen()
     }
-  }, [])
+  }, [fullscreen, onToggleFullscreen])
 
   // Esc to exit fullscreen (don't hijack when editing inside a textarea)
   useEffect(() => {
@@ -2391,7 +2398,36 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }} dir="rtl">
       {xpBurst !== null && <XpBurst amount={xpBurst} onDone={() => setXpBurst(null)} />}
 
-      {/* Top bar */}
+      {/* Chrome-toggle chip — visible only when fullscreen (chrome hidden).
+          Single button per user request: "הצג כלי לימוד" / "הסתר כלי לימוד".
+          Top-right corner, floats above everything. */}
+      {fullscreen && onToggleFullscreen && (
+        <button
+          onClick={onToggleFullscreen}
+          aria-label="הצג כלי לימוד (סרגל צד + סרגל עליון)"
+          title="הצג סרגלים"
+          style={{
+            position: 'fixed', top: 12,
+            insetInlineStart: 12,
+            zIndex: 300,
+            background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+            color: '#0B1B3E',
+            border: 0, borderRadius: 14,
+            padding: '8px 14px',
+            fontFamily: "'Rubik', sans-serif",
+            fontSize: 12, fontWeight: 700,
+            cursor: 'pointer',
+            boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}
+        >
+          ☰ הצג כלי לימוד
+        </button>
+      )}
+
+      {/* Top bar — hidden in fullscreen so canvas + question get full
+          viewport. The floating "הצג כלי לימוד" chip above restores it. */}
+      {!fullscreen && (
       <div className="ws-quiz-topbar" style={{ background: '#FFFFFF', boxShadow: '2px 2px 6px rgba(0,0,0,0.18)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12, zIndex: 10 }}>
         <img src={`${import.meta.env.BASE_URL}building-figma.png`} alt="" style={{ width: 34, height: 26, objectFit: 'cover', borderRadius: 5 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
         <div style={{ flex: 1 }}>
@@ -2425,6 +2461,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           </button>
         )}
       </div>
+      )}{/* end !fullscreen topbar guard */}
 
       {/* Two-mode layout — calm focus when tab='none', tool-fullscreen with
           docked chip when a companion tool is active.
@@ -3003,12 +3040,16 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           <div style={{
             flexShrink: 0, padding: '12px 24px 16px',
             display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap',
-            position: (tab !== 'none' && (isMobile || floatMode)) ? 'absolute' : 'relative',
-            bottom: (tab !== 'none' && (isMobile || floatMode)) ? 0 : undefined,
-            left: (tab !== 'none' && (isMobile || floatMode)) ? 0 : undefined,
-            right: (tab !== 'none' && (isMobile || floatMode)) ? 0 : undefined,
-            zIndex: 40,
-            background: (tab !== 'none' && floatMode) ? 'linear-gradient(180deg, rgba(13,22,40,0) 0%, rgba(13,22,40,0.82) 60%, rgba(13,22,40,0.95) 100%)' : 'transparent',
+            // When a companion tool is active, ALWAYS pin tabs to viewport
+            // bottom (was previously only mobile/floatMode). Otherwise tabs
+            // could fall below the canvas at 100% zoom + only show on
+            // zoom-out. Per user: keep them reachable always.
+            position: (tab !== 'none') ? 'fixed' : 'relative',
+            bottom: (tab !== 'none') ? 0 : undefined,
+            left: (tab !== 'none') ? 0 : undefined,
+            right: (tab !== 'none') ? 0 : undefined,
+            zIndex: 80,
+            background: (tab !== 'none') ? 'linear-gradient(180deg, rgba(13,22,40,0) 0%, rgba(13,22,40,0.82) 60%, rgba(13,22,40,0.95) 100%)' : 'transparent',
           }}>
             {([
               ['none',    '🚫 ללא',         'התמקדו רק בשאלה'],

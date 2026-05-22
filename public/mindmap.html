@@ -1075,6 +1075,14 @@ function initMM(){
           MM = parsed;
           if (!MM.searchMatches) MM.searchMatches = [];
           if (!MM.searchIdx) MM.searchIdx = 0;
+          // First-load auto-collapse: keep top 3 tiers visible (depth 0..2),
+          // collapse everything deeper so a wide stats tree (~60 leaves)
+          // doesn't fan into illegible 46% zoom soup. One-shot per user via
+          // mmAutoCollapsed flag — user clicks expand chevrons to drill in.
+          if (!MM.mmAutoCollapsed) {
+            mmCollapseBelowDepth(3);
+            MM.mmAutoCollapsed = true;
+          }
           MM_HISTORY = [cloneMMForHistory()];
           return; // loaded successfully — skip fresh init
         }
@@ -1620,6 +1628,19 @@ function mmAddCanvas(){
 function mmCollapseAll(collapse=true){
   Object.values(MM.nodes).forEach(n=>{if(n.type==='branch'||n.type==='equation'||n.type==='canvas')n.collapsed=collapse;});
   mmRender();
+}
+
+// Collapse all nodes deeper than `maxDepth` from root. Top tiers (0,1,2)
+// stay expanded; tier 3+ collapsed so dense leaf rows don't crowd the view.
+// Called once on mount via initMM unless user has manually toggled before.
+function mmCollapseBelowDepth(maxDepth){
+  if(!MM || !MM.nodes || !MM.root) return;
+  function walk(id, depth){
+    const n = MM.nodes[id]; if(!n) return;
+    if(depth >= maxDepth){ n.collapsed = true; }
+    for(const cid of (n.childIds || [])) walk(cid, depth + 1);
+  }
+  walk(MM.root, 0);
 }
 
 // Full subtree-aware auto-layout — positions every node so subtrees never collide
