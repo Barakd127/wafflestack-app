@@ -2441,6 +2441,20 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         <div className="ws-quiz-topic" style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: TEXT_DARK }}>
           <span style={{ fontWeight: 700 }}>סטטיסטיקה</span>{!isDone && ` | ${q.topic}`}
         </div>
+        {/* XP-per-question chip (moved here from inside question card per
+            user request — keeps card lighter, header is the single source
+            of truth for question metadata) */}
+        {!isDone && (
+          <div style={{
+            background: 'rgba(212,175,55,0.16)',
+            border: '1px solid rgba(212,175,55,0.5)',
+            color: '#7A5C00',
+            borderRadius: 12,
+            padding: '4px 10px',
+            fontFamily: "'Rubik', sans-serif",
+            fontSize: 12, fontWeight: 700,
+          }}>+{q.xp} XP ⭐</div>
+        )}
         {/* Fullscreen toggle — distraction-free practice; parent hides sidebar+topbar */}
         {onToggleFullscreen && !isMobile && (
           <button
@@ -2754,22 +2768,21 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           ) : phase === 'write' ? (
             /* ── Write your answer ── */
             <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>
-                  +{q.xp} XP ⭐
-                </div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>
-                  שאלה {currentQ + 1} / {total}
-                </div>
+              {/* Question title — full width, no XP chip here (moved into
+                  outer ws-quiz-topbar). User asked for fewer competing chips
+                  on the question card itself. */}
+              <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 18, color: TEXT_DARK, marginBottom: 10, textAlign: 'right' }}>
+                שאלה {currentQ + 1} / {total}
               </div>
 
-              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 19, color: 'var(--sh-q-text-color)', lineHeight: 2.1, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: 22 }}>
+              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 19, color: 'var(--sh-q-text-color)', lineHeight: 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: 16, width: '100%' }}>
                 {q.text}
               </div>
 
               {((q as any).format === 'mc' && Array.isArray((q as any).options)) ? (
-                /* ── Multiple-choice render — 4 buttons, RTL, gold A/B/C/D pill ── */
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }} dir="rtl">
+                /* ── Multiple-choice render — 2×2 grid so all 4 options fit
+                     w/o scrolling alongside the 25vh question card. ── */
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }} dir="rtl">
                   {((q as any).options as string[]).map((opt: string, idx: number) => {
                     const correctIdx: number = (q as any).correctIndex
                     const isChosen = mcSelected === idx
@@ -2805,15 +2818,15 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         onClick={() => handleMcChoose(idx)}
                         disabled={revealed}
                         style={{
-                          display: 'flex', alignItems: 'center', gap: 14,
-                          minHeight: 56, // ≥44px tap target + padding
-                          padding: '12px 16px',
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          minHeight: 44,
+                          padding: '8px 12px',
                           background: bg,
                           border: `2px solid ${border}`,
-                          borderRadius: 12,
+                          borderRadius: 10,
                           color,
                           fontFamily: "'Assistant', sans-serif",
-                          fontSize: 18,
+                          fontSize: 15,
                           fontWeight: 500,
                           cursor: revealed ? 'default' : 'pointer',
                           textAlign: 'right',
