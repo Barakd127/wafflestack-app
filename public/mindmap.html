@@ -714,7 +714,7 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
 <!-- Notebook math editor modal (MathLive). Opened by openMathEditor(widget). -->
 <div id="nb-math-modal" onclick="if(event.target===this)nbCloseMathEditor(false)">
   <div class="mm-panel">
-    <h3>Edit Equation</h3>
+    <h3 dir="rtl">עריכת משוואה</h3>
     <div id="nb-math-field-host"></div>
     <div class="mm-actions">
       <button class="mm-btn danger" onclick="nbDeleteMathWidget()">Delete</button>
@@ -4500,6 +4500,22 @@ async function openMathEditor(widget){
   host.appendChild(mf);
   document.getElementById('nb-math-modal').classList.add('open');
   setTimeout(() => { try { mf.focus(); } catch {} }, 30);
+}
+
+// Document-level ESC handler so the modal closes even when focus has moved
+// outside the math-field (e.g. user clicked the cancel button area or
+// the MathLive virtual keyboard stole focus). Attached once.
+if(!window._nbMathEscBound){
+  window._nbMathEscBound = true;
+  document.addEventListener('keydown', (e) => {
+    if(e.key !== 'Escape') return;
+    const modal = document.getElementById('nb-math-modal');
+    if(modal && modal.classList.contains('open')){
+      e.preventDefault();
+      e.stopPropagation();
+      nbCloseMathEditor(false);
+    }
+  }, true);
 }
 
 function nbCloseMathEditor(commit){
