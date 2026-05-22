@@ -2388,10 +2388,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             : floatMode
             ? { position: 'fixed', top: floatPos.y, left: floatPos.x, zIndex: 250, width: 'min(420px, calc(100vw - 24px))', maxHeight: 'calc(100vh - 88px)', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.45)' }
             : !isMobile && tab !== 'none' && !isDone
-            // Desktop split: question card capped to ~25vh so the canvas /
-            // mindmap below gets the remaining ~75vh for meaningful
-            // interaction. Internal scroll if question is long.
-            ? { flexShrink: 0, zIndex: 2, display: 'flex', flexDirection: 'column', maxHeight: '25vh', overflow: 'hidden' }
+            // Desktop split: question card capped to ~38vh so the canvas /
+            // mindmap below still gets ~62vh for meaningful interaction.
+            // Raised from 25vh because long stems + 4 MC options + KaTeX
+            // were getting cropped (option D invisible). Internal scroll
+            // on the inner card if needed.
+            ? { flexShrink: 0, zIndex: 2, display: 'flex', flexDirection: 'column', maxHeight: '38vh', overflow: 'hidden' }
             : tab === 'none' || isDone
             ? { flexShrink: 0, padding: '18px 24px 12px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
             : { position: 'absolute', bottom: 72, insetInlineEnd: 14, zIndex: 60, width: 'min(420px, calc(100vw - 28px))', maxHeight: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }
@@ -2415,9 +2417,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   background: 'var(--sh-q-card-bg, #ffffff)',
                   borderRadius: 0,
                   borderBottom: '1px solid rgba(127,155,217,0.22)',
-                  overflow: 'auto',           // scroll if question + MC options exceed 25vh
+                  overflow: 'auto',           // scroll if question + MC options exceed cap
                   display: 'flex', flexDirection: 'column',
-                  maxHeight: '25vh',
+                  // Was 25vh — too tight: header strip (~40px) + question stem +
+                  // 4 MC options + KaTeX often clipped, hiding option D entirely.
+                  // 38vh gives full options room while still leaving ~62vh for
+                  // the canvas/mindmap pane beneath.
+                  maxHeight: '38vh',
+                  minHeight: '180px',
                 }
               : tab === 'none' || isDone
               ? {
