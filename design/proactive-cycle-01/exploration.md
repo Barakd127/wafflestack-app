@@ -1,348 +1,327 @@
-# WaffleStack — Proactive Cycle 01: Gameplay Design Space Exploration
+# Proactive Cycle 01 — Gameplay Design Space Exploration
 
 **Date:** 2026-05-22  
-**Branch:** proactive/exploration/games-design-space  
-**Model:** Opus 4.7 (gameplay design oracle)  
-**NotebookLM:** SKIPPED — MCP connector not available in this container. Design judgment drawn from VISION.md catalogue + model's own synthesis.
+**Cycle:** 1 (exploration only — no code)  
+**Branch:** `proactive/exploration/games-design-space`  
+**Designer:** Opus 4.7 (gameplay-design decision call)  
+**Synthesizer:** Sonnet 4.6  
 
 ---
 
-## Framing
+## Context
 
-WaffleStack teaches intro statistics to BA social-science students through **real gameplay**, not quiz wrappers. The core constraint from VISION.md: every candidate must give the player a meaningful decision that **uses** a statistical concept — not one that is merely adjacent to it. The existing city-builder is the baseline to beat (known risk: decoration, not decision).
+Current WaffleStack state: React + TypeScript + Vite + Tailwind. Quiz engine (MC, 757 questions, SM-2 spaced repetition). Kenney GLB city in a Godot iframe — buildings unlock with XP. **The city is purely cosmetic: no player decision drives it.** VISION.md names this the locked-in risk for the "city builder" seed: "decoration not decision unless buildings consume/produce resources."
 
-Intro stats topics in scope: descriptive stats (mean/median/mode/variance/std dev), frequency distributions, histograms, normal distribution, z-scores, probability, sampling, confidence intervals, hypothesis testing (t-test, chi-square), correlation, linear regression.
-
----
-
-## Scoring rubric (1–5 each, total /30)
-
-| Axis | 1 | 5 |
-|---|---|---|
-| Decision rhythm | slow/rare decisions | one meaningful choice every ~15s |
-| Wonder tap | dry, academic | joyful pull, "just one more" |
-| Engine-building potential | flat/linear | strong compounding from early choices |
-| Topic-fit | stats concept adjacent | player literally applies the concept to decide |
-| Decoration risk | high — cosmetics can crowd out gameplay | structurally impossible to play without using stats |
-| Scope for Cycle 2 prototype | weeks/months | one sprint (one week) |
+This cycle explores candidate gameplay loops where the player makes a meaningful decision that *uses* a statistical concept every 15–30 seconds.
 
 ---
 
-## 8 Candidate Gameplay Loops
+## Candidates
+
+### 1. Pollster Press ★
+A Hebrew-first newsroom sim where the player runs a polling agency during a fictional Knesset election cycle. Every 20 seconds a client (party, NGO, newspaper) requests a poll on some claim; player must pick **sample size, sampling frame, and confidence level** under a budget clock, then publish or kill the result based on the CI they roll. Wrong calls cost reputation, right calls unlock new clients and bigger contracts.
+
+- **Decision:** allocate budget across n, stratification, and α; then decide publish/spike based on the interval.
+- **Stats concept:** CI width as a function of n and SD, margin of error, sampling bias, type-I error.
+- **Board inspiration:** Godfather: Corleone's Empire (commission-driven contract pickup), Century Spice Road (engine of upgrade tokens).
+- **Mobile inspiration:** Mini Metro (resource-constrained service under pressure), Reigns (binary commit/spike decision).
+
+| Criterion | Score |
+|---|---|
+| Decision rhythm | 5 |
+| Wonder tap | 4 |
+| Engine-building potential | 5 |
+| Topic fit | 5 |
+| Decoration risk | 5 (low) |
+| Build feasibility | 4 |
+| **Total** | **28** |
 
 ---
 
-### 1. ☕ The Variance Café
-**Core mechanic:** Each "shift," customers arrive with a hidden taste distribution. You see a small sample (2–3 sip-dots on an axis). You tune two sliders — **μ** (sweetness center) and **σ** (consistency/spread) — on an espresso machine. Commit; the machine brews; a histogram of customer satisfaction fills the screen. Tips scale with distributional overlap. Between waves, spend tips on equipment cards that modify your statistical action space.
+### 2. Sigma Bakery (Variance Tycoon) ★
+Run a waffle stand. Every batch is a tiny sample with mean and variance of quality. The player tunes **process parameters** (oven temp, batter mix ratio, station count) to compress variance and push the mean toward customer-tolerance bands. Real consequences: customers leave if their order falls below their personal z-threshold. Engine grows by buying machines that reduce SD or shift the mean.
 
-- **Stats concept used:** Mean, variance, standard deviation — infer from a sample, act on the estimate.
-- **Board game ref:** Wingspan (engine-building, each equipment card alters action space) + Quacks of Quedlinburg (push-your-luck on σ: too tight = bust on outlier customers).
-- **Mobile game ref:** Mini Metro (tightening pressure curve, decisions cheap but compounding) + Threes (atomic-commit — each slider lock is irreversible for that customer).
-- **Decision interval:** ~15 seconds per customer.
+- **Decision:** invest scarce shekels in mean-shifters vs variance-reducers each shift.
+- **Stats concept:** mean/SD trade-off, z-scores against customer thresholds, the normal distribution as the customer-satisfaction curve.
+- **Board inspiration:** Coffee Rush (real-time bean allocation), Patchwork (scarce tile/upgrade tradeoffs).
+- **Mobile inspiration:** Threes (compounding small numeric decisions), Two Dots (board-shaping puzzles).
 
-| Axis | Score |
+| Criterion | Score |
 |---|---|
 | Decision rhythm | 5 |
 | Wonder tap | 5 |
 | Engine-building potential | 5 |
-| Topic-fit | 5 |
-| Decoration risk | 5 |
-| Scope for Cycle 2 | 4 |
-| **Total** | **29/30** |
-
-**One-line risk:** Slider UX can feel arcade-y if the histogram readout is too slow to make the feedback feel like statistical insight.
+| Topic fit | 5 |
+| Decoration risk | 4 (low-medium) |
+| Build feasibility | 5 |
+| **Total** | **29** |
 
 ---
 
-### 2. 🎲 Dice Forge: Lab of Distributions
-**Core mechanic:** You own a die; each round you remove one face and engrave a new outcome (a probability value you choose) to beat the night's "experiment" target. Over time you craft a custom distribution and observe how samples from it hit (or miss) the target.
+### 3. Hypothesis Court
+Player is a research-fraud detective. Each "case" is a published claim with raw data; player must pick the **right test** (t, chi-square, correlation), choose α, and rule guilty/innocent within a 30-second timer. Cases compound — false convictions damage the journal's credibility meter, throttling future case load.
 
-- **Stats concept used:** Probability, expected value, sampling distributions.
-- **Board game ref:** Dice Forge (mutable dice — the die you own IS your probability distribution).
-- **Mobile game ref:** Threes (small atomic choices, irreversible, deeply satisfying).
-- **Decision interval:** ~20 seconds per face-swap.
+- **Decision:** test selection + α + verdict.
+- **Stats concept:** hypothesis testing, test selection by data type, p-values, type I/II errors.
+- **Board inspiration:** Mechs vs Minions (escalating scenario chain), Cry Havoc (claim adjudication).
+- **Mobile inspiration:** Reigns (swipe verdicts), Stack the States (escalating fact stack).
 
-| Axis | Score |
-|---|---|
-| Decision rhythm | 4 |
-| Wonder tap | 4 |
-| Engine-building potential | 5 |
-| Topic-fit | 5 |
-| Decoration risk | 5 |
-| Scope for Cycle 2 | 4 |
-| **Total** | **27/30** |
-
-**One-line risk:** Abstract without a strong theme — needs a vivid "lab" or "forge" skin so dice feel tangible, not spreadsheet-like.
-
----
-
-### 3. 🧵 Patchwork of Proof (daily puzzle)
-**Core mechanic:** A daily puzzle: tile a board with sample-shaped patches under a joint time + α-budget. Each patch placement corresponds to a hypothesis test decision (reject/retain H₀) with a cost in Type I error budget. Once budget is exhausted, you see how many patches caused false positives.
-
-- **Stats concept used:** Hypothesis testing, p-values, Type I / Type II error.
-- **Board game ref:** Patchwork (spatial fitting under dual budget) + Wordle (one-a-day, shareable result).
-- **Mobile game ref:** Wordle (daily ritual, social share on completion).
-- **Decision interval:** ~25 seconds per tile placement.
-
-| Axis | Score |
+| Criterion | Score |
 |---|---|
 | Decision rhythm | 4 |
 | Wonder tap | 3 |
 | Engine-building potential | 3 |
-| Topic-fit | 5 |
-| Decoration risk | 5 |
-| Scope for Cycle 2 | 5 |
-| **Total** | **25/30** |
-
-**One-line risk:** Daily-only cadence kills the in-between-session retention loop; needs a second mode to sustain a 10-session arc.
+| Topic fit | 5 |
+| Decoration risk | 4 |
+| Build feasibility | 5 |
+| **Total** | **24** |
 
 ---
 
-### 4. 🧸 Stat-Critter Brawler
-**Core mechanic:** Asymmetric creatures whose combat attacks are modeled as distributions (Normal, Uniform, Skewed). You pick which critter to send against a boss whose defense is also a distribution. Victory = your distribution "covers" theirs by enough overlap (z-score reasoning).
+### 4. Z-Score Dungeon
+Roguelike corridor where monsters have a hidden stat drawn from a normal distribution. Player sees 3 sample fights and must decide **engage, retreat, or scout more** based on the inferred distribution. Equipment lets you reduce SD of your own attack or shift mean.
 
-- **Stats concept used:** Z-scores, distributional overlap, Central Limit Theorem.
-- **Board game ref:** Stuffed Fables (per-encounter unique mechanic) + Root / Cry Havoc (asymmetric factions, each with own rules).
-- **Mobile game ref:** Vampire Survivors (build a kit, lean into a style, watch it execute).
-- **Decision interval:** ~20 seconds per combat pick.
+- **Decision:** sample more (cost) vs commit (risk).
+- **Stats concept:** sampling distribution, SE of mean, normal tails.
+- **Board inspiration:** Arctic Scavengers (scout vs commit), Stuffed Fables (story-room loop).
+- **Mobile inspiration:** Tomb of the Mask (room-by-room flow), Dice Forge (dice-evolution — also board game).
 
-| Axis | Score |
+| Criterion | Score |
 |---|---|
 | Decision rhythm | 4 |
-| Wonder tap | 5 |
+| Wonder tap | 4 |
 | Engine-building potential | 4 |
-| Topic-fit | 4 |
+| Topic fit | 3 |
+| Decoration risk | 2 (HIGH RISK) |
+| Build feasibility | 3 |
+| **Total** | **20** |
+
+---
+
+### 5. Correlation Garden
+Tile-laying game where each tile is a variable. Placing tiles adjacent creates a correlation; player must build a "causal hedge" that maximizes target outcome correlation while avoiding spurious-correlation traps that drain points. Scatterplots animate in real time.
+
+- **Decision:** which variable to add next, where, and whether to prune a spurious neighbor.
+- **Stats concept:** correlation vs causation, confounding, r value, regression slope.
+- **Board inspiration:** Patchwork (tile placement), Seize the Bean (recipe stacking).
+- **Mobile inspiration:** Mini Metro (graph growth), Two Dots (adjacency mechanics).
+
+| Criterion | Score |
+|---|---|
+| Decision rhythm | 3 |
+| Wonder tap | 4 |
+| Engine-building potential | 5 |
+| Topic fit | 4 |
 | Decoration risk | 3 |
-| Scope for Cycle 2 | 2 |
-| **Total** | **22/30** |
-
-**One-line risk:** Scope explosion — asymmetric critter design costs massive content work before the stats insight fires. Combat framing can mask whether the player is actually thinking statistically.
+| Build feasibility | 3 |
+| **Total** | **22** |
 
 ---
 
-### 5. ⚙️ Regression Robotics
-**Core mechanic:** Pre-commit a sequence of operations (transform → fit → predict → evaluate residuals) for a robot arm, then watch it execute against a scatter-plot dataset. Iterate on the program after seeing residuals.
+### 6. Distribution Drafter
+Each round you're dealt 5 "data cards" (numeric values). You draft 3 into your **sample tray** and discard 2. After 7 rounds the tray's mean, median, and SD are scored against a hidden target distribution. Bonus combos for matching mode, beating a z-threshold, or holding outliers.
 
-- **Stats concept used:** Linear regression, residuals, correlation.
-- **Board game ref:** Mechs vs Minions (programming-puzzle — commit a sequence, watch execution, iterate).
-- **Mobile game ref:** Tomb of the Mask (commit → watch unfold, tight feedback).
-- **Decision interval:** ~30 seconds during programming phase.
+- **Decision:** draft-and-discard for distribution shaping.
+- **Stats concept:** central tendency, dispersion, outliers, robust vs non-robust statistics.
+- **Board inspiration:** Century Spice Road (draft engine), Dice Forge (curated dice pool).
+- **Mobile inspiration:** Threes (numeric merge intuition), Reigns (commit cards).
 
-| Axis | Score |
-|---|---|
-| Decision rhythm | 3 |
-| Wonder tap | 3 |
-| Engine-building potential | 4 |
-| Topic-fit | 5 |
-| Decoration risk | 5 |
-| Scope for Cycle 2 | 3 |
-| **Total** | **23/30** |
-
-**One-line risk:** The programming phase breaks the 15–30s decision cadence; players may sit for 45+ seconds sequencing before they see feedback.
-
----
-
-### 6. 🕴 Influence on Topic Territories
-**Core mechanic:** Place influence cubes on stats-topic "districts" of a city map. AI opponents bluff their statistical claims; you call confidence intervals on their claims to contest or accept territory.
-
-- **Stats concept used:** Confidence intervals, sampling, estimation.
-- **Board game ref:** Godfather: Corleone's Empire (influence placement + bluffing + area control).
-- **Mobile game ref:** Reigns (binary commit under uncertainty — accept/reject every few seconds).
-- **Decision interval:** ~20 seconds.
-
-| Axis | Score |
-|---|---|
-| Decision rhythm | 4 |
-| Wonder tap | 3 |
-| Engine-building potential | 3 |
-| Topic-fit | 4 |
-| Decoration risk | 4 |
-| Scope for Cycle 2 | 3 |
-| **Total** | **21/30** |
-
-**One-line risk:** Bluffing requires distinct AI personalities with believable statistical behavior — heavy content cost before the mechanic clicks.
-
----
-
-### 7. 🏨 Triage Clinic (real-time)
-**Core mechanic:** Patients (NPCs) arrive with symptom-frequency tables (sample data). You classify each case (chi-square goodness-of-fit test) and route them to the correct room before a per-patient timer expires.
-
-- **Stats concept used:** Chi-square test, frequency distributions, goodness-of-fit.
-- **Board game ref:** Coffee Rush (real-time triage pacing, prioritization under pressure).
-- **Mobile game ref:** Two Dots (chain decisions under tempo, one-thumb).
-- **Decision interval:** ~10 seconds.
-
-| Axis | Score |
+| Criterion | Score |
 |---|---|
 | Decision rhythm | 5 |
-| Wonder tap | 4 |
-| Engine-building potential | 3 |
-| Topic-fit | 4 |
-| Decoration risk | 4 |
-| Scope for Cycle 2 | 3 |
-| **Total** | **23/30** |
-
-**One-line risk:** Real-time triage + Hebrew RTL on mobile creates a tight UX budget — the stat reasoning may get crowded out by time pressure.
-
----
-
-### 8. 🌶 Spice Road of Sampling
-**Core mechanic:** Pickup-and-deliver: convert raw samples → summary statistics → inferences along a route. Each card in your deck transforms one resource tier into the next (raw data → mean → confidence interval → decision). Upgrade cards to reduce conversion cost.
-
-- **Stats concept used:** Sampling distributions, Central Limit Theorem, chain of inference.
-- **Board game ref:** Century Spice Road (pickup-and-deliver resource pyramid mirroring topic prerequisites).
-- **Mobile game ref:** Duolingo (path with branching, player chooses which upgrade to pursue next).
-- **Decision interval:** ~25 seconds.
-
-| Axis | Score |
-|---|---|
-| Decision rhythm | 3 |
 | Wonder tap | 3 |
-| Engine-building potential | 5 |
-| Topic-fit | 4 |
+| Engine-building potential | 4 |
+| Topic fit | 4 |
+| Decoration risk | 3 |
+| Build feasibility | 5 |
+| **Total** | **24** |
+
+---
+
+### 7. Regression Racer
+Side-scrolling race where the track is a noisy scatter of points. Player drags a **regression line** (slope, intercept) in real time; the car follows the line. Tighter fit = more speed. Curves in the data punish overfitting; toggle between linear and polynomial models at a fuel cost.
+
+- **Decision:** when to refit, when to switch model complexity.
+- **Stats concept:** linear regression, residuals, overfitting.
+- **Board inspiration:** Mechs vs Minions (programmed-line driving), Catan (real-time trade pressure).
+- **Mobile inspiration:** Mini Metro (line-drawing under pressure), Tomb of the Mask (continuous motion).
+
+| Criterion | Score |
+|---|---|
+| Decision rhythm | 4 |
+| Wonder tap | 5 |
+| Engine-building potential | 2 |
+| Topic fit | 4 |
 | Decoration risk | 4 |
-| Scope for Cycle 2 | 3 |
-| **Total** | **22/30** |
-
-**One-line risk:** "Resource conversion" can feel like a worksheet unless the theme (route, journey, discovery) is vivid and each conversion is visualized as a statistical transformation.
+| Build feasibility | 2 |
+| **Total** | **21** |
 
 ---
 
-## Summary Scores
+## Top 3 Ranking
 
-| Rank | Candidate | Score |
-|---|---|---|
-| 1 | ☕ The Variance Café | 29/30 |
-| 2 | 🎲 Dice Forge: Lab of Distributions | 27/30 |
-| 3 | 🧵 Patchwork of Proof | 25/30 |
-| 4 | ⚙️ Regression Robotics | 23/30 |
-| — | 🏨 Triage Clinic | 23/30 |
-| 5 | 🧸 Stat-Critter Brawler | 22/30 |
-| 6 | 🌶 Spice Road of Sampling | 22/30 |
-| 7 | 🕴 Influence on Topic Territories | 21/30 |
+### #1 — Sigma Bakery (Variance Tycoon) — 29 points
 
----
+**Why it wins:** Perfect brand alignment (WaffleStack is literally a waffle app — the metaphor is load-bearing, not tacked on). Every 15–25 seconds the player makes a real numerical decision: tune μ vs σ with scarce focus tokens. The customer-tolerance curve is literally a visible normal distribution — the player learns to read it by playing, not by being told. Engine-building is intrinsic: better machines = tighter SD = more predictable outcomes = more shekels = stronger upgrades. Build feasibility is the highest of any candidate — Canvas + Tailwind histogram, sliders, and a customer queue are all achievable in React in 2 weeks. Distribution Drafter is a natural mini-game *inside* Sigma Bakery for early-game tutorials.
 
-## Top-3 Ranking
+**What it is NOT:** a quiz with waffle graphics. The 757-question bank plugs in as difficulty curation for customer profiles and market events — existing questions drive which distribution scenarios spawn, but the player's verb is never "answer this question."
 
-### Rank 1: ☕ The Variance Café (29/30)
-Highest decision rhythm, strongest "run your own place" wonder tap, and — most importantly — the histogram IS the gameplay surface, making decoration drift structurally impossible. Equipment cards expand the statistical action space (not just the visual space), so every upgrade the player earns is literally a new statistical operator in their toolkit. The "run a place" emotional pull (VISION.md primary pull) maps naturally onto a web-first mobile layout: bottom-sheet equipment shop, histogram fills vertically on mobile, sliders are one-thumb reachable.
+### #2 — Pollster Press — 28 points
 
-### Rank 2: 🎲 Dice Forge: Lab of Distributions (27/30)
-The cleanest single-mechanic illustration of "your decisions literally change your probability distribution." A student who builds their die for three sessions has physically constructed a sampling distribution by hand — which is exactly what the topic requires. Loses to #1 only on wonder and theme immediacy: a lab of dice needs more UI richness to feel joyful rather than technical. Excellent candidate for a later cycle that specifically targets probability + expected value in depth.
+**Why it ranks second:** The only candidate where confidence intervals and sampling are the *literal verb* of the game. Extremely strong stats fit. Docked one point vs Sigma Bakery: requires richer Hebrew text content per client brief, and the decision rhythm dips during reading. Strong candidate for Cycle 3 as a Sigma Bakery DLC — "open a research division inside your bakery."
 
-### Rank 3: 🧵 Patchwork of Proof (25/30)
-Tightest fit for hypothesis testing — the α-budget mechanic makes Type I error visceral (you feel yourself "spending" significance). The daily-shareable hook is the strongest social-retention signal in the list. Ranks third because a daily-only loop doesn't sustain a 10-session progression arc without a secondary mode, and Cycle 2 scope would be under-leveraged on a game that caps at one interaction per day.
+### #3 — Distribution Drafter — 24 points (tied with Hypothesis Court)
+
+**Why it takes #3 over Hypothesis Court:** Cleanest decision rhythm (a card commit every 4 seconds), zero reading load, easiest to build. The engine layer is thin and wonder ceiling is lower — but it is the best onboarding loop and a natural fit as a **tutorial mini-game inside Sigma Bakery's first shift**.
+
+Hypothesis Court: rejected because it is still a quiz disguised as a game — the player identifies the right test, but "identify the right test" is recall, not forward inference. Fails the VISION brief.
+
+Z-Score Dungeon: rejected — high decoration risk. Stats becomes flavor over HP bars.
+Correlation Garden: rejected — rhythm too slow, mobile gesture on RTL is awkward.
+Regression Racer: rejected — RTL gesture precision on mobile kills feasibility; no engine layer.
 
 ---
 
-## #1 Detailed Spec: The Variance Café
+## #1 Full Specification: Sigma Bakery (Variance Tycoon)
 
-**Hebrew working title:** בית הקפה של השונוּת  
-**Tagline:** נהל בית קפה. לכל לקוח יש טעם — ולכל טעם יש התפלגות.  
-*(Manage a café. Every customer has a taste — and every taste has a distribution.)*
+### Core loop (one sentence)
+Bake → inspect the batch's distribution → spend revenue on machines that shift mean or shrink SD → next shift's customers have stricter z-thresholds.
+
+### Turn / round structure
+
+A **shift** is ~90 seconds and contains 4–6 **batches**. A **day** is 3 shifts. A **week** is 5 days and ends with a market event (festival, heatwave, supplier shortage) that mutates the customer distribution.
+
+**Per batch (15–25 sec decision window):**
+
+1. **See:** a queue of 3–7 customers slides in from the right (RTL). Each customer has a colored band showing their tolerance: a horizontal segment on a vertical axis labeled "quality." The band is their personal acceptance interval (e.g., [62, 78]).
+2. **See:** your current process state — oven temp dial, batter ratio slider, station count. Below them, a live histogram of your last 20 waffles' quality scores, with mean and SD numerically displayed in gold.
+3. **Decide:** before pressing BAKE, the player may make **one** adjustment — nudge the oven (shifts mean), rebalance batter (changes SD), or pull a station offline (changes throughput at cost of SD). Each adjustment costs one **focus token** (3 per shift).
+4. **Forecast Gate (the load-bearing mechanic):** before baking, player must tap one of three forecast chips: "I'll serve ≥80% / 50–80% / <50% of this queue." Calibration of forecasts vs outcomes is what drives reputation growth — forcing the player to internally compute `P(customer_band | μ, σ)` every 20 seconds. Wrong forecasts cost a focus token; right forecasts earn a calibration star.
+5. **Bake:** the engine draws N samples from N(μ, σ²) where μ and σ are derived from current machines + adjustment. Each sample animates as a waffle dropping onto a customer's plate.
+6. **Consequence:** each customer accepts if `sample ∈ [their_lower, their_upper]`, i.e., `|z| < their_z_threshold`. Accepted = pay; rejected = red angry icon + reputation drop. Histogram updates.
+7. **Micro-reward:** 100% acceptance → streak ticks + calibration star.
+
+**Between batches (5 sec):** a mini dashboard slides up — "this batch: μ=71.2, σ=4.1, served 5/6." Tap to dismiss or drill into misses (customer rejected, z-score of failing waffle shown in --red).
+
+**End of shift (15 sec):** upgrade kiosk opens (Century Spice Road draft). Three machine cards face-up:
+- **Mean-shifters:** "Precision Spatula (+2 μ)", "Thermal Stabilizer (μ +1, σ −0.3)".
+- **Variance-reducers:** "Calibrated Whisk (−0.5 σ)", "Twin Oven (−1.0 σ, but max batch 4)".
+- **Distribution-shapers:** "Outlier Trap (clip bottom 5% before serving)" — introduces truncated normals.
+
+Player picks one; other two are discarded. This is the engine-building step.
+
+### State the player manages
+
+```
+ProcessState {
+  baseMu: number              // from machines
+  baseSigma: number           // from machines
+  machines: Machine[]         // each contributes deltaMu, deltaSigma, modifiers
+  focusTokens: number         // 3 per shift, spent on per-batch adjustments
+  reputation: number          // 0..100; below 20 throttles customer count
+  shekels: number             // currency
+  calibrationStars: number    // permanent currency
+  streak: number
+  history: BatchResult[]      // last N batches for the live histogram
+}
+
+Customer {
+  lowerBound: number
+  upperBound: number          // derived from a personalZ around marketMean
+  patience: number            // ms before they leave
+  reward: number              // shekels if served
+}
+
+MarketState {
+  marketMean: number          // drifts daily; players who only chase mean lose
+  marketSigma: number         // tightens during festivals
+  event: 'normal'|'festival'|'heatwave'|'shortage'
+}
+```
+
+### Stats-concept mapping
+
+| Concept | Where it appears |
+|---|---|
+| Mean / median / mode | Live histogram; some events reward median-stable players (heatwave = heavy upper tail, mean misleads). |
+| Variance / SD | The visible sigma dial; every machine purchase is a literal SD trade. |
+| Z-score | Each miss displays its z-score in --red. `z = (waffle − μ) / σ` shown after every rejected batch. |
+| Normal distribution | Customer-tolerance overlay is a normal curve over the histogram; 68% rule becomes intuitive. |
+| Sampling distribution | End-of-day view shows distribution of batch means; tighter machines visibly shrink SE = σ/√n. |
+| Confidence interval | Weekly inspector audit: player picks n samples; CI shown; fine if true μ outside CI. |
+| Hypothesis testing | "Is my new whisk actually better?" — two-sample t-test on yesterday vs today at α player chooses. |
+| Correlation / regression | Week 3 unlock: marketing assistant hands scatter (price vs demand); player drags regression line. |
+| Chi-square | Contingency mini-puzzle when reputation drops: which customer segment is failing? |
+
+### Visual / spatial representation (mobile portrait, RTL)
+
+```
+┌─────────────────────────────┐
+│ [timer] [reputation ▓▓▓░░] [₪] [★] │  10%
+├─────────────────────────────┤
+│  Customer queue →←→←→←→   │  25%
+│  [card][card][card][card]   │
+│  each shows tolerance band  │
+├─────────────────────────────┤
+│  Histogram + tolerance over- │  35%
+│  lay. μ and σ in --gold.    │
+│  Customer bands in --teal.  │
+│  Rejected flashes --red.    │
+├─────────────────────────────┤
+│  [oven knob] [batter] [n]   │  20%
+│  μ=70  σ=5   stations=3    │
+├─────────────────────────────┤
+│ [forecast 80% / 50-80% / <50%] [BAKE] │  10%
+└─────────────────────────────┘
+```
+
+Color use: histogram bars `--blue`, customer bands `--teal`, misses flash `--red`, accepted pop `--gold` 200ms. Upgrade kiosk uses `--card` + `--border`, gold trim on rare machines. Zero new hex values.
+
+### Failure state
+
+Reputation 0 = shop closed for the day. Not game-over — player keeps machines and calibration stars, restarts next day at reputation 30 with a **diagnostic screen** showing which customer z-thresholds were most often missed. This points to a specific stats weakness:
+- Many misses at low z-thresholds → σ is too high → buy variance-reducers.
+- Misses on one side of distribution → μ is biased → buy mean-shifters.
+
+The fix is a concrete machine suggestion, not a lecture.
+
+### Branching path (player controls what to learn next)
+
+The upgrade kiosk is the curriculum branch. Three machine families = three topic tracks:
+
+- **Mean track** (μ-shifters) → estimators, bias, mean vs median robustness.
+- **Variance track** (σ-shrinkers) → SD, SE, sampling distribution, CIs.
+- **Distribution-shaper track** (outlier traps, truncation, mixture machines) → distribution families, hypothesis testing, chi-square.
+
+Machine cards show the stats concept they teach as a small icon in `--mute`. Players who buy three SD-reducers in a row trigger the CI audit event early. Players who buy distribution shapers trigger the t-test event early. Player chooses curriculum order by playing.
+
+### Why this beats the current quiz+cosmetic-city loop
+
+- **City is read-only.** XP unlocks buildings but the player makes no choice. Sigma Bakery makes every shift a sequence of resource-bound numerical decisions whose outcome the player can predict using stats.
+- **Quizzes test recall; the bakery tests forward inference.** "Given μ=70, σ=5, what fraction of customers in [65,75] will I serve?" is the actual educational goal.
+- **Engine-building replaces flat XP unlock.** Machine choices compound — early SD reduction pays dividends every future shift.
+- **The histogram is the playing field, not a decorative chart.** The normal distribution is the game board.
+- **SM-2 spaced repetition plugs in as difficulty curation.** Existing 757-question bank drives which customer profiles and market events spawn — the bank isn't discarded, it drives scenario selection. The player's verb is never "answer this question"; the bank is the procedural content engine.
+- **Cosmetic city becomes optional eye-candy** ("your bakery on the city map") rather than the only reward layer.
+
+### Biggest risk and mitigation
+
+**Risk:** player optimizes by feel, not stats. They learn "bigger oven = more money" without computing a z-score. Stats becomes decorative again — the failure mode VISION.md warns about.
+
+**Mitigation — Forecast Gate:** before each batch the player taps a forecast chip (≥80% / 50–80% / <50%). Reputation grows only when forecasts match results. This forces internal computation of `P(customer_band | μ, σ)` every 20 seconds — i.e., using the normal CDF. Wrong forecasts cost focus tokens; right forecasts earn calibration stars. Without the Forecast Gate, Sigma Bakery degrades into Cookie Clicker with sliders.
+
+Secondary mitigation: machine tooltips show the formula (`μ' = μ + 2`, `σ' = σ · 0.9`) in `--mute` text. Price tags, not tutorials.
 
 ---
 
-### 1. The Core Loop (~130 words)
+## Cycle 2 plan (for next cycle to pick up)
 
-A shift = ~3 minutes. A wave of 3–5 customers arrives, each with a hidden taste expressed as a target distribution (e.g., "likes sweetness μ ≈ 7, σ ≈ 1.2"). The player sees only a small sample — 2–3 sip-dots on a horizontal axis — representing previous drinks that customer has rated. The player tunes two sliders on an espresso machine: **μ** (the blend's center/strength) and **σ** (consistency/spread). They commit; the machine brews; a histogram of satisfaction scores fills under each cup in real time. Tips scale with the distributional overlap of the player's brew vs. the customer's true taste. Between waves, tips buy **equipment cards** that modify the statistical action space: a "precision grinder" tightens the σ minimum, a "milk steamer" unlocks a second axis (bitterness), a "regular customer" card locks one slider to a known parameter. Days end with a "daily special" boss: match an unusual distribution from limited samples.
-
----
-
-### 2. First 5 Minutes
-
-**Minute 0–1 (tutorial):** Customer 1 arrives. Two sip-dots appear near 6 on the sweetness axis. A tutorial nudges: drag μ to 6, leave σ wide. Player commits. Near-miss — satisfaction histogram peaks slightly off-center. Tooltip explains: "Their sample points to 6, but your σ was so wide it covered 2–10. Less spread = better match." 
-
-**Minute 1–2:** Customer 2 has three sip-dots at 6, 6, 7. Tighter cluster — obvious σ guidance. Player narrows σ, commits, gets their first big-tip animation with histogram glow. No instruction needed: the histogram explained it.
-
-**Minute 2–3:** End of Wave 1. Equipment shop opens (bottom-sheet). Player buys "Better Grinder" (minimum σ drops from 1.5 to 1.0). Wave 2 starts. Customer 3 has sip-dots at 3 and 9 — the first puzzle moment: high-variance sample. Is this a wide-distribution customer, or just noise? Player must decide: lean wide, or guess a hidden bimodal? Day 1 ends with a 5-customer rush that rewards fast, confident μ picks.
+- Implement `src/config/featureFlags.ts` with `SIGMA_BAKERY_ENABLED = false`.
+- Scaffold `src/components/SigmaBakery/` with pure-logic layer (no UI): `bakeryEngine.ts` — `sampleBatch(mu, sigma, n)`, `scoreCustomers(samples, customers)`, `applyMachineUpgrade(state, machine)`.
+- Add Vitest unit tests for all pure functions.
+- Wire basic histogram component (Tailwind bars, no canvas).
+- npm run build must pass.
 
 ---
 
-### 3. The Stats Concept as Decision, Not Decoration
-
-The primary concept throughout Sessions 1–4 is **variance and sample inference**: inferring a population parameter (σ of taste) from a small, noisy sample, then acting on that estimate.
-
-Choosing σ **is** the decision — not a decorative knob. Pick too tight → miss outliers, tip drops. Pick too wide → average satisfaction falls, tips fall. The histogram of satisfaction scores makes the abstract idea of spread **physically visible**: cups fill, foam overflows when σ is too narrow or too wide. Later levels introduce **standard error** explicitly: a "frequent customer" provides a larger sample, so the recommended σ band tightens — the student directly experiences why n matters.
-
-The player cannot earn a tip without reading a sample and estimating μ and σ. There is no other input. The game literally cannot be played without applying inferential thinking.
-
----
-
-### 4. Progression Arc (10 Sessions)
-
-| Sessions | Mechanic unlocked | Core concept |
-|---|---|---|
-| S1–2 | μ slider only, σ fixed | Mean, reading a sample, center estimation |
-| S3–4 | σ slider unlocked | Variance, standard deviation |
-| S5 | Third axis (bitterness) | Joint distributions, multi-dimensional thinking |
-| S6 | "Regulars" with known params | Planning vs. inference, using known population |
-| S7 | VIP customers with z-score tips | Z-scores, standardized distance |
-| S8 | A/B menu testing event | Two-sample comparison, soft intro to t-test |
-| S9 | "Health inspector" boss | Chi-square goodness-of-fit |
-| S10 | Open café — you design a menu | Confidence intervals + hypothesis test finale |
-
-Each session unlocks exactly one new statistical operator as a gameplay mechanic. The progression arc IS the statistics curriculum.
-
----
-
-### 5. Failure State
-
-Bad shifts lose tips but never lock progress or destroy streaks. Each missed customer reveals their **true distribution** overlaid on the player's brew — a "you were here, they were here" annotation in `--teal` / `--red` with a one-sentence explanation: *"הלקוח אהב מרירות נמוכה — ה-σ שלך היה רחב מדי"* ("The customer liked low bitterness — your σ was too wide").
-
-Three bad shifts in a row → a friendly regular walks in with a free guided round (the regular's distribution is revealed from the start). No streak destruction, no punishment screen. The histogram annotation IS the lesson; losing IS the most informative moment.
-
----
-
-### 6. Board Game Mechanic Adapted
-
-**Wingspan engine-building** for the equipment cards: each card permanently expands the player's statistical action space. The cards are not cosmetic upgrades — they add new sliders (axes), change slider bounds (σ floor), or add sample tokens (larger n). The engine the player builds over sessions IS their growing statistical toolkit.
-
-**Quacks of Quedlinburg push-your-luck** for the σ slider: going too narrow on σ to maximize "precision tips" risks busting on outlier customers — a recoverable risk that teaches the cost of overconfidence in estimates. The player will quickly internalize that tight σ is not always correct, which is the same insight as "a very precise but wrong estimate is still wrong."
-
-Both mechanics fit stats teaching because the **upgrades themselves are statistical operators**, not just score multipliers.
-
----
-
-### 7. Mobile Pattern Adapted
-
-**Mini Metro's tightening pressure curve:** early shifts are forgiving (3 customers, slow pace), later shifts add customers, time pressure, and simultaneous orders. The player develops quick distributional intuition — the same reflexive pattern-recognition that Mini Metro builds for network topology.
-
-**Threes' atomic-commit feel:** each slider lock per customer is irreversible for that customer's cup. The 15-second decision window enforces judgment under uncertainty (a direct stats pedagogy goal). There is no "undo" on a committed brew — the student must act on their best estimate, then see the result. This mirrors real statistical decision-making.
-
-Histogram fill animation = feedback density without modal interruption. All feedback lives in the bottom-sheet or inline histogram; no modals stack.
-
----
-
-### 8. Why This Beats City-Builder
-
-The city-builder's structural failure mode: placing a "histogram building" on a tile looks like stats engagement but the placement decision doesn't require reading or reasoning about a histogram. The building is cosmetic evidence of learning, not the learning itself.
-
-In Variance Café, there is no tip without slider interaction, no slider interaction without reading the sample dots, no reading sample dots without thinking about distributional spread. The statistical concept is the **only input** to the reward function. Equipment cards modify the *decision space* (slider ranges, axes, sample sizes), not just the skyline. Even the visual output (the histogram) is the **score surface**, not a decoration layer on top of a score.
-
-Decoration drift is structurally prevented: if you removed the stats reasoning, the game has no inputs and no outputs. The city-builder remains useful as a **visualization layer** for the player's overall progress map — what topics they've mastered — but should not be the primary decision arena.
-
----
-
-### 9. Cycle 2 Prototype Scope (Minimum Playable Version)
-
-**What to build:**
-- One café scene (static illustration or simple SVG — no 3D required)
-- One slider axis: sweetness **μ only** (σ fixed at 1.5)
-- 5 hand-authored customer types with pre-defined sample dot sets
-- 3 equipment cards: "Sample +1" (see one extra dot), "μ range +" (extend slider), "Tip multiplier" (cosmetic, for feel)
-- One shift = 5 customers, ~90 seconds
-- Histogram rendered via SVG (inline, no library needed for v0)
-- RTL Hebrew UI, bottom-sheet for equipment shop, `--bg` / `--bg-2` / `--gold` / `--teal` / `--red` tokens only
-- Zustand store shape: `{ shiftId: number, customers: Customer[], currentMu: number, equipment: EquipmentCard[], tips: number }`
-- No backend, no auth, no persistence in v0
-- Feature flag: `FEATURE_VARIANCE_CAFE` in `src/config/featureFlags.ts`
-
-**Goal of Cycle 2:** Prove the **15-second decision cadence** and the **"aha — I picked σ too tight"** moment in a single 3-minute play session. If a playtester says "wait, I need to read the dots better" unprompted, the prototype is working.
-
-**Not in scope for Cycle 2:** σ slider, equipment persistence, sound, 3D, multiple days, full curriculum.
-
----
-
-*Design oracle: Opus 4.7. Cycle author: Sonnet 4.6. Date: 2026-05-22.*
+*VISION.md not modified this cycle. NotebookLM: SKIPPED (MCP connector not available in this container). Design judgment drawn from VISION.md catalogue + Opus 4.7 synthesis.*
