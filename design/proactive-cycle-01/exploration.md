@@ -1,222 +1,413 @@
-# WaffleStack — Gameplay Exploration
-## Proactive Cycle 01 | 2026-05-21
+# WaffleStack — Gameplay Loop Exploration (Cycle 1)
 
-**Branch:** `proactive/exploration/games-design-space`
-**Cycle type:** Exploration only — no code changes.
-**NotebookLM:** SKIP — MCP connector not available in this container. VISION.md catalogue + design judgment used instead.
-
----
-
-### 1. Candidate Gameplay Loops
+**Date:** 2026-05-22  
+**Branch:** proactive/exploration/games-design-space  
+**Cycle type:** Exploration only — no code produced  
+**NotebookLM:** SKIPPED — MCP connector not available this container. Used VISION.md catalogue + design judgment.
 
 ---
 
-#### Candidate A: Cafe Forecaster (קפה ניבוי) — ☕📈
-- **One-line concept:** Run a Tel Aviv cafe where you predict daily customer demand from sample data, then stock inventory under uncertainty.
-- **Core mechanic:** Engine-building + push-your-luck (Seize the Bean × Quacks of Quedlinburg).
-- **The player's decision:** Given a sample of past-day demand, decide a confidence interval for tomorrow's traffic and stock accordingly — over-stock wastes capital, under-stock loses customers. Player chooses both the point estimate AND the interval width (risk tolerance).
-- **Decision interval:** ~20s per stocking decision; 4–6 decisions per "day"; ~8 days per session.
-- **Stats concepts used:** sampling distributions, confidence intervals, mean/median, standard deviation, normal distribution, z-scores (for interval width).
-- **Compounding mechanism:** Profit funds equipment (espresso machine = lower variance, marketing = higher mean), staff (more samples per day = tighter CIs), and cafe expansion (new locations = new distributions to learn). Better instruments literally shrink the sigma you're estimating against.
-- **Failure mode:** Bankrupt day = lose one location, not the run. Sample data preserved. Player sees ex-post which interval would have caught the true demand — explicit calibration feedback.
-- **Mobile feasibility:** Excellent. One-handed; slider for CI width sits in bottom third; histogram of past demand sits top. Hebrew RTL friendly.
-- **Decoration risk:** LOW. Every cosmetic upgrade is a statistical parameter (μ, σ, n). Cannot drift cosmetic without breaking the loop.
-- **Score: 28/30** — Decision Quality 10, Wonder 8, Stats Fit 10.
+## Context & Framing
+
+WaffleStack's current loop has a well-known problem: the city builder is purely decorative and the quiz panel lives in isolation. The VISION explicitly flags this: *"Locked-in risk: decoration not decision unless buildings consume/produce resources."* The question for this cycle is: **what gameplay loop makes statistical reasoning the actual game mechanic, not a reward wrapper?**
+
+Criteria applied to every candidate (from VISION.md "Gameplay candidate criteria"):
+
+| Criterion | Weight |
+|---|---|
+| Decision rhythm (1 meaningful choice / 15–30s) | ×1 |
+| Wonder tap (visceral delight / curiosity pull) | ×1 |
+| Engine-building potential (early choices compound) | ×1 |
+| Stats concept fit (player USES concept to decide, not just memorizes) | ×1 |
+| Anti-decoration score (player CANNOT win without engaging the stats) | ×1 |
+
+Max total score per candidate: 50.
 
 ---
 
-#### Candidate B: Creature Hypothesis Lab (מעבדת היצורים) — 🦕🔬
-- **One-line concept:** Collect mysterious creatures; test hypotheses about their hidden traits via experiments you fund.
-- **Core mechanic:** Set-collection + boss-encounter (Stuffed Fables × Pokémon).
-- **The player's decision:** Allocate a limited testing budget across creatures, choosing sample size and significance threshold per experiment to confirm/reject trait hypotheses before a "field exam."
-- **Decision interval:** ~25s per experiment design; 6–8 experiments per session.
-- **Stats concepts used:** hypothesis testing, p-values, t-tests, effect size, sample size / power, type I/II errors.
-- **Compounding mechanism:** Confirmed creatures join your roster and grant lab upgrades (cheaper sampling, higher power). Wrong rejections leave permanent "?" cards reminding you of past type II errors.
-- **Failure mode:** A false confirmation in the field exam reveals the truth visually — the creature literally fails its predicted behavior. Recoverable: re-test with bigger n.
-- **Mobile feasibility:** Good. Creature cards swipe-stack; budget allocation is tap-and-hold. Some risk of cramped UI with 4+ variables on screen.
-- **Decoration risk:** MEDIUM. The creature collection layer can drift toward pure Pokédex if the experiment math gets bypassed. Must enforce: no creature joins roster without a passed hypothesis test.
-- **Score: 26/30** — Decision Quality 9, Wonder 9, Stats Fit 8.
+## 8 Candidate Gameplay Loops
+
+### Candidate 1 — Distribution Forge
+
+**Elevator pitch:** You own a 6-faced die. The face values define a live discrete distribution. Each round a Hebrew contract demands a roll outcome (sum ≥ X, mean ≈ Y, z-score > 1.5). Between roll attempts you RESHAPE the die — swapping faces, buying new faces from a market — and every reshape is a statistical decision: does adding a high-value face raise σ in a way that hurts precision contracts? You are literally engineering distributions.
+
+- **Board inspiration:** Dice Forge (BGG/234931) — mutable die faces as the engine; Quacks of Quedlinburg — push-your-luck risk framing  
+- **Mobile inspiration:** Dicey Dungeons, Slice & Dice — dice-manipulation roguelites  
+- **Decision interval:** ~15–20s (face swap or market buy)  
+- **Stats concept USED in each decision:** Mean, variance/SD, expected value, probability, z-scores, sampling distributions (CLT boss rounds), confidence intervals (tournament mode), hypothesis testing (PvE bosses), ANOVA (tribe contracts)
+- **Implementation complexity:** 3 / 5
+
+| Dimension | Score |
+|---|---|
+| Decision rhythm | 9 |
+| Wonder tap | 8 |
+| Engine-building | 10 |
+| Stats concept fit | 10 |
+| Anti-decoration | 9 |
+| **Total** | **46** |
 
 ---
 
-#### Candidate C: Signal in the Static (אות ברעש) — 📡🎛️
-- **One-line concept:** Zen puzzle: tune dials to extract a true signal from increasingly noisy data streams.
-- **Core mechanic:** Spatial puzzle + real-time dexterity (Two Dots × Mini Metro).
-- **The player's decision:** Adjust three dials (sample size, smoothing window, threshold) to maximize true-positive detection while data streams in. Choose when to commit a reading.
-- **Decision interval:** ~10–15s per commit; continuous micro-adjustments.
-- **Stats concepts used:** mean vs median (robustness), standard deviation, z-scores, signal-to-noise, sampling.
-- **Compounding mechanism:** Unlocked dials add new dimensions (correlation filter, regression detrender). Levels remix prior noise profiles, rewarding learned intuition.
-- **Failure mode:** Missed signal = level retry with same data; you see what dial setting would have worked. Strong calibration feedback.
-- **Mobile feasibility:** Excellent. Dials are radial sliders, perfect for thumb. Beautiful at small screens.
-- **Decoration risk:** MEDIUM. Risk of becoming "pretty waveform game" if dials don't map 1:1 to named statistical operations.
-- **Score: 24/30** — Decision Quality 8, Wonder 9, Stats Fit 7.
+### Candidate 2 — Sampling Heist
+
+**Elevator pitch:** You're a data thief. Deploy "samplers" (workers) onto populations with hidden parameters. Choose: small sample of high-variance population vs. large sample of low-variance one. Each choice costs energy. The heist succeeds if your sample mean lands inside the confidence interval the contract demands. Central Limit Theorem is a core survival mechanic.
+
+- **Board inspiration:** Viticulture (worker placement + resource), Caverna  
+- **Mobile inspiration:** Loop Hero, Reigns  
+- **Decision interval:** ~25s (worker placement)  
+- **Stats concept USED:** Sampling distribution, standard error, CLT, confidence intervals
+- **Implementation complexity:** 4 / 5
+
+| Dimension | Score |
+|---|---|
+| Decision rhythm | 7 |
+| Wonder tap | 7 |
+| Engine-building | 8 |
+| Stats concept fit | 10 |
+| Anti-decoration | 9 |
+| **Total** | **41** |
 
 ---
 
-#### Candidate D: Election Night (ליל בחירות) — 🗳️📊
-- **One-line concept:** You're a pollster on election night; allocate field teams to sample districts and call races before rivals.
-- **Core mechanic:** Worker-placement + push-your-luck (Viticulture × Quacks of Quedlinburg).
-- **The player's decision:** Where to send pollsters (which districts), how large a sample to take, when to "call" a race based on current CI. Calling early scores big but wrong calls cost reputation.
-- **Decision interval:** ~20s per allocation; ~10 districts per night.
-- **Stats concepts used:** sampling, margin of error, confidence intervals, sample size effects, stratified sampling.
-- **Compounding mechanism:** Reputation buys more pollsters next night; correctly-called districts become "known" demographics, transferring priors to similar districts.
-- **Failure mode:** Wrong call shown on a giant map with the ex-post true result and CI overlay. Recoverable next election.
-- **Mobile feasibility:** Good but map-heavy — risks small tap targets on small screens. Israel map is small enough though.
-- **Decoration risk:** LOW-MEDIUM. The map is the gameplay; hard to make purely cosmetic.
-- **Score: 25/30** — Decision Quality 9, Wonder 7, Stats Fit 9.
+### Candidate 3 — Hypothesis Duel
+
+**Elevator pitch:** Asymmetric boss encounters. Each boss has a hidden parameter (μ, p, σ). You attack by drawing samples (costs stamina). Commit to reject / fail-to-reject any turn. Premature rejection → Type I damage. Waiting too long → boss heals (Type II error). You pick test type (t, z, chi-square) and α level as your "weapons."
+
+- **Board inspiration:** Gloomhaven (boss mechanics), Stuffed Fables (BGG/233312) — per-encounter unique mechanic  
+- **Mobile inspiration:** Slay the Spire, Inscryption  
+- **Decision interval:** ~20s  
+- **Stats concept USED:** Hypothesis testing, Type I/II error, p-values, test selection
+- **Implementation complexity:** 4 / 5
+
+| Dimension | Score |
+|---|---|
+| Decision rhythm | 8 |
+| Wonder tap | 9 |
+| Engine-building | 7 |
+| Stats concept fit | 10 |
+| Anti-decoration | 10 |
+| **Total** | **44** |
 
 ---
 
-#### Candidate E: Correlation Detective (בלש המתאם) — 🔍🕵️
-- **One-line concept:** Narrative mystery: examine scatterplots to identify spurious vs real correlations and accuse suspects.
-- **Core mechanic:** Narrative branching + set-collection (Reigns × Sushi Go).
-- **The player's decision:** Choose which variables to investigate next, decide whether observed correlations imply a real effect or confounding, accuse a suspect when confident.
-- **Decision interval:** ~30–45s per evidence card (slower).
-- **Stats concepts used:** correlation, confounding, regression, effect size, scatterplot reading.
-- **Compounding mechanism:** Solved cases unlock new datasets and detective tools (partial correlation, control variables). Weak.
-- **Failure mode:** Wrong accusation reveals confounder visually. Story can continue with reputation loss.
-- **Mobile feasibility:** Excellent for narrative; charts can be pinch-zoomed.
-- **Decoration risk:** HIGH. The narrative wrapper threatens to overshadow the math.
-- **Score: 20/30** — Decision Quality 6, Wonder 8, Stats Fit 6.
+### Candidate 4 — Z-Score Tetris
+
+**Elevator pitch:** A live normal curve is your board. Data-point tiles fall; you place them under the curve. The curve shape adapts to your placements (live histogram). Score by maintaining a target μ and σ while avoiding outlier pileups. Power-ups for correct z-score predictions before you place.
+
+- **Board inspiration:** Patchwork (BGG/163412), Azul  
+- **Mobile inspiration:** Threes, Drop7  
+- **Decision interval:** ~8s (fast — closer to Threes pacing)  
+- **Stats concept USED:** Z-scores, normal distribution, standard deviation
+- **Implementation complexity:** 3 / 5
+
+| Dimension | Score |
+|---|---|
+| Decision rhythm | 10 |
+| Wonder tap | 9 |
+| Engine-building | 5 |
+| Stats concept fit | 8 |
+| Anti-decoration | 8 |
+| **Total** | **40** |
 
 ---
 
-#### Candidate F: Distribution Tetris (טטריס התפלגויות) — 🧩📐
-- **One-line concept:** Spatial puzzle where you place distribution-shaped tiles onto a grid; tiles must satisfy mean/median/sd constraints per row.
-- **Core mechanic:** Spatial puzzle (Patchwork × Azul).
-- **The player's decision:** Choose which distribution tile to draft from a market and where to place it so row constraints (e.g., "this row's mean ≤ 50, sd ≥ 10") are met.
-- **Decision interval:** ~15s per tile placement.
-- **Stats concepts used:** descriptive statistics, shape of distributions, mean/median/mode interplay, std dev.
-- **Compounding mechanism:** Locked-in tiles constrain future rows — engine-building via prior placements. Strong compounding.
-- **Failure mode:** Unsatisfiable board = remove one tile at a cost. Recoverable.
-- **Mobile feasibility:** Excellent. Drag-and-drop is native to touch.
-- **Decoration risk:** LOW. Tiles must show their parameters; pure abstraction keeps it math-first.
-- **Score: 23/30** — Decision Quality 8, Wonder 6, Stats Fit 9.
+### Candidate 5 — Correlation Catan
+
+**Elevator pitch:** A hex grid of variables. Each hex produces data with correlations to adjacent hexes. Build "regression roads" between hexes — only correlations above |r| = 0.5 yield resources. Trade variables with AI opponents; hidden confounder cards can invalidate your model (spurious correlation twist).
+
+- **Board inspiration:** Catan (BGG/13) — trade window; Century Spice Road (BGG/209778) — resource chain  
+- **Mobile inspiration:** Dorfromantik, Islanders  
+- **Decision interval:** ~20s  
+- **Stats concept USED:** Correlation, regression, spurious correlation, confounders
+- **Implementation complexity:** 5 / 5
+
+| Dimension | Score |
+|---|---|
+| Decision rhythm | 7 |
+| Wonder tap | 8 |
+| Engine-building | 9 |
+| Stats concept fit | 9 |
+| Anti-decoration | 8 |
+| **Total** | **41** |
 
 ---
 
-#### Candidate G: ANOVA Arena (זירת ANOVA) — ⚔️🏟️
-- **One-line concept:** Roster-management combat: send "fighters" (samples from groups) into arena trials; compare group means to win.
-- **Core mechanic:** Deck-building + asymmetric factions (Dominion × Cry Havoc).
-- **The player's decision:** Recruit fighters into groups, decide which groups to enter into multi-way comparisons, choose sample size per group.
-- **Decision interval:** ~20s.
-- **Stats concepts used:** ANOVA, t-tests, effect size, variance within/between groups.
-- **Compounding mechanism:** Winning groups gain stat boosts; losing groups can be retrained.
-- **Failure mode:** Lost trial shows F-statistic breakdown of within vs between variance. Recoverable.
-- **Mobile feasibility:** Good but combat metaphor may feel juvenile to BA students.
-- **Decoration risk:** MEDIUM-HIGH. Easy to drift into combat-game where stats are flavor text.
-- **Score: 19/30** — Decision Quality 7, Wonder 5, Stats Fit 7.
+### Candidate 6 — Deck of Distributions
+
+**Elevator pitch:** Start with 10 "uniform" cards. Each round draw 5, play cards to solve a stats challenge (produce a sample with mean ≈ 50, σ < 5). Buy new distribution cards from a market: normal, skewed, bimodal, mixture. Late-game deck attacks ANOVA and regression contracts. Card synergies form the engine.
+
+- **Board inspiration:** Dominion, Seize the Bean (BGG/211364), Arctic Scavengers (asymmetric tribe leaders)  
+- **Mobile inspiration:** Slay the Spire, Monster Train  
+- **Decision interval:** ~15s  
+- **Stats concept USED:** Descriptive stats, distribution shapes, combining distributions, ANOVA
+- **Implementation complexity:** 4 / 5
+
+| Dimension | Score |
+|---|---|
+| Decision rhythm | 9 |
+| Wonder tap | 9 |
+| Engine-building | 10 |
+| Stats concept fit | 9 |
+| Anti-decoration | 9 |
+| **Total** | **46** |
 
 ---
 
-### 2. Top-3 Ranking
+### Candidate 7 — Push-Your-Luck Lab
 
-**#1 — Cafe Forecaster (28/30).** The strongest stats-decision marriage: every business decision IS a statistical decision, and the "run your own cool place" daydream gives natural wonder. Decoration risk is structurally low because cosmetic upgrades are math parameters (σ, μ, n). Covers the broadest intro-stats topic range and maps cleanly onto the existing Israeli BA curriculum.
+**Elevator pitch:** Pull data points from a bag each round. You want a high sample mean but too many outliers (or too-small n) causes the study to "explode" (Type I error). Buy n-boosters, outlier filters, larger sample sizes. Every pull = stop or continue decision about statistical power.
 
-**#2 — Creature Hypothesis Lab (26/30).** High wonder via the childlike-collection emotional pull; hypothesis testing is a notoriously hard topic that maps naturally onto creature confirmation. Ranks second because of medium decoration risk and the need for strict math gates; a strong Cycle 3 candidate once Cafe Forecaster has proved the engine pattern.
+- **Board inspiration:** Quacks of Quedlinburg (BGG/244521), Welcome To  
+- **Mobile inspiration:** Luck Be a Landlord, Balatro  
+- **Decision interval:** ~10s (pull or stop)  
+- **Stats concept USED:** Statistical power, outliers, sample-size effects, Type I error
+- **Implementation complexity:** 3 / 5
 
-**#3 — Election Night (25/30).** Cleanest pure-stats fit for sampling and margin of error; the map metaphor makes the decision spatial and visible. Loses to Cafe Forecaster on emotional pull and session-arc warmth; political theming needs careful neutral re-skinning for the Israeli cohort.
+| Dimension | Score |
+|---|---|
+| Decision rhythm | 10 |
+| Wonder tap | 9 |
+| Engine-building | 8 |
+| Stats concept fit | 9 |
+| Anti-decoration | 9 |
+| **Total** | **45** |
 
 ---
 
-### 3. #1 Detailed Spec — Cafe Forecaster
+### Candidate 8 — ANOVA Arena
 
-#### Title and Hebrew subtitle
-**Cafe Forecaster** — *הקפה של הסטטיסטיקאי* ("The Statistician's Cafe")
+**Elevator pitch:** You lead a research tribe. 3 groups whose means you must differentiate to win territory. Allocate sampling budget across groups each turn. Higher within-group variance = wasted effort. Larger between-group difference = territory captured. AI tribes try to make your groups look equal (collapse your F-statistic).
 
-#### Premise
-You inherit a struggling neighborhood cafe in south Tel Aviv. Every morning you see yesterday's customer log — a histogram of demand — and must decide today's stock: pastries, beans, milk, staff hours. Stock too little and customers walk; stock too much and inventory spoils. The only way to survive is to think in distributions: estimate tomorrow's mean demand, choose a confidence interval wide enough to be safe but tight enough to be profitable, then commit. As profits accumulate, you buy equipment that literally narrows the variance of your demand, hire baristas who give you more samples per day, and eventually open a second location with its own unknown distribution to learn. The fantasy is "run your own cool place" — but the engine is statistical reasoning under uncertainty.
+- **Board inspiration:** Root, Cry Havoc (BGG/192457) — asymmetric factions  
+- **Mobile inspiration:** Bad North, Mindustry  
+- **Decision interval:** ~30s  
+- **Stats concept USED:** ANOVA, F-statistic, within/between variance, effect size
+- **Implementation complexity:** 5 / 5
 
-#### Core loop
+| Dimension | Score |
+|---|---|
+| Decision rhythm | 6 |
+| Wonder tap | 7 |
+| Engine-building | 8 |
+| Stats concept fit | 10 |
+| Anti-decoration | 9 |
+| **Total** | **40** |
 
-1. **Morning briefing:** see histogram of last N days demand, with current sample mean and sample sd annotated.
-2. **Forecast:** drag a confidence interval slider (50%/80%/95%/99%) over the demand distribution. UI shows the implied stock quantity.
-3. **Commit stock:** lock the order. Cash deducted. Player sees expected cost and expected waste.
-4. **Day plays out (5s animation):** true demand drawn from underlying distribution; customers served until stock runs out OR closing time.
-5. **Day report:** actual demand vs. your CI overlaid; profit calculated; "calibration streak" updated (did the true value fall in your interval?).
-6. **Decision — upgrade or expand:** spend earnings on (a) equipment that reduces σ, (b) staff that grows n, (c) marketing that shifts μ, or (d) a new location with a fresh unknown distribution.
-7. **Next morning:** repeat with updated samples. Every ~5 days a "market event" perturbs the distribution (a festival, a rainstorm) — player must detect the shift.
-8. **Session end:** at day 8 or 12, a season-close screen scores total profit, calibration score, and detection-of-shift score.
+---
 
-#### Stats concepts mapped to mechanics
+## Summary Scoreboard
 
-| Concept | Game mechanic | What the player decides |
+| Rank | Candidate | Rhythm | Wonder | Engine | Fit | Anti-deco | **Total** |
+|---|---|---|---|---|---|---|---|
+| **1** | Distribution Forge | 9 | 8 | 10 | 10 | 9 | **46** |
+| **1** | Deck of Distributions | 9 | 9 | 10 | 9 | 9 | **46** |
+| **3** | Push-Your-Luck Lab | 10 | 9 | 8 | 9 | 9 | **45** |
+| 4 | Hypothesis Duel | 8 | 9 | 7 | 10 | 10 | **44** |
+| 5 | Sampling Heist | 7 | 7 | 8 | 10 | 9 | **41** |
+| 5 | Correlation Catan | 7 | 8 | 9 | 9 | 8 | **41** |
+| 7 | Z-Score Tetris | 10 | 9 | 5 | 8 | 8 | **40** |
+| 7 | ANOVA Arena | 6 | 7 | 8 | 10 | 9 | **40** |
+
+**Tiebreaker #1 vs #2:** Distribution Forge beats Deck of Distributions on **direct stats fit**: in the Forge, variance and mean are the literal physical object the player manipulates — the die's face values ARE the distribution. In Deck of Distributions, distributions are encoded in cards (one abstraction layer away). The wonder tap is also higher: watching a histogram reshape in real time as you swap a face is more visceral than drawing from a deck.
+
+---
+
+## Top-3 Ranking
+
+### #1 — Distribution Forge (Score: 46)
+
+The player sculpts a physical distribution (the die) to meet statistical contracts. Every mechanic is a stats decision. Extends naturally to cover the full BA intro syllabus: mean/variance → z-scores → sampling distributions (CLT boss rounds) → confidence intervals (tournament mode) → hypothesis testing (PvE bosses) → ANOVA (tribe contracts).
+
+### #2 — Deck of Distributions (Score: 46)
+
+Strong engine-building; excellent wonder tap. Best suited as a complement to Distribution Forge (late-game face card market could feel like deck-building), or as an alternate mode for learners who prefer Slay-the-Spire pacing over physics-toy pacing.
+
+### #3 — Push-Your-Luck Lab (Score: 45)
+
+The fastest decision rhythm of any candidate (every ~10s). Best for drilling intuitions about sample size and Type I error. Could be embedded as a mini-game inside Distribution Forge's early rounds (the "pull or stop" decision as a sub-mode), avoiding scope split.
+
+---
+
+## #1 Detailed Spec — Distribution Forge
+
+### Concept
+
+You possess a 6-faced "Forge Die" (R3F `<RoundedBox>` with face labels). Each face holds a numeric value — together they define a discrete distribution with a measurable mean (μ), variance (σ²), and shape (live mini-histogram). Each round, a Hebrew contract card flips: "הטל 3 פעמים. סכום ≥ 24" (Roll 3 times. Sum ≥ 24.) or "הטל 5 פעמים. ממוצע בתוך ±1 מ-8" (Average within ±1 of 8). To succeed, you strategically reshape your die between attempts — buying new faces from a market, swapping faces — and every reshape forces a live stats decision: does adding a high-value face raise μ enough to meet the contract, or does the σ spike hurt precision targets? The die persists between rounds: early sculpting choices compound into late-game capability. It cannot be played without engaging variance, mean, expected value, z-scores, and eventually sampling distributions of statistics about your die.
+
+### Core Game Loop
+
+**Round duration: ~3 minutes | Decisions per round: ~6 | Decision interval: ~25s**
+
+```
+1. Contract reveal (5s)
+   └── Hebrew contract card flips. Shows: contract type, target value, reward ore, HP cost if failed.
+
+2. Inspect phase (15s)
+   └── Player sees die's current μ, σ, mini-histogram.
+   └── Contract card shows implied target range.
+
+3. Forge phase (3–5 turns of 15–25s each)
+   ├── Decision A: Swap a face → UI shows real-time Δμ, Δσ preview before confirming.
+   ├── Decision B: Buy a face from Market (3 face cards visible, refresh with ore).
+   └── Decision C: Lock a face (protects from random events next round).
+
+4. Roll phase (10s)
+   └── Player taps "הטל" → R3F die tumbles → results plot live onto histogram.
+
+5. Resolution (5s)
+   ├── Success → ore + XP + insight tokens awarded.
+   └── Failure → HP lost proportional to |miss| (z-distance from target). Lesson token awarded.
+
+6. Branch choice (10s)
+   └── Three contract paths fanned out. Player picks next contract. (Agency rule.)
+```
+
+### Stats Concept → Mechanic Map
+
+| Concept | When introduced | Mechanic |
 |---|---|---|
-| Sample mean / median | Yesterday's demand summary card | Whether to trust mean (low-skew days) or median (festival outliers) |
-| Standard deviation | Width of histogram + slider feedback | Interval width — wider σ → wider needed CI |
-| Confidence interval | The CI slider itself | What confidence level matches today's risk |
-| Normal distribution | Overlay curve on histogram | Whether to model as normal or empirical |
-| Sampling / sample size | "Hire barista" upgrade (more samples/day) | When to invest in n vs μ vs σ upgrades |
-| Z-scores | Stock-quantity readout | Reading off the z to back out the stock level |
-| Hypothesis testing | "Market shift detected?" weekly check | When to reject the null that distribution is unchanged |
-| Effect size | Marketing upgrade preview | Is the μ shift worth the cost? |
-| t-test / two-sample | Compare two cafes' demands | Is location B genuinely better than A, or just lucky? |
+| Mean | Round 1 | Sum of face values / 6, shown as HUD top. Sum contracts depend on μ. |
+| Variance / SD | Round 3 | Computed live. Precision contracts demand low σ; push-your-luck contracts reward high σ. |
+| Expected value | Round 5 | Market cards show EV impact. Player estimates "will buying this face pay off?" |
+| Probability | Round 7 | Contract success probability shown only after spending "insight." Player must reason from visible faces otherwise. |
+| Z-scores | Round 10+ | "Roll a value with z > 1.5 relative to your own die." Forces player to compute (x−μ)/σ. |
+| CLT / sampling distributions | Boss round 15 | Roll die 30 times. Distribution of sample means becomes the new contract target. CLT emerges visually. |
+| Confidence intervals | Tournament mode | Opponent die hidden. See only their sample mean. Build tightest correct CI to win round. |
+| Hypothesis testing | PvE bosses | Boss has hidden μ. Draw samples (costs stamina), run t-test via UI button, decide reject / fail-to-reject. |
+| Correlation | Two-die contracts | Pair two faces; reward based on r between paired roll results. |
+| ANOVA | Tribe mode | Differentiate three dice's means under budget. Win = high between-group variance, low within-group variance. |
 
-#### Session structure
-A session is one **season** (8–12 in-game days), approximately 10–15 real minutes. Arc: cautious early days with wide CIs and small profits → mid-season equipment upgrades narrow σ → late-season expansion adds a new distribution to learn → season-close report with three scores (profit, calibration, shift-detection). Sessions chain via persistent cafe upgrades; player chooses next season's neighborhood (= next distribution type) — branching agency.
+### Screen Layout (mobile-first, RTL)
 
-#### Compounding engine
-- **Session 1:** estimating one distribution with n=7 samples, wide CIs, frequent stock-outs.
-- **Session 3:** same cafe has σ-reduction gear; player learns to anticipate weekend bumps and reads skew at a glance.
-- **Session 5:** two cafes, three pieces of equipment, a "regression dashboard" upgrade unlocks letting you predict demand from temperature data. Player isn't memorizing — they've internalized the feel of distributions and now reasons about covariates.
+```
+┌────────────────────────────────┐
+│  HP ████░░  ⚙  Ore: 12  Rd: 4 │  ← top bar (10vh)
+├────────────────────────────────┤
+│                                │
+│          [3D Forge Die]        │  ← hero zone (40vh)
+│    ממוצע: 5.2   סטיית תקן: 1.8 │
+│    ▂▄▆█▆▄▂  (mini-histogram)  │
+│                                │
+├────────────────────────────────┤
+│  Contract: סכום ≥ 22 ב-3 הטלות │  ← contract strip (8vh)
+│  פרס: 8 עפרה · עלות כישלון: 2HP│
+├────────────────────────────────┤
+│ ◀ [face:7 Δμ+0.8 Δσ+0.4 4ore] │  ← market scroll (20vh)
+│   [face:3 Δμ-0.3 Δσ-0.7 3ore] │     horizontal RTL scroll
+│   [face:2d4 Δμ+0.2 Δσ-0.3 6ore│
+├────────────────────────────────┤
+│         [ הטל ]                │  ← commit bar (12vh)
+│    [שאל שאלה → +3 עפרה]        │     quiz bridge button
+└────────────────────────────────┘
+```
 
-The goal: by session 5, the player thinks in σ.
+Colors: background `#0e0f12`, panel `#16181d`, face cards `#1c1f26`. Face glow: `#3b82f6` (low σ face), `#ef4444` (high σ face), `#FFD700` (high EV face). Histogram bars `--gold`.
 
-#### Failure design
-Three failure modes, all informative and recoverable:
+### Win / Lose / Progress Conditions
 
-- **Stock-out day:** screen shows the true demand exceeded your CI. Overlay: "a 95% CI would have caught this — you chose 80%." No cash penalty beyond opportunity cost. Teaches: interval width tradeoff.
-- **Waste day:** unused stock spoils. Overlay shows how much narrower a CI would have sufficed. Teaches: over-confidence cost.
-- **Bankruptcy:** lose one location, keep your equipment and samples. Restart with a smaller cafe. Never a wall.
+- **Win contract:** Roll outcome meets contract specification.
+- **Lose contract:** HP lost = z-distance of miss from target (informative failure, not wall).
+- **Run end:** HP → 0. Run summary shows which contracts failed, with concept tags. AI tutor pre-loads remedial questions.
+- **Meta progress:** Across runs, unlock face archetypes (Bernoulli face, compound 2d4 face, negative face). Unlock requires N concept-mastery points earned from contracts using that concept.
+- **Feature unlock bridge:** Existing tier system (`featureUnlocks.ts`) maps: tier-2 → compound faces, tier-4 → CI tournament, tier-5 → ANOVA tribes.
 
-Calibration streak (out of 10): how often did the true demand fall in your stated CI? A well-calibrated player at 80% CI should hit ~8/10. This is the deepest pedagogical signal — direct feedback on probabilistic intuition.
+### Feature Flag
 
-#### Mobile UX sketch
-- **Top third (non-interactive):** histogram of past demand with current μ̂, σ̂, and n labeled. Hebrew labels right-aligned. Bars in teal `#10b981`, mean marker in gold `#FFD700`.
-- **Middle third:** the CI slider — a horizontal bar overlaid on the histogram showing the chosen interval. Drag handles at left and right edges, or a single "confidence %" slider that symmetrically widens. Z-score and implied stock quantity update live in a small readout.
-- **Bottom third (thumb zone):** primary CTA button "אשר הזמנה" (gold) and secondary "הרץ סימולציה" (blue) which previews 10 hypothetical days. Upgrade shop accessed via a bottom tab.
-- **On tap of histogram bar:** drill into that day's detail (was it a Tuesday? was it raining?).
-- **RTL note:** slider direction reverses; readout numbers stay LTR per Hebrew typography convention; cash flows display with ₪ symbol.
+```typescript
+// src/config/featureFlags.ts
+ENABLE_DICE_FORGE_LOOP: false          // master gate
+ENABLE_FORGE_PVE_BOSSES: false         // hypothesis-testing bosses
+ENABLE_FORGE_TOURNAMENT_CI: false      // CI PvP mode
+ENABLE_FORGE_TRIBE_ANOVA: false        // ANOVA tribe contracts
+ENABLE_FORGE_CITY_INTEGRATION: false   // city-mastery bridge
+```
 
-#### First 10 decisions
-1. **Day 1 stock:** see 5 days of past demand, mean ≈ 60, sd ≈ 12. Choose a CI width — most players pick 80%, stock ~75 units.
-2. **Day 1 reaction:** demand was 68; comfortably in CI. Choose to spend ₪20 on a "data-board" upgrade (shows σ explicitly) or save.
-3. **Day 2 stock:** with σ now visible, choose 80% vs 95%. Decide whether to trust the slight downtrend (regression-to-mean intuition).
-4. **Day 2 surprise:** demand was 92 — an outlier. Stock-out screen shows the day was a holiday. Decision: tag holiday days separately or treat as one population?
-5. **Day 3 stock:** smaller n if holiday tagged. Choose: wider CI to compensate, or trust the cleaner non-holiday subsample?
-6. **Day 4 upgrade choice:** ₪50 for a "barista" (n+1/day) vs ₪50 for "espresso machine" (σ × 0.9). First real engine-building decision.
-7. **Day 5 stock:** apply your upgrade choice. See the histogram tighten or widen accordingly.
-8. **Day 5 market event:** a notice says "construction starts next week." Decision: pre-emptively shift μ estimate down, or wait for data?
-9. **Day 6 hypothesis check:** game asks "do you think the distribution has shifted?" — two-sample t-test framing. Player rejects or fails to reject.
-10. **Day 7 expansion offer:** open a second cafe in a new neighborhood with no prior data. Decision: accept the cold-start uncertainty for higher ceiling, or stay and master the known distribution?
+### Why This Is NOT Cosmetic
 
-#### Open design questions
-1. **Calibration math vs intuition:** do we show p-values and z-scores explicitly from day 1, or unlock them progressively? Risk: too much notation early scares non-quant BA students; too little defeats the pedagogy.
-2. **Quiz integration:** how does the existing SM-2 quiz engine plug in? Proposal — between days, an optional "study card" (the SM-2 item) grants a small bonus next day if answered correctly. Needs prototyping for balance.
-3. **Distribution diversity:** how many distribution archetypes per session feel rich without overwhelming? Three? Five? Affects content authoring.
-4. **Hebrew terminology consistency:** intervals, σ, μ — do we use Hebrew translations (סטיית תקן, ממוצע) consistently or anglicize statistical symbols? Needs user testing with target BA cohort.
-5. **3D city tie-in:** the existing Three.js city — does each cafe location appear there as a building? Cosmetic-only is acceptable here because the gameplay decisions live in 2D screens; the city becomes the "save file you can see" rather than the gameplay surface.
+A player who misreads variance literally loses the contract:
+- Buying a high-value face without noticing σ explodes → fat-tailed histogram → precision contracts unwinnable.
+- Premature hypothesis rejection (PvE boss) → 0 damage dealt + stamina lost.
+- Wide CI in tournament mode → loses to a player with tighter correct interval.
+- XP cannot be farmed: face unlocks require concept mastery points from actual contract decisions, not quiz answers alone.
 
-#### Citations
-- **Board game inspiration:** Seize the Bean (cafe operations + deck-building) and Quacks of Quedlinburg (push-your-luck on a known-but-noisy distribution).
-- **Mobile game inspiration:** Mini Metro — minimal UI, every visual element is a gameplay variable, color-coded scarcity, no decorative chrome.
-- **UI source:** Linear — dark theme with single accent color, dense numeric readouts that stay readable, keyboard-style command emphasis adapted as touch-zone hierarchy.
+The current city builder's locked-in risk is explicit: buildings don't change the math. In the Forge, **every face placement changes the distribution, and the distribution is the game**.
+
+### Connection to Existing Systems
+
+| Existing system | Bridge |
+|---|---|
+| Quiz panel (757 questions) | "שאל שאלה" button awards +3 ore on correct answer; SM-2 spacing filters to failed-concept questions |
+| XP store (`learningStore.ts`) | Contract wins award XP proportional to concept difficulty |
+| Feature unlock tiers | Tier milestones map 1:1 to face archetype + mode unlocks |
+| Mindmap view | Mastery tracks replace/augment current graph with functional concept-progression map |
+| AI tutor | Invoked after failed contract with 2-sentence diagnosis + quiz hook |
+| City builder (R3F) | Phase 2: city districts grow as mastery tracks fill (Districts = concept clusters) |
+
+### First Prototype Scope
+
+**In (target ~80 dev-hours):**
+- Single 6-faced die, integer faces 1–6 default
+- Live μ, σ, mini-histogram HUD
+- Three contract types: sum, range, mean
+- Forge market: 5 face cards per round, ore pricing
+- Ore + HP economy
+- Branch choice after each round (3 paths)
+- Run length: 10 contracts → run summary
+- `forgeStore.ts` Zustand slice: `faces`, `ore`, `hp`, `currentContract`, `runStats`
+- R3F die: `<RoundedBox>` with face labels (reuses existing drei setup)
+- Quiz bridge: "שאל שאלה → +3 עפרה" button opens existing panel
+- `ENABLE_DICE_FORGE_LOOP` feature flag defaulted off
+- Vitest tests: μ/σ computation, contract evaluation, ore/hp delta logic
+
+**Deferred to v2+:**
+- PvE hypothesis-testing bosses
+- CI tournament mode
+- ANOVA tribes
+- Compound faces (2d3, Bernoulli)
+- Z-score contracts
+- CLT boss visualization
+- City builder integration
+- Cosmetic face skins
+
+### City Builder Tension Resolution
+
+**Recommended: Option A — Recontextualize city as meta-layer.**
+
+- Phase 1 (now): Forge ships standalone, city untouched.
+- Phase 2: City districts are read-only mastery visualizations. Descriptives Quarter grows as mean/variance mastery fills. Inference Heights grows on hypothesis-testing wins.
+- Phase 3: City actions trigger Forge unlocks. City = meta-game. Forge = moment-to-moment game.
+
+This rescues the existing R3F investment without compromising the gameplay-first principle.
 
 ---
 
-### 4. What was rejected and why
+## Inspiration Citations
 
-**Signal in the Static (C)** was rejected despite a strong wonder score because the dials risk becoming abstract knobs whose statistical names are decorative labels rather than load-bearing concepts. A player can succeed by feel alone — turning dials until the waveform looks clean — without ever forming a model of mean-vs-median robustness or z-thresholds. The decoration risk is structural: the prettier the waveform UI, the more it pulls toward dexterity-juicing and away from explicit statistical reasoning. Could be salvaged as a mini-game inside Cafe Forecaster (a "tuning the espresso grind" micro-puzzle), not as the spine.
+**Board games consulted:**
+- Dice Forge (BGG/234931) — mutable die faces as core engine
+- Quacks of Quedlinburg (BGG/244521) — push-your-luck framing
+- Gloomhaven — boss encounter structure
+- Stuffed Fables (BGG/233312) — per-encounter asymmetric mechanics
+- Arctic Scavengers — asymmetric tribe leaders → ANOVA tribe mode
+- Seize the Bean (BGG/211364) — deck-building Candidate 6
+- Century Spice Road (BGG/209778) — resource chain mechanic
+- Catan (BGG/13) — trading/negotiation window
+- Patchwork (BGG/163412) — spatial puzzle framing for Candidate 4
+- Cry Havoc (BGG/192457) — asymmetric faction territory control
 
-**Election Night (D)** was rejected for the #1 slot — though it ranked #3 — because the worker-placement allocation pattern, while statistically pure, gives less emotional pull than the cafe daydream and risks political-fatigue with the Israeli student cohort even with neutral re-skinning. It also concentrates all stats concepts around sampling/CI and leaves hypothesis testing and effect size as bolt-ons. Strong contender for a Cycle 2 module once players have internalized the basics.
+**Mobile games consulted:**
+- Dicey Dungeons, Slice & Dice — dice-manipulation roguelites, decision density
+- Slay the Spire — roguelite engine-building, risk-reward per decision
+- Threes / Drop7 — spatial tile placement + immediate feedback
+- Loop Hero — "set up the engine and watch" feedback loop
+- Balatro — push-your-luck escalation pattern
 
-**Correlation Detective (E)** was rejected because the narrative wrapper is a known decoration-risk pattern: players succeed by reading story cues and ignoring the scatterplots. The compounding mechanism is also weak — solved cases don't change the next case's math, they just unlock content. Reigns works because every choice reshapes the same kingdom; here, cases are episodic. Could become an end-of-session "detective episode" rather than the core loop.
-
-**Distribution Tetris (F)** was rejected because despite excellent decoration-resistance and compounding, the wonder score is low. It feels like a math worksheet with drag-and-drop. The "run your own cool place" emotional pull is absent. It is the strongest candidate for a focused practice mode — perhaps the SM-2 quiz engine's spatial replacement — but not as the gameplay spine that draws students back daily.
-
-**ANOVA Arena (G)** was rejected on tone and decoration risk. The combat metaphor will read as juvenile to BA social-science students who are the target cohort, and within-vs-between variance — while it maps cleanly onto faction-vs-faction combat — risks becoming pure flavor text once the player learns which fighter types win. The asymmetric-faction pattern is powerful but better deployed in a later module focused on group comparisons specifically (e.g., a "research lab" theme), not as the first impression of WaffleStack gameplay.
+**UI sources:**
+- Linear.app — dark-UI density, status pills, micro-interactions (HUD design)
+- Apple HIG dark mode — elevation, 44pt hit-targets (mobile layout)
+- Duolingo — path-tree branch choice (after-round contract selection)
+- Mini Metro / Two Dots — minimal HUD, one-thumb mobile play
 
 ---
 
-*Generated by proactive-vision-builder cycle 01 on 2026-05-21.*
-*NotebookLM: SKIP — MCP connector not available in this container.*
+*Cycle 1 complete — exploration only, no code produced. Cycle 2 will implement the Distribution Forge prototype behind `ENABLE_DICE_FORGE_LOOP`.*
