@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { evaluateUnlocks, ALL_FEATURE_IDS, FEATURE_UNLOCKS_BY_ID, type FeatureId } from '../config/featureUnlocks'
+import type { PersonalPlan, IntakeAnswers } from '../data/personalPlanTypes'
 
 // ── SM-2 Spaced Repetition ────────────────────────────────────────────────────
 
@@ -380,6 +381,11 @@ interface LearningState {
   unlockedFeatures: string[]
   newlyUnlocked: string[]
 
+  // Personal study plan (rule-based, optional). See: personal-plan-spec.md
+  personalPlan: PersonalPlan | null
+  intakeAnswers: IntakeAnswers | null
+  planHistory: { plan: PersonalPlan; answers: IntakeAnswers }[]
+
   // Actions
   recordAnswer: (questionId: string, correct: boolean, xpReward: number) => void
   recordSM2Answer: (questionId: string, quality: number, xpReward: number) => void
@@ -396,6 +402,8 @@ interface LearningState {
   toggleAdminMode: () => void
   unlockFeature: (id: FeatureId) => void
   clearNewlyUnlocked: (id?: string) => void
+  setPersonalPlan: (plan: PersonalPlan, answers: IntakeAnswers) => void
+  clearPersonalPlan: () => void
 }
 
 // Helper: is a feature unlocked? Admin wins. Features with no rule are
@@ -443,6 +451,9 @@ export const useLearningStore = create<LearningState>()(
       errorTagCounts: {},
       unlockedFeatures: [],
       newlyUnlocked: [],
+      personalPlan: null,
+      intakeAnswers: null,
+      planHistory: [],
 
       recordAnswer: (questionId, correct, xpReward) => {
         const state = get()
@@ -708,6 +719,19 @@ export const useLearningStore = create<LearningState>()(
         if (id === undefined) { set({ newlyUnlocked: [] }); return }
         set({ newlyUnlocked: state.newlyUnlocked.filter(x => x !== id) })
       },
+      setPersonalPlan: (plan, answers) => {
+        const state = get()
+        // Archive the previous plan into planHistory (cap at 3 entries).
+        const archived = state.personalPlan && state.intakeAnswers
+          ? [{ plan: state.personalPlan, answers: state.intakeAnswers }, ...state.planHistory].slice(0, 3)
+          : state.planHistory
+        set({
+          personalPlan: plan,
+          intakeAnswers: answers,
+          planHistory: archived,
+        })
+      },
+      clearPersonalPlan: () => set({ personalPlan: null, intakeAnswers: null }),
     }),
     {
       name: 'wafflestack-learning',
