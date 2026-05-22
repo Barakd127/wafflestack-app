@@ -333,6 +333,7 @@ import Tooltip from './Tooltip'
 import Ribbon from './Ribbon'
 import { RiskBoard } from './RiskBoard'
 import MistakeAutopsy, { type ErrorTag } from './MistakeAutopsy'
+import PersonalPlanWizard from './PersonalPlanWizard'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d' | 'drawing') => void
@@ -1027,6 +1028,21 @@ function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
 }
 
 function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorProps) {
+  // Re-order topics according to the user's personal plan when one exists.
+  // Topics not in the plan trail at the end in their natural order.
+  const personalPlan = useLearningStore(s => s.personalPlan)
+  const sortedTopics = (() => {
+    if (!personalPlan) return QUIZ_TOPICS
+    const order = new Map(personalPlan.sequence.map((s, i) => [s.topicId, i]))
+    return [...QUIZ_TOPICS].sort((a, b) => {
+      const ai = order.has(a.id) ? (order.get(a.id) as number) : 9999
+      const bi = order.has(b.id) ? (order.get(b.id) as number) : 9999
+      return ai - bi
+    })
+  })()
+  const hintByTopic = new Map<string, string>(
+    personalPlan?.sequence.filter(s => s.hint).map(s => [s.topicId, s.hint as string]) ?? []
+  )
   return (
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }}>
       <button
@@ -1053,8 +1069,9 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
       </h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20, maxWidth: 1200 }}>
-        {QUIZ_TOPICS.map(topic => {
+        {sortedTopics.map(topic => {
           const progress = userProgress.topics[topic.id]
+          const planHint = hintByTopic.get(topic.id)
           const isMastered = progress?.mastered
           const bestScore = progress?.bestScore || 0
           const sessionsAttempted = progress?.sessionsAttempted || 0
@@ -1096,6 +1113,18 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
                   </div>
                 </div>
               </div>
+
+              {planHint && (
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(245,200,66,0.22), rgba(212,175,55,0.12))',
+                  border: '1px solid rgba(212,175,55,0.5)',
+                  borderRadius: 10, padding: '6px 10px',
+                  fontFamily: "'Rubik', sans-serif", fontSize: 12,
+                  color: '#8a6d1c', fontWeight: 600, textAlign: 'right',
+                }}>
+                  🎯 {planHint}
+                </div>
+              )}
 
               <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
                 <div style={{ textAlign: 'center', flex: 1 }}>
@@ -1676,9 +1705,83 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
   const level = Math.floor(xp / XP_PER_LEVEL) + 1
   const xpInLevel = xp % XP_PER_LEVEL
   const topicsMastered = useLearningStore(s => s.completedLessons.length)
+  const personalPlan = useLearningStore(s => s.personalPlan)
+  const clearPersonalPlan = useLearningStore(s => s.clearPersonalPlan)
+  const [planWizardOpen, setPlanWizardOpen] = useState(false)
   return (
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
+      <PersonalPlanWizard open={planWizardOpen} onClose={() => setPlanWizardOpen(false)} />
       <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+        {/* Personal study plan CTA / banner — opens 3-step intake wizard. */}
+        {!personalPlan ? (
+          <button
+            onClick={() => setPlanWizardOpen(true)}
+            style={{
+              background: 'linear-gradient(135deg, rgba(245,200,66,0.18), rgba(212,175,55,0.10))',
+              border: '1.5px solid rgba(212,175,55,0.55)',
+              borderRadius: CARD_RADIUS,
+              padding: '18px 24px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 16, textAlign: 'right',
+              fontFamily: "'Rubik', sans-serif",
+              boxShadow: '0 4px 16px rgba(212,175,55,0.18)',
+            }}
+          >
+            <div style={{ fontSize: 36 }}>🎯</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 17, fontWeight: 700, color: TEXT_DARK }}>התאם תכנית אישית</div>
+              <div style={{ fontSize: 13, color: TEXT_MED, marginTop: 3 }}>
+                שאלון של פחות מדקה — נסדר את הנושאים בדיוק לפי המטרה והזמן שלך
+              </div>
+            </div>
+            <div style={{
+              background: 'linear-gradient(135deg,#F5C842,#D4AF37)', color: '#0B1B3E',
+              padding: '8px 16px', borderRadius: 24, fontSize: 13, fontWeight: 700,
+            }}>
+              התחל ←
+            </div>
+          </button>
+        ) : (
+          <div style={{
+            background: GLASS_CARD_SM,
+            backdropFilter: 'blur(20px)',
+            borderRadius: CARD_RADIUS,
+            padding: '16px 22px',
+            border: '1px solid rgba(212,175,55,0.45)',
+            display: 'flex', alignItems: 'center', gap: 14,
+            fontFamily: "'Rubik', sans-serif",
+            boxShadow: CARD_SHADOW,
+          }}>
+            <div style={{ fontSize: 28 }}>🎯</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_DARK }}>
+                התכנית שלך · {personalPlan.sequence.length} נושאים · {personalPlan.dailyTargetMin} דק׳ ביום
+              </div>
+              <div style={{ fontSize: 12, color: TEXT_MED, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {personalPlan.sequence.slice(0, 4).map(s => HEBREW_LABELS[s.topicId] || s.topicId).join(' → ')}
+                {personalPlan.sequence.length > 4 ? ' …' : ''}
+              </div>
+            </div>
+            <button
+              onClick={() => setPlanWizardOpen(true)}
+              style={{
+                background: 'rgba(212,175,55,0.18)', color: '#8a6d1c',
+                border: '1px solid rgba(212,175,55,0.45)',
+                borderRadius: 10, padding: '6px 12px', fontSize: 12, fontWeight: 700,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >✏️ ערוך</button>
+            <button
+              onClick={() => { if (confirm('לאפס את התכנית האישית?')) clearPersonalPlan() }}
+              style={{
+                background: 'transparent', color: '#9a3b3b',
+                border: '1px solid rgba(154,59,59,0.3)',
+                borderRadius: 10, padding: '6px 10px', fontSize: 12, fontWeight: 700,
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >🗑</button>
+          </div>
+        )}
 
         {/* Motivation widgets row removed per user feedback (kanban B7) —
             home was too crowded. The 2-min challenge card (leftmost) stays
