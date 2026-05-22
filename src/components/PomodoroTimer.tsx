@@ -114,9 +114,13 @@ export default function PomodoroTimer({ leftOffset }: PomodoroTimerProps = {}) {
         title="טיימר פומודורו"
         aria-label="Open Pomodoro timer"
         style={{
-          position: 'absolute', bottom: 24,
-          left: leftOffset != null ? leftOffset : 'var(--ws-pomodoro-left, 90px)',
-          zIndex: 50,
+          // Float at bottom-left of viewport (away from sidebar admin pill
+          // which lives at bottom-right in RTL). Was 'absolute' inside the
+          // <nav> which made it overlap the admin toggle.
+          position: 'fixed',
+          bottom: 'var(--ws-pomodoro-bottom, 14px)',
+          insetInlineStart: 'var(--ws-pomodoro-start, 14px)',
+          zIndex: 240,
           background: running ? 'rgba(255,107,107,0.18)' : 'rgba(10,10,20,0.75)',
           backdropFilter: 'blur(10px)',
           border: `1px solid ${running ? accent : 'rgba(255,255,255,0.2)'}`,
