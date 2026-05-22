@@ -114,12 +114,12 @@ export default function PomodoroTimer({ leftOffset }: PomodoroTimerProps = {}) {
         title="טיימר פומודורו"
         aria-label="Open Pomodoro timer"
         style={{
-          // In RTL, insetInlineStart resolves to the RIGHT edge → that put
-          // pomo on top of the admin pill again. Use insetInlineEnd to
-          // anchor at the visual LEFT edge (far away from admin pill).
+          // Anchor at viewport bottom-left and STACK ABOVE the TutorFAB
+          // (which is at bottom:20px left:20px height ~56px). 90px clears
+          // it. Same `left` column = consistent FAB stack feel.
           position: 'fixed',
-          bottom: 'var(--ws-pomodoro-bottom, 14px)',
-          insetInlineEnd: 'var(--ws-pomodoro-end, 14px)',
+          bottom: 'var(--ws-pomodoro-bottom, 90px)',
+          left: 'var(--ws-pomodoro-left, 20px)',
           zIndex: 240,
           background: running ? 'rgba(255,107,107,0.18)' : 'rgba(10,10,20,0.75)',
           backdropFilter: 'blur(10px)',
