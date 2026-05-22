@@ -13,9 +13,15 @@ const BUILDINGS = [
   '/kenney/building-j.glb',
 ] as const
 
-const ROTATION_SPEED = 0.45                 // rad/s — full rotation ≈ 14s
-const ROTATIONS_PER_BUILDING = 2            // 2 rotations ≈ 28s per model
-const MIN_SECONDS_PER_BUILDING = 12.0       // hard floor — fade can't trigger sooner than this even if rotations finish (defensive against fast-rotation glitches)
+// Subtle wobble instead of continuous spin — ±5° over 8s ease-in-out — avoids
+// the jittery / nausea-inducing perception that fast continuous rotation gave.
+// Continuous rotation kept as a (very slow) baseline so the building still
+// presents all faces over time.
+const ROTATION_SPEED = 0.12                 // rad/s — full rotation ≈ 52s baseline
+const WOBBLE_AMPLITUDE_RAD = 0.087          // ≈ ±5° wobble overlay
+const WOBBLE_PERIOD_SEC = 8.0               // one full wobble cycle in 8s
+const ROTATIONS_PER_BUILDING = 1            // 1 rotation ≈ 52s per model
+const MIN_SECONDS_PER_BUILDING = 30.0       // hard floor before crossfade can fire
 const FADE_DURATION = 1.0                   // seconds for crossfade (smoother)
 // Each building gets normalised so its largest dimension fits this many world
 // units. Tuned for the 640×520 frameless hero — building should dominate the
@@ -164,8 +170,14 @@ function CyclingBuilding() {
       return
     }
 
-    // Normal rotation
+    // Normal rotation — very slow continuous spin + ±5° wobble overlay so the
+    // building presents subtle motion without the dizzying fast-spin effect.
     root.current.rotation.y += delta * ROTATION_SPEED
+    // Wobble is applied as an additive offset on top of the integrated base
+    // rotation. We track only the base rotation against lastFullRotY so the
+    // sinusoid doesn't trip the "full rotation" check spuriously.
+    const wobble = Math.sin((performance.now() / 1000) * (Math.PI * 2 / WOBBLE_PERIOD_SEC)) * WOBBLE_AMPLITUDE_RAD
+    root.current.rotation.z = wobble * 0.3  // tiny tilt — keeps motion visually soft
     if (root.current.rotation.y - s.lastFullRotY >= Math.PI * 2) {
       s.rotationsDone += 1
       s.lastFullRotY = root.current.rotation.y
