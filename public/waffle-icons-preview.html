@@ -2,286 +2,325 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<title>Waffle Mascot — Polished v3</title>
+<title>Waffle Icons v4 — pro-icon-pack inspired</title>
 <style>
   body { font-family: 'Heebo','Rubik',system-ui,sans-serif; margin:0; padding:32px; background:linear-gradient(160deg,#0d1d35 0%,#14294a 100%); color:#fff; min-height:100vh; }
   h1 { font-weight:900; font-size:26px; margin:0 0 4px; }
-  .sub { opacity:.7; margin-bottom:28px; font-size:14px; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:22px; max-width:1500px; }
+  .sub { opacity:.7; margin-bottom:28px; font-size:14px; max-width:780px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:22px; max-width:1500px; }
   .card { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:20px; text-align:center; }
   .card h3 { margin:0 0 2px; font-size:16px; font-weight:800; }
   .num { opacity:.5; font-size:11px; margin-bottom:14px; }
   .show { display:flex; gap:24px; align-items:center; justify-content:center; padding:14px 0 8px; }
-  .tile { width:96px; height:96px; border-radius:22px; background:linear-gradient(135deg,#1F3E6C,#3B5998); box-shadow:0 6px 18px rgba(31,41,55,.4); display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.22); }
-  .tile svg { width:80px; height:80px; }
-  .chip { width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,.06); display:flex; align-items:center; justify-content:center; }
-  .chip svg { width:30px; height:30px; }
+  .tile { width:108px; height:108px; border-radius:24px; background:linear-gradient(135deg,#1F3E6C,#3B5998); box-shadow:0 6px 18px rgba(31,41,55,.4); display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.22); }
+  .tile.lite { background:#FFF7E8; }
+  .tile svg { width:92px; height:92px; }
+  .chip { width:40px; height:40px; border-radius:10px; background:#FFF7E8; display:flex; align-items:center; justify-content:center; }
+  .chip svg { width:34px; height:34px; }
   .label { font-size:11px; opacity:.65; margin-top:8px; line-height:1.5; }
+  .palette { font-family:'JetBrains Mono',monospace; font-size:10px; opacity:.5; margin-top:4px; }
 </style>
 </head>
 <body>
-<h1>🧇 Polished Waffle Mascot v3</h1>
-<div class="sub">Fewer designs, real illustration. Soft gradients, eye shines, blush, waffle-texture overlay on the body. Compare at 80px (sidebar size) and 30px (favicon).</div>
+<h1>🧇 v4 — Pro-icon-pack style</h1>
+<div class="sub">Inspired by Flaticon / Freepik / Magnific / VectorStock refs. Thick rounded black outlines, real saturated honey-amber, square grid cells with depth shading, toppings (strawberry / syrup / cream). Each shown on real sidebar tile bg AND on light bg.</div>
+
+<defs>
+  <!-- shared defs at body level so all cards reuse -->
+</defs>
 
 <div class="grid">
 
-<!-- V1: Polished Puppy -->
-<div class="card"><h3>Sleepy Puppy</h3><div class="num">V1 — soft, gentle, content</div>
+<!-- V1: Round waffle + strawberry (Magnific style) -->
+<div class="card"><h3>Round + Strawberry</h3><div class="num">V1 — Magnific-style hero</div>
 <div class="show">
-<div class="tile"><svg viewBox="0 0 100 100">
+<div class="tile"><svg viewBox="0 0 120 120">
 <defs>
-<radialGradient id="v1Face" cx=".42" cy=".35" r=".75"><stop offset="0" stop-color="#FFE5B0"/><stop offset=".6" stop-color="#F5B454"/><stop offset="1" stop-color="#CB7818"/></radialGradient>
-<radialGradient id="v1Ear" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="#A36418"/><stop offset="1" stop-color="#5C2E0A"/></radialGradient>
-<pattern id="v1Waffle" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-  <path d="M0 5 H10 M5 0 V10" stroke="#7B3F1A" stroke-width="1" opacity=".4"/>
-  <rect x="0" y="0" width="5" height="5" fill="#7B3F1A" opacity=".05"/>
-  <rect x="5" y="5" width="5" height="5" fill="#7B3F1A" opacity=".05"/>
-</pattern>
-<clipPath id="v1Clip"><circle cx="50" cy="55" r="32"/></clipPath>
+  <radialGradient id="w1Body" cx=".45" cy=".4" r=".7">
+    <stop offset="0" stop-color="#FFD27A"/>
+    <stop offset=".55" stop-color="#F2A93E"/>
+    <stop offset="1" stop-color="#C97C18"/>
+  </radialGradient>
+  <linearGradient id="w1Side" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#C97C18"/>
+    <stop offset="1" stop-color="#7B3F1A"/>
+  </linearGradient>
 </defs>
-<!-- soft shadow -->
-<ellipse cx="50" cy="90" rx="28" ry="3" fill="#000" opacity=".2"/>
-<!-- floppy ears (back layer) -->
-<ellipse cx="20" cy="50" rx="11" ry="20" fill="url(#v1Ear)" transform="rotate(-22 20 50)" stroke="#3A1B05" stroke-width="1.5"/>
-<ellipse cx="80" cy="50" rx="11" ry="20" fill="url(#v1Ear)" transform="rotate(22 80 50)" stroke="#3A1B05" stroke-width="1.5"/>
-<!-- inner ear pink -->
-<ellipse cx="20" cy="50" rx="5" ry="12" fill="#FF8FAB" opacity=".6" transform="rotate(-22 20 50)"/>
-<ellipse cx="80" cy="50" rx="5" ry="12" fill="#FF8FAB" opacity=".6" transform="rotate(22 80 50)"/>
-<!-- head -->
-<circle cx="50" cy="55" r="32" fill="url(#v1Face)" stroke="#7B3F1A" stroke-width="2"/>
-<!-- waffle texture overlay on face only -->
-<g clip-path="url(#v1Clip)" opacity=".55">
-  <rect x="18" y="23" width="64" height="64" fill="url(#v1Waffle)"/>
+<!-- side/depth ring -->
+<ellipse cx="60" cy="76" rx="46" ry="38" fill="url(#w1Side)" stroke="#1A1A2E" stroke-width="3"/>
+<!-- top face -->
+<ellipse cx="60" cy="70" rx="46" ry="38" fill="url(#w1Body)" stroke="#1A1A2E" stroke-width="3"/>
+<!-- waffle CELL pattern: 4x3 visible squares with depth shading -->
+<g stroke="#1A1A2E" stroke-width="1.6" stroke-linejoin="round">
+  <!-- horizontal dividers -->
+  <path d="M22 60 Q60 50 98 60" fill="none" opacity=".55"/>
+  <path d="M18 78 Q60 70 102 78" fill="none" opacity=".55"/>
+  <!-- vertical dividers -->
+  <path d="M36 36 Q40 70 36 100" fill="none" opacity=".55"/>
+  <path d="M60 32 Q60 70 60 104" fill="none" opacity=".55"/>
+  <path d="M84 36 Q80 70 84 100" fill="none" opacity=".55"/>
 </g>
-<!-- inner highlight crescent -->
-<path d="M 28 40 Q 50 28 72 40" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".25" fill="none"/>
-<!-- gentle closed eyes -->
-<path d="M34 53 Q39 48 44 53" stroke="#1A1A2E" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-<path d="M56 53 Q61 48 66 53" stroke="#1A1A2E" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-<!-- eyelashes -->
-<path d="M34 51 L33 49 M39 49 L39 47 M44 51 L45 49" stroke="#1A1A2E" stroke-width="1.4" stroke-linecap="round"/>
-<path d="M56 51 L55 49 M61 49 L61 47 M66 51 L67 49" stroke="#1A1A2E" stroke-width="1.4" stroke-linecap="round"/>
-<!-- nose: glossy heart -->
-<path d="M50 64 Q45 60 45 64 Q45 68 50 71 Q55 68 55 64 Q55 60 50 64 Z" fill="#1A1A2E"/>
-<ellipse cx="48" cy="63" rx="1.4" ry="1" fill="#fff" opacity=".7"/>
-<!-- happy smile -->
-<path d="M50 71 V74 Q44 80 38 76 M50 74 Q56 80 62 76" stroke="#1A1A2E" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<!-- tongue tip -->
-<path d="M46 76 Q50 80 54 76 Q52 78 50 78 Q48 78 46 76 Z" fill="#FF6B8B"/>
-<!-- cheek blush -->
-<ellipse cx="30" cy="64" rx="5" ry="3" fill="#FF8FAB" opacity=".4"/>
-<ellipse cx="70" cy="64" rx="5" ry="3" fill="#FF8FAB" opacity=".4"/>
-<!-- top highlight -->
-<ellipse cx="42" cy="34" rx="10" ry="5" fill="#fff" opacity=".35"/>
-</svg></div>
-<div class="chip"><svg viewBox="0 0 100 100">
-<ellipse cx="20" cy="50" rx="13" ry="22" fill="#5C2E0A" transform="rotate(-22 20 50)"/>
-<ellipse cx="80" cy="50" rx="13" ry="22" fill="#5C2E0A" transform="rotate(22 80 50)"/>
-<circle cx="50" cy="55" r="34" fill="#F5B454"/>
-<path d="M34 53 Q39 48 44 53 M56 53 Q61 48 66 53" stroke="#1A1A2E" stroke-width="4" fill="none" stroke-linecap="round"/>
-<path d="M50 64 Q45 60 45 64 Q45 68 50 71 Q55 68 55 64 Q55 60 50 64 Z" fill="#1A1A2E"/>
-</svg></div>
-</div><div class="label">Sleepy/content. Soft gradient body, dark glossy ears, eyelashes, glossy heart-nose, tongue tip, blush. Reads from 30px up.</div></div>
-
-<!-- V2: Polished Cat -->
-<div class="card"><h3>Curious Kitten</h3><div class="num">V2 — wide-eyed, alert</div>
-<div class="show">
-<div class="tile"><svg viewBox="0 0 100 100">
-<defs>
-<radialGradient id="v2Face" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#FFE5B0"/><stop offset=".6" stop-color="#F5B454"/><stop offset="1" stop-color="#CB7818"/></radialGradient>
-<radialGradient id="v2EarOut" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#F5B454"/><stop offset="1" stop-color="#7B3F1A"/></radialGradient>
-<pattern id="v2Waffle" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-  <path d="M0 5 H10 M5 0 V10" stroke="#7B3F1A" stroke-width="1" opacity=".4"/>
-  <rect x="0" y="0" width="5" height="5" fill="#7B3F1A" opacity=".05"/>
-  <rect x="5" y="5" width="5" height="5" fill="#7B3F1A" opacity=".05"/>
-</pattern>
-<clipPath id="v2Clip"><circle cx="50" cy="58" r="30"/></clipPath>
-</defs>
-<ellipse cx="50" cy="92" rx="26" ry="3" fill="#000" opacity=".2"/>
-<!-- triangle ears (outer) -->
-<path d="M22 38 L30 12 L40 36 Z" fill="url(#v2EarOut)" stroke="#7B3F1A" stroke-width="2" stroke-linejoin="round"/>
-<path d="M78 38 L70 12 L60 36 Z" fill="url(#v2EarOut)" stroke="#7B3F1A" stroke-width="2" stroke-linejoin="round"/>
-<!-- inner ears pink -->
-<path d="M26 34 L30 19 L37 34 Z" fill="#FF8FAB"/>
-<path d="M74 34 L70 19 L63 34 Z" fill="#FF8FAB"/>
-<!-- ear fluff tufts -->
-<path d="M30 14 L29 10 M30 14 L32 10" stroke="#FFE5B0" stroke-width="1.4" stroke-linecap="round"/>
-<path d="M70 14 L71 10 M70 14 L68 10" stroke="#FFE5B0" stroke-width="1.4" stroke-linecap="round"/>
-<!-- head -->
-<circle cx="50" cy="58" r="30" fill="url(#v2Face)" stroke="#7B3F1A" stroke-width="2"/>
-<!-- waffle texture -->
-<g clip-path="url(#v2Clip)" opacity=".5"><rect x="20" y="28" width="60" height="60" fill="url(#v2Waffle)"/></g>
-<!-- top highlight -->
-<ellipse cx="42" cy="36" rx="11" ry="5" fill="#fff" opacity=".35"/>
-<!-- big almond eyes -->
-<ellipse cx="38" cy="56" rx="5.2" ry="7.2" fill="#fff" stroke="#1A1A2E" stroke-width="1.8"/>
-<ellipse cx="62" cy="56" rx="5.2" ry="7.2" fill="#fff" stroke="#1A1A2E" stroke-width="1.8"/>
-<!-- iris (green/teal) -->
-<ellipse cx="38" cy="57" rx="3.4" ry="5.6" fill="#4ECDC4"/>
-<ellipse cx="62" cy="57" rx="3.4" ry="5.6" fill="#4ECDC4"/>
-<!-- pupil slit -->
-<ellipse cx="38" cy="57" rx="1" ry="5.2" fill="#1A1A2E"/>
-<ellipse cx="62" cy="57" rx="1" ry="5.2" fill="#1A1A2E"/>
-<!-- eye shine -->
-<circle cx="40" cy="53" r="1.4" fill="#fff"/>
-<circle cx="64" cy="53" r="1.4" fill="#fff"/>
-<circle cx="36.5" cy="59.5" r=".7" fill="#fff"/>
-<circle cx="60.5" cy="59.5" r=".7" fill="#fff"/>
-<!-- pink triangle nose -->
-<path d="M50 66 L45 68 Q50 73 55 68 Z" fill="#FF8FAB" stroke="#1A1A2E" stroke-width="1.4" stroke-linejoin="round"/>
-<!-- mouth -->
-<path d="M50 73 V76 Q46 79 42 76 M50 76 Q54 79 58 76" stroke="#1A1A2E" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<!-- whiskers -->
-<g stroke="#1A1A2E" stroke-width="1.5" stroke-linecap="round">
-  <line x1="20" y1="64" x2="36" y2="66"/>
-  <line x1="20" y1="70" x2="36" y2="70"/>
-  <line x1="80" y1="64" x2="64" y2="66"/>
-  <line x1="80" y1="70" x2="64" y2="70"/>
+<!-- inner cell shading (deeper grooves) -->
+<g fill="#A36418" opacity=".35">
+  <ellipse cx="26" cy="50" rx="3" ry="2"/><ellipse cx="48" cy="46" rx="3" ry="2"/><ellipse cx="72" cy="46" rx="3" ry="2"/><ellipse cx="94" cy="50" rx="3" ry="2"/>
+  <ellipse cx="26" cy="70" rx="3" ry="2"/><ellipse cx="48" cy="68" rx="3" ry="2"/><ellipse cx="72" cy="68" rx="3" ry="2"/><ellipse cx="94" cy="70" rx="3" ry="2"/>
+  <ellipse cx="28" cy="88" rx="3" ry="2"/><ellipse cx="48" cy="90" rx="3" ry="2"/><ellipse cx="72" cy="90" rx="3" ry="2"/><ellipse cx="92" cy="88" rx="3" ry="2"/>
 </g>
-<!-- blush -->
-<ellipse cx="28" cy="68" rx="4" ry="2.6" fill="#FF8FAB" opacity=".55"/>
-<ellipse cx="72" cy="68" rx="4" ry="2.6" fill="#FF8FAB" opacity=".55"/>
+<!-- top highlight -->
+<ellipse cx="44" cy="44" rx="22" ry="8" fill="#FFF1C2" opacity=".55"/>
+<!-- strawberry on top -->
+<g>
+  <path d="M76 18 Q88 14 96 26 Q98 40 84 44 Q72 42 70 28 Q70 22 76 18 Z" fill="#FF4A4A" stroke="#1A1A2E" stroke-width="2.4" stroke-linejoin="round"/>
+  <!-- seeds -->
+  <g fill="#FFF1C2"><circle cx="79" cy="26" r="1"/><circle cx="87" cy="24" r="1"/><circle cx="83" cy="32" r="1"/><circle cx="90" cy="32" r="1"/><circle cx="78" cy="36" r="1"/><circle cx="86" cy="40" r="1"/></g>
+  <!-- highlight -->
+  <ellipse cx="80" cy="22" rx="3" ry="2" fill="#FFB0B0" opacity=".75"/>
+  <!-- green leaf -->
+  <path d="M76 18 L72 12 L80 14 L86 8 L86 16 L92 14 L88 22 Z" fill="#3FAA5C" stroke="#1A1A2E" stroke-width="2" stroke-linejoin="round"/>
+  <!-- leaf vein -->
+  <path d="M82 14 L82 20" stroke="#1F5C2A" stroke-width="1.2" stroke-linecap="round"/>
+</g>
 </svg></div>
-<div class="chip"><svg viewBox="0 0 100 100">
-<path d="M22 38 L30 12 L40 36 Z" fill="#7B3F1A"/><path d="M78 38 L70 12 L60 36 Z" fill="#7B3F1A"/>
-<circle cx="50" cy="58" r="32" fill="#F5B454"/>
-<ellipse cx="38" cy="56" rx="5.2" ry="7.2" fill="#fff" stroke="#1A1A2E" stroke-width="2"/>
-<ellipse cx="62" cy="56" rx="5.2" ry="7.2" fill="#fff" stroke="#1A1A2E" stroke-width="2"/>
-<ellipse cx="38" cy="57" rx="3.4" ry="5.6" fill="#4ECDC4"/>
-<ellipse cx="62" cy="57" rx="3.4" ry="5.6" fill="#4ECDC4"/>
-<ellipse cx="38" cy="57" rx="1" ry="5.2" fill="#1A1A2E"/>
-<ellipse cx="62" cy="57" rx="1" ry="5.2" fill="#1A1A2E"/>
+<div class="tile lite"><svg viewBox="0 0 120 120">
+<ellipse cx="60" cy="76" rx="46" ry="38" fill="#7B3F1A" stroke="#1A1A2E" stroke-width="3"/>
+<ellipse cx="60" cy="70" rx="46" ry="38" fill="#F2A93E" stroke="#1A1A2E" stroke-width="3"/>
+<g stroke="#1A1A2E" stroke-width="1.6" stroke-linejoin="round"><path d="M22 60 Q60 50 98 60" fill="none" opacity=".6"/><path d="M18 78 Q60 70 102 78" fill="none" opacity=".6"/><path d="M36 36 Q40 70 36 100" fill="none" opacity=".6"/><path d="M60 32 Q60 70 60 104" fill="none" opacity=".6"/><path d="M84 36 Q80 70 84 100" fill="none" opacity=".6"/></g>
+<path d="M76 18 Q88 14 96 26 Q98 40 84 44 Q72 42 70 28 Q70 22 76 18 Z" fill="#FF4A4A" stroke="#1A1A2E" stroke-width="2.4"/>
+<path d="M76 18 L72 12 L80 14 L86 8 L86 16 L92 14 L88 22 Z" fill="#3FAA5C" stroke="#1A1A2E" stroke-width="2"/>
 </svg></div>
-</div><div class="label">Wide teal eyes with slit pupils + dual shines. Inner-ear pink + fluff tufts. Whiskers + mouth + blush. Distinctly cat.</div></div>
+<div class="chip"><svg viewBox="0 0 120 120">
+<ellipse cx="60" cy="74" rx="48" ry="40" fill="#F2A93E" stroke="#1A1A2E" stroke-width="4"/>
+<path d="M76 18 Q88 14 96 26 Q98 40 84 44 Q72 42 70 28 Q70 22 76 18 Z" fill="#FF4A4A" stroke="#1A1A2E" stroke-width="3"/>
+</svg></div>
+</div><div class="label">Round Belgian waffle + strawberry + leaf. Clean silhouette at 30px.</div><div class="palette">honey #F2A93E · ember #C97C18 · berry #FF4A4A · leaf #3FAA5C</div></div>
 
-<!-- V3: Scholar Puppy (combo of dog + scholar) -->
-<div class="card"><h3>Scholar Pup</h3><div class="num">V3 — graduation cap, education brand</div>
+<!-- V2: Square waffle isometric (Flaticon style) -->
+<div class="card"><h3>Square Belgian Iso</h3><div class="num">V2 — Flaticon-pack style</div>
 <div class="show">
-<div class="tile"><svg viewBox="0 0 100 100">
+<div class="tile"><svg viewBox="0 0 120 120">
 <defs>
-<radialGradient id="v3Face" cx=".42" cy=".4" r=".75"><stop offset="0" stop-color="#FFE5B0"/><stop offset=".6" stop-color="#F5B454"/><stop offset="1" stop-color="#CB7818"/></radialGradient>
-<pattern id="v3Waffle" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-  <path d="M0 5 H10 M5 0 V10" stroke="#7B3F1A" stroke-width="1" opacity=".4"/>
-  <rect x="0" y="0" width="5" height="5" fill="#7B3F1A" opacity=".05"/>
-  <rect x="5" y="5" width="5" height="5" fill="#7B3F1A" opacity=".05"/>
-</pattern>
-<clipPath id="v3Clip"><circle cx="50" cy="60" r="28"/></clipPath>
+  <linearGradient id="w2Top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD27A"/><stop offset="1" stop-color="#F2A93E"/></linearGradient>
+  <linearGradient id="w2SideR" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C97C18"/><stop offset="1" stop-color="#7B3F1A"/></linearGradient>
+  <linearGradient id="w2SideF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A36418"/><stop offset="1" stop-color="#7B3F1A"/></linearGradient>
 </defs>
-<ellipse cx="50" cy="92" rx="26" ry="3" fill="#000" opacity=".2"/>
-<!-- floppy ears -->
-<ellipse cx="22" cy="55" rx="10" ry="17" fill="#5C2E0A" transform="rotate(-22 22 55)" stroke="#3A1B05" stroke-width="1.5"/>
-<ellipse cx="78" cy="55" rx="10" ry="17" fill="#5C2E0A" transform="rotate(22 78 55)" stroke="#3A1B05" stroke-width="1.5"/>
-<ellipse cx="22" cy="55" rx="4" ry="10" fill="#FF8FAB" opacity=".55" transform="rotate(-22 22 55)"/>
-<ellipse cx="78" cy="55" rx="4" ry="10" fill="#FF8FAB" opacity=".55" transform="rotate(22 78 55)"/>
-<!-- head -->
-<circle cx="50" cy="60" r="28" fill="url(#v3Face)" stroke="#7B3F1A" stroke-width="2"/>
-<g clip-path="url(#v3Clip)" opacity=".5"><rect x="22" y="32" width="56" height="56" fill="url(#v3Waffle)"/></g>
-<!-- highlight -->
-<ellipse cx="43" cy="42" rx="9" ry="4" fill="#fff" opacity=".3"/>
-<!-- eyes -->
-<circle cx="40" cy="58" r="3.4" fill="#1A1A2E"/>
-<circle cx="60" cy="58" r="3.4" fill="#1A1A2E"/>
-<circle cx="41.2" cy="56.5" r="1.2" fill="#fff"/>
-<circle cx="61.2" cy="56.5" r="1.2" fill="#fff"/>
-<circle cx="38.5" cy="59.7" r=".6" fill="#fff"/>
-<circle cx="58.5" cy="59.7" r=".6" fill="#fff"/>
-<!-- nose -->
-<path d="M50 66 Q45 62 45 66 Q45 70 50 73 Q55 70 55 66 Q55 62 50 66 Z" fill="#1A1A2E"/>
-<ellipse cx="48" cy="65" rx="1.2" ry=".9" fill="#fff" opacity=".7"/>
+<!-- right face -->
+<path d="M60 38 L102 60 L102 92 L60 70 Z" fill="url(#w2SideR)" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
+<!-- front face -->
+<path d="M60 38 L18 60 L18 92 L60 70 Z" fill="url(#w2SideF)" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
+<line x1="60" y1="70" x2="60" y2="100" stroke="#1A1A2E" stroke-width="3" opacity=".9"/>
+<!-- bottom front edge cell hints -->
+<line x1="30" y1="70" x2="30" y2="84" stroke="#1A1A2E" stroke-width="1.6" opacity=".6"/>
+<line x1="45" y1="71" x2="45" y2="90" stroke="#1A1A2E" stroke-width="1.6" opacity=".6"/>
+<line x1="75" y1="71" x2="75" y2="90" stroke="#1A1A2E" stroke-width="1.6" opacity=".6"/>
+<line x1="90" y1="70" x2="90" y2="84" stroke="#1A1A2E" stroke-width="1.6" opacity=".6"/>
+<!-- top face (rhombus) -->
+<path d="M60 14 L106 38 L60 62 L14 38 Z" fill="url(#w2Top)" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
+<!-- waffle cells on top: 4x4 grid lines -->
+<g stroke="#1A1A2E" stroke-width="1.8" opacity=".85">
+  <line x1="37" y1="26" x2="83" y2="50"/>
+  <line x1="60" y1="14" x2="106" y2="38" stroke-opacity="0"/>
+  <line x1="49" y1="20" x2="95" y2="44"/>
+  <line x1="25" y1="32" x2="71" y2="56"/>
+  <!-- other diagonal -->
+  <line x1="83" y1="26" x2="37" y2="50"/>
+  <line x1="95" y1="32" x2="49" y2="56"/>
+  <line x1="71" y1="20" x2="25" y2="44"/>
+</g>
+<!-- cell pits (deeper) -->
+<g fill="#7B3F1A" opacity=".5">
+  <ellipse cx="50" cy="30" rx="2.8" ry="1.6"/><ellipse cx="60" cy="36" rx="2.8" ry="1.6"/><ellipse cx="70" cy="30" rx="2.8" ry="1.6"/>
+  <ellipse cx="40" cy="36" rx="2.8" ry="1.6"/><ellipse cx="50" cy="42" rx="2.8" ry="1.6"/><ellipse cx="60" cy="48" rx="2.8" ry="1.6"/><ellipse cx="70" cy="42" rx="2.8" ry="1.6"/><ellipse cx="80" cy="36" rx="2.8" ry="1.6"/>
+  <ellipse cx="40" cy="48" rx="2.8" ry="1.6"/><ellipse cx="50" cy="54" rx="2.8" ry="1.6"/><ellipse cx="70" cy="54" rx="2.8" ry="1.6"/><ellipse cx="80" cy="48" rx="2.8" ry="1.6"/>
+</g>
+<!-- top highlight -->
+<path d="M30 32 L48 22 L56 24 L40 34 Z" fill="#FFF1C2" opacity=".55"/>
+</svg></div>
+<div class="tile lite"><svg viewBox="0 0 120 120">
+<path d="M60 38 L102 60 L102 92 L60 70 Z" fill="#7B3F1A" stroke="#1A1A2E" stroke-width="3"/>
+<path d="M60 38 L18 60 L18 92 L60 70 Z" fill="#A36418" stroke="#1A1A2E" stroke-width="3"/>
+<path d="M60 14 L106 38 L60 62 L14 38 Z" fill="#F2A93E" stroke="#1A1A2E" stroke-width="3"/>
+<g stroke="#1A1A2E" stroke-width="2" opacity=".85"><line x1="37" y1="26" x2="83" y2="50"/><line x1="49" y1="20" x2="95" y2="44"/><line x1="25" y1="32" x2="71" y2="56"/><line x1="83" y1="26" x2="37" y2="50"/><line x1="95" y1="32" x2="49" y2="56"/><line x1="71" y1="20" x2="25" y2="44"/></g>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 120 120">
+<path d="M60 38 L102 60 L102 92 L60 70 Z" fill="#7B3F1A" stroke="#1A1A2E" stroke-width="5"/>
+<path d="M60 38 L18 60 L18 92 L60 70 Z" fill="#A36418" stroke="#1A1A2E" stroke-width="5"/>
+<path d="M60 14 L106 38 L60 62 L14 38 Z" fill="#F2A93E" stroke="#1A1A2E" stroke-width="5"/>
+</svg></div>
+</div><div class="label">Isometric Belgian. Iconic 3-face silhouette. Premium icon-pack vibe.</div><div class="palette">honey #F2A93E · side #A36418 · deep #7B3F1A · ink #1A1A2E</div></div>
+
+<!-- V3: Round + syrup drip -->
+<div class="card"><h3>Syrup Drip</h3><div class="num">V3 — Freepik-pour style</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 120 120">
+<defs>
+  <radialGradient id="w3Body" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#FFD27A"/><stop offset=".55" stop-color="#F2A93E"/><stop offset="1" stop-color="#C97C18"/></radialGradient>
+  <linearGradient id="w3Syrup" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7B3F1A"/><stop offset="1" stop-color="#4A2308"/></linearGradient>
+</defs>
+<ellipse cx="60" cy="76" rx="46" ry="38" fill="#7B3F1A" stroke="#1A1A2E" stroke-width="3"/>
+<ellipse cx="60" cy="70" rx="46" ry="38" fill="url(#w3Body)" stroke="#1A1A2E" stroke-width="3"/>
+<g stroke="#1A1A2E" stroke-width="1.6" stroke-linejoin="round" opacity=".55">
+  <path d="M22 60 Q60 50 98 60" fill="none"/><path d="M18 78 Q60 70 102 78" fill="none"/>
+  <path d="M36 36 Q40 70 36 100" fill="none"/><path d="M60 32 Q60 70 60 104" fill="none"/><path d="M84 36 Q80 70 84 100" fill="none"/>
+</g>
+<g fill="#A36418" opacity=".35"><ellipse cx="26" cy="50" rx="3" ry="2"/><ellipse cx="48" cy="46" rx="3" ry="2"/><ellipse cx="72" cy="46" rx="3" ry="2"/><ellipse cx="94" cy="50" rx="3" ry="2"/><ellipse cx="26" cy="70" rx="3" ry="2"/><ellipse cx="48" cy="68" rx="3" ry="2"/><ellipse cx="72" cy="68" rx="3" ry="2"/><ellipse cx="94" cy="70" rx="3" ry="2"/></g>
+<!-- syrup pool/drip on top -->
+<path d="M28 50 Q22 56 26 64 Q34 58 42 60 Q52 56 60 62 Q72 58 82 64 Q92 60 98 70 Q104 56 96 48 Q90 42 80 46 Q70 40 60 46 Q46 40 36 46 Q28 44 28 50 Z" fill="url(#w3Syrup)" stroke="#1A1A2E" stroke-width="2.4" stroke-linejoin="round"/>
+<!-- syrup drip strand -->
+<path d="M30 60 Q28 70 32 78 Q36 84 32 88 Q26 84 28 76 Q30 70 28 64 Z" fill="#7B3F1A" stroke="#1A1A2E" stroke-width="2"/>
+<!-- highlight on syrup -->
+<path d="M40 50 Q60 46 76 52" stroke="#A86018" stroke-width="2.4" stroke-linecap="round" fill="none" opacity=".8"/>
+</svg></div>
+<div class="tile lite"><svg viewBox="0 0 120 120">
+<ellipse cx="60" cy="76" rx="46" ry="38" fill="#7B3F1A" stroke="#1A1A2E" stroke-width="3"/>
+<ellipse cx="60" cy="70" rx="46" ry="38" fill="#F2A93E" stroke="#1A1A2E" stroke-width="3"/>
+<path d="M28 50 Q22 56 26 64 Q34 58 42 60 Q52 56 60 62 Q72 58 82 64 Q92 60 98 70 Q104 56 96 48 Q90 42 80 46 Q70 40 60 46 Q46 40 36 46 Q28 44 28 50 Z" fill="#4A2308" stroke="#1A1A2E" stroke-width="2.4"/>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 120 120">
+<ellipse cx="60" cy="74" rx="48" ry="40" fill="#F2A93E" stroke="#1A1A2E" stroke-width="4"/>
+<path d="M28 50 Q22 56 26 64 Q34 58 42 60 Q52 56 60 62 Q72 58 82 64 Q92 60 98 70 Q104 56 96 48 Q90 42 80 46 Q70 40 60 46 Q46 40 36 46 Q28 44 28 50 Z" fill="#4A2308" stroke="#1A1A2E" stroke-width="3"/>
+</svg></div>
+</div><div class="label">Belgian + maple syrup pool + drip. Indulgent. Maps to "treat yourself = study" gamification.</div><div class="palette">honey #F2A93E · syrup #4A2308 · ink #1A1A2E</div></div>
+
+<!-- V4: Kawaii waffle character holding heart -->
+<div class="card"><h3>Kawaii Hugger</h3><div class="num">V4 — Magnific-chibi style</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 120 120">
+<defs><radialGradient id="w4Body" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#FFD27A"/><stop offset=".55" stop-color="#F2A93E"/><stop offset="1" stop-color="#C97C18"/></radialGradient></defs>
+<!-- body: rounded square waffle -->
+<rect x="22" y="20" width="76" height="76" rx="14" fill="url(#w4Body)" stroke="#1A1A2E" stroke-width="3"/>
+<!-- shadow bottom -->
+<path d="M22 80 Q60 96 98 80 L98 82 Q98 96 84 96 L36 96 Q22 96 22 82 Z" fill="#C97C18"/>
+<rect x="22" y="20" width="76" height="76" rx="14" fill="none" stroke="#1A1A2E" stroke-width="3"/>
+<!-- grid 3x3 -->
+<g stroke="#1A1A2E" stroke-width="2" opacity=".55">
+  <line x1="22" y1="44" x2="98" y2="44"/><line x1="22" y1="70" x2="98" y2="70"/>
+  <line x1="48" y1="20" x2="48" y2="96"/><line x1="72" y1="20" x2="72" y2="96"/>
+</g>
+<!-- cell pits -->
+<g fill="#7B3F1A" opacity=".25"><rect x="26" y="24" width="18" height="16" rx="3"/><rect x="52" y="24" width="16" height="16" rx="3"/><rect x="76" y="24" width="18" height="16" rx="3"/><rect x="26" y="48" width="18" height="18" rx="3"/><rect x="52" y="48" width="16" height="18" rx="3"/><rect x="76" y="48" width="18" height="18" rx="3"/></g>
+<!-- arms (skin tone same as body) -->
+<ellipse cx="22" cy="60" rx="8" ry="14" fill="url(#w4Body)" stroke="#1A1A2E" stroke-width="3" transform="rotate(-20 22 60)"/>
+<ellipse cx="98" cy="60" rx="8" ry="14" fill="url(#w4Body)" stroke="#1A1A2E" stroke-width="3" transform="rotate(20 98 60)"/>
+<!-- heart held in front -->
+<path d="M60 70 C 48 60, 44 50, 52 46 C 56 44, 58 46, 60 50 C 62 46, 64 44, 68 46 C 76 50, 72 60, 60 70 Z" fill="#FF4A4A" stroke="#1A1A2E" stroke-width="2.6" stroke-linejoin="round"/>
+<ellipse cx="55" cy="51" rx="2.5" ry="1.6" fill="#FFB0B0" opacity=".8"/>
+<!-- eyes (above heart) -->
+<circle cx="42" cy="38" r="3" fill="#1A1A2E"/>
+<circle cx="78" cy="38" r="3" fill="#1A1A2E"/>
+<circle cx="43" cy="36.8" r="1.1" fill="#fff"/>
+<circle cx="79" cy="36.8" r="1.1" fill="#fff"/>
 <!-- smile -->
-<path d="M50 73 V76 Q44 81 39 78 M50 76 Q56 81 61 78" stroke="#1A1A2E" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<!-- tongue -->
-<path d="M46 78 Q50 82 54 78 Q52 80 50 80 Q48 80 46 78 Z" fill="#FF6B8B"/>
+<path d="M52 44 Q60 50 68 44" stroke="#1A1A2E" stroke-width="2.2" fill="none" stroke-linecap="round"/>
 <!-- blush -->
-<ellipse cx="32" cy="66" rx="4" ry="2.4" fill="#FF8FAB" opacity=".5"/>
-<ellipse cx="68" cy="66" rx="4" ry="2.4" fill="#FF8FAB" opacity=".5"/>
-<!-- mortarboard hat -->
-<g>
-<ellipse cx="50" cy="38" rx="22" ry="3.5" fill="#0d1d35" opacity=".25"/>
-<rect x="36" y="28" width="28" height="6" rx="1" fill="#1A1A2E"/>
-<polygon points="22,30 50,21 78,30 50,38" fill="#1A1A2E" stroke="#0a0a14" stroke-width="1"/>
-<rect x="49" y="20" width="2" height="3" fill="#FFD700"/>
-<circle cx="50" cy="21" r="2" fill="#FFD700"/>
-<line x1="50" y1="22" x2="74" y2="34" stroke="#FFD700" stroke-width="1.8"/>
-<g>
-<line x1="74" y1="34" x2="74" y2="42" stroke="#FFD700" stroke-width="1.6"/>
-<line x1="72" y1="34" x2="72" y2="40" stroke="#FFD700" stroke-width="1.4"/>
-<line x1="76" y1="34" x2="76" y2="40" stroke="#FFD700" stroke-width="1.4"/>
-<circle cx="74" cy="43" r="2" fill="#FFD700"/>
-</g>
-</g>
+<ellipse cx="34" cy="44" rx="3" ry="2" fill="#FF8FAB" opacity=".7"/>
+<ellipse cx="86" cy="44" rx="3" ry="2" fill="#FF8FAB" opacity=".7"/>
 </svg></div>
-<div class="chip"><svg viewBox="0 0 100 100">
-<circle cx="50" cy="60" r="32" fill="#F5B454"/>
-<ellipse cx="22" cy="55" rx="11" ry="18" fill="#5C2E0A" transform="rotate(-22 22 55)"/>
-<ellipse cx="78" cy="55" rx="11" ry="18" fill="#5C2E0A" transform="rotate(22 78 55)"/>
-<polygon points="20,32 50,20 80,32 50,42" fill="#1A1A2E"/>
-<circle cx="74" cy="42" r="3" fill="#FFD700"/>
+<div class="tile lite"><svg viewBox="0 0 120 120">
+<rect x="22" y="20" width="76" height="76" rx="14" fill="#F2A93E" stroke="#1A1A2E" stroke-width="3"/>
+<g stroke="#1A1A2E" stroke-width="2" opacity=".55"><line x1="22" y1="44" x2="98" y2="44"/><line x1="22" y1="70" x2="98" y2="70"/><line x1="48" y1="20" x2="48" y2="96"/><line x1="72" y1="20" x2="72" y2="96"/></g>
+<ellipse cx="22" cy="60" rx="8" ry="14" fill="#F2A93E" stroke="#1A1A2E" stroke-width="3" transform="rotate(-20 22 60)"/>
+<ellipse cx="98" cy="60" rx="8" ry="14" fill="#F2A93E" stroke="#1A1A2E" stroke-width="3" transform="rotate(20 98 60)"/>
+<path d="M60 70 C 48 60, 44 50, 52 46 C 56 44, 58 46, 60 50 C 62 46, 64 44, 68 46 C 76 50, 72 60, 60 70 Z" fill="#FF4A4A" stroke="#1A1A2E" stroke-width="2.6"/>
+<circle cx="42" cy="38" r="3" fill="#1A1A2E"/><circle cx="78" cy="38" r="3" fill="#1A1A2E"/>
+<path d="M52 44 Q60 50 68 44" stroke="#1A1A2E" stroke-width="2.2" fill="none" stroke-linecap="round"/>
 </svg></div>
-</div><div class="label">Puppy + grad-cap. EdTech-specific. Gold tassel adds brand-accent color.</div></div>
+<div class="chip"><svg viewBox="0 0 120 120">
+<rect x="22" y="20" width="76" height="76" rx="14" fill="#F2A93E" stroke="#1A1A2E" stroke-width="4"/>
+<path d="M60 70 C 48 60, 44 50, 52 46 C 56 44, 58 46, 60 50 C 62 46, 64 44, 68 46 C 76 50, 72 60, 60 70 Z" fill="#FF4A4A" stroke="#1A1A2E" stroke-width="3"/>
+</svg></div>
+</div><div class="label">Square waffle character hugging heart. Matches the Magnific bottom-left ref.</div><div class="palette">honey #F2A93E · heart #FF4A4A · blush #FF8FAB</div></div>
 
-<!-- V4: Wise Cat with glasses -->
-<div class="card"><h3>Wise Cat</h3><div class="num">V4 — round glasses, professor</div>
+<!-- V5: Stack on plate (Shutterstock style) -->
+<div class="card"><h3>Stack on Plate</h3><div class="num">V5 — premium breakfast vibe</div>
 <div class="show">
-<div class="tile"><svg viewBox="0 0 100 100">
+<div class="tile"><svg viewBox="0 0 120 120">
 <defs>
-<radialGradient id="v4Face" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#FFE5B0"/><stop offset=".6" stop-color="#F5B454"/><stop offset="1" stop-color="#CB7818"/></radialGradient>
-<pattern id="v4Waffle" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-  <path d="M0 5 H10 M5 0 V10" stroke="#7B3F1A" stroke-width="1" opacity=".4"/>
-  <rect x="0" y="0" width="5" height="5" fill="#7B3F1A" opacity=".05"/>
-  <rect x="5" y="5" width="5" height="5" fill="#7B3F1A" opacity=".05"/>
-</pattern>
-<clipPath id="v4Clip"><circle cx="50" cy="58" r="30"/></clipPath>
+  <radialGradient id="w5Body" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#FFD27A"/><stop offset=".55" stop-color="#F2A93E"/><stop offset="1" stop-color="#C97C18"/></radialGradient>
 </defs>
-<ellipse cx="50" cy="92" rx="26" ry="3" fill="#000" opacity=".2"/>
-<!-- ears -->
-<path d="M22 38 L30 12 L40 36 Z" fill="#7B3F1A" stroke="#5C2E0A" stroke-width="2" stroke-linejoin="round"/>
-<path d="M78 38 L70 12 L60 36 Z" fill="#7B3F1A" stroke="#5C2E0A" stroke-width="2" stroke-linejoin="round"/>
-<path d="M26 34 L30 19 L37 34 Z" fill="#FF8FAB"/>
-<path d="M74 34 L70 19 L63 34 Z" fill="#FF8FAB"/>
-<!-- head -->
-<circle cx="50" cy="58" r="30" fill="url(#v4Face)" stroke="#7B3F1A" stroke-width="2"/>
-<g clip-path="url(#v4Clip)" opacity=".5"><rect x="20" y="28" width="60" height="60" fill="url(#v4Waffle)"/></g>
-<ellipse cx="42" cy="36" rx="11" ry="5" fill="#fff" opacity=".35"/>
-<!-- closed wise eyes behind glasses -->
-<path d="M32 55 Q38 50 44 55" stroke="#1A1A2E" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-<path d="M56 55 Q62 50 68 55" stroke="#1A1A2E" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-<!-- round glasses -->
-<circle cx="38" cy="55" r="9" fill="#fff" fill-opacity=".15" stroke="#1A1A2E" stroke-width="2.4"/>
-<circle cx="62" cy="55" r="9" fill="#fff" fill-opacity=".15" stroke="#1A1A2E" stroke-width="2.4"/>
-<line x1="47" y1="55" x2="53" y2="55" stroke="#1A1A2E" stroke-width="2.4"/>
-<!-- glass shine -->
-<path d="M33 50 Q36 47 40 50" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".85"/>
-<path d="M57 50 Q60 47 64 50" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".85"/>
-<!-- nose -->
-<path d="M50 66 L45 68 Q50 73 55 68 Z" fill="#FF8FAB" stroke="#1A1A2E" stroke-width="1.4" stroke-linejoin="round"/>
-<!-- :3 -->
-<path d="M50 73 V76 Q46 79 42 76 M50 76 Q54 79 58 76" stroke="#1A1A2E" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<!-- whiskers -->
-<g stroke="#1A1A2E" stroke-width="1.5" stroke-linecap="round">
-  <line x1="20" y1="66" x2="34" y2="68"/>
-  <line x1="20" y1="72" x2="34" y2="72"/>
-  <line x1="80" y1="66" x2="66" y2="68"/>
-  <line x1="80" y1="72" x2="66" y2="72"/>
-</g>
-<!-- subtle bow-tie -->
-<g transform="translate(50 90)">
-<path d="M-8 0 L-2 -3 L-2 3 Z" fill="#FF6B6B" stroke="#7B0000" stroke-width="1"/>
-<path d="M8 0 L2 -3 L2 3 Z" fill="#FF6B6B" stroke="#7B0000" stroke-width="1"/>
-<rect x="-2" y="-2.5" width="4" height="5" fill="#FFD700" stroke="#7B0000" stroke-width=".8"/>
+<!-- plate -->
+<ellipse cx="60" cy="98" rx="50" ry="8" fill="#E0E6F0" stroke="#1A1A2E" stroke-width="2.6"/>
+<ellipse cx="60" cy="94" rx="48" ry="6" fill="#fff" stroke="#1A1A2E" stroke-width="2.4"/>
+<!-- bottom waffle (slight darker) -->
+<rect x="20" y="68" width="80" height="22" rx="4" fill="#C97C18" stroke="#1A1A2E" stroke-width="2.6"/>
+<g stroke="#1A1A2E" stroke-width="1.4" opacity=".55"><line x1="20" y1="79" x2="100" y2="79"/><line x1="40" y1="68" x2="40" y2="90"/><line x1="60" y1="68" x2="60" y2="90"/><line x1="80" y1="68" x2="80" y2="90"/></g>
+<!-- middle waffle -->
+<rect x="22" y="48" width="76" height="22" rx="4" fill="url(#w5Body)" stroke="#1A1A2E" stroke-width="2.6"/>
+<g stroke="#1A1A2E" stroke-width="1.4" opacity=".55"><line x1="22" y1="59" x2="98" y2="59"/><line x1="40" y1="48" x2="40" y2="70"/><line x1="60" y1="48" x2="60" y2="70"/><line x1="80" y1="48" x2="80" y2="70"/></g>
+<!-- top waffle (lightest) -->
+<rect x="24" y="28" width="72" height="22" rx="4" fill="url(#w5Body)" stroke="#1A1A2E" stroke-width="2.6"/>
+<g stroke="#1A1A2E" stroke-width="1.4" opacity=".55"><line x1="24" y1="39" x2="96" y2="39"/><line x1="40" y1="28" x2="40" y2="50"/><line x1="60" y1="28" x2="60" y2="50"/><line x1="80" y1="28" x2="80" y2="50"/></g>
+<!-- syrup pour on top -->
+<path d="M50 24 Q44 32 48 40 Q52 36 58 40 L58 32 Q56 28 50 24 Z" fill="#4A2308" stroke="#1A1A2E" stroke-width="2.2"/>
+<!-- whipped cream blob -->
+<path d="M60 14 Q52 14 50 22 Q48 28 56 26 Q60 30 64 26 Q72 28 70 22 Q68 14 60 14 Z" fill="#fff" stroke="#1A1A2E" stroke-width="2.4" stroke-linejoin="round"/>
+<!-- blueberry -->
+<circle cx="78" cy="22" r="5" fill="#4A6FE3" stroke="#1A1A2E" stroke-width="2"/>
+<circle cx="76" cy="20" r="1.4" fill="#9EB6FF"/>
+</svg></div>
+<div class="tile lite"><svg viewBox="0 0 120 120">
+<ellipse cx="60" cy="94" rx="48" ry="6" fill="#fff" stroke="#1A1A2E" stroke-width="2.4"/>
+<rect x="20" y="68" width="80" height="22" rx="4" fill="#C97C18" stroke="#1A1A2E" stroke-width="2.6"/>
+<rect x="22" y="48" width="76" height="22" rx="4" fill="#F2A93E" stroke="#1A1A2E" stroke-width="2.6"/>
+<rect x="24" y="28" width="72" height="22" rx="4" fill="#FFD27A" stroke="#1A1A2E" stroke-width="2.6"/>
+<path d="M60 14 Q52 14 50 22 Q48 28 56 26 Q60 30 64 26 Q72 28 70 22 Q68 14 60 14 Z" fill="#fff" stroke="#1A1A2E" stroke-width="2.4"/>
+<circle cx="78" cy="22" r="5" fill="#4A6FE3" stroke="#1A1A2E" stroke-width="2"/>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 120 120">
+<rect x="20" y="68" width="80" height="22" rx="4" fill="#C97C18" stroke="#1A1A2E" stroke-width="4"/>
+<rect x="22" y="48" width="76" height="22" rx="4" fill="#F2A93E" stroke="#1A1A2E" stroke-width="4"/>
+<rect x="24" y="28" width="72" height="22" rx="4" fill="#FFD27A" stroke="#1A1A2E" stroke-width="4"/>
+</svg></div>
+</div><div class="label">3-waffle stack + cream + berry + plate. Premium breakfast. Most editorial.</div><div class="palette">honey #F2A93E · plate #fff · berry #4A6FE3</div></div>
+
+<!-- V6: Bold outline only (Dreamstime/Flaticon outline) -->
+<div class="card"><h3>Bold Outline</h3><div class="num">V6 — pure line-icon style</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 120 120">
+<!-- outer square waffle, bold rounded -->
+<rect x="18" y="18" width="84" height="84" rx="14" fill="none" stroke="#FFD27A" stroke-width="6" stroke-linejoin="round"/>
+<!-- inner 4x4 cells -->
+<g stroke="#FFD27A" stroke-width="4" stroke-linejoin="round">
+  <rect x="26" y="26" width="16" height="16" rx="3" fill="none"/>
+  <rect x="44" y="26" width="16" height="16" rx="3" fill="none"/>
+  <rect x="62" y="26" width="16" height="16" rx="3" fill="none"/>
+  <rect x="80" y="26" width="14" height="16" rx="3" fill="none"/>
+
+  <rect x="26" y="44" width="16" height="16" rx="3" fill="none"/>
+  <rect x="44" y="44" width="16" height="16" rx="3" fill="none"/>
+  <rect x="62" y="44" width="16" height="16" rx="3" fill="none"/>
+  <rect x="80" y="44" width="14" height="16" rx="3" fill="none"/>
+
+  <rect x="26" y="62" width="16" height="16" rx="3" fill="none"/>
+  <rect x="44" y="62" width="16" height="16" rx="3" fill="none"/>
+  <rect x="62" y="62" width="16" height="16" rx="3" fill="none"/>
+  <rect x="80" y="62" width="14" height="16" rx="3" fill="none"/>
+
+  <rect x="26" y="80" width="16" height="14" rx="3" fill="none"/>
+  <rect x="44" y="80" width="16" height="14" rx="3" fill="none"/>
+  <rect x="62" y="80" width="16" height="14" rx="3" fill="none"/>
+  <rect x="80" y="80" width="14" height="14" rx="3" fill="none"/>
 </g>
 </svg></div>
-<div class="chip"><svg viewBox="0 0 100 100">
-<path d="M22 38 L30 12 L40 36 Z" fill="#7B3F1A"/><path d="M78 38 L70 12 L60 36 Z" fill="#7B3F1A"/>
-<circle cx="50" cy="58" r="32" fill="#F5B454"/>
-<circle cx="38" cy="55" r="11" fill="none" stroke="#1A1A2E" stroke-width="4"/>
-<circle cx="62" cy="55" r="11" fill="none" stroke="#1A1A2E" stroke-width="4"/>
-<line x1="48" y1="55" x2="52" y2="55" stroke="#1A1A2E" stroke-width="4"/>
+<div class="tile lite"><svg viewBox="0 0 120 120">
+<rect x="18" y="18" width="84" height="84" rx="14" fill="none" stroke="#1A1A2E" stroke-width="6"/>
+<g stroke="#1A1A2E" stroke-width="4" fill="none">
+<rect x="26" y="26" width="16" height="16" rx="3"/><rect x="44" y="26" width="16" height="16" rx="3"/><rect x="62" y="26" width="16" height="16" rx="3"/><rect x="80" y="26" width="14" height="16" rx="3"/>
+<rect x="26" y="44" width="16" height="16" rx="3"/><rect x="44" y="44" width="16" height="16" rx="3"/><rect x="62" y="44" width="16" height="16" rx="3"/><rect x="80" y="44" width="14" height="16" rx="3"/>
+<rect x="26" y="62" width="16" height="16" rx="3"/><rect x="44" y="62" width="16" height="16" rx="3"/><rect x="62" y="62" width="16" height="16" rx="3"/><rect x="80" y="62" width="14" height="16" rx="3"/>
+<rect x="26" y="80" width="16" height="14" rx="3"/><rect x="44" y="80" width="16" height="14" rx="3"/><rect x="62" y="80" width="16" height="14" rx="3"/><rect x="80" y="80" width="14" height="14" rx="3"/>
+</g>
 </svg></div>
-</div><div class="label">Professor cat. Round glasses + bow tie. Smart, instantly-recognizable silhouette.</div></div>
+<div class="chip"><svg viewBox="0 0 120 120">
+<rect x="14" y="14" width="92" height="92" rx="16" fill="none" stroke="#1A1A2E" stroke-width="9"/>
+<rect x="26" y="26" width="32" height="32" rx="5" fill="none" stroke="#1A1A2E" stroke-width="7"/>
+<rect x="62" y="26" width="32" height="32" rx="5" fill="none" stroke="#1A1A2E" stroke-width="7"/>
+<rect x="26" y="62" width="32" height="32" rx="5" fill="none" stroke="#1A1A2E" stroke-width="7"/>
+<rect x="62" y="62" width="32" height="32" rx="5" fill="none" stroke="#1A1A2E" stroke-width="7"/>
+</svg></div>
+</div><div class="label">Pure outline (Dreamstime ref). Modernist. Single-color so works in any palette.</div><div class="palette">accent #FFD27A or ink #1A1A2E (palette-flexible)</div></div>
 
 </div>
 
-<p style="margin-top:36px; opacity:.6; font-size:13px; text-align:center;">Tell me V1 / V2 / V3 / V4. Or "more polish on Vx" / "swap accessory for X" / "warmer palette".</p>
+<p style="margin-top:36px; opacity:.6; font-size:13px; text-align:center;">Tell me V1–V6. Or hybrid ("V1 + glasses from V4"). Or "more polish on Vx".</p>
 </body>
 </html>
