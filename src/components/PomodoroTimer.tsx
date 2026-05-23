@@ -124,12 +124,14 @@ export default function PomodoroTimer({ leftOffset }: PomodoroTimerProps = {}) {
           background: running ? 'rgba(255,107,107,0.18)' : 'rgba(10,10,20,0.75)',
           backdropFilter: 'blur(10px)',
           border: `1px solid ${running ? accent : 'rgba(255,255,255,0.2)'}`,
-          borderRadius: 20, padding: '5px 12px',
+          borderRadius: 22, padding: '10px 14px',
           color: running ? accent : 'rgba(255,255,255,0.85)',
-          fontSize: 12, cursor: 'pointer',
+          fontSize: 13, cursor: 'pointer',
           fontFamily: "'Heebo', system-ui, sans-serif",
           display: 'flex', alignItems: 'center', gap: 6,
           fontVariantNumeric: 'tabular-nums',
+          // WCAG 2.5.5 touch target (chip stays visually small via minHeight only)
+          minHeight: 36,
         }}
       >
         <span>🍅</span>
@@ -164,8 +166,9 @@ export default function PomodoroTimer({ leftOffset }: PomodoroTimerProps = {}) {
             onClick={() => setOpen(false)}
             aria-label="Close"
             style={{
-              background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 8,
-              color: 'rgba(255,255,255,0.7)', width: 26, height: 26, cursor: 'pointer', fontSize: 13,
+              background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 10,
+              color: 'rgba(255,255,255,0.85)', width: 44, height: 44, cursor: 'pointer', fontSize: 16,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >✕</button>
         </div>
@@ -197,9 +200,9 @@ export default function PomodoroTimer({ leftOffset }: PomodoroTimerProps = {}) {
             style={{
               background: running ? 'rgba(255,255,255,0.1)' : accent,
               color: running ? 'white' : '#0a1530',
-              border: 'none', borderRadius: 12, padding: '10px 22px',
+              border: 'none', borderRadius: 12, padding: '12px 24px',
               fontFamily: 'inherit', fontWeight: 800, fontSize: 14, cursor: 'pointer',
-              minWidth: 100,
+              minWidth: 110, minHeight: 44,
             }}
           >
             {running ? '⏸ השהה' : '▶ התחל'}
@@ -209,8 +212,8 @@ export default function PomodoroTimer({ leftOffset }: PomodoroTimerProps = {}) {
             style={{
               background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.85)',
               border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12,
-              padding: '10px 18px', fontFamily: 'inherit', fontWeight: 600,
-              fontSize: 13, cursor: 'pointer',
+              padding: '12px 20px', fontFamily: 'inherit', fontWeight: 600,
+              fontSize: 13, cursor: 'pointer', minHeight: 44,
             }}
           >
             🔄 אפס
@@ -220,10 +223,10 @@ export default function PomodoroTimer({ leftOffset }: PomodoroTimerProps = {}) {
         <button
           onClick={handleSwitchMode}
           style={{
-            background: 'transparent', color: 'rgba(255,255,255,0.55)',
-            border: '1px dashed rgba(255,255,255,0.2)', borderRadius: 10,
-            padding: '6px 14px', fontFamily: 'inherit', fontSize: 12, cursor: 'pointer',
-            marginBottom: 18,
+            background: 'transparent', color: 'rgba(255,255,255,0.65)',
+            border: '1px dashed rgba(255,255,255,0.25)', borderRadius: 10,
+            padding: '10px 16px', fontFamily: 'inherit', fontSize: 13, cursor: 'pointer',
+            marginBottom: 18, minHeight: 36,
           }}
         >
           {mode === 'work' ? 'דלג להפסקה ☕' : 'דלג לפוקוס 🍅'}
