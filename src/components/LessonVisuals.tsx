@@ -10,31 +10,37 @@ import React, { useState, useCallback, useMemo } from 'react'
 // ── Shared tokens — Navy + Gold brand palette ─────────────────────────────────
 const ACCENT = '#1F3E6C'        // navy (was indigo #6366f1)
 const GOLD  = '#D4A017'         // gold accent
+// Theme-aware tokens. The app shell uses a dark gradient, so visuals must use
+// translucent-white surfaces that read on the navy bg AND on any light card
+// the lesson player may wrap them in. Text colors use `--sh-text-dark` CSS var
+// so they auto-flip between dark and light themes (see src/index.css).
 const WRAP: React.CSSProperties = {
-  background: 'rgba(31,62,108,0.06)',
-  border: '1px solid rgba(31,62,108,0.2)',
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.12)',
   borderRadius: 16,
-  padding: '16px 20px',
+  padding: '18px 22px',
   marginTop: 20,
-  fontFamily: "'Assistant', sans-serif",
+  fontFamily: "'Heebo','Assistant',sans-serif",
   direction: 'rtl',
+  color: 'var(--sh-text-dark)',
 }
 const BADGE = (extra?: React.CSSProperties): React.CSSProperties => ({
   display: 'inline-block',
-  background: 'rgba(212,160,23,0.12)',
+  background: 'rgba(212,160,23,0.18)',
+  border: '1px solid rgba(212,160,23,0.35)',
   borderRadius: 8,
-  padding: '3px 10px',
-  fontSize: 13,
-  fontWeight: 600,
-  color: '#1F3E6C',
+  padding: '4px 12px',
+  fontSize: 14,
+  fontWeight: 700,
+  color: 'var(--sh-text-dark)',
   margin: '0 3px',
   ...extra,
 })
-const ROW: React.CSSProperties = { display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }
-const LABEL_STYLE: React.CSSProperties = { fontSize: 13, color: '#374151', display: 'flex', alignItems: 'center', gap: 6 }
+const ROW: React.CSSProperties = { display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center', marginBottom: 12 }
+const LABEL_STYLE: React.CSSProperties = { fontSize: 14, color: 'var(--sh-text-dark)', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 500 }
 const SLIDER = (color = GOLD): React.CSSProperties => ({ width: 110, accentColor: color, marginRight: 6 } as React.CSSProperties)
-const CAPTION: React.CSSProperties = { fontSize: 11, color: '#1F3E6C', fontWeight: 600, marginBottom: 4 }
-const STORY: React.CSSProperties = { fontSize: 13, color: '#374151', lineHeight: 1.6, marginBottom: 12, padding: '8px 12px', background: 'rgba(255,255,255,0.5)', borderRight: `3px solid ${GOLD}`, borderRadius: 8 }
+const CAPTION: React.CSSProperties = { fontSize: 12, color: 'var(--sh-text-dark)', fontWeight: 700, marginBottom: 6, opacity: 0.85 }
+const STORY: React.CSSProperties = { fontSize: 14, color: 'var(--sh-text-dark)', lineHeight: 1.65, marginBottom: 14, padding: '10px 14px', background: 'rgba(255,255,255,0.08)', borderRight: `3px solid ${GOLD}`, borderRadius: 8 }
 
 // ── Math helpers ──────────────────────────────────────────────────────────────
 function normalPDF(x: number, mu: number, sigma: number) {
@@ -107,7 +113,7 @@ export function MeanVisual() {
         </div>
         <div style={{
           fontFamily: "'Inter', serif",
-          fontSize: 36, fontWeight: 700, color: '#1F3E6C',
+          fontSize: 36, fontWeight: 700, color: 'var(--sh-text-dark)',
           letterSpacing: '-0.02em', lineHeight: 1,
         }}>
           x̄ = {mean.toFixed(2)}
@@ -161,9 +167,9 @@ export function MeanVisual() {
       <div style={{ marginTop: 6 }}>
         <span style={BADGE()}>n = {values.length}</span>
         <span style={BADGE()}>Σ = {values.reduce((s, v) => s + v, 0)}</span>
-        <span style={BADGE({ background: 'rgba(212,160,23,0.12)', color: '#1F3E6C' })}>ממוצע = {mean.toFixed(2)}</span>
+        <span style={BADGE({ background: 'rgba(212,160,23,0.12)', color: 'var(--sh-text-dark)' })}>ממוצע = {mean.toFixed(2)}</span>
         <button onClick={() => values.length > 2 && setValues(v => v.slice(0, -1))}
-          style={{ marginRight: 8, background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: '#1F3E6C', fontWeight: 600, fontSize: 12 }}>
+          style={{ marginRight: 8, background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: 'var(--sh-text-dark)', fontWeight: 600, fontSize: 12 }}>
           − הסר חבר
         </button>
         <button onClick={() => values.length < 10 && setValues(v => [...v, Math.round(mean)])}
@@ -200,7 +206,7 @@ export function MedianVisual() {
           const origIdx = values.indexOf(v)
           return (
             <div key={i} style={{ textAlign: 'center', position: 'relative' }}>
-              {isMed && <div style={{ position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)', fontSize: 10, color: '#1F3E6C', fontWeight: 700, whiteSpace: 'nowrap' }}>
+              {isMed && <div style={{ position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)', fontSize: 10, color: 'var(--sh-text-dark)', fontWeight: 700, whiteSpace: 'nowrap' }}>
                 {isEven ? 'מרכז' : 'חציון'}
               </div>}
               <div style={{
@@ -218,16 +224,16 @@ export function MedianVisual() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <div>
           <span style={BADGE()}>n = {n} {isEven ? '(זוגי)' : '(אי-זוגי)'}</span>
-          <span style={BADGE({ background: 'rgba(31,62,108,0.10)', color: '#1F3E6C' })}>חציון = {median}K</span>
-          <span style={BADGE({ background: 'rgba(212,160,23,0.15)', color: '#1F3E6C' })}>ממוצע = {mean.toFixed(1)}K</span>
+          <span style={BADGE({ background: 'rgba(31,62,108,0.10)', color: 'var(--sh-text-dark)' })}>חציון = {median}K</span>
+          <span style={BADGE({ background: 'rgba(212,160,23,0.15)', color: 'var(--sh-text-dark)' })}>ממוצע = {mean.toFixed(1)}K</span>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
           <button onClick={() => values.length > 2 && setValues(v => v.slice(0, -1))}
-            style={{ background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: '#1F3E6C', fontWeight: 600, fontSize: 12 }}>− עובד</button>
+            style={{ background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: 'var(--sh-text-dark)', fontWeight: 600, fontSize: 12 }}>− עובד</button>
           <button onClick={() => values.length < 9 && setValues(v => [...v, Math.floor(Math.random() * 35) + 10])}
             style={{ background: 'rgba(31,62,108,0.07)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: ACCENT, fontWeight: 600, fontSize: 12 }}>+ עובד</button>
           <button onClick={() => setValues(v => [...v, 200])}
-            style={{ background: 'rgba(212,160,23,0.12)', border: '1px solid rgba(212,160,23,0.35)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: '#1F3E6C', fontWeight: 600, fontSize: 12 }}>+ מנכ״ל</button>
+            style={{ background: 'rgba(212,160,23,0.12)', border: '1px solid rgba(212,160,23,0.35)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: 'var(--sh-text-dark)', fontWeight: 600, fontSize: 12 }}>+ מנכ״ל</button>
         </div>
       </div>
     </div>
