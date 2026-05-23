@@ -447,8 +447,13 @@ body.light .nb-body{background-color:#FBF8F1;border-color:rgba(31,38,64,0.12);co
 .nb-body:empty::before{content:attr(data-placeholder);color:rgba(31,38,64,.30);pointer-events:none}
 /* Inline math widget (KaTeX-rendered, opens MathLive on click) */
 .nb-math-widget{display:inline-block;vertical-align:middle;padding:2px 6px;margin:0 2px;
-  background:rgba(255,255,255,0.65);border:1px solid rgba(212,175,55,0.4);border-radius:6px;
+  /* Issue 2: transparent bg so equation widgets inherit notebook/mindmap theme
+     (navy on light, gold accents). Keeps gold border for affordance. */
+  background:rgba(255,255,255,0.08);border:1px solid rgba(212,175,55,0.4);border-radius:6px;
   cursor:pointer;user-select:none;direction:ltr;font-size:15px;line-height:1.2}
+/* Dark-mode safety: ensure KaTeX text contrasts against transparent bg. */
+:root[data-theme="dark"] .nb-math-widget,.dark-mode .nb-math-widget{background:rgba(255,255,255,0.06)}
+:root[data-theme="dark"] .nb-math-widget .katex,.dark-mode .nb-math-widget .katex{color:#e9edf7}
 .nb-math-widget:hover{box-shadow:0 0 0 2px rgba(212,175,55,0.35)}
 .nb-math-widget .katex{font-size:1em}
 /* RTL safety: every KaTeX render inside the notebook (and anywhere in the

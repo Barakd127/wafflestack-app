@@ -716,11 +716,12 @@ function EquationCard({ latex, onCommit }: { latex: string; onCommit?: (newLatex
         display: 'inline-block',
         margin: '2px 3px',
         padding: '2px 6px',
-        background: 'rgba(255,255,255,0.92)',
+        // transparent so equation inherits surrounding navy/gold theme (Issue 2)
+        background: 'transparent',
         borderInlineStart: editing ? '2px solid #6366f1' : '2px solid #D4AF37',
         border: editing ? '1px solid rgba(99,102,241,0.45)' : '1px solid rgba(212,175,55,0.25)',
         borderRadius: 5,
-        boxShadow: '0 1px 2px rgba(31,62,108,0.04)',
+        boxShadow: 'none',
         unicodeBidi: 'isolate' as React.CSSProperties['unicodeBidi'],
         verticalAlign: 'middle',
       }}
