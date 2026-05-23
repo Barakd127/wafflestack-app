@@ -2407,8 +2407,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           aria-label="הצג כלי לימוד (סרגל צד + סרגל עליון)"
           title="הצג סרגלים"
           style={{
+            // Viewport-anchored chip: physical `left` on purpose — under
+            // `dir=rtl`, `insetInlineStart` resolves to the right edge and
+            // collides with the sidebar drawer. See wafflestack-conventions
+            // § 9 (FAB stacking) + anti-pattern 19.
             position: 'fixed', top: 12,
-            insetInlineStart: 12,
+            left: 12,
             zIndex: 300,
             background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
             color: '#0B1B3E',
