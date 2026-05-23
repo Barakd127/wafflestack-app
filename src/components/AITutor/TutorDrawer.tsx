@@ -197,7 +197,7 @@ export function TutorDrawer() {
             <button
               type="button"
               onClick={resetConversation}
-              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="אפס שיחה"
               title="אפס שיחה"
             >
