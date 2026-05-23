@@ -2,415 +2,285 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<title>50 WaffleStack Logo Concepts</title>
+<title>WaffleStack — Brand System v7</title>
 <style>
-  body { font-family:'Heebo','Rubik',system-ui,sans-serif; margin:0; padding:28px; background:linear-gradient(160deg,#0d1d35 0%,#14294a 100%); color:#fff; min-height:100vh; }
-  h1 { font-weight:900; font-size:24px; margin:0 0 4px; }
-  .sub { opacity:.7; margin-bottom:22px; font-size:13px; }
-  .sect { font-size:13px; opacity:.75; letter-spacing:1.5px; text-transform:uppercase; margin:24px 0 10px; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; max-width:1500px; }
-  .c { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:14px; text-align:center; }
-  .n { opacity:.45; font-size:10px; }
-  .t { font-size:11px; font-weight:700; margin:2px 0 8px; opacity:.85; }
-  .stage { width:100%; height:80px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#0d1d35,#14294a); border-radius:8px; border:1px solid rgba(255,255,255,.1); }
-  .stage svg { max-width:90%; max-height:100%; }
+  :root { --ink:#0d1d35; --honey:#F2A93E; --gold:#FFD27A; --ember:#C97C18; --paper:#FFF7E8; }
+  * { box-sizing:border-box; }
+  body { font-family:'Heebo','Rubik',system-ui,sans-serif; margin:0; padding:40px 32px 80px; background:linear-gradient(160deg,#0d1d35 0%,#14294a 100%); color:#fff; min-height:100vh; }
+  .intro { max-width:780px; margin-bottom:48px; }
+  .intro h1 { font-weight:900; font-size:28px; margin:0 0 6px; letter-spacing:-.3px; }
+  .intro p { opacity:.7; font-size:14px; line-height:1.6; margin:0; }
+  .concept { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:20px; padding:32px; margin-bottom:24px; }
+  .concept-head { display:flex; align-items:baseline; gap:14px; margin-bottom:6px; }
+  .concept-id { font-family:'JetBrains Mono','SF Mono',monospace; font-size:13px; opacity:.5; letter-spacing:1px; }
+  .concept-name { font-weight:900; font-size:20px; margin:0; }
+  .concept-tag { opacity:.55; font-size:13px; line-height:1.5; margin:0 0 28px; max-width:580px; }
+  .row { display:grid; grid-template-columns:2fr 1fr 1fr; gap:20px; margin-bottom:20px; }
+  .row:last-child { margin-bottom:0; }
+  .panel { background:linear-gradient(135deg,#0d1d35,#14294a); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:24px; display:flex; align-items:center; justify-content:center; min-height:160px; }
+  .panel.paper { background:var(--paper); }
+  .panel.mono { background:#0a0a14; }
+  .row.small .panel { min-height:90px; }
+  .meta { font-family:'JetBrains Mono',monospace; font-size:10px; opacity:.45; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px; }
+  .stack { display:flex; flex-direction:column; align-items:center; }
+  .palette-strip { display:flex; gap:6px; margin-top:24px; padding-top:20px; border-top:1px dashed rgba(255,255,255,.1); }
+  .swatch { width:36px; height:36px; border-radius:8px; border:1px solid rgba(255,255,255,.15); }
+  .swatch-label { font-family:'JetBrains Mono',monospace; font-size:9px; opacity:.55; margin-top:6px; text-align:center; }
+  .sw { display:flex; flex-direction:column; align-items:center; }
+  .rat { opacity:.65; font-size:12.5px; line-height:1.6; margin-top:22px; padding-top:18px; border-top:1px dashed rgba(255,255,255,.1); max-width:680px; }
+  .rat b { color:var(--gold); font-weight:600; }
 </style>
 </head>
 <body>
-<h1>🧇 50 WaffleStack Logo Concepts</h1>
-<div class="sub">For 3D city loading page. All in approved palette: honey #F2A93E, ember #C97C18, ink #1A1A2E. Each on real loading-screen navy bg.</div>
+
+<div class="intro">
+<h1>🧇 WaffleStack — 6 polished brand concepts</h1>
+<p>Premium EdTech direction. Hebrew primary (וופלסטאק), English secondary (WaffleStack). Each concept = hero lockup + standalone mark + favicon + 3 color variants + palette + rationale.</p>
+</div>
 
 <svg width="0" height="0" style="position:absolute"><defs>
-<radialGradient id="bd" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#FFE3A8"/><stop offset=".55" stop-color="#F2A93E"/><stop offset="1" stop-color="#C97C18"/></radialGradient>
+<radialGradient id="bodyG" cx=".42" cy=".35" r=".75"><stop offset="0" stop-color="#FFE3A8"/><stop offset=".55" stop-color="#F2A93E"/><stop offset="1" stop-color="#C97C18"/></radialGradient>
+<radialGradient id="bodyD" cx=".4" cy=".3" r=".7"><stop offset="0" stop-color="#F2A93E"/><stop offset=".5" stop-color="#C97C18"/><stop offset="1" stop-color="#7B3F1A"/></radialGradient>
 <linearGradient id="goldW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE3A8"/><stop offset="1" stop-color="#F2A93E"/></linearGradient>
-<radialGradient id="bry" cx=".4" cy=".3"><stop offset="0" stop-color="#FF8FAB"/><stop offset="1" stop-color="#C02020"/></radialGradient>
+<linearGradient id="topF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE3A8"/><stop offset="1" stop-color="#F2A93E"/></linearGradient>
 </defs></svg>
 
-<div class="sect">1–10 · Symbol left + horizontal wordmark</div>
-<div class="grid">
+<!-- 01 -->
+<div class="concept">
+<div class="concept-head"><span class="concept-id">CONCEPT · 01</span><h2 class="concept-name">Geometric Round</h2></div>
+<p class="concept-tag">Refined round Belgian waffle on 8-unit grid. Thin 1.5px stroke for premium feel. Wordmark = Heebo 900, -1% tracking. Hebrew lead, English endorsement.</p>
 
-<div class="c"><div class="n">L01</div><div class="t">Round Belgian + Heebo</div><div class="stage"><svg viewBox="0 0 360 80">
-<ellipse cx="40" cy="46" rx="28" ry="22" fill="#A36418" stroke="#1A1A2E" stroke-width="2.2"/>
-<ellipse cx="40" cy="42" rx="28" ry="22" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2.2"/>
-<g stroke="#1A1A2E" stroke-width="1.2" opacity=".55"><path d="M16 38 Q40 32 64 38" fill="none"/><path d="M14 50 Q40 44 66 50" fill="none"/><path d="M26 22 Q28 42 26 62" fill="none"/><path d="M40 18 Q40 42 40 66" fill="none"/><path d="M54 22 Q52 42 54 62" fill="none"/></g>
-<text x="90" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="34" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L02</div><div class="t">+ Strawberry hero</div><div class="stage"><svg viewBox="0 0 360 80">
-<ellipse cx="40" cy="46" rx="28" ry="22" fill="#A36418" stroke="#1A1A2E" stroke-width="2.2"/>
-<ellipse cx="40" cy="42" rx="28" ry="22" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2.2"/>
-<path d="M48 12 Q60 10 62 18 Q64 26 56 28 Q48 26 46 18 Z" fill="url(#bry)" stroke="#1A1A2E" stroke-width="1.6"/>
-<path d="M48 12 L46 8 L52 10 L56 6 L56 12 L60 12 Z" fill="#3FAA5C" stroke="#1A1A2E" stroke-width="1.2"/>
-<text x="90" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="34" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L03</div><div class="t">Iso 3D stack</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(40 44) scale(.9)">
-<ellipse cx="0" cy="22" rx="28" ry="6" fill="#5C2E0A" stroke="#1A1A2E" stroke-width="1.4"/>
-<ellipse cx="0" cy="20" rx="28" ry="6" fill="#C97C18" stroke="#1A1A2E" stroke-width="1.4"/>
-<ellipse cx="0" cy="8" rx="26" ry="5.5" fill="#5C2E0A" stroke="#1A1A2E" stroke-width="1.4"/>
-<ellipse cx="0" cy="6" rx="26" ry="5.5" fill="#F2A93E" stroke="#1A1A2E" stroke-width="1.4"/>
-<ellipse cx="0" cy="-6" rx="22" ry="5" fill="#5C2E0A" stroke="#1A1A2E" stroke-width="1.4"/>
-<ellipse cx="0" cy="-8" rx="22" ry="5" fill="#FFD27A" stroke="#1A1A2E" stroke-width="1.4"/>
+<div class="row">
+<div class="panel"><svg viewBox="0 0 420 160">
+<g transform="translate(64 80)">
+<circle cx="0" cy="0" r="42" fill="none" stroke="#5C2E0A" stroke-width="1.4" opacity=".4"/>
+<circle cx="0" cy="0" r="40" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="1.8"/>
+<g stroke="#1A1A2E" stroke-width="1.2" opacity=".5"><line x1="-40" y1="-13" x2="40" y2="-13"/><line x1="-40" y1="0" x2="40" y2="0"/><line x1="-40" y1="13" x2="40" y2="13"/><line x1="-13" y1="-40" x2="-13" y2="40"/><line x1="0" y1="-40" x2="0" y2="40"/><line x1="13" y1="-40" x2="13" y2="40"/></g>
+<ellipse cx="-12" cy="-22" rx="14" ry="5" fill="#FFE3A8" opacity=".5"/>
 </g>
-<text x="90" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="34" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
+<text x="128" y="74" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="36" fill="url(#goldW)" letter-spacing="-1">וופלסטאק</text>
+<text x="128" y="96" font-family="'Heebo','Rubik',sans-serif" font-weight="700" font-size="13" fill="#fff" opacity=".65" letter-spacing="6">WAFFLESTACK</text>
+<line x1="128" y1="106" x2="156" y2="106" stroke="url(#goldW)" stroke-width="1"/>
+<text x="162" y="111" font-family="'Heebo','Rubik',sans-serif" font-size="10" fill="#fff" opacity=".5" letter-spacing="2">סטטיסטיקה כמשחק</text>
+</svg></div>
 
-<div class="c"><div class="n">L04</div><div class="t">Square + sans bold</div><div class="stage"><svg viewBox="0 0 360 80">
-<rect x="14" y="20" width="52" height="44" rx="7" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2.2"/>
-<g stroke="#1A1A2E" stroke-width="1.4" opacity=".55"><line x1="14" y1="34" x2="66" y2="34"/><line x1="14" y1="50" x2="66" y2="50"/><line x1="32" y1="20" x2="32" y2="64"/><line x1="48" y1="20" x2="48" y2="64"/></g>
-<text x="86" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="34" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
+<div class="panel"><div class="stack"><div class="meta">Mark · 80px</div><svg viewBox="0 0 100 100" width="80" height="80"><circle cx="50" cy="50" r="40" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="2"/><g stroke="#1A1A2E" stroke-width="1.2" opacity=".5"><line x1="10" y1="37" x2="90" y2="37"/><line x1="10" y1="50" x2="90" y2="50"/><line x1="10" y1="63" x2="90" y2="63"/><line x1="37" y1="10" x2="37" y2="90"/><line x1="50" y1="10" x2="50" y2="90"/><line x1="63" y1="10" x2="63" y2="90"/></g></svg></div></div>
 
-<div class="c"><div class="n">L05</div><div class="t">Heart Belgian + serif</div><div class="stage"><svg viewBox="0 0 360 80">
-<path d="M40 70 C 12 52, 10 30, 22 22 C 30 18, 36 22, 40 30 C 44 22, 50 18, 58 22 C 70 30, 68 52, 40 70 Z" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<text x="86" y="52" font-family="Georgia,serif" font-weight="900" font-size="32" fill="url(#goldW)" font-style="italic">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L06</div><div class="t">+ crown logo</div><div class="stage"><svg viewBox="0 0 360 80">
-<ellipse cx="40" cy="52" rx="26" ry="20" fill="#A36418" stroke="#1A1A2E" stroke-width="2"/>
-<ellipse cx="40" cy="48" rx="26" ry="20" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<path d="M20 28 L26 16 L32 24 L40 12 L48 24 L54 16 L60 28 L60 34 L20 34 Z" fill="#FFD700" stroke="#1A1A2E" stroke-width="1.6"/>
-<text x="90" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="34" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L07</div><div class="t">Kawaii hugger logo</div><div class="stage"><svg viewBox="0 0 360 80">
-<rect x="14" y="20" width="52" height="48" rx="9" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2.2"/>
-<g stroke="#1A1A2E" stroke-width="1.4" opacity=".55"><line x1="14" y1="38" x2="66" y2="38"/><line x1="14" y1="54" x2="66" y2="54"/><line x1="32" y1="20" x2="32" y2="68"/><line x1="48" y1="20" x2="48" y2="68"/></g>
-<ellipse cx="14" cy="46" rx="5" ry="9" fill="url(#bd)" stroke="#1A1A2E" stroke-width="1.8" transform="rotate(-20 14 46)"/>
-<ellipse cx="66" cy="46" rx="5" ry="9" fill="url(#bd)" stroke="#1A1A2E" stroke-width="1.8" transform="rotate(20 66 46)"/>
-<circle cx="28" cy="34" r="2.4" fill="#1A1A2E"/><circle cx="52" cy="34" r="2.4" fill="#1A1A2E"/>
-<path d="M40 50 C 33 44, 32 36, 36 36 C 38 36, 40 38, 40 40 C 40 38, 42 36, 44 36 C 48 36, 47 44, 40 50 Z" fill="#FF4A4A" stroke="#1A1A2E" stroke-width="1.6"/>
-<text x="86" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="32" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L08</div><div class="t">Round + outline wordmark</div><div class="stage"><svg viewBox="0 0 360 80">
-<ellipse cx="40" cy="46" rx="28" ry="22" fill="#A36418" stroke="#1A1A2E" stroke-width="2.2"/>
-<ellipse cx="40" cy="42" rx="28" ry="22" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2.2"/>
-<text x="90" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="34" fill="none" stroke="url(#goldW)" stroke-width="1.4">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L09</div><div class="t">+ syrup mark</div><div class="stage"><svg viewBox="0 0 360 80">
-<ellipse cx="40" cy="46" rx="28" ry="22" fill="#A36418" stroke="#1A1A2E" stroke-width="2.2"/>
-<ellipse cx="40" cy="42" rx="28" ry="22" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2.2"/>
-<path d="M16 28 Q12 32 16 38 Q24 34 30 36 Q40 32 50 36 Q58 34 64 38 Q68 32 64 28 Q56 24 50 26 Q40 22 30 26 Q22 22 16 28 Z" fill="#4A2308" stroke="#1A1A2E" stroke-width="1.6"/>
-<text x="90" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="34" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L10</div><div class="t">+ rounded slab</div><div class="stage"><svg viewBox="0 0 360 80">
-<ellipse cx="40" cy="46" rx="28" ry="22" fill="#A36418" stroke="#1A1A2E" stroke-width="2.2"/>
-<ellipse cx="40" cy="42" rx="28" ry="22" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2.2"/>
-<g stroke="#1A1A2E" stroke-width="1.2" opacity=".55"><path d="M16 38 Q40 32 64 38" fill="none"/><path d="M14 50 Q40 44 66 50" fill="none"/><path d="M26 22 Q28 42 26 62" fill="none"/><path d="M40 18 Q40 42 40 66" fill="none"/><path d="M54 22 Q52 42 54 62" fill="none"/></g>
-<text x="90" y="52" font-family="'Bree Serif','Georgia',serif" font-weight="900" font-size="36" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
+<div class="panel"><div class="stack"><div class="meta">Favicon · 24px</div><svg viewBox="0 0 100 100" width="32" height="32"><circle cx="50" cy="50" r="40" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="4"/><line x1="10" y1="50" x2="90" y2="50" stroke="#1A1A2E" stroke-width="3"/><line x1="50" y1="10" x2="50" y2="90" stroke="#1A1A2E" stroke-width="3"/></svg></div></div>
 </div>
 
-<div class="sect">11–20 · Stacked / vertical layouts</div>
-<div class="grid">
-
-<div class="c"><div class="n">L11</div><div class="t">Symbol top + name + tag</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(180 28)"><ellipse cx="0" cy="2" rx="16" ry="12" fill="#A36418" stroke="#1A1A2E" stroke-width="1.6"/><ellipse cx="0" cy="0" rx="16" ry="12" fill="url(#bd)" stroke="#1A1A2E" stroke-width="1.6"/></g>
-<text x="180" y="56" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="20" fill="url(#goldW)">WaffleStack</text>
-<text x="180" y="72" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-size="9" fill="#fff" opacity=".7" letter-spacing="3">STATISTICS · GAMIFIED</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L12</div><div class="t">Iso stack centered</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(180 24) scale(.6)"><ellipse cx="0" cy="22" rx="28" ry="6" fill="#C97C18" stroke="#1A1A2E" stroke-width="1.4"/><ellipse cx="0" cy="6" rx="26" ry="5.5" fill="#F2A93E" stroke="#1A1A2E" stroke-width="1.4"/><ellipse cx="0" cy="-8" rx="22" ry="5" fill="#FFD27A" stroke="#1A1A2E" stroke-width="1.4"/></g>
-<text x="180" y="62" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="22" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L13</div><div class="t">Heart top + serif</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(180 22) scale(.4)"><path d="M0 50 C -34 28, -36 4, -20 -6 C -12 -10, -4 -4, 0 6 C 4 -4, 12 -10, 20 -6 C 36 4, 34 28, 0 50 Z" fill="url(#bd)" stroke="#1A1A2E" stroke-width="3.4"/></g>
-<text x="180" y="62" text-anchor="middle" font-family="Georgia,serif" font-weight="900" font-size="22" fill="url(#goldW)" font-style="italic">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L14</div><div class="t">Mascot top</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(180 22) scale(.5)">
-<ellipse cx="-22" cy="-12" rx="8" ry="14" fill="#5C2E0A" transform="rotate(-22 -22 -12)"/>
-<ellipse cx="22" cy="-12" rx="8" ry="14" fill="#5C2E0A" transform="rotate(22 22 -12)"/>
-<circle cx="0" cy="0" r="24" fill="url(#bd)" stroke="#1A1A2E" stroke-width="3"/>
-<circle cx="-8" cy="-2" r="3" fill="#1A1A2E"/><circle cx="8" cy="-2" r="3" fill="#1A1A2E"/>
-<ellipse cx="0" cy="8" rx="2.4" ry="1.6" fill="#1A1A2E"/>
-</g>
-<text x="180" y="62" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="22" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L15</div><div class="t">In-circle medallion</div><div class="stage"><svg viewBox="0 0 360 80">
-<circle cx="180" cy="38" r="32" fill="none" stroke="url(#goldW)" stroke-width="2"/>
-<text x="180" y="34" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="14" fill="url(#goldW)" letter-spacing="2">WAFFLE</text>
-<text x="180" y="50" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="14" fill="url(#goldW)" letter-spacing="3">STACK</text>
-<line x1="160" y1="40" x2="200" y2="40" stroke="url(#goldW)" stroke-width="1"/>
-</svg></div></div>
-
-<div class="c"><div class="n">L16</div><div class="t">Star + arc tag</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(180 24)"><polygon points="0,-16 4,-6 14,-6 6,1 10,12 0,5 -10,12 -6,1 -14,-6 -4,-6" fill="#FFD700" stroke="#1A1A2E" stroke-width="1.4"/></g>
-<text x="180" y="56" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="22" fill="url(#goldW)">WaffleStack</text>
-<text x="180" y="72" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-size="8" fill="#fff" opacity=".55" letter-spacing="2">LEVEL UP YOUR STATISTICS</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L17</div><div class="t">Trophy emblem</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(180 28) scale(.5)">
-<path d="M-22 -20 L22 -20 L22 -6 Q22 14 0 14 Q-22 14 -22 -6 Z" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2.6"/>
-<rect x="-8" y="14" width="16" height="12" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<rect x="-16" y="26" width="32" height="6" rx="1" fill="#1A1A2E"/>
-</g>
-<text x="180" y="68" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="18" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L18</div><div class="t">Big symbol + bracket name</div><div class="stage"><svg viewBox="0 0 360 80">
-<ellipse cx="180" cy="32" rx="22" ry="18" fill="#A36418" stroke="#1A1A2E" stroke-width="2"/>
-<ellipse cx="180" cy="28" rx="22" ry="18" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<text x="180" y="70" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="14" fill="url(#goldW)" letter-spacing="3">[ WAFFLESTACK ]</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L19</div><div class="t">Bee + name</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(180 26) scale(.6)">
-<ellipse cx="0" cy="0" rx="22" ry="13" fill="#FFD700" stroke="#1A1A2E" stroke-width="2"/>
-<rect x="-18" y="-6" width="36" height="3" fill="#1A1A2E"/><rect x="-18" y="4" width="36" height="3" fill="#1A1A2E"/>
-<ellipse cx="-8" cy="-14" rx="8" ry="4" fill="#fff" opacity=".85" stroke="#1A1A2E" stroke-width="1.4"/>
-<ellipse cx="8" cy="-14" rx="8" ry="4" fill="#fff" opacity=".85" stroke="#1A1A2E" stroke-width="1.4"/>
-</g>
-<text x="180" y="64" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="20" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L20</div><div class="t">Square + bottom rule</div><div class="stage"><svg viewBox="0 0 360 80">
-<rect x="156" y="6" width="48" height="40" rx="6" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<g stroke="#1A1A2E" stroke-width="1.2" opacity=".55"><line x1="156" y1="20" x2="204" y2="20"/><line x1="156" y1="32" x2="204" y2="32"/><line x1="172" y1="6" x2="172" y2="46"/><line x1="188" y1="6" x2="188" y2="46"/></g>
-<text x="180" y="62" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="14" fill="url(#goldW)" letter-spacing="2">WaffleStack</text>
-<line x1="140" y1="68" x2="220" y2="68" stroke="url(#goldW)" stroke-width="1.2"/>
-<text x="180" y="76" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-size="7" fill="#fff" opacity=".55" letter-spacing="2">SINCE 2026</text>
-</svg></div></div>
-
+<div class="row small">
+<div class="panel paper"><svg viewBox="0 0 100 100" width="60" height="60"><circle cx="50" cy="50" r="40" fill="#F2A93E" stroke="#1A1A2E" stroke-width="2"/><g stroke="#1A1A2E" stroke-width="1.4" opacity=".55"><line x1="10" y1="37" x2="90" y2="37"/><line x1="10" y1="50" x2="90" y2="50"/><line x1="10" y1="63" x2="90" y2="63"/><line x1="37" y1="10" x2="37" y2="90"/><line x1="50" y1="10" x2="50" y2="90"/><line x1="63" y1="10" x2="63" y2="90"/></g></svg></div>
+<div class="panel mono"><svg viewBox="0 0 100 100" width="60" height="60"><circle cx="50" cy="50" r="40" fill="none" stroke="#F2A93E" stroke-width="2.4"/><g stroke="#F2A93E" stroke-width="1.6"><line x1="10" y1="37" x2="90" y2="37"/><line x1="10" y1="50" x2="90" y2="50"/><line x1="10" y1="63" x2="90" y2="63"/><line x1="37" y1="10" x2="37" y2="90"/><line x1="50" y1="10" x2="50" y2="90"/><line x1="63" y1="10" x2="63" y2="90"/></g></svg></div>
+<div class="panel mono"><svg viewBox="0 0 100 100" width="60" height="60"><circle cx="50" cy="50" r="40" fill="none" stroke="#fff" stroke-width="2.4"/><g stroke="#fff" stroke-width="1.6"><line x1="10" y1="37" x2="90" y2="37"/><line x1="10" y1="50" x2="90" y2="50"/><line x1="10" y1="63" x2="90" y2="63"/><line x1="37" y1="10" x2="37" y2="90"/><line x1="50" y1="10" x2="50" y2="90"/><line x1="63" y1="10" x2="63" y2="90"/></g></svg></div>
 </div>
 
-<div class="sect">21–30 · Integrated letterforms (symbol as letter)</div>
-<div class="grid">
-
-<div class="c"><div class="n">L21</div><div class="t">"O" as waffle</div><div class="stage"><svg viewBox="0 0 360 80">
-<text x="20" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">Waffle</text>
-<ellipse cx="200" cy="40" rx="18" ry="16" fill="#A36418" stroke="#1A1A2E" stroke-width="2"/>
-<ellipse cx="200" cy="36" rx="18" ry="16" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<g stroke="#1A1A2E" stroke-width="1.1" opacity=".55"><line x1="184" y1="36" x2="216" y2="36"/><line x1="200" y1="22" x2="200" y2="50"/></g>
-<text x="222" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">tack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L22</div><div class="t">"a" dot as berry</div><div class="stage"><svg viewBox="0 0 360 80">
-<text x="20" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">WaffleStack</text>
-<circle cx="80" cy="32" r="6" fill="#FF4A4A" stroke="#1A1A2E" stroke-width="1.4"/>
-<path d="M80 26 L77 22 L83 24 L86 20 L86 26 Z" fill="#3FAA5C" stroke="#1A1A2E" stroke-width="1"/>
-</svg></div></div>
-
-<div class="c"><div class="n">L23</div><div class="t">"S" as syrup drip</div><div class="stage"><svg viewBox="0 0 360 80">
-<text x="20" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">Waffle</text>
-<path d="M180 18 Q200 16 200 26 Q200 36 184 38 Q174 40 174 50 Q174 60 196 60" fill="none" stroke="#4A2308" stroke-width="8" stroke-linecap="round"/>
-<path d="M180 18 Q200 16 200 26 Q200 36 184 38 Q174 40 174 50 Q174 60 196 60" fill="none" stroke="#1A1A2E" stroke-width="1.4"/>
-<text x="200" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">tack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L24</div><div class="t">"W" + waffle grid in stroke</div><div class="stage"><svg viewBox="0 0 360 80">
-<defs><clipPath id="cp24"><path d="M16 16 L34 64 L48 36 L60 64 L72 36 L86 64 L106 16 L94 16 L82 50 L66 16 L54 16 L42 50 L28 16 Z"/></clipPath></defs>
-<path d="M16 16 L34 64 L48 36 L60 64 L72 36 L86 64 L106 16 L94 16 L82 50 L66 16 L54 16 L42 50 L28 16 Z" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<g clip-path="url(#cp24)" stroke="#1A1A2E" stroke-width="1.2" opacity=".5"><line x1="0" y1="32" x2="120" y2="32"/><line x1="0" y1="48" x2="120" y2="48"/><line x1="32" y1="0" x2="32" y2="80"/><line x1="60" y1="0" x2="60" y2="80"/><line x1="88" y1="0" x2="88" y2="80"/></g>
-<text x="116" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="34" fill="url(#goldW)">affleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L25</div><div class="t">"S" stack of 3 plates</div><div class="stage"><svg viewBox="0 0 360 80">
-<text x="20" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">Waffle</text>
-<g transform="translate(186 38)">
-<rect x="-16" y="-18" width="32" height="9" rx="3" fill="#FFD27A" stroke="#1A1A2E" stroke-width="2"/>
-<rect x="-16" y="-4" width="32" height="9" rx="3" fill="#F2A93E" stroke="#1A1A2E" stroke-width="2"/>
-<rect x="-16" y="10" width="32" height="9" rx="3" fill="#C97C18" stroke="#1A1A2E" stroke-width="2"/>
-</g>
-<text x="208" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">tack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L26</div><div class="t">"a" as round waffle</div><div class="stage"><svg viewBox="0 0 360 80">
-<text x="20" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">W</text>
-<ellipse cx="64" cy="40" rx="16" ry="14" fill="#A36418" stroke="#1A1A2E" stroke-width="2"/>
-<ellipse cx="64" cy="36" rx="16" ry="14" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<g stroke="#1A1A2E" stroke-width="1" opacity=".55"><line x1="50" y1="36" x2="78" y2="36"/><line x1="64" y1="22" x2="64" y2="50"/></g>
-<text x="82" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">ffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L27</div><div class="t">Dot accents</div><div class="stage"><svg viewBox="0 0 360 80">
-<text x="20" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">Waffle.Stack</text>
-<circle cx="184" cy="50" r="4" fill="#FF4A4A"/>
-</svg></div></div>
-
-<div class="c"><div class="n">L28</div><div class="t">Underline waffle</div><div class="stage"><svg viewBox="0 0 360 80">
-<text x="60" y="44" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="38" fill="url(#goldW)">WaffleStack</text>
-<rect x="60" y="50" width="240" height="10" rx="2" fill="url(#bd)" stroke="#1A1A2E" stroke-width="1.6"/>
-<g stroke="#1A1A2E" stroke-width="1.2" opacity=".55"><line x1="100" y1="50" x2="100" y2="60"/><line x1="140" y1="50" x2="140" y2="60"/><line x1="180" y1="50" x2="180" y2="60"/><line x1="220" y1="50" x2="220" y2="60"/><line x1="260" y1="50" x2="260" y2="60"/></g>
-</svg></div></div>
-
-<div class="c"><div class="n">L29</div><div class="t">"k" stems = forks</div><div class="stage"><svg viewBox="0 0 360 80">
-<text x="20" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">WaffleStac</text>
-<g transform="translate(244 38)">
-<rect x="-2" y="-22" width="4" height="40" fill="url(#goldW)" stroke="#1A1A2E" stroke-width="1.4"/>
-<rect x="-12" y="-22" width="3" height="12" fill="url(#goldW)" stroke="#1A1A2E" stroke-width="1"/>
-<rect x="-6" y="-22" width="3" height="12" fill="url(#goldW)" stroke="#1A1A2E" stroke-width="1"/>
-<rect x="3" y="-22" width="3" height="12" fill="url(#goldW)" stroke="#1A1A2E" stroke-width="1"/>
-</g>
-</svg></div></div>
-
-<div class="c"><div class="n">L30</div><div class="t">"l" dotted = pencil</div><div class="stage"><svg viewBox="0 0 360 80">
-<text x="20" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">Waff</text>
-<g transform="translate(98 38)"><polygon points="-2,-22 2,-22 4,-18 -4,-18" fill="#7B3F1A" stroke="#1A1A2E" stroke-width="1.4"/><rect x="-3" y="-18" width="6" height="32" fill="url(#bd)" stroke="#1A1A2E" stroke-width="1.4"/></g>
-<text x="108" y="56" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="42" fill="url(#goldW)">eStack</text>
-</svg></div></div>
-
+<div class="palette-strip">
+<div class="sw"><div class="swatch" style="background:#F2A93E"></div><div class="swatch-label">F2A93E</div></div>
+<div class="sw"><div class="swatch" style="background:#C97C18"></div><div class="swatch-label">C97C18</div></div>
+<div class="sw"><div class="swatch" style="background:#1A1A2E"></div><div class="swatch-label">1A1A2E</div></div>
+<div class="sw"><div class="swatch" style="background:#FFF7E8"></div><div class="swatch-label">FFF7E8</div></div>
+</div>
+<p class="rat"><b>Why this works:</b> Mark constructible on 8-grid — every line meets a cell. Wordmark sits in 5:1 horizontal lockup with English as endorsement. Reads premium because nothing is decorative.</p>
 </div>
 
-<div class="sect">31–40 · Mascot integrated</div>
-<div class="grid">
+<!-- 02 -->
+<div class="concept">
+<div class="concept-head"><span class="concept-id">CONCEPT · 02</span><h2 class="concept-name">Isometric Stack</h2></div>
+<p class="concept-tag">"Stack" made literal. Three waffles in dimensional rhythm — matches product narrative: build your stack, level by level.</p>
 
-<div class="c"><div class="n">L31</div><div class="t">Puppy hugging name</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(38 42)">
-<ellipse cx="-18" cy="-10" rx="6" ry="11" fill="#5C2E0A" transform="rotate(-22 -18 -10)"/>
-<ellipse cx="18" cy="-10" rx="6" ry="11" fill="#5C2E0A" transform="rotate(22 18 -10)"/>
-<circle cx="0" cy="0" r="20" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<circle cx="-6" cy="-2" r="2.4" fill="#1A1A2E"/><circle cx="6" cy="-2" r="2.4" fill="#1A1A2E"/>
-<ellipse cx="0" cy="6" rx="2" ry="1.4" fill="#1A1A2E"/>
-<path d="M-4 9 Q0 13 4 9" stroke="#1A1A2E" stroke-width="1.4" fill="none"/>
+<div class="row">
+<div class="panel"><svg viewBox="0 0 420 160">
+<g transform="translate(72 80)">
+<ellipse cx="0" cy="34" rx="42" ry="9" fill="#5C2E0A" stroke="#1A1A2E" stroke-width="1.5"/>
+<ellipse cx="0" cy="31" rx="42" ry="9" fill="url(#bodyD)" stroke="#1A1A2E" stroke-width="1.5"/>
+<ellipse cx="0" cy="14" rx="38" ry="8" fill="#5C2E0A" stroke="#1A1A2E" stroke-width="1.5"/>
+<ellipse cx="0" cy="11" rx="38" ry="8" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="1.5"/>
+<ellipse cx="0" cy="-6" rx="32" ry="7" fill="#5C2E0A" stroke="#1A1A2E" stroke-width="1.5"/>
+<ellipse cx="0" cy="-9" rx="32" ry="7" fill="url(#topF)" stroke="#1A1A2E" stroke-width="1.5"/>
+<path d="M-26 -8 Q-30 6 -26 16 Q-30 26 -24 34" stroke="#4A2308" stroke-width="3" fill="none" stroke-linecap="round"/>
+<ellipse cx="-12" cy="-18" rx="11" ry="2.4" fill="#FFE3A8" opacity=".6"/>
 </g>
-<text x="80" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="32" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
+<text x="148" y="74" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="36" fill="url(#goldW)" letter-spacing="-1">וופלסטאק</text>
+<text x="148" y="96" font-family="'Heebo','Rubik',sans-serif" font-weight="700" font-size="13" fill="#fff" opacity=".65" letter-spacing="6">WAFFLESTACK</text>
+<text x="148" y="112" font-family="'Heebo','Rubik',sans-serif" font-size="10" fill="#fff" opacity=".5" letter-spacing="1">בנה את עיר הסטטיסטיקה שלך</text>
+</svg></div>
 
-<div class="c"><div class="n">L32</div><div class="t">Kitten peek</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(38 42)">
-<polygon points="-14,-14 -10,-26 -4,-12" fill="url(#bd)" stroke="#1A1A2E" stroke-width="1.4"/>
-<polygon points="14,-14 10,-26 4,-12" fill="url(#bd)" stroke="#1A1A2E" stroke-width="1.4"/>
-<circle cx="0" cy="0" r="20" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<ellipse cx="-6" cy="-2" rx="2" ry="3" fill="#1A1A2E"/><ellipse cx="6" cy="-2" rx="2" ry="3" fill="#1A1A2E"/>
-<polygon points="0,6 -2,8 2,8" fill="#FF8FAB" stroke="#1A1A2E" stroke-width="1"/>
-</g>
-<text x="80" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="32" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
+<div class="panel"><div class="stack"><div class="meta">Mark · 80px</div><svg viewBox="0 0 100 100" width="80" height="80"><ellipse cx="50" cy="80" rx="38" ry="8" fill="url(#bodyD)" stroke="#1A1A2E" stroke-width="2"/><ellipse cx="50" cy="60" rx="34" ry="7" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="2"/><ellipse cx="50" cy="40" rx="28" ry="6" fill="url(#topF)" stroke="#1A1A2E" stroke-width="2"/></svg></div></div>
 
-<div class="c"><div class="n">L33</div><div class="t">Scholar mascot</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(40 44)">
-<circle cx="0" cy="2" r="20" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<rect x="-14" y="-16" width="28" height="3" fill="#1A1A2E"/>
-<polygon points="-22,-14 0,-22 22,-14 0,-6" fill="#1A1A2E"/>
-<circle cx="-6" cy="0" r="2.4" fill="#1A1A2E"/><circle cx="6" cy="0" r="2.4" fill="#1A1A2E"/>
-<ellipse cx="0" cy="6" rx="2" ry="1.4" fill="#1A1A2E"/>
-</g>
-<text x="80" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="32" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L34</div><div class="t">Wise owl</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(40 44)">
-<polygon points="-16,-14 -10,-22 -4,-14" fill="#7B3F1A" stroke="#1A1A2E" stroke-width="1.4"/>
-<polygon points="16,-14 10,-22 4,-14" fill="#7B3F1A" stroke="#1A1A2E" stroke-width="1.4"/>
-<ellipse cx="0" cy="0" rx="20" ry="22" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<circle cx="-8" cy="-4" r="6" fill="#fff" stroke="#1A1A2E" stroke-width="1.4"/>
-<circle cx="8" cy="-4" r="6" fill="#fff" stroke="#1A1A2E" stroke-width="1.4"/>
-<circle cx="-8" cy="-4" r="3" fill="#1A1A2E"/><circle cx="8" cy="-4" r="3" fill="#1A1A2E"/>
-<polygon points="0,4 -3,7 3,7" fill="#FFB948" stroke="#1A1A2E" stroke-width="1"/>
-</g>
-<text x="80" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="32" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L35</div><div class="t">Bear cub</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(40 44)">
-<circle cx="-16" cy="-12" r="7" fill="#7B3F1A" stroke="#1A1A2E" stroke-width="1.4"/>
-<circle cx="16" cy="-12" r="7" fill="#7B3F1A" stroke="#1A1A2E" stroke-width="1.4"/>
-<circle cx="-16" cy="-12" r="3" fill="url(#bd)"/>
-<circle cx="16" cy="-12" r="3" fill="url(#bd)"/>
-<circle cx="0" cy="2" r="20" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<ellipse cx="0" cy="8" rx="8" ry="5" fill="#FFE3A8" stroke="#1A1A2E" stroke-width="1.4"/>
-<circle cx="-6" cy="-2" r="2.4" fill="#1A1A2E"/><circle cx="6" cy="-2" r="2.4" fill="#1A1A2E"/>
-<ellipse cx="0" cy="6" rx="1.8" ry="1.4" fill="#1A1A2E"/>
-</g>
-<text x="80" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="32" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L36</div><div class="t">Crown puppy</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(40 46)">
-<path d="M-18 -18 L-12 -28 L-6 -20 L0 -32 L6 -20 L12 -28 L18 -18 L18 -14 L-18 -14 Z" fill="#FFD700" stroke="#1A1A2E" stroke-width="1.4"/>
-<circle cx="0" cy="0" r="18" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<circle cx="-6" cy="-2" r="2.4" fill="#1A1A2E"/><circle cx="6" cy="-2" r="2.4" fill="#1A1A2E"/>
-<ellipse cx="0" cy="4" rx="2" ry="1.4" fill="#1A1A2E"/>
-</g>
-<text x="80" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="32" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L37</div><div class="t">Sleepy mascot + lowercase</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(38 42)">
-<ellipse cx="-18" cy="-10" rx="6" ry="11" fill="#5C2E0A" transform="rotate(-22 -18 -10)"/>
-<ellipse cx="18" cy="-10" rx="6" ry="11" fill="#5C2E0A" transform="rotate(22 18 -10)"/>
-<circle cx="0" cy="0" r="20" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<path d="M-8 -2 Q-5 -5 -2 -2" stroke="#1A1A2E" stroke-width="1.8" fill="none"/>
-<path d="M2 -2 Q5 -5 8 -2" stroke="#1A1A2E" stroke-width="1.8" fill="none"/>
-<ellipse cx="0" cy="6" rx="2" ry="1.4" fill="#1A1A2E"/>
-</g>
-<text x="80" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="700" font-size="32" fill="url(#goldW)">wafflestack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L38</div><div class="t">Bee + cursive</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(40 40) scale(.7)">
-<ellipse cx="0" cy="0" rx="22" ry="13" fill="#FFD700" stroke="#1A1A2E" stroke-width="2"/>
-<rect x="-18" y="-6" width="36" height="3" fill="#1A1A2E"/><rect x="-18" y="4" width="36" height="3" fill="#1A1A2E"/>
-<ellipse cx="-8" cy="-14" rx="8" ry="4" fill="#fff" opacity=".85" stroke="#1A1A2E" stroke-width="1.4"/>
-<ellipse cx="8" cy="-14" rx="8" ry="4" fill="#fff" opacity=".85" stroke="#1A1A2E" stroke-width="1.4"/>
-</g>
-<text x="80" y="52" font-family="'Pacifico','Brush Script MT',cursive" font-size="34" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L39</div><div class="t">Heart-hands mascot</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(40 44)">
-<rect x="-18" y="-22" width="36" height="36" rx="6" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<g stroke="#1A1A2E" stroke-width="1.2" opacity=".55"><line x1="-18" y1="-8" x2="18" y2="-8"/><line x1="-18" y1="6" x2="18" y2="6"/><line x1="-6" y1="-22" x2="-6" y2="14"/><line x1="6" y1="-22" x2="6" y2="14"/></g>
-<ellipse cx="-22" cy="-2" rx="5" ry="9" fill="url(#bd)" stroke="#1A1A2E" stroke-width="1.6" transform="rotate(-22 -22 -2)"/>
-<ellipse cx="22" cy="-2" rx="5" ry="9" fill="url(#bd)" stroke="#1A1A2E" stroke-width="1.6" transform="rotate(22 22 -2)"/>
-<path d="M0 12 C -5 6, -4 0, -1 -2 C 0 -2, 0 -1, 0 1 C 0 -1, 1 -2, 2 -2 C 4 0, 5 6, 0 12 Z" fill="#FF4A4A" stroke="#1A1A2E" stroke-width="1.4"/>
-</g>
-<text x="78" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="32" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L40</div><div class="t">Mascot eating</div><div class="stage"><svg viewBox="0 0 360 80">
-<g transform="translate(40 44)">
-<defs><clipPath id="bt40"><path d="M-40 -40 H40 V40 H-40 Z M18 -10 a8 8 0 0 1 0 16 a8 8 0 0 1 0 -16"/></clipPath></defs>
-<g clip-path="url(#bt40)">
-<circle cx="0" cy="0" r="20" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2"/>
-<g stroke="#1A1A2E" stroke-width="1.2" opacity=".5"><line x1="-20" y1="0" x2="20" y2="0"/><line x1="0" y1="-20" x2="0" y2="20"/></g>
-</g>
-</g>
-<text x="80" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="32" fill="url(#goldW)">WaffleStack</text>
-</svg></div></div>
-
+<div class="panel"><div class="stack"><div class="meta">Favicon · 24px</div><svg viewBox="0 0 100 100" width="32" height="32"><ellipse cx="50" cy="80" rx="38" ry="10" fill="#C97C18" stroke="#1A1A2E" stroke-width="4"/><ellipse cx="50" cy="58" rx="34" ry="9" fill="#F2A93E" stroke="#1A1A2E" stroke-width="4"/><ellipse cx="50" cy="36" rx="28" ry="8" fill="#FFD27A" stroke="#1A1A2E" stroke-width="4"/></svg></div></div>
 </div>
 
-<div class="sect">41–50 · Pure type / wordmark / badge</div>
-<div class="grid">
-
-<div class="c"><div class="n">L41</div><div class="t">Pure bold (current)</div><div class="stage"><svg viewBox="0 0 360 80"><text x="180" y="52" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="40" fill="url(#goldW)">WaffleStack</text></svg></div></div>
-
-<div class="c"><div class="n">L42</div><div class="t">Serif italic</div><div class="stage"><svg viewBox="0 0 360 80"><text x="180" y="54" text-anchor="middle" font-family="Georgia,serif" font-weight="900" font-size="40" fill="url(#goldW)" font-style="italic">WaffleStack</text></svg></div></div>
-
-<div class="c"><div class="n">L43</div><div class="t">All caps spaced</div><div class="stage"><svg viewBox="0 0 360 80"><text x="180" y="50" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="26" fill="url(#goldW)" letter-spacing="6">WAFFLESTACK</text></svg></div></div>
-
-<div class="c"><div class="n">L44</div><div class="t">Outline + fill duotone</div><div class="stage"><svg viewBox="0 0 360 80"><text x="180" y="52" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="40" fill="#1A1A2E" stroke="url(#goldW)" stroke-width="1.6">WaffleStack</text></svg></div></div>
-
-<div class="c"><div class="n">L45</div><div class="t">Two-tone Waffle.Stack</div><div class="stage"><svg viewBox="0 0 360 80"><text x="80" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="40" fill="url(#goldW)">Waffle</text><text x="218" y="52" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="40" fill="#fff">Stack</text></svg></div></div>
-
-<div class="c"><div class="n">L46</div><div class="t">Underline brush</div><div class="stage"><svg viewBox="0 0 360 80"><text x="180" y="46" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="36" fill="url(#goldW)">WaffleStack</text><path d="M80 56 Q180 64 280 56" fill="none" stroke="url(#goldW)" stroke-width="3" stroke-linecap="round"/></svg></div></div>
-
-<div class="c"><div class="n">L47</div><div class="t">Pill badge</div><div class="stage"><svg viewBox="0 0 360 80"><rect x="60" y="22" width="240" height="36" rx="18" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2.4"/><text x="180" y="46" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="22" fill="#1A1A2E" letter-spacing="3">WAFFLESTACK</text></svg></div></div>
-
-<div class="c"><div class="n">L48</div><div class="t">Shield badge</div><div class="stage"><svg viewBox="0 0 360 80"><path d="M180 8 L260 18 L260 50 Q260 70 180 76 Q100 70 100 50 L100 18 Z" fill="url(#bd)" stroke="#1A1A2E" stroke-width="2.4"/><text x="180" y="50" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="20" fill="#1A1A2E" letter-spacing="2">WAFFLE</text><text x="180" y="68" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="14" fill="#1A1A2E" letter-spacing="3">STACK</text></svg></div></div>
-
-<div class="c"><div class="n">L49</div><div class="t">Stencil grid</div><div class="stage"><svg viewBox="0 0 360 80">
-<defs><pattern id="pg49" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1" fill="#1A1A2E"/></pattern></defs>
-<text x="180" y="52" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="40" fill="url(#goldW)">WaffleStack</text>
-<text x="180" y="52" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="40" fill="url(#pg49)">WaffleStack</text>
-</svg></div></div>
-
-<div class="c"><div class="n">L50</div><div class="t">Banner ribbon name</div><div class="stage"><svg viewBox="0 0 360 80"><path d="M40 32 L320 32 L300 54 L320 76 L40 76 L60 54 Z" fill="#FF4A4A" stroke="#1A1A2E" stroke-width="2.4" stroke-linejoin="round"/><text x="180" y="62" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="24" fill="#fff" letter-spacing="3">WAFFLESTACK</text></svg></div></div>
-
+<div class="row small">
+<div class="panel paper"><svg viewBox="0 0 100 100" width="60" height="60"><ellipse cx="50" cy="80" rx="38" ry="8" fill="#C97C18" stroke="#1A1A2E" stroke-width="2"/><ellipse cx="50" cy="60" rx="34" ry="7" fill="#F2A93E" stroke="#1A1A2E" stroke-width="2"/><ellipse cx="50" cy="40" rx="28" ry="6" fill="#FFD27A" stroke="#1A1A2E" stroke-width="2"/></svg></div>
+<div class="panel mono"><svg viewBox="0 0 100 100" width="60" height="60"><ellipse cx="50" cy="80" rx="38" ry="8" fill="none" stroke="#F2A93E" stroke-width="2.4"/><ellipse cx="50" cy="60" rx="34" ry="7" fill="none" stroke="#F2A93E" stroke-width="2.4"/><ellipse cx="50" cy="40" rx="28" ry="6" fill="none" stroke="#F2A93E" stroke-width="2.4"/></svg></div>
+<div class="panel mono"><svg viewBox="0 0 100 100" width="60" height="60"><ellipse cx="50" cy="80" rx="38" ry="8" fill="none" stroke="#fff" stroke-width="2.4"/><ellipse cx="50" cy="60" rx="34" ry="7" fill="none" stroke="#fff" stroke-width="2.4"/><ellipse cx="50" cy="40" rx="28" ry="6" fill="none" stroke="#fff" stroke-width="2.4"/></svg></div>
 </div>
 
-<p style="margin-top:36px; opacity:.6; font-size:13px; text-align:center;">Tell me L01–L50. Or "iterate Lx with [tweak]". Or hybrid "Lx symbol + Ly type".</p>
+<div class="palette-strip">
+<div class="sw"><div class="swatch" style="background:#FFD27A"></div><div class="swatch-label">FFD27A</div></div>
+<div class="sw"><div class="swatch" style="background:#F2A93E"></div><div class="swatch-label">F2A93E</div></div>
+<div class="sw"><div class="swatch" style="background:#C97C18"></div><div class="swatch-label">C97C18</div></div>
+<div class="sw"><div class="swatch" style="background:#1A1A2E"></div><div class="swatch-label">1A1A2E</div></div>
+</div>
+<p class="rat"><b>Why this works:</b> Three plates = three skill stages (basic → confident → mastery). Maps 1:1 to "build your stack". Functions even reduced to 3 stacked rectangles. Most owned-by-WaffleStack of any mark.</p>
+</div>
+
+<!-- 03 -->
+<div class="concept">
+<div class="concept-head"><span class="concept-id">CONCEPT · 03</span><h2 class="concept-name">Hexagonal Mark</h2></div>
+<p class="concept-tag">Hexagonal container references honeycomb + tech grid. Waffle texture fills the hex. Most platform-leaning option.</p>
+
+<div class="row">
+<div class="panel"><svg viewBox="0 0 420 160">
+<g transform="translate(72 80)">
+<defs><clipPath id="hex3"><polygon points="0,-44 38,-22 38,22 0,44 -38,22 -38,-22"/></clipPath></defs>
+<polygon points="0,-44 38,-22 38,22 0,44 -38,22 -38,-22" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="2"/>
+<g clip-path="url(#hex3)" stroke="#1A1A2E" stroke-width="1.2" opacity=".5">
+<line x1="-44" y1="-15" x2="44" y2="-15"/><line x1="-44" y1="0" x2="44" y2="0"/><line x1="-44" y1="15" x2="44" y2="15"/>
+<line x1="-15" y1="-44" x2="-15" y2="44"/><line x1="0" y1="-44" x2="0" y2="44"/><line x1="15" y1="-44" x2="15" y2="44"/>
+</g>
+<polygon points="0,-44 38,-22 -38,-22" fill="#FFE3A8" opacity=".45" clip-path="url(#hex3)"/>
+</g>
+<text x="148" y="74" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="36" fill="url(#goldW)" letter-spacing="-1">וופלסטאק</text>
+<text x="148" y="96" font-family="'Heebo','Rubik',sans-serif" font-weight="700" font-size="13" fill="#fff" opacity=".65" letter-spacing="6">WAFFLESTACK</text>
+<text x="148" y="112" font-family="'Heebo','Rubik',sans-serif" font-size="10" fill="#fff" opacity=".5" letter-spacing="1">למידה אדפטיבית מבוססת נתונים</text>
+</svg></div>
+
+<div class="panel"><div class="stack"><div class="meta">Mark · 80px</div><svg viewBox="0 0 100 100" width="80" height="80"><polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="2"/><g stroke="#1A1A2E" stroke-width="1.2" opacity=".5"><line x1="12" y1="35" x2="88" y2="35"/><line x1="12" y1="50" x2="88" y2="50"/><line x1="12" y1="65" x2="88" y2="65"/><line x1="35" y1="14" x2="35" y2="86"/><line x1="50" y1="6" x2="50" y2="94"/><line x1="65" y1="14" x2="65" y2="86"/></g></svg></div></div>
+
+<div class="panel"><div class="stack"><div class="meta">Favicon · 24px</div><svg viewBox="0 0 100 100" width="32" height="32"><polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="4"/><line x1="12" y1="50" x2="88" y2="50" stroke="#1A1A2E" stroke-width="3"/><line x1="50" y1="6" x2="50" y2="94" stroke="#1A1A2E" stroke-width="3"/></svg></div></div>
+</div>
+
+<div class="row small">
+<div class="panel paper"><svg viewBox="0 0 100 100" width="60" height="60"><polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="#F2A93E" stroke="#1A1A2E" stroke-width="2"/></svg></div>
+<div class="panel mono"><svg viewBox="0 0 100 100" width="60" height="60"><polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="none" stroke="#F2A93E" stroke-width="2.6"/><g stroke="#F2A93E" stroke-width="1.6"><line x1="20" y1="50" x2="80" y2="50"/><line x1="50" y1="10" x2="50" y2="90"/></g></svg></div>
+<div class="panel mono"><svg viewBox="0 0 100 100" width="60" height="60"><polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="none" stroke="#fff" stroke-width="2.6"/><g stroke="#fff" stroke-width="1.6"><line x1="20" y1="50" x2="80" y2="50"/><line x1="50" y1="10" x2="50" y2="90"/></g></svg></div>
+</div>
+
+<div class="palette-strip">
+<div class="sw"><div class="swatch" style="background:#F2A93E"></div><div class="swatch-label">F2A93E</div></div>
+<div class="sw"><div class="swatch" style="background:#0d1d35"></div><div class="swatch-label">0D1D35</div></div>
+<div class="sw"><div class="swatch" style="background:#1A1A2E"></div><div class="swatch-label">1A1A2E</div></div>
+</div>
+<p class="rat"><b>Why this works:</b> Hexagonal silhouette reads "system/platform" not "food". Unique shape so brand wins on outline alone. Reduces to 16px because hex outline is the readable thing.</p>
+</div>
+
+<!-- 04 -->
+<div class="concept">
+<div class="concept-head"><span class="concept-id">CONCEPT · 04</span><h2 class="concept-name">Gem Refined</h2></div>
+<p class="concept-tag">Their current diamond redrawn with proper facets. Waffle grid lives inside as subtle texture. Premium, jewel-like.</p>
+
+<div class="row">
+<div class="panel"><svg viewBox="0 0 420 160">
+<g transform="translate(72 80)">
+<defs><clipPath id="gm4"><polygon points="0,-44 40,-12 26,40 -26,40 -40,-12"/></clipPath></defs>
+<polygon points="0,-44 40,-12 26,40 -26,40 -40,-12" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="2"/>
+<g clip-path="url(#gm4)" stroke="#1A1A2E" stroke-width="1.2" opacity=".45"><line x1="-44" y1="-12" x2="44" y2="-12"/><line x1="-44" y1="14" x2="44" y2="14"/><line x1="-15" y1="-44" x2="-15" y2="44"/><line x1="0" y1="-44" x2="0" y2="44"/><line x1="15" y1="-44" x2="15" y2="44"/></g>
+<polygon points="0,-44 40,-12 0,-12" fill="#FFE3A8" opacity=".55"/>
+<polygon points="0,-44 -40,-12 0,-12" fill="#FFD27A" opacity=".7"/>
+<line x1="-40" y1="-12" x2="40" y2="-12" stroke="#1A1A2E" stroke-width="1.4" opacity=".6"/>
+<line x1="0" y1="-44" x2="0" y2="40" stroke="#1A1A2E" stroke-width="1.2" opacity=".35"/>
+</g>
+<text x="148" y="74" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="36" fill="url(#goldW)" letter-spacing="-1">וופלסטאק</text>
+<text x="148" y="96" font-family="'Heebo','Rubik',sans-serif" font-weight="700" font-size="13" fill="#fff" opacity=".65" letter-spacing="6">WAFFLESTACK</text>
+<text x="148" y="112" font-family="'Heebo','Rubik',sans-serif" font-size="10" fill="#fff" opacity=".5" letter-spacing="1">סטטיסטיקה כמשחק</text>
+</svg></div>
+
+<div class="panel"><div class="stack"><div class="meta">Mark · 80px</div><svg viewBox="0 0 100 100" width="80" height="80"><polygon points="50,6 90,38 76,92 24,92 10,38" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="2"/><polygon points="50,6 90,38 50,38" fill="#FFE3A8" opacity=".55"/><polygon points="50,6 10,38 50,38" fill="#FFD27A" opacity=".7"/><line x1="10" y1="38" x2="90" y2="38" stroke="#1A1A2E" stroke-width="1.4" opacity=".6"/></svg></div></div>
+
+<div class="panel"><div class="stack"><div class="meta">Favicon · 24px</div><svg viewBox="0 0 100 100" width="32" height="32"><polygon points="50,6 90,38 76,92 24,92 10,38" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="5"/></svg></div></div>
+</div>
+
+<div class="row small">
+<div class="panel paper"><svg viewBox="0 0 100 100" width="60" height="60"><polygon points="50,6 90,38 76,92 24,92 10,38" fill="#F2A93E" stroke="#1A1A2E" stroke-width="2"/></svg></div>
+<div class="panel mono"><svg viewBox="0 0 100 100" width="60" height="60"><polygon points="50,6 90,38 76,92 24,92 10,38" fill="none" stroke="#F2A93E" stroke-width="2.6"/><line x1="10" y1="38" x2="90" y2="38" stroke="#F2A93E" stroke-width="2"/><line x1="50" y1="6" x2="50" y2="92" stroke="#F2A93E" stroke-width="2" opacity=".5"/></svg></div>
+<div class="panel mono"><svg viewBox="0 0 100 100" width="60" height="60"><polygon points="50,6 90,38 76,92 24,92 10,38" fill="none" stroke="#fff" stroke-width="2.6"/><line x1="10" y1="38" x2="90" y2="38" stroke="#fff" stroke-width="2"/></svg></div>
+</div>
+
+<div class="palette-strip">
+<div class="sw"><div class="swatch" style="background:#FFE3A8"></div><div class="swatch-label">FFE3A8</div></div>
+<div class="sw"><div class="swatch" style="background:#F2A93E"></div><div class="swatch-label">F2A93E</div></div>
+<div class="sw"><div class="swatch" style="background:#1A1A2E"></div><div class="swatch-label">1A1A2E</div></div>
+</div>
+<p class="rat"><b>Why this works:</b> Brand continuity (gem = current logo) + facets the original was missing. Reads as both "waffle from above" and "achievement gem" — dual reading is a feature, not a bug.</p>
+</div>
+
+<!-- 05 -->
+<div class="concept">
+<div class="concept-head"><span class="concept-id">CONCEPT · 05</span><h2 class="concept-name">Academic Seal</h2></div>
+<p class="concept-tag">Circular emblem, text on outer ring, waffle mark center. University-crest gravity. Most parent / teacher friendly.</p>
+
+<div class="row">
+<div class="panel"><svg viewBox="0 0 420 160">
+<g transform="translate(80 80)">
+<defs><path id="topArc5" d="M -54 0 a 54 54 0 0 1 108 0"/><path id="botArc5" d="M -54 0 a 54 54 0 0 0 108 0"/></defs>
+<circle cx="0" cy="0" r="58" fill="none" stroke="url(#goldW)" stroke-width="1.4"/>
+<circle cx="0" cy="0" r="54" fill="none" stroke="url(#goldW)" stroke-width=".8"/>
+<text font-family="'Heebo','Rubik',sans-serif" font-weight="800" font-size="9" fill="url(#goldW)" letter-spacing="2.4"><textPath href="#topArc5" startOffset="50%" text-anchor="middle">סטטיסטיקה · גימיפיקציה · מצוינות</textPath></text>
+<text font-family="'Heebo','Rubik',sans-serif" font-weight="800" font-size="9" fill="url(#goldW)" letter-spacing="3"><textPath href="#botArc5" startOffset="50%" text-anchor="middle">EST · 2026</textPath></text>
+<circle cx="0" cy="0" r="32" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="1.6"/>
+<g stroke="#1A1A2E" stroke-width="1.1" opacity=".55"><line x1="-32" y1="-10" x2="32" y2="-10"/><line x1="-32" y1="10" x2="32" y2="10"/><line x1="-10" y1="-32" x2="-10" y2="32"/><line x1="10" y1="-32" x2="10" y2="32"/></g>
+<polygon points="-50,0 -42,-4 -42,4" fill="url(#goldW)"/>
+<polygon points="50,0 42,-4 42,4" fill="url(#goldW)"/>
+</g>
+<text x="184" y="58" font-family="Georgia,'Times New Roman',serif" font-weight="900" font-size="32" fill="url(#goldW)" letter-spacing="-.5">וופלסטאק</text>
+<text x="184" y="82" font-family="Georgia,serif" font-weight="700" font-size="12" fill="#fff" opacity=".65" letter-spacing="5">WAFFLESTACK</text>
+<line x1="184" y1="92" x2="244" y2="92" stroke="url(#goldW)" stroke-width=".8"/>
+<text x="184" y="108" font-family="Georgia,serif" font-size="10" fill="#fff" opacity=".55" font-style="italic">— a Belgian-grade education —</text>
+</svg></div>
+
+<div class="panel"><div class="stack"><div class="meta">Mark · 80px</div><svg viewBox="0 0 100 100" width="80" height="80"><circle cx="50" cy="50" r="46" fill="none" stroke="#F2A93E" stroke-width="1.4"/><circle cx="50" cy="50" r="42" fill="none" stroke="#F2A93E" stroke-width=".8"/><circle cx="50" cy="50" r="28" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="1.6"/><g stroke="#1A1A2E" stroke-width="1.1" opacity=".55"><line x1="22" y1="42" x2="78" y2="42"/><line x1="22" y1="58" x2="78" y2="58"/><line x1="42" y1="22" x2="42" y2="78"/><line x1="58" y1="22" x2="58" y2="78"/></g></svg></div></div>
+
+<div class="panel"><div class="stack"><div class="meta">Favicon · 24px</div><svg viewBox="0 0 100 100" width="32" height="32"><circle cx="50" cy="50" r="44" fill="none" stroke="#F2A93E" stroke-width="3"/><circle cx="50" cy="50" r="28" fill="#F2A93E" stroke="#1A1A2E" stroke-width="4"/></svg></div></div>
+</div>
+
+<div class="row small">
+<div class="panel paper"><svg viewBox="0 0 100 100" width="60" height="60"><circle cx="50" cy="50" r="46" fill="none" stroke="#1A1A2E" stroke-width="1.6"/><circle cx="50" cy="50" r="28" fill="#F2A93E" stroke="#1A1A2E" stroke-width="2"/></svg></div>
+<div class="panel mono"><svg viewBox="0 0 100 100" width="60" height="60"><circle cx="50" cy="50" r="46" fill="none" stroke="#F2A93E" stroke-width="1.6"/><circle cx="50" cy="50" r="28" fill="none" stroke="#F2A93E" stroke-width="2.4"/></svg></div>
+<div class="panel mono"><svg viewBox="0 0 100 100" width="60" height="60"><circle cx="50" cy="50" r="46" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="50" cy="50" r="28" fill="none" stroke="#fff" stroke-width="2.4"/></svg></div>
+</div>
+
+<div class="palette-strip">
+<div class="sw"><div class="swatch" style="background:#F2A93E"></div><div class="swatch-label">F2A93E</div></div>
+<div class="sw"><div class="swatch" style="background:#0d1d35"></div><div class="swatch-label">0D1D35</div></div>
+<div class="sw"><div class="swatch" style="background:#FFF7E8"></div><div class="swatch-label">FFF7E8</div></div>
+</div>
+<p class="rat"><b>Why this works:</b> Crest format = legitimacy, longevity, institution. Inner mark stays the same square waffle so brand consistency holds. The ring is dignified packaging.</p>
+</div>
+
+<!-- 06 -->
+<div class="concept">
+<div class="concept-head"><span class="concept-id">CONCEPT · 06</span><h2 class="concept-name">Wordmark Only</h2></div>
+<p class="concept-tag">No symbol. Wordmark is the entire brand. Tiny golden dot above the ק. App favicon uses square ו tile.</p>
+
+<div class="row">
+<div class="panel"><svg viewBox="0 0 420 160">
+<text x="210" y="84" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="56" fill="url(#goldW)" letter-spacing="-2">וופלסטאק</text>
+<circle cx="100" cy="46" r="5" fill="url(#goldW)" stroke="#1A1A2E" stroke-width="1.2"/>
+<text x="210" y="116" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="700" font-size="14" fill="#fff" opacity=".55" letter-spacing="6">WAFFLESTACK</text>
+<line x1="180" y1="128" x2="240" y2="128" stroke="url(#goldW)" stroke-width=".8"/>
+<text x="210" y="142" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-size="10" fill="#fff" opacity=".45" letter-spacing="1.5">סטטיסטיקה כמשחק</text>
+</svg></div>
+
+<div class="panel"><div class="stack"><div class="meta">Compact · 80px</div><svg viewBox="0 0 200 100" width="160" height="80"><text x="100" y="62" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="32" fill="url(#goldW)" letter-spacing="-1">וופלסטאק</text></svg></div></div>
+
+<div class="panel"><div class="stack"><div class="meta">Favicon · 24px</div><svg viewBox="0 0 100 100" width="32" height="32"><rect x="14" y="14" width="72" height="72" rx="12" fill="url(#bodyG)" stroke="#1A1A2E" stroke-width="4"/><text x="50" y="68" text-anchor="middle" font-family="Georgia,serif" font-weight="900" font-size="50" fill="#1A1A2E">ו</text></svg></div></div>
+</div>
+
+<div class="row small">
+<div class="panel paper"><svg viewBox="0 0 220 80" width="160" height="60"><text x="110" y="50" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="28" fill="#1A1A2E" letter-spacing="-1">וופלסטאק</text></svg></div>
+<div class="panel mono"><svg viewBox="0 0 220 80" width="160" height="60"><text x="110" y="50" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="28" fill="#F2A93E" letter-spacing="-1">וופלסטאק</text></svg></div>
+<div class="panel mono"><svg viewBox="0 0 220 80" width="160" height="60"><text x="110" y="50" text-anchor="middle" font-family="'Heebo','Rubik',sans-serif" font-weight="900" font-size="28" fill="#fff" letter-spacing="-1">וופלסטאק</text></svg></div>
+</div>
+
+<div class="palette-strip">
+<div class="sw"><div class="swatch" style="background:#F2A93E"></div><div class="swatch-label">F2A93E</div></div>
+<div class="sw"><div class="swatch" style="background:#FFE3A8"></div><div class="swatch-label">FFE3A8</div></div>
+<div class="sw"><div class="swatch" style="background:#1A1A2E"></div><div class="swatch-label">1A1A2E</div></div>
+</div>
+<p class="rat"><b>Why this works:</b> Most refined. No symbol to defend, no construction to maintain — just type. Cheapest to license/use. Pairs with separate icon (square ו tile) for app + favicon.</p>
+</div>
+
 </body>
 </html>
