@@ -929,7 +929,14 @@ const WB_DOM_TYPES = new Set(['rect','circle','sticky','text']);
 // ── Per-user auto-save keys ────────────────────────────────────────────────────
 const _MM_USER_ID = new URLSearchParams(location.search).get('userId') || 'default';
 const MM_SAVE_KEY = 'mm-data-' + _MM_USER_ID;
-const WB_SAVE_KEY = 'wb-data-' + _MM_USER_ID;
+// Per-scene whiteboard key (Issue 4): when the host iframe passes ?wbScene=<id>
+// (e.g. wbScene=q-mean_001), the canvas auto-saves to a distinct localStorage
+// slot so each question gets its own canvas. Falls back to the legacy shared
+// key when no scene is specified.
+const _WB_SCENE = new URLSearchParams(location.search).get('wbScene') || '';
+const WB_SAVE_KEY = _WB_SCENE
+  ? ('wb-scene-' + _WB_SCENE + '-' + _MM_USER_ID)
+  : ('wb-data-' + _MM_USER_ID);
 let _mmSaveTimer = null;
 
 // ═══════════════════════════════════════════════════════════
