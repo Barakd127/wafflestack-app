@@ -12,6 +12,11 @@ const AXIS_X = PAD_X
 const Y_TOP = PAD_Y
 const Y_BOT = H - 50
 
+// Single source of truth for the themed navy stroke/text used across the
+// boxplot SVG. Mirrors --sh-text-dark from index.css. Kept as a JS literal
+// because SVG stroke/fill attrs cannot resolve CSS custom properties.
+const NAVY = '#1F3E6C'
+
 const yMin = 0
 const yMax = 100
 
@@ -76,8 +81,8 @@ export default function BoxplotComparisonInteractive() {
 
   return (
     <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>השוואת Boxplots — בין קבוצות</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
+      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 20, marginBottom: 6, fontWeight: 700 }}>השוואת Boxplots — בין קבוצות</h3>
+      <p style={{ fontSize: 15, opacity: 0.85, marginBottom: 14, lineHeight: 1.5 }}>
         גרור את הידיות הצהובות (Q₁, חציון, Q₃) ואת הקצוות (min, max) של כל קבוצה. השוו חציונים, IQR וטווחים.
       </p>
 
@@ -112,13 +117,13 @@ export default function BoxplotComparisonInteractive() {
           return (
             <g key={gi}>
               {/* Whisker line top */}
-              <line x1={cx} y1={yMax_} x2={cx} y2={yQ3} stroke="#1F3E6C" strokeWidth={1.5} />
+              <line x1={cx} y1={yMax_} x2={cx} y2={yQ3} stroke={NAVY} strokeWidth={1.5} />
               {/* Whisker top cap */}
-              <line x1={cx - 20} y1={yMax_} x2={cx + 20} y2={yMax_} stroke="#1F3E6C" strokeWidth={1.5} />
+              <line x1={cx - 20} y1={yMax_} x2={cx + 20} y2={yMax_} stroke={NAVY} strokeWidth={1.5} />
               {/* Whisker line bottom */}
-              <line x1={cx} y1={yQ1} x2={cx} y2={yMin_} stroke="#1F3E6C" strokeWidth={1.5} />
+              <line x1={cx} y1={yQ1} x2={cx} y2={yMin_} stroke={NAVY} strokeWidth={1.5} />
               {/* Whisker bottom cap */}
-              <line x1={cx - 20} y1={yMin_} x2={cx + 20} y2={yMin_} stroke="#1F3E6C" strokeWidth={1.5} />
+              <line x1={cx - 20} y1={yMin_} x2={cx + 20} y2={yMin_} stroke={NAVY} strokeWidth={1.5} />
 
               {/* Box */}
               <rect
@@ -154,7 +159,7 @@ export default function BoxplotComparisonInteractive() {
               })}
 
               {/* Group label */}
-              <text x={cx} y={Y_BOT + 20} fill="#1F3E6C" fontSize={14} fontWeight={700} textAnchor="middle">{b.name}</text>
+              <text x={cx} y={Y_BOT + 20} fill={NAVY} fontSize={14} fontWeight={700} textAnchor="middle">{b.name}</text>
             </g>
           )
         })}
@@ -189,7 +194,7 @@ export default function BoxplotComparisonInteractive() {
       <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
         <button
           onClick={() => setBoxes(INITIAL)}
-          style={{ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
+          style={{ background: 'rgba(31,62,108,0.10)', color: 'var(--sh-text-dark)', border: '1px solid rgba(31,62,108,0.20)', borderRadius: 8, padding: '10px 18px', cursor: 'pointer', fontSize: 14, fontWeight: 600, minHeight: 44 }}
         >
           איפוס
         </button>
