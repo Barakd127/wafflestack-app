@@ -50,7 +50,7 @@ export default function ANOVAInteractive() {
   }, [F, msB, msW])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>ANOVA — שונות בין קבוצות מול בתוך קבוצות</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור את הממוצעים של 3 הקבוצות. F גדל כשההפרשים בין הקבוצות גדולים יחסית לפיזור בתוך כל קבוצה.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
