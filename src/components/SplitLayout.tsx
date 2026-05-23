@@ -82,17 +82,32 @@ export default function SplitLayout({ onBack, darkMode, initialRight = 'study' }
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 16px', flexShrink: 0, zIndex: 100,
       }}>
+        {/* Home button — gold so it is unmistakable in split mode. Replaces the
+            previous low-contrast indigo back button (Issue 3). Routes via
+            top-level hash so it always returns to StudyHub regardless of which
+            split variant we are in. */}
         <button
-          onClick={onBack}
+          onClick={() => { window.location.hash = ''; onBack() }}
+          aria-label="חזרה לדף הבית"
+          title="חזרה לדף הבית"
           style={{
-            background: 'rgba(99,102,241,0.15)',
-            border: '1px solid rgba(99,102,241,0.4)',
-            color: '#818cf8', borderRadius: 8,
-            padding: '5px 14px', cursor: 'pointer',
-            fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
+            background: 'linear-gradient(135deg, #D4AF37 0%, #b8941f 100%)',
+            border: '1px solid rgba(212,175,55,0.65)',
+            color: '#1F2640',
+            borderRadius: 10,
+            padding: '6px 16px',
+            cursor: 'pointer',
+            fontSize: 13,
+            fontWeight: 700,
+            fontFamily: 'inherit',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            boxShadow: '0 2px 8px rgba(212,175,55,0.35)',
           }}
         >
-          ← חזרה
+          <span aria-hidden style={{ fontSize: 15 }}>🏠</span>
+          <span>דף הבית</span>
         </button>
 
         {/* Right-pane tab switcher */}
