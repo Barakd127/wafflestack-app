@@ -2429,7 +2429,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       {/* Top bar — hidden in fullscreen so canvas + question get full
           viewport. The floating "הצג כלי לימוד" chip above restores it. */}
       {!fullscreen && (
-      <div className="ws-quiz-topbar" style={{ background: '#FFFFFF', boxShadow: '2px 2px 6px rgba(0,0,0,0.18)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12, zIndex: 10 }}>
+      <div className="ws-quiz-topbar" style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', borderBottom: '1px solid rgba(127,155,217,0.30)', boxShadow: '0 2px 6px rgba(18,36,96,0.15)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12, zIndex: 10 }}>
         <img src={`${import.meta.env.BASE_URL}building-figma.png`} alt="" style={{ width: 34, height: 26, objectFit: 'cover', borderRadius: 5 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
         <div style={{ flex: 1 }}>
           <div style={{ height: 6, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
