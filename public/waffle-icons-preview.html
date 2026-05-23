@@ -2,202 +2,214 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<title>WaffleStack — Icon Options</title>
+<title>WaffleStack — 15 fresh waffle directions</title>
 <style>
-  :root { --navy:#0d1d35; --gold:#FFD700; }
-  body { font-family: 'Heebo','Rubik',system-ui,sans-serif; margin:0; padding:40px; background:linear-gradient(160deg,#0d1d35 0%,#14294a 100%); color:#fff; min-height:100vh; }
-  h1 { font-weight:900; font-size:28px; margin:0 0 8px; }
-  .sub { opacity:.7; margin-bottom:36px; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:24px; max-width:1400px; }
-  .card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:24px; text-align:center; }
-  .card h3 { margin:0 0 4px; font-size:16px; }
-  .card .num { opacity:.5; font-size:12px; margin-bottom:18px; }
-  .card .show { display:flex; gap:20px; align-items:center; justify-content:center; padding:18px 0; }
-  .chip { display:inline-flex; gap:6px; align-items:center; background:rgba(255,255,255,.08); padding:8px 14px; border-radius:999px; margin-top:14px; font-size:12px; }
-  .chip .small svg { width:20px; height:20px; }
-  .label { font-size:11px; opacity:.5; margin-top:8px; }
-  /* tile that mimics the current sidebar header bg */
-  .sidebar-tile {
-    width:72px; height:72px; border-radius:18px;
-    background:linear-gradient(135deg,#1F3E6C,#3B5998);
-    box-shadow:0 4px 16px rgba(31,41,55,.4);
-    display:flex; align-items:center; justify-content:center;
-    border:1px solid rgba(255,255,255,.25);
-  }
-  .sidebar-tile svg { width:48px; height:48px; }
-  .footer { margin-top:48px; opacity:.6; font-size:13px; text-align:center; }
+  body { font-family: 'Heebo','Rubik',system-ui,sans-serif; margin:0; padding:32px; background:linear-gradient(160deg,#0d1d35 0%,#14294a 100%); color:#fff; min-height:100vh; }
+  h1 { font-weight:900; font-size:26px; margin:0 0 4px; }
+  .sub { opacity:.7; margin-bottom:28px; font-size:14px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px; max-width:1500px; }
+  .card { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:14px; padding:16px; text-align:center; }
+  .card h3 { margin:0 0 2px; font-size:14px; font-weight:700; }
+  .num { opacity:.45; font-size:11px; margin-bottom:12px; }
+  .show { display:flex; gap:14px; align-items:center; justify-content:center; padding:10px 0 6px; }
+  .tile { width:64px; height:64px; border-radius:16px; background:linear-gradient(135deg,#1F3E6C,#3B5998); box-shadow:0 4px 12px rgba(31,41,55,.4); display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.22); }
+  .tile svg { width:46px; height:46px; }
+  .chip { width:22px; height:22px; }
+  .chip svg { width:22px; height:22px; }
+  .label { font-size:10px; opacity:.55; margin-top:6px; line-height:1.4; }
 </style>
 </head>
 <body>
-<h1>🧇 WaffleStack — Icon Direction</h1>
-<div class="sub">5 options. Each shown on the navy gradient tile that's used today in the sidebar.</div>
+<h1>🧇 15 fresh directions — pick any (or mash up)</h1>
+<div class="sub">Each on the real sidebar tile bg. Big = 46px (in app), small = 22px (favicon size).</div>
 
 <div class="grid">
 
-  <!-- 1: Round golden waffle + syrup drip -->
-  <div class="card">
-    <h3>Round + Syrup</h3>
-    <div class="num">Option 1 — playful, warm</div>
-    <div class="show">
-      <div class="sidebar-tile">
-        <svg viewBox="0 0 64 64">
-          <defs>
-            <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#FFD27A"/>
-              <stop offset="1" stop-color="#E89B3B"/>
-            </linearGradient>
-          </defs>
-          <!-- syrup arc -->
-          <path d="M22 8 Q32 2 42 8 L42 14 Q32 8 22 14 Z" fill="#7B3F1A"/>
-          <!-- waffle base -->
-          <circle cx="32" cy="36" r="22" fill="url(#g1)" stroke="#A36418" stroke-width="2"/>
-          <!-- grid lines -->
-          <g stroke="#A36418" stroke-width="1.6" stroke-linecap="round" opacity=".85">
-            <line x1="14" y1="28" x2="50" y2="28"/>
-            <line x1="14" y1="36" x2="50" y2="36"/>
-            <line x1="14" y1="44" x2="50" y2="44"/>
-            <line x1="24" y1="16" x2="24" y2="56"/>
-            <line x1="32" y1="14" x2="32" y2="58"/>
-            <line x1="40" y1="16" x2="40" y2="56"/>
-          </g>
-        </svg>
-      </div>
-    </div>
-    <div class="chip"><span class="small"><svg viewBox="0 0 64 64"><circle cx="32" cy="36" r="22" fill="#E89B3B"/><path d="M22 8 Q32 2 42 8 L42 14 Q32 8 22 14 Z" fill="#7B3F1A"/></svg></span> Sidebar 20px chip</div>
-    <div class="label">Hex: gold-light #FFD27A → gold-dark #E89B3B, syrup #7B3F1A</div>
-  </div>
+<div class="card"><h3>Mascot Waffle Face</h3><div class="num">06 — friendly character</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<defs><radialGradient id="m6" cx=".4" cy=".35"><stop offset="0" stop-color="#FFE3A8"/><stop offset="1" stop-color="#E89B3B"/></radialGradient></defs>
+<circle cx="32" cy="34" r="22" fill="url(#m6)" stroke="#7B3F1A" stroke-width="2"/>
+<g stroke="#A36418" stroke-width="1.4" opacity=".7"><line x1="14" y1="34" x2="50" y2="34"/><line x1="32" y1="14" x2="32" y2="54"/><line x1="20" y1="22" x2="20" y2="46"/><line x1="44" y1="22" x2="44" y2="46"/><line x1="14" y1="22" x2="50" y2="22"/><line x1="14" y1="46" x2="50" y2="46"/></g>
+<circle cx="25" cy="32" r="2.6" fill="#1A1A2E"/><circle cx="39" cy="32" r="2.6" fill="#1A1A2E"/>
+<circle cx="25.7" cy="31" r=".9" fill="#fff"/><circle cx="39.7" cy="31" r=".9" fill="#fff"/>
+<path d="M27 40 Q32 44 37 40" stroke="#1A1A2E" stroke-width="2" fill="none" stroke-linecap="round"/>
+<circle cx="20" cy="38" r="1.8" fill="#FF8FAB" opacity=".7"/><circle cx="44" cy="38" r="1.8" fill="#FF8FAB" opacity=".7"/>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><circle cx="32" cy="34" r="22" fill="#E89B3B"/><circle cx="25" cy="32" r="3" fill="#1A1A2E"/><circle cx="39" cy="32" r="3" fill="#1A1A2E"/><path d="M27 40 Q32 44 37 40" stroke="#1A1A2E" stroke-width="2.5" fill="none"/></svg></div>
+</div><div class="label">Brand mascot. Maps to AITutor avatar.</div></div>
 
-  <!-- 2: Square isometric 3D -->
-  <div class="card">
-    <h3>Square Isometric 3D</h3>
-    <div class="num">Option 2 — premium, depth</div>
-    <div class="show">
-      <div class="sidebar-tile">
-        <svg viewBox="0 0 64 64">
-          <defs>
-            <linearGradient id="top2" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stop-color="#FFD27A"/>
-              <stop offset="1" stop-color="#F5B040"/>
-            </linearGradient>
-            <linearGradient id="side2" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#C97E22"/>
-              <stop offset="1" stop-color="#8C5212"/>
-            </linearGradient>
-          </defs>
-          <!-- side face -->
-          <path d="M10 28 L32 40 L32 56 L10 44 Z" fill="url(#side2)"/>
-          <path d="M54 28 L32 40 L32 56 L54 44 Z" fill="#A36418"/>
-          <!-- top face -->
-          <path d="M32 16 L54 28 L32 40 L10 28 Z" fill="url(#top2)" stroke="#7B3F1A" stroke-width="1.4"/>
-          <!-- grid lines on top -->
-          <g stroke="#7B3F1A" stroke-width="1.2" opacity=".9">
-            <line x1="18.3" y1="22.7" x2="40.3" y2="34.7"/>
-            <line x1="25.5" y1="19" x2="47.5" y2="31"/>
-            <line x1="40.3" y1="22.7" x2="18.3" y2="34.7"/>
-            <line x1="47.5" y1="25" x2="25.5" y2="37"/>
-          </g>
-        </svg>
-      </div>
-    </div>
-    <div class="chip"><span class="small"><svg viewBox="0 0 64 64"><path d="M10 28 L32 40 L32 56 L10 44 Z" fill="#8C5212"/><path d="M54 28 L32 40 L32 56 L54 44 Z" fill="#A36418"/><path d="M32 16 L54 28 L32 40 L10 28 Z" fill="#F5B040"/></svg></span> Sidebar 20px chip</div>
-    <div class="label">Cinematic. Reads at small sizes too.</div>
-  </div>
+<div class="card"><h3>Scholar Waffle</h3><div class="num">07 — education</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<circle cx="32" cy="40" r="20" fill="#E89B3B" stroke="#7B3F1A" stroke-width="2"/>
+<g stroke="#7B3F1A" stroke-width="1.4" opacity=".7"><line x1="14" y1="40" x2="50" y2="40"/><line x1="32" y1="22" x2="32" y2="58"/><line x1="22" y1="28" x2="22" y2="52"/><line x1="42" y1="28" x2="42" y2="52"/></g>
+<rect x="20" y="14" width="24" height="4" fill="#1A1A2E"/>
+<polygon points="14,18 32,12 50,18 32,24" fill="#1A1A2E"/>
+<line x1="44" y1="18" x2="48" y2="26" stroke="#FFD700" stroke-width="1.6"/>
+<circle cx="48" cy="27" r="2.4" fill="#FFD700"/>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><circle cx="32" cy="42" r="22" fill="#E89B3B"/><polygon points="12,22 32,14 52,22 32,30" fill="#1A1A2E"/></svg></div>
+</div><div class="label">"Studying" — direct EdTech signal.</div></div>
 
-  <!-- 3: Flat geometric minimal -->
-  <div class="card">
-    <h3>Flat Geometric</h3>
-    <div class="num">Option 3 — modern, monoline</div>
-    <div class="show">
-      <div class="sidebar-tile">
-        <svg viewBox="0 0 64 64">
-          <rect x="12" y="12" width="40" height="40" rx="8" fill="none" stroke="#FFD27A" stroke-width="3"/>
-          <g stroke="#FFD27A" stroke-width="2.4" stroke-linecap="round">
-            <line x1="12" y1="25" x2="52" y2="25"/>
-            <line x1="12" y1="39" x2="52" y2="39"/>
-            <line x1="25" y1="12" x2="25" y2="52"/>
-            <line x1="39" y1="12" x2="39" y2="52"/>
-          </g>
-        </svg>
-      </div>
-    </div>
-    <div class="chip"><span class="small"><svg viewBox="0 0 64 64"><rect x="12" y="12" width="40" height="40" rx="8" fill="none" stroke="#FFD27A" stroke-width="4"/><line x1="12" y1="32" x2="52" y2="32" stroke="#FFD27A" stroke-width="3"/><line x1="32" y1="12" x2="32" y2="52" stroke="#FFD27A" stroke-width="3"/></svg></span> Sidebar 20px chip</div>
-    <div class="label">2 colors. Highest contrast on dark navy.</div>
-  </div>
+<div class="card"><h3>Waffle City</h3><div class="num">08 — gamification</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<defs><linearGradient id="g8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD27A"/><stop offset="1" stop-color="#E89B3B"/></linearGradient></defs>
+<rect x="6" y="42" width="52" height="18" rx="3" fill="url(#g8)" stroke="#7B3F1A" stroke-width="1.6"/>
+<g stroke="#7B3F1A" stroke-width="1" opacity=".7"><line x1="6" y1="50" x2="58" y2="50"/><line x1="18" y1="42" x2="18" y2="60"/><line x1="30" y1="42" x2="30" y2="60"/><line x1="42" y1="42" x2="42" y2="60"/></g>
+<rect x="14" y="22" width="10" height="20" fill="#4ECDC4"/><rect x="16" y="26" width="2" height="2" fill="#fff"/><rect x="20" y="26" width="2" height="2" fill="#fff"/><rect x="16" y="32" width="2" height="2" fill="#fff"/><rect x="20" y="32" width="2" height="2" fill="#fff"/>
+<rect x="27" y="14" width="10" height="28" fill="#FF6B6B"/><rect x="29" y="18" width="2" height="2" fill="#fff"/><rect x="33" y="18" width="2" height="2" fill="#fff"/><rect x="29" y="24" width="2" height="2" fill="#fff"/><rect x="33" y="24" width="2" height="2" fill="#fff"/><rect x="29" y="30" width="2" height="2" fill="#fff"/><rect x="33" y="30" width="2" height="2" fill="#fff"/>
+<rect x="40" y="26" width="10" height="16" fill="#FFD700"/><rect x="42" y="30" width="2" height="2" fill="#7B3F1A"/><rect x="46" y="30" width="2" height="2" fill="#7B3F1A"/>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><rect x="6" y="42" width="52" height="18" fill="#E89B3B"/><rect x="14" y="22" width="10" height="20" fill="#4ECDC4"/><rect x="27" y="14" width="10" height="28" fill="#FF6B6B"/><rect x="40" y="26" width="10" height="16" fill="#FFD700"/></svg></div>
+</div><div class="label">"Build the city" pillar made literal.</div></div>
 
-  <!-- 4: Round + blueberry -->
-  <div class="card">
-    <h3>Waffle + Blueberry</h3>
-    <div class="num">Option 4 — cute, foodie</div>
-    <div class="show">
-      <div class="sidebar-tile">
-        <svg viewBox="0 0 64 64">
-          <defs>
-            <linearGradient id="g4" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#FFD27A"/>
-              <stop offset="1" stop-color="#E89B3B"/>
-            </linearGradient>
-          </defs>
-          <circle cx="32" cy="36" r="22" fill="url(#g4)" stroke="#A36418" stroke-width="2"/>
-          <g stroke="#A36418" stroke-width="1.6" opacity=".85">
-            <line x1="14" y1="32" x2="50" y2="32"/>
-            <line x1="14" y1="42" x2="50" y2="42"/>
-            <line x1="26" y1="16" x2="26" y2="56"/>
-            <line x1="38" y1="16" x2="38" y2="56"/>
-          </g>
-          <!-- blueberry -->
-          <circle cx="42" cy="22" r="6" fill="#4A6FE3" stroke="#1F2D5C" stroke-width="1.5"/>
-          <circle cx="40.5" cy="20.5" r="1.2" fill="#9EB6FF"/>
-          <!-- leaf -->
-          <path d="M42 16 Q45 13 48 16 Q45 17 42 16 Z" fill="#3FAA5C"/>
-        </svg>
-      </div>
-    </div>
-    <div class="chip"><span class="small"><svg viewBox="0 0 64 64"><circle cx="32" cy="36" r="22" fill="#E89B3B"/><circle cx="42" cy="22" r="6" fill="#4A6FE3"/></svg></span> Sidebar 20px chip</div>
-    <div class="label">Recognizable at any size. Story-friendly.</div>
-  </div>
+<div class="card"><h3>Pixel Art Retro</h3><div class="num">09 — 8-bit game vibe</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 16 16" shape-rendering="crispEdges" style="image-rendering:pixelated">
+<g fill="#7B3F1A"><rect x="3" y="2" width="10" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="13" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="8"/><rect x="14" y="4" width="1" height="8"/><rect x="2" y="12" width="1" height="1"/><rect x="13" y="12" width="1" height="1"/><rect x="3" y="13" width="10" height="1"/></g>
+<g fill="#F5B040"><rect x="3" y="3" width="10" height="10"/><rect x="2" y="4" width="1" height="8"/><rect x="13" y="4" width="1" height="8"/><rect x="3" y="12" width="10" height="1"/></g>
+<g fill="#7B3F1A"><rect x="5" y="5" width="2" height="2"/><rect x="9" y="5" width="2" height="2"/><rect x="5" y="9" width="2" height="2"/><rect x="9" y="9" width="2" height="2"/></g>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="3" y="3" width="10" height="10" fill="#F5B040"/><rect x="5" y="5" width="2" height="2" fill="#7B3F1A"/><rect x="9" y="5" width="2" height="2" fill="#7B3F1A"/><rect x="5" y="9" width="2" height="2" fill="#7B3F1A"/><rect x="9" y="9" width="2" height="2" fill="#7B3F1A"/></svg></div>
+</div><div class="label">8×8 grid. Matches city-builder game DNA.</div></div>
 
-  <!-- 5: Stacked waffle stack -->
-  <div class="card">
-    <h3>WaffleStack (literal)</h3>
-    <div class="num">Option 5 — brand pun, stacked</div>
-    <div class="show">
-      <div class="sidebar-tile">
-        <svg viewBox="0 0 64 64">
-          <defs>
-            <linearGradient id="g5" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#FFD27A"/>
-              <stop offset="1" stop-color="#E89B3B"/>
-            </linearGradient>
-          </defs>
-          <!-- stack of 3 round waffles -->
-          <g>
-            <!-- bottom -->
-            <ellipse cx="32" cy="48" rx="22" ry="6" fill="#A36418"/>
-            <ellipse cx="32" cy="46" rx="22" ry="6" fill="url(#g5)" stroke="#A36418" stroke-width="1.5"/>
-            <!-- middle -->
-            <ellipse cx="32" cy="38" rx="20" ry="5.5" fill="#A36418"/>
-            <ellipse cx="32" cy="36" rx="20" ry="5.5" fill="url(#g5)" stroke="#A36418" stroke-width="1.5"/>
-            <!-- top -->
-            <ellipse cx="32" cy="28" rx="18" ry="5" fill="#A36418"/>
-            <ellipse cx="32" cy="26" rx="18" ry="5" fill="url(#g5)" stroke="#A36418" stroke-width="1.5"/>
-            <!-- syrup drip -->
-            <path d="M18 25 Q15 31 18 35 Q21 31 18 25" fill="#7B3F1A"/>
-            <!-- waffle dots indicating grid -->
-            <g fill="#A36418">
-              <circle cx="22" cy="26" r="1"/><circle cx="28" cy="26" r="1"/><circle cx="36" cy="26" r="1"/><circle cx="42" cy="26" r="1"/>
-              <circle cx="20" cy="36" r="1"/><circle cx="28" cy="36" r="1"/><circle cx="36" cy="36" r="1"/><circle cx="44" cy="36" r="1"/>
-              <circle cx="18" cy="46" r="1"/><circle cx="28" cy="46" r="1"/><circle cx="36" cy="46" r="1"/><circle cx="46" cy="46" r="1"/>
-            </g>
-          </g>
-        </svg>
-      </div>
-    </div>
-    <div class="chip"><span class="small"><svg viewBox="0 0 64 64"><ellipse cx="32" cy="44" rx="22" ry="6" fill="#E89B3B"/><ellipse cx="32" cy="34" rx="20" ry="5.5" fill="#FFD27A"/><ellipse cx="32" cy="24" rx="18" ry="5" fill="#E89B3B"/></svg></span> Sidebar 20px chip</div>
-    <div class="label">Literal "stack of waffles" — matches product name.</div>
-  </div>
+<div class="card"><h3>Sticker Thick</h3><div class="num">10 — sticker / iMessage</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<circle cx="32" cy="32" r="24" fill="#fff"/>
+<circle cx="32" cy="32" r="22" fill="#F5B040" stroke="#1A1A2E" stroke-width="3.5"/>
+<g stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"><line x1="12" y1="32" x2="52" y2="32"/><line x1="32" y1="12" x2="32" y2="52"/><line x1="20" y1="20" x2="44" y2="44"/><line x1="44" y1="20" x2="20" y2="44"/></g>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="#F5B040" stroke="#1A1A2E" stroke-width="4"/><line x1="12" y1="32" x2="52" y2="32" stroke="#1A1A2E" stroke-width="3.5"/><line x1="32" y1="12" x2="32" y2="52" stroke="#1A1A2E" stroke-width="3.5"/></svg></div>
+</div><div class="label">Bold outline. Pops at any size. Gen Z–friendly.</div></div>
+
+<div class="card"><h3>Bell-Curve Waffle</h3><div class="num">11 — stats DNA</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<rect x="8" y="28" width="48" height="28" rx="3" fill="#F5B040" stroke="#7B3F1A" stroke-width="1.6"/>
+<g stroke="#7B3F1A" stroke-width="1" opacity=".5"><line x1="8" y1="40" x2="56" y2="40"/><line x1="20" y1="28" x2="20" y2="56"/><line x1="32" y1="28" x2="32" y2="56"/><line x1="44" y1="28" x2="44" y2="56"/></g>
+<path d="M8 50 Q20 50 24 36 Q32 8 40 36 Q44 50 56 50" fill="none" stroke="#1A1A2E" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="8" y1="56" x2="56" y2="56" stroke="#1A1A2E" stroke-width="1.8"/>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><rect x="8" y="28" width="48" height="28" fill="#F5B040"/><path d="M8 50 Q24 50 32 16 Q40 50 56 50" fill="none" stroke="#1A1A2E" stroke-width="3"/></svg></div>
+</div><div class="label">Waffle plate + normal distribution. Only stats brand could.</div></div>
+
+<div class="card"><h3>Royal Waffle</h3><div class="num">12 — gamified XP</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<circle cx="32" cy="40" r="20" fill="#E89B3B" stroke="#7B3F1A" stroke-width="2"/>
+<g stroke="#7B3F1A" stroke-width="1.4" opacity=".7"><line x1="14" y1="40" x2="50" y2="40"/><line x1="32" y1="22" x2="32" y2="58"/><line x1="22" y1="28" x2="22" y2="52"/><line x1="42" y1="28" x2="42" y2="52"/></g>
+<path d="M16 22 L22 14 L28 20 L32 10 L36 20 L42 14 L48 22 L48 26 L16 26 Z" fill="#FFD700" stroke="#A36418" stroke-width="1.6" stroke-linejoin="round"/>
+<circle cx="22" cy="14" r="1.6" fill="#FF4747"/><circle cx="32" cy="10" r="2" fill="#4ECDC4"/><circle cx="42" cy="14" r="1.6" fill="#FF4747"/>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><circle cx="32" cy="42" r="22" fill="#E89B3B"/><path d="M14 22 L22 12 L32 8 L42 12 L50 22 L50 28 L14 28 Z" fill="#FFD700"/></svg></div>
+</div><div class="label">Achievement / level-up. Hero on login.</div></div>
+
+<div class="card"><h3>XP Coin Waffle</h3><div class="num">13 — gamification</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<defs><radialGradient id="c13" cx=".35" cy=".35"><stop offset="0" stop-color="#FFEC8B"/><stop offset=".7" stop-color="#FFD700"/><stop offset="1" stop-color="#A37800"/></radialGradient></defs>
+<circle cx="32" cy="32" r="24" fill="url(#c13)" stroke="#7B5A00" stroke-width="2"/>
+<circle cx="32" cy="32" r="18" fill="none" stroke="#7B5A00" stroke-width="1.5" opacity=".5"/>
+<g stroke="#7B5A00" stroke-width="2" opacity=".75"><line x1="14" y1="32" x2="50" y2="32"/><line x1="32" y1="14" x2="32" y2="50"/><line x1="20" y1="20" x2="44" y2="44"/><line x1="44" y1="20" x2="20" y2="44"/></g>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="24" fill="#FFD700" stroke="#7B5A00" stroke-width="2"/><line x1="14" y1="32" x2="50" y2="32" stroke="#7B5A00" stroke-width="2.5"/><line x1="32" y1="14" x2="32" y2="50" stroke="#7B5A00" stroke-width="2.5"/></svg></div>
+</div><div class="label">Gold coin + waffle grid. Reinforces +XP rewards.</div></div>
+
+<div class="card"><h3>Heart Waffle</h3><div class="num">14 — Belgian / soft</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<path d="M32 56 C 10 40, 8 22, 20 16 C 26 13, 30 16, 32 22 C 34 16, 38 13, 44 16 C 56 22, 54 40, 32 56 Z" fill="#F5B040" stroke="#7B3F1A" stroke-width="2"/>
+<g stroke="#7B3F1A" stroke-width="1.4" opacity=".7" stroke-linecap="round"><line x1="14" y1="30" x2="50" y2="30"/><line x1="16" y1="40" x2="48" y2="40"/><line x1="24" y1="20" x2="24" y2="50"/><line x1="32" y1="22" x2="32" y2="54"/><line x1="40" y1="20" x2="40" y2="50"/></g>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><path d="M32 56 C 10 40, 8 22, 20 16 C 26 13, 30 16, 32 22 C 34 16, 38 13, 44 16 C 56 22, 54 40, 32 56 Z" fill="#F5B040"/></svg></div>
+</div><div class="label">Belgian heart-shape. Warm, distinctive silhouette.</div></div>
+
+<div class="card"><h3>Bitten Waffle</h3><div class="num">15 — Apple-tribute</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<defs><clipPath id="bite15"><path d="M0 0 H64 V64 H0 Z M48 18 a8 8 0 0 1 0 16 a8 8 0 0 1 0 -16"/></clipPath></defs>
+<g clip-path="url(#bite15)">
+<circle cx="32" cy="34" r="22" fill="#F5B040" stroke="#7B3F1A" stroke-width="2"/>
+<g stroke="#7B3F1A" stroke-width="1.4" opacity=".7"><line x1="14" y1="34" x2="50" y2="34"/><line x1="32" y1="14" x2="32" y2="54"/><line x1="22" y1="22" x2="22" y2="46"/><line x1="42" y1="22" x2="42" y2="46"/><line x1="14" y1="44" x2="50" y2="44"/><line x1="14" y1="24" x2="50" y2="24"/></g>
+</g>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><defs><clipPath id="b15s"><path d="M0 0 H64 V64 H0 Z M50 20 a10 10 0 0 1 0 18 a10 10 0 0 1 0 -18"/></clipPath></defs><g clip-path="url(#b15s)"><circle cx="32" cy="34" r="22" fill="#F5B040"/></g></svg></div>
+</div><div class="label">Iconic silhouette trick. Memorable.</div></div>
+
+<div class="card"><h3>Brain Waffle</h3><div class="num">16 — learning</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<path d="M22 14 Q12 14 12 26 Q6 32 12 38 Q12 50 22 50 Q24 56 32 54 Q40 56 42 50 Q52 50 52 38 Q58 32 52 26 Q52 14 42 14 Q40 8 32 10 Q24 8 22 14 Z" fill="#F5B040" stroke="#7B3F1A" stroke-width="2"/>
+<g stroke="#7B3F1A" stroke-width="1.5" opacity=".75" fill="none">
+<path d="M32 10 V54"/>
+<path d="M18 26 Q24 22 24 32 Q24 42 18 38"/>
+<path d="M46 26 Q40 22 40 32 Q40 42 46 38"/>
+<path d="M14 32 Q22 30 22 34 Q22 38 14 36"/>
+<path d="M50 32 Q42 30 42 34 Q42 38 50 36"/>
+</g>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><path d="M22 14 Q12 14 12 26 Q6 32 12 38 Q12 50 22 50 Q24 56 32 54 Q40 56 42 50 Q52 50 52 38 Q58 32 52 26 Q52 14 42 14 Q40 8 32 10 Q24 8 22 14 Z" fill="#F5B040"/></svg></div>
+</div><div class="label">Brain folds drawn as waffle grid. Smart pun.</div></div>
+
+<div class="card"><h3>Streak Waffle</h3><div class="num">17 — energy / streak</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<circle cx="32" cy="34" r="20" fill="#F5B040" stroke="#7B3F1A" stroke-width="2"/>
+<g stroke="#7B3F1A" stroke-width="1.4" opacity=".65"><line x1="14" y1="34" x2="50" y2="34"/><line x1="32" y1="16" x2="32" y2="52"/><line x1="22" y1="22" x2="22" y2="46"/><line x1="42" y1="22" x2="42" y2="46"/></g>
+<polygon points="34,18 22,38 30,38 26,52 42,30 34,30 38,18" fill="#FFD700" stroke="#7B3F1A" stroke-width="1.8" stroke-linejoin="round"/>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><circle cx="32" cy="34" r="22" fill="#F5B040"/><polygon points="34,14 20,38 30,38 26,54 44,28 34,28 40,14" fill="#FFD700"/></svg></div>
+</div><div class="label">Daily streak symbol baked in.</div></div>
+
+<div class="card"><h3>Waffle Book</h3><div class="num">18 — literacy</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<path d="M8 18 L32 22 L56 18 L56 50 L32 54 L8 50 Z" fill="#F5B040" stroke="#7B3F1A" stroke-width="2" stroke-linejoin="round"/>
+<line x1="32" y1="22" x2="32" y2="54" stroke="#7B3F1A" stroke-width="2"/>
+<g stroke="#7B3F1A" stroke-width="1.2" opacity=".7">
+<line x1="12" y1="28" x2="28" y2="30"/><line x1="12" y1="34" x2="28" y2="36"/><line x1="12" y1="40" x2="28" y2="42"/>
+<line x1="36" y1="30" x2="52" y2="28"/><line x1="36" y1="36" x2="52" y2="34"/><line x1="36" y1="42" x2="52" y2="40"/>
+<line x1="20" y1="22" x2="20" y2="52"/><line x1="44" y1="22" x2="44" y2="52"/>
+</g>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><path d="M8 18 L32 22 L56 18 L56 50 L32 54 L8 50 Z" fill="#F5B040"/><line x1="32" y1="22" x2="32" y2="54" stroke="#7B3F1A" stroke-width="3"/></svg></div>
+</div><div class="label">Open textbook silhouette + waffle grid pages.</div></div>
+
+<div class="card"><h3>Hex Waffle</h3><div class="num">19 — geometric, modern</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<defs><linearGradient id="h19" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD27A"/><stop offset="1" stop-color="#E89B3B"/></linearGradient></defs>
+<polygon points="32,6 56,20 56,44 32,58 8,44 8,20" fill="url(#h19)" stroke="#7B3F1A" stroke-width="2"/>
+<g stroke="#7B3F1A" stroke-width="1.4" opacity=".7" stroke-linecap="round">
+<line x1="8" y1="32" x2="56" y2="32"/>
+<line x1="20" y1="13" x2="20" y2="51"/><line x1="32" y1="6" x2="32" y2="58"/><line x1="44" y1="13" x2="44" y2="51"/>
+<line x1="8" y1="20" x2="56" y2="20"/><line x1="8" y1="44" x2="56" y2="44"/>
+</g>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><polygon points="32,6 56,20 56,44 32,58 8,44 8,20" fill="#E89B3B"/></svg></div>
+</div><div class="label">Honeycomb-hex. Tech-vibe. Strong silhouette.</div></div>
+
+<div class="card"><h3>Glassmorphic Gem</h3><div class="num">20 — modern glass UI</div>
+<div class="show">
+<div class="tile"><svg viewBox="0 0 64 64">
+<defs>
+<linearGradient id="gl20" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE3A8" stop-opacity=".95"/><stop offset="1" stop-color="#E89B3B" stop-opacity=".85"/></linearGradient>
+</defs>
+<rect x="10" y="10" width="44" height="44" rx="14" fill="url(#gl20)" stroke="#fff" stroke-opacity=".4" stroke-width="1.4"/>
+<rect x="14" y="14" width="36" height="14" rx="8" fill="#fff" opacity=".18"/>
+<g stroke="#7B3F1A" stroke-width="1.6" opacity=".75" stroke-linecap="round">
+<line x1="14" y1="32" x2="50" y2="32"/><line x1="32" y1="14" x2="32" y2="50"/>
+<line x1="22" y1="22" x2="22" y2="42"/><line x1="42" y1="22" x2="42" y2="42"/>
+</g>
+</svg></div>
+<div class="chip"><svg viewBox="0 0 64 64"><rect x="10" y="10" width="44" height="44" rx="14" fill="#E89B3B"/><rect x="14" y="14" width="36" height="14" rx="8" fill="#fff" opacity=".25"/></svg></div>
+</div><div class="label">2026 iOS-style glass surface. Premium feel.</div></div>
 
 </div>
 
-<div class="footer">Tell me which option (1–5). I wire it into <code>StudyHub.tsx:1484</code> + LoginScreen + favicon.</div>
+<p style="margin-top:32px; opacity:.6; font-size:13px; text-align:center;">Tell me number(s). Or "iterate #X with [tweak]". Or "make 15 more in [style]".</p>
 </body>
 </html>
