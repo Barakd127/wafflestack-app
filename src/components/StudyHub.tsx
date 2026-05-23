@@ -2841,25 +2841,27 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     const isCorrect = idx === correctIdx
                     const revealed = mcSelected !== null
                     // Color logic: green for correct (when revealed), red for chosen-wrong,
-                    // dimmed for non-chosen-incorrect. Default neutral white before click.
-                    let bg = '#FFFFFF'
-                    let border = '#C8D0E0'
-                    let color = TEXT_DARK
+                    // dimmed for non-chosen-incorrect. Default = translucent-white so the
+                    // option chip reads on the dark themed shell (was solid #FFFFFF — a
+                    // Notion-paste white card in a navy/honey theme; convention 16/18).
+                    let bg = 'rgba(255,255,255,0.08)'
+                    let border = 'rgba(255,255,255,0.18)'
+                    let color = 'var(--sh-text-dark)'
                     let marker: string | null = null
                     if (revealed) {
                       if (isCorrect) {
-                        bg = 'rgba(52,168,83,0.12)'
+                        bg = 'rgba(52,168,83,0.18)'
                         border = '#34A853'
                         color = '#1E7E34'
                         marker = '✓'
                       } else if (isChosen) {
-                        bg = 'rgba(234,67,53,0.12)'
+                        bg = 'rgba(234,67,53,0.18)'
                         border = '#EA4335'
                         color = '#B92E22'
                         marker = '✗'
                       } else {
-                        bg = '#F4F6FA'
-                        border = '#D8E0F0'
+                        bg = 'rgba(255,255,255,0.04)'
+                        border = 'rgba(255,255,255,0.10)'
                         color = TEXT_LIGHT
                       }
                     }
@@ -2886,8 +2888,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           transition: 'all 0.18s',
                           boxShadow: isChosen && revealed ? '0 2px 8px rgba(0,0,0,0.12)' : 'none',
                         }}
-                        onMouseEnter={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = '#F4F6FA' }}
-                        onMouseLeave={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = '#FFFFFF' }}
+                        onMouseEnter={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.14)' }}
+                        onMouseLeave={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)' }}
                       >
                         {/* RTL primary corner = right side → letter pill comes FIRST in DOM */}
                         <span style={{
