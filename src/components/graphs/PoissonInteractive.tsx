@@ -70,7 +70,7 @@ export default function PoissonInteractive() {
   const xTicks = [0, 5, 10, 15, 20, 25, 30]
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>התפלגות פואסון — קירוב לבינומית</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
         פואסון מתארת מספר אירועים נדירים בפרק זמן קבוע. הזז את λ — ככל שהוא גדל, ההתפלגות מתקרבת לנורמלית עם μ = σ² = λ.

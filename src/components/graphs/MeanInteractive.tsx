@@ -149,7 +149,7 @@ export default function MeanInteractive() {
     <div
       dir="rtl"
       style={{
-        background: 'rgba(255,255,255,0.92)',
+        background: 'rgba(255,255,255,0.06)',
         border: '1px solid rgba(31,62,108,0.15)',
         borderRadius: 16,
         padding: 20,

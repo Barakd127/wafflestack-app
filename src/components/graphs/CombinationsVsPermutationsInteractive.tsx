@@ -70,7 +70,7 @@ export default function CombinationsVsPermutationsInteractive() {
   )
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
+    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>צירופים מול חליפות — Combinations vs Permutations</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>אותם {r} אסימונים — כצירוף (ללא סדר) זה אחד, כחליפות (עם סדר) זה {r}! סדרים.</p>
 
