@@ -551,7 +551,9 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       {/* Graph slide — rendered for graph entries in the merged sequence */}
       {isGraphSlide && effectiveGraphs && effectiveGraphs[graphIdx] && (
         <div style={{
-          background: 'rgba(255,255,255,0.6)',
+          // Issue 5: transparent-ish wrapper so graphs blend into lesson theme
+          // (navy on dark, cream on light). Keeps the gold border accent.
+          background: 'rgba(11,27,62,0.06)',
           border: '1px solid rgba(212,175,55,0.4)',
           borderRadius: 18,
           padding: '20px 18px',
@@ -564,7 +566,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             gap: 12, marginBottom: 10, paddingBottom: 10,
             borderBottom: '1px solid rgba(212,175,55,0.25)',
           }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#1F3E6C', fontFamily: "'Rubik', sans-serif" }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--sh-text-dark)', fontFamily: "'Rubik', sans-serif" }}>
               📊 {effectiveGraphs[graphIdx].title}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -574,11 +576,11 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 title="הקטן"
                 style={{
                   background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.25)',
-                  color: '#1F3E6C', borderRadius: 8, width: 30, height: 30,
+                  color: 'var(--sh-text-dark)', borderRadius: 8, width: 30, height: 30,
                   cursor: 'pointer', fontWeight: 700, fontSize: 16, lineHeight: 1,
                 }}
               >−</button>
-              <span style={{ fontSize: 12, color: '#1F3E6C', minWidth: 40, textAlign: 'center', fontFamily: "'Assistant', sans-serif" }}>
+              <span style={{ fontSize: 12, color: 'var(--sh-text-dark)', minWidth: 40, textAlign: 'center', fontFamily: "'Assistant', sans-serif" }}>
                 {Math.round(graphScale * 100)}%
               </span>
               <button
@@ -587,7 +589,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 title="הגדל"
                 style={{
                   background: 'rgba(212,160,23,0.15)', border: '1px solid rgba(212,160,23,0.5)',
-                  color: '#1F3E6C', borderRadius: 8, width: 30, height: 30,
+                  color: 'var(--sh-text-dark)', borderRadius: 8, width: 30, height: 30,
                   cursor: 'pointer', fontWeight: 700, fontSize: 16, lineHeight: 1,
                 }}
               >+</button>
@@ -596,8 +598,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 aria-label="ברירת מחדל"
                 title="גודל ברירת מחדל"
                 style={{
-                  background: 'transparent', border: '1px solid rgba(31,62,108,0.25)',
-                  color: '#1F3E6C', borderRadius: 8, padding: '4px 10px',
+                  background: 'transparent', border: '1px solid rgba(212,175,55,0.45)',
+                  color: 'var(--sh-text-dark)', borderRadius: 8, padding: '4px 10px',
                   cursor: 'pointer', fontSize: 11, fontFamily: "'Assistant', sans-serif",
                   marginInlineStart: 4,
                 }}
