@@ -2,6 +2,11 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { _installRemotePushHook } from './stores/progressStore'
+import { queueRemotePush } from './lib/syncProgress'
+
+// Wire localStorage → Supabase mirror for UserProgress.
+_installRemotePushHook(queueRemotePush)
 
 // Build version — bump this string to force a fresh entry-bundle hash so
 // clients with aggressively cached LandingPage / index chunks pick up new
