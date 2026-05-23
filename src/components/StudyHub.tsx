@@ -2505,13 +2505,60 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               />
             )}
             {tab === 'canvas' && (
-              <iframe
-                key="quiz-wb"
-                src={`${import.meta.env.BASE_URL}mindmap.html?mode=wb&userId=${userId || 'default'}`}
-                title="קנבס — תוך כדי תרגול"
-                style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
-                allow="clipboard-read; clipboard-write"
-              />
+              <>
+                {/* Per-question canvas navigation (Issue 4): each question gets
+                    its own wb scene, persisted under wb-scene-q-<id>. Lets the
+                    user jump back to a prior question's canvas without losing
+                    work. */}
+                <div style={{
+                  position: 'absolute', top: 6, insetInlineStart: 6, zIndex: 10,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  background: 'rgba(13,22,40,0.78)', backdropFilter: 'blur(6px)',
+                  border: '1px solid rgba(212,175,55,0.35)', borderRadius: 999,
+                  padding: '4px 10px', fontFamily: "'Rubik', sans-serif",
+                  fontSize: 12, color: '#e9edf7',
+                }}>
+                  <button
+                    onClick={() => setCurrentQ((i: number) => Math.max(0, i - 1))}
+                    disabled={currentQ <= 0}
+                    aria-label="קנבס קודם"
+                    title="קנבס קודם"
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid rgba(212,175,55,0.45)',
+                      color: currentQ <= 0 ? 'rgba(233,237,247,0.35)' : '#D4AF37',
+                      borderRadius: 6, padding: '2px 8px',
+                      cursor: currentQ <= 0 ? 'default' : 'pointer',
+                      fontSize: 12, fontWeight: 700,
+                    }}
+                  >← קודם</button>
+                  <span style={{ opacity: 0.75 }}>קנבס {currentQ + 1}/{questions.length}</span>
+                  <button
+                    onClick={() => setCurrentQ((i: number) => Math.min(questions.length - 1, i + 1))}
+                    disabled={currentQ >= questions.length - 1}
+                    aria-label="קנבס הבא"
+                    title="קנבס הבא"
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid rgba(212,175,55,0.45)',
+                      color: currentQ >= questions.length - 1 ? 'rgba(233,237,247,0.35)' : '#D4AF37',
+                      borderRadius: 6, padding: '2px 8px',
+                      cursor: currentQ >= questions.length - 1 ? 'default' : 'pointer',
+                      fontSize: 12, fontWeight: 700,
+                    }}
+                  >הבא →</button>
+                </div>
+                <iframe
+                  // Per-question scene key: changing q.id remounts the iframe so
+                  // mindmap.html loads the matching wb-scene-q-<id> from
+                  // localStorage. wbScene query param is read inside mindmap.html.
+                  key={`quiz-wb-${q?.id || currentQ}`}
+                  src={`${import.meta.env.BASE_URL}mindmap.html?mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
+                  title={`קנבס לשאלה ${currentQ + 1}`}
+                  style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
+                  allow="clipboard-read; clipboard-write"
+                />
+              </>
             )}
             {tab === 'arsenal' && (
               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }} dir="rtl">
