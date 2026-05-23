@@ -2807,7 +2807,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   חזור לדף הבית
                 </button>
                 <button onClick={handleReset}
-                  style={{ background: '#fff', color: BUTTON_COLOR, border: `2px solid ${BUTTON_COLOR}`, borderRadius: 24, padding: '12px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
+                  style={{ background: 'rgba(255,255,255,0.10)', color: BUTTON_COLOR, border: `2px solid ${BUTTON_COLOR}`, borderRadius: 24, padding: '12px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', minHeight: 44, backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}>
                   סשן נוסף
                 </button>
               </div>
