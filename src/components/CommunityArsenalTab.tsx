@@ -190,11 +190,12 @@ export default function CommunityArsenalTab() {
               }).then(res => { setEntries(res.entries); setError(res.error ?? null); setLoading(false) })
             }}
             style={{
-              background: '#fff', color: '#b91c1c',
+              background: 'rgba(255,255,255,0.10)', color: '#b91c1c',
               border: '1.5px solid rgba(239,68,68,0.5)',
               borderRadius: 999, padding: '6px 14px',
               fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700,
-              cursor: 'pointer', minHeight: 36,
+              cursor: 'pointer', minHeight: 44,
+              backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
             }}
           >
             ↻ נסה שוב
