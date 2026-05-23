@@ -75,9 +75,11 @@ export default function BoxplotComparisonInteractive() {
   const yTicks = [0, 20, 40, 60, 80, 100]
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>השוואת Boxplots — בין קבוצות</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
+    // Issue 6: unify with surrounding lesson card (no opaque inner surface),
+    // bump heading + body font for clarity (15px body / 20px heading).
+    <div dir="rtl" style={{ background: 'transparent', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
+      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 20, marginBottom: 6, fontWeight: 700 }}>השוואת Boxplots — בין קבוצות</h3>
+      <p style={{ fontSize: 15, opacity: 0.85, marginBottom: 14, lineHeight: 1.5 }}>
         גרור את הידיות הצהובות (Q₁, חציון, Q₃) ואת הקצוות (min, max) של כל קבוצה. השוו חציונים, IQR וטווחים.
       </p>
 

@@ -42,9 +42,11 @@ export default function IQRInteractive() {
   }, [Q1, Q2, Q3, iqr])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.92)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: '#1F3E6C' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>טווח רבעוני (IQR) — Boxplot</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור נקודות. נקודות מחוץ ל-1.5·IQR מסומנות באדום (חריגות).</p>
+    // Issue 6: transparent surface to match surrounding lesson card; bumped
+    // font sizes for legibility (was 18/13, now 20/15).
+    <div dir="rtl" style={{ background: 'transparent', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
+      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 20, marginBottom: 6, fontWeight: 700 }}>טווח רבעוני (IQR) — Boxplot</h3>
+      <p style={{ fontSize: 15, opacity: 0.85, marginBottom: 14, lineHeight: 1.5 }}>גרור נקודות. נקודות מחוץ ל-1.5·IQR מסומנות באדום (חריגות).</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>
