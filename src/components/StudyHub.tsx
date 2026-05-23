@@ -319,7 +319,8 @@ function InteractiveGraphCarousel({ selectedTopic }: { selectedTopic: string }) 
   )
 }
 import { initializeUser, getCurrentUser, loginUser, registerUser, logoutUser, onAuthStateChange, type User } from '../stores/authStore'
-import { loadProgress, recordQuizSession, saveCanvasNotes, type QuizAnswer, type UserProgress } from '../stores/progressStore'
+import { loadProgress, recordQuizSession, saveCanvasNotes, saveProgress, type QuizAnswer, type UserProgress } from '../stores/progressStore'
+import { loadProgressMerged } from '../lib/syncProgress'
 import quizBankData from '../data/quiz-bank.json'
 import LessonScreen from './LessonScreen'
 import { LESSON_CONTENT } from '../data/lesson-content'
@@ -3150,13 +3151,21 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
   })
 
   useEffect(() => {
-    getCurrentUser().then(user => {
-      if (user) {
-        setCurrentUser(user)
-        setUserProgress(loadProgress(user.userId))
-        onLoggedIn?.()
+    void (async () => {
+      const user = await getCurrentUser()
+      if (!user) return
+      setCurrentUser(user)
+      // 1. Show local progress immediately for snappy first paint.
+      const local = loadProgress(user.userId)
+      setUserProgress(local)
+      onLoggedIn?.()
+      // 2. Then pull Supabase row; if it exists, it's authoritative and overrides.
+      const merged = await loadProgressMerged(user.userId, local)
+      if (merged && merged !== local) {
+        setUserProgress(merged)
+        saveProgress(merged) // mirror remote → local cache
       }
-    })
+    })()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const onSidebarDragStart = useCallback((e: React.MouseEvent) => {
@@ -3194,8 +3203,16 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
 
   const handleLogin = (user: User) => {
     setCurrentUser(user)
-    setUserProgress(loadProgress(user.userId))
+    const local = loadProgress(user.userId)
+    setUserProgress(local)
     localStorage.setItem('userName', user.displayName || user.username)
+    // Pull authoritative remote progress (if any) and overwrite local cache.
+    void loadProgressMerged(user.userId, local).then(merged => {
+      if (merged && merged !== local) {
+        setUserProgress(merged)
+        saveProgress(merged)
+      }
+    })
     onLoggedIn?.()
   }
 

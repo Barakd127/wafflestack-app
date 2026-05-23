@@ -72,6 +72,14 @@ const SAVE_DEBOUNCE_MS = 500
 
 let saveTimeout: ReturnType<typeof setTimeout> | null = null
 
+// Late-bound remote-push hook (avoids static circular import with syncProgress).
+// syncProgress.ts imports the UserProgress type from here; importing the function
+// statically would close the cycle. We install the hook at module init below.
+let remotePushHook: ((p: UserProgress) => void) | null = null
+export function _installRemotePushHook(hook: (p: UserProgress) => void): void {
+  remotePushHook = hook
+}
+
 function initializeProgress(userId: string): UserProgress {
   return {
     userId,
@@ -123,6 +131,8 @@ export function queueProgressSave(progress: UserProgress): void {
   if (saveTimeout) clearTimeout(saveTimeout)
   saveTimeout = setTimeout(() => {
     saveProgress(progress)
+    // Mirror to Supabase if signed in (debounced inside syncProgress).
+    if (remotePushHook) remotePushHook(progress)
   }, SAVE_DEBOUNCE_MS)
 }
 
