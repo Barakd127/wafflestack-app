@@ -82,12 +82,20 @@ export default function SplitLayout({ onBack, darkMode, initialRight = 'study' }
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 16px', flexShrink: 0, zIndex: 100,
       }}>
-        {/* Home button — gold so it is unmistakable in split mode. Replaces the
-            previous low-contrast indigo back button (Issue 3). Routes via
-            top-level hash so it always returns to StudyHub regardless of which
-            split variant we are in. */}
+        {/* Home button — belt-and-suspenders 2026-05-24 (user reported
+            home button didn't work). Now: (1) calls onBack (parent state),
+            (2) sets hash so listener fires, (3) hard-fallback timer in case
+            React state didn't flip — force location.hash = #study after a
+            tick if we're still on a split route. Three independent paths. */}
         <button
-          onClick={() => { window.location.hash = ''; onBack() }}
+          onClick={() => {
+            try { onBack() } catch(_){}
+            try { window.location.hash = '#study' } catch(_){}
+            setTimeout(() => {
+              const h = window.location.hash
+              if (h.startsWith('#split')) window.location.hash = '#study'
+            }, 50)
+          }}
           aria-label="חזרה לדף הבית"
           title="חזרה לדף הבית"
           style={{
@@ -95,18 +103,19 @@ export default function SplitLayout({ onBack, darkMode, initialRight = 'study' }
             border: '1px solid rgba(212,175,55,0.65)',
             color: '#1F2640',
             borderRadius: 10,
-            padding: '6px 16px',
+            padding: '8px 18px',
             cursor: 'pointer',
-            fontSize: 13,
-            fontWeight: 700,
+            fontSize: 14,
+            fontWeight: 800,
             fontFamily: 'inherit',
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            boxShadow: '0 2px 8px rgba(212,175,55,0.35)',
+            gap: 8,
+            boxShadow: '0 2px 8px rgba(212,175,55,0.45)',
+            minHeight: 44,
           }}
         >
-          <span aria-hidden style={{ fontSize: 15 }}>🏠</span>
+          <span aria-hidden style={{ fontSize: 16 }}>🏠</span>
           <span>דף הבית</span>
         </button>
 

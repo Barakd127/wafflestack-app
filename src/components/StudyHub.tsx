@@ -325,6 +325,7 @@ import quizBankData from '../data/quiz-bank.json'
 import LessonScreen from './LessonScreen'
 import { LESSON_CONTENT } from '../data/lesson-content'
 import { MeanVisual } from './LessonVisuals'
+import SamplingDistribution from './SamplingDistribution'
 import ArsenalScreen from './ArsenalScreen'
 import { useArsenalStore, quickAddArsenal } from '../store/arsenalStore'
 import PotionInventory from './PotionInventory'
@@ -866,66 +867,13 @@ function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
     }
     onSelectActive()
   }
-  // External-course launcher overlay — opens the site in a new tab on click.
+  // Full-screen course player. Replaces the old "open external" modal: now
+  // the embedded course renders inside a tab strip so we can ship our own
+  // native simulators alongside any third-party tool. Tab 1 is always our
+  // native sampling-distribution playground; Tab 2 launches the external
+  // partner tool (mata"m visualisation site) in a new browser tab.
   if(embedded) {
-    const openExternal = () => {
-      if(embedded.embedUrl) window.open(embedded.embedUrl, '_blank', 'noopener,noreferrer')
-    }
-    return (
-      <div
-        onClick={() => setEmbedded(null)}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 150,
-          background: 'rgba(11,27,62,0.55)', backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}
-      >
-        <div
-          onClick={e => e.stopPropagation()}
-          style={{
-            background: '#fff', borderRadius: 22, padding: '36px 40px',
-            maxWidth: 480, textAlign: 'center',
-            boxShadow: '0 24px 70px rgba(0,0,0,0.3)',
-            fontFamily: "'Rubik', sans-serif",
-          }}
-          dir="rtl"
-        >
-          <div style={{
-            width: 80, height: 80, borderRadius: 20,
-            background: embedded.bg, margin: '0 auto 18px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 44, boxShadow: '0 10px 28px rgba(0,0,0,0.15)',
-          }}>{embedded.icon}</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#0B1B3E', marginBottom: 6 }}>{embedded.label}</div>
-          <div style={{ fontSize: 14, color: 'var(--sh-text-med)', marginBottom: 18 }}>{embedded.desc}</div>
-          <div style={{ fontSize: 12, color: 'var(--sh-text-light)', marginBottom: 4, direction: 'ltr' }}>
-            {embedded.embedUrl}
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--sh-text-light)', marginBottom: 18 }}>
-            הקורס מתארח באתר חיצוני ויפתח בכרטיסיה חדשה
-          </div>
-          <button
-            onClick={openExternal}
-            style={{
-              background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
-              color: '#0B1B3E', border: 0, borderRadius: 12,
-              padding: '10px 24px', fontFamily: "'Rubik', sans-serif",
-              fontWeight: 700, fontSize: 14, cursor: 'pointer',
-              boxShadow: '0 6px 18px rgba(212,175,55,0.45)',
-            }}
-          >פתח את הקורס ↗</button>
-          <button
-            onClick={() => setEmbedded(null)}
-            style={{
-              background: 'transparent', border: '1px solid rgba(31,62,108,0.2)',
-              borderRadius: 10, padding: '8px 18px', cursor: 'pointer',
-              fontFamily: 'inherit', fontSize: 13, color: 'var(--sh-text-dark)',
-              marginInlineStart: 10,
-            }}
-          >ביטול</button>
-        </div>
-      </div>
-    )
+    return <CoursePlayer course={embedded} onClose={() => setEmbedded(null)} />
   }
   return (
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
@@ -1411,6 +1359,142 @@ function ActivityChart() {
           </text>
         ))}
       </svg>
+    </div>
+  )
+}
+
+// ── CoursePlayer ─────────────────────────────────────────────────────────────
+// Fullscreen tabbed shell for any "embedded" course. Tab 1 hosts our native
+// React simulator(s) for that course; Tab 2 links out to the third-party
+// partner site (stats-viz-mata for stat-b) since modern hosts block iframe
+// embedding via X-Frame-Options. ESC closes; click outside the chrome
+// doesn't (the player owns the whole viewport).
+type CourseTab = { id: string; label: string; render: () => React.ReactNode }
+function CoursePlayer({ course, onClose }: {
+  course: CourseDef
+  onClose: () => void
+}) {
+  // For stat-b the simulator is the headline experience; the external tool
+  // is offered as a secondary "extras" tab. Other embed-style courses can
+  // reuse this component by adding their own tab list.
+  const tabs: CourseTab[] = course.id === 'stat-b'
+    ? [
+      { id: 'sampling', label: '🎯 התפלגות הדגימה', render: () => <SamplingDistribution /> },
+      { id: 'external', label: '🔗 כלי מתא"ם (חיצוני)', render: () => <ExternalLinkPanel course={course} /> },
+    ]
+    : [
+      { id: 'external', label: course.label, render: () => <ExternalLinkPanel course={course} /> },
+    ]
+  const [active, setActive] = useState<string>(tabs[0].id)
+  const activeTab = tabs.find(t => t.id === active) ?? tabs[0]
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 150,
+        background: 'linear-gradient(180deg, #F0F4FB 0%, #E8EFF8 100%)',
+        display: 'flex', flexDirection: 'column',
+        fontFamily: "'Rubik', 'Assistant', sans-serif",
+      }}
+      dir="rtl"
+    >
+      {/* Top chrome — close + title + tab strip */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 16,
+        padding: '14px 22px',
+        background: '#fff',
+        borderBottom: `1px solid ${'rgba(127,155,217,0.25)'}`,
+        boxShadow: '0 2px 12px rgba(31,62,108,0.06)',
+        flexWrap: 'wrap',
+      }}>
+        <button
+          onClick={onClose}
+          aria-label="חזרה לרשימת הקורסים"
+          style={{
+            background: 'rgba(127,155,217,0.15)', color: '#0B1B3E',
+            border: `1px solid ${'rgba(127,155,217,0.4)'}`,
+            borderRadius: 10, padding: '6px 14px',
+            fontFamily: 'inherit', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+          }}
+        >→ חזרה לקורסים</button>
+        <div style={{
+          width: 40, height: 40, borderRadius: 10,
+          background: course.bg,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+        }}>{course.icon}</div>
+        <div>
+          <div style={{ fontSize: 17, fontWeight: 700, color: '#0B1B3E' }}>{course.label}</div>
+          <div style={{ fontSize: 12, color: '#64748B' }}>{course.desc}</div>
+        </div>
+        <div style={{ flex: 1 }} />
+        {/* Tab strip */}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {tabs.map(t => (
+            <button
+              key={t.id}
+              onClick={() => setActive(t.id)}
+              style={{
+                background: active === t.id
+                  ? 'linear-gradient(135deg,#5b8bff,#6c63ff)'
+                  : 'rgba(127,155,217,0.10)',
+                color: active === t.id ? '#fff' : '#4338ca',
+                border: `1px solid ${active === t.id ? 'transparent' : 'rgba(127,155,217,0.35)'}`,
+                borderRadius: 999, padding: '7px 16px',
+                fontFamily: 'inherit', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+                boxShadow: active === t.id ? '0 4px 12px rgba(99,102,241,0.30)' : 'none',
+                transition: 'all 0.18s',
+              }}
+            >{t.label}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab body */}
+      <div style={{ flex: 1, overflow: 'auto' }}>
+        {activeTab.render()}
+      </div>
+    </div>
+  )
+}
+
+// Subtle external-link landing card for partner courses that can't iframe.
+function ExternalLinkPanel({ course }: { course: CourseDef }) {
+  const open = () => {
+    if (course.embedUrl) window.open(course.embedUrl, '_blank', 'noopener,noreferrer')
+  }
+  return (
+    <div dir="rtl" style={{
+      maxWidth: 560, margin: '60px auto', padding: '40px 36px',
+      background: '#fff', borderRadius: 22, textAlign: 'center',
+      boxShadow: '0 24px 70px rgba(0,0,0,0.10)',
+      fontFamily: "'Rubik', sans-serif",
+    }}>
+      <div style={{
+        width: 80, height: 80, borderRadius: 20,
+        background: course.bg, margin: '0 auto 18px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 44, boxShadow: '0 10px 28px rgba(0,0,0,0.15)',
+      }}>{course.icon}</div>
+      <div style={{ fontSize: 20, fontWeight: 700, color: '#0B1B3E', marginBottom: 6 }}>
+        כלי ויזואליזציה — מתא"ם
+      </div>
+      <div style={{ fontSize: 14, color: '#4A5568', marginBottom: 16 }}>
+        5 לשוניות אינטראקטיביות: איחוד מתאמים (פרדוקס סימפסון), רגרסיה, ממוצע ופיזור,
+        מתאם בסיסי, ו-α/β. הכלי מתארח באתר חיצוני ולכן יפתח בכרטיסיית דפדפן חדשה.
+      </div>
+      <div style={{ fontSize: 12, color: '#94A3B8', marginBottom: 18, direction: 'ltr' }}>
+        {course.embedUrl}
+      </div>
+      <button
+        onClick={open}
+        style={{
+          background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+          color: '#0B1B3E', border: 0, borderRadius: 12,
+          padding: '12px 28px', fontFamily: "'Rubik', sans-serif",
+          fontWeight: 700, fontSize: 14, cursor: 'pointer',
+          boxShadow: '0 6px 18px rgba(212,175,55,0.45)',
+        }}
+      >פתח את הכלי החיצוני ↗</button>
     </div>
   )
 }
@@ -2427,35 +2511,65 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }} dir="rtl">
       {xpBurst !== null && <XpBurst amount={xpBurst} onDone={() => setXpBurst(null)} />}
 
-      {/* Chrome-toggle chip — visible only when fullscreen (chrome hidden).
-          Single button per user request: "הצג כלי לימוד" / "הסתר כלי לימוד".
-          Top-right corner, floats above everything. */}
+      {/* Fullscreen FAB stack (visible only when fullscreen / chrome hidden):
+          - bottom:140 → home FAB (explicit exit-fullscreen + go to study home)
+          - bottom: 80 → restore-chrome chip (keeps user in lesson)
+          - bottom:  5 → TutorFAB (App.tsx)
+          User reported being stuck in fullscreen with no obvious way back to
+          home OR back to a non-fullscreen state. The 'הצג כלי לימוד' chip
+          restores chrome but doesn't return to split/home — adding an explicit
+          home button so the user always has a fast exit. Per user 2026-05-24. */}
       {fullscreen && onToggleFullscreen && (
-        <button
-          onClick={onToggleFullscreen}
-          aria-label="הצג כלי לימוד (סרגל צד + סרגל עליון)"
-          title="הצג סרגלים"
-          style={{
-            // FAB stacking (convention §9): TutorFAB sits at bottom:5/left:5
-            // w/ 56px height. Stacking 90px above (bottom: 80) keeps the
-            // chip clear of the AI button. Was bottom:16 which collided.
-            // Per user 2026-05-24.
-            position: 'fixed', bottom: 80,
-            left: 12,
-            zIndex: 300,
-            background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
-            color: '#0B1B3E',
-            border: 0, borderRadius: 14,
-            padding: '8px 14px',
-            fontFamily: "'Rubik', sans-serif",
-            fontSize: 12, fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}
-        >
-          ☰ הצג כלי לימוד
-        </button>
+        <>
+          <button
+            onClick={() => {
+              try { onBack() } catch(_){}
+              try { window.location.hash = '#study' } catch(_){}
+              setTimeout(() => {
+                const h = window.location.hash
+                if (h.startsWith('#split') || h.startsWith('#mindmap')) window.location.hash = '#study'
+              }, 50)
+            }}
+            aria-label="חזרה לדף הבית"
+            title="חזרה לדף הבית"
+            style={{
+              position: 'fixed', bottom: 140, left: 12, zIndex: 300,
+              background: 'linear-gradient(135deg,#D4AF37,#b8941f)',
+              color: '#1F2640',
+              border: 0, borderRadius: 14,
+              padding: '8px 14px',
+              fontFamily: "'Rubik', sans-serif",
+              fontSize: 12, fontWeight: 800,
+              cursor: 'pointer',
+              boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
+              display: 'flex', alignItems: 'center', gap: 6,
+              minHeight: 44,
+            }}
+          >
+            🏠 דף הבית
+          </button>
+          <button
+            onClick={onToggleFullscreen}
+            aria-label="הצג כלי לימוד (סרגל צד + סרגל עליון)"
+            title="הצג סרגלים"
+            style={{
+              position: 'fixed', bottom: 80,
+              left: 12,
+              zIndex: 300,
+              background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+              color: '#0B1B3E',
+              border: 0, borderRadius: 14,
+              padding: '8px 14px',
+              fontFamily: "'Rubik', sans-serif",
+              fontSize: 12, fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}
+          >
+            ☰ הצג כלי לימוד
+          </button>
+        </>
       )}
 
       {/* Top bar — hidden in fullscreen so canvas + question get full
