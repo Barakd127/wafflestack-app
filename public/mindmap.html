@@ -1252,15 +1252,22 @@ function mmRender(){
         mmRender();
       } else {
         MM.sel=id;MM.multiSel=[];
-        // Single-branch focus: auto-expand this node's children + collapse
-        // sibling branches. If node has children, also un-collapse so the
-        // click drills in.
+        // X-Mind direct-children-only semantics (§24 spec):
+        // click toggles THIS node's collapsed state. Grandchildren stay
+        // collapsed; sibling branches are unaffected. Layout re-runs so
+        // newly revealed children animate into place.
         const nn = MM.nodes[id];
         if(nn && nn.childIds && nn.childIds.length){
-          nn.collapsed = false;
+          nn.collapsed = !nn.collapsed;
+          // Ensure newly exposed direct children stay collapsed themselves.
+          if(!nn.collapsed){
+            nn.childIds.forEach(cid => {
+              const ch = MM.nodes[cid];
+              if(ch && ch.childIds && ch.childIds.length) ch.collapsed = true;
+            });
+          }
         }
-        mmFocusBranch(id);
-        mmRender();
+        mmAnimateToLayout();
         if(typeof mmFitVisibleSubtree === 'function') mmFitVisibleSubtree(id);
       }
     };
@@ -1284,9 +1291,16 @@ function mmRender(){
       tog.onclick=e=>{
         e.stopPropagation();
         n.collapsed=!n.collapsed;
-        // When expanding, collapse sibling branches (single-branch focus).
-        if(!n.collapsed) mmFocusBranch(id);
-        mmRender();
+        // X-Mind §24: direct-children-only reveal. When expanding, ensure
+        // each newly visible child starts collapsed so grandchildren stay
+        // hidden until explicitly clicked into.
+        if(!n.collapsed){
+          n.childIds.forEach(cid=>{
+            const ch = MM.nodes[cid];
+            if(ch && ch.childIds && ch.childIds.length) ch.collapsed = true;
+          });
+        }
+        mmAnimateToLayout();
         if(typeof mmFitVisibleSubtree === 'function') mmFitVisibleSubtree(id);
       };
       div.appendChild(tog);
@@ -1769,57 +1783,174 @@ function mmFocusBranch(id){
   });
 }
 
-// Full subtree-aware auto-layout — positions every node so subtrees never collide
-function mmAutoLayout(){
-  // Width along the cross-axis used to place subtrees. For top-down (tb)
-  // mode the cross-axis is horizontal so we measure each subtree's width
-  // (sum of leaf widths). For lr we keep the original height-based logic.
-  function subtreeSpan(id){
+// ─────────────────────────────────────────────────────────────────────────
+// X-Mind-style tidy-tree layout engine (§24 spec — 2026-05-24)
+// Strict auto-layout: positions are derived from the tree topology.
+// Free-position drag is disabled; user only reorders/reparents.
+// ─────────────────────────────────────────────────────────────────────────
+const MM_TIDY_VGAP = 24; // vertical gap between sibling subtrees (anti-collision)
+const MM_TIDY_HGAP = 140; // horizontal depth-step
+const MM_TIDY_NODE_H = 40; // default node height used for spacing
+
+// Returns visible direct children (collapse-aware) of node id.
+function mmTidyVisibleChildren(n){
+  if(!n || !n.childIds || n.collapsed) return [];
+  return n.childIds.filter(c => MM.nodes[c] && MM.nodes[c].type !== 'summary');
+}
+
+// Tidy-tree (LR horizontal) — places visible subtree rooted at id.
+// Top-level children of root are split: even-index → right, odd-index → left,
+// so the map balances around the root (X-Mind classic balanced layout).
+// Algorithm: 2-pass — (1) recursive subtree-height computation,
+// (2) assign x by depth*hgap + side, assign y as centred over children.
+//
+// Single-side layouts (when only one side has children) collapse to one side
+// to avoid an empty half.
+function mmTidyLayout(){
+  if(!MM || !MM.nodes || !MM.root) return;
+  const root = MM.nodes[MM.root]; if(!root) return;
+
+  // Subtree height: vertical span needed for visible descendants.
+  function subtreeH(id){
     const n = MM.nodes[id]; if(!n) return 0;
-    const own = mmOrient() === 'tb' ? (n.W || 140) : (n.H || 40);
-    if(n.collapsed || !n.childIds.length) return own;
-    const visible = n.childIds.filter(c => MM.nodes[c]);
-    if(!visible.length) return own;
-    const childTotal = visible.reduce((s,cid)=> s + subtreeSpan(cid), 0) + (visible.length - 1) * MM_GAP;
-    return Math.max(own, childTotal);
+    const h = (n.H || MM_TIDY_NODE_H);
+    const kids = mmTidyVisibleChildren(n);
+    if(!kids.length) return h;
+    const total = kids.reduce((s,c)=> s + subtreeH(c), 0) + (kids.length-1) * MM_TIDY_VGAP;
+    return Math.max(h, total);
   }
-  function layoutTB(id, leftX, topY){
+
+  // Place a node and its visible subtree on one side ('right' = +x, 'left' = -x).
+  // (parentRightEdgeX, parentCenterY) is the anchor; node is positioned so its
+  // own subtree is vertically centred around centreY.
+  function place(id, anchorX, centreY, side){
     const n = MM.nodes[id]; if(!n) return;
-    const span = subtreeSpan(id);
-    // Centre this node horizontally within its subtree band
-    n.x = leftX + Math.round(span/2 - (n.W||140)/2);
-    n.y = topY;
-    if(!n.collapsed && n.childIds.length){
-      let cx = leftX;
-      const childY = topY + (n.H||40) + 80;
-      n.childIds.forEach(cid => {
-        if(!MM.nodes[cid]) return;
-        layoutTB(cid, cx, childY);
-        cx += subtreeSpan(cid) + MM_GAP;
-      });
+    const w = (n.W || 140), h = (n.H || MM_TIDY_NODE_H);
+    if(side === 'right'){ n.x = anchorX; }
+    else                { n.x = anchorX - w; }
+    n.y = centreY - h/2;
+
+    const kids = mmTidyVisibleChildren(n);
+    if(!kids.length) return;
+
+    // Stack children vertically, each centred at half its subtreeH from running cursor.
+    const sizes = kids.map(c => subtreeH(c));
+    const totalH = sizes.reduce((a,b)=>a+b,0) + (kids.length-1) * MM_TIDY_VGAP;
+    let cy = centreY - totalH/2;
+    const childAnchorX = (side === 'right')
+      ? (n.x + w + MM_TIDY_HGAP)
+      : (n.x - MM_TIDY_HGAP);
+    for(let i=0;i<kids.length;i++){
+      const ch = sizes[i];
+      const childCentreY = cy + ch/2;
+      place(kids[i], childAnchorX, childCentreY, side);
+      cy += ch + MM_TIDY_VGAP;
     }
   }
-  function layoutLR(id, x, topY){
-    const n = MM.nodes[id]; if(!n) return;
-    const sh = mmSubtreeH(id);
-    n.x = x; n.y = topY + Math.round(sh/2 - (n.H||40)/2);
-    if(!n.collapsed && n.childIds.length){
-      let cy = topY;
-      n.childIds.forEach(cid => {
-        if(!MM.nodes[cid]) return;
-        layoutLR(cid, x + MM_XSTEP, cy);
-        cy += mmSubtreeH(cid) + MM_GAP;
-      });
+
+  // Root at (0,0) world-space; viewport pan will centre it visually.
+  const rw = (root.W || 140), rh = (root.H || MM_TIDY_NODE_H);
+  root.x = -rw/2; root.y = -rh/2;
+
+  const topKids = mmTidyVisibleChildren(root);
+  if(topKids.length){
+    // Split top-level into left/right alternately for balance.
+    const right = [], left = [];
+    topKids.forEach((c,i)=>{ (i % 2 === 0 ? right : left).push(c); });
+
+    // Right side
+    if(right.length){
+      const sizes = right.map(c => subtreeH(c));
+      const totalH = sizes.reduce((a,b)=>a+b,0) + (right.length-1) * MM_TIDY_VGAP;
+      let cy = -totalH/2;
+      const ax = root.x + rw + MM_TIDY_HGAP;
+      for(let i=0;i<right.length;i++){
+        const ch = sizes[i];
+        place(right[i], ax, cy + ch/2, 'right');
+        cy += ch + MM_TIDY_VGAP;
+      }
+    }
+    // Left side
+    if(left.length){
+      const sizes = left.map(c => subtreeH(c));
+      const totalH = sizes.reduce((a,b)=>a+b,0) + (left.length-1) * MM_TIDY_VGAP;
+      let cy = -totalH/2;
+      const ax = root.x - MM_TIDY_HGAP;
+      for(let i=0;i<left.length;i++){
+        const ch = sizes[i];
+        place(left[i], ax, cy + ch/2, 'left');
+        cy += ch + MM_TIDY_VGAP;
+      }
     }
   }
-  if(mmOrient() === 'tb') layoutTB(MM.root, 100, 80);
-  else                    layoutLR(MM.root, 100, 100);
-  mmResolveCollisions();
-  // Snapshot the new layout so Ctrl+Z restores the previous node positions.
-  // Without this, "סדר מחדש" silently rearranged the canvas with no way back.
+}
+
+// Animate every node from its current (x,y) to target (tx,ty) computed by
+// mmTidyLayout. Uses easeInOutQuad over ~220ms. Falls back to instant snap
+// for huge trees (>300 nodes) to avoid frame budget overrun.
+function mmAnimateToLayout(){
+  if(!MM || !MM.nodes) return;
+  // Snapshot current positions BEFORE recomputing.
+  const from = {};
+  for(const id in MM.nodes){
+    const n = MM.nodes[id];
+    if(typeof n.x !== 'number' || typeof n.y !== 'number') continue;
+    from[id] = { x: n.x, y: n.y };
+  }
+  // Compute target positions.
+  mmTidyLayout();
+  const to = {};
+  for(const id in MM.nodes){
+    const n = MM.nodes[id];
+    to[id] = { x: n.x, y: n.y };
+  }
+  const nodeCount = Object.keys(MM.nodes).length;
+  if(nodeCount > 300){
+    // Skip animation on huge trees — render at final positions.
+    mmRender();
+    return;
+  }
+  // Restore start positions so the animation begins at the previous frame.
+  for(const id in from){
+    if(MM.nodes[id]){ MM.nodes[id].x = from[id].x; MM.nodes[id].y = from[id].y; }
+  }
+  const start = performance.now();
+  const DUR = 220;
+  function tick(t){
+    const k = Math.min(1, (t - start) / DUR);
+    const e = k < 0.5 ? 2*k*k : 1 - Math.pow(-2*k+2, 2)/2; // easeInOutQuad
+    for(const id in to){
+      const n = MM.nodes[id]; if(!n) continue;
+      const f = from[id]; if(!f){ n.x = to[id].x; n.y = to[id].y; continue; }
+      n.x = f.x + (to[id].x - f.x) * e;
+      n.y = f.y + (to[id].y - f.y) * e;
+    }
+    mmRender();
+    if(k < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// One-shot migration: existing maps had persisted node.x/node.y. Drop them
+// so the tidy layout owns positions from now on. Gated by mmAutoLayoutMigrated.
+function mmMigrateToAutoLayout(){
+  try{
+    if(localStorage.getItem('mmAutoLayoutMigrated') === '1') return;
+    // Positions will be recomputed; nothing to delete from MM.nodes since
+    // tidyLayout overwrites x/y unconditionally. Just set the gate.
+    localStorage.setItem('mmAutoLayoutMigrated', '1');
+  }catch(e){ /* private mode etc. */ }
+}
+
+// Full subtree-aware auto-layout — now delegates to the X-Mind tidy-tree engine.
+// Legacy callers (toolbar "Layout" button, post-add nudges) all funnel through
+// here. Positions are strictly derived from topology; node.x / node.y are
+// outputs of mmTidyLayout, never inputs.
+function mmAutoLayout(){
+  mmTidyLayout();
   if(typeof mmPushHistory === 'function') mmPushHistory();
   mmRender();
-  mmFitView();
+  if(typeof mmFitView === 'function') mmFitView();
 }
 
 // Anti-collision: scan all nodes, find axis-aligned-rect overlaps, push the
