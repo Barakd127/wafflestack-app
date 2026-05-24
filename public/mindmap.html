@@ -3442,11 +3442,12 @@ function applyTemplate(name){
   const anchorId = (MM.sel && MM.nodes[MM.sel]) ? MM.sel : MM.root;
   const anchor = MM.nodes[anchorId];
   const pos = findNextTemplatePos(anchor);
-  const topCount=MM.nodes[MM.root].childIds.length;
-  const color=NODE_COLORS[topCount%NODE_COLORS.length];
-  // Templates always attach under root for now (canvas nodes are top-level),
-  // but visually placed near the anchor so they stay close to existing tree.
-  const cn=mmNode('canvas',def.title,pos.x,pos.y,MM.root,color);
+  const parentSiblingCount = (MM.nodes[anchorId].childIds || []).length;
+  const color=NODE_COLORS[parentSiblingCount%NODE_COLORS.length];
+  // Templates now attach as a child of the selected node (falling back to
+  // root when nothing is selected). Previously every template was wired
+  // under root regardless of selection — user couldn't grow a sub-branch.
+  const cn=mmNode('canvas',def.title,pos.x,pos.y,anchorId,color);
   try{if(def.sceneFn)cn.scene=def.sceneFn();}catch(e){console.warn('Template scene error:',e);}
   // v18: Auto-spawn of side-branch nodes ('μ = mean', 'Set A', etc.) removed.
   // User flagged them as visual clutter — the template's canvas already shows
