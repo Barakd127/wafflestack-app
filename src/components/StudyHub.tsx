@@ -2436,11 +2436,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           aria-label="הצג כלי לימוד (סרגל צד + סרגל עליון)"
           title="הצג סרגלים"
           style={{
-            // Viewport-anchored chip: physical `left` on purpose — under
-            // `dir=rtl`, `insetInlineStart` resolves to the right edge and
-            // collides with the sidebar drawer. See wafflestack-conventions
-            // § 9 (FAB stacking) + anti-pattern 19.
-            position: 'fixed', top: 12,
+            // Moved from top-left to BOTTOM-left per user 2026-05-24 — the
+            // top-left position obscured the canvas iframe's internal
+            // prev/next pill (קודם · קנבס N/M · הבא) at top:6 inset-inline-start:6.
+            // Bottom-left keeps the chip visible and reachable without
+            // colliding with the canvas's own controls.
+            position: 'fixed', bottom: 16,
             left: 12,
             zIndex: 300,
             background: 'linear-gradient(135deg,#F5C842,#D4AF37)',

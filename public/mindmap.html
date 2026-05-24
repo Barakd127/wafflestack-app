@@ -1772,6 +1772,13 @@ function branchColor(id){
 
 function mmApplyTransform(){
   const vp=document.getElementById('viewport');
+  // Guard against NaN/Infinity propagating into the transform — happens when
+  // mmFitView runs before node positions are populated (early load) or when
+  // the visible-node bounding box collapses to zero. User reported NaN% in the
+  // zoom readout 2026-05-24.
+  if(!isFinite(MM.zoom) || MM.zoom <= 0) MM.zoom = 1;
+  if(!isFinite(MM.panX)) MM.panX = 0;
+  if(!isFinite(MM.panY)) MM.panY = 0;
   vp.style.transform=`translate(${MM.panX}px, ${MM.panY}px) scale(${MM.zoom})`;
   vp.style.transformOrigin='0 0';
   // FIX #6: update zoom display and scrollbars here instead of patching via reassignment
@@ -1788,12 +1795,20 @@ function mmFitView(){
   for(const id in MM.nodes){
     const n=MM.nodes[id];
     if(!mmIsVisible(id)&&id!==MM.root)continue;
+    // Guard: skip nodes whose tidy-layout pass hasn't populated x/y yet.
+    // Without this, Math.min(Infinity, undefined) = NaN cascades into MM.zoom.
+    if(!isFinite(n.x) || !isFinite(n.y)) continue;
     minX=Math.min(minX,n.x);maxX=Math.max(maxX,n.x);minY=Math.min(minY,n.y);maxY=Math.max(maxY,n.y);
   }
   if(minX===Infinity)return;
-  const pad=60;const w=maxX-minX+pad*2;const h=maxY-minY+pad*2;
-  const windowW=document.getElementById('app').clientWidth;const windowH=document.getElementById('app').clientHeight;
-  MM.zoom=Math.min(windowW/w,windowH/h,1.5);MM.panX=windowW/2-(minX+maxX)/2*MM.zoom;MM.panY=windowH/2-(minY+maxY)/2*MM.zoom;
+  const pad=60;const w=Math.max(1, maxX-minX+pad*2);const h=Math.max(1, maxY-minY+pad*2);
+  const app=document.getElementById('app');
+  const windowW=Math.max(1, app?.clientWidth || 0);
+  const windowH=Math.max(1, app?.clientHeight || 0);
+  const computed = Math.min(windowW/w, windowH/h, 1.5);
+  MM.zoom = isFinite(computed) && computed > 0 ? computed : 1;
+  MM.panX = windowW/2 - (minX+maxX)/2 * MM.zoom;
+  MM.panY = windowH/2 - (minY+maxY)/2 * MM.zoom;
   mmApplyTransform();mmRender();
 }
 
@@ -2133,6 +2148,11 @@ function mmTidyLayout(){
   if(!MM || !MM.nodes || !MM.root) return;
   const root = MM.nodes[MM.root]; if(!root) return;
 
+  // TB (top-bottom) mode: delegate to vertical layout that swaps axes — root
+  // at top, children stack horizontally beneath. Added 2026-05-24 — the
+  // mmToggleOrientation button was a no-op for LR layout previously.
+  if(mmOrient() === 'tb'){ mmTidyLayoutTB(); return; }
+
   // Subtree height: vertical span needed for visible descendants.
   function subtreeH(id){
     const n = MM.nodes[id]; if(!n) return 0;
@@ -2205,6 +2225,66 @@ function mmTidyLayout(){
         place(left[i], ax, cy + ch/2, 'left');
         cy += ch + MM_TIDY_VGAP;
       }
+    }
+  }
+}
+
+// Top-Bottom layout: root anchored at top, children stack horizontally below.
+// Mirrors mmTidyLayout but swaps the role of x and y axes. Triggered when
+// MM.orientation === 'tb' (the mmToggleOrientation button). Per user
+// 2026-05-24 — TB/LR button was previously a no-op.
+function mmTidyLayoutTB(){
+  const root = MM.nodes[MM.root]; if(!root) return;
+
+  function subtreeW(id){
+    const n = MM.nodes[id]; if(!n) return 0;
+    const w = (n.W || 140);
+    const kids = mmTidyVisibleChildren(n);
+    if(!kids.length) return w;
+    const total = kids.reduce((s,c)=> s + subtreeW(c), 0) + (kids.length-1) * MM_TIDY_VGAP;
+    return Math.max(w, total);
+  }
+
+  function place(id, centreX, anchorY, side){
+    const n = MM.nodes[id]; if(!n) return;
+    const w = (n.W || 140), h = (n.H || MM_TIDY_NODE_H);
+    if(side === 'bottom'){ n.y = anchorY; }
+    else                 { n.y = anchorY - h; } // 'top' branch
+    n.x = centreX - w/2;
+
+    const kids = mmTidyVisibleChildren(n);
+    if(!kids.length) return;
+
+    const sizes = kids.map(c => subtreeW(c));
+    const totalW = sizes.reduce((a,b)=>a+b,0) + (kids.length-1) * MM_TIDY_VGAP;
+    let cx = centreX - totalW/2;
+    const childAnchorY = (side === 'bottom')
+      ? (n.y + h + MM_TIDY_HGAP)
+      : (n.y - MM_TIDY_HGAP);
+    for(let i=0;i<kids.length;i++){
+      const cw = sizes[i];
+      const childCentreX = cx + cw/2;
+      place(kids[i], childCentreX, childAnchorY, side);
+      cx += cw + MM_TIDY_VGAP;
+    }
+  }
+
+  const rw = (root.W || 140), rh = (root.H || MM_TIDY_NODE_H);
+  root.x = -rw/2; root.y = -rh/2;
+
+  const topKids = mmTidyVisibleChildren(root);
+  if(topKids.length){
+    // All children grow DOWN. (Alternating up/down for balance would look
+    // weird visually since it puts unrelated kids on either side of the
+    // root — TB users expect one direction.)
+    const sizes = topKids.map(c => subtreeW(c));
+    const totalW = sizes.reduce((a,b)=>a+b,0) + (topKids.length-1) * MM_TIDY_VGAP;
+    let cx = -totalW/2;
+    const ay = root.y + rh + MM_TIDY_HGAP;
+    for(let i=0;i<topKids.length;i++){
+      const cw = sizes[i];
+      place(topKids[i], cx + cw/2, ay, 'bottom');
+      cx += cw + MM_TIDY_VGAP;
     }
   }
 }
