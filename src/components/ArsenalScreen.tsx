@@ -78,8 +78,37 @@ function autoWrapMath(text: string): string {
 // in-place equation editor — keeping a single source of truth means a segment
 // index is stable between the two so we can replace exactly one occurrence.
 type ArsenalSegment = { type: 'text' | 'math'; value: string }
-function tokenizeEntry(text: string): ArsenalSegment[] {
+
+// Auto-detect math runs in plain text. A math run is a sequence containing
+// digits/operators/Greek-math letters but NO Hebrew or English alphabet
+// letters. Per user 2026-05-24: only the explicit $...$ wrapped chunks were
+// rendering as KaTeX; the surrounding `Σx ÷ n = ... = 70` was plain text.
+// Now any LTR math-like run is captured automatically.
+const AUTODETECT_MATH_RE = /[Σπμσ²³√∞≤≥≠÷×·\d][Σπμσ²³√∞≤≥≠÷×·\d\s()+\-=*/.,]*[Σπμσ²³√∞≤≥≠÷×·\d)]/g
+
+function autoDetectMathInText(text: string): ArsenalSegment[] {
   const out: ArsenalSegment[] = []
+  let last = 0
+  let m: RegExpExecArray | null
+  AUTODETECT_MATH_RE.lastIndex = 0
+  while ((m = AUTODETECT_MATH_RE.exec(text)) !== null) {
+    const start = m.index
+    const end = start + m[0].length
+    // Reject runs that are just digits — those read fine as text (no LaTeX gain)
+    if (!/[ΣπμσΕ÷×·+\-=()²³√]/.test(m[0])) continue
+    // Reject runs shorter than 3 chars — not worth a math box
+    if (m[0].trim().length < 3) continue
+    if (last < start) out.push({ type: 'text', value: text.slice(last, start) })
+    out.push({ type: 'math', value: m[0].trim() })
+    last = end
+  }
+  if (last < text.length) out.push({ type: 'text', value: text.slice(last) })
+  return out
+}
+
+function tokenizeEntry(text: string): ArsenalSegment[] {
+  // Pass 1: extract explicit $...$ math.
+  const explicit: ArsenalSegment[] = []
   let i = 0
   let buf = ''
   while (i < text.length) {
@@ -88,15 +117,23 @@ function tokenizeEntry(text: string): ArsenalSegment[] {
     if (ch === '$') {
       const end = text.indexOf('$', i + 1)
       if (end === -1) { buf += text.slice(i); break }
-      if (buf) { out.push({ type: 'text', value: buf }); buf = '' }
-      out.push({ type: 'math', value: text.slice(i + 1, end) })
+      if (buf) { explicit.push({ type: 'text', value: buf }); buf = '' }
+      explicit.push({ type: 'math', value: text.slice(i + 1, end) })
       i = end + 1
       continue
     }
     buf += ch
     i++
   }
-  if (buf) out.push({ type: 'text', value: buf })
+  if (buf) explicit.push({ type: 'text', value: buf })
+
+  // Pass 2: auto-detect math runs inside each TEXT segment. Math segments
+  // (from $...$) pass through unchanged so the explicit user wrapping wins.
+  const out: ArsenalSegment[] = []
+  for (const seg of explicit) {
+    if (seg.type === 'math') { out.push(seg); continue }
+    out.push(...autoDetectMathInText(seg.value))
+  }
   return out
 }
 
