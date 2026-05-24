@@ -229,24 +229,10 @@ function App() {
               }}
               darkMode={darkMode}
             />
-            {/* Split-screen with city button — bottom-right */}
-            <button
-              onClick={() => setActiveView('split-mindmap')}
-              aria-label="פצל מסך — עיר ומפת חשיבה"
-              className="ws-split-btn"
-              style={{
-                position: 'fixed', bottom: 24, right: 24, zIndex: 1000,
-                background: 'rgba(51,81,202,0.9)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(99,162,255,0.55)',
-                borderRadius: 20, padding: '9px 18px',
-                color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(51,81,202,0.45)',
-                display: 'flex', alignItems: 'center', gap: 8,
-              }}
-            >
-              ⊟ עיר + מפת חשיבה
-            </button>
+            {/* "עיר + מפת חשיבה" floating split button removed per user
+                feedback 2026-05-24. Same split is reachable from the
+                top-right WaffleCity controls; the duplicate FAB just
+                cluttered the mindmap view bottom-right. */}
           </div>
         )}
 
