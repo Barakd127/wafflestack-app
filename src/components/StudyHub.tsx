@@ -2516,7 +2516,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           at the TOP (so it's immediately readable + room for the answer
           textarea), and the companion tool fills the remaining space BELOW.
           That mirrors textbook-style problem→workspace layout. */}
-      <div ref={contentRowRef} style={{ flex: 1, display: 'flex', flexDirection: 'column-reverse', overflow: 'hidden', minHeight: 0, background: 'var(--sh-page-bg)', position: 'relative' }}>
+      {/* justifyContent: 'flex-end' on column-reverse packs items toward the
+          visual TOP so the tab chips and quiz card sit touching. Default
+          (flex-start) left ~170px of dead band between them. User flagged
+          this multiple times; per-element padding tweaks were trivial vs
+          this flex distribution. Per user 2026-05-24. */}
+      <div ref={contentRowRef} style={{ flex: 1, display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end', overflow: 'hidden', minHeight: 0, background: 'var(--sh-page-bg)', position: 'relative' }}>
 
         {/* ── Companion tool ── */}
         {!isDone && tab !== 'none' && (
