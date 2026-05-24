@@ -161,6 +161,7 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 .cn-title-text{unicode-bidi:plaintext}
 .node-div:hover{box-shadow:0 4px 18px rgba(0,0,0,.32);transform:translateY(-1px)}
 .node-div.selected{outline:2.5px solid #D4AF37;outline-offset:2px;box-shadow:0 0 0 4px rgba(212,175,55,.3)}
+.mm-drop-target-glow .node-div{outline:3px solid #D4AF37 !important;outline-offset:3px;box-shadow:0 0 0 5px rgba(212,175,55,0.55), 0 0 18px 4px rgba(212,175,55,0.45) !important;transition:box-shadow 80ms ease-out}
 .node-div.node-root{background:#fff!important;color:#1a1a1a!important;border:2.5px solid #1a1a1a;font-size:14px;font-weight:700;padding:10px 22px;border-radius:12px;box-shadow:0 3px 14px rgba(0,0,0,.3)}
 .node-div.search-match{box-shadow:0 0 0 3px rgba(212,175,55,.6)!important}
 .node-div.eq-node{padding:8px 18px;min-width:80px}
@@ -1341,54 +1342,280 @@ function mmRender(){
       div.appendChild(noteBtn);
     }
 
-    // ── Node dragging (move nodes by dragging) — mouse + touch parity ──
+    // ── Node drag: REORDER + REPARENT only (§24, X-Mind tidy-tree mode) ──
+    // Free-position dragging is disabled. mousedown → ghost outline at
+    // pointer, hit-testing detects drop target (gap between siblings =
+    // reorder; over node body = reparent). mouseup commits topology change
+    // and animates layout to new positions. Root cannot be dragged.
     (function(nodeObj,nodeEl){
+      if(nodeObj.id === MM.root) return; // root is not draggable
+      if(nodeObj.type === 'summary') return; // summaries follow their group
+
       function startDrag(sx, sy, isTouch){
-        MM.sel=nodeObj.id;
-        const ox=nodeObj.x,oy=nodeObj.y;
-        let moved=false;
-        function applyMove(cx, cy){
-          const dx=(cx-sx)/MM.zoom,dy=(cy-sy)/MM.zoom;
-          if(!moved&&Math.hypot(dx,dy)<4)return;
-          moved=true;
-          nodeObj.x=ox+dx;nodeObj.y=oy+dy;
-          mmRender();
+        MM.sel = nodeObj.id;
+        const startNX = nodeObj.x, startNY = nodeObj.y;
+        let moved = false;
+        let ghost = null;
+        let dropTarget = null; // {kind:'reparent', parentId} or {kind:'reorder', parentId, index}
+        let dropIndicator = null;
+
+        function ensureGhost(){
+          if(ghost) return;
+          ghost = document.createElement('div');
+          ghost.id = 'mm-drag-ghost';
+          ghost.style.cssText = [
+            'position:fixed', 'pointer-events:none', 'z-index:9999',
+            'background:'+(nodeObj.color||'#60a5fa'),
+            'color:#fff', 'opacity:0.65',
+            'border:2px dashed #D4AF37',
+            'border-radius:10px',
+            'padding:6px 12px',
+            'font:600 13px Rubik,sans-serif',
+            'white-space:nowrap',
+            'box-shadow:0 8px 24px rgba(0,0,0,0.25)',
+            'transform:translate(-50%,-50%)'
+          ].join(';');
+          ghost.textContent = nodeObj.text || nodeObj.id;
+          document.body.appendChild(ghost);
         }
+
+        function clearIndicator(){
+          if(dropIndicator){ dropIndicator.remove(); dropIndicator = null; }
+          // Clear any reparent-target glow.
+          const prev = document.querySelector('.mm-drop-target-glow');
+          if(prev) prev.classList.remove('mm-drop-target-glow');
+        }
+
+        // Detect whether candidate is the dragged node or a descendant of it
+        // (cycle prevention for reparent).
+        function isDescendantOrSelf(candidateId, ancestorId){
+          let cur = candidateId;
+          while(cur){
+            if(cur === ancestorId) return true;
+            const cn = MM.nodes[cur];
+            cur = cn ? cn.parentId : null;
+          }
+          return false;
+        }
+
+        // Convert client (screen) coords → world coords for hit-testing.
+        function clientToWorld(cx, cy){
+          const ca = document.getElementById('canvas-area');
+          const rect = ca.getBoundingClientRect();
+          return {
+            x: (cx - rect.left - MM.panX) / MM.zoom,
+            y: (cy - rect.top  - MM.panY) / MM.zoom
+          };
+        }
+
+        // Find a drop target given world-space (wx,wy).
+        // Priority: (1) gap between two siblings under any visible parent
+        // (reorder); (2) over a visible node body (reparent). Returns null
+        // if neither hits within tolerance.
+        function findDropTarget(wx, wy){
+          const REPARENT_SLOP = 6;
+          const REORDER_SLOP = 18;
+          // First pass: reparent — find a visible node whose box contains (wx,wy).
+          let reparentHit = null;
+          for(const id in MM.nodes){
+            if(id === nodeObj.id) continue;
+            if(!mmIsVisible(id) && id !== MM.root) continue;
+            if(isDescendantOrSelf(id, nodeObj.id)) continue; // cycle
+            const n = MM.nodes[id];
+            if(n.type === 'summary') continue;
+            const w = n.W||140, h = n.H||40;
+            if(wx >= n.x - REPARENT_SLOP && wx <= n.x + w + REPARENT_SLOP &&
+               wy >= n.y - REPARENT_SLOP && wy <= n.y + h + REPARENT_SLOP){
+              reparentHit = id; break;
+            }
+          }
+
+          // Second pass: reorder — find a sibling gap. We scan every visible
+          // parent's child list and look for the vertical gap nearest (wx,wy).
+          // Only candidate parents whose subtree horizontally brackets wx
+          // (within HGAP) are eligible — avoids reordering on the wrong side.
+          let bestReorder = null;
+          for(const pid in MM.nodes){
+            const p = MM.nodes[pid];
+            if(!p || p.collapsed) continue;
+            if(!mmIsVisible(pid) && pid !== MM.root) continue;
+            if(isDescendantOrSelf(pid, nodeObj.id)) continue;
+            const kids = (p.childIds||[]).filter(c => MM.nodes[c] && c !== nodeObj.id && MM.nodes[c].type !== 'summary');
+            if(!kids.length) continue;
+            // Estimate the children's x-band: use first child's x.
+            const firstChild = MM.nodes[kids[0]];
+            const bandX = firstChild.x;
+            const bandW = firstChild.W || 140;
+            if(wx < bandX - REORDER_SLOP - 10 || wx > bandX + bandW + REORDER_SLOP + 10) continue;
+            // Walk gaps: before kids[0], between each pair, after last.
+            const gaps = [];
+            // Gap before first child:
+            gaps.push({ y: firstChild.y - MM_TIDY_VGAP/2, index: 0 });
+            for(let i=0;i<kids.length-1;i++){
+              const a = MM.nodes[kids[i]], b = MM.nodes[kids[i+1]];
+              const gy = (a.y + (a.H||40) + b.y) / 2;
+              gaps.push({ y: gy, index: i+1 });
+            }
+            const last = MM.nodes[kids[kids.length-1]];
+            gaps.push({ y: last.y + (last.H||40) + MM_TIDY_VGAP/2, index: kids.length });
+            for(const g of gaps){
+              const d = Math.abs(g.y - wy);
+              if(d <= REORDER_SLOP + 6 && (!bestReorder || d < bestReorder.dist)){
+                bestReorder = { dist: d, parentId: pid, index: g.index, y: g.y, bandX, bandW };
+              }
+            }
+          }
+
+          // Prefer reorder (more precise) when present; otherwise reparent.
+          if(bestReorder) return { kind:'reorder', parentId: bestReorder.parentId, index: bestReorder.index, _y: bestReorder.y, _x: bestReorder.bandX, _w: bestReorder.bandW };
+          if(reparentHit) return { kind:'reparent', parentId: reparentHit };
+          return null;
+        }
+
+        function paintIndicator(t){
+          clearIndicator();
+          if(!t) return;
+          const ca = document.getElementById('canvas-area');
+          if(t.kind === 'reparent'){
+            const el = document.getElementById('nw_' + t.parentId);
+            if(el){
+              el.classList.add('mm-drop-target-glow');
+            }
+          } else if(t.kind === 'reorder'){
+            // Draw a thin gold horizontal line at world y = t._y across the
+            // children's band, projected into canvas-area screen space.
+            const sx = t._x * MM.zoom + MM.panX;
+            const sw = (t._w) * MM.zoom;
+            const sy = t._y * MM.zoom + MM.panY;
+            const line = document.createElement('div');
+            line.style.cssText = [
+              'position:absolute',
+              'left:'+(sx-6)+'px',
+              'top:'+(sy-1)+'px',
+              'width:'+(sw+12)+'px',
+              'height:3px',
+              'background:#D4AF37',
+              'box-shadow:0 0 6px rgba(212,175,55,0.85)',
+              'border-radius:2px',
+              'pointer-events:none',
+              'z-index:120'
+            ].join(';');
+            ca.appendChild(line);
+            dropIndicator = line;
+          }
+        }
+
+        function applyMove(cx, cy){
+          const ddx = cx - sx, ddy = cy - sy;
+          if(!moved && Math.hypot(ddx, ddy) < 5) return;
+          moved = true;
+          ensureGhost();
+          ghost.style.left = cx + 'px';
+          ghost.style.top  = cy + 'px';
+          const world = clientToWorld(cx, cy);
+          dropTarget = findDropTarget(world.x, world.y);
+          paintIndicator(dropTarget);
+        }
+
         function onMove(me){ applyMove(me.clientX, me.clientY); }
         function onTouchMove(te){
-          if(te.touches.length<1)return;
+          if(te.touches.length < 1) return;
           te.preventDefault();
           applyMove(te.touches[0].clientX, te.touches[0].clientY);
         }
-        function onUp(){
-          document.removeEventListener('mousemove',onMove);
-          document.removeEventListener('mouseup',onUp);
-          document.removeEventListener('touchmove',onTouchMove);
-          document.removeEventListener('touchend',onUp);
-          document.removeEventListener('touchcancel',onUp);
-          if(moved){ mmPushHistory(); if(typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('drag-node'); }
+
+        function commitDrop(){
+          if(!dropTarget) return false;
+          const t = dropTarget;
+          // Cycle / no-op guards.
+          if(isDescendantOrSelf(t.parentId, nodeObj.id)) return false;
+          const oldParentId = nodeObj.parentId;
+          const oldParent = MM.nodes[oldParentId];
+          if(!oldParent) return false;
+
+          if(t.kind === 'reparent'){
+            if(t.parentId === oldParentId) return false; // no-op
+            // Remove from old parent, append to new.
+            oldParent.childIds = oldParent.childIds.filter(c => c !== nodeObj.id);
+            const newParent = MM.nodes[t.parentId];
+            if(!newParent) return false;
+            newParent.childIds = newParent.childIds || [];
+            newParent.childIds.push(nodeObj.id);
+            // Auto-expand the new parent so the drop lands somewhere visible.
+            newParent.collapsed = false;
+            nodeObj.parentId = t.parentId;
+            return true;
+          }
+          if(t.kind === 'reorder'){
+            const newParent = MM.nodes[t.parentId];
+            if(!newParent) return false;
+            let targetIdx = t.index;
+            if(t.parentId === oldParentId){
+              // Same-parent reorder: account for self removal.
+              const currentIdx = oldParent.childIds.indexOf(nodeObj.id);
+              oldParent.childIds.splice(currentIdx, 1);
+              if(currentIdx < targetIdx) targetIdx -= 1;
+              oldParent.childIds.splice(targetIdx, 0, nodeObj.id);
+            } else {
+              oldParent.childIds = oldParent.childIds.filter(c => c !== nodeObj.id);
+              newParent.childIds = newParent.childIds || [];
+              newParent.childIds.splice(targetIdx, 0, nodeObj.id);
+              newParent.collapsed = false;
+              nodeObj.parentId = t.parentId;
+            }
+            return true;
+          }
+          return false;
         }
+
+        function onUp(){
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+          document.removeEventListener('touchmove', onTouchMove);
+          document.removeEventListener('touchend', onUp);
+          document.removeEventListener('touchcancel', onUp);
+
+          if(ghost){ ghost.remove(); ghost = null; }
+          clearIndicator();
+
+          if(!moved){
+            // Treated as a click — defer to node's existing onclick.
+            return;
+          }
+          const committed = commitDrop();
+          if(committed){
+            mmPushHistory();
+            mmAnimateToLayout();
+            if(typeof mmTourCompleteIfStep === 'function') mmTourCompleteIfStep('drag-node');
+          } else {
+            // Snap back: restore positions (tidy layout will repaint).
+            nodeObj.x = startNX; nodeObj.y = startNY;
+            mmRender();
+          }
+        }
+
         if(isTouch){
-          document.addEventListener('touchmove',onTouchMove,{passive:false});
-          document.addEventListener('touchend',onUp);
-          document.addEventListener('touchcancel',onUp);
+          document.addEventListener('touchmove', onTouchMove, {passive:false});
+          document.addEventListener('touchend', onUp);
+          document.addEventListener('touchcancel', onUp);
         } else {
-          document.addEventListener('mousemove',onMove);
-          document.addEventListener('mouseup',onUp);
+          document.addEventListener('mousemove', onMove);
+          document.addEventListener('mouseup', onUp);
         }
       }
-      nodeEl.addEventListener('mousedown',ev=>{
-        if(ev.button!==0)return;
-        if(ev.target.closest('.node-toggle,button,input'))return;
+
+      nodeEl.addEventListener('mousedown', ev => {
+        if(ev.button !== 0) return;
+        if(ev.target.closest('.node-toggle,button,input,.node-note-badge')) return;
         ev.stopPropagation();
         startDrag(ev.clientX, ev.clientY, false);
       });
-      nodeEl.addEventListener('touchstart',ev=>{
-        if(ev.target.closest('.node-toggle,button,input'))return;
-        if(ev.touches.length!==1)return;
+      nodeEl.addEventListener('touchstart', ev => {
+        if(ev.target.closest('.node-toggle,button,input,.node-note-badge')) return;
+        if(ev.touches.length !== 1) return;
         ev.stopPropagation();
         startDrag(ev.touches[0].clientX, ev.touches[0].clientY, true);
-      },{passive:true});
+      }, {passive:true});
     })(n,div);
 
     vp.appendChild(div);
