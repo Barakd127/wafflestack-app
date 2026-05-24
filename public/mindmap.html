@@ -1200,6 +1200,13 @@ function mmSerializeForSave(){
 }
 
 function mmRender(){
+  // §24: positions are derived. Recompute via tidy-tree unless an animation
+  // is currently easing positions (window._mmAnimating is set by
+  // mmAnimateToLayout during the ease so we don't fight it frame-by-frame).
+  if(!window._mmAnimating && typeof mmTidyLayout === 'function'){
+    try { mmTidyLayout(); } catch(e) { /* fall through */ }
+  }
+
   // Auto-save after each render (debounced 600ms) — topology only (no x/y).
   clearTimeout(_mmSaveTimer);
   _mmSaveTimer = setTimeout(function(){ try{ localStorage.setItem(MM_SAVE_KEY, mmSerializeForSave()); }catch(e){} }, 600);
@@ -2184,6 +2191,7 @@ function mmAnimateToLayout(){
   }
   const start = performance.now();
   const DUR = 220;
+  window._mmAnimating = true;
   function tick(t){
     const k = Math.min(1, (t - start) / DUR);
     const e = k < 0.5 ? 2*k*k : 1 - Math.pow(-2*k+2, 2)/2; // easeInOutQuad
@@ -2195,6 +2203,7 @@ function mmAnimateToLayout(){
     }
     mmRender();
     if(k < 1) requestAnimationFrame(tick);
+    else window._mmAnimating = false;
   }
   requestAnimationFrame(tick);
 }
