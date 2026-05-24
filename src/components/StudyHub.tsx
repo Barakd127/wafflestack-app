@@ -969,8 +969,11 @@ function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
             <div style={{ fontSize: 19, fontWeight: 700, color: TEXT_DARK, marginBottom: 4 }}>{c.label}</div>
             <div style={{ fontSize: 13, color: TEXT_MED, lineHeight: 1.45 }}>{c.desc}</div>
             {!c.active && (
+              // Pin moved from insetInlineStart (right edge in RTL — collided
+              // with the centered course icon) to insetInlineEnd (left edge
+              // in RTL) per user feedback 2026-05-24. Convention §23.
               <div style={{
-                position: 'absolute', top: 14, insetInlineStart: 14,
+                position: 'absolute', top: 14, insetInlineEnd: 14,
                 background: 'rgba(127,155,217,0.18)',
                 color: '#1f3e6c', border: '1px solid rgba(127,155,217,0.45)',
                 borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700, letterSpacing: 0.2,
@@ -2640,7 +2643,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             // on the inner card if needed.
             ? { flexShrink: 0, zIndex: 2, display: 'flex', flexDirection: 'column', maxHeight: '38vh', overflow: 'hidden' }
             : tab === 'none' || isDone
-            ? { flexShrink: 0, padding: '18px 24px 12px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
+            // Padding tightened per user 2026-05-24 — was 18px top / 12px bot
+            // creating a big empty gap between the companion-tab chips above
+            // and the quiz card. Now 6/6.
+            ? { flexShrink: 0, padding: '6px 24px 6px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
             : { position: 'absolute', bottom: 72, insetInlineEnd: 14, zIndex: 60, width: 'min(420px, calc(100vw - 28px))', maxHeight: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }
         }>
           <div style={
@@ -2899,9 +2905,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         onClick={() => handleMcChoose(idx)}
                         disabled={revealed}
                         style={{
-                          display: 'flex', alignItems: 'center', gap: 10,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
                           minHeight: 44,
-                          padding: '8px 12px',
+                          padding: '10px 16px',
                           background: bg,
                           border: `2px solid ${border}`,
                           borderRadius: 10,
@@ -2910,7 +2916,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           fontSize: 15,
                           fontWeight: 500,
                           cursor: revealed ? 'default' : 'pointer',
-                          textAlign: 'right',
+                          textAlign: 'center',
                           direction: 'rtl',
                           transition: 'all 0.18s',
                           boxShadow: isChosen && revealed ? '0 2px 8px rgba(0,0,0,0.12)' : 'none',
@@ -2928,7 +2934,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         }}>
                           {letter}
                         </span>
-                        <span style={{ flex: 1, lineHeight: 1.5 }}>{opt}</span>
+                        <span style={{ lineHeight: 1.5, textAlign: 'center' }}>{opt}</span>
                         {marker && (
                           <span style={{
                             fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20,
@@ -3132,7 +3138,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
              On desktop it sits below the canvas with a dark gradient. */}
         {!isDone && !(isMobile && tab !== 'none') && (
           <div style={{
-            flexShrink: 0, padding: '12px 24px 16px',
+            // Was 12/16 → 6/6 per user 2026-05-24 to remove the big empty band
+            // between the tab chips and the quiz card.
+            flexShrink: 0, padding: '6px 24px 6px',
             display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap',
             // When a companion tool is active, ALWAYS pin tabs to viewport
             // bottom (was previously only mobile/floatMode). Otherwise tabs
