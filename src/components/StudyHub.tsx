@@ -339,6 +339,10 @@ import PersonalPlanWizard from './PersonalPlanWizard'
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d' | 'drawing') => void
   darkMode?: boolean
+  /** When provided, StudyHub renders a dark-mode toggle inside its TopBar
+   *  (per user 2026-05-24). The parent App.tsx is then responsible for
+   *  hiding any duplicate floating toggle. */
+  onToggleDarkMode?: () => void
   onLoggedIn?: () => void
   onLoggedOut?: () => void
 }
@@ -1608,7 +1612,7 @@ function AdminToggle({ collapsed }: { collapsed: boolean }) {
 }
 
 // ── Top bar ────────────────────────────────────────────────────────────────────
-function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
+function TopBar({ title, onLogout, darkMode, onToggleDark }: { title: string; onLogout?: () => void; darkMode?: boolean; onToggleDark?: () => void }) {
   const userName = localStorage.getItem('userName') || 'Student'
   const xp = useLearningStore(state => state.xp)
   return (
@@ -1633,6 +1637,27 @@ function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
         textShadow: '0 1px 4px rgba(255,255,255,0.8)',
       }}>{title}</h1>
       <div className="ws-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 14 }} dir="ltr">
+        {/* Dark-mode toggle, integrated into topbar per user 2026-05-24
+            (was a floating fixed button at top-right obscuring sidebar icons). */}
+        {onToggleDark && (
+          <button
+            onClick={onToggleDark}
+            aria-label={darkMode ? 'הפעל מצב בהיר' : 'הפעל מצב כהה'}
+            title={darkMode ? 'מצב בהיר' : 'מצב כהה'}
+            style={{
+              background: 'rgba(31,62,108,0.08)',
+              border: '1px solid rgba(31,62,108,0.25)',
+              borderRadius: 10,
+              width: 40, height: 40,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--sh-text-dark)',
+              cursor: 'pointer',
+            }}
+          >
+            {darkMode ? '☀' : '☾'}
+          </button>
+        )}
+        <span className="ws-ribbon-divider" />
         {/* Ribbon A — Progress */}
         <Ribbon label="התקדמות">
           <span style={{
@@ -1650,15 +1675,15 @@ function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
 
         <span className="ws-ribbon-divider" />
 
-        {/* Ribbon B — Potions */}
-        <Ribbon label="שיקויים">
+        {/* Ribbon B — Potions (label hidden per user 2026-05-24, icons keep aria) */}
+        <Ribbon label="שיקויים" hideLabel>
           <PotionInventory />
         </Ribbon>
 
         <span className="ws-ribbon-divider" />
 
-        {/* Ribbon C — Account */}
-        <Ribbon label="חשבון">
+        {/* Ribbon C — Account (label hidden per user 2026-05-24) */}
+        <Ribbon label="חשבון" hideLabel>
           <span className="hidden md:inline" style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_DARK }}>שלום, {userName}</span>
           <Tooltip label="סיור מודרך" description="הפעל מחדש את ההדרכה">
             <button
@@ -3159,7 +3184,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
 }
 
 // ── Root ───────────────────────────────────────────────────────────────────────
-const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
+const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLoggedOut }: StudyHubProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [internalView, setInternalView] = useState<InternalView>('home')
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>()
@@ -3371,7 +3396,7 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
       {/* Main */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {!(learningFullscreen && internalView === 'learning') && (
-          <header ref={topbarTutRef}><TopBar title={title} onLogout={handleLogout} /></header>
+          <header ref={topbarTutRef}><TopBar title={title} onLogout={handleLogout} darkMode={darkMode} onToggleDark={onToggleDarkMode} /></header>
         )}
         {internalView === 'home' && (
           <HomeScreen

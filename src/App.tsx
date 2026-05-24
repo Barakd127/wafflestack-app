@@ -124,7 +124,10 @@ function App() {
   // Godot city) has its own theme button at the bottom — two buttons in the
   // top-right corner is what the user sees as "the toggle obscures the
   // back/split buttons".
-  const showDarkToggle = activeView !== 'mindmap' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'landing'
+  // Floating dark-mode toggle hides on views that have their own integrated
+  // dark-mode control (study screen ships one inside its TopBar per user
+  // feedback 2026-05-24 — was obscuring sidebar lock icons at top-right).
+  const showDarkToggle = activeView !== 'study' && activeView !== 'mindmap' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'landing'
 
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
@@ -156,6 +159,7 @@ function App() {
                 else setActiveView(v as View)
               }}
               darkMode={darkMode}
+              onToggleDarkMode={() => setDarkMode(d => !d)}
               onLoggedIn={() => setLoggedIn(true)}
               onLoggedOut={() => setLoggedIn(false)}
             />
