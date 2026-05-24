@@ -275,14 +275,20 @@ export default function MeanInteractive() {
         })}
       </svg>
 
-      {/* Live formula */}
+      {/* Live formula — centered + compact per user 2026-05-24. KaTeX inside
+          is LTR-isolated; flex parent centers it horizontally. Reduced padding
+          (12 → 6) so the container hugs the formula instead of leaving big air. */}
       <div
         style={{
-          marginTop: 12,
-          padding: 12,
+          marginTop: 10,
+          padding: '6px 12px',
           background: 'rgba(31,62,108,0.06)',
           borderRadius: 8,
-          minHeight: 50,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          maxWidth: 520,
+          marginInline: 'auto',
         }}
       >
         <KatexInline latex={latex} />

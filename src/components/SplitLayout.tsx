@@ -152,19 +152,25 @@ export default function SplitLayout({ onBack, darkMode, initialRight = 'study' }
         </div>
 
         {/* Resize handle */}
+        {/* Resize handle — bumped from 6px to 12px hit-area with a more
+            visible gold accent so users actually find + use the drag
+            affordance. Per user 2026-05-24 (didn't realize handle existed). */}
         <div
           onMouseDown={onMouseDown}
+          aria-label="גרור לשינוי גודל החלונות"
+          title="גרור לשינוי גודל"
           style={{
-            width: 6, height: '100%', flexShrink: 0,
-            background: 'rgba(99,102,241,0.2)',
+            width: 12, height: '100%', flexShrink: 0,
+            background: 'rgba(212,175,55,0.18)',
+            borderInline: '1px solid rgba(212,175,55,0.45)',
             cursor: 'col-resize',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'background 0.15s',
           }}
-          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(99,102,241,0.55)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(99,102,241,0.2)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(212,175,55,0.45)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(212,175,55,0.18)' }}
         >
-          <div style={{ width: 2, height: 40, borderRadius: 2, background: 'rgba(165,180,252,0.6)' }} />
+          <div style={{ width: 4, height: 56, borderRadius: 4, background: 'rgba(212,175,55,0.85)', boxShadow: '0 0 0 1px rgba(0,0,0,0.15)' }} />
         </div>
 
         {/* Right panel — keeps both mounted so iframes don't reload on tab switch */}

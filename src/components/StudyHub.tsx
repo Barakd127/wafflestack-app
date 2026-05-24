@@ -2436,12 +2436,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           aria-label="הצג כלי לימוד (סרגל צד + סרגל עליון)"
           title="הצג סרגלים"
           style={{
-            // Moved from top-left to BOTTOM-left per user 2026-05-24 — the
-            // top-left position obscured the canvas iframe's internal
-            // prev/next pill (קודם · קנבס N/M · הבא) at top:6 inset-inline-start:6.
-            // Bottom-left keeps the chip visible and reachable without
-            // colliding with the canvas's own controls.
-            position: 'fixed', bottom: 16,
+            // FAB stacking (convention §9): TutorFAB sits at bottom:5/left:5
+            // w/ 56px height. Stacking 90px above (bottom: 80) keeps the
+            // chip clear of the AI button. Was bottom:16 which collided.
+            // Per user 2026-05-24.
+            position: 'fixed', bottom: 80,
             left: 12,
             zIndex: 300,
             background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
@@ -2517,12 +2516,21 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           at the TOP (so it's immediately readable + room for the answer
           textarea), and the companion tool fills the remaining space BELOW.
           That mirrors textbook-style problem→workspace layout. */}
-      {/* justifyContent: 'flex-end' on column-reverse packs items toward the
-          visual TOP so the tab chips and quiz card sit touching. Default
-          (flex-start) left ~170px of dead band between them. User flagged
-          this multiple times; per-element padding tweaks were trivial vs
-          this flex distribution. Per user 2026-05-24. */}
-      <div ref={contentRowRef} style={{ flex: 1, display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end', overflow: 'hidden', minHeight: 0, background: 'var(--sh-page-bg)', position: 'relative' }}>
+      {/* When tab === 'none' (no companion tool active), the contentRow
+          container should NOT take flex:1 — there's nothing to fill the
+          vertical space with, so a flex:1 column-reverse produces a
+          200-500px dead band between the chips at the top and the quiz
+          card pushed to the bottom. justifyContent:'flex-end' (PR #47)
+          worked in theory but the user kept seeing the gap — root cause
+          is the container OWNING height it doesn't need. Conditional
+          flex sizing makes the gap structurally impossible.
+
+          Tab active: flex:1 + column-reverse so the iframe/canvas fills
+            the viewport with the quiz card at the bottom (textbook layout).
+          Tab none:   flex:0 0 auto + column-reverse so the container is
+            only as tall as its content (tabs + quiz card touching).
+          Per user 2026-05-24 (7th flag of this issue). */}
+      <div ref={contentRowRef} style={{ flex: (tab === 'none' && !isDone) ? '0 0 auto' : 1, display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end', overflow: (tab === 'none' && !isDone) ? 'visible' : 'hidden', minHeight: 0, background: 'var(--sh-page-bg)', position: 'relative' }}>
 
         {/* ── Companion tool ── */}
         {!isDone && tab !== 'none' && (
