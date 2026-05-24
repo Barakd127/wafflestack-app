@@ -34,6 +34,7 @@ function App() {
     if (h === '#study') return 'study'
     if (h === '#split') return 'split'
     if (h === '#split-mindmap') return 'split-mindmap'
+    if (h === '#split-study-mindmap') return 'split-study-mindmap'
     if (h === '#mindmap') return 'mindmap'
     if (h === '#notebook') return 'notebook'
     // First-time / no-hash visitor → landing page. Returning users keep their
@@ -103,6 +104,7 @@ function App() {
       else if (h === '#notebook') setActiveView('notebook')
       else if (h === '#split') setActiveView('split')
       else if (h === '#split-mindmap') setActiveView('split-mindmap')
+      else if (h === '#split-study-mindmap') setActiveView('split-study-mindmap')
       else if (h === '#view-wafflecity' || h === '#city' || h === '#topics' || h === '#score' || h.startsWith('#challenge/')) setActiveView('wafflecity')
       else if (h === '#study' || h === '') setActiveView('study')
     }
@@ -115,6 +117,7 @@ function App() {
     else if (activeView === 'landing') window.location.hash = '#landing'
     else if (activeView === 'split') window.location.hash = '#split'
     else if (activeView === 'split-mindmap') window.location.hash = '#split-mindmap'
+    else if (activeView === 'split-study-mindmap') window.location.hash = '#split-study-mindmap'
     else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
     else if (activeView === 'notebook') window.location.hash = '#notebook'
