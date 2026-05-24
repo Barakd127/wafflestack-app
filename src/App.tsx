@@ -201,10 +201,13 @@ function App() {
               onClick={() => setActiveView('mindmap')}
               aria-label="סגור פיצול"
               style={{
-                position: 'absolute', top: 8, left: 8, zIndex: 1000,
-                background: 'rgba(108,99,255,0.85)', border: '1px solid rgba(165,180,252,0.5)',
-                color: '#fff', borderRadius: 8, padding: '5px 12px',
-                fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                position: 'absolute', top: 12, left: 12, zIndex: 1000,
+                background: 'rgba(108,99,255,0.9)', border: '1px solid rgba(165,180,252,0.55)',
+                color: '#fff', borderRadius: 12, padding: '10px 16px',
+                fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                minHeight: 44, minWidth: 44,
+                boxShadow: '0 4px 12px rgba(108,99,255,0.35)',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
               }}
             >
               ✕ סגור פיצול
