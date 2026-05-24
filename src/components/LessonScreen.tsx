@@ -509,10 +509,15 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                       <ellipse cx="7" cy="6.5" rx="3.5" ry="1.4" fill="#FFE3A8" opacity="0.55"/>
                     </svg>
                   </div>
-                  <div style={{
+                  <div dir="rtl" style={{
                     flex: 1, minWidth: 0,
                     fontSize: 18.5, lineHeight: 1.85, color: TEXT_DARK,
                     whiteSpace: 'pre-wrap',
+                    textAlign: 'right',
+                    // Force entire line to read RTL so the LTR math chunks (the
+                    // 'sum' result the user wants on the right) sit at the line
+                    // END which in RTL = right edge. Per user 2026-05-24.
+                    unicodeBidi: 'plaintext',
                   }}>
                     {bullet}
                   </div>
