@@ -61,8 +61,63 @@ function normalizeMathGlyphs(s: string): string {
 // `\bar{x}`, `f_6+f_9=60`, etc. without false-positive wrapping plain words.
 const HEBREW_RE = /[֐-׿]/
 const MATHRUN_RE = /[^\s֐-׿][^֐-׿]*?(?=$|[\s֐-׿])/g
+
+// Whole-line equation pre-processor (NEW, per user 2026-05-24).
+// A LINE like "ממוצע = Σx ÷ n = (60+70+80) ÷ 3 = 210 ÷ 3 = 70" should render
+// as ONE styled equation, not split into 5 mini fragments. We wrap the
+// entire line in $...$ and convert Hebrew runs to LaTeX \text{...} so the
+// label and the math sit inside a single KaTeX block.
+function wholeLineEquation(text: string): string {
+  return text.split(/\n/).map(line => {
+    if (line.includes('$')) return line               // user already wrapped → trust them
+    if (!line.includes('=')) return line              // need an = to qualify as equation
+    if (!HEBREW_RE.test(line)) return line            // no Hebrew → existing autoWrapMath handles
+    if (!/[=+\-*/÷×·\d]/.test(line)) return line     // no math → plain text
+
+    let out = ''
+    let buf = ''
+    let mode: 'heb' | 'math' = 'math'
+    const flush = () => {
+      if (!buf) return
+      const piece = mode === 'heb' ? `\\text{${buf.replace(/[{}\\]/g, '')}}` : buf
+      out += piece
+      buf = ''
+    }
+    for (const ch of line) {
+      const isHeb = /[֐-׿]/.test(ch)
+      const isSpace = /\s/.test(ch)
+      // Spaces don't trigger mode flip — they stick to whichever mode is active.
+      let newMode: 'heb' | 'math' = mode
+      if (!isSpace) newMode = isHeb ? 'heb' : 'math'
+      if (newMode !== mode) { flush(); mode = newMode }
+      buf += ch
+    }
+    flush()
+    // Convert Unicode math glyphs to LaTeX commands so KaTeX renders them
+    // with proper spacing (÷ alone reads as binary op but \div is tighter).
+    out = out
+      .replace(/÷/g, ' \\div ')
+      .replace(/×/g, ' \\times ')
+      .replace(/·/g, ' \\cdot ')
+      .replace(/Σ/g, '\\Sigma ')
+      .replace(/π/g, '\\pi ')
+      .replace(/μ/g, '\\mu ')
+      .replace(/σ/g, '\\sigma ')
+      .replace(/√/g, '\\sqrt ')
+      .replace(/∞/g, '\\infty ')
+      .replace(/≤/g, ' \\le ')
+      .replace(/≥/g, ' \\ge ')
+      .replace(/≠/g, ' \\ne ')
+    return '$' + out + '$'
+  }).join('\n')
+}
+
 function autoWrapMath(text: string): string {
   if (text.includes('$')) return text // user already wrapped — trust them
+  // First: try whole-line equation wrapping (catches Hebrew-labelled equations).
+  const lineWrapped = wholeLineEquation(text)
+  if (lineWrapped !== text) return lineWrapped
+  // Otherwise: fall back to per-run wrapping (catches bare math chunks).
   return text.replace(MATHRUN_RE, (run) => {
     if (HEBREW_RE.test(run)) return run
     // Must have a math operator AND a digit-or-backslash to count as math.
