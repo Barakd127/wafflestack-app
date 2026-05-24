@@ -2858,8 +2858,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
 
               {((q as any).format === 'mc' && Array.isArray((q as any).options)) ? (
                 /* ── Multiple-choice render — 2×2 grid so all 4 options fit
-                     w/o scrolling alongside the 25vh question card. ── */
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }} dir="rtl">
+                     w/o scrolling alongside the 25vh question card. Per user
+                     2026-05-24: max-width + auto margins to center the grid
+                     so answers don't push right of the question text. ── */
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14, maxWidth: 640, marginInline: 'auto', placeItems: 'stretch', justifyItems: 'stretch' }} dir="rtl">
                   {((q as any).options as string[]).map((opt: string, idx: number) => {
                     const correctIdx: number = (q as any).correctIndex
                     const isChosen = mcSelected === idx
