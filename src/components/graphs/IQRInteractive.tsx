@@ -8,6 +8,11 @@ const W = 640, H = 280, PAD = 40
 const X0 = PAD, X1 = W - PAD
 const Y_BOX = 130, BOX_H = 60
 
+// Single source of truth for the themed navy stroke used in the boxplot SVG.
+// Mirrors --sh-text-dark from index.css. JS literal because SVG stroke/fill
+// attrs do not resolve CSS custom properties.
+const NAVY = '#1F3E6C'
+
 const quantile = (sorted: number[], q: number) => {
   const pos = (sorted.length - 1) * q
   const lo = Math.floor(pos), hi = Math.ceil(pos)
@@ -43,8 +48,8 @@ export default function IQRInteractive() {
 
   return (
     <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>טווח רבעוני (IQR) — Boxplot</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור נקודות. נקודות מחוץ ל-1.5·IQR מסומנות באדום (חריגות).</p>
+      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 20, marginBottom: 6, fontWeight: 700 }}>טווח רבעוני (IQR) — Boxplot</h3>
+      <p style={{ fontSize: 15, opacity: 0.85, marginBottom: 14, lineHeight: 1.5 }}>גרור נקודות. נקודות מחוץ ל-1.5·IQR מסומנות באדום (חריגות).</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>
@@ -56,7 +61,7 @@ export default function IQRInteractive() {
           const outlier = v < fenceLo || v > fenceHi
           return (
             <circle key={i} cx={toX(v)} cy={Y_BOX + BOX_H + 30} r={9}
-              fill={outlier ? '#ef4444' : '#60a5fa'} stroke="#1F3E6C" strokeWidth={1.5}
+              fill={outlier ? '#ef4444' : '#60a5fa'} stroke={NAVY} strokeWidth={1.5}
               onPointerDown={e => { setDrag(i); (e.target as Element).setPointerCapture(e.pointerId) }}
               style={{ cursor: 'grab' }} />
           )
@@ -67,8 +72,8 @@ export default function IQRInteractive() {
       </svg>
       <div id="iqr-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <button onClick={() => setValues([2, 4, 5, 6, 7, 8, 9, 10, 11, 13])} style={{
-        background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)',
-        borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13,
+        background: 'rgba(31,62,108,0.10)', color: 'var(--sh-text-dark)', border: '1px solid rgba(31,62,108,0.20)',
+        borderRadius: 8, padding: '10px 18px', cursor: 'pointer', fontSize: 14, fontWeight: 600, minHeight: 44,
       }}>איפוס</button>
     </div>
   )
