@@ -2512,15 +2512,36 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       {xpBurst !== null && <XpBurst amount={xpBurst} onDone={() => setXpBurst(null)} />}
 
       {/* Fullscreen FAB stack (visible only when fullscreen / chrome hidden):
-          - bottom:140 → home FAB (explicit exit-fullscreen + go to study home)
-          - bottom: 80 → restore-chrome chip (keeps user in lesson)
+          - bottom:200 → back-to-split FAB (split-study-mindmap)
+          - bottom:140 → home FAB (go to study home)
+          - bottom: 80 → restore-chrome chip (stay in lesson)
           - bottom:  5 → TutorFAB (App.tsx)
-          User reported being stuck in fullscreen with no obvious way back to
-          home OR back to a non-fullscreen state. The 'הצג כלי לימוד' chip
-          restores chrome but doesn't return to split/home — adding an explicit
-          home button so the user always has a fast exit. Per user 2026-05-24. */}
+          Per user 2026-05-24 — three exit paths all visible. */}
       {fullscreen && onToggleFullscreen && (
         <>
+          <button
+            onClick={() => {
+              try { onToggleFullscreen() } catch(_){}
+              try { window.location.hash = '#split-study-mindmap' } catch(_){}
+            }}
+            aria-label="חזרה לפיצול מסך"
+            title="חזרה לפיצול מסך"
+            style={{
+              position: 'fixed', bottom: 200, left: 12, zIndex: 300,
+              background: 'linear-gradient(135deg,#4ECDC4,#3FB8AF)',
+              color: '#0B1B3E',
+              border: 0, borderRadius: 14,
+              padding: '8px 14px',
+              fontFamily: "'Rubik', sans-serif",
+              fontSize: 12, fontWeight: 800,
+              cursor: 'pointer',
+              boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
+              display: 'flex', alignItems: 'center', gap: 6,
+              minHeight: 44,
+            }}
+          >
+            ⊟ פיצול מסך
+          </button>
           <button
             onClick={() => {
               try { onBack() } catch(_){}
