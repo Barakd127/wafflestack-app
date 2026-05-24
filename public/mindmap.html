@@ -6394,6 +6394,35 @@ window.addEventListener('message', function(e){
   } catch(err) { console.error('ws-add-node failed', err); }
 });
 
+// Drain queued adds from localStorage. Lets LessonScreen queue equations
+// when this iframe is NOT mounted (user hasn't opened split yet). On every
+// mindmap load we pick up the queue, insert each node, clear the key.
+// Per user 2026-05-24: 'I can only add the equation in half-screen mode'.
+function mmDrainPendingAdds(){
+  try {
+    var KEY = 'wafflestack-mm-pending-adds';
+    var raw = localStorage.getItem(KEY);
+    if (!raw) return;
+    var queue = JSON.parse(raw);
+    if (!Array.isArray(queue) || !queue.length) return;
+    localStorage.removeItem(KEY);  // consume first to avoid double-insert on quick reloads
+    queue.forEach(function(item){
+      // Re-dispatch as a ws-add-node message so the existing handler does
+      // the actual node creation — single code path, no duplication.
+      window.dispatchEvent(new MessageEvent('message', {
+        data: { type: 'ws-add-node', kind: item.kind, text: item.text, latex: item.latex, connectMode: item.connectMode },
+        origin: window.location.origin,
+      }));
+    });
+    console.info('[mm-drain] inserted ' + queue.length + ' queued node(s)');
+  } catch(err) { console.warn('[mm-drain] failed', err); }
+}
+// Drain after MM has had a chance to init. Multiple retry windows so we
+// don't miss the case where mmInit fires after the localStorage check.
+setTimeout(mmDrainPendingAdds, 400);
+setTimeout(mmDrainPendingAdds, 1200);
+setTimeout(mmDrainPendingAdds, 2500);
+
 // ── WaffleStack parent-frame helpers ──────────────────────────────────────────
 // These let buttons inside the iframe ask the React host to navigate.
 // MindMapCanvas.tsx listens for these messages and dispatches view changes.

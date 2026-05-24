@@ -152,18 +152,39 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   }
 
   // Confirm the chooser: complete the pending insert with the user's choice.
+  // Two transport paths:
+  //  (a) Live postMessage — when the mindmap iframe is already mounted.
+  //  (b) localStorage queue — when iframe is closed/not yet mounted. The
+  //      mindmap.html drains the queue on load. User no longer needs to
+  //      open the split first. Per user 2026-05-24.
   const confirmInsert = (mode: 'connected' | 'free') => {
     if (!pendingInsert) return
     const { text, kind, sourceLabel } = pendingInsert
     setPendingInsert(null)
-    if (!mindmapOpen) setMindmapOpen(true)
-    setTimeout(() => {
+
+    // Always queue to localStorage so the equation lands eventually even
+    // when the iframe never opens during this session (it'll be picked up
+    // next time the user visits the mindmap).
+    try {
+      const KEY = 'wafflestack-mm-pending-adds'
+      const raw = localStorage.getItem(KEY)
+      const queue = raw ? JSON.parse(raw) : []
+      queue.push({ kind, text, latex: kind === 'equation' ? text : undefined, connectMode: mode, ts: Date.now() })
+      localStorage.setItem(KEY, JSON.stringify(queue.slice(-50)))  // cap at 50
+    } catch { /* localStorage full / disabled — ignore */ }
+
+    // Also try live postMessage if the iframe IS already mounted; gives instant feedback.
+    if (mindmapOpen) {
       const ok = sendToMindMap(text, kind, mode)
       if (ok) {
         setCopied(sourceLabel)
         setTimeout(() => setCopied(null), 1500)
+        return
       }
-    }, mindmapOpen ? 0 : 320)
+    }
+    // Otherwise just toast that it's queued.
+    setCopied(sourceLabel)
+    setTimeout(() => setCopied(null), 1500)
   }
 
   const handleCopyFormula = (formula: string) => {
