@@ -3,6 +3,7 @@ import { LESSON_CONTENT } from '../data/lesson-content'
 import { TOPIC_VISUALS } from './LessonVisuals'
 import ArsenalCapture from './ArsenalCapture'
 import { quickAddToMindmap } from '../lib/mindmapWriter'
+import { MathLineBlock } from '../lib/mathRender'
 
 // Design tokens — keep in sync with StudyHub.tsx
 const GLASS_CARD  = 'var(--sh-glass-card)'
@@ -530,18 +531,20 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                       <ellipse cx="7" cy="6.5" rx="3.5" ry="1.4" fill="#FFE3A8" opacity="0.55"/>
                     </svg>
                   </div>
-                  <div dir="rtl" style={{
-                    flex: 1, minWidth: 0,
-                    fontSize: 18.5, lineHeight: 1.85, color: TEXT_DARK,
-                    whiteSpace: 'pre-wrap',
-                    textAlign: 'right',
-                    // Force entire line to read RTL so the LTR math chunks (the
-                    // 'sum' result the user wants on the right) sit at the line
-                    // END which in RTL = right edge. Per user 2026-05-24.
-                    unicodeBidi: 'plaintext',
-                  }}>
-                    {bullet}
-                  </div>
+                  {/* MathLineBlock: lines that mix Hebrew + math render as
+                      a single KaTeX block (label + equation in one styled
+                      box). Pure-text lines stay as plain RTL text. Per user
+                      2026-05-24. */}
+                  <MathLineBlock
+                    text={bullet}
+                    style={{
+                      flex: 1, minWidth: 0,
+                      fontSize: 18.5, lineHeight: 1.85, color: TEXT_DARK,
+                      whiteSpace: 'pre-wrap',
+                      textAlign: 'right',
+                      unicodeBidi: 'plaintext',
+                    }}
+                  />
                 </div>
               ))}
             </div>
