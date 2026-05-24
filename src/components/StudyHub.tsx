@@ -969,8 +969,11 @@ function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
             <div style={{ fontSize: 19, fontWeight: 700, color: TEXT_DARK, marginBottom: 4 }}>{c.label}</div>
             <div style={{ fontSize: 13, color: TEXT_MED, lineHeight: 1.45 }}>{c.desc}</div>
             {!c.active && (
+              // Pin moved from insetInlineStart (right edge in RTL — collided
+              // with the centered course icon) to insetInlineEnd (left edge
+              // in RTL) per user feedback 2026-05-24. Convention §23.
               <div style={{
-                position: 'absolute', top: 14, insetInlineStart: 14,
+                position: 'absolute', top: 14, insetInlineEnd: 14,
                 background: 'rgba(127,155,217,0.18)',
                 color: '#1f3e6c', border: '1px solid rgba(127,155,217,0.45)',
                 borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 700, letterSpacing: 0.2,
