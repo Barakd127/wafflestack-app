@@ -1099,14 +1099,28 @@ function initMM(){
           MM = parsed;
           if (!MM.searchMatches) MM.searchMatches = [];
           if (!MM.searchIdx) MM.searchIdx = 0;
+          // §24 migration: legacy maps had persisted node.x / node.y.
+          // Drop them so the tidy-tree engine owns layout from now on.
+          if (typeof mmMigrateToAutoLayout === 'function') mmMigrateToAutoLayout();
+          for (const id in MM.nodes) {
+            const n = MM.nodes[id];
+            if (typeof n.x === 'number' || typeof n.y === 'number') {
+              delete n.x; delete n.y;
+            }
+            // Restore defaults so the layout has something to measure.
+            if (!n.W) n.W = (n.type === 'canvas' ? 220 : 140);
+            if (!n.H) n.H = (n.type === 'canvas' ? 145 : 40);
+          }
           // First-load auto-collapse: keep only root + depth-1 children
-          // visible. User clicks a depth-1 node to drill into its branch;
-          // mmFocusBranch auto-collapses sibling branches so only one is
-          // open at a time (single-branch focus). One-shot per user via
-          // mmAutoCollapsed flag.
+          // visible. Direct-children-only expansion (§24) handles subsequent
+          // reveals. One-shot per user via mmAutoCollapsed flag.
           if (!MM.mmAutoCollapsed) {
             mmCollapseBelowDepth(1);
             MM.mmAutoCollapsed = true;
+          }
+          // Run tidy layout to compute positions from topology before render.
+          if (typeof mmTidyLayout === 'function') {
+            try { mmTidyLayout(); } catch(e) { /* render will retry */ }
           }
           MM_HISTORY = [cloneMMForHistory()];
           return; // loaded successfully — skip fresh init
@@ -1158,10 +1172,37 @@ function mmRedo(){
   mmRender();
 }
 
+// Serialize MM for persistence, stripping derived position fields.
+// §24: positions are owned by the tidy-tree layout engine; never persist
+// node.x / node.y. On load, mmTidyLayout recomputes them from topology.
+function mmSerializeForSave(){
+  try{
+    const out = {
+      root: MM.root,
+      sel: MM.sel,
+      multiSel: MM.multiSel,
+      orientation: MM.orientation,
+      searchMatches: [],
+      searchIdx: 0,
+      mmAutoCollapsed: MM.mmAutoCollapsed,
+      nodes: {}
+    };
+    for(const id in MM.nodes){
+      const n = MM.nodes[id];
+      // Skip x/y — derived. Keep W/H (measurement) and everything else.
+      const { x, y, ...rest } = n;
+      out.nodes[id] = rest;
+    }
+    return JSON.stringify(out);
+  } catch(e){
+    return JSON.stringify(MM);
+  }
+}
+
 function mmRender(){
-  // Auto-save after each render (debounced 600ms)
+  // Auto-save after each render (debounced 600ms) — topology only (no x/y).
   clearTimeout(_mmSaveTimer);
-  _mmSaveTimer = setTimeout(function(){ try{ localStorage.setItem(MM_SAVE_KEY, JSON.stringify(MM)); }catch(e){} }, 600);
+  _mmSaveTimer = setTimeout(function(){ try{ localStorage.setItem(MM_SAVE_KEY, mmSerializeForSave()); }catch(e){} }, 600);
 
   // Empty-state hint: when the map has only the root node (or fewer), show
   // an onboarding tip so first-time users know what to do.
@@ -5538,7 +5579,7 @@ function nbToggle(){
 
 function nbSave(){
   clearTimeout(_mmSaveTimer);
-  _mmSaveTimer = setTimeout(()=>{ try{ localStorage.setItem(MM_SAVE_KEY, JSON.stringify(MM)); }catch(e){} }, 500);
+  _mmSaveTimer = setTimeout(()=>{ try{ localStorage.setItem(MM_SAVE_KEY, (typeof mmSerializeForSave==='function' ? mmSerializeForSave() : JSON.stringify(MM))); }catch(e){} }, 500);
 }
 
 function nbCommitHistory(){
