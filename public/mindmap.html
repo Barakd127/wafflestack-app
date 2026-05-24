@@ -36,13 +36,18 @@ body.light #search-input::placeholder{color:rgba(0,0,0,.4)}
    so it doesn't obscure tb-left buttons. */
 #topbar{min-height:52px;background:linear-gradient(135deg,#0B1B3E 0%,#1E3A8A 100%);display:flex;align-items:center;justify-content:space-between;padding:6px 70px 6px 14px;color:white;gap:8px;box-shadow:0 4px 18px rgba(11,27,62,.55),inset 0 -2px 0 rgba(212,175,55,.35);position:relative;z-index:200;overflow:visible;flex-wrap:wrap;row-gap:6px;border-bottom:1px solid rgba(212,175,55,.4)}
 /* Salient "back home" button — top-left UP corner */
-#back-home-btn.tb-btn{height:36px;padding:0 18px;background:linear-gradient(135deg,#FFD700,#FFA500)!important;border:1px solid #FFC107!important;color:#1a1a2e!important;font-weight:700!important;font-size:13px!important;box-shadow:0 4px 14px rgba(255,193,7,.55),0 0 0 2px rgba(255,215,0,.25);transition:transform .15s,box-shadow .15s;letter-spacing:.2px}
+#back-home-btn.tb-btn{height:32px;min-width:32px;width:32px;padding:0;background:linear-gradient(135deg,#FFD700,#FFA500)!important;border:1px solid #FFC107!important;color:#1a1a2e!important;font-weight:700!important;font-size:13px!important;box-shadow:0 4px 14px rgba(255,193,7,.55),0 0 0 2px rgba(255,215,0,.25);transition:transform .15s,box-shadow .15s;letter-spacing:.2px;display:inline-flex;align-items:center;justify-content:center}
 #back-home-btn.tb-btn:hover{transform:scale(1.05);box-shadow:0 6px 22px rgba(255,193,7,.75),0 0 0 3px rgba(255,215,0,.4)}
 body.light #back-home-btn.tb-btn{background:linear-gradient(135deg,#FFD700,#FFA500)!important;color:#1a1a2e!important;border-color:#E6A800!important}
 #topbar::-webkit-scrollbar{height:4px}
 #topbar::-webkit-scrollbar-thumb{background:rgba(212,175,55,.4);border-radius:2px}
 /* ── Ribbon tabs (clustered toolbar) ── */
-.tb-ribbon-tab{height:28px;padding:0 11px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.88);border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:background .15s,border-color .15s;white-space:nowrap}
+.tb-ribbon-tab{height:32px;min-width:32px;padding:0 6px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.88);border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:background .15s,border-color .15s;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:2px}
+/* §25 icon-only toolbar: hide visible text labels but keep accessible name via aria-label / title.
+   Children inside ribbon tabs and tb-btn other than <svg>/.tb-chev are reduced to zero. */
+.tb-ribbon-tab > .tb-label, .tb-btn > .tb-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.tb-chev{font-size:9px;line-height:1;opacity:.85;margin-inline-start:1px}
+.tb-ribbon-tab > svg, .tb-btn > svg{vertical-align:middle;margin:0 !important}
 .tb-ribbon-tab:hover{background:rgba(108,99,255,.3);border-color:rgba(108,99,255,.6)}
 .tb-ribbon-tab.active{background:rgba(108,99,255,.45);border-color:#6c63ff;color:#fff}
 #ribbon-panel{display:none;background:linear-gradient(135deg,#162244 0%,#1a2c55 100%);border-bottom:1px solid rgba(127,155,217,.2);padding:7px 14px;gap:6px;flex-wrap:wrap;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 16px rgba(0,0,0,.3);position:relative;z-index:199}
@@ -50,7 +55,7 @@ body.light #back-home-btn.tb-btn{background:linear-gradient(135deg,#FFD700,#FFA5
 .tb-left{display:flex;align-items:center;gap:8px;font-size:13px;flex-shrink:0}
 .tb-logo{font-size:18px;cursor:pointer;font-weight:700;letter-spacing:-.5px;color:#D4AF37}
 .tb-center{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1 1 auto;justify-content:center;min-width:0;row-gap:6px}
-.tb-btn{height:28px;padding:0 10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:4px;font-weight:500}
+.tb-btn{height:32px;min-width:32px;padding:0 6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:2px;font-weight:500}
 .tb-btn:hover{background:rgba(212,175,55,.3);border-color:rgba(212,175,55,.6);color:#D4AF37}
 .tb-div{width:1px;height:20px;background:rgba(255,255,255,.2);margin:0 2px}
 .tb-right{display:flex;align-items:center;gap:8px}
@@ -631,18 +636,19 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
 <!-- Top bar -->
 <div id="topbar">
   <div class="tb-left">
-    <button class="tb-btn" id="back-home-btn" onclick="wsGoHome()" title="חזרה לדף הבית" aria-label="חזרה לדף הבית">← דף הבית</button>
+    <button class="tb-btn" id="back-home-btn" onclick="wsGoHome()" title="חזרה לדף הבית" aria-label="חזרה לדף הבית"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span class="tb-label">חזרה לדף הבית</span></button>
   </div>
   <div class="tb-center">
-    <button class="tb-btn" id="nb-toggle-btn" onclick="nbToggle()" title="עבור בין מפת חשיבה למחברת" aria-label="עבור בין מפת חשיבה למחברת"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-inline-end:6px"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h11"/></svg>מחברת</button>
+    <button class="tb-btn" id="nb-toggle-btn" onclick="nbToggle()" title="עבור בין מפת חשיבה למחברת" aria-label="עבור בין מפת חשיבה למחברת"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h11"/></svg><span class="tb-label">מחברת</span></button>
     <div class="tb-div"></div>
-    <button class="tb-ribbon-tab" id="rtab-split"     onclick="toggleRibbon('split')"     title="פצל מסך עם פאנל אחר" aria-label="פצל מסך — בחר פאנל"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-inline-end:5px"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="12" y1="4" x2="12" y2="20"/></svg>פצל ▾</button>
-    <button class="tb-ribbon-tab" id="rtab-add"       onclick="toggleRibbon('add')"       title="הוסף אלמנטים למפה" aria-label="הוסף אלמנטים למפה"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-inline-end:5px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>הוסף ▾</button>
-    <button class="tb-ribbon-tab" id="rtab-view"      onclick="toggleRibbon('view')"      title="כלי תצוגה ופריסה" aria-label="כלי תצוגה ופריסה"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-inline-end:5px"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>תצוגה ▾</button>
-    <button class="tb-ribbon-tab" id="rtab-templates" onclick="toggleRibbon('templates')" title="תבניות סטטיסטיות" aria-label="תבניות סטטיסטיות"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-inline-end:5px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>תבניות ▾</button>
-    <button class="tb-ribbon-tab" id="rtab-files"     onclick="toggleRibbon('files')"     title="ייצוא, ייבוא, ניקוי" aria-label="ייצוא, ייבוא וניקוי"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-inline-end:5px"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>קבצים ▾</button>
+    <button class="tb-ribbon-tab" id="rtab-split"     onclick="toggleRibbon('split')"     title="פצל מסך — בחר פאנל" aria-label="פצל מסך — בחר פאנל"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="12" y1="4" x2="12" y2="20"/></svg><span class="tb-chev">▾</span><span class="tb-label">פצל</span></button>
+    <button class="tb-ribbon-tab" id="rtab-add"       onclick="toggleRibbon('add')"       title="הוסף אלמנטים למפה" aria-label="הוסף אלמנטים למפה"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span class="tb-chev">▾</span><span class="tb-label">הוסף</span></button>
+    <button class="tb-ribbon-tab" id="rtab-view"      onclick="toggleRibbon('view')"      title="כלי תצוגה ופריסה" aria-label="כלי תצוגה ופריסה"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span class="tb-chev">▾</span><span class="tb-label">תצוגה</span></button>
+    <button class="tb-ribbon-tab" id="rtab-templates" onclick="toggleRibbon('templates')" title="תבניות סטטיסטיות" aria-label="תבניות סטטיסטיות"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="tb-chev">▾</span><span class="tb-label">תבניות</span></button>
+    <button class="tb-ribbon-tab" id="rtab-files"     onclick="toggleRibbon('files')"     title="ייצוא, ייבוא, ניקוי" aria-label="ייצוא, ייבוא וניקוי"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="tb-chev">▾</span><span class="tb-label">קבצים</span></button>
     <div class="tb-div"></div>
-    <button class="tb-btn" id="tidy-layout-btn" onclick="mmAutoLayout();mmFitView&&mmFitView()" title="סדר מחדש את הצמתים" aria-label="סדר מחדש את הצמתים" style="background:linear-gradient(135deg,rgba(212,175,55,.85),rgba(255,193,7,.85));border-color:rgba(212,175,55,.9);color:#1a1a2e;font-weight:700"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-inline-end:5px"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><polyline points="21 3 21 8 16 8"/><polyline points="3 21 3 16 8 16"/></svg>סדר מחדש</button>
+    <button class="tb-btn" id="zone-create-btn" onclick="mmStartZoneCreate()" title="צור אזור — נקודות חופשיות" aria-label="צור אזור — נקודות חופשיות"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2" stroke-dasharray="3 2"/><path d="M17 17l4 4"/><path d="M21 17v4h-4"/></svg><span class="tb-label">צור אזור</span></button>
+    <button class="tb-btn" id="tidy-layout-btn" onclick="mmAutoLayout();mmFitView&&mmFitView()" title="סדר מחדש את הצמתים" aria-label="סדר מחדש את הצמתים" style="background:linear-gradient(135deg,rgba(212,175,55,.85),rgba(255,193,7,.85));border-color:rgba(212,175,55,.9);color:#1a1a2e;font-weight:700"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><polyline points="21 3 21 8 16 8"/><polyline points="3 21 3 16 8 16"/></svg><span class="tb-label">סדר מחדש</span></button>
     <button class="tb-btn" onclick="openSearch()" title="חיפוש (Ctrl+F)" aria-label="חיפוש בצמתי המפה"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg></button>
     <button class="tb-btn" id="pomo-topbar-btn" onclick="pomoToggleWidget()" title="פומודורו" aria-label="טיימר פומודורו"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><line x1="9" y1="3" x2="15" y2="3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="13" x2="15" y2="15"/></svg></button>
     <button class="tb-btn" onclick="mmTourStart()" title="סיור מודרך" aria-label="התחל סיור מודרך"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l10-5 10 5-10 5z"/><path d="M6 11v5c0 1 2.5 3 6 3s6-2 6-3v-5"/></svg></button>
@@ -963,7 +969,7 @@ const NODE_COLORS=['#60a5fa','#34d399','#f59e0b','#f87171','#a78bfa','#22d3ee','
 // `orientation` controls tree flow:
 //   'lr' = horizontal (parent left, kids spread vertically to the right) — original
 //   'tb' = vertical   (parent top, kids spread horizontally below)        — X-Mind brace
-let MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0,orientation:'tb'};
+let MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0,orientation:'tb',zones:[],selectedZoneId:null};
 let MM_HISTORY=[];
 let MM_REDO=[]; // FIX #9 support: redo stack for Ctrl+Y
 
@@ -1070,7 +1076,7 @@ function _seedNode(spec, parentId, depth, slot, totalSiblings) {
 }
 
 function buildSeedMap() {
-  MM = { nodes: {}, root: 'root', sel: null, multiSel: [], zoom: 1, panX: 0, panY: 0, orientation: 'tb' };
+  MM = { nodes: {}, root: 'root', sel: null, multiSel: [], zoom: 1, panX: 0, panY: 0, orientation: 'tb', zones: [], selectedZoneId: null };
   // Root with id 'root' (not uid) so MM.root='root' lookup works.
   MM.nodes.root = {
     id: 'root', type: 'root', text: COURSE_SEED.text,
@@ -1102,9 +1108,11 @@ function initMM(){
           // §24 migration: legacy maps had persisted node.x / node.y.
           // Drop them so the tidy-tree engine owns layout from now on.
           if (typeof mmMigrateToAutoLayout === 'function') mmMigrateToAutoLayout();
+          if (!Array.isArray(MM.zones)) MM.zones = [];
           for (const id in MM.nodes) {
             const n = MM.nodes[id];
-            if (typeof n.x === 'number' || typeof n.y === 'number') {
+            // Zoned nodes keep their persisted (x,y) — they're free-positioned.
+            if (!n.zoneId && (typeof n.x === 'number' || typeof n.y === 'number')) {
               delete n.x; delete n.y;
             }
             // Restore defaults so the layout has something to measure.
@@ -1133,7 +1141,7 @@ function initMM(){
   try { buildSeedMap(); }
   catch(e) {
     console.warn('seed failed, falling back to blank root', e);
-    MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,orientation:'tb'};
+    MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,orientation:'tb',zones:[],selectedZoneId:null};
     MM.nodes.root=mmNode('root','סטטיסטיקה',100,100,null,'#312e81');
   }
   MM_HISTORY=[cloneMMForHistory()];
@@ -1185,13 +1193,19 @@ function mmSerializeForSave(){
       searchMatches: [],
       searchIdx: 0,
       mmAutoCollapsed: MM.mmAutoCollapsed,
+      zones: Array.isArray(MM.zones) ? MM.zones : [],
       nodes: {}
     };
     for(const id in MM.nodes){
       const n = MM.nodes[id];
-      // Skip x/y — derived. Keep W/H (measurement) and everything else.
-      const { x, y, ...rest } = n;
-      out.nodes[id] = rest;
+      if(n.zoneId){
+        // Zoned (free-positioned) node — keep x/y.
+        out.nodes[id] = { ...n };
+      } else {
+        // Skip x/y — derived by tidy-tree. Keep W/H (measurement) and everything else.
+        const { x, y, ...rest } = n;
+        out.nodes[id] = rest;
+      }
     }
     return JSON.stringify(out);
   } catch(e){
@@ -1237,6 +1251,8 @@ function mmRender(){
   // v17: SVG is inside viewport — clear nodes but keep svg; then clear svg separately
   // Remove only node-wrap children, not the svg itself
   Array.from(vp.children).forEach(c=>{if(c!==svg)c.remove();});
+  // §25 Zone feature: render zones first so they sit beneath nodes (z-index 1 vs 2).
+  if(typeof mmRenderZones === 'function') mmRenderZones();
   svg.innerHTML='';
   let svgCode='';
   // Pre-pass: position summary nodes next to their target groups so the
@@ -1517,6 +1533,13 @@ function mmRender(){
           // Prefer reorder (more precise) when present; otherwise reparent.
           if(bestReorder) return { kind:'reorder', parentId: bestReorder.parentId, index: bestReorder.index, _y: bestReorder.y, _x: bestReorder.bandX, _w: bestReorder.bandW };
           if(reparentHit) return { kind:'reparent', parentId: reparentHit };
+          // §25 Zone — check whether the drop point lands inside a zone.
+          // O(zones) hit test. If yes, we'll commit as free-positioned.
+          const zone = (typeof mmZoneAt === 'function') ? mmZoneAt(wx, wy) : null;
+          if(zone) return { kind:'zone-place', zoneId: zone.id, _wx: wx, _wy: wy };
+          // If the node was previously zoned and the drop is OUTSIDE any zone,
+          // release it back to the tidy-tree under its existing parent.
+          if(nodeObj.zoneId) return { kind:'zone-release' };
           return null;
         }
 
@@ -1582,16 +1605,33 @@ function mmRender(){
           if(!oldParent) return false;
 
           if(t.kind === 'reparent'){
-            if(t.parentId === oldParentId) return false; // no-op
+            if(t.parentId === oldParentId && !nodeObj.zoneId) return false; // no-op
             // Remove from old parent, append to new.
             oldParent.childIds = oldParent.childIds.filter(c => c !== nodeObj.id);
             const newParent = MM.nodes[t.parentId];
             if(!newParent) return false;
             newParent.childIds = newParent.childIds || [];
-            newParent.childIds.push(nodeObj.id);
+            if(t.parentId !== oldParentId) newParent.childIds.push(nodeObj.id);
+            else newParent.childIds.push(nodeObj.id);
             // Auto-expand the new parent so the drop lands somewhere visible.
             newParent.collapsed = false;
             nodeObj.parentId = t.parentId;
+            // Reparenting onto a real node leaves the zone (back into the tree).
+            if(nodeObj.zoneId){ delete nodeObj.zoneId; delete nodeObj.x; delete nodeObj.y; }
+            return true;
+          }
+          if(t.kind === 'zone-place'){
+            // Mark as zoned + persist drop position (world coords, top-left).
+            const w = nodeObj.W || 140, h = nodeObj.H || 40;
+            nodeObj.zoneId = t.zoneId;
+            nodeObj.x = t._wx - w/2;
+            nodeObj.y = t._wy - h/2;
+            return true;
+          }
+          if(t.kind === 'zone-release'){
+            // Strip zoneId — tidy-tree will reclaim layout next pass.
+            delete nodeObj.zoneId;
+            delete nodeObj.x; delete nodeObj.y;
             return true;
           }
           if(t.kind === 'reorder'){
@@ -1667,7 +1707,8 @@ function mmRender(){
     })(n,div);
 
     vp.appendChild(div);
-    if(id!==MM.root && n.type!=='summary'){
+    // §25: zoned nodes are free-positioned → suppress the parent-child curve.
+    if(id!==MM.root && n.type!=='summary' && !n.zoneId){
       const p=MM.nodes[n.parentId];
       if(p){
         const lc = n.color||'#60a5fa';
@@ -1714,6 +1755,9 @@ function mmIsVisible(id){
   if(id===MM.root)return true;
   const n=MM.nodes[id];
   if(!n)return false;
+  // §25 Zone: zoned (free-positioned) nodes are always visible regardless
+  // of ancestor collapse state — they're an explicit escape hatch.
+  if(n.zoneId) return true;
   const p=MM.nodes[n.parentId];
   if(!p)return false;
   if(p.collapsed)return false;
@@ -2068,14 +2112,18 @@ const MM_TIDY_HGAP = 140; // horizontal depth-step
 const MM_TIDY_NODE_H = 40; // default node height used for spacing
 
 // Returns visible direct children (collapse-aware) of node id.
+// §25 Zone feature: nodes with a zoneId are free-positioned inside their
+// zone — they are excluded from the tidy-tree layout so the engine treats
+// the parent as if they aren't there.
 function mmTidyVisibleChildren(n){
   if(!n || !n.childIds || n.collapsed) return [];
-  return n.childIds.filter(c => MM.nodes[c] && MM.nodes[c].type !== 'summary');
+  return n.childIds.filter(c => MM.nodes[c] && MM.nodes[c].type !== 'summary' && !MM.nodes[c].zoneId);
 }
 
 // Tidy-tree (LR horizontal) — places visible subtree rooted at id.
-// Top-level children of root are split: even-index → right, odd-index → left,
-// so the map balances around the root (X-Mind classic balanced layout).
+// Top-level children of root are split: even-index → LEFT, odd-index → RIGHT,
+// so the map balances around the root and the PRIMARY side grows LEFT
+// (RTL/Hebrew convention — eyes scan right→left, primary content starts left).
 // Algorithm: 2-pass — (1) recursive subtree-height computation,
 // (2) assign x by depth*hgap + side, assign y as centred over children.
 //
@@ -2130,8 +2178,9 @@ function mmTidyLayout(){
   const topKids = mmTidyVisibleChildren(root);
   if(topKids.length){
     // Split top-level into left/right alternately for balance.
+    // RTL: even-index → LEFT (primary side in Hebrew), odd-index → RIGHT.
     const right = [], left = [];
-    topKids.forEach((c,i)=>{ (i % 2 === 0 ? right : left).push(c); });
+    topKids.forEach((c,i)=>{ (i % 2 === 0 ? left : right).push(c); });
 
     // Right side
     if(right.length){
@@ -2206,6 +2255,233 @@ function mmAnimateToLayout(){
     else window._mmAnimating = false;
   }
   requestAnimationFrame(tick);
+}
+
+// ═══════════════════════════════════════════════════════════
+// §25 ZONE feature — X-Mind-style escape hatch from tidy-tree.
+// A zone is a rectangular region of world space. Nodes inside the zone
+// are FREE-POSITIONED (have explicit x/y + zoneId). Outside = tidy tree.
+// Persisted in MM.zones[] alongside nodes. O(zones) hit-test on drop.
+// ═══════════════════════════════════════════════════════════
+const MM_ZONE_BORDER = '#D4A017';
+const MM_ZONE_FILL = 'rgba(212,175,55,0.04)';
+
+function mmZoneAt(wx, wy){
+  if(!Array.isArray(MM.zones) || !MM.zones.length) return null;
+  // Iterate in reverse so top-most (last-created) zone wins.
+  for(let i = MM.zones.length - 1; i >= 0; i--){
+    const z = MM.zones[i];
+    if(wx >= z.x && wx <= z.x + z.w && wy >= z.y && wy <= z.y + z.h) return z;
+  }
+  return null;
+}
+
+function mmZonesEnsureArray(){ if(!Array.isArray(MM.zones)) MM.zones = []; }
+
+// Toolbar entry — switch into "create zone" mode. Cursor becomes crosshair.
+// User click-drags on the canvas; mouseup commits the new zone.
+function mmStartZoneCreate(){
+  mmZonesEnsureArray();
+  const ca = document.getElementById('canvas-area');
+  if(!ca) return;
+  ca.style.cursor = 'crosshair';
+  // Build a one-shot overlay that captures the drag.
+  let startW = null;
+  let preview = null;
+
+  function clientToWorld(cx, cy){
+    const rect = ca.getBoundingClientRect();
+    return {
+      x: (cx - rect.left - MM.panX) / MM.zoom,
+      y: (cy - rect.top  - MM.panY) / MM.zoom
+    };
+  }
+
+  function onDown(ev){
+    if(ev.button !== 0) return;
+    ev.preventDefault(); ev.stopPropagation();
+    startW = clientToWorld(ev.clientX, ev.clientY);
+    preview = document.createElement('div');
+    preview.id = 'mm-zone-preview';
+    preview.style.cssText = 'position:absolute;border:1.5px dashed '+MM_ZONE_BORDER+';background:'+MM_ZONE_FILL+';pointer-events:none;z-index:50;border-radius:12px';
+    ca.appendChild(preview);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }
+  function onMove(ev){
+    if(!startW || !preview) return;
+    const cur = clientToWorld(ev.clientX, ev.clientY);
+    const x = Math.min(startW.x, cur.x), y = Math.min(startW.y, cur.y);
+    const w = Math.abs(cur.x - startW.x), h = Math.abs(cur.y - startW.y);
+    preview.style.left = (x * MM.zoom + MM.panX) + 'px';
+    preview.style.top  = (y * MM.zoom + MM.panY) + 'px';
+    preview.style.width  = (w * MM.zoom) + 'px';
+    preview.style.height = (h * MM.zoom) + 'px';
+  }
+  function cleanup(){
+    if(preview){ preview.remove(); preview = null; }
+    ca.style.cursor = '';
+    ca.removeEventListener('mousedown', onDown, true);
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+  function onUp(ev){
+    if(!startW){ cleanup(); return; }
+    const end = clientToWorld(ev.clientX, ev.clientY);
+    const x = Math.min(startW.x, end.x), y = Math.min(startW.y, end.y);
+    const w = Math.abs(end.x - startW.x), h = Math.abs(end.y - startW.y);
+    cleanup();
+    // Reject zones smaller than ~40×40 world units (likely an accidental click).
+    if(w < 40 || h < 40) return;
+    const zid = 'zone_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6);
+    MM.zones.push({ id: zid, x: x, y: y, w: w, h: h, label: 'אזור' });
+    MM.selectedZoneId = zid;
+    if(typeof mmPushHistory === 'function') mmPushHistory();
+    if(typeof mmRender === 'function') mmRender();
+  }
+
+  // Use capture phase so we beat node mousedown handlers.
+  ca.addEventListener('mousedown', onDown, true);
+  // Escape cancels create-mode.
+  document.addEventListener('keydown', function esc(e){
+    if(e.key === 'Escape'){ cleanup(); document.removeEventListener('keydown', esc); }
+  });
+}
+
+// Render all zones into the viewport. Called from mmRender (after nodes so
+// zone chrome z-orders below nodes; the dashed border still reads through).
+function mmRenderZones(){
+  mmZonesEnsureArray();
+  const vp = document.getElementById('viewport');
+  if(!vp) return;
+  // Remove any previous zone DOM nodes.
+  Array.from(vp.querySelectorAll('.mm-zone')).forEach(el => el.remove());
+  for(const z of MM.zones){
+    const wrap = document.createElement('div');
+    wrap.className = 'mm-zone' + (MM.selectedZoneId === z.id ? ' selected' : '');
+    wrap.dataset.zoneId = z.id;
+    wrap.style.cssText = [
+      'position:absolute',
+      'left:'+z.x+'px',
+      'top:'+z.y+'px',
+      'width:'+z.w+'px',
+      'height:'+z.h+'px',
+      'border:1.5px dashed '+MM_ZONE_BORDER,
+      'background:'+MM_ZONE_FILL,
+      'border-radius:12px',
+      'z-index:1',
+      'pointer-events:auto',
+      'cursor:move'
+    ].join(';');
+    // Label (top-left in world; flipped to start-side via CSS direction).
+    const lbl = document.createElement('div');
+    lbl.className = 'mm-zone-label';
+    lbl.textContent = z.label || 'אזור';
+    lbl.style.cssText = 'position:absolute;top:-12px;inset-inline-start:10px;background:'+MM_ZONE_BORDER+';color:#1a1a2e;font:600 11px Rubik,sans-serif;padding:2px 8px;border-radius:6px;cursor:text;user-select:none;direction:rtl';
+    lbl.title = 'לחיצה כפולה לשינוי שם';
+    lbl.ondblclick = (e) => {
+      e.stopPropagation();
+      const v = prompt('שם האזור:', z.label || 'אזור');
+      if(v !== null){ z.label = v.trim() || z.label; mmPushHistory(); mmRender(); }
+    };
+    wrap.appendChild(lbl);
+
+    // Resize handles (8 — 4 corners + 4 edges).
+    const handleDefs = [
+      ['nw','top:-5px;inset-inline-start:-5px;cursor:nwse-resize'],
+      ['n', 'top:-5px;inset-inline-start:50%;transform:translateX(-50%);cursor:ns-resize'],
+      ['ne','top:-5px;inset-inline-end:-5px;cursor:nesw-resize'],
+      ['e', 'top:50%;inset-inline-end:-5px;transform:translateY(-50%);cursor:ew-resize'],
+      ['se','bottom:-5px;inset-inline-end:-5px;cursor:nwse-resize'],
+      ['s', 'bottom:-5px;inset-inline-start:50%;transform:translateX(-50%);cursor:ns-resize'],
+      ['sw','bottom:-5px;inset-inline-start:-5px;cursor:nesw-resize'],
+      ['w', 'top:50%;inset-inline-start:-5px;transform:translateY(-50%);cursor:ew-resize'],
+    ];
+    if(MM.selectedZoneId === z.id){
+      for(const [dir, css] of handleDefs){
+        const h = document.createElement('div');
+        h.className = 'mm-zone-handle';
+        h.dataset.dir = dir;
+        h.style.cssText = 'position:absolute;width:10px;height:10px;background:#fff;border:1.5px solid '+MM_ZONE_BORDER+';border-radius:2px;'+css;
+        h.addEventListener('mousedown', (ev) => mmZoneBeginResize(ev, z, dir));
+        wrap.appendChild(h);
+      }
+    }
+
+    // Click to select; drag from body (not handles) to move.
+    wrap.addEventListener('mousedown', (ev) => {
+      if(ev.target.classList.contains('mm-zone-handle')) return;
+      if(ev.target.classList.contains('mm-zone-label')) return;
+      ev.stopPropagation();
+      MM.selectedZoneId = z.id;
+      MM.sel = null; MM.multiSel = [];
+      mmZoneBeginMove(ev, z);
+    });
+
+    vp.appendChild(wrap);
+  }
+}
+
+function mmZoneBeginMove(ev, z){
+  const startX = ev.clientX, startY = ev.clientY;
+  const zx0 = z.x, zy0 = z.y;
+  function mv(e){
+    const dx = (e.clientX - startX) / MM.zoom;
+    const dy = (e.clientY - startY) / MM.zoom;
+    z.x = zx0 + dx; z.y = zy0 + dy;
+    mmRender();
+  }
+  function up(){
+    document.removeEventListener('mousemove', mv);
+    document.removeEventListener('mouseup', up);
+    mmPushHistory();
+  }
+  document.addEventListener('mousemove', mv);
+  document.addEventListener('mouseup', up);
+}
+
+function mmZoneBeginResize(ev, z, dir){
+  ev.stopPropagation(); ev.preventDefault();
+  const sx = ev.clientX, sy = ev.clientY;
+  const x0 = z.x, y0 = z.y, w0 = z.w, h0 = z.h;
+  function mv(e){
+    const dx = (e.clientX - sx) / MM.zoom;
+    const dy = (e.clientY - sy) / MM.zoom;
+    let nx = x0, ny = y0, nw = w0, nh = h0;
+    if(dir.includes('w')){ nx = x0 + dx; nw = w0 - dx; }
+    if(dir.includes('e')){ nw = w0 + dx; }
+    if(dir.includes('n')){ ny = y0 + dy; nh = h0 - dy; }
+    if(dir.includes('s')){ nh = h0 + dy; }
+    if(nw < 60){ nw = 60; if(dir.includes('w')) nx = x0 + w0 - 60; }
+    if(nh < 60){ nh = 60; if(dir.includes('n')) ny = y0 + h0 - 60; }
+    z.x = nx; z.y = ny; z.w = nw; z.h = nh;
+    mmRender();
+  }
+  function up(){
+    document.removeEventListener('mousemove', mv);
+    document.removeEventListener('mouseup', up);
+    mmPushHistory();
+  }
+  document.addEventListener('mousemove', mv);
+  document.addEventListener('mouseup', up);
+}
+
+// Delete the currently-selected zone. Nodes inside revert to tidy-tree.
+function mmDeleteSelectedZone(){
+  const zid = MM.selectedZoneId;
+  if(!zid) return false;
+  const idx = MM.zones.findIndex(z => z.id === zid);
+  if(idx < 0) return false;
+  if(!confirm('למחוק את האזור? צמתים בתוכו יחזרו לעץ הראשי.')) return false;
+  // Release every node that belonged to this zone.
+  for(const id in MM.nodes){
+    const n = MM.nodes[id];
+    if(n.zoneId === zid){ delete n.zoneId; delete n.x; delete n.y; }
+  }
+  MM.zones.splice(idx, 1);
+  MM.selectedZoneId = null;
+  mmPushHistory(); mmRender();
+  return true;
 }
 
 // One-shot migration: existing maps had persisted node.x/node.y. Drop them
@@ -4105,6 +4381,11 @@ document.addEventListener('keydown', e => {
       else if(MM.sel) mmAddChild(MM.sel);
     }
   } else if(e.key==='Delete'||e.key==='Backspace'){
+    // §25 Zone: if a zone is selected, delete it (releases its nodes).
+    if(MM.selectedZoneId){
+      e.preventDefault();
+      if(typeof mmDeleteSelectedZone === 'function' && mmDeleteSelectedZone()) return;
+    }
     // Batch delete: drop every multi-selected node + descendants. Falls back
     // to single-node deletion if nothing is multi-selected.
     if (MM.multiSel && MM.multiSel.length) {
@@ -4236,6 +4517,9 @@ function mmEnsureSelVisible(){
       ca.style.cursor = 'grabbing';
       e.preventDefault();
     } else if (e.button === 0 && !onNode && !spaceDown) {
+      // §25: bare-canvas click outside any zone → deselect zone.
+      const onZone = e.target.closest('.mm-zone');
+      if(!onZone && MM.selectedZoneId){ MM.selectedZoneId = null; mmRender(); }
       // Plain left-click on empty canvas → start marquee
       const rect = ca.getBoundingClientRect();
       const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
@@ -5545,7 +5829,7 @@ function mmTourRender(){
 function mmClearAll(){
   if(!confirm('למחוק את כל המפה? הפעולה לא הפיכה.')) return;
   try{ localStorage.removeItem(MM_SAVE_KEY); }catch(e){}
-  MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0};
+  MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0,zones:[],selectedZoneId:null};
   MM.nodes.root = mmNode('root','Untitled',100,100,null,'#60a5fa');
   MM_HISTORY=[cloneMMForHistory()];
   MM_REDO=[];
