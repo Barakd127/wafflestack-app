@@ -34,7 +34,7 @@ body.light #search-input::placeholder{color:rgba(0,0,0,.4)}
    weird vertical pile-up at narrow widths. Padding-right reserves space
    for the React dark-mode toggle (z-200, fixed top-right of host page)
    so it doesn't obscure tb-left buttons. */
-#topbar{height:52px;background:linear-gradient(135deg,#0B1B3E 0%,#1E3A8A 100%);display:flex;align-items:center;justify-content:space-between;padding:0 70px 0 14px;color:white;gap:8px;box-shadow:0 4px 18px rgba(11,27,62,.55),inset 0 -2px 0 rgba(212,175,55,.35);position:relative;z-index:200;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;border-bottom:1px solid rgba(212,175,55,.4)}
+#topbar{min-height:52px;background:linear-gradient(135deg,#0B1B3E 0%,#1E3A8A 100%);display:flex;align-items:center;justify-content:space-between;padding:6px 70px 6px 14px;color:white;gap:8px;box-shadow:0 4px 18px rgba(11,27,62,.55),inset 0 -2px 0 rgba(212,175,55,.35);position:relative;z-index:200;overflow:visible;flex-wrap:wrap;row-gap:6px;border-bottom:1px solid rgba(212,175,55,.4)}
 /* Salient "back home" button — top-left UP corner */
 #back-home-btn.tb-btn{height:36px;padding:0 18px;background:linear-gradient(135deg,#FFD700,#FFA500)!important;border:1px solid #FFC107!important;color:#1a1a2e!important;font-weight:700!important;font-size:13px!important;box-shadow:0 4px 14px rgba(255,193,7,.55),0 0 0 2px rgba(255,215,0,.25);transition:transform .15s,box-shadow .15s;letter-spacing:.2px}
 #back-home-btn.tb-btn:hover{transform:scale(1.05);box-shadow:0 6px 22px rgba(255,193,7,.75),0 0 0 3px rgba(255,215,0,.4)}
@@ -49,7 +49,7 @@ body.light #back-home-btn.tb-btn{background:linear-gradient(135deg,#FFD700,#FFA5
 .ribbon-group{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap}
 .tb-left{display:flex;align-items:center;gap:8px;font-size:13px;flex-shrink:0}
 .tb-logo{font-size:18px;cursor:pointer;font-weight:700;letter-spacing:-.5px;color:#D4AF37}
-.tb-center{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;flex:1 1 auto;justify-content:center;min-width:0}
+.tb-center{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1 1 auto;justify-content:center;min-width:0;row-gap:6px}
 .tb-btn{height:28px;padding:0 10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:4px;font-weight:500}
 .tb-btn:hover{background:rgba(212,175,55,.3);border-color:rgba(212,175,55,.6);color:#D4AF37}
 .tb-div{width:1px;height:20px;background:rgba(255,255,255,.2);margin:0 2px}
@@ -396,7 +396,12 @@ body.notebook-mode #app{display:none}
 body.notebook-mode #notebook-panel{display:flex}
 body.notebook-mode #minimap-container{display:none}
 body.light #notebook-panel{background:linear-gradient(135deg,#f3f5fc 0%,#e9eef9 100%);color:#1a1f2e}
-.nb-tree{width:320px;min-width:220px;max-width:480px;flex-shrink:0;border-left:1px solid rgba(255,255,255,.08);overflow-y:auto;padding:14px 10px;background:rgba(15,18,32,.55);backdrop-filter:blur(8px)}
+.nb-tree{width:200px;min-width:140px;max-width:520px;flex-shrink:0;border-left:1px solid rgba(255,255,255,.08);overflow-y:auto;padding:14px 10px;background:rgba(15,18,32,.55);backdrop-filter:blur(8px);position:relative}
+/* Drag handle on the LEFT edge of the aside (it sits on the visual right in
+   RTL row-reverse layout, so the inner edge is left). 6px wide hit zone. */
+.nb-tree-resizer{position:absolute;top:0;left:0;width:6px;height:100%;cursor:col-resize;z-index:5;background:transparent;transition:background .12s}
+.nb-tree-resizer:hover,.nb-tree-resizer.dragging{background:rgba(212,175,55,.35)}
+body.light .nb-tree-resizer:hover,body.light .nb-tree-resizer.dragging{background:rgba(212,175,55,.45)}
 body.light .nb-tree{background:rgba(255,255,255,.7);border-left:1px solid rgba(99,102,241,.18);backdrop-filter:blur(8px)}
 .nb-tree-header{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45)}
 body.light .nb-tree-header{color:rgba(0,0,0,.5)}
@@ -444,7 +449,12 @@ body.light .nb-breadcrumb{color:rgba(0,0,0,.55)}
   transition:border-color .2s,box-shadow .2s}
 body.light .nb-body{background-color:#FBF8F1;border-color:rgba(31,38,64,0.12);color:#1F2640}
 .nb-body:focus{border-color:rgba(91,139,255,.55);box-shadow:0 0 0 3px rgba(91,139,255,.12)}
-.nb-body:empty::before{content:attr(data-placeholder);color:rgba(31,38,64,.30);pointer-events:none}
+/* Empty-state placeholder removed per user feedback — show only the
+   real blinking caret (caret-color set above). The :empty::before rule
+   was rendering "התחל להקליד…" which the user explicitly rejected.
+   Match axis 4 of wafflestack-conventions: cursor-only empty states. */
+.nb-body:empty{caret-color:#D4AF37}
+.nb-body:empty:focus{caret-color:#D4AF37}
 /* Inline math widget (KaTeX-rendered, opens MathLive on click) */
 .nb-math-widget{display:inline-block;vertical-align:middle;padding:2px 6px;margin:0 2px;
   /* Issue 2: transparent bg so equation widgets inherit notebook/mindmap theme
@@ -695,6 +705,7 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
 <!-- Notebook view (toggled with body.notebook-mode) -->
 <div id="notebook-panel">
   <aside class="nb-tree" id="nb-tree">
+    <div class="nb-tree-resizer" id="nb-tree-resizer" title="גרור לשינוי רוחב"></div>
     <div class="nb-tree-header">
       <span>תיקיות</span>
       <button onclick="nbAddFolder()" title="תיקייה חדשה ברמה העליונה">+ תיקייה</button>
@@ -1087,12 +1098,13 @@ function initMM(){
           MM = parsed;
           if (!MM.searchMatches) MM.searchMatches = [];
           if (!MM.searchIdx) MM.searchIdx = 0;
-          // First-load auto-collapse: keep top 3 tiers visible (depth 0..2),
-          // collapse everything deeper so a wide stats tree (~60 leaves)
-          // doesn't fan into illegible 46% zoom soup. One-shot per user via
-          // mmAutoCollapsed flag — user clicks expand chevrons to drill in.
+          // First-load auto-collapse: keep only root + depth-1 children
+          // visible. User clicks a depth-1 node to drill into its branch;
+          // mmFocusBranch auto-collapses sibling branches so only one is
+          // open at a time (single-branch focus). One-shot per user via
+          // mmAutoCollapsed flag.
           if (!MM.mmAutoCollapsed) {
-            mmCollapseBelowDepth(3);
+            mmCollapseBelowDepth(1);
             MM.mmAutoCollapsed = true;
           }
           MM_HISTORY = [cloneMMForHistory()];
@@ -1237,10 +1249,20 @@ function mmRender(){
         else MM.multiSel.push(id);
         if(!MM.multiSel.includes(MM.sel)) MM.multiSel.unshift(MM.sel||id);
         MM.sel = id;
+        mmRender();
       } else {
         MM.sel=id;MM.multiSel=[];
+        // Single-branch focus: auto-expand this node's children + collapse
+        // sibling branches. If node has children, also un-collapse so the
+        // click drills in.
+        const nn = MM.nodes[id];
+        if(nn && nn.childIds && nn.childIds.length){
+          nn.collapsed = false;
+        }
+        mmFocusBranch(id);
+        mmRender();
+        if(typeof mmFitVisibleSubtree === 'function') mmFitVisibleSubtree(id);
       }
-      mmRender();
     };
     if(n.type==='equation'){
       nodeDiv.title='Double-click to edit';
@@ -1259,7 +1281,14 @@ function mmRender(){
       const tog=document.createElement('div');
       tog.className='node-toggle';
       tog.textContent=n.collapsed?'+':'-';
-      tog.onclick=e=>{e.stopPropagation();n.collapsed=!n.collapsed;mmRender();};
+      tog.onclick=e=>{
+        e.stopPropagation();
+        n.collapsed=!n.collapsed;
+        // When expanding, collapse sibling branches (single-branch focus).
+        if(!n.collapsed) mmFocusBranch(id);
+        mmRender();
+        if(typeof mmFitVisibleSubtree === 'function') mmFitVisibleSubtree(id);
+      };
       div.appendChild(tog);
     }
     if(n.type==='canvas'){
@@ -1433,6 +1462,60 @@ function mmFitView(){
   const windowW=document.getElementById('app').clientWidth;const windowH=document.getElementById('app').clientHeight;
   MM.zoom=Math.min(windowW/w,windowH/h,1.5);MM.panX=windowW/2-(minX+maxX)/2*MM.zoom;MM.panY=windowH/2-(minY+maxY)/2*MM.zoom;
   mmApplyTransform();mmRender();
+}
+
+// Auto-fit a subtree's visible nodes after expand/collapse, eased.
+// Targets ~80% of viewport so the focused branch fills the screen without
+// hugging the edges. Falls back to mmFitView if the subtree has no
+// visible descendants.
+function mmFitVisibleSubtree(rootId){
+  if(!MM || !MM.nodes || !rootId) return;
+  if(localStorage.getItem('mmAutoZoom') === 'off') return;
+  // Collect every visible descendant of rootId (plus rootId itself).
+  const ids = [];
+  (function walk(id){
+    const n = MM.nodes[id]; if(!n) return;
+    ids.push(id);
+    if(n.collapsed) return;
+    for(const cid of (n.childIds || [])){
+      if(MM.nodes[cid]) walk(cid);
+    }
+  })(rootId);
+  if(!ids.length) return mmFitView();
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(const id of ids){
+    const n = MM.nodes[id]; if(!n) continue;
+    const w = n.W || 140, h = n.H || 40;
+    minX = Math.min(minX, n.x);
+    maxX = Math.max(maxX, n.x + w);
+    minY = Math.min(minY, n.y);
+    maxY = Math.max(maxY, n.y + h);
+  }
+  if(minX === Infinity) return mmFitView();
+  const pad = 80;
+  const w = (maxX - minX) + pad*2;
+  const h = (maxY - minY) + pad*2;
+  const appEl = document.getElementById('app');
+  if(!appEl) return;
+  const windowW = appEl.clientWidth, windowH = appEl.clientHeight;
+  const targetZoom = Math.min(windowW/w, windowH/h, 1.4) * 0.95;
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  const targetPanX = windowW/2 - cx * targetZoom;
+  const targetPanY = windowH/2 - cy * targetZoom;
+  // Eased animation from current to target.
+  const fromZ = MM.zoom, fromX = MM.panX, fromY = MM.panY;
+  const dur = 280, t0 = performance.now();
+  function step(now){
+    const t = Math.min(1, (now - t0) / dur);
+    const e = t<0.5 ? 2*t*t : -1 + (4 - 2*t)*t; // easeInOutQuad
+    MM.zoom = fromZ + (targetZoom - fromZ) * e;
+    MM.panX = fromX + (targetPanX - fromX) * e;
+    MM.panY = fromY + (targetPanY - fromY) * e;
+    mmApplyTransform();
+    if(t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 function mmZoomBy(factor){
@@ -1653,6 +1736,37 @@ function mmCollapseBelowDepth(maxDepth){
     for(const cid of (n.childIds || [])) walk(cid, depth + 1);
   }
   walk(MM.root, 0);
+}
+
+// Single-branch focus: expand the path from root → id, collapse every
+// sibling branch along the way. Persists via mmFocusEnabled in localStorage
+// (default: on). User can disable via localStorage.mmFocusBranch='off'.
+function mmFocusBranch(id){
+  if(!MM || !MM.nodes || !id) return;
+  if(localStorage.getItem('mmFocusBranch') === 'off') return;
+  // Walk root → id, marking ancestors. Anything not on the path that sits
+  // at the same depth as an ancestor's other children gets collapsed.
+  const path = [];
+  let cur = id;
+  while(cur){
+    path.unshift(cur);
+    const n = MM.nodes[cur];
+    cur = n && n.parentId;
+  }
+  const onPath = new Set(path);
+  // For each node on the path, expand it and collapse its siblings'
+  // subtrees (collapse only the sibling itself, not deep inside).
+  path.forEach((nid) => {
+    const n = MM.nodes[nid]; if(!n) return;
+    n.collapsed = false;
+    const parent = MM.nodes[n.parentId];
+    if(!parent) return;
+    (parent.childIds || []).forEach(sid => {
+      if(sid !== nid && !onPath.has(sid)){
+        const s = MM.nodes[sid]; if(s) s.collapsed = true;
+      }
+    });
+  });
 }
 
 // Full subtree-aware auto-layout — positions every node so subtrees never collide
@@ -3339,11 +3453,12 @@ function applyTemplate(name){
   const anchorId = (MM.sel && MM.nodes[MM.sel]) ? MM.sel : MM.root;
   const anchor = MM.nodes[anchorId];
   const pos = findNextTemplatePos(anchor);
-  const topCount=MM.nodes[MM.root].childIds.length;
-  const color=NODE_COLORS[topCount%NODE_COLORS.length];
-  // Templates always attach under root for now (canvas nodes are top-level),
-  // but visually placed near the anchor so they stay close to existing tree.
-  const cn=mmNode('canvas',def.title,pos.x,pos.y,MM.root,color);
+  const parentSiblingCount = (MM.nodes[anchorId].childIds || []).length;
+  const color=NODE_COLORS[parentSiblingCount%NODE_COLORS.length];
+  // Templates now attach as a child of the selected node (falling back to
+  // root when nothing is selected). Previously every template was wired
+  // under root regardless of selection — user couldn't grow a sub-branch.
+  const cn=mmNode('canvas',def.title,pos.x,pos.y,anchorId,color);
   try{if(def.sceneFn)cn.scene=def.sceneFn();}catch(e){console.warn('Template scene error:',e);}
   // v18: Auto-spawn of side-branch nodes ('μ = mean', 'Set A', etc.) removed.
   // User flagged them as visual clutter — the template's canvas already shows
@@ -5296,11 +5411,14 @@ function nbRenderContent(){
   body.contentEditable = 'true';
   body.spellcheck = false;
   body.dir = 'rtl';
-  // Empty-page hint. Visible via .nb-body:empty::before (pointer-events:none
-  // so it never blocks the caret). Empty string previously gave the user no
-  // signal that the area was editable.
-  body.setAttribute('data-placeholder', 'התחל להקליד…');
+  // No placeholder text — user wants cursor-only empty state (matches
+  // wafflestack-conventions axis 4). The blinking caret is enough signal
+  // that the area is editable.
   body.innerHTML = nbBodyAsHtml(n);
+  // Auto-focus the body when empty so the caret is immediately visible.
+  if (!n.body || !n.body.trim()) {
+    setTimeout(() => { try { body.focus(); } catch(_){} }, 50);
+  }
   let bodyTimer = null;
   body.oninput = () => {
     n.body = body.innerHTML;
@@ -5700,6 +5818,71 @@ function panToNode(node){
   }
   requestAnimationFrame(tick);
 }
+
+// ── Notebook folder-tree resize handle ──
+// RTL: aside sits on the visual right via flex-direction:row-reverse on
+// #notebook-panel. The drag handle is on the LEFT edge of the aside
+// (the inner edge facing the content area). Persisted width key:
+// wafflestack-nb-tree-width.
+(function nbTreeResizeInit(){
+  var STORAGE_KEY = 'wafflestack-nb-tree-width';
+  function apply(){
+    try {
+      var w = parseInt(localStorage.getItem(STORAGE_KEY) || '', 10);
+      if (!isNaN(w) && w >= 140 && w <= 520) {
+        var t = document.getElementById('nb-tree');
+        if (t) t.style.width = w + 'px';
+      }
+    } catch(_) {}
+  }
+  function wire(){
+    var handle = document.getElementById('nb-tree-resizer');
+    var tree   = document.getElementById('nb-tree');
+    if (!handle || !tree || handle._wired) return;
+    handle._wired = true;
+    apply();
+    var dragging = false, startX = 0, startW = 0;
+    function onMove(e){
+      if (!dragging) return;
+      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      // Aside is on the RIGHT in RTL: dragging the handle LEFT (clientX
+      // decreasing) should INCREASE width. Dragging RIGHT shrinks.
+      var dx = startX - clientX;
+      var next = Math.max(140, Math.min(520, startW + dx));
+      tree.style.width = next + 'px';
+      e.preventDefault();
+    }
+    function onUp(){
+      if (!dragging) return;
+      dragging = false;
+      handle.classList.remove('dragging');
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onUp);
+      try { localStorage.setItem(STORAGE_KEY, String(parseInt(tree.style.width, 10))); } catch(_) {}
+    }
+    function onDown(e){
+      dragging = true;
+      handle.classList.add('dragging');
+      startX = e.touches ? e.touches[0].clientX : e.clientX;
+      startW = tree.getBoundingClientRect().width;
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      document.addEventListener('touchmove', onMove, {passive:false});
+      document.addEventListener('touchend', onUp);
+      e.preventDefault();
+    }
+    handle.addEventListener('mousedown', onDown);
+    handle.addEventListener('touchstart', onDown, {passive:false});
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wire);
+  } else {
+    wire();
+  }
+  setTimeout(wire, 200);
+})();
 </script>
 </body>
 </html>
