@@ -125,7 +125,11 @@ export default function UnlockToast() {
       style={{
         position: 'fixed',
         bottom: 24,
-        insetInlineEnd: 24,
+        // Viewport-anchored FAB — physical `right` on purpose (conventions 9/19).
+        // `insetInlineEnd: 24` in dir=rtl resolves to the LEFT edge and collides
+        // with TutorFAB (bottom-left, z 250). The toast (z 9000) then visually
+        // blocks the Tutor button. Anchor to bottom-right always.
+        right: 24,
         zIndex: 9000,
         maxWidth: 360,
         padding: '14px 18px',
