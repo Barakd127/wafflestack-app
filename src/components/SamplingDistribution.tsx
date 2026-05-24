@@ -24,9 +24,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 // ── Theme tokens ──────────────────────────────────────────────────────────────
-const C_POP = '#4A90E2'           // population panel — blue
-const C_SAMPLE = '#F5A623'        // sample panel — amber
-const C_DIST = '#10B981'          // sampling dist — emerald
+// WaffleStack palette: deep blue (brand), gold (brand accent), mint-teal
+// (auxiliary). No orange/emerald — those clashed with the app chrome per
+// user feedback 2026-05-24.
+const C_POP = '#1F3E6C'           // population panel — deep brand blue
+const C_POP_SOFT = '#7CB7F8'      // softer blue for fills
+const C_SAMPLE = '#D4AF37'        // sample panel — brand gold
+const C_SAMPLE_DEEP = '#9C7A1A'   // darker gold for text on light bg
+const C_DIST = '#14B8A6'          // sampling dist — mint-teal
+const C_DIST_DEEP = '#0F766E'     // darker mint for text on light bg
 const C_TEXT_DARK = '#0B1B3E'
 const C_TEXT_MED = '#4A5568'
 const C_TEXT_LIGHT = '#94A3B8'
@@ -191,8 +197,6 @@ export default function SamplingDistribution() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   const sampleStat = lastSample.length ? computeStat(lastSample, stat) : null
-  const distMean = dist.length ? mean(dist) : null
-  const distSD = dist.length > 1 ? stddev(dist) : null
   const theorySE = sigma / Math.sqrt(n)
 
   return (
@@ -215,7 +219,7 @@ export default function SamplingDistribution() {
         </p>
         <div style={{
           marginTop: 10, fontSize: 13, color: C_TEXT_MED,
-          background: 'rgba(74,144,226,0.08)', borderRight: `3px solid ${C_POP}`,
+          background: 'rgba(212,175,55,0.10)', borderRight: `3px solid ${C_SAMPLE}`,
           padding: '8px 12px', borderRadius: 8, lineHeight: 1.6,
         }}>
           💡 <strong>טיפ:</strong> צבעו אוכלוסייה משונה (לחצו "צבע אוכלוסייה" וגררו במשטח העליון),
@@ -243,14 +247,14 @@ export default function SamplingDistribution() {
           ))}
           <button
             onClick={() => setPaintMode(v => !v)}
-            style={{ ...presetBtn, background: paintMode ? C_POP : 'rgba(74,144,226,0.10)', color: paintMode ? '#fff' : C_POP }}
+            style={{ ...presetBtn, background: paintMode ? C_POP : 'rgba(31,62,108,0.10)', color: paintMode ? '#fff' : C_POP }}
           >🖌 {paintMode ? 'יציאה מציור' : 'צבע אוכלוסייה'}</button>
         </div>
         <div style={{ flex: 1 }} />
         <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13 }}>
           n = <strong>{n}</strong>
           <input type="range" min={2} max={100} value={n} onChange={e => setN(+e.target.value)}
-            style={{ width: 130, accentColor: C_DIST }} />
+            style={{ width: 130, accentColor: C_POP }} />
         </label>
         <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 13 }}>
           סטטיסטי:
@@ -270,12 +274,13 @@ export default function SamplingDistribution() {
       <div style={{
         display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14, alignItems: 'center',
       }}>
-        <button onClick={animateOne} disabled={animating} style={{ ...primaryBtn, background: C_SAMPLE }}>
+        <button onClick={animateOne} disabled={animating}
+          style={{ ...primaryBtn, background: `linear-gradient(135deg,#F5C842,${C_SAMPLE})`, color: '#0B1B3E', boxShadow: '0 4px 12px rgba(212,175,55,0.40)' }}>
           ▶ הנפש מדגם
         </button>
         {[1, 5, 1000, 10000].map(k => (
           <button key={k} onClick={() => runK(k)} disabled={animating}
-            style={{ ...primaryBtn, background: C_DIST }}>
+            style={{ ...primaryBtn, background: `linear-gradient(135deg,#3b6db8,${C_POP})` }}>
             + {k.toLocaleString()} מדגמים
           </button>
         ))}
@@ -287,7 +292,7 @@ export default function SamplingDistribution() {
       {/* Three panels */}
       <Panel
         title="אוכלוסיית מקור"
-        sub={`μ = ${mu.toFixed(2)}    σ = ${sigma.toFixed(2)}`}
+        sub={`μ = ${mu.toFixed(2)}  ·  σ = ${sigma.toFixed(2)}`}
         accent={C_POP}
       >
         <PopulationHist
@@ -304,56 +309,35 @@ export default function SamplingDistribution() {
         title={`המדגם האחרון (n = ${n})`}
         sub={
           sampleStat !== null
-            ? `${STAT_LABEL[stat]} = ${sampleStat.toFixed(2)}`
+            // Sample mean + sample standard deviation alongside, per user
+            // 2026-05-24 — single line so the eye reads spread next to centre.
+            ? (() => {
+              const sampleSD = stddev(lastSample)
+              if (stat === 'mean') return `x̄ = ${sampleStat.toFixed(2)} · s = ${sampleSD.toFixed(2)}`
+              if (stat === 'median') return `med = ${sampleStat.toFixed(2)} · s = ${sampleSD.toFixed(2)}`
+              return `s = ${sampleStat.toFixed(2)} · x̄ = ${mean(lastSample).toFixed(2)}`
+            })()
             : 'טרם נדגם — לחצו על "הנפש מדגם" או "+1 מדגמים"'
         }
-        accent={C_SAMPLE}
+        accent={C_SAMPLE_DEEP}
       >
         <SampleStrip values={lastSample} statValue={sampleStat} />
       </Panel>
 
       <Panel
         title={`התפלגות הדגימה של ${STAT_LABEL[stat]}`}
+        // Single canonical SE formula — replaces the old four-stat clutter
+        // (count + emp-mean + emp-SE + theory-SE). Mean of sampling dist is
+        // visualised on the chart itself; SE_x̄ = σ/√n is the headline.
         sub={
           dist.length
-            ? `${dist.length.toLocaleString()} מדגמים · ממוצע = ${distMean!.toFixed(2)} · ` +
-              `SE (אמפירי) = ${distSD ? distSD.toFixed(2) : '—'} · SE (תאורטי) = ${theorySE.toFixed(2)}`
+            ? `σ_x̄ = σ/√n = ${theorySE.toFixed(2)}  ·  ${dist.length.toLocaleString()} מדגמים`
             : 'התפלגות הדגימה ריקה — דגמו כדי לראות את עקומת CLT מתפתחת'
         }
-        accent={C_DIST}
+        accent={C_DIST_DEEP}
       >
         <SamplingDistHist values={dist} mu={mu} stat={stat} theorySE={theorySE} />
       </Panel>
-
-      {/* Stats summary */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: 10, marginTop: 14,
-      }}>
-        <StatCard label="אוכלוסייה μ" value={mu.toFixed(2)} color={C_POP} />
-        <StatCard label="אוכלוסייה σ" value={sigma.toFixed(2)} color={C_POP} />
-        <StatCard
-          label={`מדגם · ${STAT_LABEL[stat]}`}
-          value={sampleStat !== null ? sampleStat.toFixed(2) : '—'}
-          color={C_SAMPLE}
-        />
-        <StatCard
-          label="התפלגות דגימה · ממוצע"
-          value={distMean !== null ? distMean.toFixed(2) : '—'}
-          color={C_DIST}
-        />
-        <StatCard
-          label="SE אמפירי"
-          value={distSD !== null ? distSD.toFixed(2) : '—'}
-          color={C_DIST}
-        />
-        <StatCard
-          label="SE תאורטי σ/√n"
-          value={theorySE.toFixed(2)}
-          color={C_DIST}
-          subtle
-        />
-      </div>
     </div>
   )
 }
@@ -380,22 +364,6 @@ function Panel({ title, sub, accent, children }: {
   )
 }
 
-function StatCard({ label, value, color, subtle }: {
-  label: string; value: string; color: string; subtle?: boolean
-}) {
-  return (
-    <div style={{
-      background: subtle ? 'rgba(255,255,255,0.55)' : '#fff',
-      border: `1px solid ${C_BORDER}`,
-      borderRight: `4px solid ${color}`,
-      borderRadius: 10, padding: '8px 12px',
-    }}>
-      <div style={{ fontSize: 11, color: C_TEXT_LIGHT, fontWeight: 600 }}>{label}</div>
-      <div style={{ fontSize: 20, fontWeight: 700, color: C_TEXT_DARK, direction: 'ltr', textAlign: 'left' }}>{value}</div>
-    </div>
-  )
-}
-
 /** Population histogram — bins as bars, paintable when paintMode on. */
 function PopulationHist({ bins, highlight, paintMode, onDown, onMove, onUp }: {
   bins: Bins
@@ -415,7 +383,7 @@ function PopulationHist({ bins, highlight, paintMode, onDown, onMove, onUp }: {
       width="100%"
       viewBox={`0 0 ${W} ${H}`}
       style={{
-        background: 'linear-gradient(180deg, rgba(74,144,226,0.04), rgba(74,144,226,0.02))',
+        background: 'linear-gradient(180deg, rgba(124,183,248,0.10), rgba(124,183,248,0.03))',
         borderRadius: 8,
         cursor: paintMode ? 'crosshair' : 'default',
         userSelect: 'none',
@@ -434,7 +402,7 @@ function PopulationHist({ bins, highlight, paintMode, onDown, onMove, onUp }: {
           <g key={i}>
             <rect
               x={x} y={H - 22 - h} width={barW} height={h}
-              fill={isHi ? '#1d4ed8' : C_POP} opacity={isHi ? 1 : 0.78}
+              fill={isHi ? C_POP : C_POP_SOFT} opacity={isHi ? 1 : 0.85}
               rx={2}
             />
             {(i % 4 === 0) && (
@@ -470,7 +438,7 @@ function SampleStrip({ values, statValue }: { values: number[]; statValue: numbe
   const yForN = (k: number) => H - 22 - k * (r * 2 + 1)
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{
-      background: 'linear-gradient(180deg, rgba(245,166,35,0.04), rgba(245,166,35,0.02))',
+      background: 'linear-gradient(180deg, rgba(212,175,55,0.07), rgba(212,175,55,0.02))',
       borderRadius: 8,
     }}>
       <line x1={20} y1={H - 22} x2={W - 20} y2={H - 22} stroke="#cbd5e1" strokeWidth={1} />
@@ -488,11 +456,12 @@ function SampleStrip({ values, statValue }: { values: number[]; statValue: numbe
           <line
             x1={20 + statValue * binW + binW / 2} y1={4}
             x2={20 + statValue * binW + binW / 2} y2={H - 22}
-            stroke="#b45309" strokeWidth={2} strokeDasharray="4,3"
+            stroke={C_SAMPLE_DEEP} strokeWidth={2} strokeDasharray="4,3"
           />
-          <text x={20 + statValue * binW + binW / 2} y={14}
-            textAnchor="middle" fontSize={10} fill="#92400e" fontWeight={700}>
-            {statValue.toFixed(2)}
+          <text x={20 + statValue * binW + binW / 2 - 6} y={16}
+            textAnchor="end" direction="ltr" fontSize={11} fill={C_SAMPLE_DEEP} fontWeight={700}
+            style={{ fontFamily: "'Inter','Rubik',sans-serif" }}>
+            x̄ = {statValue.toFixed(2)}
           </text>
         </>
       )}
@@ -543,7 +512,7 @@ function SamplingDistHist({ values, mu, stat, theorySE }: {
   }
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{
-      background: 'linear-gradient(180deg, rgba(16,185,129,0.04), rgba(16,185,129,0.015))',
+      background: 'linear-gradient(180deg, rgba(20,184,166,0.05), rgba(20,184,166,0.02))',
       borderRadius: 8,
     }}>
       <line x1={20} y1={H - 22} x2={W - 20} y2={H - 22} stroke="#cbd5e1" strokeWidth={1} />
@@ -554,22 +523,26 @@ function SamplingDistHist({ values, mu, stat, theorySE }: {
         return <rect key={i} x={x} y={H - 22 - h} width={barW} height={h} fill={C_DIST} opacity={0.78} rx={1.2} />
       })}
       {curvePath && (
-        <path d={curvePath} fill="none" stroke="#065f46" strokeWidth={2}
-          strokeDasharray="3,3" opacity={0.85} />
+        <path d={curvePath} fill="none" stroke={C_DIST_DEEP} strokeWidth={2}
+          strokeDasharray="3,3" opacity={0.9} />
       )}
-      {/* μ marker */}
+      {/* μ marker — label sits to the LEFT of the vertical line, LTR formula */}
       <line x1={xToPx(mu)} y1={4} x2={xToPx(mu)} y2={H - 22}
-        stroke="#1e40af" strokeWidth={2} />
-      <text x={xToPx(mu)} y={14} textAnchor="middle" fontSize={10} fill="#1e40af" fontWeight={700}>
+        stroke={C_POP} strokeWidth={2} />
+      <text x={xToPx(mu) - 6} y={16} textAnchor="end" direction="ltr"
+        fontSize={11} fill={C_POP} fontWeight={700}
+        style={{ fontFamily: "'Inter','Rubik',sans-serif" }}>
         μ = {mu.toFixed(2)}
       </text>
-      {/* empirical mean marker */}
+      {/* empirical mean marker — same convention: label LEFT of line, LTR */}
       {empMean !== null && Math.abs(empMean - mu) > 0.05 && (
         <>
           <line x1={xToPx(empMean)} y1={4} x2={xToPx(empMean)} y2={H - 22}
             stroke="#b91c1c" strokeWidth={2} strokeDasharray="4,3" />
-          <text x={xToPx(empMean)} y={26} textAnchor="middle" fontSize={10} fill="#b91c1c" fontWeight={700}>
-            x̄ דגימה = {empMean.toFixed(2)}
+          <text x={xToPx(empMean) - 6} y={32} textAnchor="end" direction="ltr"
+            fontSize={11} fill="#b91c1c" fontWeight={700}
+            style={{ fontFamily: "'Inter','Rubik',sans-serif" }}>
+            x̄ = {empMean.toFixed(2)}
           </text>
         </>
       )}
@@ -587,17 +560,17 @@ function SamplingDistHist({ values, mu, stat, theorySE }: {
 
 // ── Button styles ─────────────────────────────────────────────────────────────
 const presetBtn: React.CSSProperties = {
-  background: 'rgba(74,144,226,0.10)', color: C_POP,
-  border: `1px solid rgba(74,144,226,0.35)`,
+  background: 'rgba(31,62,108,0.08)', color: C_POP,
+  border: `1px solid rgba(31,62,108,0.30)`,
   borderRadius: 8, padding: '4px 10px',
   fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 12,
   cursor: 'pointer',
 }
 const primaryBtn: React.CSSProperties = {
-  background: C_DIST, color: '#fff', border: 0,
+  background: C_POP, color: '#fff', border: 0,
   borderRadius: 10, padding: '8px 16px', fontFamily: "'Rubik', sans-serif",
   fontWeight: 700, fontSize: 13, cursor: 'pointer',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
+  boxShadow: '0 4px 12px rgba(31,62,108,0.20)',
 }
 const ghostBtn: React.CSSProperties = {
   background: 'transparent', color: C_TEXT_MED,
