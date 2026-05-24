@@ -1087,12 +1087,13 @@ function initMM(){
           MM = parsed;
           if (!MM.searchMatches) MM.searchMatches = [];
           if (!MM.searchIdx) MM.searchIdx = 0;
-          // First-load auto-collapse: keep top 3 tiers visible (depth 0..2),
-          // collapse everything deeper so a wide stats tree (~60 leaves)
-          // doesn't fan into illegible 46% zoom soup. One-shot per user via
-          // mmAutoCollapsed flag — user clicks expand chevrons to drill in.
+          // First-load auto-collapse: keep only root + depth-1 children
+          // visible. User clicks a depth-1 node to drill into its branch;
+          // mmFocusBranch auto-collapses sibling branches so only one is
+          // open at a time (single-branch focus). One-shot per user via
+          // mmAutoCollapsed flag.
           if (!MM.mmAutoCollapsed) {
-            mmCollapseBelowDepth(3);
+            mmCollapseBelowDepth(1);
             MM.mmAutoCollapsed = true;
           }
           MM_HISTORY = [cloneMMForHistory()];
@@ -1237,10 +1238,20 @@ function mmRender(){
         else MM.multiSel.push(id);
         if(!MM.multiSel.includes(MM.sel)) MM.multiSel.unshift(MM.sel||id);
         MM.sel = id;
+        mmRender();
       } else {
         MM.sel=id;MM.multiSel=[];
+        // Single-branch focus: auto-expand this node's children + collapse
+        // sibling branches. If node has children, also un-collapse so the
+        // click drills in.
+        const nn = MM.nodes[id];
+        if(nn && nn.childIds && nn.childIds.length){
+          nn.collapsed = false;
+        }
+        mmFocusBranch(id);
+        mmRender();
+        if(typeof mmFitVisibleSubtree === 'function') mmFitVisibleSubtree(id);
       }
-      mmRender();
     };
     if(n.type==='equation'){
       nodeDiv.title='Double-click to edit';
@@ -1259,7 +1270,14 @@ function mmRender(){
       const tog=document.createElement('div');
       tog.className='node-toggle';
       tog.textContent=n.collapsed?'+':'-';
-      tog.onclick=e=>{e.stopPropagation();n.collapsed=!n.collapsed;mmRender();};
+      tog.onclick=e=>{
+        e.stopPropagation();
+        n.collapsed=!n.collapsed;
+        // When expanding, collapse sibling branches (single-branch focus).
+        if(!n.collapsed) mmFocusBranch(id);
+        mmRender();
+        if(typeof mmFitVisibleSubtree === 'function') mmFitVisibleSubtree(id);
+      };
       div.appendChild(tog);
     }
     if(n.type==='canvas'){
@@ -1653,6 +1671,37 @@ function mmCollapseBelowDepth(maxDepth){
     for(const cid of (n.childIds || [])) walk(cid, depth + 1);
   }
   walk(MM.root, 0);
+}
+
+// Single-branch focus: expand the path from root → id, collapse every
+// sibling branch along the way. Persists via mmFocusEnabled in localStorage
+// (default: on). User can disable via localStorage.mmFocusBranch='off'.
+function mmFocusBranch(id){
+  if(!MM || !MM.nodes || !id) return;
+  if(localStorage.getItem('mmFocusBranch') === 'off') return;
+  // Walk root → id, marking ancestors. Anything not on the path that sits
+  // at the same depth as an ancestor's other children gets collapsed.
+  const path = [];
+  let cur = id;
+  while(cur){
+    path.unshift(cur);
+    const n = MM.nodes[cur];
+    cur = n && n.parentId;
+  }
+  const onPath = new Set(path);
+  // For each node on the path, expand it and collapse its siblings'
+  // subtrees (collapse only the sibling itself, not deep inside).
+  path.forEach((nid) => {
+    const n = MM.nodes[nid]; if(!n) return;
+    n.collapsed = false;
+    const parent = MM.nodes[n.parentId];
+    if(!parent) return;
+    (parent.childIds || []).forEach(sid => {
+      if(sid !== nid && !onPath.has(sid)){
+        const s = MM.nodes[sid]; if(s) s.collapsed = true;
+      }
+    });
+  });
 }
 
 // Full subtree-aware auto-layout — positions every node so subtrees never collide
