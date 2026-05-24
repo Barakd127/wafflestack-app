@@ -449,7 +449,12 @@ body.light .nb-breadcrumb{color:rgba(0,0,0,.55)}
   transition:border-color .2s,box-shadow .2s}
 body.light .nb-body{background-color:#FBF8F1;border-color:rgba(31,38,64,0.12);color:#1F2640}
 .nb-body:focus{border-color:rgba(91,139,255,.55);box-shadow:0 0 0 3px rgba(91,139,255,.12)}
-.nb-body:empty::before{content:attr(data-placeholder);color:rgba(31,38,64,.30);pointer-events:none}
+/* Empty-state placeholder removed per user feedback — show only the
+   real blinking caret (caret-color set above). The :empty::before rule
+   was rendering "התחל להקליד…" which the user explicitly rejected.
+   Match axis 4 of wafflestack-conventions: cursor-only empty states. */
+.nb-body:empty{caret-color:#D4AF37}
+.nb-body:empty:focus{caret-color:#D4AF37}
 /* Inline math widget (KaTeX-rendered, opens MathLive on click) */
 .nb-math-widget{display:inline-block;vertical-align:middle;padding:2px 6px;margin:0 2px;
   /* Issue 2: transparent bg so equation widgets inherit notebook/mindmap theme
@@ -5406,11 +5411,14 @@ function nbRenderContent(){
   body.contentEditable = 'true';
   body.spellcheck = false;
   body.dir = 'rtl';
-  // Empty-page hint. Visible via .nb-body:empty::before (pointer-events:none
-  // so it never blocks the caret). Empty string previously gave the user no
-  // signal that the area was editable.
-  body.setAttribute('data-placeholder', 'התחל להקליד…');
+  // No placeholder text — user wants cursor-only empty state (matches
+  // wafflestack-conventions axis 4). The blinking caret is enough signal
+  // that the area is editable.
   body.innerHTML = nbBodyAsHtml(n);
+  // Auto-focus the body when empty so the caret is immediately visible.
+  if (!n.body || !n.body.trim()) {
+    setTimeout(() => { try { body.focus(); } catch(_){} }, 50);
+  }
   let bodyTimer = null;
   body.oninput = () => {
     n.body = body.innerHTML;
