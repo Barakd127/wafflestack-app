@@ -2080,8 +2080,9 @@ function mmTidyVisibleChildren(n){
 }
 
 // Tidy-tree (LR horizontal) — places visible subtree rooted at id.
-// Top-level children of root are split: even-index → right, odd-index → left,
-// so the map balances around the root (X-Mind classic balanced layout).
+// Top-level children of root are split: even-index → LEFT, odd-index → RIGHT,
+// so the map balances around the root and the PRIMARY side grows LEFT
+// (RTL/Hebrew convention — eyes scan right→left, primary content starts left).
 // Algorithm: 2-pass — (1) recursive subtree-height computation,
 // (2) assign x by depth*hgap + side, assign y as centred over children.
 //
@@ -2136,8 +2137,9 @@ function mmTidyLayout(){
   const topKids = mmTidyVisibleChildren(root);
   if(topKids.length){
     // Split top-level into left/right alternately for balance.
+    // RTL: even-index → LEFT (primary side in Hebrew), odd-index → RIGHT.
     const right = [], left = [];
-    topKids.forEach((c,i)=>{ (i % 2 === 0 ? right : left).push(c); });
+    topKids.forEach((c,i)=>{ (i % 2 === 0 ? left : right).push(c); });
 
     // Right side
     if(right.length){
