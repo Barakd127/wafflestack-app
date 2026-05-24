@@ -42,7 +42,9 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
 
   const slides = lesson?.slides ?? []
   const lessonTotal = slides.length
-  const [graphScale, setGraphScale] = useState(0.7)
+  // Default 100% — per user feedback 2026-05-24. Was 0.7 which compressed
+  // interactive visuals into unreadable thumbnails on first render.
+  const [graphScale, setGraphScale] = useState(1.0)
 
   // Auto-inject TOPIC_VISUALS[topicId] as a synthetic graph card so every
   // topic's "lesson visual" becomes a standalone carousel slide instead of
@@ -484,19 +486,27 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                     marginTop: 5,
                     opacity: 0.85,
                   }} aria-hidden="true">
-                    {/* Golden waffle bullet — mini 3×3 grid, brand-matched */}
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    {/* Round Belgian waffle bullet — premium honey gradient,
+                        ink outline, real cell pits. Matches v4 brand direction
+                        (concept 01 from the brand system). Replaces the prior
+                        flat 3x3-grid square rect per user feedback 2026-05-24. */}
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                       <defs>
-                        <linearGradient id="waffle-bullet-grad" x1="0" y1="0" x2="16" y2="16" gradientUnits="userSpaceOnUse">
-                          <stop offset="0" stopColor="#FFE066"/>
-                          <stop offset="1" stopColor="#D4A017"/>
-                        </linearGradient>
+                        <radialGradient id="waffle-bullet-grad" cx="0.42" cy="0.35" r="0.7">
+                          <stop offset="0" stopColor="#FFE3A8"/>
+                          <stop offset="0.55" stopColor="#F2A93E"/>
+                          <stop offset="1" stopColor="#C97C18"/>
+                        </radialGradient>
                       </defs>
-                      <rect x="1" y="1" width="14" height="14" rx="3" fill="url(#waffle-bullet-grad)" stroke="rgba(127,90,12,0.35)" strokeWidth="0.7"/>
-                      <line x1="1" y1="6" x2="15" y2="6" stroke="rgba(127,90,12,0.45)" strokeWidth="0.7"/>
-                      <line x1="1" y1="10" x2="15" y2="10" stroke="rgba(127,90,12,0.45)" strokeWidth="0.7"/>
-                      <line x1="6" y1="1" x2="6" y2="15" stroke="rgba(127,90,12,0.45)" strokeWidth="0.7"/>
-                      <line x1="10" y1="1" x2="10" y2="15" stroke="rgba(127,90,12,0.45)" strokeWidth="0.7"/>
+                      <ellipse cx="10" cy="11.5" rx="8.5" ry="7.2" fill="#A36418" stroke="#1A1A2E" strokeWidth="0.9"/>
+                      <ellipse cx="10" cy="10.5" rx="8.5" ry="7.2" fill="url(#waffle-bullet-grad)" stroke="#1A1A2E" strokeWidth="0.9"/>
+                      <g stroke="#1A1A2E" strokeWidth="0.55" opacity="0.55">
+                        <line x1="2" y1="10.5" x2="18" y2="10.5"/>
+                        <line x1="10" y1="3.5" x2="10" y2="17.5"/>
+                        <line x1="5.5" y1="5.5" x2="5.5" y2="15.5"/>
+                        <line x1="14.5" y1="5.5" x2="14.5" y2="15.5"/>
+                      </g>
+                      <ellipse cx="7" cy="6.5" rx="3.5" ry="1.4" fill="#FFE3A8" opacity="0.55"/>
                     </svg>
                   </div>
                   <div style={{
@@ -594,7 +604,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 }}
               >+</button>
               <button
-                onClick={() => setGraphScale(0.7)}
+                onClick={() => setGraphScale(1.0)}
                 aria-label="ברירת מחדל"
                 title="גודל ברירת מחדל"
                 style={{
