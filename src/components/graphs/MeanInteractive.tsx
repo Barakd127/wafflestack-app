@@ -216,18 +216,22 @@ export default function MeanInteractive() {
           strokeWidth={2}
           strokeDasharray="4 3"
         />
+        {/* Triangle pointer offset 14px lower so it doesn't collide with the
+            data-point circles sitting on the axis. Was tip at AXIS_Y+8. */}
         <polygon
-          points={`${meanPx - 10},${AXIS_Y + 30} ${meanPx + 10},${AXIS_Y + 30} ${meanPx},${AXIS_Y + 8}`}
+          points={`${meanPx - 9},${AXIS_Y + 44} ${meanPx + 9},${AXIS_Y + 44} ${meanPx},${AXIS_Y + 24}`}
           fill="#D4A017"
           stroke="#1F3E6C"
           strokeWidth={1.5}
         />
+        {/* Larger x̄ readout — was fontSize 14, now 22 / weight 800 per user
+            feedback that the average label was unreadably small. */}
         <text
           x={meanPx}
-          y={24}
+          y={22}
           fill="#1F3E6C"
-          fontSize={14}
-          fontWeight={700}
+          fontSize={22}
+          fontWeight={800}
           textAnchor="middle"
         >
           x̄ = {mean.toFixed(2)}
@@ -289,18 +293,18 @@ export default function MeanInteractive() {
         <button
           onClick={addPoint}
           disabled={points.length >= 12}
-          style={btnStyle('#1F3E6C')}
+          style={btnStyle('#1F3E6C', '#fff')}
         >
           הוסף נקודה
         </button>
         <button
           onClick={removePoint}
           disabled={points.length <= 1}
-          style={btnStyle('#1F3E6C')}
+          style={btnStyle('#1F3E6C', '#fff')}
         >
           הסר אחרונה
         </button>
-        <button onClick={reset} style={btnStyle('#D4A017')}>
+        <button onClick={reset} style={btnStyle('#D4A017', '#1F3E6C')}>
           איפוס
         </button>
         <span style={{ alignSelf: 'center', marginInlineStart: 'auto', opacity: 0.7, fontSize: 13 }}>
@@ -311,16 +315,19 @@ export default function MeanInteractive() {
   )
 }
 
-function btnStyle(bg: string): React.CSSProperties {
+// fg must be passed explicitly — previously defaulted to #1F3E6C which made
+// navy buttons unreadable (dark text on dark bg). Per user feedback 2026-05-24.
+function btnStyle(bg: string, fg: string): React.CSSProperties {
   return {
     background: bg,
-    color: '#1F3E6C',
+    color: fg,
     border: 'none',
     borderRadius: 8,
-    padding: '8px 14px',
+    padding: '10px 18px',
     fontSize: 14,
-    fontWeight: 600,
+    fontWeight: 700,
     cursor: 'pointer',
     fontFamily: 'inherit',
+    minHeight: 44,
   }
 }
