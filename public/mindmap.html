@@ -1453,6 +1453,60 @@ function mmFitView(){
   mmApplyTransform();mmRender();
 }
 
+// Auto-fit a subtree's visible nodes after expand/collapse, eased.
+// Targets ~80% of viewport so the focused branch fills the screen without
+// hugging the edges. Falls back to mmFitView if the subtree has no
+// visible descendants.
+function mmFitVisibleSubtree(rootId){
+  if(!MM || !MM.nodes || !rootId) return;
+  if(localStorage.getItem('mmAutoZoom') === 'off') return;
+  // Collect every visible descendant of rootId (plus rootId itself).
+  const ids = [];
+  (function walk(id){
+    const n = MM.nodes[id]; if(!n) return;
+    ids.push(id);
+    if(n.collapsed) return;
+    for(const cid of (n.childIds || [])){
+      if(MM.nodes[cid]) walk(cid);
+    }
+  })(rootId);
+  if(!ids.length) return mmFitView();
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(const id of ids){
+    const n = MM.nodes[id]; if(!n) continue;
+    const w = n.W || 140, h = n.H || 40;
+    minX = Math.min(minX, n.x);
+    maxX = Math.max(maxX, n.x + w);
+    minY = Math.min(minY, n.y);
+    maxY = Math.max(maxY, n.y + h);
+  }
+  if(minX === Infinity) return mmFitView();
+  const pad = 80;
+  const w = (maxX - minX) + pad*2;
+  const h = (maxY - minY) + pad*2;
+  const appEl = document.getElementById('app');
+  if(!appEl) return;
+  const windowW = appEl.clientWidth, windowH = appEl.clientHeight;
+  const targetZoom = Math.min(windowW/w, windowH/h, 1.4) * 0.95;
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  const targetPanX = windowW/2 - cx * targetZoom;
+  const targetPanY = windowH/2 - cy * targetZoom;
+  // Eased animation from current to target.
+  const fromZ = MM.zoom, fromX = MM.panX, fromY = MM.panY;
+  const dur = 280, t0 = performance.now();
+  function step(now){
+    const t = Math.min(1, (now - t0) / dur);
+    const e = t<0.5 ? 2*t*t : -1 + (4 - 2*t)*t; // easeInOutQuad
+    MM.zoom = fromZ + (targetZoom - fromZ) * e;
+    MM.panX = fromX + (targetPanX - fromX) * e;
+    MM.panY = fromY + (targetPanY - fromY) * e;
+    mmApplyTransform();
+    if(t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
 function mmZoomBy(factor){
   MM.zoom=clamp(MM.zoom*factor,0.2,3);mmApplyTransform();mmRender();
 }
