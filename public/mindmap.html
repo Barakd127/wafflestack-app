@@ -969,7 +969,7 @@ const NODE_COLORS=['#60a5fa','#34d399','#f59e0b','#f87171','#a78bfa','#22d3ee','
 // `orientation` controls tree flow:
 //   'lr' = horizontal (parent left, kids spread vertically to the right) — original
 //   'tb' = vertical   (parent top, kids spread horizontally below)        — X-Mind brace
-let MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0,orientation:'tb'};
+let MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0,orientation:'tb',zones:[],selectedZoneId:null};
 let MM_HISTORY=[];
 let MM_REDO=[]; // FIX #9 support: redo stack for Ctrl+Y
 
@@ -1076,7 +1076,7 @@ function _seedNode(spec, parentId, depth, slot, totalSiblings) {
 }
 
 function buildSeedMap() {
-  MM = { nodes: {}, root: 'root', sel: null, multiSel: [], zoom: 1, panX: 0, panY: 0, orientation: 'tb' };
+  MM = { nodes: {}, root: 'root', sel: null, multiSel: [], zoom: 1, panX: 0, panY: 0, orientation: 'tb', zones: [], selectedZoneId: null };
   // Root with id 'root' (not uid) so MM.root='root' lookup works.
   MM.nodes.root = {
     id: 'root', type: 'root', text: COURSE_SEED.text,
@@ -1108,9 +1108,11 @@ function initMM(){
           // §24 migration: legacy maps had persisted node.x / node.y.
           // Drop them so the tidy-tree engine owns layout from now on.
           if (typeof mmMigrateToAutoLayout === 'function') mmMigrateToAutoLayout();
+          if (!Array.isArray(MM.zones)) MM.zones = [];
           for (const id in MM.nodes) {
             const n = MM.nodes[id];
-            if (typeof n.x === 'number' || typeof n.y === 'number') {
+            // Zoned nodes keep their persisted (x,y) — they're free-positioned.
+            if (!n.zoneId && (typeof n.x === 'number' || typeof n.y === 'number')) {
               delete n.x; delete n.y;
             }
             // Restore defaults so the layout has something to measure.
@@ -1139,7 +1141,7 @@ function initMM(){
   try { buildSeedMap(); }
   catch(e) {
     console.warn('seed failed, falling back to blank root', e);
-    MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,orientation:'tb'};
+    MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,orientation:'tb',zones:[],selectedZoneId:null};
     MM.nodes.root=mmNode('root','סטטיסטיקה',100,100,null,'#312e81');
   }
   MM_HISTORY=[cloneMMForHistory()];
@@ -1191,13 +1193,19 @@ function mmSerializeForSave(){
       searchMatches: [],
       searchIdx: 0,
       mmAutoCollapsed: MM.mmAutoCollapsed,
+      zones: Array.isArray(MM.zones) ? MM.zones : [],
       nodes: {}
     };
     for(const id in MM.nodes){
       const n = MM.nodes[id];
-      // Skip x/y — derived. Keep W/H (measurement) and everything else.
-      const { x, y, ...rest } = n;
-      out.nodes[id] = rest;
+      if(n.zoneId){
+        // Zoned (free-positioned) node — keep x/y.
+        out.nodes[id] = { ...n };
+      } else {
+        // Skip x/y — derived by tidy-tree. Keep W/H (measurement) and everything else.
+        const { x, y, ...rest } = n;
+        out.nodes[id] = rest;
+      }
     }
     return JSON.stringify(out);
   } catch(e){
@@ -1243,6 +1251,8 @@ function mmRender(){
   // v17: SVG is inside viewport — clear nodes but keep svg; then clear svg separately
   // Remove only node-wrap children, not the svg itself
   Array.from(vp.children).forEach(c=>{if(c!==svg)c.remove();});
+  // §25 Zone feature: render zones first so they sit beneath nodes (z-index 1 vs 2).
+  if(typeof mmRenderZones === 'function') mmRenderZones();
   svg.innerHTML='';
   let svgCode='';
   // Pre-pass: position summary nodes next to their target groups so the
@@ -1523,6 +1533,13 @@ function mmRender(){
           // Prefer reorder (more precise) when present; otherwise reparent.
           if(bestReorder) return { kind:'reorder', parentId: bestReorder.parentId, index: bestReorder.index, _y: bestReorder.y, _x: bestReorder.bandX, _w: bestReorder.bandW };
           if(reparentHit) return { kind:'reparent', parentId: reparentHit };
+          // §25 Zone — check whether the drop point lands inside a zone.
+          // O(zones) hit test. If yes, we'll commit as free-positioned.
+          const zone = (typeof mmZoneAt === 'function') ? mmZoneAt(wx, wy) : null;
+          if(zone) return { kind:'zone-place', zoneId: zone.id, _wx: wx, _wy: wy };
+          // If the node was previously zoned and the drop is OUTSIDE any zone,
+          // release it back to the tidy-tree under its existing parent.
+          if(nodeObj.zoneId) return { kind:'zone-release' };
           return null;
         }
 
@@ -1588,16 +1605,33 @@ function mmRender(){
           if(!oldParent) return false;
 
           if(t.kind === 'reparent'){
-            if(t.parentId === oldParentId) return false; // no-op
+            if(t.parentId === oldParentId && !nodeObj.zoneId) return false; // no-op
             // Remove from old parent, append to new.
             oldParent.childIds = oldParent.childIds.filter(c => c !== nodeObj.id);
             const newParent = MM.nodes[t.parentId];
             if(!newParent) return false;
             newParent.childIds = newParent.childIds || [];
-            newParent.childIds.push(nodeObj.id);
+            if(t.parentId !== oldParentId) newParent.childIds.push(nodeObj.id);
+            else newParent.childIds.push(nodeObj.id);
             // Auto-expand the new parent so the drop lands somewhere visible.
             newParent.collapsed = false;
             nodeObj.parentId = t.parentId;
+            // Reparenting onto a real node leaves the zone (back into the tree).
+            if(nodeObj.zoneId){ delete nodeObj.zoneId; delete nodeObj.x; delete nodeObj.y; }
+            return true;
+          }
+          if(t.kind === 'zone-place'){
+            // Mark as zoned + persist drop position (world coords, top-left).
+            const w = nodeObj.W || 140, h = nodeObj.H || 40;
+            nodeObj.zoneId = t.zoneId;
+            nodeObj.x = t._wx - w/2;
+            nodeObj.y = t._wy - h/2;
+            return true;
+          }
+          if(t.kind === 'zone-release'){
+            // Strip zoneId — tidy-tree will reclaim layout next pass.
+            delete nodeObj.zoneId;
+            delete nodeObj.x; delete nodeObj.y;
             return true;
           }
           if(t.kind === 'reorder'){
@@ -1673,7 +1707,8 @@ function mmRender(){
     })(n,div);
 
     vp.appendChild(div);
-    if(id!==MM.root && n.type!=='summary'){
+    // §25: zoned nodes are free-positioned → suppress the parent-child curve.
+    if(id!==MM.root && n.type!=='summary' && !n.zoneId){
       const p=MM.nodes[n.parentId];
       if(p){
         const lc = n.color||'#60a5fa';
@@ -1720,6 +1755,9 @@ function mmIsVisible(id){
   if(id===MM.root)return true;
   const n=MM.nodes[id];
   if(!n)return false;
+  // §25 Zone: zoned (free-positioned) nodes are always visible regardless
+  // of ancestor collapse state — they're an explicit escape hatch.
+  if(n.zoneId) return true;
   const p=MM.nodes[n.parentId];
   if(!p)return false;
   if(p.collapsed)return false;
@@ -2074,9 +2112,12 @@ const MM_TIDY_HGAP = 140; // horizontal depth-step
 const MM_TIDY_NODE_H = 40; // default node height used for spacing
 
 // Returns visible direct children (collapse-aware) of node id.
+// §25 Zone feature: nodes with a zoneId are free-positioned inside their
+// zone — they are excluded from the tidy-tree layout so the engine treats
+// the parent as if they aren't there.
 function mmTidyVisibleChildren(n){
   if(!n || !n.childIds || n.collapsed) return [];
-  return n.childIds.filter(c => MM.nodes[c] && MM.nodes[c].type !== 'summary');
+  return n.childIds.filter(c => MM.nodes[c] && MM.nodes[c].type !== 'summary' && !MM.nodes[c].zoneId);
 }
 
 // Tidy-tree (LR horizontal) — places visible subtree rooted at id.
@@ -2214,6 +2255,233 @@ function mmAnimateToLayout(){
     else window._mmAnimating = false;
   }
   requestAnimationFrame(tick);
+}
+
+// ═══════════════════════════════════════════════════════════
+// §25 ZONE feature — X-Mind-style escape hatch from tidy-tree.
+// A zone is a rectangular region of world space. Nodes inside the zone
+// are FREE-POSITIONED (have explicit x/y + zoneId). Outside = tidy tree.
+// Persisted in MM.zones[] alongside nodes. O(zones) hit-test on drop.
+// ═══════════════════════════════════════════════════════════
+const MM_ZONE_BORDER = '#D4A017';
+const MM_ZONE_FILL = 'rgba(212,175,55,0.04)';
+
+function mmZoneAt(wx, wy){
+  if(!Array.isArray(MM.zones) || !MM.zones.length) return null;
+  // Iterate in reverse so top-most (last-created) zone wins.
+  for(let i = MM.zones.length - 1; i >= 0; i--){
+    const z = MM.zones[i];
+    if(wx >= z.x && wx <= z.x + z.w && wy >= z.y && wy <= z.y + z.h) return z;
+  }
+  return null;
+}
+
+function mmZonesEnsureArray(){ if(!Array.isArray(MM.zones)) MM.zones = []; }
+
+// Toolbar entry — switch into "create zone" mode. Cursor becomes crosshair.
+// User click-drags on the canvas; mouseup commits the new zone.
+function mmStartZoneCreate(){
+  mmZonesEnsureArray();
+  const ca = document.getElementById('canvas-area');
+  if(!ca) return;
+  ca.style.cursor = 'crosshair';
+  // Build a one-shot overlay that captures the drag.
+  let startW = null;
+  let preview = null;
+
+  function clientToWorld(cx, cy){
+    const rect = ca.getBoundingClientRect();
+    return {
+      x: (cx - rect.left - MM.panX) / MM.zoom,
+      y: (cy - rect.top  - MM.panY) / MM.zoom
+    };
+  }
+
+  function onDown(ev){
+    if(ev.button !== 0) return;
+    ev.preventDefault(); ev.stopPropagation();
+    startW = clientToWorld(ev.clientX, ev.clientY);
+    preview = document.createElement('div');
+    preview.id = 'mm-zone-preview';
+    preview.style.cssText = 'position:absolute;border:1.5px dashed '+MM_ZONE_BORDER+';background:'+MM_ZONE_FILL+';pointer-events:none;z-index:50;border-radius:12px';
+    ca.appendChild(preview);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }
+  function onMove(ev){
+    if(!startW || !preview) return;
+    const cur = clientToWorld(ev.clientX, ev.clientY);
+    const x = Math.min(startW.x, cur.x), y = Math.min(startW.y, cur.y);
+    const w = Math.abs(cur.x - startW.x), h = Math.abs(cur.y - startW.y);
+    preview.style.left = (x * MM.zoom + MM.panX) + 'px';
+    preview.style.top  = (y * MM.zoom + MM.panY) + 'px';
+    preview.style.width  = (w * MM.zoom) + 'px';
+    preview.style.height = (h * MM.zoom) + 'px';
+  }
+  function cleanup(){
+    if(preview){ preview.remove(); preview = null; }
+    ca.style.cursor = '';
+    ca.removeEventListener('mousedown', onDown, true);
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+  function onUp(ev){
+    if(!startW){ cleanup(); return; }
+    const end = clientToWorld(ev.clientX, ev.clientY);
+    const x = Math.min(startW.x, end.x), y = Math.min(startW.y, end.y);
+    const w = Math.abs(end.x - startW.x), h = Math.abs(end.y - startW.y);
+    cleanup();
+    // Reject zones smaller than ~40×40 world units (likely an accidental click).
+    if(w < 40 || h < 40) return;
+    const zid = 'zone_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6);
+    MM.zones.push({ id: zid, x: x, y: y, w: w, h: h, label: 'אזור' });
+    MM.selectedZoneId = zid;
+    if(typeof mmPushHistory === 'function') mmPushHistory();
+    if(typeof mmRender === 'function') mmRender();
+  }
+
+  // Use capture phase so we beat node mousedown handlers.
+  ca.addEventListener('mousedown', onDown, true);
+  // Escape cancels create-mode.
+  document.addEventListener('keydown', function esc(e){
+    if(e.key === 'Escape'){ cleanup(); document.removeEventListener('keydown', esc); }
+  });
+}
+
+// Render all zones into the viewport. Called from mmRender (after nodes so
+// zone chrome z-orders below nodes; the dashed border still reads through).
+function mmRenderZones(){
+  mmZonesEnsureArray();
+  const vp = document.getElementById('viewport');
+  if(!vp) return;
+  // Remove any previous zone DOM nodes.
+  Array.from(vp.querySelectorAll('.mm-zone')).forEach(el => el.remove());
+  for(const z of MM.zones){
+    const wrap = document.createElement('div');
+    wrap.className = 'mm-zone' + (MM.selectedZoneId === z.id ? ' selected' : '');
+    wrap.dataset.zoneId = z.id;
+    wrap.style.cssText = [
+      'position:absolute',
+      'left:'+z.x+'px',
+      'top:'+z.y+'px',
+      'width:'+z.w+'px',
+      'height:'+z.h+'px',
+      'border:1.5px dashed '+MM_ZONE_BORDER,
+      'background:'+MM_ZONE_FILL,
+      'border-radius:12px',
+      'z-index:1',
+      'pointer-events:auto',
+      'cursor:move'
+    ].join(';');
+    // Label (top-left in world; flipped to start-side via CSS direction).
+    const lbl = document.createElement('div');
+    lbl.className = 'mm-zone-label';
+    lbl.textContent = z.label || 'אזור';
+    lbl.style.cssText = 'position:absolute;top:-12px;inset-inline-start:10px;background:'+MM_ZONE_BORDER+';color:#1a1a2e;font:600 11px Rubik,sans-serif;padding:2px 8px;border-radius:6px;cursor:text;user-select:none;direction:rtl';
+    lbl.title = 'לחיצה כפולה לשינוי שם';
+    lbl.ondblclick = (e) => {
+      e.stopPropagation();
+      const v = prompt('שם האזור:', z.label || 'אזור');
+      if(v !== null){ z.label = v.trim() || z.label; mmPushHistory(); mmRender(); }
+    };
+    wrap.appendChild(lbl);
+
+    // Resize handles (8 — 4 corners + 4 edges).
+    const handleDefs = [
+      ['nw','top:-5px;inset-inline-start:-5px;cursor:nwse-resize'],
+      ['n', 'top:-5px;inset-inline-start:50%;transform:translateX(-50%);cursor:ns-resize'],
+      ['ne','top:-5px;inset-inline-end:-5px;cursor:nesw-resize'],
+      ['e', 'top:50%;inset-inline-end:-5px;transform:translateY(-50%);cursor:ew-resize'],
+      ['se','bottom:-5px;inset-inline-end:-5px;cursor:nwse-resize'],
+      ['s', 'bottom:-5px;inset-inline-start:50%;transform:translateX(-50%);cursor:ns-resize'],
+      ['sw','bottom:-5px;inset-inline-start:-5px;cursor:nesw-resize'],
+      ['w', 'top:50%;inset-inline-start:-5px;transform:translateY(-50%);cursor:ew-resize'],
+    ];
+    if(MM.selectedZoneId === z.id){
+      for(const [dir, css] of handleDefs){
+        const h = document.createElement('div');
+        h.className = 'mm-zone-handle';
+        h.dataset.dir = dir;
+        h.style.cssText = 'position:absolute;width:10px;height:10px;background:#fff;border:1.5px solid '+MM_ZONE_BORDER+';border-radius:2px;'+css;
+        h.addEventListener('mousedown', (ev) => mmZoneBeginResize(ev, z, dir));
+        wrap.appendChild(h);
+      }
+    }
+
+    // Click to select; drag from body (not handles) to move.
+    wrap.addEventListener('mousedown', (ev) => {
+      if(ev.target.classList.contains('mm-zone-handle')) return;
+      if(ev.target.classList.contains('mm-zone-label')) return;
+      ev.stopPropagation();
+      MM.selectedZoneId = z.id;
+      MM.sel = null; MM.multiSel = [];
+      mmZoneBeginMove(ev, z);
+    });
+
+    vp.appendChild(wrap);
+  }
+}
+
+function mmZoneBeginMove(ev, z){
+  const startX = ev.clientX, startY = ev.clientY;
+  const zx0 = z.x, zy0 = z.y;
+  function mv(e){
+    const dx = (e.clientX - startX) / MM.zoom;
+    const dy = (e.clientY - startY) / MM.zoom;
+    z.x = zx0 + dx; z.y = zy0 + dy;
+    mmRender();
+  }
+  function up(){
+    document.removeEventListener('mousemove', mv);
+    document.removeEventListener('mouseup', up);
+    mmPushHistory();
+  }
+  document.addEventListener('mousemove', mv);
+  document.addEventListener('mouseup', up);
+}
+
+function mmZoneBeginResize(ev, z, dir){
+  ev.stopPropagation(); ev.preventDefault();
+  const sx = ev.clientX, sy = ev.clientY;
+  const x0 = z.x, y0 = z.y, w0 = z.w, h0 = z.h;
+  function mv(e){
+    const dx = (e.clientX - sx) / MM.zoom;
+    const dy = (e.clientY - sy) / MM.zoom;
+    let nx = x0, ny = y0, nw = w0, nh = h0;
+    if(dir.includes('w')){ nx = x0 + dx; nw = w0 - dx; }
+    if(dir.includes('e')){ nw = w0 + dx; }
+    if(dir.includes('n')){ ny = y0 + dy; nh = h0 - dy; }
+    if(dir.includes('s')){ nh = h0 + dy; }
+    if(nw < 60){ nw = 60; if(dir.includes('w')) nx = x0 + w0 - 60; }
+    if(nh < 60){ nh = 60; if(dir.includes('n')) ny = y0 + h0 - 60; }
+    z.x = nx; z.y = ny; z.w = nw; z.h = nh;
+    mmRender();
+  }
+  function up(){
+    document.removeEventListener('mousemove', mv);
+    document.removeEventListener('mouseup', up);
+    mmPushHistory();
+  }
+  document.addEventListener('mousemove', mv);
+  document.addEventListener('mouseup', up);
+}
+
+// Delete the currently-selected zone. Nodes inside revert to tidy-tree.
+function mmDeleteSelectedZone(){
+  const zid = MM.selectedZoneId;
+  if(!zid) return false;
+  const idx = MM.zones.findIndex(z => z.id === zid);
+  if(idx < 0) return false;
+  if(!confirm('למחוק את האזור? צמתים בתוכו יחזרו לעץ הראשי.')) return false;
+  // Release every node that belonged to this zone.
+  for(const id in MM.nodes){
+    const n = MM.nodes[id];
+    if(n.zoneId === zid){ delete n.zoneId; delete n.x; delete n.y; }
+  }
+  MM.zones.splice(idx, 1);
+  MM.selectedZoneId = null;
+  mmPushHistory(); mmRender();
+  return true;
 }
 
 // One-shot migration: existing maps had persisted node.x/node.y. Drop them
@@ -4113,6 +4381,11 @@ document.addEventListener('keydown', e => {
       else if(MM.sel) mmAddChild(MM.sel);
     }
   } else if(e.key==='Delete'||e.key==='Backspace'){
+    // §25 Zone: if a zone is selected, delete it (releases its nodes).
+    if(MM.selectedZoneId){
+      e.preventDefault();
+      if(typeof mmDeleteSelectedZone === 'function' && mmDeleteSelectedZone()) return;
+    }
     // Batch delete: drop every multi-selected node + descendants. Falls back
     // to single-node deletion if nothing is multi-selected.
     if (MM.multiSel && MM.multiSel.length) {
@@ -4244,6 +4517,9 @@ function mmEnsureSelVisible(){
       ca.style.cursor = 'grabbing';
       e.preventDefault();
     } else if (e.button === 0 && !onNode && !spaceDown) {
+      // §25: bare-canvas click outside any zone → deselect zone.
+      const onZone = e.target.closest('.mm-zone');
+      if(!onZone && MM.selectedZoneId){ MM.selectedZoneId = null; mmRender(); }
       // Plain left-click on empty canvas → start marquee
       const rect = ca.getBoundingClientRect();
       const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
@@ -5553,7 +5829,7 @@ function mmTourRender(){
 function mmClearAll(){
   if(!confirm('למחוק את כל המפה? הפעולה לא הפיכה.')) return;
   try{ localStorage.removeItem(MM_SAVE_KEY); }catch(e){}
-  MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0};
+  MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0,zones:[],selectedZoneId:null};
   MM.nodes.root = mmNode('root','Untitled',100,100,null,'#60a5fa');
   MM_HISTORY=[cloneMMForHistory()];
   MM_REDO=[];
