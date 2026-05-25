@@ -71,8 +71,16 @@ function wholeLineEquation(text: string): string {
   return text.split(/\n/).map(line => {
     if (line.includes('$')) return line               // user already wrapped → trust them
     if (!line.includes('=')) return line              // need an = to qualify as equation
+    if (!/[=+\-*/÷×·\d]/.test(line) && !line.includes('\\')) return line  // no math → plain text
+
+    // Pure-LaTeX line (no Hebrew, contains backslash like \frac, \sum, \bar).
+    // Per-run wrap splits by space which breaks `\frac{\sum x_i}{n}` apart.
+    // Solution: wrap whole line as one $...$ if it contains backslash commands.
+    // Per user 2026-05-25 — '\\frac{\\sum x_i}{n}' was rendering as raw text.
+    if (!HEBREW_RE.test(line) && line.includes('\\')) {
+      return '$' + line + '$'
+    }
     if (!HEBREW_RE.test(line)) return line            // no Hebrew → existing autoWrapMath handles
-    if (!/[=+\-*/÷×·\d]/.test(line)) return line     // no math → plain text
 
     let out = ''
     let buf = ''
