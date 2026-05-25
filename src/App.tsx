@@ -16,6 +16,7 @@ import { TutorFAB } from './components/AITutor/TutorFAB'
 import { TutorDrawer } from './components/AITutor/TutorDrawer'
 import FeatureGate from './components/FeatureGate'
 import UnlockToast from './components/UnlockToast'
+import VirtualKeyboardCloser from './components/VirtualKeyboardCloser'
 import { useLearningStore } from './store/learningStore'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
@@ -329,6 +330,9 @@ function App() {
 
       {/* Global unlock celebration toast (drains learningStore.newlyUnlocked). */}
       <UnlockToast />
+      {/* Floating ✕ button visible whenever MathLive's virtual keyboard is
+          open. Closes via API + on Escape + on route change. Per user 2026-05-25. */}
+      <VirtualKeyboardCloser />
     </div>
   )
 }

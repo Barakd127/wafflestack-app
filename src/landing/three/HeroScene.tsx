@@ -172,7 +172,12 @@ function CyclingBuilding() {
 
     // Normal rotation — very slow continuous spin + ±5° wobble overlay so the
     // building presents subtle motion without the dizzying fast-spin effect.
-    root.current.rotation.y += delta * ROTATION_SPEED
+    // Clamp delta at 1/30s — if the tab was backgrounded, useFrame returns
+    // a delta covering the whole hidden interval (sometimes seconds), causing
+    // a burst rotation that the user perceives as 'all buildings spinning
+    // too fast suddenly'. Per user 2026-05-25.
+    const clampedDelta = Math.min(delta, 1 / 30)
+    root.current.rotation.y += clampedDelta * ROTATION_SPEED
     // Wobble is applied as an additive offset on top of the integrated base
     // rotation. We track only the base rotation against lastFullRotY so the
     // sinusoid doesn't trip the "full rotation" check spuriously.
