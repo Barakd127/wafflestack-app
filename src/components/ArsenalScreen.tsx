@@ -905,8 +905,17 @@ function EquationEditor({
       setDraft(value)
     }
     el.addEventListener('input', handler)
+    // Track the most-recently-focused math-field so the global
+    // CalculatorDrawer can insert results into the right one regardless of
+    // which surface (Arsenal / Notebook / Mindmap) hosts it.
+    const onFocus = () => { (window as unknown as { wsActiveMathField?: HTMLElement }).wsActiveMathField = el }
+    el.addEventListener('focus', onFocus)
     ;(el as unknown as { focus: () => void }).focus()
-    return () => el.removeEventListener('input', handler)
+    onFocus()
+    return () => {
+      el.removeEventListener('input', handler)
+      el.removeEventListener('focus', onFocus)
+    }
   }, [ready])
 
   return (

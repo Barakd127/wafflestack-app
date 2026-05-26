@@ -41,6 +41,18 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
     return () => window.removeEventListener('resize', handler)
   }, [])
 
+  // Publish current topic so the WaffleStack formula keyboard tab can
+  // filter chips to topic-relevant formulas. Cleared on unmount so
+  // returning to StudyHub / Arsenal shows the full library again.
+  useEffect(() => {
+    try { localStorage.setItem('wafflestack-current-topic', topicId) } catch { /* quota */ }
+    window.dispatchEvent(new CustomEvent('ws-current-topic-changed'))
+    return () => {
+      try { localStorage.removeItem('wafflestack-current-topic') } catch { /* ignore */ }
+      window.dispatchEvent(new CustomEvent('ws-current-topic-changed'))
+    }
+  }, [topicId])
+
   const slides = lesson?.slides ?? []
   const lessonTotal = slides.length
   // Default 100% — per user feedback 2026-05-24. Was 0.7 which compressed

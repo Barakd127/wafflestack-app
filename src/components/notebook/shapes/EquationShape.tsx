@@ -177,10 +177,16 @@ function EquationView(props: {
       onChange(value)
     }
     el.addEventListener('input', handler)
+    // Track most-recently-focused math-field globally so the WaffleStack
+    // CalculatorDrawer can insert results into the right field.
+    const onFocus = () => { (window as unknown as { wsActiveMathField?: HTMLElement }).wsActiveMathField = el }
+    el.addEventListener('focus', onFocus)
     // Focus the math field so the user can start typing immediately.
     ;(el as unknown as { focus: () => void }).focus()
+    onFocus()
     return () => {
       el.removeEventListener('input', handler)
+      el.removeEventListener('focus', onFocus)
     }
   }, [isEditing, mathLiveReady, onChange])
 

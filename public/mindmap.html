@@ -5471,9 +5471,18 @@ async function openMathEditor(widget){
     if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); nbCloseMathEditor(true); }
     else if(e.key === 'Escape'){ e.preventDefault(); nbCloseMathEditor(false); }
   });
+  // Track most-recently-focused math-field for the WaffleStack
+  // CalculatorDrawer (lives in the parent React app). Set on iframe
+  // window so cross-frame access works; also mirror onto parent if the
+  // browser permits (same-origin in dev + prod GH Pages deployments).
+  const trackFocus = () => {
+    try { window.wsActiveMathField = mf; } catch {}
+    try { if(window.parent && window.parent !== window) window.parent.wsActiveMathField = mf; } catch {}
+  };
+  mf.addEventListener('focus', trackFocus);
   host.appendChild(mf);
   document.getElementById('nb-math-modal').classList.add('open');
-  setTimeout(() => { try { mf.focus(); } catch {} }, 30);
+  setTimeout(() => { try { mf.focus(); trackFocus(); } catch {} }, 30);
 }
 
 // Document-level ESC handler so the modal closes even when focus has moved
