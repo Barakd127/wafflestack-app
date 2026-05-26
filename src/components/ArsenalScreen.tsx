@@ -6,10 +6,15 @@
  * defined in index.css (`arsenal-card-in`, `arsenal-pin-pulse`, `arsenal-card-out`).
  */
 import { createElement, useState, useMemo, useRef, useEffect } from 'react'
-import { useArsenalStore, KIND_META, type ArsenalEntry, type ArsenalKind } from '../store/arsenalStore'
+import {
+  useArsenalStore, KIND_META,
+  serializeEquation, deserializeEquation, looksLikeMath,
+  type ArsenalEntry, type ArsenalKind,
+} from '../store/arsenalStore'
 import { useTutorialStep } from '../hooks/useTutorialStep'
 import CommunityArsenalTab from './CommunityArsenalTab'
 import { publishEntry, SUPABASE_CONFIGURED } from '../lib/communityArsenal'
+import { MathLineBlock } from '../lib/mathRender'
 
 // MathLive ships ~400 KB; load it on first equation edit and cache the promise.
 let mathliveLoader: Promise<unknown> | null = null
@@ -33,7 +38,7 @@ const UNICODE_SUPERSCRIPTS: Record<string, string> = {
   '⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9',
   '⁺':'+','⁻':'-','⁼':'=','⁽':'(','⁾':')','ⁿ':'n','ⁱ':'i',
 }
-function normalizeMathGlyphs(s: string): string {
+export function normalizeMathGlyphs(s: string): string {
   // f₆₇ → f_{67}, x² → x^{2}, etc. Run on contiguous sub/super sequences.
   let out = s
   out = out.replace(/([₀-₉₊₋₌₍₎ₐₑᵢⱼₖₗₘₙₒₚₛₜᵤᵥₓ]+)/g,
@@ -244,6 +249,7 @@ export default function ArsenalScreen() {
   const removeEntry = useArsenalStore(s => s.removeEntry)
   const togglePin = useArsenalStore(s => s.togglePin)
   const editEntry = useArsenalStore(s => s.editEntry)
+  const changeKind = useArsenalStore(s => s.changeKind)
   const addEntry = useArsenalStore(s => s.addEntry)
   const markPublished = useArsenalStore(s => s.markPublished)
 
@@ -271,11 +277,12 @@ export default function ArsenalScreen() {
 
   // Counts per kind (includes pinned across all kinds)
   const counts = useMemo(() => ({
-    all: entries.length,
-    gotcha: entries.filter(e => e.kind === 'gotcha').length,
-    trick:  entries.filter(e => e.kind === 'trick').length,
-    tip:    entries.filter(e => e.kind === 'tip').length,
-    pinned: entries.filter(e => e.pinned).length,
+    all:      entries.length,
+    gotcha:   entries.filter(e => e.kind === 'gotcha').length,
+    trick:    entries.filter(e => e.kind === 'trick').length,
+    tip:      entries.filter(e => e.kind === 'tip').length,
+    equation: entries.filter(e => e.kind === 'equation').length,
+    pinned:   entries.filter(e => e.pinned).length,
   }), [entries])
 
   // Filtered + sorted (pinned first, then newest)
@@ -441,6 +448,10 @@ export default function ArsenalScreen() {
           selected={kindFilter === 'tip'} onClick={() => setKindFilter('tip')}
           color={KIND_META.tip.color} bg={KIND_META.tip.bg}
           tip={showHints ? KIND_META.tip.description : undefined} />
+        <FilterPill label={KIND_META.equation.label + 'ות'} icon={KIND_META.equation.icon} count={counts.equation}
+          selected={kindFilter === 'equation'} onClick={() => setKindFilter('equation')}
+          color={KIND_META.equation.color} bg={KIND_META.equation.bg}
+          tip={showHints ? KIND_META.equation.description : undefined} />
         <FilterPill label="מוצמדים" icon="📍" count={counts.pinned}
           selected={kindFilter === 'pinned'} onClick={() => setKindFilter('pinned')}
           color="#92400e" bg="rgba(251,191,36,0.18)"
@@ -503,6 +514,8 @@ export default function ArsenalScreen() {
               onEditEquation={(segIdx, newLatex) => {
                 editEntry(entry.id, replaceMathSegment(entry.text, segIdx, newLatex))
               }}
+              onChangeKind={(kind) => changeKind(entry.id, kind)}
+              onSaveEquation={(serialized) => editEntry(entry.id, serialized)}
             />
           ))}
         </div>
@@ -593,7 +606,8 @@ function FilterPill({ label, icon, count, selected, onClick, color, bg, tip }: {
 function ArsenalCard({
   entry, indexInList, isEditing, editingText, onEditingTextChange,
   onStartEdit, onCommitEdit, onCancelEdit, onTogglePin, onDelete, removing,
-  onShare, canShare, isPublished, sharing, onEditEquation,
+  onShare, canShare, isPublished, sharing, onEditEquation, onChangeKind,
+  onSaveEquation,
 }: {
   entry: ArsenalEntry
   indexInList: number
@@ -612,9 +626,37 @@ function ArsenalCard({
   sharing: boolean
   /** Edits the math segment at `segmentIndex` of entry.text via MathLive. */
   onEditEquation: (segmentIndex: number, newLatex: string) => void
+  /** Reclassifies the entry to a different kind (e.g. gotcha → equation). */
+  onChangeKind: (kind: ArsenalKind) => void
+  /** Saves a full equation edit (label + latex) back to the store. */
+  onSaveEquation: (serialized: string) => void
 }) {
   const meta = KIND_META[entry.kind]
   const topicLabel = entry.topicId ? TOPIC_LABELS[entry.topicId] || entry.topicId : null
+
+  // Local state for inline equation editing (equation kind only)
+  const [editingEq, setEditingEq] = useState(false)
+  const isEquation = entry.kind === 'equation'
+
+  // Parse equation payload once (memoized on entry.text)
+  const eqData = useMemo(
+    () => isEquation ? deserializeEquation(entry.text) : null,
+    [isEquation, entry.text],
+  )
+
+  const handleStartEdit = () => {
+    if (isEquation) {
+      setEditingEq(true)
+    } else {
+      onStartEdit()
+    }
+  }
+
+  const handleCancelEq = () => setEditingEq(false)
+  const handleSaveEq = (label: string, latex: string) => {
+    onSaveEquation(serializeEquation(label, latex))
+    setEditingEq(false)
+  }
 
   return (
     <div
@@ -658,8 +700,19 @@ function ArsenalCard({
         )}
       </div>
 
-      {/* Body */}
-      {isEditing ? (
+      {/* Body — equation kind gets its own renderer; others use ArsenalEntryBody */}
+      {isEquation ? (
+        editingEq ? (
+          <EquationCardEditor
+            initialLabel={eqData?.label ?? ''}
+            initialLatex={eqData?.latex ?? ''}
+            onSave={handleSaveEq}
+            onCancel={handleCancelEq}
+          />
+        ) : (
+          <EquationCardBody eqData={eqData} rawText={entry.text} />
+        )
+      ) : isEditing ? (
         <textarea
           autoFocus
           value={editingText}
@@ -699,49 +752,216 @@ function ArsenalCard({
         <span style={{ fontSize: 11, color: TEXT_LIGHT }}>
           {relativeTime(entry.createdAt)}
         </span>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {isEditing ? (
-            <>
-              <button onClick={onCommitEdit} style={iconBtn('rgba(16,185,129,0.18)', '#065f46')} title="שמור">✓</button>
-              <button onClick={onCancelEdit} style={iconBtn('rgba(127,155,217,0.18)', TEXT_DARK)} title="בטל">✕</button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={onTogglePin}
-                style={iconBtn(entry.pinned ? 'rgba(245,158,11,0.22)' : 'rgba(127,155,217,0.12)', entry.pinned ? '#92400e' : TEXT_LIGHT)}
-                title={entry.pinned ? 'בטל הצמדה' : 'הצמד'}
-              >
-                📌
-              </button>
-              <button onClick={onStartEdit} style={iconBtn('rgba(127,155,217,0.12)', TEXT_LIGHT)} title="ערוך">✏️</button>
-              {canShare && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {/* Equation edit flow: show save/cancel when editing equation inline */}
+          {isEquation && editingEq ? null /* buttons rendered inside EquationCardEditor */ : (
+            (isEditing && !isEquation) ? (
+              <>
+                <button onClick={onCommitEdit} style={iconBtn('rgba(16,185,129,0.18)', '#065f46')} title="שמור">✓</button>
+                <button onClick={onCancelEdit} style={iconBtn('rgba(127,155,217,0.18)', TEXT_DARK)} title="בטל">✕</button>
+              </>
+            ) : (
+              <>
                 <button
-                  onClick={onShare}
-                  disabled={sharing}
-                  style={iconBtn('rgba(99,102,241,0.14)', '#4338ca')}
-                  title="🌐 שתף בקהילה"
+                  onClick={onTogglePin}
+                  style={iconBtn(entry.pinned ? 'rgba(245,158,11,0.22)' : 'rgba(127,155,217,0.12)', entry.pinned ? '#92400e' : TEXT_LIGHT)}
+                  title={entry.pinned ? 'בטל הצמדה' : 'הצמד'}
                 >
-                  {sharing ? '…' : '🌐 שתף בקהילה'}
+                  📌
                 </button>
-              )}
-              {isPublished && (
-                <span
-                  style={{
-                    background: 'rgba(16,185,129,0.18)',
-                    border: '1px solid rgba(16,185,129,0.35)',
-                    color: '#065f46', borderRadius: 8, padding: '4px 8px',
-                    fontSize: 11, fontWeight: 700, fontFamily: "'Rubik', sans-serif",
-                  }}
-                  title="כבר משותף לקהילה"
-                >
-                  🌐 משותף
-                </span>
-              )}
-              <button onClick={onDelete} style={iconBtn('rgba(239,68,68,0.12)', '#b91c1c')} title="מחק">🗑</button>
-            </>
+                <button onClick={handleStartEdit} style={iconBtn('rgba(127,155,217,0.12)', TEXT_LIGHT)} title="ערוך">✏️</button>
+                {/* "המר לנוסחה" reclassify — shown only when text passes math
+                    heuristic AND the entry is not already equation kind.
+                    Lets users fix broken auto-extracted gotcha entries in one tap. */}
+                {!isEquation && looksLikeMath(entry.text) && (
+                  <button
+                    onClick={() => onChangeKind('equation')}
+                    style={iconBtn(KIND_META.equation.bg, KIND_META.equation.color)}
+                    title="המר לנוסחה"
+                  >
+                    Σ המר
+                  </button>
+                )}
+                {canShare && (
+                  <button
+                    onClick={onShare}
+                    disabled={sharing}
+                    style={iconBtn('rgba(99,102,241,0.14)', '#4338ca')}
+                    title="🌐 שתף בקהילה"
+                  >
+                    {sharing ? '…' : '🌐 שתף בקהילה'}
+                  </button>
+                )}
+                {isPublished && (
+                  <span
+                    style={{
+                      background: 'rgba(16,185,129,0.18)',
+                      border: '1px solid rgba(16,185,129,0.35)',
+                      color: '#065f46', borderRadius: 8, padding: '4px 8px',
+                      fontSize: 11, fontWeight: 700, fontFamily: "'Rubik', sans-serif",
+                    }}
+                    title="כבר משותף לקהילה"
+                  >
+                    🌐 משותף
+                  </span>
+                )}
+                <button onClick={onDelete} style={iconBtn('rgba(239,68,68,0.12)', '#b91c1c')} title="מחק">🗑</button>
+              </>
+            )
           )}
         </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Equation card body ────────────────────────────────────────────────────────
+/** Renders the body of an equation-kind card: optional Hebrew label above a
+ *  KaTeX block. Falls back to raw text if the stored format is not valid JSON.
+ *  Uses MathLineBlock (already imported) so rendering is consistent with
+ *  LessonScreen equation blocks. */
+function EquationCardBody({
+  eqData,
+  rawText,
+}: {
+  eqData: { label: string; latex: string } | null
+  rawText: string
+}) {
+  if (!eqData) {
+    // Stored text is not the JSON equation format — render as plain text
+    // (backwards compat for any manually-entered gotchas reclassified to equation).
+    return (
+      <div dir="rtl" style={{ flex: 1, fontFamily: "'Assistant', sans-serif", fontSize: 14, color: TEXT_MED, lineHeight: 1.6 }}>
+        <ArsenalEntryBody text={rawText} />
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {eqData.label ? (
+        <div dir="rtl" style={{
+          fontSize: 12, fontWeight: 600, color: KIND_META.equation.color,
+          fontFamily: "'Rubik', sans-serif", opacity: 0.85,
+        }}>
+          {eqData.label}
+        </div>
+      ) : null}
+      <MathLineBlock
+        text={'$' + eqData.latex + '$'}
+        style={{
+          fontSize: 17,
+          textAlign: 'center',
+          padding: '6px 0',
+        }}
+      />
+    </div>
+  )
+}
+
+// ── Equation card editor ──────────────────────────────────────────────────────
+/** Inline editor for equation-kind cards. Pre-fills label + latex, uses a
+ *  math-field (MathLive) for the formula input, and calls onSave / onCancel.
+ *  Mirrors the pattern from EquationEditor and the AddEntryModal equation path. */
+function EquationCardEditor({
+  initialLabel,
+  initialLatex,
+  onSave,
+  onCancel,
+}: {
+  initialLabel: string
+  initialLatex: string
+  onSave: (label: string, latex: string) => void
+  onCancel: () => void
+}) {
+  const [label, setLabel] = useState(initialLabel)
+  const [latex, setLatex] = useState(initialLatex)
+  const [mathReady, setMathReady] = useState(false)
+  const fieldRef = useRef<HTMLElement | null>(null)
+  const eqMeta = KIND_META.equation
+
+  useEffect(() => {
+    let active = true
+    loadMathLive().then(() => { if (active) setMathReady(true) })
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
+    if (!mathReady) return
+    const el = fieldRef.current
+    if (!el) return
+    const onInput = () => {
+      setLatex((el as unknown as { value: string }).value)
+    }
+    const onFocus = () => {
+      ;(window as unknown as { wsActiveMathField?: HTMLElement }).wsActiveMathField = el
+    }
+    el.addEventListener('input', onInput)
+    el.addEventListener('focus', onFocus)
+    ;(el as unknown as { focus: () => void }).focus()
+    onFocus()
+    return () => {
+      el.removeEventListener('input', onInput)
+      el.removeEventListener('focus', onFocus)
+    }
+  }, [mathReady])
+
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <input
+        type="text"
+        dir="rtl"
+        value={label}
+        onChange={e => setLabel(e.target.value)}
+        placeholder="תווית (אופציונלי)…"
+        style={{
+          padding: '6px 8px', border: `1px solid ${eqMeta.border}`,
+          borderRadius: 8, fontFamily: "'Assistant', sans-serif",
+          fontSize: 13, color: TEXT_DARK,
+          background: 'rgba(255,255,255,0.7)',
+          boxSizing: 'border-box', width: '100%',
+        }}
+      />
+      <div style={{
+        border: `1.5px solid ${eqMeta.border}`, borderRadius: 10,
+        padding: '8px 10px', background: eqMeta.bg, minHeight: 48,
+        display: 'flex', alignItems: 'center', gap: 8,
+      }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {mathReady
+            ? createElement(
+                'math-field' as unknown as 'div',
+                {
+                  ref: (el: HTMLElement | null): void => { fieldRef.current = el },
+                  'math-virtual-keyboard-policy': 'manual',
+                  'virtual-keyboard-mode': 'onfocus',
+                  'smart-mode': 'true',
+                  'default-mode': 'math',
+                  style: {
+                    width: '100%', fontSize: 18,
+                    border: 0, outline: 'none',
+                    background: 'transparent',
+                    '--keystroke-caret-color': eqMeta.color,
+                    '--latex-color': 'transparent',
+                  } as React.CSSProperties,
+                },
+                initialLatex,
+              )
+            : <span style={{ fontSize: 12, color: TEXT_LIGHT }}>טוען…</span>
+          }
+        </div>
+        <button
+          onClick={() => onSave(label, latex)}
+          style={iconBtn('rgba(16,185,129,0.18)', '#065f46')}
+          title="שמור"
+          aria-label="שמור נוסחה"
+        >✓</button>
+        <button
+          onClick={onCancel}
+          style={iconBtn('rgba(127,155,217,0.18)', TEXT_DARK)}
+          title="בטל"
+          aria-label="בטל"
+        >✕</button>
       </div>
     </div>
   )
@@ -1014,6 +1234,9 @@ function ConfirmShareDialog({ onCancel, onConfirm, loading }: {
 }
 
 // ── Add modal ────────────────────────────────────────────────────────────────
+// serializeEquation / deserializeEquation / looksLikeMath live in arsenalStore.ts
+// and are imported above — single source of truth for the equation JSON format.
+
 function AddEntryModal({ onClose, onSave, presentTopics }: {
   onClose: () => void
   onSave: (kind: ArsenalKind, text: string, topicId?: string) => void
@@ -1021,9 +1244,62 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
 }) {
   const [kind, setKind] = useState<ArsenalKind>('tip')
   const [text, setText] = useState('')
+  const [eqLabel, setEqLabel] = useState('')
+  const [eqLatex, setEqLatex] = useState('')
   const [topicId, setTopicId] = useState<string>('')
+  const [mathReady, setMathReady] = useState(false)
+  const mathFieldRef = useRef<HTMLElement | null>(null)
 
-  const canSave = text.trim().length > 0
+  // Load MathLive when the user switches to the equation tab
+  useEffect(() => {
+    if (kind !== 'equation') return
+    let active = true
+    loadMathLive().then(() => { if (active) setMathReady(true) })
+    return () => { active = false }
+  }, [kind])
+
+  // Wire up the math-field once it renders
+  useEffect(() => {
+    if (!mathReady || kind !== 'equation') return
+    const el = mathFieldRef.current
+    if (!el) return
+
+    // Update draft latex on every keystroke
+    const onInput = () => {
+      const value = (el as unknown as { value: string }).value
+      setEqLatex(value)
+    }
+    // Expose field globally so the CalculatorDrawer / MathLive keyboard hooks
+    // into the correct surface — same pattern as EquationEditor (line ~921).
+    const onFocus = () => {
+      ;(window as unknown as { wsActiveMathField?: HTMLElement }).wsActiveMathField = el
+    }
+    el.addEventListener('input', onInput)
+    el.addEventListener('focus', onFocus)
+    // Auto-focus so the MathLive virtual keyboard opens immediately
+    ;(el as unknown as { focus: () => void }).focus()
+    onFocus()
+    return () => {
+      el.removeEventListener('input', onInput)
+      el.removeEventListener('focus', onFocus)
+    }
+  }, [mathReady, kind])
+
+  const isEquation = kind === 'equation'
+  const canSave = isEquation
+    ? eqLatex.trim().length > 0
+    : text.trim().length > 0
+
+  const handleSave = () => {
+    if (!canSave) return
+    if (isEquation) {
+      onSave(kind, serializeEquation(eqLabel, eqLatex), topicId || undefined)
+    } else {
+      onSave(kind, text.trim(), topicId || undefined)
+    }
+  }
+
+  const eqMeta = KIND_META.equation
 
   return (
     <div
@@ -1053,9 +1329,9 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
           + הוסף פריט חדש לארסנל
         </h3>
 
-        {/* Kind selector */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-          {(['gotcha', 'trick', 'tip'] as ArsenalKind[]).map(k => {
+        {/* Kind selector — 4 buttons: gotcha / trick / tip / equation */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+          {(['gotcha', 'trick', 'tip', 'equation'] as ArsenalKind[]).map(k => {
             const m = KIND_META[k]
             const active = kind === k
             return (
@@ -1063,7 +1339,7 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
                 key={k}
                 onClick={() => setKind(k)}
                 style={{
-                  flex: 1,
+                  flex: 1, minWidth: 72,
                   background: active ? m.color : m.bg,
                   border: `1.5px solid ${active ? m.color : m.border}`,
                   color: active ? '#fff' : m.color,
@@ -1081,21 +1357,79 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
           })}
         </div>
 
-        {/* Text */}
-        <textarea
-          autoFocus
-          value={text}
-          onChange={e => setText(e.target.value)}
-          placeholder="כתוב/י את הקאצ' שלך כאן…"
-          style={{
-            width: '100%', minHeight: 110, resize: 'vertical',
-            border: '1px solid rgba(127,155,217,0.4)', borderRadius: 12,
-            padding: '10px 12px', fontFamily: "'Assistant', sans-serif",
-            fontSize: 15, lineHeight: 1.6, color: TEXT_DARK,
-            background: 'rgba(255,255,255,0.6)',
-            boxSizing: 'border-box',
-          }}
-        />
+        {/* Equation mode: label input + math-field */}
+        {isEquation ? (
+          <div>
+            <div style={{ marginBottom: 10 }}>
+              <label style={{ fontSize: 12, color: TEXT_LIGHT, display: 'block', marginBottom: 4 }}>
+                תווית (אופציונלי) — למשל: "ממוצע פשוט"
+              </label>
+              <input
+                type="text"
+                dir="rtl"
+                value={eqLabel}
+                onChange={e => setEqLabel(e.target.value)}
+                placeholder="שם הנוסחה בעברית…"
+                style={{
+                  width: '100%', padding: '8px 10px',
+                  border: '1px solid rgba(127,155,217,0.4)',
+                  borderRadius: 10, fontFamily: "'Assistant', sans-serif",
+                  background: 'rgba(255,255,255,0.6)', fontSize: 14, color: TEXT_DARK,
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+            <div style={{ marginBottom: 4 }}>
+              <label style={{ fontSize: 12, color: TEXT_LIGHT, display: 'block', marginBottom: 4 }}>
+                נוסחה — הקלד באמצעות מקלדת הנוסחאות
+              </label>
+              <div style={{
+                border: `1.5px solid ${eqMeta.border}`,
+                borderRadius: 12, padding: '10px 12px',
+                background: eqMeta.bg, minHeight: 60,
+                display: 'flex', alignItems: 'center',
+              }}>
+                {mathReady
+                  ? createElement(
+                      'math-field' as unknown as 'div',
+                      {
+                        ref: (el: HTMLElement | null): void => { mathFieldRef.current = el },
+                        'math-virtual-keyboard-policy': 'manual',
+                        'virtual-keyboard-mode': 'onfocus',
+                        'smart-mode': 'true',
+                        'default-mode': 'math',
+                        style: {
+                          width: '100%',
+                          fontSize: 20,
+                          border: 0, outline: 'none',
+                          background: 'transparent',
+                          '--keystroke-caret-color': eqMeta.color,
+                          '--latex-color': 'transparent',
+                        } as React.CSSProperties,
+                      },
+                    )
+                  : <span style={{ fontSize: 13, color: TEXT_LIGHT }}>טוען מקלדת נוסחאות…</span>
+                }
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Regular text area for gotcha / trick / tip */
+          <textarea
+            autoFocus
+            value={text}
+            onChange={e => setText(e.target.value)}
+            placeholder="כתוב/י את הקאצ' שלך כאן…"
+            style={{
+              width: '100%', minHeight: 110, resize: 'vertical',
+              border: '1px solid rgba(127,155,217,0.4)', borderRadius: 12,
+              padding: '10px 12px', fontFamily: "'Assistant', sans-serif",
+              fontSize: 15, lineHeight: 1.6, color: TEXT_DARK,
+              background: 'rgba(255,255,255,0.6)',
+              boxSizing: 'border-box',
+            }}
+          />
+        )}
 
         {/* Optional topic */}
         <div style={{ marginTop: 12 }}>
@@ -1124,7 +1458,7 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
         <div style={{ display: 'flex', gap: 10, marginTop: 18, justifyContent: 'flex-end' }}>
           <button onClick={onClose} style={secondaryBtn}>ביטול</button>
           <button
-            onClick={() => canSave && onSave(kind, text.trim(), topicId || undefined)}
+            onClick={handleSave}
             disabled={!canSave}
             style={{ ...primaryBtn, opacity: canSave ? 1 : 0.4, cursor: canSave ? 'pointer' : 'not-allowed' }}
           >

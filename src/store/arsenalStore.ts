@@ -12,7 +12,7 @@
  */
 import { create } from 'zustand'
 
-export type ArsenalKind = 'gotcha' | 'trick' | 'tip'
+export type ArsenalKind = 'gotcha' | 'trick' | 'tip' | 'equation'
 
 export interface ArsenalEntry {
   id: string
@@ -38,6 +38,7 @@ interface ArsenalState {
   removeEntry: (id: string) => void
   togglePin: (id: string) => void
   editEntry: (id: string, text: string) => void
+  changeKind: (id: string, kind: ArsenalKind) => void
   markPublished: (id: string, publishedAt: number) => void
   activatePotion: (kind: ArsenalKind) => void
   consumeMemoryTea: () => void
@@ -58,9 +59,12 @@ function potionStorageKey(userId: string): string {
 function loadPotionState(userId: string): { potionsUsed: Record<ArsenalKind, number> } {
   try {
     const raw = localStorage.getItem(potionStorageKey(userId))
-    if (!raw) return { potionsUsed: { gotcha: 0, trick: 0, tip: 0 } }
-    return JSON.parse(raw)
-  } catch { return { potionsUsed: { gotcha: 0, trick: 0, tip: 0 } } }
+    if (!raw) return { potionsUsed: { gotcha: 0, trick: 0, tip: 0, equation: 0 } }
+    const parsed = JSON.parse(raw) as { potionsUsed: Record<string, number> }
+    // Backfill equation key for existing stored potion states
+    if (!('equation' in parsed.potionsUsed)) parsed.potionsUsed.equation = 0
+    return parsed as { potionsUsed: Record<ArsenalKind, number> }
+  } catch { return { potionsUsed: { gotcha: 0, trick: 0, tip: 0, equation: 0 } } }
 }
 
 function savePotionState(userId: string, data: { potionsUsed: Record<ArsenalKind, number> }): void {
@@ -90,7 +94,7 @@ function makeId(): string {
 export const useArsenalStore = create<ArsenalState>((set, get) => ({
   entries: [],
   currentUserId: null,
-  potionsUsed: { gotcha: 0, trick: 0, tip: 0 },
+  potionsUsed: { gotcha: 0, trick: 0, tip: 0, equation: 0 },
   activePotion: null,
   potionActivatedAt: null,
   memoryTeaRemaining: 0,
@@ -143,6 +147,15 @@ export const useArsenalStore = create<ArsenalState>((set, get) => ({
     })
   },
 
+  changeKind: (id, kind) => {
+    const userId = get().currentUserId
+    set((state) => {
+      const next = state.entries.map(e => e.id === id ? { ...e, kind } : e)
+      if (userId) saveEntries(userId, next)
+      return { entries: next }
+    })
+  },
+
   markPublished: (id, publishedAt) => {
     const userId = get().currentUserId
     set((state) => {
@@ -186,6 +199,49 @@ export function quickAddArsenal(input: Omit<ArsenalEntry, 'id' | 'createdAt' | '
   return useArsenalStore.getState().addEntry(input)
 }
 
+/**
+ * Equation entries store content as JSON in `ArsenalEntry.text`:
+ *   {"label":"ממוצע פשוט","latex":"\\bar{x}=\\frac{\\sum x_i}{n}"}
+ * label is optional (empty string). This is the single canonical format used
+ * by AddEntryModal, EquationCardBody, and the equation edit flow.
+ */
+export function serializeEquation(label: string, latex: string): string {
+  return JSON.stringify({ label: label.trim(), latex: latex.trim() })
+}
+
+export function deserializeEquation(text: string): { label: string; latex: string } | null {
+  try {
+    const parsed = JSON.parse(text) as unknown
+    if (
+      typeof parsed === 'object' && parsed !== null &&
+      'latex' in parsed && typeof (parsed as { latex: unknown }).latex === 'string'
+    ) {
+      const labelVal = (parsed as { label?: unknown }).label
+      return {
+        label: typeof labelVal === 'string' ? labelVal : '',
+        latex: (parsed as { latex: string }).latex,
+      }
+    }
+  } catch { /* not JSON — fall through */ }
+  return null
+}
+
+/**
+ * Returns true when text looks like a math formula worth auto-classifying
+ * as `equation` kind. Requires an '=' sign PLUS at least one unambiguous
+ * math signal (LaTeX commands, Unicode sub/superscripts, Greek symbols, etc.).
+ * Used for: quiz auto-classify + "המר לנוסחה" card button visibility.
+ */
+export function looksLikeMath(text: string): boolean {
+  if (!text.includes('=')) return false
+  return (
+    /[\\^_]/.test(text) ||
+    /[₀-₉⁰-⁹]/.test(text) ||
+    /\\frac|\\sum|\\bar|\\sqrt|\\int|\\prod/.test(text) ||
+    /[Σ∑∏√∞±÷×·≤≥≠μσπαβθ]/.test(text)
+  )
+}
+
 /** Hook: how many charges of this potion kind the user can still activate. */
 export function useAvailablePotion(kind: ArsenalKind): number {
   const entries = useArsenalStore(s => s.entries)
@@ -197,7 +253,7 @@ export function useAvailablePotion(kind: ArsenalKind): number {
 /** Hebrew labels, icons, accent colours, and the long-form description shown
    inside the togglable hover tooltip. The `kind` keys stay 'gotcha' / 'trick'
    / 'tip' for backwards-compatibility with stored entries — only the labels
-   and icons changed. */
+   and icons changed. 'equation' added 2026-05-26. */
 export const KIND_META: Record<ArsenalKind, {
   label: string;
   icon: string;
@@ -238,12 +294,23 @@ export const KIND_META: Record<ArsenalKind, {
     border: 'rgba(99,102,241,0.35)',
     description: 'עצה כללית או דגש שכדאי לזכור — לא טעות ולא טריק, אלא הכוונה לדרך הנכונה לחשוב על הנושא.',
   },
+  // "Equation" — stored formula with optional Hebrew label. Honey/ember palette.
+  // Added 2026-05-26: math-field entry so the MathLive keyboard wires correctly.
+  equation: {
+    label: 'נוסחה',
+    icon: 'Σ',
+    color: '#c97c18',
+    bg: 'rgba(242,169,62,0.12)',
+    border: 'rgba(242,169,62,0.40)',
+    description: 'נוסחה מתמטית — נכתבת דרך מקלדת הנוסחאות ומוצגת כ-KaTeX. אפשר להוסיף תווית בעברית מעל הנוסחה.',
+  },
 }
 
 export const POTION_META: Record<ArsenalKind, {
   name: string; nameHe: string; effect: string; icon: string; color: string; threshold: number
 }> = {
-  gotcha: { name: 'Insight Lens', nameHe: 'עדשת תובנה',   effect: 'שאלת MCQ הבאה: תשובה שגויה אחת מסומנת', icon: '🔮', color: '#b45309', threshold: 3 },
-  trick:  { name: 'Speed Tonic',  nameHe: 'טוניק מהירות', effect: 'חידון בניין הבא: XP ×1.5 (5 דקות)',       icon: '⚗️', color: '#7c3aed', threshold: 3 },
-  tip:    { name: 'Memory Tea',   nameHe: 'תה זיכרון',    effect: '3 שאלות הבאות: XP ×2',                    icon: '🍵', color: '#1e40af', threshold: 3 },
+  gotcha:   { name: 'Insight Lens', nameHe: 'עדשת תובנה',   effect: 'שאלת MCQ הבאה: תשובה שגויה אחת מסומנת', icon: '🔮', color: '#b45309', threshold: 3 },
+  trick:    { name: 'Speed Tonic',  nameHe: 'טוניק מהירות', effect: 'חידון בניין הבא: XP ×1.5 (5 דקות)',       icon: '⚗️', color: '#7c3aed', threshold: 3 },
+  tip:      { name: 'Memory Tea',   nameHe: 'תה זיכרון',    effect: '3 שאלות הבאות: XP ×2',                    icon: '🍵', color: '#1e40af', threshold: 3 },
+  equation: { name: 'Formula Bank', nameHe: 'בנק נוסחאות',  effect: '',                                         icon: 'Σ',  color: '#c97c18', threshold: 99 },
 }
