@@ -17,6 +17,7 @@ import { TutorDrawer } from './components/AITutor/TutorDrawer'
 import FeatureGate from './components/FeatureGate'
 import UnlockToast from './components/UnlockToast'
 import VirtualKeyboardCloser from './components/VirtualKeyboardCloser'
+import WaffleStackKeyboard from './components/WaffleStackKeyboard'
 import { useLearningStore } from './store/learningStore'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
@@ -333,6 +334,9 @@ function App() {
       {/* Floating ✕ button visible whenever MathLive's virtual keyboard is
           open. Closes via API + on Escape + on route change. Per user 2026-05-25. */}
       <VirtualKeyboardCloser />
+      {/* Registers a "וופלסטאק" tab on MathLive's virtual keyboard with
+          formula chips from FORMULA_LIBRARY. Side-effect-only component. */}
+      <WaffleStackKeyboard />
     </div>
   )
 }
