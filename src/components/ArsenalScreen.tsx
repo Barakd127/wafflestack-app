@@ -741,6 +741,12 @@ function ArsenalCard({
             color: TEXT_MED, lineHeight: 1.6, whiteSpace: 'pre-wrap',
             direction: 'rtl', textAlign: 'right',
             unicodeBidi: 'plaintext' as React.CSSProperties['unicodeBidi'],
+            // Long auto-extracted equations (gotcha-kind with math content)
+            // render as one wide inline-block KaTeX node and overflow the
+            // card edge. Allow horizontal scroll. Per user 2026-05-26.
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            maxWidth: '100%',
           }}
         >
           <ArsenalEntryBody text={entry.text} onEditEquation={onEditEquation} />
