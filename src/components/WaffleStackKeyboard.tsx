@@ -72,20 +72,43 @@ function chipForFormula(f: Formula): Record<string, unknown> {
   // MathLive renders the `latex` field as the visual KaTeX on the keycap AND
   // as the inserted content. Previous attempt set `label: "$$…$$"` thinking
   // MathLive would render labels-with-delimiters — it does NOT (the dollars
-  // are shown verbatim). Per user 2026-05-26 screenshot. Drop `label`
-  // entirely so the keycap visual comes from the `latex` field directly.
+  // are shown verbatim). Per user 2026-05-26 screenshot.
+  //
+  // Width: rough heuristic based on LaTeX length. MathLive uses column units
+  // where 1 = standard key width and the value gets mapped to CSS classes
+  // like w15 (1.5), w20 (2.0), w30 (3.0). Decimal values that don't map to
+  // a class (e.g. 2.2) silently fall back to width:auto = clipped content.
+  // Snap to known valid increments. Per user screenshot 2026-05-26.
+  // Use a coarse width hint just for layout packing. Real chip sizing is
+  // overridden by our injected CSS (`.ws-formula-chip { flex: 0 0 auto }`)
+  // which lets each chip size to its content. Width here just controls how
+  // many chips packRows() squeezes per row.
+  const len = f.latex.length
+  const width = len < 12 ? 2 : len < 22 ? 3 : len < 35 ? 4 : 5
   return {
     latex: f.latex,
     class: `small ws-formula-chip ws-fid-${f.id}`,
     tooltip: f.label + (f.desc ? ' — ' + f.desc : ''),
-    width: 1.6,
+    width,
   }
 }
 
-function chunk<T>(arr: T[], size: number): T[][] {
-  const out: T[][] = []
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
-  return out
+/** Pack chips into rows so each row's total `width` stays within budget.
+ *  MathLive keyboard ≈ 10 columns. Returns rows that respect the per-chip
+ *  width hints from `chipForFormula`. */
+function packRows(chips: Array<Record<string, unknown>>, budget = 10): Array<Array<Record<string, unknown>>> {
+  const rows: Array<Array<Record<string, unknown>>> = []
+  let cur: Array<Record<string, unknown>> = []
+  let used = 0
+  for (const c of chips) {
+    const w = typeof c.width === 'number' ? c.width : 1
+    if (used + w > budget && cur.length) {
+      rows.push(cur); cur = []; used = 0
+    }
+    cur.push(c); used += w
+  }
+  if (cur.length) rows.push(cur)
+  return rows
 }
 
 function buildRows(): unknown[] {
@@ -118,8 +141,8 @@ function buildRows(): unknown[] {
   if (topicFormulas.length) {
     rows.push([{ class: 'separator w10', label: '⭐ נושא נוכחי' }])
     // 4 chips per row.
-    for (const row of chunk(topicFormulas, 4)) {
-      rows.push(row.map(chipForFormula))
+    for (const row of packRows(topicFormulas.map(chipForFormula))) {
+      rows.push(row)
     }
   }
 
@@ -129,8 +152,8 @@ function buildRows(): unknown[] {
     const remaining = cat.formulas.filter(f => !topicFormulas.includes(f))
     if (!remaining.length) continue
     rows.push([{ class: 'separator w10', label: cat.label }])
-    for (const row of chunk(remaining, 4)) {
-      rows.push(row.map(chipForFormula))
+    for (const row of packRows(remaining.map(chipForFormula))) {
+      rows.push(row)
     }
   }
 
@@ -177,11 +200,46 @@ function isRegistered(): boolean {
   )
 }
 
+// Injected once on first mount — MathLive's default `.MLK__keycap` enforces a
+// fixed min-width and clips overflow, which clips our LaTeX-rendered keycaps.
+// Per user 2026-05-26 screenshot: chips were cut on both sides.
+function injectKeyboardCSS(): void {
+  if (document.getElementById('ws-keyboard-style')) return
+  const style = document.createElement('style')
+  style.id = 'ws-keyboard-style'
+  style.textContent = `
+.ws-formula-chip {
+  /* Override MathLive's default fixed-width keycap so chips size to their
+   * LaTeX content. Without this, widths 3 and 4 (no corresponding w30/w40
+   * CSS class in MathLive) fell back to auto and clipped the content. */
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 60px !important;
+  max-width: none !important;
+  padding: 6px 10px !important;
+  white-space: nowrap !important;
+  min-height: 42px !important;
+  overflow: visible !important;
+}
+.ws-formula-chip .ML__latex,
+.ws-formula-chip .ML__base {
+  font-size: 0.85em !important;
+  max-width: 100% !important;
+  display: inline-block !important;
+}
+.MLK__row:has(.ws-formula-chip) {
+  gap: 4px;
+}
+`
+  document.head.appendChild(style)
+}
+
 export default function WaffleStackKeyboard() {
   const longPressTimer = useRef<number | null>(null)
   const longPressFired = useRef(false)
 
   useEffect(() => {
+    injectKeyboardCSS()
     // Retry registration until MathLive's `mathVirtualKeyboard` exists, then
     // hook into its `before-virtual-keyboard-toggle` event so we re-register
     // every time the keyboard is shown. MathLive resets the `layouts` array
