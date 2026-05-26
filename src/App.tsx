@@ -18,6 +18,7 @@ import FeatureGate from './components/FeatureGate'
 import UnlockToast from './components/UnlockToast'
 import VirtualKeyboardCloser from './components/VirtualKeyboardCloser'
 import WaffleStackKeyboard from './components/WaffleStackKeyboard'
+import CalculatorDrawer from './components/CalculatorDrawer'
 import { useLearningStore } from './store/learningStore'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
@@ -337,6 +338,9 @@ function App() {
       {/* Registers a "וופלסטאק" tab on MathLive's virtual keyboard with
           formula chips from FORMULA_LIBRARY. Side-effect-only component. */}
       <WaffleStackKeyboard />
+      {/* Slot-input formula evaluator. Subscribes to 'ws-open-calc' fired
+          by a long-press on a keyboard chip. */}
+      <CalculatorDrawer />
     </div>
   )
 }
