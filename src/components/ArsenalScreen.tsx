@@ -14,7 +14,7 @@ import {
 import { useTutorialStep } from '../hooks/useTutorialStep'
 import CommunityArsenalTab from './CommunityArsenalTab'
 import { publishEntry, SUPABASE_CONFIGURED } from '../lib/communityArsenal'
-import { MathLineBlock } from '../lib/mathRender'
+import { MathLineBlock, KatexInline } from '../lib/mathRender'
 
 // MathLive ships ~400 KB; load it on first equation edit and cache the promise.
 let mathliveLoader: Promise<unknown> | null = null
@@ -448,7 +448,7 @@ export default function ArsenalScreen() {
           selected={kindFilter === 'tip'} onClick={() => setKindFilter('tip')}
           color={KIND_META.tip.color} bg={KIND_META.tip.bg}
           tip={showHints ? KIND_META.tip.description : undefined} />
-        <FilterPill label={KIND_META.equation.label + 'ות'} icon={KIND_META.equation.icon} count={counts.equation}
+        <FilterPill label="נוסחאות" icon={KIND_META.equation.icon} count={counts.equation}
           selected={kindFilter === 'equation'} onClick={() => setKindFilter('equation')}
           color={KIND_META.equation.color} bg={KIND_META.equation.bg}
           tip={showHints ? KIND_META.equation.description : undefined} />
@@ -847,14 +847,24 @@ function EquationCardBody({
           {eqData.label}
         </div>
       ) : null}
-      <MathLineBlock
-        text={'$' + eqData.latex + '$'}
+      {/* Horizontal scroll container — KaTeX can render equations wider than the
+       *  card body. Forcing LTR direction lets the math read naturally inside
+       *  an RTL card. Use KatexInline (not MathLineBlock) because raw LaTeX
+       *  has no Hebrew runs — MathLineBlock would bail out and render plain
+       *  text. Per user 2026-05-26 screenshot. */}
+      <div
+        dir="ltr"
         style={{
-          fontSize: 17,
+          maxWidth: '100%',
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          padding: '6px 4px',
           textAlign: 'center',
-          padding: '6px 0',
+          fontSize: 17,
         }}
-      />
+      >
+        <KatexInline latex={eqData.latex} displayMode={false} />
+      </div>
     </div>
   )
 }
