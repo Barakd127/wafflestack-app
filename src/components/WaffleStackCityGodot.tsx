@@ -67,14 +67,14 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
     // standalone full-screen mode AND split-pane mode without escaping the
     // panel boundary. Parent (App.tsx wafflecity wrapper or SplitLayout left
     // panel) provides position:relative.
-    <div className="absolute inset-0 z-0 ws-godot-shell" style={{ background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f1f3f 100%)' }}>
+    <div className="absolute inset-0 z-0 ws-godot-shell" style={{ background: 'linear-gradient(160deg, #1a2a5e 0%, #2653b8 50%, #1a3580 100%)' }}>
       {/* Custom Hebrew loading overlay — masks the Godot canvas until ready */}
       {!ready && (
         <div
           dir="rtl"
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.15) 0%, rgba(15,15,35,0.95) 70%)',
+            background: 'radial-gradient(ellipse at center, rgba(84,121,221,0.25) 0%, rgba(20,40,110,0.96) 70%)',
             zIndex: 30,
             fontFamily: "'Rubik', 'Assistant', sans-serif",
           }}
@@ -94,14 +94,14 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
             <div style={{
               width: '100%', maxWidth: 360, margin: '0 auto',
               height: 8, borderRadius: 8,
-              background: 'rgba(255,255,255,0.08)',
+              background: 'rgba(255,255,255,0.10)',
               overflow: 'hidden',
-              border: '1px solid rgba(99,102,241,0.25)',
+              border: '1px solid rgba(146,168,230,0.35)',
             }}>
               <div style={{
                 height: '100%',
                 width: progress ? `${pct}%` : '15%',
-                background: 'linear-gradient(90deg, #818cf8, #6366f1, #4338ca)',
+                background: 'linear-gradient(90deg, #92A8E6, #5479DD, #3a5fc4)',
                 transition: 'width 240ms ease-out',
                 animation: progress ? undefined : 'wsIndeterminate 1.4s linear infinite',
                 backgroundSize: progress ? undefined : '200% 100%',
