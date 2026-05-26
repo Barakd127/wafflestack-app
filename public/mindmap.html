@@ -5241,6 +5241,43 @@ const FTB_DATA = [
 let FTB_starred = new Set(JSON.parse(localStorage.getItem('ftb_starred')||'[]'));
 let FTB_filter = '';
 
+// ─── Shared formula library (single source of truth) ─────────────────────
+// At runtime, swap FTB_DATA's contents with /formula-library.json. That file
+// is emitted from src/data/formula-library.ts via scripts/emit-formula-library.mjs
+// at npm run prebuild. The inline literal above (10 categories, ~47 formulas)
+// stays as a first-paint fallback in case the fetch fails / is racing.
+// Adapter: JSON entries use {id,label,formulas:[...]} while the inline ones
+// use {name,label,formulas:[...]} — we normalise to whatever the existing
+// rendering loop expects (`topic.label`, `topic.formulas`).
+(function loadFormulaLibrary(){
+  // Resolve relative to this document so /mindmap.html → /formula-library.json
+  // when hosted at the site root, and /sub/mindmap.html → /sub/formula-library.json
+  // when embedded via a subpath (GH Pages).
+  const url = new URL('formula-library.json', document.baseURI).toString();
+  fetch(url, {cache:'no-cache'})
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP '+r.status)))
+    .then(json => {
+      if(!Array.isArray(json) || !json.length) return;
+      // Replace in-place so existing iterators keep working.
+      FTB_DATA.length = 0;
+      for(const cat of json){
+        FTB_DATA.push({
+          name: cat.id || cat.label,
+          label: cat.label,
+          formulas: (cat.formulas||[]).map(f => ({
+            id: f.id, label: f.label, latex: f.latex, desc: f.desc || ''
+          })),
+        });
+      }
+      // If the formula library modal is open, re-render it.
+      try {
+        const open = document.querySelector('[data-ftb-list]');
+        if(open && typeof open._ftbRerender === 'function') open._ftbRerender();
+      } catch(e){}
+    })
+    .catch(()=>{/* keep inline fallback */});
+})();
+
 function ftbToggle(){
   const tb=document.getElementById('formula-toolbox');
   tb.classList.toggle('collapsed');
@@ -5434,9 +5471,18 @@ async function openMathEditor(widget){
     if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); nbCloseMathEditor(true); }
     else if(e.key === 'Escape'){ e.preventDefault(); nbCloseMathEditor(false); }
   });
+  // Track most-recently-focused math-field for the WaffleStack
+  // CalculatorDrawer (lives in the parent React app). Set on iframe
+  // window so cross-frame access works; also mirror onto parent if the
+  // browser permits (same-origin in dev + prod GH Pages deployments).
+  const trackFocus = () => {
+    try { window.wsActiveMathField = mf; } catch {}
+    try { if(window.parent && window.parent !== window) window.parent.wsActiveMathField = mf; } catch {}
+  };
+  mf.addEventListener('focus', trackFocus);
   host.appendChild(mf);
   document.getElementById('nb-math-modal').classList.add('open');
-  setTimeout(() => { try { mf.focus(); } catch {} }, 30);
+  setTimeout(() => { try { mf.focus(); trackFocus(); } catch {} }, 30);
 }
 
 // Document-level ESC handler so the modal closes even when focus has moved
