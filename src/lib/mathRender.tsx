@@ -73,6 +73,34 @@ export function MathLineBlock({ text, style }: { text: string; style?: React.CSS
   )
 }
 
+/** Render a raw LaTeX string as KaTeX. Use this when you have only LaTeX
+ *  (no Hebrew, no surrounding text) and just want the rendered equation. */
+export function KatexInline({ latex, displayMode = false, style }: {
+  latex: string; displayMode?: boolean; style?: React.CSSProperties
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+    let cancelled = false
+    const render = () => {
+      if (cancelled) return
+      if (window.katex) {
+        try {
+          node.innerHTML = window.katex.renderToString(latex, {
+            throwOnError: false, displayMode, output: 'html',
+          })
+        } catch { node.textContent = latex }
+      } else {
+        setTimeout(render, 80)
+      }
+    }
+    render()
+    return () => { cancelled = true }
+  }, [latex, displayMode])
+  return <div ref={ref} dir="ltr" style={{ direction: 'ltr', unicodeBidi: 'isolate', display: 'inline-block', ...style }} />
+}
+
 function KatexLine({ latex }: { latex: string }) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {

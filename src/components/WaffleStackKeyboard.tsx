@@ -69,15 +69,16 @@ export function pushRecentFormula(id: string): void {
 // `ws-formula-chip ws-fid-<id>` so the global pointerdown listener can
 // detect long-press on the right DOM element.
 function chipForFormula(f: Formula): Record<string, unknown> {
-  // Use latex insert command — MathLive layouts accept either a raw `latex`
-  // shorthand (typed) or `command: ['insertLatex', '…']`.
+  // MathLive renders the `latex` field as the visual KaTeX on the keycap AND
+  // as the inserted content. Previous attempt set `label: "$$…$$"` thinking
+  // MathLive would render labels-with-delimiters — it does NOT (the dollars
+  // are shown verbatim). Per user 2026-05-26 screenshot. Drop `label`
+  // entirely so the keycap visual comes from the `latex` field directly.
   return {
     latex: f.latex,
-    // MathLive renders `label` as LaTeX when wrapped in `$$…$$`, else as text.
-    label: `$$${f.latex}$$`,
     class: `small ws-formula-chip ws-fid-${f.id}`,
     tooltip: f.label + (f.desc ? ' — ' + f.desc : ''),
-    width: 1.5,
+    width: 1.6,
   }
 }
 
@@ -145,19 +146,35 @@ function registerLayout(): boolean {
   if (!kb) return false
   const rows = buildRows()
   // The custom-layout shape MathLive accepts: { label, tooltip, rows }.
-  // We keep the default layout alongside ours so the user never loses the
-  // standard ABC/numeric tabs.
+  // We keep the 4 standard MathLive tabs alongside ours so the user never
+  // loses ABC/numeric/symbols/greek. Using the expanded names (not 'default')
+  // because MathLive resets `layouts` to the expanded form on first keyboard
+  // show, which silently dropped our custom entry. Per user 2026-05-26.
   const customLayout = {
     label: 'וופלסטאק',
     tooltip: 'נוסחאות וופלסטאק',
     rows,
   }
   try {
-    ;(kb as { layouts?: unknown }).layouts = ['default', customLayout]
+    ;(kb as { layouts?: unknown }).layouts = [
+      'numeric', 'symbols', 'alphabetic', 'greek', customLayout,
+    ]
     return true
   } catch {
     return false
   }
+}
+
+/** Check whether our custom layout is actually in MathLive's layouts list.
+ *  Used by the retry loop — MathLive may overwrite `layouts` on first show,
+ *  so we keep re-registering until our entry sticks. */
+function isRegistered(): boolean {
+  const kb = getKB() as { layouts?: unknown[] } | undefined
+  if (!kb?.layouts) return false
+  return kb.layouts.some(l =>
+    typeof l === 'object' && l !== null &&
+    (l as { label?: string }).label === 'וופלסטאק',
+  )
 }
 
 export default function WaffleStackKeyboard() {
@@ -165,12 +182,31 @@ export default function WaffleStackKeyboard() {
   const longPressFired = useRef(false)
 
   useEffect(() => {
-    // Retry registration until MathLive's mathVirtualKeyboard is on window.
-    // ArsenalScreen lazy-loads MathLive so it may arrive after first render.
+    // Retry registration until MathLive's `mathVirtualKeyboard` exists, then
+    // hook into its `before-virtual-keyboard-toggle` event so we re-register
+    // every time the keyboard is shown. MathLive resets the `layouts` array
+    // back to its 4 default tabs on first show, silently dropping our custom
+    // layout — the event-driven re-registration plugs that hole. Per user
+    // 2026-05-26: וופלסטאק tab was disappearing after page reload.
     let attempts = 0
+    let listenerAttached = false
+    const attachListener = () => {
+      if (listenerAttached) return
+      const kb = getKB() as (EventTarget & { addEventListener?: (t: string, f: () => void) => void }) | undefined
+      if (!kb?.addEventListener) return
+      kb.addEventListener('before-virtual-keyboard-toggle', () => {
+        if (!isRegistered()) registerLayout()
+      })
+      kb.addEventListener('virtual-keyboard-toggle', () => {
+        if (!isRegistered()) registerLayout()
+      })
+      listenerAttached = true
+    }
     const tryRegister = () => {
-      if (registerLayout()) return
-      if (attempts++ < 60) {
+      if (!isRegistered()) registerLayout()
+      attachListener()
+      attempts++
+      if (!isRegistered() && attempts < 120) {
         window.setTimeout(tryRegister, 500)
       }
     }
