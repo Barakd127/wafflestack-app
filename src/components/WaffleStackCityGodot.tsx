@@ -71,7 +71,7 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
   return (
     <div
       className="absolute inset-0 z-0 ws-godot-shell"
-      style={{ background: '#0e1a3f' }}
+      style={{ background: '#0c1535' }}
     >
       {/* Branded loading overlay — stays until godot-ready (or 35s fallback) */}
       {!ready && (
@@ -79,7 +79,7 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
           dir="rtl"
           className="absolute inset-0 flex flex-col items-center justify-center"
           style={{
-            background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(84,121,221,0.18) 0%, #0e1a3f 70%)',
+            background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(85,122,222,0.20) 0%, #0c1535 70%)',
             zIndex: 30,
             fontFamily: "'Rubik', 'Assistant', sans-serif",
             pointerEvents: 'none',
@@ -87,21 +87,11 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
         >
           {/* App logo row */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 32 }}>
-            <img
-              src="/building-figma.png"
-              alt="WaffleStack"
-              style={{
-                height: 72,
-                width: 'auto',
-                animation: 'wsFloat 2.8s ease-in-out infinite',
-                filter: 'drop-shadow(0 6px 18px rgba(84,121,221,0.6))',
-              }}
-            />
             <div>
-              <div style={{ fontSize: 32, fontWeight: 800, color: '#F5C842', letterSpacing: -0.5, lineHeight: 1 }}>
+              <div style={{ fontSize: 36, fontWeight: 800, color: '#A0B4EA', letterSpacing: -0.5, lineHeight: 1 }}>
                 WaffleStack
               </div>
-              <div style={{ fontSize: 13, color: 'rgba(146,168,230,0.80)', marginTop: 3, fontWeight: 400 }}>
+              <div style={{ fontSize: 13, color: 'rgba(160,180,234,0.65)', marginTop: 4, fontWeight: 400 }}>
                 עיר הסטטיסטיקה שלך
               </div>
             </div>
@@ -113,13 +103,13 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
               height: 6,
               borderRadius: 6,
               background: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(146,168,230,0.20)',
+              border: '1px solid rgba(160,180,234,0.20)',
               overflow: 'hidden',
             }}>
               <div style={{
                 height: '100%',
                 width: pct !== null ? `${pct}%` : '100%',
-                background: 'linear-gradient(90deg, #92A8E6, #5479DD)',
+                background: 'linear-gradient(90deg, #A0B4EA, #557ADE)',
                 transition: 'width 300ms ease-out',
                 animation: pct === null ? 'wsSweep 1.8s ease-in-out infinite' : undefined,
                 transformOrigin: pct === null ? 'left center' : undefined,
@@ -128,7 +118,7 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
           </div>
 
           {/* Status text */}
-          <div style={{ fontSize: 12, color: 'rgba(146,168,230,0.65)', marginBottom: 36, fontVariantNumeric: 'tabular-nums' }}>
+          <div style={{ fontSize: 12, color: 'rgba(160,180,234,0.60)', marginBottom: 36, fontVariantNumeric: 'tabular-nums' }}>
             {pct !== null
               ? `טוען… ${pct}% — ${mb} / ${totalMb} MB`
               : 'טוען את העיר…'}
@@ -141,7 +131,7 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
               maxWidth: 340,
               textAlign: 'center',
               fontSize: 13,
-              color: 'rgba(255,255,255,0.55)',
+              color: 'rgba(255,255,255,0.50)',
               lineHeight: 1.65,
               animation: 'wsFadeIn 0.6s ease',
               padding: '0 16px',
@@ -151,10 +141,6 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
           </div>
 
           <style>{`
-            @keyframes wsFloat {
-              0%, 100% { transform: translateY(0px); }
-              50%       { transform: translateY(-7px); }
-            }
             @keyframes wsSweep {
               0%   { transform: translateX(-100%) scaleX(0.4); }
               50%  { transform: translateX(60%)  scaleX(0.6); }
