@@ -1,266 +1,231 @@
 # Proactive Cycle 01 — Gameplay Design Space Exploration
 
-**Date:** 2026-05-26  
-**Agent:** proactive-vision-builder, Cycle 1 (exploration only — no code)  
-**Branch:** proactive/exploration/games-design-space  
-**Model routing:** Haiku for VISION read + git survey → Opus 4.7 for design decision → Sonnet 4.6 for document synthesis  
-**NotebookLM:** SKIPPED — MCP connector not available in this container. Drew from VISION.md catalogue + design judgment.
+**Branch:** `proactive/exploration/games-design-space`  
+**Date:** 2026-05-27  
+**Cycle:** 1 of N (exploration only — no code changes)  
+**NotebookLM:** SKIPPED (MCP connector not available in this container; design judgment drawn from VISION.md catalogue + git history + game mechanic library)
 
 ---
 
-## Codebase Snapshot
+## Context
 
-WaffleStack is a Hebrew-first, dark-UI web app (React + TypeScript + Vite + Tailwind + R3F + Zustand). Current state:
-
-- **3D city** (Santorini aesthetic, Godot export behind iframe) — buildings = stats topics, but placing them is cosmetic today (no resource production/consumption loop).
-- **SM-2 spaced-repetition quiz engine** — 10 topics: normal, hypothesis, correlation, mean, median, stddev, sampling, regression, CI, binomial.
-- **XP / coins / streak / mastery** tracked in Zustand + localStorage.
-- **MindMap canvas, SplitLayout, Formula keyboard, AI Tutor drawer** — all functional.
-
-**Core tension identified:** The city exists, but VISION.md explicitly flags it as "locked-in risk: decoration not decision unless buildings consume/produce resources." The exploration task is to find a gameplay loop that makes the city (or a replacement metaphor) structurally necessary for stats learning — not a trophy shelf.
+WaffleStack today has a working quiz engine (SM-2, Hebrew, RTL) and a 3D Kenney city scene, but the city is purely cosmetic — buildings unlock at XP milestones, which is **gamification, not gameplay**. The VISION.md north-star rule demands: one meaningful decision every 15–30 seconds, where the player *uses* the statistical concept to make the decision. This cycle explores the space of candidates that could replace or supplement the current city-as-decoration loop with real gameplay.
 
 ---
 
 ## Scoring Rubric
 
-| Axis | What it measures | Weight |
+| # | Criterion | Notes |
 |---|---|---|
-| **Decision rhythm** | One meaningful choice every 15–30s? | equal |
-| **Wonder tap** | Emotional pull beyond "answer quiz"? | equal |
-| **Engine-building potential** | Early decisions compound into later advantage? | equal |
-| **Stats-concept fit** | Player USES (not memorizes) the concept to make the choice? | equal |
-| **Decoration risk** | High score = structurally necessary, not cosmetic | equal |
+| 1 | Decision rhythm | Meaningful choices every 15–30 s |
+| 2 | Stats-fit | Player *uses* the concept in the decision (not adjacent) |
+| 3 | Engine-building | Early choices compound into later state |
+| 4 | Wonder-tap | Delight / surprise / "wow" moment |
+| 5 | Decoration risk | HIGH score = LOW risk (mechanic stands without cosmetics) |
+| 6 | Mobile-thumb | One-thumb, portrait, bottom-reach |
+| 7 | Hebrew/Israeli fit | Theme resonates with target learner |
 
-Max = 50 (10 per axis × 5 axes).
-
----
-
-## 7 Candidate Gameplay Loops
-
-### A — Mutable-Dice Probability Lab
-*Dice Forge × Mini Metro*
-
-Player crafts a set of dice where each face is a mastered statistical concept (bell curve, uniform, Bernoulli, etc.). City buildings advertise distribution requirements; player pre-commits a die to a building slot, rolls, and observes how the empirical distribution fills (or misses) the requirement. Mastery tokens (earned from quiz answers) re-engrave faces.
-
-- **Board game ref:** Dice Forge
-- **Mobile game ref:** Mini Metro
-
-### B — Data-Trading Caravan
-*Century Spice Road × Reigns*
-
-Stats topics form a prerequisite pyramid. NPC caravans offer data-packet cards; player makes binary accept/skip decisions (Reigns-style). Accepted packets trade up the pyramid via upgrade cards mapping to topic prerequisites. Player shapes which topics become reachable.
-
-- **Board game ref:** Century Spice Road + Arctic Scavengers
-- **Mobile game ref:** Reigns
-
-### C — Pre-commit Hypothesis Pipeline
-*Mechs vs Minions × Two Dots*
-
-Player pre-commits a 4-step stats pipeline (Collect → Clean → Model → Test) as a "program" before the dataset arrives. Dataset executes the pipeline step-by-step. Pipeline breaks are shown visually; player adds error-handling branches using earned "connector" cards.
-
-- **Board game ref:** Mechs vs Minions
-- **Mobile game ref:** Two Dots
-
-### D — Statistical Coffee Shop
-*Seize the Bean × Coffee Rush × Viticulture*
-
-Player runs a café. NPC customers arrive with "data orders" (e.g., "95% CI on this sample"). Player assigns workers (topic-skill slots) to stations (stats operations). Artifacts produced combine into daily revenue.
-
-- **Board game ref:** Seize the Bean + Viticulture
-- **Mobile game ref:** Coffee Rush
-
-### E — Spatial Tile-Fit Daily
-*Patchwork × Wordle*
-
-Daily puzzle: a grid of data cells arrives. Player has a hand of analysis tiles (histogram, scatter, t-test, etc.) with time+token costs and shapes. Placing a tile on compatible data cells scores insight-points; wrong tile = visible gap.
-
-- **Board game ref:** Patchwork
-- **Mobile game ref:** Wordle
-
-### F — Push-Your-Luck Sampling Run
-*Quacks of Quedlinburg × Tomb of the Mask*
-
-Player draws sample tokens from a population bag. After each draw: STOP (compute stat with current sample) or DRAW MORE (risk an outlier that blows up the estimate). Bag quality improves as topics are mastered (better-quality tokens added). Directly teaches stopping rules, LLN, and CI.
-
-- **Board game ref:** Quacks of Quedlinburg
-- **Mobile game ref:** Tomb of the Mask
-
-### G — Influence Territory Map
-*Godfather: Corleone's Empire × Cry Havoc*
-
-Seven stats schools control districts on a hex map. Player places influence tokens by answering questions in each school's style. Hidden objective cards tell which districts to control for bonus points. NPC rival competes for territory.
-
-- **Board game ref:** Godfather: Corleone's Empire + Cry Havoc
-- **Mobile game ref:** Reigns (hidden information / binary commitment)
+Each criterion 0–5. Max total: 35.
 
 ---
 
-## Candidate Scores (Opus 4.7 judgement)
+## Candidates
 
-| # | Name | Decision rhythm | Wonder tap | Engine-building | Stats-concept fit | Decoration risk | **Total** |
-|---|---|---|---|---|---|---|---|
-| A | Mutable-Dice Probability Lab | 9 | 8 | 9 | 9 | 9 | **44** |
-| F | Push-Your-Luck Sampling Run | 10 | 8 | 5 | 9 | 8 | **40** |
-| C | Pre-commit Hypothesis Pipeline | 5 | 7 | 8 | 10 | 9 | **39** |
-| D | Statistical Coffee Shop | 7 | 7 | 7 | 7 | 6 | **34** |
-| E | Spatial Tile-Fit Daily | 6 | 6 | 4 | 8 | 7 | **31** |
-| B | Data-Trading Caravan | 6 | 5 | 7 | 5 | 6 | **29** |
-| G | Influence Territory Map | 5 | 6 | 7 | 4 | 5 | **27** |
+### Loop 1: Sampling Caravan — דגימת השוק
 
-**Scoring rationale (terse):**
-- **A (44):** Tick-tight decisions (each face-craft + each pre-roll commit), dice-as-knowledge is wonder-rich, faces literally ARE the stats concept being used. Kills decoration risk by making building output contingent on distribution quality.
-- **F (40):** Highest decision rhythm of any candidate and teaches stopping rules/LLN/CI viscerally, but lacks cross-run engine-building — a single bag run is self-contained.
-- **C (39):** Best pure stats-concept fit (player literally writes a test procedure), penalised on decision rhythm because commit-then-watch can stall under 15s pacing.
-- **D (34):** Solid but worker-placement drifts to pattern-match ("data type X → slot worker Y") rather than computing statistics.
-- **E (31):** Wordle daily ≠ engine-building; once tiles are placed the run ends, no compounding.
-- **B (29):** Card-draft tempo slow; spice trading only weakly forces stats use — risks becoming a resource game with stats labels.
-- **G (27):** Hex-map influence smells like reskinned XP allocation; "which school" rarely requires USING the stat.
+Player sends "surveyors" into a procedurally-generated Tel Aviv neighborhood grid to sample populations; budget is limited so each sample size + stratification choice matters. Pay shekels for n, get a confidence interval back; client (the quiz) demands an estimate within tolerance.
+
+- **Board game mechanic:** Century Spice Road — converting cheap resources (small n) into valuable ones (tight CI) via investment chains.
+- **Mobile game pattern:** Mini Metro — fixed budget, growing demand, weekly upgrade choice (n, strata, or replicates).
+- **Decision interval:** ~20 s
+- **Stats concept used in decision:** Sampling, confidence intervals, bias vs. variance, stratification
+- **Scores:** Decision 5 / Stats-fit 5 / Engine 4 / Wonder 3 / DecoRisk 5 / Mobile 4 / Hebrew 4 → **Total: 30/35**
+- **Risk:** Math-heavy UI may feel like a spreadsheet on mobile.
+
+---
+
+### Loop 2: Distribution Garden — גן ההתפלגויות
+
+Player plants "seed" data points onto a histogram canvas to match a target distribution shown by a client (e.g., "build me a right-skewed income dist, μ≈8k"). Each plant costs energy; mean/SD/skew update live.
+
+- **Board game mechanic:** Patchwork — spatial tile placement with limited resource (time/energy) and irregular shapes (bin widths).
+- **Mobile game pattern:** Two Dots — tactile drag, immediate visual feedback per placement.
+- **Decision interval:** ~10–15 s
+- **Stats concept used in decision:** Shape of distribution, central tendency, dispersion, skew
+- **Scores:** Decision 4 / Stats-fit 5 / Engine 3 / Wonder 4 / DecoRisk 5 / Mobile 5 / Hebrew 3 → **Total: 29/35**
+- **Risk:** Becomes pattern-matching without conceptual depth if targets are too literal.
+
+---
+
+### Loop 3: Hypothesis Heist — שוד ההשערות
+
+Reigns-style swipe game where each card is a research claim ("קפה גורם לחרדה — n=40, p=.048"); swipe left = reject, right = accept. Wrong swipes drain credibility meters (Type I / Type II shown as two opposing gauges).
+
+- **Board game mechanic:** Godfather: Corleone's Empire — territory/reputation pressure; each decision shifts faction balance.
+- **Mobile game pattern:** Reigns — binary swipe, dual-meter tension.
+- **Decision interval:** ~8–12 s
+- **Stats concept used in decision:** p-values, effect size, statistical power, multiple comparisons
+- **Scores:** Decision 5 / Stats-fit 4 / Engine 2 / Wonder 4 / DecoRisk 4 / Mobile 5 / Hebrew 4 → **Total: 28/35**
+- **Risk:** Weak engine-building; mostly tactical not strategic. Type I/II gauge risk becoming pure Whack-a-Mole.
+
+---
+
+### Loop 4: Regression Roastery — בית הקלייה
+
+Player operates a coffee shop and must predict daily demand by choosing predictors (weather, day-of-week, promo) to add to a regression model; over-fit = inventory waste, under-fit = lost sales.
+
+- **Board game mechanic:** Seize the Bean — coffee-shop engine with daily customer types and upgrade tiles.
+- **Mobile game pattern:** Duolingo — daily session, streak, incremental complexity unlock.
+- **Decision interval:** ~25 s
+- **Stats concept used in decision:** Regression, overfitting, R², residuals, predictor selection
+- **Scores:** Decision 4 / Stats-fit 5 / Engine 5 / Wonder 3 / DecoRisk 4 / Mobile 4 / Hebrew 5 → **Total: 30/35**
+- **Risk:** Regression intuition is hard to convey in one thumb-swipe; the "overfitting" revelation requires multiple rounds to land.
+
+---
+
+### Loop 5: Bias Brigade — חטיבת ההטיות
+
+Stuffed Fables–style scene where player navigates a research scenario and must spot/correct biases (selection, recall, confounding) before publishing; each unfixed bias spawns a "gremlin" that distorts later results.
+
+- **Board game mechanic:** Stuffed Fables — narrative scenes with branching choices and persistent consequences (per-encounter unique mechanic).
+- **Mobile game pattern:** Duolingo — scene-by-scene progression with immediate correction.
+- **Decision interval:** ~30 s
+- **Stats concept used in decision:** Research design, confounding, selection bias, internal validity
+- **Scores:** Decision 3 / Stats-fit 5 / Engine 4 / Wonder 5 / DecoRisk 4 / Mobile 3 / Hebrew 5 → **Total: 29/35**
+- **Risk:** Authoring scenarios doesn't scale; content bottleneck. Wonder-tap is strong but relies on high-quality writing.
+
+---
+
+### Loop 6: Probability Pushka — קופת ההסתברות ⭐
+
+Player owns a "pushka" (jar) of numbered chips representing a personal probability distribution. Each round: a Hebrew word-problem sets a target (e.g., "ממוצע הציונים שלך השבוע צריך להיות בין 75–85"). Player draws chips one at a time; running mean + live density plot updates on screen. Push-your-luck: stop early (safer estimate, fewer points) or keep drawing (tighter CI, but bust if you cross a variance threshold). Between rounds, spend earned shekels to add/remove/swap chips — reshaping your distribution.
+
+- **Board game mechanic:** Quacks of Quedlinburg — bag-building + push-your-luck. Dice Forge (mutating your own toolkit).
+- **Mobile game pattern:** Threes — simple satisfying tactile draw, escalating numeric stakes.
+- **Decision interval:** ~15 s
+- **Stats concept used in decision:** Expected value, variance, Law of Large Numbers, empirical vs. theoretical probability
+- **Scores:** Decision 5 / Stats-fit 5 / Engine 5 / Wonder 5 / DecoRisk 4 / Mobile 5 / Hebrew 3 → **Total: 32/35**
+- **Risk:** "Bag" metaphor is unfamiliar to Israeli BA students without a "pushka" reskin (addressed in spec below).
+
+---
+
+### Loop 7: Correlation Catan — קטאן של מתאמים
+
+Hex map of variables; player draws "edges" they believe are causal/correlated and earns points per correct edge; spurious edges trigger Simpson's-paradox style reversals later.
+
+- **Board game mechanic:** Catan — hex placement, road-building, longest-network bonus; trading window for swapping variable hypotheses with NPCs.
+- **Mobile game pattern:** Two Dots — connect-the-dots with chain bonuses.
+- **Decision interval:** ~20 s
+- **Stats concept used in decision:** Correlation, causation, confounders, Simpson's paradox
+- **Scores:** Decision 4 / Stats-fit 5 / Engine 4 / Wonder 4 / DecoRisk 4 / Mobile 4 / Hebrew 3 → **Total: 28/35**
+- **Risk:** Causal inference is conceptually advanced for intro stats; scope risk is high.
+
+---
+
+## Score Summary Table
+
+| # | Name | Decision | Stats-fit | Engine | Wonder | DecoRisk | Mobile | Hebrew | Total |
+|---|---|---|---|---|---|---|---|---|---|
+| 6 | Probability Pushka | 5 | 5 | 5 | 5 | 4 | 5 | 3 | **32** |
+| 1 | Sampling Caravan | 5 | 5 | 4 | 3 | 5 | 4 | 4 | **30** |
+| 4 | Regression Roastery | 4 | 5 | 5 | 3 | 4 | 4 | 5 | **30** |
+| 2 | Distribution Garden | 4 | 5 | 3 | 4 | 5 | 5 | 3 | **29** |
+| 5 | Bias Brigade | 3 | 5 | 4 | 5 | 4 | 3 | 5 | **29** |
+| 3 | Hypothesis Heist | 5 | 4 | 2 | 4 | 4 | 5 | 4 | **28** |
+| 7 | Correlation Catan | 4 | 5 | 4 | 4 | 4 | 4 | 3 | **28** |
 
 ---
 
 ## Top-3 Ranking
 
-1. **A — Mutable-Dice Probability Lab (44/50)** — The dice themselves ARE the statistical concepts; every roll is a literal sampling event, every face-craft is an expected-value decision, and buildings produce/consume resources contingent on distribution quality — kills decoration risk structurally.
+**1. Loop 6 — Probability Pushka (32/35)**  
+**2. Loop 1 — Sampling Caravan (30/35)**  
+**3. Loop 4 — Regression Roastery (30/35)**
 
-2. **F — Push-Your-Luck Sampling Run (40/50)** — Tightest decision rhythm and teaches stopping rules / LLN / CI viscerally through the draw-or-stop mechanic; penalised for weak cross-run engine-building.
-
-3. **C — Pre-commit Hypothesis Pipeline (39/50)** — Best fit for teaching statistical procedure (the player literally encodes a test pipeline); penalised for bursty decision rhythm (one big commit, then watch).
-
----
-
-## #1 Detailed Spec: Mutable-Dice Probability Lab
-
-*Source: Opus 4.7 design decision call (one call only, ≤4k output)*
-
-### Elevator Pitch
-
-WaffleStack's city becomes a probability factory: every building on the Santorini grid is fed by **dice the player has personally re-engineered**, where each face is a statistical concept they have mastered. You don't *decorate* with stats — you *roll* with stats, and your city's output is the realised distribution of your own knowledge.
-
-### Decision Loop (every ~20 seconds)
-
-A single **"tick"** flows:
-
-1. **Pre-commit (5s)** — Player picks WHICH die (of up to 6 in hand) to roll into WHICH building slot. Each building advertises a target statistic ("needs mean ≥ 4", "needs variance ≤ 2", "needs 3 successes in 5 trials").
-2. **Roll (3s)** — Die rolls in 3D; result lands on the grid tile.
-3. **Read the outcome (5s)** — Result either *fills* the building (resource produced) or *spoils* (resource lost). Live histogram of that die's empirical distribution updates on screen.
-4. **Craft / swap (7s)** — Player spends 1 mastery token (earned from quiz answers) to: (a) re-engrave one face, (b) swap a die into/out of hand, or (c) commit to the next building's distribution requirement.
-
-Every step demands a choice; no step is auto-resolved.
-
-### Statistical Concepts USED (not memorised)
-
-| Concept | How the player USES it |
-|---|---|
-| Expected value | Choosing which die maximises E[X] for a building's requirement |
-| Variance | Tolerating risk on a "needs ≥6" building vs. a "needs in [3,5]" building |
-| Distribution shape | Bell-curve face vs. uniform vs. skewed — felt because building output tracks it |
-| Law of Large Numbers | Empirical histogram converges as die is reused; player sees it live |
-| Binomial / Bernoulli | Success-face dice for "k of n" buildings |
-| Sampling | Drawing a die from hand = sampling from the player's knowledge population |
-| Conditional probability | Some buildings activate only "given previous tile rolled X" |
-
-### Session Structure
-
-- **One session = 6–8 minutes** (a "day" in the city)
-- **~18–24 decisions per session** (4 ticks/min × ~5 min active + 2 min review)
-- **Daily run + roguelite layer:** each day is self-contained, but mastery tokens and die-faces persist into a "season" (7 days). End of season → leaderboard + city reset, dice persist.
-
-### Engine-Building Mechanism
-
-- **Faces persist across sessions.** Mastering "normal distribution" today swaps a uniform face for a Gaussian face permanently — every future roll uses that better die.
-- **Buildings unlock buildings.** A working "mean-tracker" building unlocks a "CI-computer" building, which requires the mean-tracker's output as input. The pyramid of stats topics = the build tree.
-- **Resource feedback loop.** Resources produced by buildings = mastery tokens spent on more faces. Bad early die-crafts produce slow runs; good early crafts compound into 2x output by day 5.
-- **Asymmetric starter dice.** Player picks ONE archetype on day 1 (Sampler / Tester / Modeler) — flavours all subsequent face options.
-
-### Failure State (informative + recoverable)
-
-- A die can be **mis-engineered** (e.g., high-variance face on a "needs low variance" building). The empirical histogram shows the mismatch in real time — the player SEES variance ballooning.
-- A building can **spoil** (3 bad rolls in a row) — produces a **"residual" resource** that ironically unlocks the diagnostics topic. Failure = pedagogical lever.
-- No hard wall: spoiled buildings can be re-fed; mastery tokens are never lost, only spent.
-- **End-of-day post-mortem:** player's empirical distribution vs. optimal, gap annotated in Hebrew.
-
-### Visual Representation
-
-**Top 60% of screen:** existing R3F city (Santorini palette preserved).
-- Buildings glow **teal `#10b981`** when fed, **amber `#f59e0b`** when starving, **red `#ef4444`** when spoiled.
-- Active building pulses **gold `#FFD700`**.
-
-**Bottom 40% (thumb-zone bottom-sheet):**
-- Right edge (RTL "start"): die-hand carousel — 6 dice as 3D cubes, swipeable.
-- Center: pre-commit slot ("הטל לכאן") — large 44pt drop target.
-- Left edge (RTL "end"): live histogram (`#3b82f6` bars) of selected die's empirical distribution; theoretical curve overlays in `#FFD700`.
-
-**Face-crafting modal:** full-screen dark sheet `#0e0f12`, hexagonal grid of 6 faces, each showing symbol (μ, σ, ✓, etc.) in Hebrew + icon. Tap to re-engrave; cost in mastery tokens shown bottom-right.
-
-All locked palette tokens used: `#0e0f12` (bg), `#10b981` (fed), `#f59e0b` (starving), `#ef4444` (spoiled), `#FFD700` (gold accent), `#3b82f6` (histogram). **Zero new hex values.**
-
-### Implementation Fit (WaffleStack codebase)
-
-**New Zustand slice:** `useDiceStore` — holds `dice: Die[]` (each `Die` has 6 `Face` objects with `{ topicId, distribution, parameters }`), `hand: DieId[]`, `masteryTokens: number`, `seasonDay: number`. Persists to localStorage same pattern as existing XP store.
-
-**New components (all in `src/`):**
-- `<DiceLab />` — root screen, mounts under existing `SplitLayout` as third route
-- `<DieCarousel />` — Embla-style horizontal swipe, RTL-aware
-- `<RollSlot />` — drop target, wired to existing haptics/sounds (gold-rim glow on commit)
-- `<EmpiricalHistogram />` — animated bar chart (D3/visx) updating on each roll
-- `<FaceForge />` — bottom-sheet modal for re-engraving; reuses existing `<BottomSheet />` pattern
-- `<BuildingRequirement />` — `<Html occlude>` overlay on R3F building meshes, shows target stat in Hebrew
-
-**R3F integration:** `<DieMesh />` instances pooled per roll; physics via `@react-three/rapier` for tumble animation (skippable after 1.5s).
-
-**Quiz engine bridge:** SM-2 correct answers hand out mastery tokens (in addition to existing XP/coins). `topicId → face` map lives in `src/data/faces.ts`.
-
-**Feature flag:** `DICE_LAB_ENABLED` in `src/config/featureFlags.ts` — false by default.
-
-### Risk Factors
-
-1. **Pre-commit dead time** — if roll animation exceeds 3s, the 15–30s decision rhythm collapses into waiting.
-2. **Face-crafting becomes a one-time menu** — players optimise once and stop engaging, reverting the game to "roll → harvest" with stats only at unlock time.
-3. **Building requirements become pattern-match** — "this building wants high mean → use die X" degrades into rote slot assignment, not stats reasoning.
-
-### Mitigation Tactics
-
-1. **Roll under 1.5s with skippable physics** — overlap the roll animation with the next pre-commit decision so decisions pipeline, never gate on animation.
-2. **Force mid-session forge engagement** — every 3rd building's requirement drifts mid-session based on roll history. Player must re-engrave during the run, not only between runs.
-3. **Requirements on distribution shape, not scalar result** — "sample mean within 0.5 of true μ over 5 rolls", not "needs ≥4". Forces reasoning about sampling distribution every time.
+**Rationale:** Pushka tops because every chip-draw is a probability decision the player *feels* through live variance, the bag IS the engine (early chip choices compound across all later rounds), and the push-your-luck bust moment creates a wonder/dread beat without any cosmetic layer. It also teaches E[X], Var[X], SE, and LLN in one mechanic that is indistinguishable from the game itself. Sampling Caravan is conceptually richer but heavier UI for mobile. Regression Roastery has the strongest Israeli cultural fit (coffee shop) but slower decision rhythm and harder-to-convey overfitting intuition.
 
 ---
 
-## Vision Alignment Check (Cycle 1 — exploration doc, no code)
+## #1 Detailed Spec: Probability Pushka — קופת ההסתברות
 
-| Rule | Compliant? | Citation |
+### Tagline (Hebrew, player-facing)
+> "בנה את קופת המזל שלך — כל צ'יפ שתוסיף משנה את ההסתברויות. תמשוך עוד? או תעצור לפני שתתפוצץ?"
+
+### Core Mechanic
+
+1. Player owns a **pushka** (jar) of numbered chips representing their personal probability distribution.
+2. Each round, a Hebrew word-problem sets a **target interval** (e.g., "ממוצע הציונים שלך צריך להיות בין 75–85, תוך 6 משיכות לכל היותר").
+3. Player draws chips one at a time; **running mean** + **live density sparkline** updates after each draw.
+4. **Push-your-luck decision:** stop now (lock in current estimate, safe points) or draw again (tighter CI, but risk crossing the bust threshold = variance too high).
+5. Between rounds, spend earned **shekels** at a chip shop: add chips (raise EV, inflate variance), remove chips (tighten variance, lower EV), or swap (shift the distribution).
+
+### The Meaningful Decision
+
+Every 10–20 seconds the player chooses: draw another chip (reduce sampling error, risk bust) or lock in the current estimate. This is a literal application of the **stopping rule** in sequential sampling — one of the hardest intuitions in intro statistics. Between rounds the strategic decision is which chips to buy: high-value chips raise the mean but inflate variance; "anchor" chips at the median stabilize. The mix the player builds over 5 minutes determines what target intervals they can safely hit.
+
+### How Statistics Is USED (Not Decorated)
+
+The bust threshold IS the variance of the player's bag, computed live — to survive long rounds the player must intuitively understand that adding extreme chips raises both E[X] and σ². To hit a narrow target interval the player must reason about the Law of Large Numbers (more draws → tighter sample mean) versus the bust risk from their bag's variance. There is no way to win by guessing; the optimal strategy literally requires applying E[X], Var[X], and the relationship `n → SE = σ/√n`.
+
+### Engine-Building Moment
+
+In round 2 the player can buy a cheap "median anchor" chip (value=5, contributes low variance) instead of a flashy "10" chip. Five rounds later, when a tough target (μ=7, σ<2) appears, that anchor is the only reason their bag doesn't bust every draw. Players who chased high-value chips early hit a wall and *learn variance the hard way* — but recoverably (next round they can re-tool the shop).
+
+### Failure State
+
+"Bust" pops a Hebrew explainer:
+> "השונות של הקופה שלך הייתה 14.2 — חצית את הסף של 12. נסה להוסיף צ'יפ קרוב לממוצע."
+
+No XP lost; round ends, player keeps bag, sees a 1-tap "תקן את הקופה" suggestion. Failure teaches the exact concept that caused it. Aligned with VISION tone rule: encouragement after wrong, never punishment.
+
+### MVP Scope (One Sprint)
+
+- `src/components/Pushka/PushkaPanel.tsx` — main game container (Pushka mode toggle alongside existing quiz)
+- `src/components/Pushka/PushkaJar.tsx` — animated jar with chip count, live mean/variance display
+- `src/components/Pushka/ChipShop.tsx` — between-rounds shop, 6 chip types priced by EV-contribution
+- `src/components/Pushka/TargetCard.tsx` — Hebrew word-problem card with target interval display and live CI meter
+- `src/components/Pushka/DensitySparkline.tsx` — live histogram of bag using Recharts (already in deps) or inline SVG
+- 10 hand-authored Hebrew target prompts spanning EV / variance / LLN / stopping rules
+- Feature-flagged: `src/config/featureFlags.ts` → `PUSHKA_MODE: false` until reviewed by Barak
+
+### Where It Lives in the Current Codebase
+
+- New route/mode alongside existing study hub; reuses `XPSystem`, `StreakTracker`, achievements infrastructure
+- SM-2 engine ingests bust-reasons as flashcards (bust on variance → variance card marked overdue), preserving the existing spaced-repetition investment
+- The R3F city scene backdrop is reused cosmetically — the pushka sits on a market stall; city buildings are NOT the mechanic (avoids the current decoration trap)
+- Hebrew/RTL layout inherited from existing i18n setup (`dir="rtl"` on root)
+- No new color tokens: uses `--gold`, `--teal`, `--red`, `--bg-2`, `--border` from locked palette
+
+### Hebrew Cultural Hook
+
+"Pushka" (קופת צדקה / קופה) is a culturally loaded Israeli object — a charity jar you put coins in over time and shake to guess what's inside; reframing it as a probability jar with actual stakes lands instantly with the target demographic.
+
+### Open Questions for Barak
+
+1. **Session persistence:** Should the bag (chip collection) persist across sessions (true engine-building, heavier onboarding for returning users) or reset daily (Duolingo-style, lower stakes, simpler mental model)?
+2. **Adaptive difficulty:** Is the bust threshold fixed per level (legible rules) or tied to the player's own bag variance history (adaptive, but harder to explain to a statistics novice)?
+3. **Social layer:** Do we want an asynchronous mode where two students compare bags on the same target round (social pressure motivator common in Israeli classroom culture) or strictly solo for the MVP?
+
+---
+
+## Citations Summary
+
+| Source | Type | Borrowed |
 |---|---|---|
-| What we are: stats-first via game | ✓ | Mutable-Dice loop: player uses E[X], variance, LLN to make every decision |
-| Gameplay ≠ Gamification | ✓ | Decision: which face to craft, which die to commit — not "earn confetti" |
-| Design rule: Hebrew-first | ✓ | Post-mortem annotated in Hebrew; forge UI uses Hebrew labels |
-| Design rule: dark UI | ✓ | `#0e0f12` background throughout |
-| **Color palette: only locked tokens used** | ✓ | #0e0f12, #10b981, #f59e0b, #ef4444, #FFD700, #3b82f6 — all from table |
-| **UI source cited** | ✓ | Mini Metro (minimal HUD + instant restart); Apple HIG (44pt targets); Linear (dark-UI density) |
-| **UI anti-pattern avoided** | ✓ | No modal-on-modal: face-forge is one bottom-sheet depth; no hamburger menu |
-| Tech invariant: Tailwind only | ✓ | No CSS modules planned |
-| Tech invariant: Zustand only | ✓ | `useDiceStore` follows existing pattern |
-| Tone rule: encouragement | ✓ | Spoiled building = unlocks diagnostics topic, not punishment |
-| Mobile-first (thumb-reach + 44pt targets) | ✓ | Bottom 40% is thumb-zone; drop target is 44pt+ |
-| Out of scope: stays in scope | ✓ | No multiplayer, no teacher dashboard, intro stats only |
-
-**NotebookLM consulted:** no — MCP connector not available in this container (logged per hard rule).  
-**Board-game inspiration:** Dice Forge (mutable dice = mutable statistical toolkit), mechanic borrowed: face re-engraving as mastery expression.  
-**Mobile-game inspiration:** Mini Metro, feedback pattern borrowed: minimal HUD + network-building under emergent surprise.  
-**Decision interval:** every ~20 seconds.  
-**Statistical concept used in decision:** expected value + variance (which face to craft / which die to commit).
+| Quacks of Quedlinburg | Board game | Bag-building + push-your-luck core loop |
+| Dice Forge | Board game | Mutating your own probability toolkit |
+| Seize the Bean | Board game | Coffee-shop engine feel for Loop 4 |
+| Century Spice Road | Board game | Resource-conversion chain for Loop 1 |
+| Patchwork | Board game | Spatial placement + cost pressure for Loop 2 |
+| Godfather: Corleone's Empire | Board game | Dual-meter reputation tension for Loop 3 |
+| Stuffed Fables | Board game | Per-encounter narrative consequences for Loop 5 |
+| Catan | Board game | Trade window + network for Loop 7 |
+| Threes | Mobile game | Tactile draw, escalating numeric stakes (Pushka) |
+| Mini Metro | Mobile game | Fixed-budget routing decisions (Caravan) |
+| Two Dots | Mobile game | Drag + chain + visual feedback (Garden, Catan) |
+| Reigns | Mobile game | Binary swipe + dual meter (Heist) |
+| Duolingo | Mobile/UI | Daily session + streak (Roastery, Brigade) |
 
 ---
 
-## Next Cycle Recommendation
-
-Cycle 2 should build the Mutable-Dice Probability Lab prototype behind a feature flag. Suggested scope:
-1. `src/config/featureFlags.ts` — add `DICE_LAB_ENABLED: false`
-2. `src/store/diceStore.ts` — Zustand slice with `Die`, `Face`, `masteryTokens`
-3. `src/data/faces.ts` — topic-to-face mapping for the 10 existing topics
-4. `src/components/DiceLab.tsx` — stub root component (non-R3F first: carousel + roll slot + histogram)
-5. One Vitest unit test for `rollDie(die: Die): number` pure function
-6. Wire `npm run build` passing
-
-Cycle 3: Add R3F `<DieMesh />` + building requirement overlays.  
-Cycle 4: Add face-forge bottom-sheet + mid-session drift mechanic.  
-Cycle 5: Season persistence + end-of-day post-mortem screen.
+*Next cycle (Cycle 2): Implement Probability Pushka MVP behind feature flag. npm run build must pass. Minimum one Vitest unit test for chip-draw / variance logic.*
