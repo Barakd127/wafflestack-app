@@ -19,6 +19,7 @@ import UnlockToast from './components/UnlockToast'
 import VirtualKeyboardCloser from './components/VirtualKeyboardCloser'
 import WaffleStackKeyboard from './components/WaffleStackKeyboard'
 import CalculatorDrawer from './components/CalculatorDrawer'
+import { setKeyboardOpen } from './lib/uiStacks'
 import { useLearningStore } from './store/learningStore'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
@@ -125,6 +126,46 @@ function App() {
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
     else if (activeView === 'notebook') window.location.hash = '#notebook'
   }, [activeView])
+
+  // Bridge MathLive's virtual-keyboard visibility into the uiStacks signal
+  // so every fixed FAB (TutorFAB, PomodoroTimer, UnlockToast) can hide while
+  // the keyboard is on screen. Per plan curried-waddling-pelican Part D.
+  // MathLive lazy-loads — retry attaching the listener until the global is
+  // ready. Once attached, both `before-virtual-keyboard-toggle` and
+  // `virtual-keyboard-toggle` events sync the flag (catches show + hide).
+  useEffect(() => {
+    type AnyKB = {
+      visible?: boolean
+      addEventListener?: (event: string, fn: () => void) => void
+      removeEventListener?: (event: string, fn: () => void) => void
+    }
+    const getKB = () => (window as unknown as { mathVirtualKeyboard?: AnyKB }).mathVirtualKeyboard
+    let kb: AnyKB | undefined
+    let attached = false
+    let timer: number | null = null
+    const sync = () => setKeyboardOpen(!!getKB()?.visible)
+    const attach = () => {
+      kb = getKB()
+      if (!kb?.addEventListener) { timer = window.setTimeout(attach, 400); return }
+      kb.addEventListener('before-virtual-keyboard-toggle', sync)
+      kb.addEventListener('virtual-keyboard-toggle', sync)
+      kb.addEventListener('geometrychange', sync)
+      attached = true
+      sync()
+    }
+    attach()
+    // Safety net: poll every 600ms in case events don't fire in some edge case.
+    const poll = window.setInterval(sync, 600)
+    return () => {
+      if (timer) window.clearTimeout(timer)
+      window.clearInterval(poll)
+      if (attached && kb) {
+        kb.removeEventListener?.('before-virtual-keyboard-toggle', sync)
+        kb.removeEventListener?.('virtual-keyboard-toggle', sync)
+        kb.removeEventListener?.('geometrychange', sync)
+      }
+    }
+  }, [])
 
   // Hide the floating dark-mode toggle in views where the iframe (mindmap or
   // Godot city) has its own theme button at the bottom — two buttons in the

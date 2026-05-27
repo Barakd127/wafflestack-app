@@ -57,9 +57,13 @@ export default function VirtualKeyboardCloser() {
       const kb = getKB()
       if (!kb || !kb.addEventListener) { timer = window.setTimeout(tryAttach, 400); return }
       kb.addEventListener('geometrychange', sync)
+      kb.addEventListener('before-virtual-keyboard-toggle', sync)
+      kb.addEventListener('virtual-keyboard-toggle', sync)
       sync()
     }
     tryAttach()
+    // Safety net poll — some MathLive open paths don't fire toggle events.
+    const poll = window.setInterval(sync, 600)
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && getKB()?.visible) {
@@ -81,9 +85,12 @@ export default function VirtualKeyboardCloser() {
 
     return () => {
       if (timer) clearTimeout(timer)
+      window.clearInterval(poll)
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('hashchange', onHash)
       getKB()?.removeEventListener?.('geometrychange', sync)
+      getKB()?.removeEventListener?.('before-virtual-keyboard-toggle', sync)
+      getKB()?.removeEventListener?.('virtual-keyboard-toggle', sync)
     }
   }, [])
 
