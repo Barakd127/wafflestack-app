@@ -113,6 +113,7 @@ export default function CalculatorDrawer() {
   const [formula, setFormula] = useState<Formula | null>(null)
   const [vals, setVals] = useState<Record<string, string>>({})
   const [copied, setCopied] = useState(false)
+  const firstInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     const onOpen = (e: Event) => {
@@ -135,7 +136,13 @@ export default function CalculatorDrawer() {
       if (e.key === 'Escape') setFormula(null)
     }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    // Auto-focus first slot input on open so user can type values immediately.
+    // Per plan curried-waddling-pelican Part B / Commit 6.
+    const t = window.setTimeout(() => firstInputRef.current?.focus(), 80)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.clearTimeout(t)
+    }
   }, [formula])
 
   if (!formula) return null
@@ -159,6 +166,15 @@ export default function CalculatorDrawer() {
     if (mf?.executeCommand) {
       try {
         mf.executeCommand(['insert', '= ' + formatResult(result)])
+      } catch { /* MathLive command rejected */ }
+    }
+  }
+
+  const insertFormulaIntoField = () => {
+    const mf = window.wsActiveMathField
+    if (mf?.executeCommand) {
+      try {
+        mf.executeCommand(['insert', formula.latex])
       } catch { /* MathLive command rejected */ }
     }
   }
@@ -227,7 +243,7 @@ export default function CalculatorDrawer() {
           לנוסחה זו אין משתנים לחישוב.
         </div>
       ) : (
-        formula.slots.map(slot => (
+        formula.slots.map((slot, slotIdx) => (
           <label
             key={slot.key}
             style={{
@@ -250,6 +266,7 @@ export default function CalculatorDrawer() {
               {slot.label}
             </span>
             <input
+              ref={slotIdx === 0 ? firstInputRef : undefined}
               type="text"
               inputMode="decimal"
               dir="ltr"
@@ -363,9 +380,33 @@ export default function CalculatorDrawer() {
           }}
           title="הכנס את התוצאה לתוך שדה המשוואה הפעיל"
         >
-          📐 הכנס למשוואה
+          📐 הכנס תוצאה
         </button>
       </div>
+
+      {/* Secondary action — insert the formula's LaTeX itself into the
+       *  focused math-field, even before the user filled values. Per plan
+       *  curried-waddling-pelican Part B / Commit 6. */}
+      <button
+        onClick={insertFormulaIntoField}
+        style={{
+          marginTop: 8,
+          width: '100%',
+          minHeight: 40,
+          background: 'transparent',
+          border: '1px dashed ' + BORDER,
+          borderRadius: 10,
+          color: 'rgba(255,247,232,0.78)',
+          fontFamily: "'Rubik', sans-serif",
+          fontSize: 12,
+          fontWeight: 700,
+          cursor: 'pointer',
+          padding: '8px 12px',
+        }}
+        title="הכנס את הנוסחה עצמה (LaTeX) למשוואה הפעילה"
+      >
+        ✍️ הכנס את הנוסחה למשוואה
+      </button>
     </div>
   )
 }
