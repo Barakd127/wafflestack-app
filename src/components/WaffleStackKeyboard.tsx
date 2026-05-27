@@ -69,46 +69,22 @@ export function pushRecentFormula(id: string): void {
 // `ws-formula-chip ws-fid-<id>` so the global pointerdown listener can
 // detect long-press on the right DOM element.
 function chipForFormula(f: Formula): Record<string, unknown> {
-  // MathLive renders the `latex` field as the visual KaTeX on the keycap AND
-  // as the inserted content. Previous attempt set `label: "$$…$$"` thinking
-  // MathLive would render labels-with-delimiters — it does NOT (the dollars
-  // are shown verbatim). Per user 2026-05-26 screenshot.
-  //
-  // Width: rough heuristic based on LaTeX length. MathLive uses column units
-  // where 1 = standard key width and the value gets mapped to CSS classes
-  // like w15 (1.5), w20 (2.0), w30 (3.0). Decimal values that don't map to
-  // a class (e.g. 2.2) silently fall back to width:auto = clipped content.
-  // Snap to known valid increments. Per user screenshot 2026-05-26.
-  // Use a coarse width hint just for layout packing. Real chip sizing is
-  // overridden by our injected CSS (`.ws-formula-chip { flex: 0 0 auto }`)
-  // which lets each chip size to its content. Width here just controls how
-  // many chips packRows() squeezes per row.
-  const len = f.latex.length
-  const width = len < 12 ? 2 : len < 22 ? 3 : len < 35 ? 4 : 5
+  // Visual parity with MathLive's default tabs: uniform-width chips,
+  // 4 per row (each width:2 = w20 CSS class, one of the 3 safe MathLive
+  // width values). Glyph scale shrunk via CSS so long formulas fit one
+  // keycap. Per plan curried-waddling-pelican Part A.
   return {
     latex: f.latex,
     class: `small ws-formula-chip ws-fid-${f.id}`,
     tooltip: f.label + (f.desc ? ' — ' + f.desc : ''),
-    width,
+    width: 2,
   }
 }
 
-/** Pack chips into rows so each row's total `width` stays within budget.
- *  MathLive keyboard ≈ 10 columns. Returns rows that respect the per-chip
- *  width hints from `chipForFormula`. */
-function packRows(chips: Array<Record<string, unknown>>, budget = 10): Array<Array<Record<string, unknown>>> {
-  const rows: Array<Array<Record<string, unknown>>> = []
-  let cur: Array<Record<string, unknown>> = []
-  let used = 0
-  for (const c of chips) {
-    const w = typeof c.width === 'number' ? c.width : 1
-    if (used + w > budget && cur.length) {
-      rows.push(cur); cur = []; used = 0
-    }
-    cur.push(c); used += w
-  }
-  if (cur.length) rows.push(cur)
-  return rows
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = []
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
+  return out
 }
 
 function buildRows(): unknown[] {
@@ -141,7 +117,7 @@ function buildRows(): unknown[] {
   if (topicFormulas.length) {
     rows.push([{ class: 'separator w10', label: '⭐ נושא נוכחי' }])
     // 4 chips per row.
-    for (const row of packRows(topicFormulas.map(chipForFormula))) {
+    for (const row of chunk(topicFormulas.map(chipForFormula), 4)) {
       rows.push(row)
     }
   }
@@ -152,7 +128,7 @@ function buildRows(): unknown[] {
     const remaining = cat.formulas.filter(f => !topicFormulas.includes(f))
     if (!remaining.length) continue
     rows.push([{ class: 'separator w10', label: cat.label }])
-    for (const row of packRows(remaining.map(chipForFormula))) {
+    for (const row of chunk(remaining.map(chipForFormula), 4)) {
       rows.push(row)
     }
   }
@@ -208,27 +184,53 @@ function injectKeyboardCSS(): void {
   const style = document.createElement('style')
   style.id = 'ws-keyboard-style'
   style.textContent = `
-.ws-formula-chip {
-  /* Override MathLive's default fixed-width keycap so chips size to their
-   * LaTeX content. Without this, widths 3 and 4 (no corresponding w30/w40
-   * CSS class in MathLive) fell back to auto and clipped the content. */
-  flex: 0 0 auto !important;
-  width: auto !important;
-  min-width: 60px !important;
-  max-width: none !important;
-  padding: 6px 10px !important;
+/* Uniform-width chips matching MathLive's default tab density (4 per row).
+ * Themed to the dark navy / gold ink palette rather than fighting the rest
+ * of the app's surfaces. Per plan curried-waddling-pelican Part A. */
+.ws-formula-chip.MLK__keycap {
+  background: linear-gradient(135deg, #1A2440 0%, #101a2e 100%) !important;
+  border: 1px solid rgba(212,175,55,0.18) !important;
+  border-radius: 10px !important;
+  padding: 6px 8px !important;
+  min-height: 46px !important;
   white-space: nowrap !important;
-  min-height: 42px !important;
-  overflow: visible !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
+.ws-formula-chip.MLK__keycap:hover,
+.ws-formula-chip.MLK__keycap:active {
+  border-color: rgba(212,175,55,0.55) !important;
+  box-shadow: 0 0 0 2px rgba(212,175,55,0.32) !important;
+  transform: translateY(-1px);
+}
+/* Shrink the rendered KaTeX so long formulas fit one keycap. */
 .ws-formula-chip .ML__latex,
-.ws-formula-chip .ML__base {
-  font-size: 0.85em !important;
+.ws-formula-chip .ML__base,
+.ws-formula-chip .ML__mathit,
+.ws-formula-chip .ML__cmr {
+  font-size: 0.62em !important;
   max-width: 100% !important;
-  display: inline-block !important;
 }
+/* Section separators — gold ribbon look (wafflestack-conventions §17). */
+.MLK__row .separator {
+  font-family: 'Rubik', sans-serif !important;
+  font-size: 11px !important;
+  letter-spacing: 0.05em !important;
+  color: #D4AF37 !important;
+  padding: 10px 0 4px !important;
+  text-align: center !important;
+  width: 100% !important;
+  background: transparent !important;
+  border: 0 !important;
+  font-weight: 700 !important;
+}
+/* Row spacing comfortable on the dark plate. */
 .MLK__row:has(.ws-formula-chip) {
-  gap: 4px;
+  gap: 6px;
+  padding: 2px 8px;
 }
 `
   document.head.appendChild(style)
