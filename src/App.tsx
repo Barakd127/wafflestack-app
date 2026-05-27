@@ -14,6 +14,8 @@ import TutorialOverlay from './components/TutorialOverlay'
 import DrawingScreen from './components/DrawingScreen'
 import { TutorFAB } from './components/AITutor/TutorFAB'
 import { TutorDrawer } from './components/AITutor/TutorDrawer'
+import { FEATURE_FLAGS } from './config/featureFlags'
+import PushkaPanel from './components/Pushka/PushkaPanel'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
 // Notebook view is now a different render-mode of mindmap.html (loaded as an
@@ -21,7 +23,7 @@ const LandingPage = lazy(() => import('./landing/LandingPage'))
 // wired here — kept on disk for reference. Unified data source: notebook and
 // mindmap share the same MM.nodes[id].body field inside mindmap.html.
 
-type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook'
+type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook' | 'pushka'
 
 function App() {
   const [activeView, setActiveView] = useState<View>(() => {
@@ -33,6 +35,7 @@ function App() {
     if (h === '#split-mindmap') return 'split-mindmap'
     if (h === '#mindmap') return 'mindmap'
     if (h === '#notebook') return 'notebook'
+    if (h === '#pushka' && FEATURE_FLAGS.PUSHKA_MODE) return 'pushka'
     // First-time / no-hash visitor → landing page. Returning users keep their
     // hash route (#study, #mindmap, etc.) so refreshing stays in-app.
     return 'landing'
@@ -101,6 +104,7 @@ function App() {
       else if (h === '#split') setActiveView('split')
       else if (h === '#split-mindmap') setActiveView('split-mindmap')
       else if (h === '#view-wafflecity' || h === '#city' || h === '#topics' || h === '#score' || h.startsWith('#challenge/')) setActiveView('wafflecity')
+      else if (h === '#pushka' && FEATURE_FLAGS.PUSHKA_MODE) setActiveView('pushka')
       else if (h === '#study' || h === '') setActiveView('study')
     }
     window.addEventListener('hashchange', onHashChange)
@@ -115,13 +119,14 @@ function App() {
     else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
     else if (activeView === 'notebook') window.location.hash = '#notebook'
+    else if (activeView === 'pushka') window.location.hash = '#pushka'
   }, [activeView])
 
   // Hide the floating dark-mode toggle in views where the iframe (mindmap or
   // Godot city) has its own theme button at the bottom — two buttons in the
   // top-right corner is what the user sees as "the toggle obscures the
   // back/split buttons".
-  const showDarkToggle = activeView !== 'mindmap' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'landing'
+  const showDarkToggle = activeView !== 'mindmap' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'landing' && activeView !== 'pushka'
 
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
@@ -150,6 +155,7 @@ function App() {
                 if (v === 'mindmap') openMindMap('study')
                 else if (v === '3d') setActiveView('wafflecity')
                 else if (v === 'drawing') setActiveView('drawing')
+                else if (v === 'pushka' && FEATURE_FLAGS.PUSHKA_MODE) setActiveView('pushka')
                 else setActiveView(v as View)
               }}
               darkMode={darkMode}
@@ -157,6 +163,10 @@ function App() {
               onLoggedOut={() => setLoggedIn(false)}
             />
           </div>
+        )}
+
+        {activeView === 'pushka' && FEATURE_FLAGS.PUSHKA_MODE && (
+          <PushkaPanel onBack={() => setActiveView('study')} />
         )}
 
         {activeView === 'split' && (

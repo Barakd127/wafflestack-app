@@ -330,7 +330,7 @@ import Tooltip from './Tooltip'
 import Ribbon from './Ribbon'
 
 interface StudyHubProps {
-  onViewChange: (view: 'study' | 'mindmap' | '3d' | 'drawing') => void
+  onViewChange: (view: 'study' | 'mindmap' | '3d' | 'drawing' | 'pushka') => void
   darkMode?: boolean
   onLoggedIn?: () => void
   onLoggedOut?: () => void
@@ -1367,10 +1367,11 @@ function TopBar({ title, onLogout }: { title: string; onLogout?: () => void }) {
 }
 
 // ── Home screen ────────────────────────────────────────────────────────────────
-function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
+function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onGoPushka }: {
   onGoLearning: () => void
   onGoWorld: () => void
   onGoMindmap: () => void
+  onGoPushka?: () => void
 }) {
   const xp = useLearningStore(s => s.xp)
   const totalCorrect = useLearningStore(s => s.totalCorrect)
@@ -1613,6 +1614,48 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap }: {
             </button>
           </div>
         </div>
+
+        {/* ── Pushka promo card ─────────────────────────── */}
+        {onGoPushka && (
+          <button
+            onClick={onGoPushka}
+            dir="rtl"
+            style={{
+              width: '100%',
+              background: 'linear-gradient(135deg, rgba(255,215,0,0.10) 0%, rgba(255,215,0,0.04) 100%)',
+              border: '1.5px solid rgba(255,215,0,0.35)',
+              borderRadius: 20,
+              padding: '18px 24px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 16,
+              textAlign: 'right',
+              boxShadow: '0 0 28px rgba(255,215,0,0.08)',
+              transition: 'transform 0.15s, box-shadow 0.15s',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1.01)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 0 36px rgba(255,215,0,0.18)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 0 28px rgba(255,215,0,0.08)' }}
+          >
+            <span style={{ fontSize: 44, flexShrink: 0 }}>🏺</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: "'Heebo', sans-serif", fontWeight: 700, fontSize: 18, color: '#FFD700', marginBottom: 4 }}>
+                קופת ההסתברות — חדש!
+              </div>
+              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: 'rgba(232,234,237,0.75)', lineHeight: 1.5 }}>
+                משחק דגימה + הסתברות: שלוף שבבים מהצנצנת, עצור כשאתה בטוח — ורווח שקלים.
+              </div>
+              <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+                {['CLT', 'CI', 'ממוצע', 'שונות'].map(tag => (
+                  <span key={tag} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 99, background: 'rgba(255,215,0,0.12)', color: '#FFD700', fontFamily: "'Assistant', sans-serif" }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <span style={{ fontSize: 20, color: '#FFD700', flexShrink: 0 }}>←</span>
+          </button>
+        )}
       </div>
     </div>
   )
@@ -2561,6 +2604,7 @@ const StudyHub = ({ onViewChange, onLoggedIn, onLoggedOut }: StudyHubProps) => {
             onGoLearning={() => setInternalView('topics')}
             onGoWorld={() => onViewChange('3d')}
             onGoMindmap={() => onViewChange('mindmap')}
+            onGoPushka={() => onViewChange('pushka')}
           />
         )}
         {internalView === 'topics' && (
