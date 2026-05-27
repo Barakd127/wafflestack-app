@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { getStackOffset, useKeyboardOpen } from '../lib/uiStacks'
 
 const WORK_MIN = 25
 const BREAK_MIN = 5
@@ -45,8 +46,10 @@ interface PomodoroTimerProps {
   leftOffset?: number
 }
 
-export default function PomodoroTimer({ leftOffset }: PomodoroTimerProps = {}) {
+export default function PomodoroTimer({ leftOffset: _leftOffset }: PomodoroTimerProps = {}) {
   const [open, setOpen] = useState(false)
+  const kbOpen = useKeyboardOpen()
+  const stackPos = getStackOffset('bl', 'pomodoro')
   const [mode, setMode] = useState<Mode>('work')
   const [secondsLeft, setSecondsLeft] = useState(WORK_MIN * 60)
   const [running, setRunning] = useState(false)
@@ -114,13 +117,15 @@ export default function PomodoroTimer({ leftOffset }: PomodoroTimerProps = {}) {
         title="טיימר פומודורו"
         aria-label="Open Pomodoro timer"
         style={{
-          // Anchor at viewport bottom-left and STACK ABOVE the TutorFAB
-          // (which is at bottom:20px left:20px height ~56px). 90px clears
-          // it. Same `left` column = consistent FAB stack feel.
+          // Position from uiStacks registry (bl stack slot 'pomodoro').
+          // Hides with 200ms fade when MathLive virtual keyboard is open.
           position: 'fixed',
-          bottom: 'var(--ws-pomodoro-bottom, 90px)',
-          left: 'var(--ws-pomodoro-left, 20px)',
-          zIndex: 240,
+          bottom: stackPos.bottom,
+          left: stackPos.left,
+          zIndex: 235,
+          opacity: kbOpen ? 0 : 1,
+          pointerEvents: kbOpen ? 'none' : 'auto',
+          transition: 'opacity 200ms ease',
           background: running ? 'rgba(255,107,107,0.18)' : 'rgba(10,10,20,0.75)',
           backdropFilter: 'blur(10px)',
           border: `1px solid ${running ? accent : 'rgba(255,255,255,0.2)'}`,

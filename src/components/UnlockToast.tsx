@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useLearningStore } from '../store/learningStore'
 import { FEATURE_UNLOCKS_BY_ID, type FeatureId } from '../config/featureUnlocks'
+import { useKeyboardOpen } from '../lib/uiStacks'
 
 // Map feature ids → emoji icons for the toast. Falls back to 🎉.
 const FEATURE_ICONS: Partial<Record<FeatureId, string>> = {
@@ -80,6 +81,7 @@ export default function UnlockToast() {
   const queue = useLearningStore(s => s.newlyUnlocked)
   const clear = useLearningStore(s => s.clearNewlyUnlocked)
   const playedRef = useRef<Set<string>>(new Set())
+  const kbOpen = useKeyboardOpen()
 
   // Play unlock sound when a new id arrives, once per id per session.
   useEffect(() => {
