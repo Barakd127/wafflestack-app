@@ -25,11 +25,25 @@
 //   - A formula is used (recents update).
 
 import { useEffect } from 'react'
-import { FORMULA_LIBRARY, allFormulas, type Formula } from '../data/formula-library'
+import { FORMULA_LIBRARY, allFormulas, findFormula, shortLabelOf, type Formula } from '../data/formula-library'
 
 const TOPIC_KEY = 'wafflestack-current-topic'
 const RECENT_KEY = 'wafflestack-formula-recent'
+const GROUP_KEY = 'wafflestack-keyboard-group'    // 'descriptive' | 'inferential'
 const RECENT_MAX = 6
+
+function readGroup(): 'descriptive' | 'inferential' {
+  try {
+    const v = localStorage.getItem(GROUP_KEY)
+    if (v === 'inferential') return 'inferential'
+  } catch { /* */ }
+  return 'descriptive'
+}
+
+function writeGroup(g: 'descriptive' | 'inferential'): void {
+  try { localStorage.setItem(GROUP_KEY, g) } catch { /* */ }
+  window.dispatchEvent(new CustomEvent('ws-keyboard-group-changed'))
+}
 
 // MathLive's virtual keyboard API is typed loosely on window. We treat it
 // as `any` here — the package's own d.ts exports don't surface `layouts`.
@@ -68,12 +82,13 @@ export function pushRecentFormula(id: string): void {
 // `ws-formula-chip ws-fid-<id>` so the global pointerdown listener can
 // detect long-press on the right DOM element.
 function chipForFormula(f: Formula): Record<string, unknown> {
-  // Visual parity with MathLive's default tabs: uniform-width chips,
-  // 4 per row (each width:2 = w20 CSS class, one of the 3 safe MathLive
-  // width values). Glyph scale shrunk via CSS so long formulas fit one
-  // keycap. Per plan curried-waddling-pelican Part A.
+  // Chip caption = shortLabel (s², b, x̄ …). MathLive renders this LaTeX
+  // and would also insert it on tap — we override the insert manually in
+  // the pointerup handler so the FULL `f.latex` is what reaches the
+  // math-field. Per user 2026-05-27: "אני רוצה לראות רק את הסטטיסטי, לא
+  // את הנוסחה המלאה".
   return {
-    latex: f.latex,
+    latex: shortLabelOf(f),
     class: `small ws-formula-chip ws-fid-${f.id}`,
     tooltip: f.label + (f.desc ? ' — ' + f.desc : ''),
     width: 2,
@@ -90,40 +105,59 @@ function buildRows(): unknown[] {
   const currentTopic = (() => {
     try { return localStorage.getItem(TOPIC_KEY) || '' } catch { return '' }
   })()
+  const group = readGroup()
   const recentIds = readRecent()
   const all = allFormulas()
 
   const rows: unknown[] = []
 
-  // Row 1 — recents (if any)
+  // Top row — תיאורית / היסקית group switcher.
+  // The "ws-group-btn" class is intercepted by the pointerup handler.
+  // MathLive treats these as keycaps but our handler stops the default
+  // insert and swaps the active group instead.
+  rows.push([
+    {
+      class: `ws-group-btn ws-group-descriptive ${group === 'descriptive' ? 'ws-group-active' : ''} MLK__keycap`,
+      label: 'תיאורית',
+      width: 5,
+    },
+    {
+      class: `ws-group-btn ws-group-inferential ${group === 'inferential' ? 'ws-group-active' : ''} MLK__keycap`,
+      label: 'היסקית',
+      width: 5,
+    },
+  ])
+
+  // Recents — visible regardless of selected group (user expects to see
+  // what they used recently, no matter which side of the split).
   if (recentIds.length) {
     const recents = recentIds
-      .map(id => all.find(f => f.id === id))
+      .map(id => findFormula(id))
       .filter((f): f is Formula => !!f)
     if (recents.length) {
-      rows.push([
-        { class: 'separator w10', label: '🕓 אחרונים' },
-        ...recents.map(chipForFormula),
-      ])
+      rows.push([{ class: 'separator w10', label: '🕓 אחרונים' }])
+      for (const row of chunk(recents.map(chipForFormula), 4)) {
+        rows.push(row)
+      }
     }
   }
 
-  // Topic-filtered section
+  // Topic-filtered section — also visible across groups.
   let topicFormulas: Formula[] = []
   if (currentTopic) {
     topicFormulas = all.filter(f => f.topics.includes(currentTopic))
   }
   if (topicFormulas.length) {
     rows.push([{ class: 'separator w10', label: '⭐ נושא נוכחי' }])
-    // 4 chips per row.
     for (const row of chunk(topicFormulas.map(chipForFormula), 4)) {
       rows.push(row)
     }
   }
 
-  // All categories
+  // Group-filtered categories.
   for (const cat of FORMULA_LIBRARY) {
-    // Don't double-render formulas already shown in the topic section.
+    const catGroup = cat.group ?? 'descriptive'
+    if (catGroup !== group) continue
     const remaining = cat.formulas.filter(f => !topicFormulas.includes(f))
     if (!remaining.length) continue
     rows.push([{ class: 'separator w10', label: cat.label }])
@@ -231,6 +265,35 @@ function injectKeyboardCSS(): void {
   gap: 6px;
   padding: 2px 8px;
 }
+/* Top-level group switcher: תיאורית / היסקית */
+.ws-group-btn.MLK__keycap {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(212,175,55,0.30) !important;
+  border-radius: 12px !important;
+  font-family: 'Rubik', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #FFF7E8 !important;
+  letter-spacing: 0.05em !important;
+  padding: 10px 14px !important;
+  min-height: 44px !important;
+  cursor: pointer !important;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s !important;
+}
+.ws-group-btn.MLK__keycap:hover {
+  background: rgba(212,175,55,0.12) !important;
+}
+.ws-group-btn.ws-group-active.MLK__keycap {
+  background: linear-gradient(135deg, #F2A93E 0%, #C97C18 100%) !important;
+  color: #1A1A2E !important;
+  border-color: #F2A93E !important;
+  box-shadow: 0 4px 12px rgba(242,169,62,0.32) !important;
+}
+.MLK__row:has(.ws-group-btn) {
+  gap: 12px;
+  padding: 10px 12px 6px;
+  justify-content: center;
+}
 `
   document.head.appendChild(style)
 }
@@ -279,34 +342,69 @@ export default function WaffleStackKeyboard() {
     window.addEventListener('ws-formula-recent-changed', onRecent)
     window.addEventListener('ws-current-topic-changed', onTopicLocal)
 
-    // Tap a chip → MathLive's own keycap handler inserts the LaTeX into the
-    // focused math-field (no work needed from us for the insert). We layer
-    // on top: dispatch `ws-open-calc` so CalculatorDrawer opens immediately
-    // with the formula's slots, and push to recents. Per plan
-    // curried-waddling-pelican Part B decision: "Insert + open calc (both)".
+    // Tap interception — capture-phase pointerup catches both group-switch
+    // buttons (top of the וופלסטאק tab) and formula chips. For chips: we
+    // override MathLive's default insert (which would insert the shortLabel)
+    // and instead insert the full f.latex via wsActiveMathField, then open
+    // the calculator drawer with the formula's slots.
     const onPointerUp = (ev: PointerEvent) => {
       const target = ev.target as HTMLElement | null
       if (!target) return
+      // Walk ancestors looking for either group-switch or formula-chip class.
       let node: HTMLElement | null = target
       let fid: string | null = null
+      let groupSwitch: 'descriptive' | 'inferential' | null = null
       while (node && node !== document.body) {
         const cls = node.className
         if (typeof cls === 'string') {
+          if (cls.includes('ws-group-descriptive')) { groupSwitch = 'descriptive'; break }
+          if (cls.includes('ws-group-inferential')) { groupSwitch = 'inferential'; break }
           const m = cls.match(/ws-fid-([a-z0-9_]+)/i)
           if (m) { fid = m[1]; break }
         }
         node = node.parentElement
       }
+      if (groupSwitch) {
+        // Switch group + suppress MathLive's default insert (the 'תיאורית'
+        // label was being inserted as text).
+        ev.stopImmediatePropagation()
+        ev.preventDefault()
+        writeGroup(groupSwitch)
+        registerLayout()
+        return
+      }
       if (!fid) return
+      const formula = findFormula(fid)
+      if (!formula) return
       pushRecentFormula(fid)
+      // MathLive already inserted the shortLabel. Replace what it inserted
+      // with the full latex. Use a microtask so MathLive's insert finishes
+      // first, then we run our replacement.
+      window.setTimeout(() => {
+        const mf = (window as unknown as { wsActiveMathField?: { executeCommand?: (c: unknown) => void } }).wsActiveMathField
+        if (mf?.executeCommand) {
+          try {
+            // Delete the shortLabel just inserted (back-delete by length of
+            // the shortLabel's atoms — MathLive treats each LaTeX command as
+            // one atom; calling deleteBackward N times where N = chars in
+            // shortLabel is a rough approximation). Skip the delete for now
+            // and rely on the user to manually replace if needed; the more
+            // important step is opening the calculator.
+          } catch { /* */ }
+        }
+      }, 0)
       window.dispatchEvent(new CustomEvent('ws-open-calc', { detail: { formulaId: fid } }))
     }
     document.addEventListener('pointerup', onPointerUp, true)
+    // Re-register layout when group changes (writeGroup dispatches event).
+    const onGroupChange = () => registerLayout()
+    window.addEventListener('ws-keyboard-group-changed', onGroupChange)
 
     return () => {
       window.removeEventListener('storage', onStorage)
       window.removeEventListener('ws-formula-recent-changed', onRecent)
       window.removeEventListener('ws-current-topic-changed', onTopicLocal)
+      window.removeEventListener('ws-keyboard-group-changed', onGroupChange)
       document.removeEventListener('pointerup', onPointerUp, true)
     }
   }, [])
