@@ -331,6 +331,25 @@ export default function WaffleStackKeyboard() {
     }
     tryRegister()
 
+    // Safety: also re-check + re-register every time ANY math-field gets
+    // focus. MathLive's toggle events sometimes don't fire (race vs. lazy
+    // load), and once layouts is reset the keyboard ships without our tab.
+    // Listening on document for focusin handles every math-field across
+    // every surface (Arsenal, Notebook, Mindmap embed). Per user 2026-05-27.
+    const onFocusIn = (ev: FocusEvent) => {
+      const target = ev.target as HTMLElement | null
+      if (!target) return
+      // math-field is a custom element; nodeName is 'MATH-FIELD'
+      if (target.tagName === 'MATH-FIELD' || target.closest?.('math-field')) {
+        // Delay so MathLive's own focus handler runs first and may overwrite.
+        window.setTimeout(() => {
+          if (!isRegistered()) registerLayout()
+          attachListener()
+        }, 60)
+      }
+    }
+    document.addEventListener('focusin', onFocusIn, true)
+
     // Re-register on topic change (LessonScreen writes TOPIC_KEY on enter)
     // and on recents update.
     const onStorage = (e: StorageEvent) => {
@@ -405,6 +424,7 @@ export default function WaffleStackKeyboard() {
       window.removeEventListener('ws-formula-recent-changed', onRecent)
       window.removeEventListener('ws-current-topic-changed', onTopicLocal)
       window.removeEventListener('ws-keyboard-group-changed', onGroupChange)
+      document.removeEventListener('focusin', onFocusIn, true)
       document.removeEventListener('pointerup', onPointerUp, true)
     }
   }, [])
