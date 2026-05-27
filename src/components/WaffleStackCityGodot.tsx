@@ -80,8 +80,16 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
           }}
         >
           <div style={{ textAlign: 'center', maxWidth: 460, padding: 24 }}>
-            {/* Animated stack of waffle / building icons */}
-            <div className="ws-godot-emoji" style={{ fontSize: 64, marginBottom: 8, animation: 'wsBuild 2.4s ease-in-out infinite' }}>🏙️</div>
+            {/* Hero building image */}
+            <img
+              src="/building-figma.png"
+              alt="WaffleStack city"
+              style={{
+                width: 140, height: 'auto', marginBottom: 12,
+                animation: 'wsBuild 2.4s ease-in-out infinite',
+                filter: 'drop-shadow(0 8px 24px rgba(84,121,221,0.55))',
+              }}
+            />
 
             <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 4, letterSpacing: 0.5 }}>
               טוען את העיר…
