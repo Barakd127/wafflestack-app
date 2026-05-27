@@ -24,13 +24,12 @@
 //   - The current topic changes (storage event from LessonScreen).
 //   - A formula is used (recents update).
 
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { FORMULA_LIBRARY, allFormulas, type Formula } from '../data/formula-library'
 
 const TOPIC_KEY = 'wafflestack-current-topic'
 const RECENT_KEY = 'wafflestack-formula-recent'
 const RECENT_MAX = 6
-const LONG_PRESS_MS = 350
 
 // MathLive's virtual keyboard API is typed loosely on window. We treat it
 // as `any` here — the package's own d.ts exports don't surface `layouts`.
@@ -237,9 +236,6 @@ function injectKeyboardCSS(): void {
 }
 
 export default function WaffleStackKeyboard() {
-  const longPressTimer = useRef<number | null>(null)
-  const longPressFired = useRef(false)
-
   useEffect(() => {
     injectKeyboardCSS()
     // Retry registration until MathLive's `mathVirtualKeyboard` exists, then
@@ -283,13 +279,14 @@ export default function WaffleStackKeyboard() {
     window.addEventListener('ws-formula-recent-changed', onRecent)
     window.addEventListener('ws-current-topic-changed', onTopicLocal)
 
-    // Global long-press detector — runs on capture-phase pointerdown so it
-    // sees taps inside MathLive's shadow-root-less keyboard DOM.
-    const onPointerDown = (ev: PointerEvent) => {
+    // Tap a chip → MathLive's own keycap handler inserts the LaTeX into the
+    // focused math-field (no work needed from us for the insert). We layer
+    // on top: dispatch `ws-open-calc` so CalculatorDrawer opens immediately
+    // with the formula's slots, and push to recents. Per plan
+    // curried-waddling-pelican Part B decision: "Insert + open calc (both)".
+    const onPointerUp = (ev: PointerEvent) => {
       const target = ev.target as HTMLElement | null
       if (!target) return
-      // MathLive renders keys as divs with class names that include our
-      // `ws-fid-<id>` tag (set via chipForFormula). Walk up to find one.
       let node: HTMLElement | null = target
       let fid: string | null = null
       while (node && node !== document.body) {
@@ -301,52 +298,16 @@ export default function WaffleStackKeyboard() {
         node = node.parentElement
       }
       if (!fid) return
-      longPressFired.current = false
-      const id = fid
-      longPressTimer.current = window.setTimeout(() => {
-        longPressFired.current = true
-        window.dispatchEvent(new CustomEvent('ws-open-calc', { detail: { formulaId: id } }))
-        // Hide the keyboard so the calculator can claim screen real estate.
-        const kb = getKB() as { hide?: () => void } | undefined
-        kb?.hide?.()
-      }, LONG_PRESS_MS)
+      pushRecentFormula(fid)
+      window.dispatchEvent(new CustomEvent('ws-open-calc', { detail: { formulaId: fid } }))
     }
-    const cancelLongPress = () => {
-      if (longPressTimer.current) {
-        window.clearTimeout(longPressTimer.current)
-        longPressTimer.current = null
-      }
-    }
-    // On tap (pointerup without long-press firing), record it as recent.
-    const onPointerUp = (ev: PointerEvent) => {
-      cancelLongPress()
-      if (longPressFired.current) return
-      const target = ev.target as HTMLElement | null
-      if (!target) return
-      let node: HTMLElement | null = target
-      while (node && node !== document.body) {
-        const cls = node.className
-        if (typeof cls === 'string') {
-          const m = cls.match(/ws-fid-([a-z0-9_]+)/i)
-          if (m) { pushRecentFormula(m[1]); break }
-        }
-        node = node.parentElement
-      }
-    }
-    document.addEventListener('pointerdown', onPointerDown, true)
     document.addEventListener('pointerup', onPointerUp, true)
-    document.addEventListener('pointercancel', cancelLongPress, true)
-    document.addEventListener('pointerleave', cancelLongPress, true)
 
     return () => {
       window.removeEventListener('storage', onStorage)
       window.removeEventListener('ws-formula-recent-changed', onRecent)
       window.removeEventListener('ws-current-topic-changed', onTopicLocal)
-      document.removeEventListener('pointerdown', onPointerDown, true)
       document.removeEventListener('pointerup', onPointerUp, true)
-      document.removeEventListener('pointercancel', cancelLongPress, true)
-      document.removeEventListener('pointerleave', cancelLongPress, true)
-      cancelLongPress()
     }
   }, [])
 
