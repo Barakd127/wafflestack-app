@@ -19,7 +19,7 @@
 // '= ' + result])` so the answer lands inline at the user's caret position
 // in whichever math-field they last focused (Arsenal, Notebook, Mindmap).
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { findFormula, type Formula } from '../data/formula-library'
 
 declare global {
@@ -37,6 +37,61 @@ const INK = '#1A1A2E'
 const PAPER = '#FFF7E8'
 const SURFACE = 'rgba(255,255,255,0.06)'
 const BORDER = 'rgba(242,169,62,0.45)'
+
+/** Render a slot's text label. If the label looks like math (contains `_`,
+ *  `^`, `\`, or `Σ` etc.) it renders via KaTeX so `s_y` looks like `s_y`
+ *  with proper subscript instead of raw text. Per user 2026-05-27. */
+function SlotLabel({ text }: { text: string }) {
+  const ref = useRef<HTMLSpanElement | null>(null)
+  // Heuristic: treat as math if it contains LaTeX commands or sub/super
+  // markers. Plain Hebrew labels (like "ממוצע") render as text.
+  const isMath = /[_^\\]/.test(text) || /[Σ∑μσπ√≤≥]/.test(text)
+  useEffect(() => {
+    if (!isMath) return
+    const el = ref.current
+    if (!el) return
+    if (window.katex) {
+      try {
+        el.innerHTML = window.katex.renderToString(text, {
+          throwOnError: false, displayMode: false, output: 'html',
+        })
+        return
+      } catch { /* fall through */ }
+    }
+    el.textContent = text
+  }, [text, isMath])
+  if (!isMath) return (
+    <span dir="ltr" style={{ minWidth: 80, fontSize: 13, color: HONEY, fontWeight: 600, textAlign: 'left' }}>
+      {text}
+    </span>
+  )
+  return (
+    <span
+      ref={ref}
+      dir="ltr"
+      style={{ minWidth: 80, fontSize: 14, color: HONEY, fontWeight: 600, textAlign: 'left' }}
+    />
+  )
+}
+
+/** Inline LaTeX block — used for the substitution row. */
+function KatexBlock({ latex }: { latex: string }) {
+  const ref = useRef<HTMLSpanElement | null>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (window.katex) {
+      try {
+        el.innerHTML = window.katex.renderToString(latex, {
+          throwOnError: false, displayMode: false, output: 'html',
+        })
+        return
+      } catch { /* fall through */ }
+    }
+    el.textContent = latex
+  }, [latex])
+  return <span ref={ref} dir="ltr" style={{ display: 'inline-block' }} />
+}
 
 function FormulaPreview({ latex }: { latex: string }) {
   const ref = useRef<HTMLSpanElement | null>(null)
@@ -145,10 +200,41 @@ export default function CalculatorDrawer() {
     }
   }, [formula])
 
+  // Compute substitution string — replace each slot's label/key in the LaTeX
+  // with the parenthesised value the user typed. Best-effort: works well for
+  // labels like 'n', 'k', 'r'. For multi-glyph labels (Σx) it tries the
+  // simple replace first; if the slot's literal label can't be found in the
+  // raw latex (because LaTeX-rendered Σ is `\sum`), we fall back to the
+  // 2-line view (formula → result). Per user 2026-05-27.
+  const allFilled = formula && formula.slots.every(s => (vals[s.key] ?? '').trim() !== '')
+  const substLatex = useMemo(() => {
+    if (!formula || !allFilled) return null
+    let out = formula.latex
+    let allReplaced = true
+    for (const slot of formula.slots) {
+      const raw = (vals[slot.key] ?? '').trim()
+      const display = '(' + raw + ')'
+      // Try slot.label first, then slot.key. Use a literal find (no regex
+      // escape needed for typical labels: n, k, p, r, s_x).
+      const candidates = [slot.label, slot.key]
+      let replaced = false
+      for (const c of candidates) {
+        if (!c) continue
+        if (out.includes(c)) {
+          out = out.split(c).join(display)
+          replaced = true
+          break
+        }
+      }
+      if (!replaced) allReplaced = false
+    }
+    return allReplaced ? out : null
+  }, [formula, vals, allFilled])
+
   if (!formula) return null
 
   const result = evaluate(formula, vals)
-  const resultText = result == null ? '—' : formatResult(result)
+  const resultText = result == null ? null : formatResult(result)
   const canInsertOrCopy = result != null
 
   const copyResult = async () => {
@@ -253,18 +339,7 @@ export default function CalculatorDrawer() {
               margin: '8px 0',
             }}
           >
-            <span
-              dir="ltr"
-              style={{
-                minWidth: 80,
-                fontSize: 13,
-                color: HONEY,
-                fontWeight: 600,
-                textAlign: 'left',
-              }}
-            >
-              {slot.label}
-            </span>
+            <SlotLabel text={slot.label} />
             <input
               ref={slotIdx === 0 ? firstInputRef : undefined}
               type="text"
@@ -292,8 +367,63 @@ export default function CalculatorDrawer() {
         ))
       )}
 
-      {/* Result */}
-      {formula.eval ? (
+      {/* Substitution step — formula with values plugged in. Shown only when
+       *  all slots filled AND substitution succeeded. Per user 2026-05-27. */}
+      {formula.eval && substLatex && resultText && (
+        <div
+          dir="ltr"
+          style={{
+            marginTop: 12,
+            padding: '10px 12px',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px dashed ' + BORDER,
+            borderRadius: 10,
+            textAlign: 'center',
+            color: PAPER,
+            fontSize: 14,
+            overflowX: 'auto',
+          }}
+        >
+          <div style={{ fontSize: 10, color: HONEY, marginBottom: 6, fontWeight: 600, letterSpacing: 0.3, direction: 'rtl' }}>
+            הצבה
+          </div>
+          <KatexBlock latex={substLatex} />
+        </div>
+      )}
+
+      {/* Result OR friendly missing-values hint */}
+      {!formula.eval ? (
+        <div
+          style={{
+            marginTop: 12,
+            padding: '10px 12px',
+            background: SURFACE,
+            border: '1px dashed rgba(255,255,255,0.2)',
+            borderRadius: 10,
+            fontSize: 12,
+            color: 'rgba(255,247,232,0.7)',
+            textAlign: 'center',
+          }}
+        >
+          לנוסחה זו אין חישוב נומרי מובנה — נדרשת טבלה / כלי חיצוני.
+        </div>
+      ) : resultText == null ? (
+        <div
+          style={{
+            marginTop: 12,
+            padding: '10px 12px',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px dashed rgba(242,169,62,0.45)',
+            borderRadius: 10,
+            fontSize: 13,
+            color: 'rgba(255,247,232,0.85)',
+            textAlign: 'center',
+            fontWeight: 600,
+          }}
+        >
+          מלא ערכים לכל המשתנים כדי לראות תוצאה
+        </div>
+      ) : (
         <div
           style={{
             marginTop: 12,
@@ -319,21 +449,6 @@ export default function CalculatorDrawer() {
           >
             {resultText}
           </span>
-        </div>
-      ) : (
-        <div
-          style={{
-            marginTop: 12,
-            padding: '10px 12px',
-            background: SURFACE,
-            border: '1px dashed rgba(255,255,255,0.2)',
-            borderRadius: 10,
-            fontSize: 12,
-            color: 'rgba(255,247,232,0.7)',
-            textAlign: 'center',
-          }}
-        >
-          לנוסחה זו אין חישוב נומרי מובנה — נדרשת טבלה / כלי חיצוני.
         </div>
       )}
 

@@ -26,6 +26,10 @@ export interface Formula {
   id: string
   label: string
   latex: string
+  /** Optional short symbolic label shown on the keyboard chip (LHS of the
+   *  equation). When omitted, defaults to the LHS auto-extracted from
+   *  `latex` via shortLabelOf(). Full `latex` is still inserted on tap. */
+  shortLabel?: string
   desc?: string
   slots: Slot[]
   eval?: (vals: Record<string, number>) => number
@@ -36,6 +40,11 @@ export interface Formula {
 export interface FormulaCategory {
   id: string
   label: string
+  /** Top-level group selector on the keyboard:
+   *  'descriptive' = תיאורית (center / dispersion / transform / correlation / regression / combinatorics)
+   *  'inferential' = היסקית   (probability / rv / distributions)
+   *  Defaults to 'descriptive' for any category that omits it. */
+  group?: 'descriptive' | 'inferential'
   formulas: Formula[]
 }
 
@@ -66,12 +75,14 @@ function nCk(n: number, k: number): number {
 export const FORMULA_LIBRARY: FormulaCategory[] = [
   {
     id: 'center',
+    group: 'descriptive',
     label: 'תיאורית — מדדי מרכז',
     formulas: [
       {
         id: 'mean_raw',
         label: 'ממוצע (גולמי)',
         latex: '\\bar{x}=\\frac{\\sum x_i}{n}',
+        shortLabel: '\\bar{x}',
         desc: 'ממוצע אריתמטי',
         slots: [
           { key: 'sum', label: 'Σx', placeholder: '60+70+80' },
@@ -85,6 +96,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         id: 'mean_freq',
         label: 'ממוצע (טבלת שכיחויות)',
         latex: '\\bar{x}=\\frac{\\sum x_i f(x_i)}{n}',
+        shortLabel: '\\bar{x}_f',
         desc: 'ממוצע משוקלל',
         slots: [
           { key: 'sumxf', label: 'Σx·f(x)' },
@@ -98,6 +110,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         id: 'grand_mean',
         label: 'ממוצע כללי',
         latex: '\\bar{\\bar{x}}=\\frac{\\sum_j \\bar{x}_j n_j}{N}',
+        shortLabel: '\\bar{\\bar{x}}',
         desc: 'ממוצע משולב בין קבוצות',
         slots: [
           { key: 'sumxn', label: 'Σ x̄ⱼ·nⱼ' },
@@ -111,6 +124,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         id: 'midrange',
         label: 'אמצע טווח',
         latex: 'MR=\\frac{x_{max}+x_{min}}{2}',
+        shortLabel: 'MR',
         desc: 'ממוצע הקצוות',
         slots: [
           { key: 'max', label: 'xₘₐₓ' },
@@ -124,12 +138,14 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
   },
   {
     id: 'dispersion',
+    group: 'descriptive',
     label: 'תיאורית — מדדי פיזור',
     formulas: [
       {
         id: 'var_raw',
         label: 'שונות (גולמי)',
         latex: 's^2=\\frac{\\sum(x_i-\\bar{x})^2}{n}=\\frac{\\sum x_i^2}{n}-\\bar{x}^2',
+        shortLabel: 's^2',
         desc: 'שונות אוכלוסיה',
         slots: [
           { key: 'sumx2', label: 'Σx²' },
@@ -144,6 +160,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         id: 'var_freq',
         label: 'שונות (שכיחויות)',
         latex: 's^2=\\frac{\\sum x_i^2 f(x_i)}{n}-\\bar{x}^2',
+        shortLabel: 's^2_f',
         desc: 'שונות מטבלת שכיחויות',
         slots: [
           { key: 'sumx2f', label: 'Σx²·f(x)' },
@@ -158,6 +175,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         id: 'std',
         label: 'סטיית תקן',
         latex: 's=\\sqrt{s^2}',
+        shortLabel: 's',
         desc: 'סטיית תקן',
         slots: [{ key: 'var', label: 's²' }],
         eval: v => Math.sqrt(v.var),
@@ -168,6 +186,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         id: 'pooled_var',
         label: 'שונות משולבת',
         latex: 's_c^2=\\frac{\\sum n_j s_j^2}{N}+\\frac{\\sum n_j(\\bar{x}_j-\\bar{\\bar{x}})^2}{N}',
+        shortLabel: 's_c^2',
         desc: 'שונות בתוך + בין קבוצות',
         slots: [
           { key: 'within', label: 'Σnⱼ·sⱼ²' },
@@ -182,12 +201,14 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
   },
   {
     id: 'transform',
+    group: 'descriptive',
     label: 'טרנספורמציות לינאריות',
     formulas: [
       {
         id: 'tr_mean',
         label: 'ממוצע אחרי טרנספורמציה',
         latex: "\\bar{x}'=b\\bar{x}+a",
+        shortLabel: "\\bar{x}'",
         desc: "אם x'=bx+a",
         slots: [
           { key: 'b', label: 'b' },
@@ -202,6 +223,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         id: 'tr_var',
         label: 'שונות אחרי טרנספורמציה',
         latex: "s_{x'}^2=b^2 s_x^2",
+        shortLabel: "s_{x'}^2",
         desc: 'שונות מוכפלת ב-b²',
         slots: [
           { key: 'b', label: 'b' },
@@ -215,6 +237,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         id: 'tr_sd',
         label: 'סטיית תקן אחרי טרנספורמציה',
         latex: "s_{x'}=|b|\\cdot s_x",
+        shortLabel: "s_{x'}",
         desc: 'SD מוכפלת ב-|b|',
         slots: [
           { key: 'b', label: 'b' },
@@ -228,6 +251,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         id: 'zscore',
         label: 'ציון z',
         latex: 'Z=\\frac{x-\\bar{x}}{s}',
+        shortLabel: 'Z',
         desc: 'ציון תקני',
         slots: [
           { key: 'x', label: 'x' },
@@ -242,12 +266,14 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
   },
   {
     id: 'normal',
+    group: 'inferential',
     label: 'התפלגות נורמלית',
     formulas: [
       {
         id: 'norm_cdf',
         label: 'CDF — Φ(z)',
         latex: 'P(Z\\leq z)=\\Phi(z)',
+        shortLabel: '\\Phi(z)',
         desc: 'פונקציית התפלגות מצטברת',
         slots: [{ key: 'z', label: 'z' }],
         eval: v => normCdf(v.z),
@@ -258,6 +284,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         id: 'norm_right',
         label: 'זנב ימני',
         latex: 'P(Z>z)=1-\\Phi(z)',
+        shortLabel: 'P(Z>z)',
         desc: 'הסתברות זנב ימני',
         slots: [{ key: 'z', label: 'z' }],
         eval: v => 1 - normCdf(v.z),
@@ -268,6 +295,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         id: 'norm_interval',
         label: 'הסתברות בתוך תחום',
         latex: 'P(z_1<Z\\leq z_2)=\\Phi(z_2)-\\Phi(z_1)',
+        shortLabel: 'P(z_1<Z\\leq z_2)',
         desc: 'בין שני ערכי z',
         slots: [
           { key: 'z1', label: 'z₁' },
@@ -295,6 +323,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
   },
   {
     id: 'correlation',
+    group: 'descriptive',
     label: 'קורלציה',
     formulas: [
       {
@@ -380,6 +409,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
   },
   {
     id: 'regression',
+    group: 'descriptive',
     label: 'רגרסיה',
     formulas: [
       {
@@ -454,6 +484,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
   },
   {
     id: 'combinatorics',
+    group: 'descriptive',
     label: 'קומבינטוריקה',
     formulas: [
       {
@@ -509,6 +540,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
   },
   {
     id: 'probability',
+    group: 'inferential',
     label: 'כללי הסתברות',
     formulas: [
       {
@@ -602,6 +634,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
   },
   {
     id: 'rv',
+    group: 'inferential',
     label: 'משתנים אקראיים',
     formulas: [
       {
@@ -678,6 +711,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
   },
   {
     id: 'binomial',
+    group: 'inferential',
     label: 'התפלגות בינומית',
     formulas: [
       {
@@ -723,6 +757,22 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
     ],
   },
 ]
+
+/** Return the chip's caption — either the explicit `shortLabel` field or
+ *  the LHS auto-extracted from the `latex`. Used by the keyboard's
+ *  chipForFormula() so chips read like a glossary, not a textbook.
+ *  Examples:
+ *    \\bar{x}=\\frac{\\sum x_i}{n}  → \\bar{x}
+ *    s^2=\\sum(x_i-\\bar{x})^2/n   → s^2
+ *    b=\\frac{r s_y}{s_x}          → b
+ *    P(A \\cup B) = ...            → P(A \\cup B)
+ *  If the LaTeX has no `=`, falls back to the full LaTeX. */
+export function shortLabelOf(f: Formula): string {
+  if (f.shortLabel) return f.shortLabel
+  const eqIdx = f.latex.indexOf('=')
+  if (eqIdx === -1) return f.latex
+  return f.latex.slice(0, eqIdx).trim()
+}
 
 // Flatten helper for keyboard rows / search.
 export function allFormulas(): Formula[] {
