@@ -139,6 +139,15 @@ export const useArsenalStore = create<ArsenalState>((set, get) => ({
   },
 
   editEntry: (id, text) => {
+    // Reject empty edits — prevents the silent wipe-to-empty bug where an
+    // equation entry's raw JSON was shown in the wrong textarea, user cleared
+    // it, and the store overwrote the original LaTeX with ''. Per user
+    // 2026-05-26 screenshot + plan-curried-waddling-pelican Part C.
+    if (!text || !text.trim()) {
+      // eslint-disable-next-line no-console
+      console.warn('[arsenalStore.editEntry] refusing to save empty text for', id)
+      return
+    }
     const userId = get().currentUserId
     set((state) => {
       const next = state.entries.map(e => e.id === id ? { ...e, text } : e)

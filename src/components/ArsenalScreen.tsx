@@ -275,6 +275,24 @@ export default function ArsenalScreen() {
     })
   }
 
+  // One-time corruption sweep — equation entries whose `text` isn't valid
+  // {label,latex} JSON get demoted to `gotcha` kind silently. Auto-migrate
+  // per plan curried-waddling-pelican Part C decision.
+  const sweptRef = useRef(false)
+  useEffect(() => {
+    if (sweptRef.current) return
+    sweptRef.current = true
+    for (const e of entries) {
+      if (e.kind === 'equation' && deserializeEquation(e.text) === null) {
+        // eslint-disable-next-line no-console
+        console.warn('[Arsenal] auto-migrating corrupt equation entry → gotcha:', e.id)
+        changeKind(e.id, 'gotcha')
+      }
+    }
+    // intentionally exclude `entries` from deps — sweep runs once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Counts per kind (includes pinned across all kinds)
   const counts = useMemo(() => ({
     all:      entries.length,
@@ -313,6 +331,11 @@ export default function ArsenalScreen() {
   }
 
   const startEdit = (entry: ArsenalEntry) => {
+    // Equation kind has its OWN editor (EquationCardEditor via setEditingEq)
+    // — never populate the textarea with the raw JSON `{"label":"…","latex":"…"}`,
+    // which is what caused the wipe-to-empty regression in PR #60. Per plan
+    // curried-waddling-pelican Part C.
+    if (entry.kind === 'equation') return
     setEditingId(entry.id)
     setEditingText(entry.text)
   }
