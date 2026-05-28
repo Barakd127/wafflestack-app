@@ -200,10 +200,14 @@
 }
 .ls-gold-text { color: var(--ls-gold); }
 .ls-gold-gradient {
-  background: linear-gradient(135deg, #B8960C, #D4AF37);
+  /* Brighter, more luminous honey→ember gold so it pops on the light-blue
+   * hero instead of reading as a dull mustard. Per user 2026-05-27. */
+  background: linear-gradient(120deg, #FFD24D 0%, #F5A623 40%, #E08A1E 70%, #C97C18 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  /* Subtle warm glow lifts the gold off the pale background. */
+  filter: drop-shadow(0 1px 1px rgba(201,124,24,0.25));
 }
 
 /* === Scroll progress bar === */
