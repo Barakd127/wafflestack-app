@@ -214,11 +214,13 @@ export function quickAddArsenal(input: Omit<ArsenalEntry, 'id' | 'createdAt' | '
  * label is optional (empty string). This is the single canonical format used
  * by AddEntryModal, EquationCardBody, and the equation edit flow.
  */
-export function serializeEquation(label: string, latex: string): string {
-  return JSON.stringify({ label: label.trim(), latex: latex.trim() })
+export interface EquationData { label: string; latex: string; explanation: string }
+
+export function serializeEquation(label: string, latex: string, explanation = ''): string {
+  return JSON.stringify({ label: label.trim(), latex: latex.trim(), explanation: explanation.trim() })
 }
 
-export function deserializeEquation(text: string): { label: string; latex: string } | null {
+export function deserializeEquation(text: string): EquationData | null {
   try {
     const parsed = JSON.parse(text) as unknown
     if (
@@ -226,8 +228,10 @@ export function deserializeEquation(text: string): { label: string; latex: strin
       'latex' in parsed && typeof (parsed as { latex: unknown }).latex === 'string'
     ) {
       const labelVal = (parsed as { label?: unknown }).label
+      const explVal = (parsed as { explanation?: unknown }).explanation
       return {
         label: typeof labelVal === 'string' ? labelVal : '',
+        explanation: typeof explVal === 'string' ? explVal : '',
         latex: (parsed as { latex: string }).latex,
       }
     }

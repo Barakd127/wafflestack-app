@@ -676,8 +676,8 @@ function ArsenalCard({
   }
 
   const handleCancelEq = () => setEditingEq(false)
-  const handleSaveEq = (label: string, latex: string) => {
-    onSaveEquation(serializeEquation(label, latex))
+  const handleSaveEq = (label: string, latex: string, explanation: string) => {
+    onSaveEquation(serializeEquation(label, latex, explanation))
     setEditingEq(false)
   }
 
@@ -729,6 +729,7 @@ function ArsenalCard({
           <EquationCardEditor
             initialLabel={eqData?.label ?? ''}
             initialLatex={eqData?.latex ?? ''}
+            initialExplanation={eqData?.explanation ?? ''}
             onSave={handleSaveEq}
             onCancel={handleCancelEq}
           />
@@ -853,7 +854,7 @@ function EquationCardBody({
   eqData,
   rawText,
 }: {
-  eqData: { label: string; latex: string } | null
+  eqData: { label: string; latex: string; explanation: string } | null
   rawText: string
 }) {
   if (!eqData) {
@@ -905,6 +906,18 @@ function EquationCardBody({
           displayMode={/\\begin\{(gathered|aligned|array|cases)\}|\\\\/.test(eqData.latex)}
         />
       </div>
+      {/* Explanation preview — first ~2 lines, plain Hebrew prose. Per user
+       *  2026-05-28. Full text shows on edit. */}
+      {eqData.explanation ? (
+        <div dir="rtl" style={{
+          fontSize: 13, lineHeight: 1.5, color: TEXT_MED,
+          fontFamily: "'Assistant', sans-serif",
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+          overflow: 'hidden', marginTop: 4,
+        }}>
+          {eqData.explanation}
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -916,16 +929,19 @@ function EquationCardBody({
 function EquationCardEditor({
   initialLabel,
   initialLatex,
+  initialExplanation,
   onSave,
   onCancel,
 }: {
   initialLabel: string
   initialLatex: string
-  onSave: (label: string, latex: string) => void
+  initialExplanation: string
+  onSave: (label: string, latex: string, explanation: string) => void
   onCancel: () => void
 }) {
   const [label, setLabel] = useState(initialLabel)
   const [latex, setLatex] = useState(initialLatex)
+  const [explanation, setExplanation] = useState(initialExplanation)
   const [mathReady, setMathReady] = useState(false)
   const fieldRef = useRef<HTMLElement | null>(null)
   const eqMeta = KIND_META.equation
@@ -1001,7 +1017,7 @@ function EquationCardEditor({
           }
         </div>
         <button
-          onClick={() => onSave(label, latex)}
+          onClick={() => onSave(label, latex, explanation)}
           style={iconBtn('rgba(16,185,129,0.18)', '#065f46')}
           title="שמור"
           aria-label="שמור נוסחה"
@@ -1013,6 +1029,20 @@ function EquationCardEditor({
           aria-label="בטל"
         >✕</button>
       </div>
+      {/* Explanation editor — plain prose, separate from the math-field. */}
+      <textarea
+        dir="rtl"
+        value={explanation}
+        onChange={e => setExplanation(e.target.value)}
+        placeholder="הסבר (אופציונלי)…"
+        style={{
+          width: '100%', minHeight: 60, resize: 'vertical',
+          border: `1px solid ${eqMeta.border}`, borderRadius: 8,
+          padding: '8px 10px', fontFamily: "'Assistant', sans-serif",
+          fontSize: 13, lineHeight: 1.6, color: TEXT_DARK,
+          background: 'rgba(255,255,255,0.85)', boxSizing: 'border-box',
+        }}
+      />
     </div>
   )
 }
@@ -1296,6 +1326,7 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
   const [text, setText] = useState('')
   const [eqLabel, setEqLabel] = useState('')
   const [eqLatex, setEqLatex] = useState('')
+  const [eqExplanation, setEqExplanation] = useState('')
   const [topicId, setTopicId] = useState<string>('')
   const [mathReady, setMathReady] = useState(false)
   const mathFieldRef = useRef<HTMLElement | null>(null)
@@ -1343,7 +1374,7 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
   const handleSave = () => {
     if (!canSave) return
     if (isEquation) {
-      onSave(kind, serializeEquation(eqLabel, eqLatex), topicId || undefined)
+      onSave(kind, serializeEquation(eqLabel, eqLatex, eqExplanation), topicId || undefined)
     } else {
       onSave(kind, text.trim(), topicId || undefined)
     }
@@ -1366,11 +1397,14 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          width: 'min(480px, calc(100% - 32px))',
-          background: 'var(--sh-glass-card, #fff)',
+          width: 'min(520px, calc(100% - 32px))',
+          maxHeight: 'calc(100vh - 48px)', overflowY: 'auto',
+          // Opaque (was translucent var(--sh-glass-card) → unreadable over the
+          // dark sidebar). Solid white page bg. Per user 2026-05-28.
+          background: '#FFFFFF',
           borderRadius: 20,
-          boxShadow: '0 30px 80px rgba(0,0,0,0.4)',
-          border: '1px solid rgba(255,255,255,0.5)',
+          boxShadow: '0 30px 80px rgba(0,0,0,0.45)',
+          border: '1px solid rgba(127,155,217,0.45)',
           padding: 26,
           animation: 'arsenalCardIn 0.25s cubic-bezier(.22,1.36,.36,1)',
         }}
@@ -1435,8 +1469,8 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
               </label>
               <div style={{
                 border: `1.5px solid ${eqMeta.border}`,
-                borderRadius: 12, padding: '10px 12px',
-                background: eqMeta.bg, minHeight: 60,
+                borderRadius: 12, padding: '14px 14px',
+                background: eqMeta.bg, minHeight: 90,
                 display: 'flex', alignItems: 'center',
               }}>
                 {mathReady
@@ -1461,6 +1495,27 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
                   : <span style={{ fontSize: 13, color: TEXT_LIGHT }}>טוען מקלדת נוסחאות…</span>
                 }
               </div>
+            </div>
+            {/* Explanation — plain Hebrew prose goes HERE, not in the math-field
+             *  (typing prose into the math-field rendered some words as huge
+             *  italic math). Per user 2026-05-28. */}
+            <div style={{ marginTop: 10 }}>
+              <label style={{ fontSize: 12, color: TEXT_LIGHT, display: 'block', marginBottom: 4 }}>
+                הסבר (אופציונלי)
+              </label>
+              <textarea
+                dir="rtl"
+                value={eqExplanation}
+                onChange={e => setEqExplanation(e.target.value)}
+                placeholder="כתוב/י כאן הסבר חופשי על הנוסחה…"
+                style={{
+                  width: '100%', minHeight: 80, resize: 'vertical',
+                  border: '1px solid rgba(127,155,217,0.4)', borderRadius: 10,
+                  padding: '8px 10px', fontFamily: "'Assistant', sans-serif",
+                  fontSize: 14, lineHeight: 1.6, color: TEXT_DARK,
+                  background: 'rgba(255,255,255,0.85)', boxSizing: 'border-box',
+                }}
+              />
             </div>
           </div>
         ) : (
