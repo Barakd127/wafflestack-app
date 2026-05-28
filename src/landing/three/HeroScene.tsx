@@ -10,18 +10,21 @@ const BUILDINGS = [
   '/kenney/building-skyscraper-a.glb',
   '/kenney/building-skyscraper-c.glb',
   '/kenney/building-sample-tower-a.glb',
-  '/kenney/building-j.glb',
+  // building-j.glb removed per user 2026-05-28 ("את הבניין הזה אני שונא") —
+  // swapped for the second sample tower so all 4 are the impressive set.
+  '/kenney/building-sample-tower-b.glb',
 ] as const
 
 // Subtle wobble instead of continuous spin — ±5° over 8s ease-in-out — avoids
 // the jittery / nausea-inducing perception that fast continuous rotation gave.
 // Continuous rotation kept as a (very slow) baseline so the building still
 // presents all faces over time.
-const ROTATION_SPEED = 0.12                 // rad/s — full rotation ≈ 52s baseline
-const WOBBLE_AMPLITUDE_RAD = 0.087          // ≈ ±5° wobble overlay
-const WOBBLE_PERIOD_SEC = 8.0               // one full wobble cycle in 8s
-const ROTATIONS_PER_BUILDING = 1            // 1 rotation ≈ 52s per model
-const MIN_SECONDS_PER_BUILDING = 30.0       // hard floor before crossfade can fire
+// NO continuous 360° spin. The building only gently wobbles left↔right so it
+// never does the periodic fast-spin the user repeatedly flagged. Crossfade to
+// the next building is purely TIME-based now (was rotation-count-based).
+const WOBBLE_AMPLITUDE_RAD = 0.22           // ≈ ±13° gentle turn (shows faces)
+const WOBBLE_PERIOD_SEC = 9.0               // one full back-and-forth in 9s
+const SECONDS_PER_BUILDING = 14.0           // crossfade cadence per model
 const FADE_DURATION = 1.0                   // seconds for crossfade (smoother)
 // Each building gets normalised so its largest dimension fits this many world
 // units. Tuned for the 640×520 frameless hero — building should dominate the
@@ -176,30 +179,18 @@ function CyclingBuilding() {
       return
     }
 
-    // Normal rotation — very slow continuous spin + ±5° wobble overlay so the
-    // building presents subtle motion without the dizzying fast-spin effect.
-    // Clamp delta at 1/30s — if the tab was backgrounded, useFrame returns
-    // a delta covering the whole hidden interval (sometimes seconds), causing
-    // a burst rotation that the user perceives as 'all buildings spinning
-    // too fast suddenly'. Per user 2026-05-25.
-    const clampedDelta = Math.min(delta, 1 / 30)
-    root.current.rotation.y += clampedDelta * ROTATION_SPEED
-    // Wobble is applied as an additive offset on top of the integrated base
-    // rotation. We track only the base rotation against lastFullRotY so the
-    // sinusoid doesn't trip the "full rotation" check spuriously.
-    const wobble = Math.sin((performance.now() / 1000) * (Math.PI * 2 / WOBBLE_PERIOD_SEC)) * WOBBLE_AMPLITUDE_RAD
-    root.current.rotation.z = wobble * 0.3  // tiny tilt — keeps motion visually soft
-    if (root.current.rotation.y - s.lastFullRotY >= Math.PI * 2) {
-      s.rotationsDone += 1
-      s.lastFullRotY = root.current.rotation.y
-      // Hard time-floor: even if rotations finished (e.g. a tab returned
-      // from background with accumulated delta), only fade after this
-      // model has been visible for MIN_SECONDS_PER_BUILDING. Prevents
-      // the "all 4 buildings flash through in <1 second" glitch.
-      const elapsedSinceVisible = (performance.now() / 1000) - s.cycleStartTime
-      if (s.rotationsDone >= ROTATIONS_PER_BUILDING && elapsedSinceVisible >= MIN_SECONDS_PER_BUILDING) {
-        s.fadeStart = performance.now() / 1000
-      }
+    // Gentle wobble ONLY — absolute (not integrated), so the building turns
+    // ±13° left↔right forever and NEVER completes a spin. This kills the
+    // periodic fast-spin the user flagged many times. rotation.y is set
+    // directly from a sine of wall-clock time, so a backgrounded-tab delta
+    // can't accumulate into a burst.
+    const t = performance.now() / 1000
+    root.current.rotation.y = Math.sin(t * (Math.PI * 2 / WOBBLE_PERIOD_SEC)) * WOBBLE_AMPLITUDE_RAD
+    root.current.rotation.z = 0
+    // Time-based crossfade — swap to the next building every
+    // SECONDS_PER_BUILDING. No rotation counting involved.
+    if (t - s.cycleStartTime >= SECONDS_PER_BUILDING) {
+      s.fadeStart = performance.now() / 1000
     }
   })
 
