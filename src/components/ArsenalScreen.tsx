@@ -885,14 +885,14 @@ function EquationCardBody({
         dir="ltr"
         style={{
           maxWidth: '100%',
-          overflowX: 'auto',
-          overflowY: 'hidden',
+          // No horizontal scrollbar — the user disliked the RTL-origin scroll.
+          // Multi-line solutions wrap vertically via \begin{gathered}; a rare
+          // over-wide single formula is scaled to fit instead of scrolled.
+          // Per user 2026-05-28.
+          overflow: 'hidden',
           padding: '6px 4px',
-          // LTR origin so the horizontal scrollbar starts at the LEFT and the
-          // equation reads left→right (was scrolling RTL because the card is
-          // dir=rtl). Per user 2026-05-28.
           direction: 'ltr',
-          textAlign: 'left',
+          textAlign: 'center',
           fontSize: 17,
         }}
       >

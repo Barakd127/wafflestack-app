@@ -253,24 +253,25 @@ function injectKeyboardCSS(): void {
   .ML__keyboard,
   .ML__keyboard .MLK__plate,
   .ML__keyboard .MLK__backdrop {
-    --keyboard-background: #14213d !important;
-    --keyboard-text: #E8F0FF !important;
-    --keycap-background: #1c2742 !important;
-    --keycap-background-hover: #243150 !important;
-    --keycap-text: #E8F0FF !important;
-    --keycap-border: #2c3a5e !important;
+    /* Lighter dark-mode blue (was #14213d near-black) per user 2026-05-28. */
+    --keyboard-background: #243860 !important;
+    --keyboard-text: #EAF1FF !important;
+    --keycap-background: #2f4673 !important;
+    --keycap-background-hover: #3a5488 !important;
+    --keycap-text: #EAF1FF !important;
+    --keycap-border: #436099 !important;
     --keycap-primary-background: #3351CA !important;
     --keycap-primary-text: #FFFFFF !important;
-    --keyboard-toolbar-text: #DCE8FB !important;
-    background-color: #14213d !important;
-    color: #E8F0FF !important;
+    --keyboard-toolbar-text: #EAF1FF !important;
+    background-color: #243860 !important;
+    color: #EAF1FF !important;
   }
   .ML__keyboard .MLK__toolbar .left > div,
-  .ML__keyboard .MLK__toolbar .right > div { color: #DCE8FB !important; }
+  .ML__keyboard .MLK__toolbar .right > div { color: #EAF1FF !important; }
   .ML__keyboard .MLK__keycap:not(.ws-formula-chip):not(.ws-group-btn) {
-    background-color: #1c2742 !important;
-    color: #E8F0FF !important;
-    border-color: #2c3a5e !important;
+    background-color: #2f4673 !important;
+    color: #EAF1FF !important;
+    border-color: #436099 !important;
   }
 }
 /* Uniform-width chips matching MathLive's default tab density (4 per row).
@@ -483,28 +484,16 @@ export default function WaffleStackKeyboard() {
       const formula = findFormula(fid)
       if (!formula) return
       pushRecentFormula(fid)
-      // The chip displays the shortLabel, but we want the FULL formula latex
-      // inserted — on its OWN line if the field already has content (so taps
-      // never jam together: `…}{n}s^2…`). MathLive auto-inserts the shortLabel
-      // on tap; we overwrite the whole value after, using the snapshot taken
-      // at pointerdown (captured BEFORE MathLive's insert). Per user 2026-05-28.
+      // Tapping a chip should ONLY open the calculator — NOT add the formula
+      // to the equation field. (Previously tap auto-inserted AND opened the
+      // calc, which double-added when the user then pressed an insert button.)
+      // MathLive's keycap handler still auto-inserts the chip's shortLabel, so
+      // we restore the pre-tap snapshot to undo it. The actual insert happens
+      // only via the calculator's buttons. Per user 2026-05-28.
       window.setTimeout(() => {
         const mf = (window as unknown as { wsActiveMathField?: { value?: string } }).wsActiveMathField
         if (mf && typeof mf.value === 'string') {
-          const before = (valueBeforeTap.current ?? '').trim()
-          // Each tapped formula goes on its OWN line. A bare `\\` only breaks
-          // lines INSIDE a multi-line environment — otherwise it renders as
-          // raw backslash glyphs (user 2026-05-28). Use \begin{gathered}…
-          // \end{gathered} (supported by BOTH KaTeX + MathLive; \displaylines
-          // is NOT a KaTeX macro). Keep the field's content inside one
-          // gathered block and append into it.
-          if (!before) {
-            mf.value = formula.latex
-          } else {
-            const m = before.match(/^\\begin\{gathered\}([\s\S]*)\\end\{gathered\}$/)
-            const inner = m ? m[1] : before
-            mf.value = '\\begin{gathered}' + inner + ' \\\\ ' + formula.latex + '\\end{gathered}'
-          }
+          mf.value = valueBeforeTap.current ?? ''
         }
       }, 0)
       window.dispatchEvent(new CustomEvent('ws-open-calc', { detail: { formulaId: fid } }))
