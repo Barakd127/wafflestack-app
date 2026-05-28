@@ -239,12 +239,11 @@ function injectKeyboardCSS(): void {
   box-shadow: 0 0 0 2px rgba(212,175,55,0.32) !important;
   transform: translateY(-1px);
 }
-/* Shrink the rendered KaTeX so long formulas fit one keycap. */
-.ws-formula-chip .ML__latex,
-.ws-formula-chip .ML__base,
-.ws-formula-chip .ML__mathit,
-.ws-formula-chip .ML__cmr {
-  font-size: 0.62em !important;
+/* Chips show the short symbol (s², b, x̄) — render it at a comfortably
+ * readable size. Was 0.62em (sized for full formulas) which made the
+ * short labels microscopic. Per user 2026-05-27. */
+.ws-formula-chip .ML__latex {
+  font-size: 1.15em !important;
   max-width: 100% !important;
 }
 /* Section separators — gold ribbon look (wafflestack-conventions §17). */
