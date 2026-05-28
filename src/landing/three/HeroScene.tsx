@@ -151,8 +151,14 @@ function CyclingBuilding() {
           cur.wrapper.visible = false
           cur.materials.forEach(m => { m.opacity = 0 })
           s.index = (s.index + 1) % prepared.length
-          if (root.current) root.current.rotation.y = 0
-          s.lastFullRotY = 0
+          // DO NOT reset rotation.y to 0 here. The old code snapped it from
+          // ~2π back to 0; even though 2π and 0 are the same angle, the
+          // building is still partially visible mid-crossfade and carries a
+          // rotation.z wobble offset, so the snap rendered as a fast 'spin'
+          // once per ~30-50s cycle. Keep rotation continuous; just re-baseline
+          // the full-rotation counter to the current angle. Per user
+          // 2026-05-28 (flagged many times).
+          if (root.current) s.lastFullRotY = root.current.rotation.y
           s.cycleStartTime = performance.now() / 1000  // mark new model's start
           const next = prepared[s.index]
           next.wrapper.visible = true
