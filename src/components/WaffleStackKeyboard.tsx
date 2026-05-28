@@ -112,6 +112,13 @@ function buildRows(): unknown[] {
 
   const rows: unknown[] = []
 
+  // Essentials row — digits + operators + edit keys. Since WaffleStack is now
+  // the ONLY tab (no 123/abc), this keeps the keyboard usable for typing
+  // custom values + editing. Per user 2026-05-28.
+  rows.push(['7', '8', '9', { latex: '\\div', label: '÷' }, '[(]', '[)]', '[backspace]'])
+  rows.push(['4', '5', '6', { latex: '\\times', label: '×' }, { latex: 'x', label: 'x' }, { latex: 'n', label: 'n' }, '[left]', '[right]'])
+  rows.push(['1', '2', '3', '-', '0', '.', '=', '+'])
+
   // Top row — תיאורית / היסקית group switcher.
   // The "ws-group-btn" class is intercepted by the pointerup handler.
   // MathLive treats these as keycaps but our handler stops the default
@@ -174,37 +181,22 @@ function buildRows(): unknown[] {
   return rows
 }
 
-// Compact numeric layout — tighter than MathLive's built-in 'numeric' which
-// the user said doesn't fit the page. Numpad + the operators/vars a stats
-// student actually needs. Per user 2026-05-28.
-const COMPACT_NUMERIC = {
-  label: '123',
-  tooltip: 'מספרים',
-  rows: [
-    ['7', '8', '9', { latex: '\\div', label: '÷' }, { latex: 'x', label: 'x' }],
-    ['4', '5', '6', { latex: '\\times', label: '×' }, { latex: 'n', label: 'n' }],
-    ['1', '2', '3', { latex: '-', label: '−' }, '[(]', '[)]'],
-    ['0', '.', '=', '+', '[separator-5]', '[backspace]'],
-  ],
-}
-
 function registerLayout(): boolean {
   const kb = getKB()
   if (!kb) return false
   const rows = buildRows()
-  // The custom-layout shape MathLive accepts: { label, tooltip, rows }.
-  // Tabs: compact numeric + alphabetic + WaffleStack. Symbols (∞≠∈) and Greek
-  // (αβγ) dropped per user 2026-05-28 — not needed for stats. We re-register
-  // on every keyboard show (MathLive resets layouts on first show).
+  // ONLY the WaffleStack layout — numeric (123) and alphabetic (abc) tabs
+  // dropped per user 2026-05-28 ("רק של הוופלסטאק"). buildRows() prepends a
+  // slim essentials row (digits + operators + backspace + arrows) so the
+  // single keyboard stays usable for typing values + editing without a
+  // separate tab.
   const customLayout = {
     label: 'וופלסטאק',
     tooltip: 'נוסחאות וופלסטאק',
     rows,
   }
   try {
-    ;(kb as { layouts?: unknown }).layouts = [
-      COMPACT_NUMERIC, 'alphabetic', customLayout,
-    ]
+    ;(kb as { layouts?: unknown }).layouts = [customLayout]
     return true
   } catch {
     return false
