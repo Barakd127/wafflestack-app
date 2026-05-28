@@ -60,6 +60,15 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true
+    open: true,
+    // Force every dev response to be uncacheable. The Claude Code desktop
+    // preview (and other embedded webviews) cache aggressively, so edits
+    // didn't show without a manual hard refresh. no-store kills that — the
+    // preview always pulls fresh assets. Per user 2026-05-27.
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
   }
 })
