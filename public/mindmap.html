@@ -1799,7 +1799,14 @@ function mmFitView(){
     // Guard: skip nodes whose tidy-layout pass hasn't populated x/y yet.
     // Without this, Math.min(Infinity, undefined) = NaN cascades into MM.zoom.
     if(!isFinite(n.x) || !isFinite(n.y)) continue;
-    minX=Math.min(minX,n.x);maxX=Math.max(maxX,n.x);minY=Math.min(minY,n.y);maxY=Math.max(maxY,n.y);
+    // Include the node's FULL extent (width/height), not just its top-left
+    // anchor. Previously the bbox spanned only x/y anchors, so the right/
+    // bottom-most nodes' bodies extended past maxX/maxY and got clipped in
+    // the narrow split pane (user 2026-05-28, images 2-3). mmFitVisibleSubtree
+    // already does this — that's why clicking the root node zoomed correctly.
+    const w = n.W || 140, h = n.H || 40;
+    minX=Math.min(minX,n.x);maxX=Math.max(maxX,n.x + w);
+    minY=Math.min(minY,n.y);maxY=Math.max(maxY,n.y + h);
   }
   if(minX===Infinity)return;
   const pad=60;const w=Math.max(1, maxX-minX+pad*2);const h=Math.max(1, maxY-minY+pad*2);
