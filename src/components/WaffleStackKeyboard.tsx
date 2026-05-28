@@ -217,6 +217,30 @@ function injectKeyboardCSS(): void {
   const style = document.createElement('style')
   style.id = 'ws-keyboard-style'
   style.textContent = `
+/* Force the MathLive keyboard plate to a consistent dark theme REGARDLESS of
+ * the OS prefers-color-scheme. Without this, light-mode users got a pale
+ * plate where the (light) chips blended in — unreadable. Per user 2026-05-27
+ * "כשהפסקתי דארק מוד … אי אפשר לראות כלום". Dark plate + light chips = always
+ * readable on both OS themes. */
+.ML__keyboard,
+.ML__keyboard .MLK__plate,
+.ML__keyboard .MLK__backdrop {
+  --keyboard-background: #0f1830 !important;
+  --keyboard-text: #FFF7E8 !important;
+  background-color: #0f1830 !important;
+  color: #FFF7E8 !important;
+}
+.ML__keyboard .MLK__toolbar,
+.ML__keyboard .MLK__toolbar .left > div,
+.ML__keyboard .MLK__toolbar .right > div {
+  color: #DCE8FB !important;
+}
+/* MathLive's own (non-WaffleStack) keycaps — keep them legible on the
+ * forced-dark plate too. */
+.ML__keyboard .MLK__keycap:not(.ws-formula-chip):not(.ws-group-btn) {
+  background-color: #1c2742 !important;
+  color: #F2F7FF !important;
+}
 /* Uniform-width chips matching MathLive's default tab density (4 per row).
  * Themed to the dark navy / gold ink palette rather than fighting the rest
  * of the app's surfaces. Per plan curried-waddling-pelican Part A. */
