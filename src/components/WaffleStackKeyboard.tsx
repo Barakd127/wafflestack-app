@@ -221,8 +221,11 @@ function injectKeyboardCSS(): void {
  * Themed to the dark navy / gold ink palette rather than fighting the rest
  * of the app's surfaces. Per plan curried-waddling-pelican Part A. */
 .ws-formula-chip.MLK__keycap {
-  background: linear-gradient(135deg, #1A2440 0%, #101a2e 100%) !important;
-  border: 1px solid rgba(212,175,55,0.18) !important;
+  /* Light app-palette chips: sky-blue gradient + navy ink text, instead of
+   * the dark navy that fought the bright app theme. Per user 2026-05-27
+   * "צבעים בהירים של האפליקציה". */
+  background: linear-gradient(135deg, #F2F7FF 0%, #DCE8FB 100%) !important;
+  border: 1px solid rgba(31,62,108,0.18) !important;
   border-radius: 10px !important;
   padding: 6px 8px !important;
   min-height: 46px !important;
@@ -231,20 +234,22 @@ function injectKeyboardCSS(): void {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  color: #1F3E6C !important;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
 .ws-formula-chip.MLK__keycap:hover,
 .ws-formula-chip.MLK__keycap:active {
-  border-color: rgba(212,175,55,0.55) !important;
-  box-shadow: 0 0 0 2px rgba(212,175,55,0.32) !important;
+  background: linear-gradient(135deg, #FFFFFF 0%, #E8F1FF 100%) !important;
+  border-color: rgba(212,175,55,0.65) !important;
+  box-shadow: 0 0 0 2px rgba(212,175,55,0.40) !important;
   transform: translateY(-1px);
 }
-/* Chips show the short symbol (s², b, x̄) — render it at a comfortably
- * readable size. Was 0.62em (sized for full formulas) which made the
- * short labels microscopic. Per user 2026-05-27. */
+/* Chips show the short symbol at a readable size, in navy ink so it reads
+ * on the light chip. KaTeX inherits the color property from the chip. */
 .ws-formula-chip .ML__latex {
   font-size: 1.15em !important;
   max-width: 100% !important;
+  color: #1F3E6C !important;
 }
 /* Section separators — gold ribbon look (wafflestack-conventions §17). */
 .MLK__row .separator {
