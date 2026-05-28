@@ -112,12 +112,9 @@ function buildRows(): unknown[] {
 
   const rows: unknown[] = []
 
-  // Essentials row — digits + operators + edit keys. Since WaffleStack is now
-  // the ONLY tab (no 123/abc), this keeps the keyboard usable for typing
-  // custom values + editing. Per user 2026-05-28.
-  rows.push(['7', '8', '9', { latex: '\\div', label: '÷' }, '[(]', '[)]', '[backspace]'])
-  rows.push(['4', '5', '6', { latex: '\\times', label: '×' }, { latex: 'x', label: 'x' }, { latex: 'n', label: 'n' }, '[left]', '[right]'])
-  rows.push(['1', '2', '3', '-', '0', '.', '=', '+'])
+  // (Essentials digit/edit row removed per user 2026-05-28 — they didn't want
+  // it. Pure WaffleStack chips; numbers come from the calculator, editing from
+  // the physical keyboard.)
 
   // Top row — תיאורית / היסקית group switcher.
   // The "ws-group-btn" class is intercepted by the pointerup handler.

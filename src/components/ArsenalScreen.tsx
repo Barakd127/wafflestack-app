@@ -888,7 +888,11 @@ function EquationCardBody({
           overflowX: 'auto',
           overflowY: 'hidden',
           padding: '6px 4px',
-          textAlign: 'center',
+          // LTR origin so the horizontal scrollbar starts at the LEFT and the
+          // equation reads left→right (was scrolling RTL because the card is
+          // dir=rtl). Per user 2026-05-28.
+          direction: 'ltr',
+          textAlign: 'left',
           fontSize: 17,
         }}
       >
