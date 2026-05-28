@@ -3026,8 +3026,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     // dimmed for non-chosen-incorrect. Default = translucent-white so the
                     // option chip reads on the dark themed shell (was solid #FFFFFF — a
                     // Notion-paste white card in a navy/honey theme; convention 16/18).
-                    let bg = 'rgba(255,255,255,0.08)'
-                    let border = 'rgba(255,255,255,0.18)'
+                    // Default = SOLID white card + thick navy border so the
+                    // options separate clearly from the light quiz background
+                    // (was translucent white 0.08 → invisible on the pale shell).
+                    // Per user 2026-05-28.
+                    let bg = '#FFFFFF'
+                    let border = 'rgba(31,62,108,0.45)'
                     let color = 'var(--sh-text-dark)'
                     let marker: string | null = null
                     if (revealed) {
@@ -3042,8 +3046,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         color = '#B92E22'
                         marker = '✗'
                       } else {
-                        bg = 'rgba(255,255,255,0.04)'
-                        border = 'rgba(255,255,255,0.10)'
+                        bg = 'rgba(255,255,255,0.55)'
+                        border = 'rgba(31,62,108,0.20)'
                         color = TEXT_LIGHT
                       }
                     }
@@ -3058,7 +3062,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           minHeight: 44,
                           padding: '10px 16px',
                           background: bg,
-                          border: `2px solid ${border}`,
+                          border: `2.5px solid ${border}`,
                           borderRadius: 10,
                           color,
                           fontFamily: "'Assistant', sans-serif",
@@ -3068,10 +3072,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           textAlign: 'center',
                           direction: 'rtl',
                           transition: 'all 0.18s',
-                          boxShadow: isChosen && revealed ? '0 2px 8px rgba(0,0,0,0.12)' : 'none',
+                          boxShadow: revealed ? (isChosen ? '0 2px 8px rgba(0,0,0,0.12)' : 'none') : '0 2px 6px rgba(31,62,108,0.12)',
                         }}
-                        onMouseEnter={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.14)' }}
-                        onMouseLeave={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)' }}
+                        onMouseEnter={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = '#EAF1FF' }}
+                        onMouseLeave={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = '#FFFFFF' }}
                       >
                         {/* RTL primary corner = right side → letter pill comes FIRST in DOM */}
                         <span style={{
