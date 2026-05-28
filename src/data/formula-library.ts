@@ -20,6 +20,12 @@ export interface Slot {
   key: string
   label: string
   placeholder?: string
+  /** LaTeX substring to replace with the user's value when building the
+   *  substitution display row in the calculator. e.g. for the mean formula
+   *  `\bar{x}=\frac{\sum x_i}{n}` the 'sum' slot has sym '\\sum x_i' and the
+   *  'n' slot has sym 'n'. When omitted, the calculator falls back to trying
+   *  `label` then `key` as the literal find target. */
+  sym?: string
 }
 
 export interface Formula {
@@ -85,8 +91,8 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         shortLabel: '\\bar{x}',
         desc: 'ממוצע אריתמטי',
         slots: [
-          { key: 'sum', label: 'Σx', placeholder: '60+70+80' },
-          { key: 'n', label: 'n', placeholder: '3' },
+          { key: 'sum', label: 'Σx', placeholder: '60+70+80', sym: '\\sum x_i' },
+          { key: 'n', label: 'n', placeholder: '3', sym: 'n' },
         ],
         eval: v => v.sum / v.n,
         topics: ['mean', 'weighted-combined'],
@@ -99,8 +105,8 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         shortLabel: '\\bar{x}_f',
         desc: 'ממוצע משוקלל',
         slots: [
-          { key: 'sumxf', label: 'Σx·f(x)' },
-          { key: 'n', label: 'n' },
+          { key: 'sumxf', label: 'Σx·f(x)', sym: '\\sum x_i f(x_i)' },
+          { key: 'n', label: 'n', sym: 'n' },
         ],
         eval: v => v.sumxf / v.n,
         topics: ['mean', 'weighted-combined'],
@@ -113,8 +119,8 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         shortLabel: '\\bar{\\bar{x}}',
         desc: 'ממוצע משולב בין קבוצות',
         slots: [
-          { key: 'sumxn', label: 'Σ x̄ⱼ·nⱼ' },
-          { key: 'N', label: 'N' },
+          { key: 'sumxn', label: 'Σ x̄ⱼ·nⱼ', sym: '\\sum_j \\bar{x}_j n_j' },
+          { key: 'N', label: 'N', sym: 'N' },
         ],
         eval: v => v.sumxn / v.N,
         topics: ['weighted-combined'],
@@ -127,8 +133,8 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         shortLabel: 'MR',
         desc: 'ממוצע הקצוות',
         slots: [
-          { key: 'max', label: 'xₘₐₓ' },
-          { key: 'min', label: 'xₘᵢₙ' },
+          { key: 'max', label: 'xₘₐₓ', sym: 'x_{max}' },
+          { key: 'min', label: 'xₘᵢₙ', sym: 'x_{min}' },
         ],
         eval: v => (v.max + v.min) / 2,
         topics: ['mean', 'std-dev'],
@@ -148,9 +154,9 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         shortLabel: 's^2',
         desc: 'שונות אוכלוסיה',
         slots: [
-          { key: 'sumx2', label: 'Σx²' },
-          { key: 'n', label: 'n' },
-          { key: 'mean', label: 'x̄' },
+          { key: 'sumx2', label: 'Σx²', sym: '\\sum x_i^2' },
+          { key: 'n', label: 'n', sym: 'n' },
+          { key: 'mean', label: 'x̄', sym: '\\bar{x}' },
         ],
         eval: v => v.sumx2 / v.n - v.mean * v.mean,
         topics: ['std-dev', 'observation-changes'],
@@ -163,9 +169,9 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         shortLabel: 's^2_f',
         desc: 'שונות מטבלת שכיחויות',
         slots: [
-          { key: 'sumx2f', label: 'Σx²·f(x)' },
-          { key: 'n', label: 'n' },
-          { key: 'mean', label: 'x̄' },
+          { key: 'sumx2f', label: 'Σx²·f(x)', sym: '\\sum x_i^2 f(x_i)' },
+          { key: 'n', label: 'n', sym: 'n' },
+          { key: 'mean', label: 'x̄', sym: '\\bar{x}' },
         ],
         eval: v => v.sumx2f / v.n - v.mean * v.mean,
         topics: ['std-dev'],
@@ -177,7 +183,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         latex: 's=\\sqrt{s^2}',
         shortLabel: 's',
         desc: 'סטיית תקן',
-        slots: [{ key: 'var', label: 's²' }],
+        slots: [{ key: 'var', label: 's²', sym: 's^2' }],
         eval: v => Math.sqrt(v.var),
         topics: ['std-dev', 'observation-changes'],
         courseId: 'stat-a',
@@ -189,9 +195,9 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         shortLabel: 's_c^2',
         desc: 'שונות בתוך + בין קבוצות',
         slots: [
-          { key: 'within', label: 'Σnⱼ·sⱼ²' },
-          { key: 'between', label: 'Σnⱼ(x̄ⱼ-x̄̄)²' },
-          { key: 'N', label: 'N' },
+          { key: 'within', label: 'Σnⱼ·sⱼ²', sym: '\\sum n_j s_j^2' },
+          { key: 'between', label: 'Σnⱼ(x̄ⱼ-x̄̄)²', sym: '\\sum n_j(\\bar{x}_j-\\bar{\\bar{x}})^2' },
+          { key: 'N', label: 'N', sym: 'N' },
         ],
         eval: v => (v.within + v.between) / v.N,
         topics: ['weighted-combined'],
@@ -211,9 +217,9 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         shortLabel: "\\bar{x}'",
         desc: "אם x'=bx+a",
         slots: [
-          { key: 'b', label: 'b' },
-          { key: 'mean', label: 'x̄' },
-          { key: 'a', label: 'a' },
+          { key: 'b', label: 'b', sym: 'b' },
+          { key: 'mean', label: 'x̄', sym: '\\bar{x}' },
+          { key: 'a', label: 'a', sym: 'a' },
         ],
         eval: v => v.b * v.mean + v.a,
         topics: ['linear-transformations'],
@@ -226,8 +232,8 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         shortLabel: "s_{x'}^2",
         desc: 'שונות מוכפלת ב-b²',
         slots: [
-          { key: 'b', label: 'b' },
-          { key: 'var', label: 's²' },
+          { key: 'b', label: 'b', sym: 'b' },
+          { key: 'var', label: 's²', sym: 's_x^2' },
         ],
         eval: v => v.b * v.b * v.var,
         topics: ['linear-transformations'],
@@ -240,8 +246,8 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         shortLabel: "s_{x'}",
         desc: 'SD מוכפלת ב-|b|',
         slots: [
-          { key: 'b', label: 'b' },
-          { key: 'sd', label: 's' },
+          { key: 'b', label: 'b', sym: 'b' },
+          { key: 'sd', label: 's', sym: 's_x' },
         ],
         eval: v => Math.abs(v.b) * v.sd,
         topics: ['linear-transformations'],
@@ -254,9 +260,9 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         shortLabel: 'Z',
         desc: 'ציון תקני',
         slots: [
-          { key: 'x', label: 'x' },
-          { key: 'mean', label: 'x̄' },
-          { key: 's', label: 's' },
+          { key: 'x', label: 'x', sym: 'x' },
+          { key: 'mean', label: 'x̄', sym: '\\bar{x}' },
+          { key: 's', label: 's', sym: 's' },
         ],
         eval: v => (v.x - v.mean) / v.s,
         topics: ['std-dev', 'linear-transformations', 'percentiles'],
@@ -275,7 +281,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         latex: 'P(Z\\leq z)=\\Phi(z)',
         shortLabel: '\\Phi(z)',
         desc: 'פונקציית התפלגות מצטברת',
-        slots: [{ key: 'z', label: 'z' }],
+        slots: [{ key: 'z', label: 'z', sym: 'z' }],
         eval: v => normCdf(v.z),
         topics: ['percentiles'],
         courseId: 'stat-a',
@@ -286,7 +292,7 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         latex: 'P(Z>z)=1-\\Phi(z)',
         shortLabel: 'P(Z>z)',
         desc: 'הסתברות זנב ימני',
-        slots: [{ key: 'z', label: 'z' }],
+        slots: [{ key: 'z', label: 'z', sym: 'z' }],
         eval: v => 1 - normCdf(v.z),
         topics: ['percentiles'],
         courseId: 'stat-a',
@@ -298,8 +304,8 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         shortLabel: 'P(z_1<Z\\leq z_2)',
         desc: 'בין שני ערכי z',
         slots: [
-          { key: 'z1', label: 'z₁' },
-          { key: 'z2', label: 'z₂' },
+          { key: 'z1', label: 'z₁', sym: 'z_1' },
+          { key: 'z2', label: 'z₂', sym: 'z_2' },
         ],
         eval: v => normCdf(v.z2) - normCdf(v.z1),
         topics: ['percentiles'],
@@ -311,9 +317,9 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         latex: 'f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{1}{2}\\left(\\frac{x-\\mu}{\\sigma}\\right)^2}',
         desc: 'פונקציית צפיפות נורמלית',
         slots: [
-          { key: 'x', label: 'x' },
-          { key: 'mu', label: 'μ' },
-          { key: 'sigma', label: 'σ' },
+          { key: 'x', label: 'x', sym: 'x' },
+          { key: 'mu', label: 'μ', sym: '\\mu' },
+          { key: 'sigma', label: 'σ', sym: '\\sigma' },
         ],
         eval: v => Math.exp(-0.5 * Math.pow((v.x - v.mu) / v.sigma, 2)) / (v.sigma * Math.sqrt(2 * Math.PI)),
         topics: ['percentiles'],
@@ -332,9 +338,9 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         latex: 'r=\\frac{\\mathrm{cov}(x,y)}{s_x\\cdot s_y}',
         desc: 'קורלציה לינארית [-1,1]',
         slots: [
-          { key: 'cov', label: 'cov(x,y)' },
-          { key: 'sx', label: 'sₓ' },
-          { key: 'sy', label: 's_y' },
+          { key: 'cov', label: 'cov(x,y)', sym: '\\mathrm{cov}(x,y)' },
+          { key: 'sx', label: 'sₓ', sym: 's_x' },
+          { key: 'sy', label: 's_y', sym: 's_y' },
         ],
         eval: v => v.cov / (v.sx * v.sy),
         topics: ['pearson', 'correlation'],
@@ -346,10 +352,10 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         latex: '\\mathrm{cov}(x,y)=\\frac{\\sum x_i y_i}{n}-\\bar{x}\\bar{y}',
         desc: 'שונות בין X ל-Y',
         slots: [
-          { key: 'sumxy', label: 'Σxᵢyᵢ' },
-          { key: 'n', label: 'n' },
-          { key: 'xbar', label: 'x̄' },
-          { key: 'ybar', label: 'ȳ' },
+          { key: 'sumxy', label: 'Σxᵢyᵢ', sym: '\\sum x_i y_i' },
+          { key: 'n', label: 'n', sym: 'n' },
+          { key: 'xbar', label: 'x̄', sym: '\\bar{x}' },
+          { key: 'ybar', label: 'ȳ', sym: '\\bar{y}' },
         ],
         eval: v => v.sumxy / v.n - v.xbar * v.ybar,
         topics: ['pearson', 'correlation'],
@@ -361,8 +367,8 @@ export const FORMULA_LIBRARY: FormulaCategory[] = [
         latex: 'r_s=1-\\frac{6\\sum d_i^2}{n(n^2-1)}',
         desc: 'קורלציה לפי דירוג',
         slots: [
-          { key: 'sumd2', label: 'Σdᵢ²' },
-          { key: 'n', label: 'n' },
+          { key: 'sumd2', label: 'Σdᵢ²', sym: '\\sum d_i^2' },
+          { key: 'n', label: 'n', sym: 'n' },
         ],
         eval: v => 1 - (6 * v.sumd2) / (v.n * (v.n * v.n - 1)),
         topics: ['spearman'],

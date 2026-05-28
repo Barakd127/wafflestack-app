@@ -214,9 +214,9 @@ export default function CalculatorDrawer() {
     for (const slot of formula.slots) {
       const raw = (vals[slot.key] ?? '').trim()
       const display = '(' + raw + ')'
-      // Try slot.label first, then slot.key. Use a literal find (no regex
-      // escape needed for typical labels: n, k, p, r, s_x).
-      const candidates = [slot.label, slot.key]
+      // Prefer slot.sym (the LaTeX substring authored for this slot), then
+      // fall back to slot.label / slot.key as literal find targets.
+      const candidates = [slot.sym, slot.label, slot.key]
       let replaced = false
       for (const c of candidates) {
         if (!c) continue
