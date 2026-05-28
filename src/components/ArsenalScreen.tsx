@@ -892,7 +892,14 @@ function EquationCardBody({
           fontSize: 17,
         }}
       >
-        <KatexInline latex={eqData.latex} displayMode={false} />
+        {/* Multi-line equations (\begin{gathered}…) only stack as separate
+         *  lines under KaTeX displayMode. Detect a multi-line env / row break
+         *  and switch on display mode so the worked solution shows line-by-line.
+         *  Per user 2026-05-28. */}
+        <KatexInline
+          latex={eqData.latex}
+          displayMode={/\\begin\{(gathered|aligned|array|cases)\}|\\\\/.test(eqData.latex)}
+        />
       </div>
     </div>
   )

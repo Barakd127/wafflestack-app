@@ -29,14 +29,16 @@ declare global {
   }
 }
 
-// Palette (kept inline so this component is portable; matches
-// wafflestack-conventions skill §16-§27).
+// Palette — LIGHT app theme (per user 2026-05-28: drawer was too dark).
+// PAPER is the primary TEXT colour (dark navy) on a light surface; SURFACE
+// is a pale blue tint; gold is reserved for the action buttons.
 const HONEY = '#F2A93E'
 const EMBER = '#C97C18'
-const INK = '#1A1A2E'
-const PAPER = '#FFF7E8'
-const SURFACE = 'rgba(255,255,255,0.06)'
-const BORDER = 'rgba(242,169,62,0.45)'
+const INK = '#1A1A2E'            // dark text on gold buttons
+const PAPER = '#1F3E6C'          // primary text (navy ink) on light bg
+const SURFACE = 'rgba(51,81,202,0.06)'  // pale blue tint panels
+const BORDER = 'rgba(242,169,62,0.55)'
+const GOLD_GRAD = 'linear-gradient(135deg, #F5C842 0%, #D4AF37 100%)'
 
 /** Render a slot's text label. If the label looks like math (contains `_`,
  *  `^`, `\`, or `Σ` etc.) it renders via KaTeX so `s_y` looks like `s_y`
@@ -250,26 +252,39 @@ export default function CalculatorDrawer() {
     } catch { /* clipboard blocked */ }
   }
 
+  // Close the drawer + hide the virtual keyboard so the user lands back on the
+  // equation they just built. Every action button calls this after its work.
+  // Per user 2026-05-28.
+  const closeAndReturn = () => {
+    setFormula(null)
+    try {
+      const kb = (window as unknown as { mathVirtualKeyboard?: { hide?: () => void } }).mathVirtualKeyboard
+      kb?.hide?.()
+    } catch { /* */ }
+  }
+
   const insertIntoField = () => {
     if (result == null) return
     const mf = window.wsActiveMathField
     if (!mf?.executeCommand) return
-    // Build the chain to paste. `\\` is the LaTeX row separator so each part
-    // lands on its own line in the multi-line math-field:
+    // Build the worked-solution chain. A bare `\\` only breaks lines INSIDE a
+    // multi-line LaTeX environment — in a plain math-field it renders as raw
+    // backslash glyphs (user 2026-05-28). Use \begin{gathered}…\end{gathered}
+    // which BOTH KaTeX (the Arsenal card renderer) and MathLive support —
+    // \displaylines is NOT a KaTeX macro and leaked as literal text. Each part
+    // renders on its OWN line:
     //   formula
-    //   substitution           (only when checkbox on + substLatex exists)
+    //   substitution        (only when checkbox on + substLatex exists)
     //   = result
-    // Per user 2026-05-28: substitution should carry to the equation by
-    // default, unless the user unchecks it.
     const res = formatResult(result)
-    let chain = formula.latex
-    if (insertSubst && substLatex) {
-      chain += ' \\\\ ' + substLatex
-    }
-    chain += ' \\\\ = ' + res
+    const parts = [formula.latex]
+    if (insertSubst && substLatex) parts.push(substLatex)
+    parts.push('= ' + res)
+    const chain = '\\begin{gathered}' + parts.join(' \\\\ ') + '\\end{gathered}'
     try {
       mf.executeCommand(['insert', chain])
     } catch { /* MathLive command rejected */ }
+    closeAndReturn()
   }
 
   const insertFormulaIntoField = () => {
@@ -279,6 +294,7 @@ export default function CalculatorDrawer() {
         mf.executeCommand(['insert', formula.latex])
       } catch { /* MathLive command rejected */ }
     }
+    closeAndReturn()
   }
 
   return (
@@ -295,11 +311,11 @@ export default function CalculatorDrawer() {
         maxHeight: 'calc(100vh - 200px)',
         overflowY: 'auto',
         zIndex: 100001,
-        background: 'rgba(26,26,46,0.96)',
+        background: 'linear-gradient(160deg, #FFFFFF 0%, #EAF1FF 100%)',
         backdropFilter: 'blur(16px)',
         border: '2px solid ' + BORDER,
         borderRadius: 16,
-        boxShadow: '0 18px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.4)',
+        boxShadow: '0 18px 48px rgba(31,62,108,0.28), 0 0 0 1px rgba(212,175,55,0.25)',
         padding: 16,
         color: PAPER,
         fontFamily: "'Rubik', sans-serif",
@@ -488,76 +504,55 @@ export default function CalculatorDrawer() {
         </div>
       )}
 
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-        <button
-          onClick={copyResult}
-          disabled={!canInsertOrCopy}
-          style={{
-            flex: 1,
-            minHeight: 44,
-            minWidth: 120,
-            background: canInsertOrCopy
-              ? `linear-gradient(135deg, ${HONEY}, ${EMBER})`
-              : SURFACE,
-            border: '1px solid ' + BORDER,
-            borderRadius: 12,
-            color: canInsertOrCopy ? INK : 'rgba(255,247,232,0.55)',
-            fontFamily: "'Rubik', sans-serif",
-            fontSize: 13,
-            fontWeight: 800,
-            cursor: canInsertOrCopy ? 'pointer' : 'not-allowed',
-            padding: '10px 14px',
-          }}
-        >
-          {copied ? '✓ הועתק' : '📋 העתק תוצאה'}
-        </button>
-        <button
-          onClick={insertIntoField}
-          disabled={!canInsertOrCopy}
-          style={{
-            flex: 1,
-            minHeight: 44,
-            minWidth: 120,
-            background: SURFACE,
-            border: '1px solid ' + BORDER,
-            borderRadius: 12,
-            color: canInsertOrCopy ? PAPER : 'rgba(255,247,232,0.55)',
-            fontFamily: "'Rubik', sans-serif",
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: canInsertOrCopy ? 'pointer' : 'not-allowed',
-            padding: '10px 14px',
-          }}
-          title="הכנס את התוצאה לתוך שדה המשוואה הפעיל"
-        >
-          📐 הכנס תוצאה
-        </button>
-      </div>
-
-      {/* Secondary action — insert the formula's LaTeX itself into the
-       *  focused math-field, even before the user filled values. Per plan
-       *  curried-waddling-pelican Part B / Commit 6. */}
-      <button
-        onClick={insertFormulaIntoField}
-        style={{
-          marginTop: 8,
-          width: '100%',
-          minHeight: 40,
-          background: 'transparent',
-          border: '1px dashed ' + BORDER,
-          borderRadius: 10,
-          color: 'rgba(255,247,232,0.78)',
+      {/* Actions — all gold, clear distinct labels. Each closes the drawer +
+       *  hides the keyboard so the user returns to the written equation.
+       *  Per user 2026-05-28. */}
+      {(() => {
+        const goldBtn = (enabled: boolean) => ({
+          flex: 1,
+          minHeight: 46,
+          minWidth: 130,
+          background: enabled ? GOLD_GRAD : 'rgba(31,62,108,0.10)',
+          border: '1px solid ' + (enabled ? 'rgba(212,175,55,0.8)' : 'rgba(31,62,108,0.18)'),
+          borderRadius: 12,
+          color: enabled ? INK : 'rgba(31,62,108,0.4)',
           fontFamily: "'Rubik', sans-serif",
-          fontSize: 12,
-          fontWeight: 700,
-          cursor: 'pointer',
-          padding: '8px 12px',
-        }}
-        title="הכנס את הנוסחה עצמה (LaTeX) למשוואה הפעילה"
-      >
-        ✍️ הכנס את הנוסחה למשוואה
-      </button>
+          fontSize: 13,
+          fontWeight: 800,
+          cursor: enabled ? 'pointer' : 'not-allowed',
+          padding: '10px 14px',
+          boxShadow: enabled ? '0 4px 12px rgba(212,175,55,0.32)' : 'none',
+        })
+        return (
+          <>
+            <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => { copyResult(); closeAndReturn() }}
+                disabled={!canInsertOrCopy}
+                style={goldBtn(canInsertOrCopy)}
+                title="העתק את התוצאה ללוח"
+              >
+                {copied ? '✓ הועתק' : '📋 העתק תוצאה'}
+              </button>
+              <button
+                onClick={insertIntoField}
+                disabled={!canInsertOrCopy}
+                style={goldBtn(canInsertOrCopy)}
+                title="הכנס את הפתרון המלא (נוסחה + הצבה + תוצאה) למשוואה"
+              >
+                ✅ הכנס פתרון מלא
+              </button>
+            </div>
+            <button
+              onClick={insertFormulaIntoField}
+              style={{ ...goldBtn(true), width: '100%', marginTop: 8, minHeight: 42, fontSize: 12.5 }}
+              title="הכנס רק את הנוסחה הריקה (בלי מספרים) למשוואה"
+            >
+              ✍️ הכנס נוסחה ריקה
+            </button>
+          </>
+        )
+      })()}
     </div>
   )
 }

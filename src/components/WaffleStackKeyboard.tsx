@@ -353,29 +353,35 @@ function injectKeyboardCSS(): void {
   max-height: calc(92vh - 52px) !important;
   overflow-y: auto !important;
 }
-/* Top-level group switcher: תיאורית / היסקית */
+/* Top-level group switcher: תיאורית / היסקית.
+ * INACTIVE state must stay legible on BOTH the light and dark plate — the
+ * old near-white text on a near-transparent bg vanished on the light-mode
+ * plate (user 2026-05-28 circled the washed-out 'תיאורית' button). */
 .ws-group-btn.MLK__keycap {
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid rgba(212,175,55,0.30) !important;
+  border: 1.5px solid rgba(212,175,55,0.55) !important;
   border-radius: 12px !important;
   font-family: 'Rubik', sans-serif !important;
   font-size: 13px !important;
-  font-weight: 700 !important;
-  color: #FFF7E8 !important;
+  font-weight: 800 !important;
   letter-spacing: 0.05em !important;
   padding: 10px 14px !important;
   min-height: 44px !important;
   cursor: pointer !important;
   transition: background 0.15s, border-color 0.15s, transform 0.15s !important;
 }
-.ws-group-btn.MLK__keycap:hover {
-  background: rgba(212,175,55,0.12) !important;
+@media (prefers-color-scheme: light) {
+  .ws-group-btn.MLK__keycap { background: #FFFFFF !important; color: #1F3E6C !important; }
+  .ws-group-btn.MLK__keycap:hover { background: #FFF7E0 !important; }
+}
+@media (prefers-color-scheme: dark) {
+  .ws-group-btn.MLK__keycap { background: rgba(255,255,255,0.06) !important; color: #FFF7E8 !important; }
+  .ws-group-btn.MLK__keycap:hover { background: rgba(212,175,55,0.16) !important; }
 }
 .ws-group-btn.ws-group-active.MLK__keycap {
-  background: linear-gradient(135deg, #F2A93E 0%, #C97C18 100%) !important;
+  background: linear-gradient(135deg, #F5C842 0%, #D4AF37 100%) !important;
   color: #1A1A2E !important;
-  border-color: #F2A93E !important;
-  box-shadow: 0 4px 12px rgba(242,169,62,0.32) !important;
+  border-color: #D4AF37 !important;
+  box-shadow: 0 4px 12px rgba(242,169,62,0.40) !important;
 }
 .MLK__row:has(.ws-group-btn) {
   gap: 12px;
@@ -497,10 +503,19 @@ export default function WaffleStackKeyboard() {
         const mf = (window as unknown as { wsActiveMathField?: { value?: string } }).wsActiveMathField
         if (mf && typeof mf.value === 'string') {
           const before = (valueBeforeTap.current ?? '').trim()
-          // `\\` is the LaTeX row separator — renders each formula on its own
-          // line inside the multi-line math-field.
-          const sep = before ? ' \\\\ ' : ''
-          mf.value = before + sep + formula.latex
+          // Each tapped formula goes on its OWN line. A bare `\\` only breaks
+          // lines INSIDE a multi-line environment — otherwise it renders as
+          // raw backslash glyphs (user 2026-05-28). Use \begin{gathered}…
+          // \end{gathered} (supported by BOTH KaTeX + MathLive; \displaylines
+          // is NOT a KaTeX macro). Keep the field's content inside one
+          // gathered block and append into it.
+          if (!before) {
+            mf.value = formula.latex
+          } else {
+            const m = before.match(/^\\begin\{gathered\}([\s\S]*)\\end\{gathered\}$/)
+            const inner = m ? m[1] : before
+            mf.value = '\\begin{gathered}' + inner + ' \\\\ ' + formula.latex + '\\end{gathered}'
+          }
         }
       }, 0)
       window.dispatchEvent(new CustomEvent('ws-open-calc', { detail: { formulaId: fid } }))
