@@ -546,9 +546,9 @@ export default function CalculatorDrawer() {
             <button
               onClick={insertFormulaIntoField}
               style={{ ...goldBtn(true), width: '100%', marginTop: 8, minHeight: 42, fontSize: 12.5 }}
-              title="הכנס רק את הנוסחה הריקה (בלי מספרים) למשוואה"
+              title="הכנס רק את הנוסחה (בלי מספרים) למשוואה"
             >
-              ✍️ הכנס נוסחה ריקה
+              ✍️ הכנס נוסחה בלבד
             </button>
           </>
         )
