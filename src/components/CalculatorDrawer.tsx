@@ -168,6 +168,10 @@ export default function CalculatorDrawer() {
   const [formula, setFormula] = useState<Formula | null>(null)
   const [vals, setVals] = useState<Record<string, string>>({})
   const [copied, setCopied] = useState(false)
+  // When ON (default), the "הכנס תוצאה" action also pastes the substitution
+  // step into the equation, so the Arsenal card shows formula → substitution
+  // → result. Uncheck to paste only formula + result. Per user 2026-05-28.
+  const [insertSubst, setInsertSubst] = useState(true)
   const firstInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -249,11 +253,23 @@ export default function CalculatorDrawer() {
   const insertIntoField = () => {
     if (result == null) return
     const mf = window.wsActiveMathField
-    if (mf?.executeCommand) {
-      try {
-        mf.executeCommand(['insert', '= ' + formatResult(result)])
-      } catch { /* MathLive command rejected */ }
+    if (!mf?.executeCommand) return
+    // Build the chain to paste. `\\` is the LaTeX row separator so each part
+    // lands on its own line in the multi-line math-field:
+    //   formula
+    //   substitution           (only when checkbox on + substLatex exists)
+    //   = result
+    // Per user 2026-05-28: substitution should carry to the equation by
+    // default, unless the user unchecks it.
+    const res = formatResult(result)
+    let chain = formula.latex
+    if (insertSubst && substLatex) {
+      chain += ' \\\\ ' + substLatex
     }
+    chain += ' \\\\ = ' + res
+    try {
+      mf.executeCommand(['insert', chain])
+    } catch { /* MathLive command rejected */ }
   }
 
   const insertFormulaIntoField = () => {
@@ -389,6 +405,26 @@ export default function CalculatorDrawer() {
           </div>
           <KatexBlock latex={substLatex} />
         </div>
+      )}
+
+      {/* Checkbox — include the substitution when pasting into the equation.
+       *  Default ON. Per user 2026-05-28. Shown only when substitution exists. */}
+      {formula.eval && substLatex && resultText && (
+        <label
+          dir="rtl"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, marginTop: 8,
+            fontSize: 12, color: PAPER, cursor: 'pointer', userSelect: 'none',
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={insertSubst}
+            onChange={e => setInsertSubst(e.target.checked)}
+            style={{ width: 18, height: 18, accentColor: HONEY, cursor: 'pointer' }}
+          />
+          <span>הכנס גם את ההצבה למשוואה</span>
+        </label>
       )}
 
       {/* Result OR friendly missing-values hint */}

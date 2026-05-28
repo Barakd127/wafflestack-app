@@ -24,8 +24,9 @@
 //   - The current topic changes (storage event from LessonScreen).
 //   - A formula is used (recents update).
 
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FORMULA_LIBRARY, allFormulas, findFormula, shortLabelOf, type Formula } from '../data/formula-library'
+import { useKeyboardOpen, getStackOffset } from '../lib/uiStacks'
 
 const TOPIC_KEY = 'wafflestack-current-topic'
 const RECENT_KEY = 'wafflestack-formula-recent'
@@ -173,15 +174,28 @@ function buildRows(): unknown[] {
   return rows
 }
 
+// Compact numeric layout — tighter than MathLive's built-in 'numeric' which
+// the user said doesn't fit the page. Numpad + the operators/vars a stats
+// student actually needs. Per user 2026-05-28.
+const COMPACT_NUMERIC = {
+  label: '123',
+  tooltip: 'מספרים',
+  rows: [
+    ['7', '8', '9', { latex: '\\div', label: '÷' }, { latex: 'x', label: 'x' }],
+    ['4', '5', '6', { latex: '\\times', label: '×' }, { latex: 'n', label: 'n' }],
+    ['1', '2', '3', { latex: '-', label: '−' }, '[(]', '[)]'],
+    ['0', '.', '=', '+', '[separator-5]', '[backspace]'],
+  ],
+}
+
 function registerLayout(): boolean {
   const kb = getKB()
   if (!kb) return false
   const rows = buildRows()
   // The custom-layout shape MathLive accepts: { label, tooltip, rows }.
-  // We keep the 4 standard MathLive tabs alongside ours so the user never
-  // loses ABC/numeric/symbols/greek. Using the expanded names (not 'default')
-  // because MathLive resets `layouts` to the expanded form on first keyboard
-  // show, which silently dropped our custom entry. Per user 2026-05-26.
+  // Tabs: compact numeric + alphabetic + WaffleStack. Symbols (∞≠∈) and Greek
+  // (αβγ) dropped per user 2026-05-28 — not needed for stats. We re-register
+  // on every keyboard show (MathLive resets layouts on first show).
   const customLayout = {
     label: 'וופלסטאק',
     tooltip: 'נוסחאות וופלסטאק',
@@ -189,7 +203,7 @@ function registerLayout(): boolean {
   }
   try {
     ;(kb as { layouts?: unknown }).layouts = [
-      'numeric', 'symbols', 'alphabetic', 'greek', customLayout,
+      COMPACT_NUMERIC, 'alphabetic', customLayout,
     ]
     return true
   } catch {
@@ -217,29 +231,58 @@ function injectKeyboardCSS(): void {
   const style = document.createElement('style')
   style.id = 'ws-keyboard-style'
   style.textContent = `
-/* Force the MathLive keyboard plate to a consistent dark theme REGARDLESS of
- * the OS prefers-color-scheme. Without this, light-mode users got a pale
- * plate where the (light) chips blended in — unreadable. Per user 2026-05-27
- * "כשהפסקתי דארק מוד … אי אפשר לראות כלום". Dark plate + light chips = always
- * readable on both OS themes. */
-.ML__keyboard,
-.ML__keyboard .MLK__plate,
-.ML__keyboard .MLK__backdrop {
-  --keyboard-background: #0f1830 !important;
-  --keyboard-text: #FFF7E8 !important;
-  background-color: #0f1830 !important;
-  color: #FFF7E8 !important;
+/* Blue-toned keyboard theme that FOLLOWS the OS color-scheme — light-blue
+ * plate + navy text in light mode, blue-dark plate + light text in dark mode.
+ * Never the harsh near-black. Per user 2026-05-28: "אני רוצה רקע כחול".
+ * We drive MathLive's own CSS custom properties (the clean way) rather than
+ * hard background-color overrides. */
+@media (prefers-color-scheme: light) {
+  .ML__keyboard,
+  .ML__keyboard .MLK__plate,
+  .ML__keyboard .MLK__backdrop {
+    --keyboard-background: #E8F0FF !important;
+    --keyboard-text: #1F3E6C !important;
+    --keycap-background: #F0F4FF !important;
+    --keycap-background-hover: #E2ECFF !important;
+    --keycap-text: #1F3E6C !important;
+    --keycap-border: #C5D9F5 !important;
+    --keycap-primary-background: #3351CA !important;
+    --keycap-primary-text: #FFFFFF !important;
+    --keyboard-toolbar-text: #1F3E6C !important;
+    background-color: #E8F0FF !important;
+    color: #1F3E6C !important;
+  }
+  .ML__keyboard .MLK__toolbar .left > div,
+  .ML__keyboard .MLK__toolbar .right > div { color: #1F3E6C !important; }
+  .ML__keyboard .MLK__keycap:not(.ws-formula-chip):not(.ws-group-btn) {
+    background-color: #F0F4FF !important;
+    color: #1F3E6C !important;
+    border-color: #C5D9F5 !important;
+  }
 }
-.ML__keyboard .MLK__toolbar,
-.ML__keyboard .MLK__toolbar .left > div,
-.ML__keyboard .MLK__toolbar .right > div {
-  color: #DCE8FB !important;
-}
-/* MathLive's own (non-WaffleStack) keycaps — keep them legible on the
- * forced-dark plate too. */
-.ML__keyboard .MLK__keycap:not(.ws-formula-chip):not(.ws-group-btn) {
-  background-color: #1c2742 !important;
-  color: #F2F7FF !important;
+@media (prefers-color-scheme: dark) {
+  .ML__keyboard,
+  .ML__keyboard .MLK__plate,
+  .ML__keyboard .MLK__backdrop {
+    --keyboard-background: #14213d !important;
+    --keyboard-text: #E8F0FF !important;
+    --keycap-background: #1c2742 !important;
+    --keycap-background-hover: #243150 !important;
+    --keycap-text: #E8F0FF !important;
+    --keycap-border: #2c3a5e !important;
+    --keycap-primary-background: #3351CA !important;
+    --keycap-primary-text: #FFFFFF !important;
+    --keyboard-toolbar-text: #DCE8FB !important;
+    background-color: #14213d !important;
+    color: #E8F0FF !important;
+  }
+  .ML__keyboard .MLK__toolbar .left > div,
+  .ML__keyboard .MLK__toolbar .right > div { color: #DCE8FB !important; }
+  .ML__keyboard .MLK__keycap:not(.ws-formula-chip):not(.ws-group-btn) {
+    background-color: #1c2742 !important;
+    color: #E8F0FF !important;
+    border-color: #2c3a5e !important;
+  }
 }
 /* Uniform-width chips matching MathLive's default tab density (4 per row).
  * Themed to the dark navy / gold ink palette rather than fighting the rest
@@ -293,6 +336,23 @@ function injectKeyboardCSS(): void {
   gap: 6px;
   padding: 2px 8px;
 }
+/* Dockable keyboard: cap the height so it doesn't swallow the whole screen,
+ * and let the chip rows scroll inside. The .ws-kb-expanded class (toggled by
+ * the expand FAB) removes the cap for true fullscreen. Per user 2026-05-28. */
+.ML__keyboard:not(.ws-kb-expanded) .MLK__plate {
+  max-height: 46vh !important;
+}
+.ML__keyboard:not(.ws-kb-expanded) .MLK__rows {
+  max-height: calc(46vh - 52px) !important;
+  overflow-y: auto !important;
+}
+.ML__keyboard.ws-kb-expanded .MLK__plate {
+  max-height: 92vh !important;
+}
+.ML__keyboard.ws-kb-expanded .MLK__rows {
+  max-height: calc(92vh - 52px) !important;
+  overflow-y: auto !important;
+}
 /* Top-level group switcher: תיאורית / היסקית */
 .ws-group-btn.MLK__keycap {
   background: rgba(255, 255, 255, 0.04) !important;
@@ -327,6 +387,10 @@ function injectKeyboardCSS(): void {
 }
 
 export default function WaffleStackKeyboard() {
+  // Snapshot of the active math-field value taken at pointerdown on a chip,
+  // before MathLive auto-inserts the shortLabel. Used to overwrite with the
+  // full formula latex on its own line.
+  const valueBeforeTap = useRef<string>('')
   useEffect(() => {
     injectKeyboardCSS()
     // Retry registration until MathLive's `mathVirtualKeyboard` exists, then
@@ -424,24 +488,40 @@ export default function WaffleStackKeyboard() {
       const formula = findFormula(fid)
       if (!formula) return
       pushRecentFormula(fid)
-      // MathLive already inserted the shortLabel. Replace what it inserted
-      // with the full latex. Use a microtask so MathLive's insert finishes
-      // first, then we run our replacement.
+      // The chip displays the shortLabel, but we want the FULL formula latex
+      // inserted — on its OWN line if the field already has content (so taps
+      // never jam together: `…}{n}s^2…`). MathLive auto-inserts the shortLabel
+      // on tap; we overwrite the whole value after, using the snapshot taken
+      // at pointerdown (captured BEFORE MathLive's insert). Per user 2026-05-28.
       window.setTimeout(() => {
-        const mf = (window as unknown as { wsActiveMathField?: { executeCommand?: (c: unknown) => void } }).wsActiveMathField
-        if (mf?.executeCommand) {
-          try {
-            // Delete the shortLabel just inserted (back-delete by length of
-            // the shortLabel's atoms — MathLive treats each LaTeX command as
-            // one atom; calling deleteBackward N times where N = chars in
-            // shortLabel is a rough approximation). Skip the delete for now
-            // and rely on the user to manually replace if needed; the more
-            // important step is opening the calculator.
-          } catch { /* */ }
+        const mf = (window as unknown as { wsActiveMathField?: { value?: string } }).wsActiveMathField
+        if (mf && typeof mf.value === 'string') {
+          const before = (valueBeforeTap.current ?? '').trim()
+          // `\\` is the LaTeX row separator — renders each formula on its own
+          // line inside the multi-line math-field.
+          const sep = before ? ' \\\\ ' : ''
+          mf.value = before + sep + formula.latex
         }
       }, 0)
       window.dispatchEvent(new CustomEvent('ws-open-calc', { detail: { formulaId: fid } }))
     }
+    // Capture-phase pointerdown fires BEFORE MathLive's keycap handler, so we
+    // snapshot the math-field value as it was just before this tap inserts.
+    const onPointerDown = (ev: PointerEvent) => {
+      const target = ev.target as HTMLElement | null
+      if (!target) return
+      let node: HTMLElement | null = target
+      while (node && node !== document.body) {
+        const cls = node.className
+        if (typeof cls === 'string' && /ws-fid-/.test(cls)) {
+          const mf = (window as unknown as { wsActiveMathField?: { value?: string } }).wsActiveMathField
+          valueBeforeTap.current = mf?.value ?? ''
+          return
+        }
+        node = node.parentElement
+      }
+    }
+    document.addEventListener('pointerdown', onPointerDown, true)
     document.addEventListener('pointerup', onPointerUp, true)
     // Re-register layout when group changes (writeGroup dispatches event).
     const onGroupChange = () => registerLayout()
@@ -453,10 +533,62 @@ export default function WaffleStackKeyboard() {
       window.removeEventListener('ws-current-topic-changed', onTopicLocal)
       window.removeEventListener('ws-keyboard-group-changed', onGroupChange)
       document.removeEventListener('focusin', onFocusIn, true)
+      document.removeEventListener('pointerdown', onPointerDown, true)
       document.removeEventListener('pointerup', onPointerUp, true)
     }
   }, [])
 
-  // No visible DOM — this is a side-effect-only component.
-  return null
+  // Expand/collapse toggle for the keyboard footprint. Visible only while the
+  // keyboard is open. Default = docked (capped height, scrolls). Per user
+  // 2026-05-28: "אפשרות להרחיב למסך מלא, או לגלול".
+  const kbOpen = useKeyboardOpen()
+  const [expanded, setExpanded] = useState<boolean>(() => {
+    try { return localStorage.getItem('wafflestack-keyboard-expanded') === '1' } catch { return false }
+  })
+  useEffect(() => {
+    const kb = document.querySelector('.ML__keyboard')
+    if (!kb) return
+    kb.classList.toggle('ws-kb-expanded', expanded)
+  }, [expanded, kbOpen])
+
+  if (!kbOpen) return null
+  const pos = getStackOffset('br', 'calculator-drawer') // sits just above keyboard-closer
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        setExpanded(v => {
+          const next = !v
+          try { localStorage.setItem('wafflestack-keyboard-expanded', next ? '1' : '0') } catch { /* */ }
+          const kb = document.querySelector('.ML__keyboard')
+          kb?.classList.toggle('ws-kb-expanded', next)
+          return next
+        })
+      }}
+      aria-label={expanded ? 'כווץ מקלדת' : 'הרחב מקלדת'}
+      title={expanded ? 'כווץ מקלדת' : 'הרחב מקלדת למסך מלא'}
+      style={{
+        position: 'fixed',
+        ...pos,
+        zIndex: 242,
+        background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+        color: '#0B1B3E',
+        border: 0,
+        borderRadius: 24,
+        padding: '8px 14px',
+        fontFamily: "'Rubik', sans-serif",
+        fontSize: 13,
+        fontWeight: 800,
+        cursor: 'pointer',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.45)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        minHeight: 44,
+      }}
+    >
+      <span aria-hidden style={{ fontSize: 16 }}>{expanded ? '⤡' : '⤢'}</span>
+      <span>{expanded ? 'כווץ' : 'הרחב'}</span>
+    </button>
+  )
 }
