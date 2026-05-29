@@ -774,14 +774,9 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
     <button class="wbt on" data-tool="select" onclick="wbTool('select')" title="Select [V]" aria-label="Select"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.5 18 2.4-7.7L21 11z"/></svg></button>
     <div class="wb-sep"></div>
 
-    <!-- 2. Draw cluster: pen, eraser -->
-    <div class="wbt-cluster">
-      <button class="wbt wbt-cluster-trigger" onclick="wbTogglePopover('draw',event)" title="כלי ציור" aria-label="כלי ציור" aria-haspopup="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 3.3a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L7.5 22.5 2 22.5l0-5.5z"/><path d="M13.5 4.5l6 6"/></svg><span class="wbt-chev">▾</span></button>
-      <div class="wbt-popover" id="wbt-pop-draw" role="menu">
-        <button class="wbt-pop-item" data-tool="pen"    onclick="wbTool('pen');wbClosePopovers()" title="עיפרון [P]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 3.3a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L7.5 22.5 2 22.5l0-5.5z"/><path d="M13.5 4.5l6 6"/></svg><span>עיפרון</span></button>
-        <button class="wbt-pop-item" data-tool="eraser" onclick="wbTool('eraser');wbClosePopovers()" title="מחק [E]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg><span>מחק</span></button>
-      </div>
-    </div>
+    <!-- 2. Draw: pen + eraser as DIRECT top-bar buttons (no popover) for discoverability -->
+    <button class="wbt" data-tool="pen"    onclick="wbTool('pen')"    title="עיפרון [P]" aria-label="עיפרון"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 3.3a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L7.5 22.5 2 22.5l0-5.5z"/><path d="M13.5 4.5l6 6"/></svg></button>
+    <button class="wbt" data-tool="eraser" onclick="wbTool('eraser')" title="מחק [E]" aria-label="מחק"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg></button>
 
     <!-- 3. Shapes cluster: rect, circle, line, arrow, connect -->
     <div class="wbt-cluster">
