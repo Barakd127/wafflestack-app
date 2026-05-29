@@ -6,13 +6,14 @@ import { SkeletonUtils } from 'three-stdlib'
 
 // Cycle through these buildings — after every 2 full rotations, fade out,
 // swap to the next model, fade in. Loops forever.
+// Both sample-tower variants were the dark narrow tower the user dislikes —
+// dropped. Keep the two glassy skyscrapers (user likes them) + two other
+// distinct buildings for variety. Per user 2026-05-29.
 const BUILDINGS = [
   '/kenney/building-skyscraper-a.glb',
   '/kenney/building-skyscraper-c.glb',
-  '/kenney/building-sample-tower-a.glb',
-  // building-j.glb removed per user 2026-05-28 ("את הבניין הזה אני שונא") —
-  // swapped for the second sample tower so all 4 are the impressive set.
-  '/kenney/building-sample-tower-b.glb',
+  '/kenney/building-n.glb',
+  '/kenney/building-a.glb',
 ] as const
 
 // Subtle wobble instead of continuous spin — ±5° over 8s ease-in-out — avoids
