@@ -2555,7 +2555,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             aria-label="חזרה לדף הבית"
             title="חזרה לדף הבית"
             style={{
-              position: 'fixed', bottom: 140, left: 12, zIndex: 300,
+              // TOP-left in fullscreen (topbar is hidden so the corner is free)
+              // — keeps Home reachable without stacking over the bottom-left
+              // FABs. Per user 2026-05-29.
+              position: 'fixed', top: 12, left: 12, zIndex: 300,
               background: 'linear-gradient(135deg,#D4AF37,#b8941f)',
               color: '#1F2640',
               border: 0, borderRadius: 14,
