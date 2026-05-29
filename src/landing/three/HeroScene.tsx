@@ -35,6 +35,16 @@ const TARGET_FIT_SIZE = 4.2
 // Preload at module scope so all 4 GLBs are ready before mount.
 BUILDINGS.forEach(path => useGLTF.preload(path))
 
+// HMR self-heal: the Three.js useFrame loop is created once on <Canvas> mount,
+// so a hot-swap of THIS module leaves the OLD rotation loop running with the
+// OLD constants — the user kept seeing the old fast spin in the dev preview
+// even after fixes. Force a full page reload on any hot-update so the loop is
+// recreated with the new code. Dev-only (stripped from production build).
+// Per user 2026-05-29.
+if (import.meta.hot) {
+  import.meta.hot.accept(() => { window.location.reload() })
+}
+
 type Prepared = {
   /** Outer wrapper Group — its scale + position are tuned post-mount via bbox. */
   wrapper: THREE.Group
