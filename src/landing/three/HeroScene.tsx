@@ -16,16 +16,16 @@ const BUILDINGS = [
   '/kenney/building-a.glb',
 ] as const
 
-// Subtle wobble instead of continuous spin — ±5° over 8s ease-in-out — avoids
-// the jittery / nausea-inducing perception that fast continuous rotation gave.
-// Continuous rotation kept as a (very slow) baseline so the building still
-// presents all faces over time.
-// NO continuous 360° spin. The building only gently wobbles left↔right so it
-// never does the periodic fast-spin the user repeatedly flagged. Crossfade to
-// the next building is purely TIME-based now (was rotation-count-based).
-const WOBBLE_AMPLITUDE_RAD = 0.22           // ≈ ±13° gentle turn (shows faces)
-const WOBBLE_PERIOD_SEC = 9.0               // one full back-and-forth in 9s
-const SECONDS_PER_BUILDING = 14.0           // crossfade cadence per model
+// SLOW continuous full rotation — the user is fine with a gentle full spin,
+// only the AGGRESSIVE burst was the problem. The burst came from useFrame's
+// delta accumulating while the tab was backgrounded (returns a multi-second
+// delta on refocus → one giant rotation step). We clamp delta to 1/30s so a
+// backgrounded tab can never burst. No rotation reset anywhere (that snap was
+// the other spin source). Per user 2026-05-29: "fine with slow full circle,
+// just not the aggressive one."
+const ROTATION_SPEED = 0.18                 // rad/s → full turn ≈ 35s (gentle)
+const MAX_DELTA = 1 / 30                     // clamp: never integrate > 1 frame
+const SECONDS_PER_BUILDING = 16.0           // crossfade cadence per model
 const FADE_DURATION = 1.0                   // seconds for crossfade (smoother)
 // Each building gets normalised so its largest dimension fits this many world
 // units. Tuned for the 640×520 frameless hero — building should dominate the
@@ -180,14 +180,14 @@ function CyclingBuilding() {
       return
     }
 
-    // Gentle wobble ONLY — absolute (not integrated), so the building turns
-    // ±13° left↔right forever and NEVER completes a spin. This kills the
-    // periodic fast-spin the user flagged many times. rotation.y is set
-    // directly from a sine of wall-clock time, so a backgrounded-tab delta
-    // can't accumulate into a burst.
-    const t = performance.now() / 1000
-    root.current.rotation.y = Math.sin(t * (Math.PI * 2 / WOBBLE_PERIOD_SEC)) * WOBBLE_AMPLITUDE_RAD
+    // Slow continuous spin. delta is clamped so a backgrounded tab (which
+    // returns a multi-second delta on refocus) can advance at most one frame's
+    // worth — no aggressive burst. No reset of rotation.y (the old 2π→0 snap
+    // was the other spin source).
+    const clamped = Math.min(delta, MAX_DELTA)
+    root.current.rotation.y += clamped * ROTATION_SPEED
     root.current.rotation.z = 0
+    const t = performance.now() / 1000
     // Time-based crossfade — swap to the next building every
     // SECONDS_PER_BUILDING. No rotation counting involved.
     if (t - s.cycleStartTime >= SECONDS_PER_BUILDING) {
