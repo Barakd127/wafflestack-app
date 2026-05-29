@@ -214,10 +214,21 @@ export function quickAddArsenal(input: Omit<ArsenalEntry, 'id' | 'createdAt' | '
  * label is optional (empty string). This is the single canonical format used
  * by AddEntryModal, EquationCardBody, and the equation edit flow.
  */
-export interface EquationData { label: string; latex: string; explanation: string }
+export interface EquationData {
+  label: string
+  latex: string
+  explanation: string
+  /** When true, multi-line (gathered) formulas render with right-side line
+   *  numbers (1),(2),(3)… like numbered textbook equations. Off by default.
+   *  Optional + absent-means-false keeps old serialized entries parsing. */
+  numbered?: boolean
+}
 
-export function serializeEquation(label: string, latex: string, explanation = ''): string {
-  return JSON.stringify({ label: label.trim(), latex: latex.trim(), explanation: explanation.trim() })
+export function serializeEquation(label: string, latex: string, explanation = '', numbered = false): string {
+  // Only emit `numbered` when true so existing un-numbered entries keep their
+  // current serialized shape (no spurious diffs / no migration needed).
+  const base = { label: label.trim(), latex: latex.trim(), explanation: explanation.trim() }
+  return JSON.stringify(numbered ? { ...base, numbered: true } : base)
 }
 
 export function deserializeEquation(text: string): EquationData | null {
@@ -229,10 +240,13 @@ export function deserializeEquation(text: string): EquationData | null {
     ) {
       const labelVal = (parsed as { label?: unknown }).label
       const explVal = (parsed as { explanation?: unknown }).explanation
+      const numberedVal = (parsed as { numbered?: unknown }).numbered
       return {
         label: typeof labelVal === 'string' ? labelVal : '',
         explanation: typeof explVal === 'string' ? explVal : '',
         latex: (parsed as { latex: string }).latex,
+        // Absent (legacy entries) → false.
+        numbered: numberedVal === true,
       }
     }
   } catch { /* not JSON — fall through */ }
