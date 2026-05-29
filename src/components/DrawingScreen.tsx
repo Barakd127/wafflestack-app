@@ -23,7 +23,14 @@ const KEY_PREFIX = 'wafflestack-excalidraw-'
 
 interface DrawingScreenProps {
   userId: string
-  onBack: () => void
+  onBack?: () => void
+  /** When true, fills its parent container (position:absolute) instead of a
+   *  fixed full-viewport overlay, and hides the back button — for embedding
+   *  as the quiz-split companion. Per user 2026-05-29 (Excalidraw 5th option). */
+  embed?: boolean
+  /** Overrides the storage scene id — used for per-question scenes in the
+   *  quiz split (e.g. `q-<questionId>`). Falls back to the per-user scene. */
+  sceneId?: string
 }
 
 interface SavedScene {
@@ -31,13 +38,13 @@ interface SavedScene {
   appState?: Record<string, unknown>
 }
 
-function storageKey(userId: string): string {
-  return KEY_PREFIX + (userId || 'default')
+function storageKey(userId: string, sceneId?: string): string {
+  return KEY_PREFIX + (sceneId ? sceneId + '-' : '') + (userId || 'default')
 }
 
-function loadScene(userId: string): SavedScene | null {
+function loadScene(userId: string, sceneId?: string): SavedScene | null {
   try {
-    const raw = localStorage.getItem(storageKey(userId))
+    const raw = localStorage.getItem(storageKey(userId, sceneId))
     if (!raw) return null
     const parsed = JSON.parse(raw)
     if (parsed && Array.isArray(parsed.elements)) return parsed
@@ -45,18 +52,19 @@ function loadScene(userId: string): SavedScene | null {
   return null
 }
 
-function saveScene(userId: string, scene: SavedScene): void {
-  try { localStorage.setItem(storageKey(userId), JSON.stringify(scene)) } catch { /* quota */ }
+function saveScene(userId: string, scene: SavedScene, sceneId?: string): void {
+  try { localStorage.setItem(storageKey(userId, sceneId), JSON.stringify(scene)) } catch { /* quota */ }
 }
 
-export default function DrawingScreen({ userId, onBack }: DrawingScreenProps) {
+export default function DrawingScreen({ userId, onBack, embed = false, sceneId }: DrawingScreenProps) {
   // We don't need to read the saved scene back into state — Excalidraw is
   // initialised with `initialData` once. We just save on change.
   const [initial, setInitial] = useState<SavedScene | null | 'loading'>('loading')
 
   useEffect(() => {
-    setInitial(loadScene(userId))
-  }, [userId])
+    setInitial(loadScene(userId, sceneId))
+    // Re-key on sceneId change so per-question scenes load fresh.
+  }, [userId, sceneId])
 
   // Debounce save so we don't thrash localStorage on every brush-stroke.
   const saveTimerRef = useState<{ t: ReturnType<typeof setTimeout> | null }>(() => ({ t: null }))[0]
@@ -64,14 +72,16 @@ export default function DrawingScreen({ userId, onBack }: DrawingScreenProps) {
   const onChange = useCallback((elements: readonly unknown[], appState: Record<string, unknown>) => {
     if (saveTimerRef.t) clearTimeout(saveTimerRef.t)
     saveTimerRef.t = setTimeout(() => {
-      saveScene(userId, { elements: [...elements], appState: { viewBackgroundColor: appState?.viewBackgroundColor as string } })
+      saveScene(userId, { elements: [...elements], appState: { viewBackgroundColor: appState?.viewBackgroundColor as string } }, sceneId)
       setSavedFlash(true)
       setTimeout(() => setSavedFlash(false), 1400)
     }, 600)
-  }, [userId, saveTimerRef])
+  }, [userId, saveTimerRef, sceneId])
 
   return (
-    <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', background: '#1a1a1a', zIndex: 100 }}>
+    <div style={embed
+      ? { position: 'absolute', inset: 0, width: '100%', height: '100%', background: '#1a1a1a' }
+      : { position: 'fixed', inset: 0, width: '100vw', height: '100vh', background: '#1a1a1a', zIndex: 100 }}>
       {/* Auto-save toast — appears 0.6s after stroke commit, fades after 1.4s */}
       {savedFlash && (
         <div
@@ -92,6 +102,7 @@ export default function DrawingScreen({ userId, onBack }: DrawingScreenProps) {
         </div>
       )}
       <style>{`@keyframes savedFlashFade{0%{opacity:0;transform:translateY(6px)}15%{opacity:1;transform:translateY(0)}80%{opacity:1}100%{opacity:0;transform:translateY(-4px)}}`}</style>
+      {!embed && (
       <button
         onClick={onBack}
         aria-label="חזרה לדף הבית — יציאה מלוח הציור"
@@ -113,6 +124,7 @@ export default function DrawingScreen({ userId, onBack }: DrawingScreenProps) {
       >
         ← דף הבית
       </button>
+      )}
       <Suspense fallback={<div style={{ color: '#fff', padding: 60, textAlign: 'center' }}>טוען Excalidraw…</div>}>
         {initial !== 'loading' && (
           <Excalidraw
