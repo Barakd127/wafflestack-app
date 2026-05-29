@@ -2207,6 +2207,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   //                     compact card with answer field + dots.
   const [tab, setTab] = useState<'none' | 'mindmap' | 'arsenal' | 'canvas' | 'excalidraw'>('none')
   const [chipExpanded, setChipExpanded] = useState<boolean>(true)
+  // "⊟ פיצול מסך" FAB → swap-pane dropdown. Lists the companion surfaces that
+  // can fill the BOTTOM pane (תרגול is always locked on top). The currently
+  // active surface is excluded so we never offer a pane already in the split.
+  // Per user 2026-05-29.
+  const [splitMenuOpen, setSplitMenuOpen] = useState<boolean>(false)
   // Pop-out + drag state for the question card. When floatMode is true the
   // card detaches into a draggable floating panel positioned at floatPos.
   const [floatMode, setFloatMode] = useState<boolean>(false)
@@ -2521,12 +2526,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       {fullscreen && onToggleFullscreen && (
         <>
           <button
-            onClick={() => {
-              try { onToggleFullscreen() } catch(_){}
-              try { window.location.hash = '#split-study-mindmap' } catch(_){}
-            }}
-            aria-label="חזרה לפיצול מסך"
-            title="חזרה לפיצול מסך"
+            onClick={() => setSplitMenuOpen(o => !o)}
+            aria-label="פיצול מסך — בחר כלי לחלונית התחתונה"
+            aria-haspopup="menu"
+            aria-expanded={splitMenuOpen}
+            title="פיצול מסך — בחר כלי לחלונית התחתונה"
             style={{
               position: 'fixed', bottom: 200, left: 12, zIndex: 300,
               background: 'linear-gradient(135deg,#4ECDC4,#3FB8AF)',
@@ -2541,8 +2545,67 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               minHeight: 44,
             }}
           >
-            ⊟ פיצול מסך
+            ⊟ פיצול מסך {splitMenuOpen ? '▾' : '▸'}
           </button>
+          {/* Swap-pane popover anchored above the FAB. תרגול stays locked on
+              top; picking a surface swaps the BOTTOM pane via handleSetTab.
+              The active surface is excluded. Light card, navy text, gold
+              accents — matches the app. Per user 2026-05-29. */}
+          {splitMenuOpen && (
+            <>
+              {/* click-away backdrop */}
+              <div
+                onClick={() => setSplitMenuOpen(false)}
+                style={{ position: 'fixed', inset: 0, zIndex: 305, background: 'transparent' }}
+              />
+              <div
+                role="menu"
+                aria-label="בחר כלי לחלונית התחתונה"
+                dir="rtl"
+                style={{
+                  position: 'fixed', bottom: 252, left: 12, zIndex: 306,
+                  background: '#FBF8F1',
+                  border: '1px solid rgba(212,175,55,0.55)',
+                  borderRadius: 12,
+                  boxShadow: '0 10px 28px rgba(11,27,62,0.30)',
+                  padding: 6, minWidth: 188,
+                  fontFamily: "'Rubik', sans-serif",
+                }}
+              >
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#1F3E6C', opacity: 0.7, padding: '4px 10px 6px' }}>
+                  כלי לחלונית התחתונה
+                </div>
+                {([
+                  ['mindmap',    '🧠 מפת חשיבה'],
+                  ['canvas',     '✏️ קנבס'],
+                  ['excalidraw', '🎨 לוח ציור'],
+                  ['arsenal',    '🎯 הארסנל שלי'],
+                ] as const)
+                  .filter(([key]) => key !== tab)
+                  .map(([key, label]) => (
+                    <button
+                      key={key}
+                      role="menuitem"
+                      onClick={() => { handleSetTab(key as typeof tab); setSplitMenuOpen(false) }}
+                      style={{
+                        display: 'flex', alignItems: 'center', width: '100%',
+                        textAlign: 'start',
+                        background: 'transparent',
+                        border: '1px solid transparent',
+                        borderRadius: 8, padding: '9px 10px',
+                        color: '#1F3E6C', fontFamily: "'Rubik', sans-serif",
+                        fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                        minHeight: 40,
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.16)'; e.currentTarget.style.borderColor = 'rgba(212,175,55,0.45)' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent' }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+              </div>
+            </>
+          )}
           <button
             onClick={() => {
               try { onBack() } catch(_){}
