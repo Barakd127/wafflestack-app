@@ -17,6 +17,47 @@ declare global {
 
 const HEBREW_RE = /[֐-׿]/
 
+/**
+ * Merge adjacent `\begin{gathered}…\end{gathered}` blocks into ONE gathered.
+ *
+ * Legacy bug: some equation cards stored two formulas as back-to-back gathered
+ * blocks (`…\end{gathered}\begin{gathered}…`). KaTeX renders those side-by-side
+ * on one line instead of stacking. Replacing the `\end{gathered}\begin{gathered}`
+ * seam with a row break ` \\ ` folds them into a single vertically-stacked
+ * gathered. Render-time only; safe no-op when there's just one (or zero) block.
+ */
+export function mergeAdjacentGathered(latex: string): string {
+  return latex.replace(/\\end\{gathered\}\s*\\begin\{gathered\}/g, ' \\\\ ')
+}
+
+/**
+ * Build a line-numbered version of a (possibly multi-row) equation.
+ *
+ * KaTeX's `\tag` only works at the top level — NOT inside `gathered` — so we
+ * build the body manually: split the gathered rows on the top-level `\\` row
+ * separator and re-emit them as a 2-column `array`, each row carrying a
+ * right-aligned `(n)` number. Column spec `cr` centres the formula and
+ * right-aligns the number; a `\quad` before the number adds the gap. (KaTeX
+ * 0.16 does NOT support the `@{…}` inter-column form, verified live — so the
+ * gap goes inside the cell, not the preamble.)
+ *
+ * Always normalises legacy adjacent gathered blocks first. Returns the merged
+ * (un-numbered) latex unchanged when there's only a single row — a lone formula
+ * doesn't need a "(1)".
+ */
+export function buildNumberedLatex(latex: string): string {
+  const merged = mergeAdjacentGathered(latex)
+  const m = merged.match(/\\begin\{gathered\}([\s\S]*?)\\end\{gathered\}/)
+  const inner = m ? m[1] : merged
+  const rows = inner
+    .split(/\\\\/)            // split on the `\\` row separator
+    .map(r => r.trim())
+    .filter(r => r.length > 0)
+  if (rows.length < 2) return merged
+  const body = rows.map((r, i) => `${r} & \\quad(${i + 1})`).join(' \\\\ ')
+  return `\\begin{array}{cr} ${body} \\end{array}`
+}
+
 /** Convert a single line containing both Hebrew and math into a LaTeX string
  *  with `\text{...}` blocks around Hebrew runs. Returns null if the line
  *  is not a "mixed equation" (= leave as plain text). */

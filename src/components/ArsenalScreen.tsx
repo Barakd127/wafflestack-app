@@ -9,12 +9,12 @@ import { createElement, useState, useMemo, useRef, useEffect } from 'react'
 import {
   useArsenalStore, KIND_META,
   serializeEquation, deserializeEquation, looksLikeMath,
-  type ArsenalEntry, type ArsenalKind,
+  type ArsenalEntry, type ArsenalKind, type EquationData,
 } from '../store/arsenalStore'
 import { useTutorialStep } from '../hooks/useTutorialStep'
 import CommunityArsenalTab from './CommunityArsenalTab'
 import { publishEntry, SUPABASE_CONFIGURED } from '../lib/communityArsenal'
-import { MathLineBlock, KatexInline } from '../lib/mathRender'
+import { MathLineBlock, KatexInline, buildNumberedLatex, mergeAdjacentGathered } from '../lib/mathRender'
 
 // MathLive ships ~400 KB; load it on first equation edit and cache the promise.
 let mathliveLoader: Promise<unknown> | null = null
@@ -677,8 +677,15 @@ function ArsenalCard({
 
   const handleCancelEq = () => setEditingEq(false)
   const handleSaveEq = (label: string, latex: string, explanation: string) => {
-    onSaveEquation(serializeEquation(label, latex, explanation))
+    // Preserve the existing `numbered` flag across a label/latex edit — the
+    // editor doesn't touch it, so re-serialize with the current value.
+    onSaveEquation(serializeEquation(label, latex, explanation, eqData?.numbered ?? false))
     setEditingEq(false)
+  }
+  // Flip the line-numbering flag and persist (re-serialize keeping everything else).
+  const handleToggleNumbered = () => {
+    if (!eqData) return
+    onSaveEquation(serializeEquation(eqData.label, eqData.latex, eqData.explanation, !eqData.numbered))
   }
 
   return (
@@ -734,7 +741,7 @@ function ArsenalCard({
             onCancel={handleCancelEq}
           />
         ) : (
-          <EquationCardBody eqData={eqData} rawText={entry.text} />
+          <EquationCardBody eqData={eqData} rawText={entry.text} onToggleNumbered={handleToggleNumbered} />
         )
       ) : isEditing ? (
         <textarea
@@ -853,9 +860,12 @@ function ArsenalCard({
 function EquationCardBody({
   eqData,
   rawText,
+  onToggleNumbered,
 }: {
-  eqData: { label: string; latex: string; explanation: string } | null
+  eqData: EquationData | null
   rawText: string
+  /** Flips the line-numbering flag for this entry (equation cards only). */
+  onToggleNumbered?: () => void
 }) {
   if (!eqData) {
     // Stored text is not the JSON equation format — render as plain text
@@ -866,6 +876,14 @@ function EquationCardBody({
       </div>
     )
   }
+
+  // Normalize legacy adjacent gathered blocks always; apply line numbers when on.
+  const renderLatex = eqData.numbered
+    ? buildNumberedLatex(eqData.latex)
+    : mergeAdjacentGathered(eqData.latex)
+  // The toggle only makes sense when there are 2+ rows to number. Detect a row
+  // break in the merged latex (a single formula has none).
+  const multiRow = /\\\\/.test(mergeAdjacentGathered(eqData.latex))
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -900,12 +918,39 @@ function EquationCardBody({
         {/* Multi-line equations (\begin{gathered}…) only stack as separate
          *  lines under KaTeX displayMode. Detect a multi-line env / row break
          *  and switch on display mode so the worked solution shows line-by-line.
-         *  Per user 2026-05-28. */}
+         *  Per user 2026-05-28.
+         *
+         *  `renderLatex` always merges legacy adjacent gathered blocks (old
+         *  side-by-side bug → vertical stack). When `numbered` is on, rows get
+         *  right-side (1),(2),(3)… numbers; otherwise it renders exactly as
+         *  before. Per user 2026-05-29. */}
         <KatexInline
-          latex={eqData.latex}
-          displayMode={/\\begin\{(gathered|aligned|array|cases)\}|\\\\/.test(eqData.latex)}
+          latex={renderLatex}
+          displayMode={/\\begin\{(gathered|aligned|array|cases)\}|\\\\/.test(renderLatex)}
         />
       </div>
+      {/* Line-numbering toggle — only meaningful for multi-row formulas. */}
+      {multiRow && onToggleNumbered ? (
+        <button
+          type="button"
+          onClick={onToggleNumbered}
+          dir="rtl"
+          aria-pressed={!!eqData.numbered}
+          title={eqData.numbered ? 'הסתר מספור שורות' : 'הצג מספור שורות'}
+          style={{
+            alignSelf: 'flex-start',
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            border: `1px solid ${eqData.numbered ? '#D4AF37' : KIND_META.equation.border}`,
+            background: eqData.numbered ? 'rgba(212,175,55,0.16)' : 'rgba(255,255,255,0.6)',
+            color: eqData.numbered ? '#92400e' : '#1F3E6C',
+            borderRadius: 8, padding: '3px 9px',
+            fontSize: 11, fontWeight: 700,
+            fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+          }}
+        >
+          🔢 מספור שורות
+        </button>
+      ) : null}
       {/* Explanation preview — first ~2 lines, plain Hebrew prose. Per user
        *  2026-05-28. Full text shows on edit. */}
       {eqData.explanation ? (
