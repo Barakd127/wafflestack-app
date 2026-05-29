@@ -3337,7 +3337,10 @@ function wbRedrawEquationLayer(){
     div.addEventListener('dblclick', e => {
       e.stopPropagation();
       const eqObj = WB.scene.find(x => x.id === o.id);
-      EQ.currentLatex = eqObj ? (eqObj.latex || '') : '';
+      const eqLatex = eqObj ? (eqObj.latex || '') : '';
+      // Library equation → open calculator; free-hand → LaTeX editor.
+      if(mmTryOpenCalcForLatex(eqLatex)) return;
+      EQ.currentLatex = eqLatex;
       WB._editingEqId = o.id;        // set BEFORE opening modal so insertBtn finds it
       EQ.targetMode = 'editWB';
       openEquationModal(null, 'editWB');
@@ -5321,6 +5324,42 @@ let FTB_filter = '';
     .catch(()=>{/* keep inline fallback */});
 })();
 
+// ── Equation → calculator matching ─────────────────────────────────────────
+// Clicking a rendered equation opens the React CalculatorDrawer (מחשבון נוסחה,
+// lives in the PARENT app) pre-loaded with the matching library formula, rather
+// than the raw-LaTeX Equation Editor. Free-hand equations (no library match)
+// fall back to the editor. The normalizer mirrors normalizeLatex() in
+// src/data/formula-library.ts — keep the two in sync.
+function mmNormalizeLatex(s){
+  return String(s||'')
+    .replace(/\\left|\\right/g,'')
+    .replace(/\\,|\\!|\\;|\\:|\\quad|\\qquad/g,'')
+    .replace(/\s+/g,'')
+    .trim();
+}
+function mmFindFormulaIdByLatex(latex){
+  const t=mmNormalizeLatex(latex);
+  if(!t)return null;
+  for(const cat of FTB_DATA){
+    for(const f of (cat.formulas||[])){
+      if(f && f.latex && mmNormalizeLatex(f.latex)===t) return f.id;
+    }
+  }
+  return null;
+}
+// Returns true if a library formula matched and a ws-open-calc message was
+// posted to the parent app; false → caller should fall back to the editor.
+// mindmap.html always runs inside an iframe, so the dispatch must reach the
+// PARENT (App.tsx re-dispatches the local ws-open-calc CustomEvent).
+function mmTryOpenCalcForLatex(latex){
+  const id=mmFindFormulaIdByLatex(latex);
+  if(!id) return false;
+  try{
+    (window.parent||window).postMessage({type:'ws-open-calc', formulaId:id}, '*');
+  }catch(e){ return false; }
+  return true;
+}
+
 function ftbToggle(){
   const tb=document.getElementById('formula-toolbox');
   tb.classList.toggle('collapsed');
@@ -6305,7 +6344,10 @@ function nbRenderContent(){
   // Click on inline math/canvas widget → open editor.
   body.addEventListener('click', (e) => {
     const mw = e.target.closest('.nb-math-widget');
-    if(mw){ e.preventDefault(); openMathEditor(mw); return; }
+    if(mw){ e.preventDefault();
+      // Library equation → open calculator; free-hand → LaTeX editor.
+      if(mmTryOpenCalcForLatex(mw.dataset.latex||'')) return;
+      openMathEditor(mw); return; }
     const cw = e.target.closest('.nb-canvas-widget');
     if(cw){ e.preventDefault(); nbOpenCanvasEditor(cw); return; }
   });

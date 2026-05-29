@@ -90,6 +90,11 @@ function App() {
       } else if (d.type === 'ws-go-drawing') {
         // Iframe's "🎨 לוח ציור" button — full-screen Excalidraw drawing surface.
         setActiveView('drawing')
+      } else if (d.type === 'ws-open-calc' && typeof d.formulaId === 'string') {
+        // Cross-frame bridge: mindmap.html (iframe) posts this when the user
+        // clicks a rendered equation that matched a library formula. Re-dispatch
+        // as the local ws-open-calc CustomEvent the CalculatorDrawer listens for.
+        window.dispatchEvent(new CustomEvent('ws-open-calc', { detail: { formulaId: d.formulaId } }))
       }
     }
     window.addEventListener('message', onMessage)

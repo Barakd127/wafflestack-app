@@ -791,5 +791,27 @@ export function findFormula(id: string): Formula | undefined {
   return allFormulas().find(f => f.id === id)
 }
 
+/** Normalize a LaTeX string for tolerant equality matching: drop spacing
+ *  macros (`\,` `\!` `\;` `\:` `\quad`…), `\left`/`\right` delimiters, and all
+ *  whitespace. Keeps braces/operators so `\frac{a}{b}` stays distinct.
+ *  Shared with public/mindmap.html — keep the two implementations in sync. */
+export function normalizeLatex(latex: string): string {
+  return String(latex || '')
+    .replace(/\\left|\\right/g, '')
+    .replace(/\\,|\\!|\\;|\\:|\\quad|\\qquad/g, '')
+    .replace(/\s+/g, '')
+    .trim()
+}
+
+/** Match a (possibly free-hand) LaTeX string against the library by its
+ *  canonical `latex` field, using normalizeLatex() for tolerance. Returns the
+ *  matching Formula or undefined when there's no library entry (free-hand
+ *  equation → caller falls back to the raw LaTeX editor). */
+export function findFormulaByLatex(latex: string): Formula | undefined {
+  const target = normalizeLatex(latex)
+  if (!target) return undefined
+  return allFormulas().find(f => normalizeLatex(f.latex) === target)
+}
+
 // keep `sum` exported in case anyone imports it — not used internally now.
 export { sum }
