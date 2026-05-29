@@ -9,20 +9,11 @@ const TASK_BOARD_PATH = "C:\\Users\\BARAK\\My Agents system\\Barak's Vault\\TASK
 export default defineConfig({
   plugins: [
     react(),
-    {
-      // Force a FULL page reload on every file change instead of HMR. The
-      // Claude Code desktop preview keeps long-lived documents alive and never
-      // does a manual reload, so HMR left stale running loops (the Three.js
-      // hero spin, MathLive layouts, etc.) executing OLD code forever — the
-      // user kept seeing fixed-and-merged bugs. A full reload rebuilds every
-      // loop with current code. We lose HMR state-preservation, but for this
-      // preview workflow always-fresh beats fast. Per user 2026-05-29.
-      name: 'force-full-reload',
-      handleHotUpdate({ server }) {
-        server.ws.send({ type: 'full-reload' })
-        return []   // skip HMR module-swap → the full-reload above takes over
-      },
-    },
+    // NOTE: a 'force-full-reload' plugin was tried (full reload on every file
+    // change) but it caused a RELOAD LOOP — a background process writing files
+    // every ~2s made the page reload endlessly, so the hero never stabilized
+    // and looked like it was spinning. Reverted 2026-05-29. HMR is normal now;
+    // HeroScene self-heals on its own hot-update via import.meta.hot (#90).
     {
       name: 'task-board-api',
       configureServer(server) {
