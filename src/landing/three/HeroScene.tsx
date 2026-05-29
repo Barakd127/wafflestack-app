@@ -54,8 +54,23 @@ type Prepared = {
   materials: THREE.MeshStandardMaterial[]
 }
 
+// GHOST-LOOP KILLER. Vite HMR / React Fast Refresh on OTHER modules
+// (App.tsx, StudyHub…) re-creates the <Canvas> frame loop WITHOUT disposing
+// the previous one. HeroScene's own import.meta.hot.accept only reloads when
+// THIS file is edited — edits elsewhere accumulate ghost useFrame loops that
+// all mutate the same group, so rotation AND the crossfade timer advance N×
+// (measured ~25× in a long dev session → looked like a fast spin + buildings
+// swapping every ~0.6s instead of 16s). A module-level counter can't fix this:
+// each HMR module version has its OWN binding, so an old ghost never sees the
+// new module's counter. A token on `window` IS shared across every module
+// version — the newest mount bumps it, every older loop sees a stale gen and
+// bails. Only one loop ever animates. Per user 2026-05-29 (video diagnosis).
+const HERO_LOOP_GEN_KEY = '__wsHeroLoopGen'
+
 function CyclingBuilding() {
   const root = useRef<THREE.Group>(null!)
+  // This instance's generation. Claimed in useLayoutEffect (newest wins).
+  const myGen = useRef(-1)
 
   // Load all 4 scenes upfront — drei dedupes per-URL; module-level preload
   // ensures these resolve immediately so Suspense never falls back.
@@ -117,6 +132,10 @@ function CyclingBuilding() {
 
   useLayoutEffect(() => {
     if (!root.current) return
+    // Claim newest generation — any older ghost loop now bails in useFrame.
+    const w = window as unknown as Record<string, number>
+    w[HERO_LOOP_GEN_KEY] = (w[HERO_LOOP_GEN_KEY] || 0) + 1
+    myGen.current = w[HERO_LOOP_GEN_KEY]
     prepared.forEach(p => {
       p.wrapper.updateMatrixWorld(true)
       const bbox = new THREE.Box3().setFromObject(p.inner)
@@ -146,6 +165,9 @@ function CyclingBuilding() {
 
   useFrame((_, delta) => {
     if (!root.current || !ready) return
+    // Only the newest mounted loop animates. Ghost loops left over from HMR /
+    // Fast Refresh hold a stale gen and bail here → no N× speed-up ever.
+    if ((window as unknown as Record<string, number>)[HERO_LOOP_GEN_KEY] !== myGen.current) return
     const s = animRef.current
 
     // Bobbing (recentred — TARGET_FIT_SIZE 4.2 means model is taller; pull
