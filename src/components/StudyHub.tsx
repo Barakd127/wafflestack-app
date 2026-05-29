@@ -327,6 +327,7 @@ import { LESSON_CONTENT } from '../data/lesson-content'
 import { MeanVisual } from './LessonVisuals'
 import SamplingDistribution from './SamplingDistribution'
 import ArsenalScreen, { normalizeMathGlyphs } from './ArsenalScreen'
+import DrawingScreen from './DrawingScreen'
 import { useArsenalStore, quickAddArsenal, looksLikeMath, serializeEquation } from '../store/arsenalStore'
 import PotionInventory from './PotionInventory'
 import { useTutorialStep } from '../hooks/useTutorialStep'
@@ -2204,7 +2205,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   //                     floating chip docked top-right (RTL primary corner).
   //                     chipExpanded toggles between a tiny pill and a full
   //                     compact card with answer field + dots.
-  const [tab, setTab] = useState<'none' | 'mindmap' | 'arsenal' | 'canvas'>('none')
+  const [tab, setTab] = useState<'none' | 'mindmap' | 'arsenal' | 'canvas' | 'excalidraw'>('none')
   const [chipExpanded, setChipExpanded] = useState<boolean>(true)
   // Pop-out + drag state for the question card. When floatMode is true the
   // card detaches into a draggable floating panel positioned at floatPos.
@@ -2745,6 +2746,16 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }} dir="rtl">
                 <ArsenalScreen />
               </div>
+            )}
+            {tab === 'excalidraw' && (
+              // Full Excalidraw board embedded in the companion pane, with a
+              // per-question scene so each question keeps its own drawing.
+              // Per user 2026-05-29 (5th companion option).
+              <DrawingScreen
+                userId={userId || 'default'}
+                embed
+                sceneId={`q-${q?.id ?? `idx${currentQ}`}`}
+              />
             )}
           </div>
         )}
@@ -3307,10 +3318,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             background: (tab !== 'none') ? 'linear-gradient(180deg, rgba(13,22,40,0) 0%, rgba(13,22,40,0.82) 60%, rgba(13,22,40,0.95) 100%)' : 'transparent',
           }}>
             {([
-              ['none',    '🚫 ללא',         'התמקדו רק בשאלה'],
-              ['mindmap', '🧠 מפת חשיבה',   'הוסיפו תובנות למפה תוך כדי'],
-              ['arsenal', '🎯 הארסנל שלי',   'תפסו רגעי אהה וטריקים'],
-              ['canvas',  '✏️ קנבס',         'ציירו, רשמו, פתרו ויזואלית'],
+              ['none',       '🚫 ללא',         'התמקדו רק בשאלה'],
+              ['mindmap',    '🧠 מפת חשיבה',   'הוסיפו תובנות למפה תוך כדי'],
+              ['arsenal',    '🎯 הארסנל שלי',   'תפסו רגעי אהה וטריקים'],
+              ['canvas',     '✏️ קנבס',         'ציירו, רשמו, פתרו ויזואלית'],
+              ['excalidraw', '🎨 לוח ציור',     'לוח ציור Excalidraw מלא'],
             ] as const).map(([key, label, hint]) => {
               const active = tab === key
               const onTool = tab !== 'none'
