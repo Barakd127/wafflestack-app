@@ -6369,7 +6369,22 @@ function nbRender(){
     // Initialise whiteboard — load saved state or start fresh
     WB.histIdx=-1;WB.history=[];WB.selId=null;
     var cnvs=document.getElementById('wb-canvas');
-    if(cnvs){cnvs.width=window.innerWidth;cnvs.height=window.innerHeight;}
+    var wrap=document.getElementById('wb-canvas-wrap');
+    // Size the canvas BITMAP to its VISIBLE wrap, not window.innerWidth/Height.
+    // In the quiz-split the iframe's wrap is shorter than the iframe viewport
+    // (toolbar takes space) and its container resizes after load — sizing the
+    // bitmap to the wrap keeps offsetX/offsetY draw coords 1:1 with what's
+    // shown, so drawing actually works in the split. Per user 2026-05-29
+    // ("tool highlights but can't draw" in the split).
+    function wbSizeCanvas(){
+      var c=document.getElementById('wb-canvas');
+      var w=document.getElementById('wb-canvas-wrap');
+      if(!c||!w)return;
+      var cw=Math.max(1, w.clientWidth), ch=Math.max(1, w.clientHeight);
+      if(c.width!==cw || c.height!==ch){ c.width=cw; c.height=ch; wbRedraw(); }
+    }
+    if(cnvs && wrap){ cnvs.width=Math.max(1,wrap.clientWidth); cnvs.height=Math.max(1,wrap.clientHeight); }
+    else if(cnvs){ cnvs.width=window.innerWidth; cnvs.height=window.innerHeight; }
     // Try to restore saved whiteboard for this user
     var wbRestored = false;
     try {
@@ -6382,12 +6397,16 @@ function nbRender(){
     if (!wbRestored) WB.scene = [];
     wbPush();
     wbRedraw();
-
-    // Resize canvas when window resizes
-    window.addEventListener('resize',function(){
-      var c=document.getElementById('wb-canvas');
-      if(c){c.width=window.innerWidth;c.height=window.innerHeight;wbRedraw();}
-    });
+    // Re-fit the bitmap whenever the wrap's box changes (container resize in
+    // the split, splitter drag, etc.) — window.resize alone misses these.
+    if(wrap && typeof ResizeObserver!=='undefined'){
+      try { new ResizeObserver(wbSizeCanvas).observe(wrap); } catch(e){}
+    }
+    window.addEventListener('resize', wbSizeCanvas);
+    // One more pass after layout settles (the split pane often gets its final
+    // size a tick after iframe load).
+    setTimeout(wbSizeCanvas, 120);
+    setTimeout(wbSizeCanvas, 500);
   });
 })();
 
