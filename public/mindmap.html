@@ -307,7 +307,7 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 #wb-canvas{position:absolute;top:0;left:0}
 #wb-canvas-wrap.cur-select #wb-canvas{cursor:default}
 #wb-canvas-wrap.cur-text #wb-canvas{cursor:text}
-#wb-canvas-wrap.cur-eraser #wb-canvas{cursor:none}
+#wb-canvas-wrap.cur-eraser #wb-canvas{cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='rgba(99,102,241,0.12)' stroke='%236366f1' stroke-width='1.5'/></svg>") 12 12, crosshair}
 #wb-canvas-wrap.cur-connect #wb-canvas{cursor:crosshair}
 
 /* Inline label editor after shape draw */
@@ -779,7 +779,7 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
       <button class="wbt wbt-cluster-trigger" onclick="wbTogglePopover('draw',event)" title="כלי ציור" aria-label="כלי ציור" aria-haspopup="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 3.3a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L7.5 22.5 2 22.5l0-5.5z"/><path d="M13.5 4.5l6 6"/></svg><span class="wbt-chev">▾</span></button>
       <div class="wbt-popover" id="wbt-pop-draw" role="menu">
         <button class="wbt-pop-item" data-tool="pen"    onclick="wbTool('pen');wbClosePopovers()" title="עיפרון [P]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 3.3a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L7.5 22.5 2 22.5l0-5.5z"/><path d="M13.5 4.5l6 6"/></svg><span>עיפרון</span></button>
-        <button class="wbt-pop-item" data-tool="eraser" onclick="wbTool('eraser');wbClosePopovers()" title="מחק [E]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14L9 4 3 10l10 10h8z"/><line x1="13" y1="20" x2="20" y2="20"/><line x1="7" y1="8" x2="15" y2="16"/></svg><span>מחק</span></button>
+        <button class="wbt-pop-item" data-tool="eraser" onclick="wbTool('eraser');wbClosePopovers()" title="מחק [E]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg><span>מחק</span></button>
       </div>
     </div>
 
@@ -3106,6 +3106,20 @@ function wbRedraw(){
     if(sel)drawSelHandles(ctx,sel);
   }
 
+  // Faint outline per marquee-selected object so the user sees the picked set.
+  if(WB.multiSel&&WB.multiSel.length){
+    ctx.save();
+    ctx.strokeStyle='#6366f1';ctx.lineWidth=1.5/WB.vp.s;ctx.setLineDash([5/WB.vp.s,4/WB.vp.s]);
+    ctx.fillStyle='rgba(99,102,241,0.07)';
+    for(const id of WB.multiSel){
+      const o=WB.scene.find(x=>x.id===id);if(!o)continue;
+      const bb=objBB(o);if(!bb)continue;
+      ctx.fillRect(bb.x,bb.y,bb.w,bb.h);
+      ctx.strokeRect(bb.x,bb.y,bb.w,bb.h);
+    }
+    ctx.setLineDash([]);ctx.restore();
+  }
+
   // Draw selection outline for selected connector
   if(WB.selId){
     const selObj=WB.scene.find(o=>o.id===WB.selId);
@@ -3196,8 +3210,9 @@ function wbRedraw(){
     drawObj(ctx,WB.drag.preview,false);ctx.restore();
   }
   if(WB.tool==='eraser'&&WB._lastMouse){
-    const m=WB._lastMouse;
-    ctx.beginPath();ctx.arc(m.x,m.y,12,0,Math.PI*2);
+    // Erase-radius preview ring (scene-space 12px → screen). Reinforces the CSS cursor.
+    const m=WB._lastMouse,r=12*WB.vp.s;
+    ctx.beginPath();ctx.arc(m.x,m.y,r,0,Math.PI*2);
     ctx.strokeStyle='rgba(99,102,241,.5)';ctx.lineWidth=1.5;ctx.stroke();
   }
   wboSync();
@@ -3483,12 +3498,36 @@ function objBB(o){
     const w=(o.cols||[]).reduce((s,c)=>s+(c.w||80),0);
     return{x:o.x,y:o.y,w:w,h:((o.rows||[]).length+1)*(o.rowH||30)};
   }
+  if((o.type==='pen'||o.type==='path')&&o.pts&&o.pts.length){
+    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    for(const p of o.pts){if(p.x<minX)minX=p.x;if(p.x>maxX)maxX=p.x;if(p.y<minY)minY=p.y;if(p.y>maxY)maxY=p.y;}
+    const pad=(o.size||2)/2+1;
+    return{x:minX-pad,y:minY-pad,w:(maxX-minX)+pad*2,h:(maxY-minY)+pad*2};
+  }
   return null;
 }
 
-function hitObj(o,sx,sy){
+// Shortest distance from point (px,py) to segment (ax,ay)-(bx,by)
+function _distToSeg(px,py,ax,ay,bx,by){
+  const dx=bx-ax,dy=by-ay,len2=dx*dx+dy*dy;
+  let t=len2?((px-ax)*dx+(py-ay)*dy)/len2:0;
+  t=Math.max(0,Math.min(1,t));
+  const cx=ax+t*dx,cy=ay+t*dy;
+  return Math.hypot(px-cx,py-cy);
+}
+
+function hitObj(o,sx,sy,tol){
   if(o.type==='equation')return false;
   if(WB_DOM_TYPES.has(o.type)&&!o.locked) return false; // DOM objects handled via their DOM element (unless locked = canvas-only)
+  if((o.type==='pen'||o.type==='path')&&o.pts&&o.pts.length){
+    // Hit a stroke by distance to its nearest segment, not just its bbox.
+    const t=tol!=null?tol:Math.max(8,o.size||2);
+    if(o.pts.length===1)return Math.hypot(sx-o.pts[0].x,sy-o.pts[0].y)<=t;
+    for(let i=1;i<o.pts.length;i++){
+      if(_distToSeg(sx,sy,o.pts[i-1].x,o.pts[i-1].y,o.pts[i].x,o.pts[i].y)<=t)return true;
+    }
+    return false;
+  }
   const bb=objBB(o);if(!bb)return false;
   return sx>=bb.x&&sx<=bb.x+bb.w&&sy>=bb.y&&sy<=bb.y+bb.h;
 }
@@ -3596,17 +3635,33 @@ canvas.addEventListener('keydown',e=>{
       WB.selId=null;WB._connDelBtn=null;wbPush();wbRedraw();
     }
   }
-  if((e.ctrlKey||e.metaKey)&&e.code==='KeyC'&&WB.selId){
-    e.preventDefault();
-    WB.clipboard=JSON.parse(JSON.stringify(WB.scene.find(x=>x.id===WB.selId)||null));
+  if((e.ctrlKey||e.metaKey)&&e.code==='KeyC'){
+    // Copy: multiSel (array) takes priority, else single selId. Clipboard is
+    // always an array so paste handles one or many uniformly.
+    const ids=(WB.multiSel&&WB.multiSel.length)?WB.multiSel.slice():(WB.selId?[WB.selId]:[]);
+    if(ids.length){
+      e.preventDefault();
+      WB.clipboard=ids.map(id=>WB.scene.find(x=>x.id===id)).filter(Boolean).map(o=>JSON.parse(JSON.stringify(o)));
+    }
   }
-  if((e.ctrlKey||e.metaKey)&&e.code==='KeyV'&&WB.clipboard){
+  if((e.ctrlKey||e.metaKey)&&e.code==='KeyV'&&WB.clipboard&&WB.clipboard.length){
     e.preventDefault();
-    const cloned=JSON.parse(JSON.stringify(WB.clipboard));
-    cloned.id=uid();
-    if(cloned.x!==undefined)cloned.x+=24;if(cloned.cx!==undefined)cloned.cx+=24;
-    if(cloned.y!==undefined)cloned.y+=24;if(cloned.cy!==undefined)cloned.cy+=24;
-    WB.scene.push(cloned);WB.selId=cloned.id;wbPush();wbRedraw();
+    const off=(o,d)=>{
+      if(o.x!==undefined)o.x+=d;if(o.y!==undefined)o.y+=d;
+      if(o.cx!==undefined)o.cx+=d;if(o.cy!==undefined)o.cy+=d;
+      if(o.x1!==undefined)o.x1+=d;if(o.y1!==undefined)o.y1+=d;
+      if(o.x2!==undefined)o.x2+=d;if(o.y2!==undefined)o.y2+=d;
+      if(o.pts)o.pts=o.pts.map(p=>({...p,x:p.x+d,y:p.y+d}));
+    };
+    const pasted=[];
+    for(const src of WB.clipboard){
+      const c=JSON.parse(JSON.stringify(src));
+      c.id=uid();off(c,24);
+      WB.scene.push(c);pasted.push(c.id);
+    }
+    if(pasted.length===1){WB.selId=pasted[0];WB.multiSel=[];}
+    else{WB.multiSel=pasted;WB.selId=null;}
+    wbPush();wbRedraw();
   }
   if(e.code==='F2'&&WB.selId){
     const o=WB.scene.find(x=>x.id===WB.selId);
@@ -3737,9 +3792,13 @@ canvas.addEventListener('mousedown',e=>{
     WB.scene.push(o);WB.selId=o.id;wbPush();wbRedraw();
     wbTool('select');
   }else if(WB.tool==='eraser'){
-    const tol=12;
-    WB.scene=WB.scene.filter(o=>!hitObj(o,sc.x,sc.y));
-    wbPush();wbRedraw();
+    // Start a drag-erase stroke. Each mousemove erases along the path;
+    // a single wbPush() fires on mouseup so undo reverts the whole stroke.
+    WB.erasing=true;WB._erasedAny=false;
+    const before=WB.scene.length;
+    WB.scene=WB.scene.filter(o=>!hitObj(o,sc.x,sc.y,12));
+    if(WB.scene.length!==before)WB._erasedAny=true;
+    wbRedraw();
   }
 });
 
@@ -3751,6 +3810,16 @@ canvas.addEventListener('mousemove',e=>{
     const dx=e.offsetX-WB.panStartX,dy=e.offsetY-WB.panStartY;
     WB.vp.x+=dx;WB.vp.y+=dy;
     WB.panStartX=e.offsetX;WB.panStartY=e.offsetY;
+    wbRedraw();return;
+  }
+
+  if(WB.tool==='eraser'){
+    // Always redraw so the cursor preview circle tracks the mouse.
+    if(WB.erasing){
+      const before=WB.scene.length;
+      WB.scene=WB.scene.filter(o=>!hitObj(o,sc.x,sc.y,12));
+      if(WB.scene.length!==before)WB._erasedAny=true;
+    }
     wbRedraw();return;
   }
 
@@ -3883,6 +3952,11 @@ canvas.addEventListener('mouseup',e=>{
   canvas.style.cursor='default';
 
   const sc=sc2scene(e.offsetX,e.offsetY);
+  if(WB.erasing){
+    WB.erasing=false;
+    if(WB._erasedAny){WB._erasedAny=false;wbPush();}
+    wbRedraw();
+  }
   const d=WB.drag;
   if(!d)return;
   if(d.type==='marquee'){
