@@ -256,7 +256,11 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 .wbt-cluster{position:relative;display:inline-flex;flex-shrink:0}
 .wbt-cluster.open .wbt-cluster-trigger{background:rgba(212,175,55,.25);border-color:rgba(212,175,55,.6);color:#D4AF37}
 .wbt-chev{font-size:9px;opacity:.7;margin-inline-start:2px}
-.wbt-popover{display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:1000;
+/* position:fixed (not absolute) so the toolbar's overflow-y:hidden can't clip
+ * the dropdown — top/left are set in JS from the trigger's bounding rect.
+ * Per user 2026-05-29 ("pen not showing, buttons toggle but do nothing"):
+ * the popovers were opening but clipped off by the scroll container. */
+.wbt-popover{display:none;position:fixed;z-index:100002;
   background:linear-gradient(135deg,#1F3E6C 0%,#1a3260 100%);
   border:1px solid rgba(212,175,55,.45);border-radius:8px;
   box-shadow:0 10px 28px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.05) inset;
@@ -2952,6 +2956,21 @@ function wbTogglePopover(name, ev){
   if(!wasOpen){
     pop.classList.add('open');
     cluster.classList.add('open');
+    // Position the fixed popover just below its trigger button, clamped to
+    // the viewport so it's never clipped by the toolbar's overflow.
+    const trig = cluster.querySelector('.wbt-cluster-trigger') || cluster;
+    const r = trig.getBoundingClientRect();
+    pop.style.visibility='hidden';
+    requestAnimationFrame(function(){
+      const pw = pop.offsetWidth || 180, ph = pop.offsetHeight || 160;
+      let left = r.right - pw;                       // right-align to trigger
+      left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+      let top = r.bottom + 6;
+      if(top + ph > window.innerHeight - 8) top = Math.max(8, r.top - ph - 6); // flip up if no room
+      pop.style.left = left + 'px';
+      pop.style.top = top + 'px';
+      pop.style.visibility='visible';
+    });
   }
 }
 function wbClosePopovers(){
@@ -3024,8 +3043,25 @@ function openWB(cnId){
   document.getElementById('wb-node-title').textContent=cn.text||'Canvas';
   document.getElementById('wb-overlay').classList.add('open');
   const cnvs=document.getElementById('wb-canvas');
-  cnvs.width=window.innerWidth;cnvs.height=window.innerHeight;
+  // Size the bitmap to the VISIBLE wrap, not the window — otherwise inside an
+  // embedded/split context the canvas is mis-scaled and drawing lands off the
+  // visible area ("buttons toggle but nothing draws"). Mirrors the standalone
+  // fix. Per user 2026-05-29.
+  const wrap=document.getElementById('wb-canvas-wrap');
+  if(wrap){ cnvs.width=Math.max(1,wrap.clientWidth); cnvs.height=Math.max(1,wrap.clientHeight); }
+  else { cnvs.width=window.innerWidth; cnvs.height=window.innerHeight; }
   wbRedraw();
+  // Keep synced if the container resizes after open (split drag, layout settle).
+  if(wrap && typeof ResizeObserver!=='undefined' && !wrap._wbRO){
+    try {
+      wrap._wbRO=new ResizeObserver(function(){
+        var c=document.getElementById('wb-canvas'), w=document.getElementById('wb-canvas-wrap');
+        if(c&&w){ var cw=Math.max(1,w.clientWidth),ch=Math.max(1,w.clientHeight); if(c.width!==cw||c.height!==ch){c.width=cw;c.height=ch;wbRedraw();} }
+      });
+      wrap._wbRO.observe(wrap);
+    } catch(e){}
+  }
+  setTimeout(function(){ var c=document.getElementById('wb-canvas'),w=document.getElementById('wb-canvas-wrap'); if(c&&w){var cw=Math.max(1,w.clientWidth),ch=Math.max(1,w.clientHeight); if(c.width!==cw||c.height!==ch){c.width=cw;c.height=ch;wbRedraw();}} }, 150);
 }
 
 function sc2scene(sx,sy){return{x:(sx-WB.vp.x)/WB.vp.s,y:(sy-WB.vp.y)/WB.vp.s};}
