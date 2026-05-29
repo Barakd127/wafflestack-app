@@ -12,12 +12,14 @@
           {
             "key": "sum",
             "label": "Σx",
-            "placeholder": "60+70+80"
+            "placeholder": "60+70+80",
+            "sym": "\\sum x_i"
           },
           {
             "key": "n",
             "label": "n",
-            "placeholder": "3"
+            "placeholder": "3",
+            "sym": "n"
           }
         ],
         "hasEval": true,
@@ -35,11 +37,13 @@
         "slots": [
           {
             "key": "sumxf",
-            "label": "Σx·f(x)"
+            "label": "Σx·f(x)",
+            "sym": "\\sum x_i f(x_i)"
           },
           {
             "key": "n",
-            "label": "n"
+            "label": "n",
+            "sym": "n"
           }
         ],
         "hasEval": true,
@@ -57,11 +61,13 @@
         "slots": [
           {
             "key": "sumxn",
-            "label": "Σ x̄ⱼ·nⱼ"
+            "label": "Σ x̄ⱼ·nⱼ",
+            "sym": "\\sum_j \\bar{x}_j n_j"
           },
           {
             "key": "N",
-            "label": "N"
+            "label": "N",
+            "sym": "N"
           }
         ],
         "hasEval": true,
@@ -78,11 +84,13 @@
         "slots": [
           {
             "key": "max",
-            "label": "xₘₐₓ"
+            "label": "xₘₐₓ",
+            "sym": "x_{max}"
           },
           {
             "key": "min",
-            "label": "xₘᵢₙ"
+            "label": "xₘᵢₙ",
+            "sym": "x_{min}"
           }
         ],
         "hasEval": true,
@@ -106,15 +114,18 @@
         "slots": [
           {
             "key": "sumx2",
-            "label": "Σx²"
+            "label": "Σx²",
+            "sym": "\\sum x_i^2"
           },
           {
             "key": "n",
-            "label": "n"
+            "label": "n",
+            "sym": "n"
           },
           {
             "key": "mean",
-            "label": "x̄"
+            "label": "x̄",
+            "sym": "\\bar{x}"
           }
         ],
         "hasEval": true,
@@ -132,15 +143,18 @@
         "slots": [
           {
             "key": "sumx2f",
-            "label": "Σx²·f(x)"
+            "label": "Σx²·f(x)",
+            "sym": "\\sum x_i^2 f(x_i)"
           },
           {
             "key": "n",
-            "label": "n"
+            "label": "n",
+            "sym": "n"
           },
           {
             "key": "mean",
-            "label": "x̄"
+            "label": "x̄",
+            "sym": "\\bar{x}"
           }
         ],
         "hasEval": true,
@@ -157,7 +171,8 @@
         "slots": [
           {
             "key": "var",
-            "label": "s²"
+            "label": "s²",
+            "sym": "s^2"
           }
         ],
         "hasEval": true,
@@ -175,15 +190,18 @@
         "slots": [
           {
             "key": "within",
-            "label": "Σnⱼ·sⱼ²"
+            "label": "Σnⱼ·sⱼ²",
+            "sym": "\\sum n_j s_j^2"
           },
           {
             "key": "between",
-            "label": "Σnⱼ(x̄ⱼ-x̄̄)²"
+            "label": "Σnⱼ(x̄ⱼ-x̄̄)²",
+            "sym": "\\sum n_j(\\bar{x}_j-\\bar{\\bar{x}})^2"
           },
           {
             "key": "N",
-            "label": "N"
+            "label": "N",
+            "sym": "N"
           }
         ],
         "hasEval": true,
@@ -206,15 +224,18 @@
         "slots": [
           {
             "key": "b",
-            "label": "b"
+            "label": "b",
+            "sym": "b"
           },
           {
             "key": "mean",
-            "label": "x̄"
+            "label": "x̄",
+            "sym": "\\bar{x}"
           },
           {
             "key": "a",
-            "label": "a"
+            "label": "a",
+            "sym": "a"
           }
         ],
         "hasEval": true,
@@ -231,11 +252,13 @@
         "slots": [
           {
             "key": "b",
-            "label": "b"
+            "label": "b",
+            "sym": "b"
           },
           {
             "key": "var",
-            "label": "s²"
+            "label": "s²",
+            "sym": "s_x^2"
           }
         ],
         "hasEval": true,
@@ -252,11 +275,13 @@
         "slots": [
           {
             "key": "b",
-            "label": "b"
+            "label": "b",
+            "sym": "b"
           },
           {
             "key": "sd",
-            "label": "s"
+            "label": "s",
+            "sym": "s_x"
           }
         ],
         "hasEval": true,
@@ -273,15 +298,18 @@
         "slots": [
           {
             "key": "x",
-            "label": "x"
+            "label": "x",
+            "sym": "x"
           },
           {
             "key": "mean",
-            "label": "x̄"
+            "label": "x̄",
+            "sym": "\\bar{x}"
           },
           {
             "key": "s",
-            "label": "s"
+            "label": "s",
+            "sym": "s"
           }
         ],
         "hasEval": true,
@@ -306,7 +334,8 @@
         "slots": [
           {
             "key": "z",
-            "label": "z"
+            "label": "z",
+            "sym": "z"
           }
         ],
         "hasEval": true,
@@ -323,7 +352,8 @@
         "slots": [
           {
             "key": "z",
-            "label": "z"
+            "label": "z",
+            "sym": "z"
           }
         ],
         "hasEval": true,
@@ -340,11 +370,13 @@
         "slots": [
           {
             "key": "z1",
-            "label": "z₁"
+            "label": "z₁",
+            "sym": "z_1"
           },
           {
             "key": "z2",
-            "label": "z₂"
+            "label": "z₂",
+            "sym": "z_2"
           }
         ],
         "hasEval": true,
@@ -361,15 +393,18 @@
         "slots": [
           {
             "key": "x",
-            "label": "x"
+            "label": "x",
+            "sym": "x"
           },
           {
             "key": "mu",
-            "label": "μ"
+            "label": "μ",
+            "sym": "\\mu"
           },
           {
             "key": "sigma",
-            "label": "σ"
+            "label": "σ",
+            "sym": "\\sigma"
           }
         ],
         "hasEval": true,
@@ -392,15 +427,18 @@
         "slots": [
           {
             "key": "cov",
-            "label": "cov(x,y)"
+            "label": "cov(x,y)",
+            "sym": "\\mathrm{cov}(x,y)"
           },
           {
             "key": "sx",
-            "label": "sₓ"
+            "label": "sₓ",
+            "sym": "s_x"
           },
           {
             "key": "sy",
-            "label": "s_y"
+            "label": "s_y",
+            "sym": "s_y"
           }
         ],
         "hasEval": true,
@@ -418,19 +456,23 @@
         "slots": [
           {
             "key": "sumxy",
-            "label": "Σxᵢyᵢ"
+            "label": "Σxᵢyᵢ",
+            "sym": "\\sum x_i y_i"
           },
           {
             "key": "n",
-            "label": "n"
+            "label": "n",
+            "sym": "n"
           },
           {
             "key": "xbar",
-            "label": "x̄"
+            "label": "x̄",
+            "sym": "\\bar{x}"
           },
           {
             "key": "ybar",
-            "label": "ȳ"
+            "label": "ȳ",
+            "sym": "\\bar{y}"
           }
         ],
         "hasEval": true,
@@ -448,11 +490,13 @@
         "slots": [
           {
             "key": "sumd2",
-            "label": "Σdᵢ²"
+            "label": "Σdᵢ²",
+            "sym": "\\sum d_i^2"
           },
           {
             "key": "n",
-            "label": "n"
+            "label": "n",
+            "sym": "n"
           }
         ],
         "hasEval": true,
