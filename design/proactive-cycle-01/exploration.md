@@ -1,294 +1,228 @@
-# WaffleStack — Cycle 1: Gameplay Design Space Exploration
+# WaffleStack — Proactive Cycle 01: Gameplay Design-Space Exploration
 
 **Date:** 2026-05-29  
 **Branch:** proactive/exploration/games-design-space  
-**Status:** Exploration only — no code. Top-3 ranking + detailed spec for #1.  
-**NotebookLM:** SKIPPED (MCP connector not available in this container). Design judgment drawn from VISION.md catalogue + board/mobile game references below.
+**Cycle type:** Exploration only (no code)  
+**Vision source:** VISION.md (root) — read in full  
+**NotebookLM:** SKIPPED — MCP connector not available in this container. Used VISION.md catalogue + design judgment instead.
 
 ---
 
-## Evaluation Criteria (from VISION.md)
+## Current App State (context)
 
-| Criterion | Abbrev | Description |
-|---|---|---|
-| Decision Rhythm | DR | Meaningful player choice every 15–30s |
-| Wonder Tap | WT | Emotional delight / pull to continue |
-| Engine-Building Potential | EB | Early decisions compound into later state |
-| Topic Fit | TF | Statistical concept IS the decision, not adjacent |
-| Low Decoration Risk | LDR | Rewards are game-consequences, not cosmetic |
-
-Scores 1–10 per criterion.
+The app currently has:
+- A Godot 3D city in an iframe — buildings = topics, but **currently decorative** (no resource production/consumption)
+- Quiz/mastery system: `TopicProgress`, XP, streaks, quiz sessions
+- Components: `StudyHub`, `LearningMap` (path-tree), `StatChallenge`, `FlashcardMode`, `AchievementsPanel`, `ConceptMapFlow`, `AITutor` drawer, `DistributionChart`, `SamplingDistribution`, `ArsenalScreen`, `PotionInventory`
+- **Gap flagged in VISION.md:** city is eye candy, not a decision engine. "Locked-in risk: decoration not decision unless buildings consume/produce resources."
 
 ---
 
-## Candidate Evaluation
+## Scoring Rubric
 
-### A — Mutable-Dice Coffee Shop (Dice Forge × "Run Your Own Place")
+Each candidate scored 1–5 per dimension:
 
-**Mechanic:** Player owns a coffee shop. Each stats concept mastered upgrades a die face. Rolling dice = generating sample data. Player crafts the probability distribution they sample from. Correct answers expand what dice can do.  
-**Board game inspiration:** Dice Forge (BGG/219717) — mutable die faces; Seize the Bean (BGG/211364) — coffee-shop engine-builder  
-**Mobile inspiration:** Two Dots — feedback density + flow; Mini Metro — resource-routing decisions under constraints
-
-| DR | WT | EB | TF | LDR | **Avg** |
-|---|---|---|---|---|---|
-| 8 | 8 | 9 | 7 | 8 | **8.0** |
-
-**Rationale:** In Dice Forge you literally edit die faces, which ARE the probability distribution you sample from — the concept is the controller, not adjacent to it. Engine-building is native (forged faces compound into your sampling toolkit). The coffee shop thematic shell taps the "run your own cool place" emotional pull in VISION.md. Decoration risk exists (coffee skin could drift cosmetic) but is mitigable: every serve must read a fresh sample the player computes, so no auto-resolve path.
-
----
-
-### B — Mechs-vs-Data Pipeline (Pre-commit Programming Puzzle)
-
-**Mechanic:** Each "data challenge" (a dataset with a question) requires player to pre-commit a stats pipeline (collect → clean → describe → test → interpret). Pipeline executes, player watches results, iterates.  
-**Board game inspiration:** Mechs vs Minions (BGG/209010) — program a sequence, watch execution  
-**Mobile inspiration:** Opus Magnum mobile-style puzzle-fiddle
-
-| DR | WT | EB | TF | LDR | **Avg** |
-|---|---|---|---|---|---|
-| 5 | 6 | 7 | 9 | 8 | **7.0** |
-
-**Rationale:** Highest topic fit for *procedure* (hypothesis-testing pipeline is genuinely a program). But decision rhythm is slow: you commit one big pipeline then watch — minutes between meaningful choices, violating the 15–30s rule. Best as a late-game mode or "specialty drink" endgame challenge, not the core loop.
-
----
-
-### C — Spatial-Tile Daily Puzzle (Patchwork × Wordle)
-
-**Mechanic:** Daily puzzle. 7 stat-concept tiles, each with a shape and a cost (time + resources). Player fills a grid under budget. Each tile requires answering a stat question to place it.  
-**Board game inspiration:** Patchwork (BGG/163412) — spatial tiling + time/button cost  
-**Mobile inspiration:** Wordle — daily ritual, measurable progress, social share
-
-| DR | WT | EB | TF | LDR | **Avg** |
-|---|---|---|---|---|---|
-| 7 | 6 | 4 | 6 | 6 | **5.8** |
-
-**Rationale:** Clean daily ritual + aesthetic satisfaction, but engine-building is near-zero (each day resets). "Answer question to place tile" risks becoming a quiz with a tiling reward on top — pure decoration risk. Session length fits commute but topic fit is weak: the tiling layout doesn't map onto the statistical concept being used.
-
----
-
-### D — Arctic Scavengers Tribe-Leader Path (Asymmetric Factions)
-
-**Mechanic:** Pick a statistical "school" at start (frequentist / Bayesian / descriptive). Each school has a different deck and deck-building rules. Asymmetric play: frequentists test hypotheses, descriptivists build distributions, Bayesians update priors.  
-**Board game inspiration:** Arctic Scavengers (BGG/56625) — asymmetric tribe leaders; Cry Havoc (BGG/192457) — faction asymmetry  
-**Mobile inspiration:** Reigns — identity-framing through persistent choice
-
-| DR | WT | EB | TF | LDR | **Avg** |
-|---|---|---|---|---|---|
-| 4 | 7 | 8 | 8 | 6 | **6.6** |
-
-**Rationale:** Strong identity-framing and long-arc replay. Asymmetry lives at the meta layer; moment-to-moment it doesn't guarantee a decision every 30s. Three distinct rule-sets is heavy scope for Cycle 1. Bayesian inference is also out of scope (VISION.md "out of scope" list). Revisit post-intro-mastery.
-
----
-
-### E — Catan Trade Window (Data Exchange)
-
-**Mechanic:** NPC merchants each hold part of a dataset (a column). Player trades statistical insights to get needed columns to answer research questions.  
-**Board game inspiration:** Catan (BGG/13) — trade window, negotiation  
-**Mobile inspiration:** Slay the Spire — resource triage decisions
-
-| DR | WT | EB | TF | LDR | **Avg** |
-|---|---|---|---|---|---|
-| 5 | 5 | 6 | 6 | 5 | **5.4** |
-
-**Rationale:** Negotiation is fun but the stat content ("which insight is worth trading?") is fuzzy and easy to fake without using the actual concept. NPC trade logic is heavy design work for thin concept-use. Decoration risk is real: trading produces no consequence if wrong insights are tradable equivalents.
-
----
-
-### F — Reigns-Style Decision Stream
-
-**Mechanic:** Swipe-card decisions. Each card is a real-world scenario with a stat question. Left/right answer. Kingdom resources (sample size, confidence, data quality) rise/fall.  
-**Board game inspiration:** (none strong — card-driven but not board-game-derived)  
-**Mobile inspiration:** Reigns — swipe decision cadence; Tinder-style micro-commitment
-
-| DR | WT | EB | TF | LDR | **Avg** |
-|---|---|---|---|---|---|
-| 9 | 5 | 3 | 7 | 4 | **5.6** |
-
-**Rationale:** Best raw decision rhythm (a swipe every few seconds) and mobile-native. But swipe-left/right collapses statistics into binary trivia — no engine-building, "kingdom resources" are pure gamification dressing. Lowest decoration resistance in the set. Resources feel arbitrary, not conceptually grounded.
-
----
-
-### G — Stuffed Fables Per-Topic Boss Encounters
-
-**Mechanic:** Each statistics topic is a unique "boss" with its own mini-mechanic. Mean/Median boss = balancing a see-saw under noise. Hypothesis boss = threshold-crossing with evidence tokens. Correlation boss = arranging scatter dots.  
-**Board game inspiration:** Stuffed Fables (BGG/233312) — per-encounter unique mechanic; Gloomhaven — boss encounters  
-**Mobile inspiration:** Alto's Odyssey — per-biome mechanic shifts; Mini Metro — unique station rules
-
-| DR | WT | EB | TF | LDR | **Avg** |
-|---|---|---|---|---|---|
-| 7 | 9 | 5 | 9 | 7 | **7.4** |
-
-**Rationale:** Highest wonder + per-concept fit: each encounter's mechanic literally IS the concept (balance a see-saw under noise = mean vs. median sensitivity). Weakness: encounters are siloed, so decisions don't compound across topics — engine-building is weak. Per-boss bespoke mechanics are expensive to build. Best used as the content layer INSIDE another loop (folded into Candidate A's shell as "forged tools").
-
----
-
-### H — Mini Metro–Style Flow Optimizer
-
-**Mechanic:** Stations = data sources. Lines = analysis pipelines. Player draws connections, watches data flow. Bottlenecks = concept gaps. Upgrading a station requires answering a stat question.  
-**Board game inspiration:** (no strong fit — flow-optimization is more digital-native)  
-**Mobile inspiration:** Mini Metro (the game directly) — spatial routing + resource constraints
-
-| DR | WT | EB | TF | LDR | **Avg** |
-|---|---|---|---|---|---|
-| 6 | 7 | 7 | 5 | 6 | **6.2** |
-
-**Rationale:** Elegant spatial pipeline-thinking, but "data flow" maps poorly onto intro descriptive/inferential topics. It teaches workflow, not statistical concepts. Topic fit is the weakest of the set for intro stats scope. Better fit for a data-science / data-engineering course.
-
----
-
-## Summary Scorecard
-
-| Rank | Candidate | Avg Score |
-|---|---|---|
-| 1 | A — Mutable-Dice Coffee Shop | **8.0** |
-| 2 | G — Stuffed Fables Topic Bosses | **7.4** |
-| 3 | B — Mechs-vs-Data Pipeline | **7.0** |
-| 4 | D — Arctic Scavengers Tribe-Leader | 6.6 |
-| 5 | H — Mini Metro Flow Optimizer | 6.2 |
-| 6 | F — Reigns Decision Stream | 5.6 |
-| 7 | C — Spatial-Tile Daily Puzzle | 5.8 |
-| 8 | E — Catan Trade Window | 5.4 |
-
-**Strategic synthesis:** Ship **A** as the engine, fold **G**'s bespoke mini-mechanics in as the "forged tool" content per station, and hold **B** for a late-game "specialty drink" endgame mode.
-
----
-
-## Top-3 Ranking
-
-### #1 — Mutable-Dice Coffee Shop (avg 8.0)
-Best fusion of concept-as-controller + engine-building + thematic pull + reuse of existing R3F assets. Dice faces ARE the population distribution. No path to auto-resolve without using statistics. Folds G's encounter mechanics in as upgrades, amortizing their bespoke cost.
-
-### #2 — Stuffed Fables Topic Bosses (avg 7.4)
-Highest wonder and per-topic concept fidelity. Not a standalone engine — best as the content layer inside #1's coffee-shop shell. Each new shop station (drip → espresso → cold-brew lab) introduces a new topic's boss mechanic, giving bespoke encounters a natural cadence rather than an endless one-off design burden.
-
-### #3 — Mechs-vs-Data Pipeline (avg 7.0)
-Highest procedural topic fit. Holds as the endgame "mastery challenge" mode: once the player has forged all die faces for a topic cluster, they face a Mechs-style pre-commit challenge that tests the full pipeline. Decision rhythm too slow for the core loop but perfect for high-stakes test-prep moments.
-
----
-
-## #1 Detailed Specification: Bean & Bell Curve
-
-### Formal name + tagline
-**WaffleStack: Bean & Bell Curve** (Hebrew working title: *פולים והתפלגות*)  
-> *Forge the dice you roll from. Every roll is a sample; every face you carve is a statistic you've mastered.*
-
----
-
-### Core game loop (every ~25 seconds)
-
-You run a coffee shop. Each in-game "morning rush" a queue of customers arrives, each wanting a drink defined by a **target statistic**: "a latte whose foam is at the *median*," or "a blend whose bean-mix has *low spread*." To serve them you **roll your bean dice** — each roll is a draw from a distribution. Each turn you decide:
-
-1. **Which dice to roll, and how many** (choosing sample size n).
-2. **Whether to re-roll / keep rolling** (push-your-luck stopping rule).
-3. **Which forged face to spend** (a mastered statistic that transforms the sample).
-4. **How to read the sample** — drag dice into order on a spatial track, identify the requested statistic, serve.
-
-Profit funds **forging new faces**: carving a value onto a blank die slot. Forging requires a *constructive* concept challenge (place values to hit a target distribution shape), not multiple-choice. The shape of the die you build IS the distribution you sample from next session.
-
----
-
-### Statistics embedded in every decision
-
-| Decision | Statistical concept used |
+| Dimension | What it measures |
 |---|---|
-| How many dice to roll | Sample size n, SE shrinkage, law of large numbers |
-| Stop or keep rolling | Push-your-luck stopping rule, confidence vs. cost |
-| Which forged face to activate | Probability of different outcomes, distribution shape |
-| Drag dice into order + read | Mean, median, mode, spread from live sample |
-| Forge a face (constructive) | Building a distribution by specifying its shape/SD |
-| Choose next station to unlock | Concept prerequisites (Century Spice Road pickup-and-deliver graph) |
+| **Decision quality** | Does the player USE the stat concept to decide, or merely be near it? |
+| **Decision rhythm** | Is there a meaningful choice every 15–30s naturally? |
+| **Engine energy** | Do early choices compound into later advantage? |
+| **Wonder tap** | Would a first-time player feel delight/surprise, not just progress? |
+| **Decoration risk** | How easy to ship hollow version where game = just rewards? (1=high risk, 5=well-protected) |
 
 ---
 
-### Three example decision moments
+## Section 1: Candidate Scores
 
-**Decision 1 — Sample size and SE shrinkage (Sampling Distributions)**  
-Customer wants foam "reliably near 7." Player holds a die averaging 7 but high variance. Choice: roll it once (cheap, risky) or roll 5 dice and serve the mean of the batch (costs beans, but the sample-mean track visibly narrows). Player uses the Law of Large Numbers as a resource trade — abstract concept becomes a visible on-table transaction.
+| Candidate | Dec. quality | Rhythm | Engine | Wonder | Decor. risk | TOTAL | Rationale |
+|---|---|---|---|---|---|---|---|
+| A. Run-a-place engine-builder | 3 | 3 | 5 | 3 | 2 | **16** | Strong compounding, but "serve customer" can decay into quiz-with-coins. |
+| B. Collection asymmetric brawler | 3 | 3 | 3 | 5 | 2 | **16** | Huge wonder-tap; risk that creatures are reskinned XP badges. |
+| C. Pre-commit programming puzzle | 5 | 2 | 4 | 3 | 5 | **19** | Player literally builds a stats procedure; weak 15–30s rhythm (long planning phases). |
+| D. Real-time triage | 4 | 5 | 2 | 3 | 4 | **18** | Best rhythm, but pressure punishes deliberate statistical reasoning; little compounding. |
+| E. Mutable-dice engine | 5 | 4 | 5 | 4 | 4 | **22** | You CRAFT the distribution you sample from — concept IS the mechanic. |
+| F. Push-your-luck sampler | 5 | 4 | 3 | 4 | 4 | **20** | Stopping decision = literal use of confidence/SE; engine weaker alone. |
+| G. Asymmetric-factions civ | 3 | 2 | 4 | 3 | 3 | **15** | Rich but scope-creep magnet; out-of-scope Bayesian temptation. |
+| H. Spatial-tiling daily | 3 | 3 | 2 | 4 | 3 | **15** | Lovely daily habit, but tile-fit is geometry, not statistics. |
+| **X. Dice Forge × Quacks hybrid** _(invented)_ | 5 | 5 | 5 | 4 | 5 | **24** | Craft your sampling distribution (E), then push-your-luck draws from it (F): decision density + compounding + the concept lives in both halves. |
+| Y. Programming-puzzle × Dice (C×E) _(invented)_ | 5 | 3 | 4 | 3 | 5 | **20** | Pre-commit a sampling plan then watch it run; rhythm still slow. |
 
-**Decision 2 — Mean vs. median under an outlier (Robustness)**  
-A rolled batch shows {3, 3, 4, 4, 20} — one scalding-hot bean (outlier). The order wants "typical temperature." Decision: serve by mean (8, wrong — drink ruined) or spend the forged **Median face** to serve 4 (correct). This is Stuffed Fables (#2 mechanic) folded in as a forged tool: the see-saw tilts on the outlier, making sensitivity visceral.
-
-**Decision 3 — Constructing a distribution (Probability + Variance)**  
-To unlock the espresso station the player must forge a die that "usually lands 4–6, rarely 1 or 9." Six die faces are allocated across a drag-and-drop UI; the resulting bar chart updates live. Player must hit a target SD band before the slot saves. They are constructing a distribution from its dispersion properties — using variance to design, not to recall.
+**Board game citations:** Dice Forge [BGG/216225], Quacks of Quedlinburg [BGG/244521], Mechs vs Minions [BGG/209010], Stuffed Fables [BGG/233312], Seize the Bean [BGG/211364], Arctic Scavengers [BGG/40628], Coffee Rush [BGG/377061], Patchwork [BGG/163412], Cry Havoc [BGG/192457]  
+**Mobile game citations:** Two Dots, Threes, Mini Metro
 
 ---
 
-### Session length and natural stopping points
+## Section 2: Top-3 Ranking
 
-| Session type | Duration | Stopping point |
+### #1 — X. מעבדת הדגימה / "Sampling Lab" — Dice Forge × Quacks hybrid (24/25)
+
+The player **forges a sampling distribution** by upgrading die faces with mastered topics, then runs push-your-luck draws from that very distribution to hit a target estimate. Both the **build phase** AND the **draw phase** require using sampling theory (SE, CLT, variance, stopping rules) — the concept cannot be removed without removing the game. Highest decision density and strongest compounding of all candidates.
+
+**Board-game inspiration:** Dice Forge (mutable-dice face-upgrading) × Quacks of Quedlinburg (push-your-luck bag drawing with stopping mechanic)  
+**Mobile-game inspiration:** Threes / Two Dots — every tap produces an immediate legible state change (the CI band visibly contracts per draw)
+
+### #2 — F. Push-your-luck sampler (20/25)
+
+Cleanest single-concept fit: "stop sampling now or draw one more?" is the confidence-interval decision made physical. Slightly weaker engine-building alone, which is exactly why candidate X absorbs it as one phase. Worth revisiting as a standalone daily mini-mode after the Lab ships.
+
+**Board-game inspiration:** Quacks of Quedlinburg (push-your-luck draw from bag)  
+**Mobile-game inspiration:** Mini Metro (constrained-resource depletion under pressure)
+
+### #3 — C. Pre-commit programming puzzle (19/25)
+
+Best decoration-resistance and the truest model of a statistical procedure, but planning phases break the 15–30s rhythm. Reserved as the eventual "boss encounter" layer on top of the Sampling Lab — the "sequence and execute" mechanic maps perfectly onto multi-step hypothesis testing once the player has CLT mastered.
+
+**Board-game inspiration:** Mechs vs Minions (pre-commit a sequence, watch execution, iterate)  
+**Mobile-game inspiration:** Mini Metro (plan a network, watch it run under load)
+
+---
+
+## Section 3: #1 Detailed Spec — מעבדת הדגימה / Sampling Lab
+
+### Name + pitch
+
+**מעבדת הדגימה** ("The Sampling Lab")  
+You forge your own probability dice from mastered statistics, then push your luck drawing samples from them to estimate a hidden parameter before your variance budget runs out.
+
+---
+
+### Core loop (one ~3-min session)
+
+1. **Brief (5s):** A "client" NPC states a goal: "Estimate the mean of this hidden population within ±2." Target shown as a band on a live `DistributionChart`.
+2. **Forge phase (~45s, 3–4 decisions):** You have a bag of dice. Spend mastered-topic tokens to swap die faces — e.g., replace a high-variance face with a tighter one, or add a face that lets you "average two draws." Each upgrade visibly reshapes a live distribution preview.  
+   _Decision: which face-swap shrinks my standard error most per token?_
+3. **Draw phase (~90s, ~8–12 decisions):** Roll a die = draw one sample. Running mean + a shrinking confidence band updates live after each draw. After every roll: **stop and submit, or draw again?** Drawing more tightens the band (n↑ → SE↓) but each draw costs from a variance/fatigue budget, and a "noise face" can blow the estimate.  
+   _Decision: is my CI now inside the client's target band, or do I risk one more draw?_
+4. **Resolve (15s):** Submit. Reveal true parameter. Score = accuracy × efficiency (fewer draws = bonus). Earn topic tokens that unlock new die faces.
+
+---
+
+### Statistical concept wired into each decision
+
+| Phase | Player decision | Statistical concept |
 |---|---|---|
-| Micro | 4–6 min | "Morning rush" ends — 8–12 customers served. Score tallied. |
-| Meso | 10–15 min | Forging decision between mornings — pick next face = agency over what to learn. |
-| Macro arc | 5–7 mornings | New station unlocked (drip → espresso → cold-brew lab). Topic cluster gated. |
-
-The morning-rush boundary is a Duolingo-style natural pause: clean stop, progress tallied, no cliffhanger needed. Station unlock is the "open a new world" beat (Civilization feel). Both align with Anki-interval research (~15–30s per decision, ~5-min burst sessions).
+| Forge: face swap | Which face lowers my σ most? | Variance / standard deviation of a single observation |
+| Forge: CLT face | Add "average two draws" face? | Central Limit Theorem — SE = σ/√n; averaging narrows sampling distribution |
+| Draw: stop or continue | Is my current CI inside the target band? | Confidence interval width; stopping rules |
+| Draw: noise face trigger | Drop the outlier or include it? | Robustness; trimmed estimator / mean vs median |
+| Resolve: target band | Did my estimate land inside ±margin? | Margin of error as win condition |
 
 ---
 
-### Build on existing R3F / city-builder code
+### Engine-building mechanic
 
-This is **extend, not pivot**. No tech-invariant violations.
+Mastered topics in the existing `TopicProgress` / quiz system mint **face-tokens**. Early mastery (CLT, variance) unlocks structurally better faces that compound: a CLT face bought in session 2 makes every future draw phase cheaper, so early correct answers permanently widen strategic options. Die collection persists across runs — ties into existing `ArsenalScreen`/`PotionInventory` inventory.
 
-| Existing asset | Reuse in Bean & Bell Curve |
+---
+
+### Failure state
+
+Missing the target band never ends the game. The reveal overlays *your* CI against the true value and says (in Hebrew), e.g.:
+
+> "עצרת אחרי 4 דגימות — רווח הסמך עוד היה רחב מדי; עוד 3 דגימות היו מספיקות."  
+> _(You stopped at n=4; the CI was still too wide. Three more draws would have sufficed.)_
+
+You retry the same client immediately with knowledge intact. Failure teaches the exact stopping miscalibration.
+
+---
+
+### Mobile UX sketch (RTL, thumb-zone)
+
+```
+┌─────────────────────────────────────┐
+│  [Distribution chart — glanceable]  │  top third: live preview, no touch
+│  μ̂ = 18.4  │  CI ±3.2  │  n=5      │
+├─────────────────────────────────────┤
+│                                     │
+│        [ DIE ]  big, centered       │  middle: tap to roll in draw phase
+│                                     │
+├─────────────────────────────────────┤
+│  [face tile] [face tile] [+token]   │  forge phase: face swap tiles
+│  ━━━━━━━━━━━━━━━ budget bar ━━━━━━  │
+│  [הגש הערכה]        [דגום שוב 🎲]   │  draw phase: submit (RTL primary) / draw again
+└─────────────────────────────────────┘
+```
+
+- Bottom-sheet pattern (no modals-on-modals)
+- Primary CTA ("הגש הערכה" / submit) on the right-thumb side (RTL primary position)
+- Budget meter as a thin progress bar — persistent banner, not a toast
+- Hit targets ≥44pt (Apple HIG)
+- Single active touch-region per phase (no hover-only affordances)
+
+**UI citations:** Linear.app (status-pill budget bar, dark-UI density) / Apple HIG dark mode (elevation, 44pt targets) / Mini Metro (one-handed play, minimal HUD)
+
+---
+
+### Integration with existing app
+
+| Integration point | How |
 |---|---|
-| `ProceduralBuilding` / `buildingGenerator` / `irregularGrid` | Shop stations = buildings in the city scene. Buildings now **produce/consume beans** → kills original "decoration not decision" risk flagged in VISION.md. |
-| `DeformableCell` + `DeformationShader` | Die faces + sampling-distribution bar track (deform face mesh to visualize skew/spread). |
-| `ToonShader` / `PaintableAsset` / `ColorableModel` | Bean/drink dice faces, the "forged face comes alive" wonder-tap moment. Gold token on face = mastered concept. |
-| `progressStore` (Zustand) | Forged faces = mastered topics. Already the mastery model. No new state shape needed. |
-| `TopicViz` / `LearningMap` / `ConceptMapGalaxy` | Becomes the shop tech-tree / station map. Spatial concept-prerequisite graph (Century Spice Road pickup-and-deliver) maps onto existing `ConceptMapFlow`. |
-| `SamplingDistribution` component | Directly surfaced as the on-table dice-roll result bar chart. |
-| `DistributionChart` | Used in the forging UI to render the live distribution shape as faces are allocated. |
-| `StatChallenge` / `ReviewMode` | Forging challenges replace the current quiz wrapper — now constructive (build the distribution) rather than multiple-choice. |
-| MathLive / KaTeX | Reading panel when player computes the requested statistic from the sample. |
-
-New code required:
-- **Dice simulation engine** — pure TypeScript, no UI. Roll n dice from a distribution defined by face values, return sample array. Vitest-testable.
-- **Serving logic** — compare player's computed statistic to customer's target statistic within tolerance. Score and feedback.
-- **Forging UI** — drag-and-drop face allocator with live distribution preview (reuses `DistributionChart`).
-- **Customer queue generator** — procedural customer orders tied to unlocked concept pool.
-- Feature-flagged behind `BEAN_CURVE_MODE` in `src/config/featureFlags.ts`.
+| **Godot city** | New building "מעבדת הדגימה" — tapping it opens the Lab as a route. Closes the decoration gap: city now drives a decision. |
+| **TopicProgress / XP** | Mastered topics mint face-tokens. No new mastery system needed. |
+| **LearningMap** | Topic mastery in LearningMap unlocks specific die faces — "what to learn next" has direct mechanical payoff. |
+| **DistributionChart / SamplingDistribution** | Reused for live distribution preview (forge) and running CI band (draw). |
+| **ArsenalScreen / PotionInventory** | Die/face collection stored alongside existing inventory. |
+| **StudyHub** | Unchanged — remains the primary study path; Lab is an alternate entry point that reinforces the same topics. |
 
 ---
 
-### Risks and mitigations
+### Decision interval
 
-| Risk | Mitigation |
+- Draw phase: **~5–12s** per stop-or-draw choice (comfortable inside 15–30s ceiling, denser than required).
+- Forge phase: **~10–15s** per face-swap decision.
+
+---
+
+### Risk flags and guards
+
+| Risk | Guard |
 |---|---|
-| Coffee-shop becomes a clicker (decoration creep) | Every serve requires reading a fresh sample the player computes. No auto-resolve path. If a customer can be served without using a statistic, cut that customer type. |
-| Reading samples feels like arithmetic homework | Spatial track — drag dice into order, median snaps to center, mean shown as a balance-point marker. Computation is manipulation, not typing. |
-| Forging question regresses to a quiz | Forging is constructive (allocate die faces to hit a target distribution shape). Player proves mastery by building, not picking. |
-| Push-your-luck + sampling confuse two concepts | Stopping-rule rolls introduced only after sample-size basics land (gated behind espresso station unlock). |
-| Scope overrun (all 8 concepts at once) | Ship Cycle 1 with descriptive stats only (mean/median/mode/spread + basic probability via die construction). Sampling distributions, CIs, and hypothesis testing arrive with later stations. |
-| R3F die-rolling performance on mobile | Cap max simultaneous dice at 12. Use instanced meshes for dice faces. Keep <16ms per frame budget. |
+| Forge = "buy upgrade with coins" (gamification) | Face choices must change the *shape* of the live distribution preview; optimal swap depends on client's target band — no dominant universal upgrade exists. |
+| Draw phase = "spam draw mindlessly" | Hard variance/fatigue budget + noise faces make over-sampling a losing strategy. Stopping must be reasoned from the visible CI. |
+| Numbers shown but never used (decoration) | The CI band IS the win condition and IS the submit trigger. You cannot win without reading SE. |
+| RNG feels unfair | Post-reveal shows the correct stopping point with proof. Failure is skill-attributable, not luck-attributable. |
 
 ---
 
-### Vision alignment check (for this exploration doc)
+### Prototype scope for Cycle 2 (1 sprint, isolated branch)
+
+Minimum playable version:
+- One client/goal: estimate a mean, fixed hidden population (no NPC variety yet).
+- 3 forgeable faces only: tight (low σ), wide (high σ), CLT "average-two-draws" face.
+- Single die, hardcoded token grant (stub `TopicProgress` wiring for now).
+- Draw phase with live running-mean + CI band reusing `DistributionChart`, fat submit/draw-again buttons, fixed 10-draw budget.
+- Reveal screen with informative-failure overlay (Hebrew copy, shows optimal n).
+- No persistence, no city entry point yet — launched from a dev route (`/#lab`).
+- Feature flag: `SAMPLING_LAB_ENABLED` in `src/config/featureFlags.ts`.
+- At least one Vitest unit test covering the CI-width calculation and stop/draw logic.
+
+**Goal:** Prove the stop-or-draw decision *feels like statistics in the hand* before wiring it to the city.
+
+---
+
+## Vision-Alignment Check
 
 | Rule | Compliant? | Citation |
 |---|---|---|
-| What we are: stats-first via game | ✓ | Die faces ARE the distribution; stats concept used in every decision |
-| Gameplay ≠ Gamification | ✓ | Wrong drink = lost customer (consequence), not XP deduction |
-| Design rule: Hebrew-first | ✓ | Hebrew working title; all player-facing text would be Hebrew |
-| Design rule: dark UI | ✓ | All colors from locked palette; bg `#0e0f12` |
-| Color palette: only locked tokens used | ✓ | Gold = forged face; teal = correct serve; red = wrong drink |
-| UI source cited | ✓ | Linear dark-UI density for the serving panel; Apple HIG 44pt targets for die-tap zones |
-| UI anti-pattern avoided | ✓ | Bottom-sheet for feedback (not modal); no hamburger; no hover-only affordances |
-| Tech invariant: Tailwind only | ✓ | No CSS modules planned |
-| Tech invariant: Zustand only | ✓ | progressStore extended; no new state library |
-| Tone rule: encouragement | ✓ | Wrong drink → "הלקוח ביקש ממוצע — ניסית חציון. הנה למה זה שונה:" |
-| Mobile-first (thumb-reach + 44pt targets) | ✓ | Bottom-sheet serving panel; dice tap = 44pt min; one-thumb roll |
-| Out of scope: stays in scope | ✓ | Bayesian inference excluded; no multiplayer; no teacher dashboard |
+| What we are: stats-first via game | ✓ | CI width IS the win condition; stats concept drives every decision |
+| Gameplay ≠ Gamification | ✓ | Stop-or-draw is a real decision with real statistical consequence; no confetti-only path |
+| Design rule: Hebrew-first | ✓ | All UX copy in Hebrew; RTL bottom-sheet layout |
+| Design rule: dark UI | ✓ | Uses `--bg`, `--bg-2`, `--card` tokens throughout |
+| **Color palette: only locked tokens used** | ✓ | No new hex values introduced in this spec |
+| **UI source cited** | ✓ | Linear.app (density/status-pill), Apple HIG (44pt targets, elevation), Mini Metro (one-handed, minimal HUD) |
+| **UI anti-pattern avoided** | ✓ | No hamburger, no modal-on-modal, no hover-only affordances, no toast for budget state |
+| Tech invariant: Tailwind only | ✓ | Spec references Tailwind-compatible bottom-sheet pattern |
+| Tech invariant: Zustand only | ✓ | Die/face state via Zustand store (beside existing `ArsenalScreen` store) |
+| Tone rule: encouragement | ✓ | Failure overlay is warm Hebrew explanation, never punishment |
+| Mobile-first (thumb-reach + 44pt) | ✓ | Bottom-sheet with RTL CTA in thumb zone; explicit 44pt target call-out |
+| Out of scope: stays in scope | ✓ | No Bayesian, no multiplayer, no teacher dashboard; intro stats only |
 
-**NotebookLM consulted:** No — MCP connector not available in this container.  
-**Board-game inspiration:** Dice Forge (mutable die faces = distribution you craft); Seize the Bean (coffee-shop engine-builder); Arctic Scavengers (tribe-leader identity framing for faction paths — held for Cycle N); Stuffed Fables (per-encounter mechanic = forged tool per topic); Catan (trade window → resource negotiation = concept-prerequisite graph); Century Spice Road (pickup-and-deliver prerequisite chain = station unlock tree)  
-**Mobile-game inspiration:** Two Dots (feedback density + flow state between decisions); Mini Metro (resource routing under constraints = die allocation); Reigns (micro-commitment cadence = serve decision cadence)  
-**Decision interval:** every ~25 seconds (roll → read sample → serve → next customer).  
-**Statistical concept used in decision:** Mean, median, mode, spread — chosen by the player to satisfy the customer's order, computed from a live sample they rolled.
+**NotebookLM consulted:** no — MCP connector not available in this container (SKIPPED per rules).  
+**Board-game inspiration:** Dice Forge (mutable dice faces as engine), Quacks of Quedlinburg (push-your-luck stopping mechanic).  
+**Mobile-game inspiration:** Threes / Two Dots — per-tap immediate legible state change sustains decision density.  
+**Decision interval:** 5–12s in draw phase; 10–15s in forge phase.  
+**Statistical concept used in decision:** Standard error, confidence interval width, Central Limit Theorem (SE = σ/√n), stopping rules, margin of error.
 
 ---
 
-## Next cycle recommendation
-
-Cycle 2 should implement the **dice simulation engine** (pure TS, Vitest tests) + the **serving logic** behind `BEAN_CURVE_MODE` feature flag. No UI yet — validate the core mechanic is fun via unit-test driven TDD. The morning-rush game loop can be text-driven in a Vitest test before any R3F work begins.
-
-Candidate G's Stuffed-Fables mechanic (mean vs. median see-saw) should be the first "forged tool" implemented — highest teaching value, visually striking, and directly reuses `DeformableCell`.
+_Cycle 1 complete. Next: Cycle 2 = build the Sampling Lab prototype behind feature flag._
