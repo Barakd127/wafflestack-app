@@ -25,7 +25,7 @@ import { findFormula, type Formula } from '../data/formula-library'
 declare global {
   interface Window {
     katex?: { renderToString: (latex: string, opts?: object) => string }
-    wsActiveMathField?: { executeCommand?: (cmd: unknown) => void } | null
+    wsActiveMathField?: { executeCommand?: (cmd: unknown) => void; value?: string } | null
   }
 }
 
@@ -263,37 +263,51 @@ export default function CalculatorDrawer() {
     } catch { /* */ }
   }
 
+  // Fold the new formula's rows into the field as NEW LINES. Inserting a fresh
+  // \begin{gathered}…\end{gathered} next to an existing one renders the two
+  // blocks side-by-side on the SAME line (user 2026-05-29: "I want it on a new
+  // line!"). Instead we unwrap any existing gathered env, append the new rows,
+  // and re-wrap as ONE gathered so every formula stacks vertically. We set
+  // mf.value directly (full replace) rather than executeCommand-insert at the
+  // cursor, which is what caused the inline concatenation.
+  const appendRowsToField = (newRows: string[]) => {
+    const mf = window.wsActiveMathField
+    if (!mf) return
+    const newBlock = newRows.join(' \\\\ ')
+    const existing = (mf.value ?? '').trim()
+    let inner = ''
+    const m = existing.match(/^\\begin\{gathered\}([\s\S]*)\\end\{gathered\}$/)
+    if (m) inner = m[1].trim()
+    else if (existing) inner = existing
+    const merged = inner ? inner + ' \\\\ ' + newBlock : newBlock
+    const value = '\\begin{gathered}' + merged + '\\end{gathered}'
+    try {
+      if (typeof mf.value === 'string') {
+        mf.value = value
+        // Programmatic .value set doesn't fire MathLive's 'input' event, so the
+        // Arsenal save (which reads on input) wouldn't see the change. Fire it.
+        ;(mf as unknown as HTMLElement).dispatchEvent?.(new Event('input', { bubbles: true }))
+      } else {
+        mf.executeCommand?.(['insert', value])
+      }
+    } catch { /* MathLive rejected */ }
+  }
+
   const insertIntoField = () => {
     if (result == null) return
-    const mf = window.wsActiveMathField
-    if (!mf?.executeCommand) return
-    // Build the worked-solution chain. A bare `\\` only breaks lines INSIDE a
-    // multi-line LaTeX environment — in a plain math-field it renders as raw
-    // backslash glyphs (user 2026-05-28). Use \begin{gathered}…\end{gathered}
-    // which BOTH KaTeX (the Arsenal card renderer) and MathLive support —
-    // \displaylines is NOT a KaTeX macro and leaked as literal text. Each part
-    // renders on its OWN line:
-    //   formula
-    //   substitution        (only when checkbox on + substLatex exists)
-    //   = result
+    if (!window.wsActiveMathField) return
+    // Worked-solution rows: formula / substitution (if checkbox on) / = result.
     const res = formatResult(result)
     const parts = [formula.latex]
     if (insertSubst && substLatex) parts.push(substLatex)
     parts.push('= ' + res)
-    const chain = '\\begin{gathered}' + parts.join(' \\\\ ') + '\\end{gathered}'
-    try {
-      mf.executeCommand(['insert', chain])
-    } catch { /* MathLive command rejected */ }
+    appendRowsToField(parts)
     closeAndReturn()
   }
 
   const insertFormulaIntoField = () => {
-    const mf = window.wsActiveMathField
-    if (mf?.executeCommand) {
-      try {
-        mf.executeCommand(['insert', formula.latex])
-      } catch { /* MathLive command rejected */ }
-    }
+    if (!window.wsActiveMathField) return
+    appendRowsToField([formula.latex])
     closeAndReturn()
   }
 
