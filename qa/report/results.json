@@ -1,0 +1,1938 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\BARAK\\Projects\\base44\\qa\\playwright.config.ts",
+    "rootDir": "C:/Users/BARAK/Projects/base44/qa/specs",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 4
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/BARAK/Projects/base44/qa/report",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "chromium-desktop",
+        "name": "chromium-desktop",
+        "testDir": "C:/Users/BARAK/Projects/base44/qa/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/Users/BARAK/Projects/base44/qa/report",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "chromium-mobile",
+        "name": "chromium-mobile",
+        "testDir": "C:/Users/BARAK/Projects/base44/qa/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "report",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "report/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 4,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "01-landing.spec.ts",
+      "file": "01-landing.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Landing page smoke tests",
+          "file": "01-landing.spec.ts",
+          "line": 18,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-LAND-01 — page title contains brand name",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 19208,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:17.531Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c6d9a8e5b4c3be54e58a-8ff1f4bc8d5f51ff664d",
+              "file": "01-landing.spec.ts",
+              "line": 39,
+              "column": 3
+            },
+            {
+              "title": "TC-LAND-02 — Hebrew tagline is visible",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 28133,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:37.434Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c6d9a8e5b4c3be54e58a-7cfe5ec56eb171e74cc9",
+              "file": "01-landing.spec.ts",
+              "line": 56,
+              "column": 3
+            },
+            {
+              "title": "TC-LAND-03 — primary CTA button is present and clickable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 9856,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:07:05.603Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c6d9a8e5b4c3be54e58a-7d39c3a96b00208cce59",
+              "file": "01-landing.spec.ts",
+              "line": 69,
+              "column": 3
+            },
+            {
+              "title": "TC-LAND-04 — no JS console errors on load",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 9878,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:07:15.499Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c6d9a8e5b4c3be54e58a-4b17cdf6d0e3324d4196",
+              "file": "01-landing.spec.ts",
+              "line": 95,
+              "column": 3
+            },
+            {
+              "title": "TC-LAND-05 — zero axe critical violations",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 16125,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[a11y] All violations on landing page: [\n  {\n    \"id\": \"landmark-one-main\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure the document has a main landmark\",\n    \"nodes\": 1\n  },\n  {\n    \"id\": \"region\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure all page content is contained by landmarks\",\n    \"nodes\": 23\n  }\n]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:07:25.412Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c6d9a8e5b4c3be54e58a-ae7648cb93fe015999d3",
+              "file": "01-landing.spec.ts",
+              "line": 120,
+              "column": 3
+            },
+            {
+              "title": "TC-LAND-01 — page title contains brand name",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 6209,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:07:32.991Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c6d9a8e5b4c3be54e58a-7af6218f7b32d6f77b1c",
+              "file": "01-landing.spec.ts",
+              "line": 39,
+              "column": 3
+            },
+            {
+              "title": "TC-LAND-02 — Hebrew tagline is visible",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 1,
+                      "status": "timedOut",
+                      "duration": 69004,
+                      "error": {
+                        "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 60000ms.\u001b[39m",
+                        "stack": "\u001b[31mTearing down \"context\" exceeded the test timeout of 60000ms.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 60000ms.\u001b[39m"
+                        },
+                        {
+                          "message": "Error: browserContext.close: Test ended.\nBrowser logs:\n\n<launching> C:\\Users\\BARAK\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1223\\chrome-headless-shell-win64\\chrome-headless-shell.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --enable-unsafe-swiftshader --user-data-dir=C:\\Users\\BARAK\\AppData\\Local\\Temp\\playwright_chromiumdev_profile-bX8ltl --remote-debugging-pipe --no-startup-window\n<launched> pid=32552\n[pid=32552][err] [0530/120740.226:INFO:CONSOLE:401] \"[wafflestack] build 2026-05-09-72fe066-cache-bust\", source: https://wafflestack-app.vercel.app/assets/index-mUI7ORG1.js (401)\n[pid=32552][err] [0530/120740.804:ERROR:gpu\\command_buffer\\service\\gl_utils.cc:430] [.WebGL-0x3c44001e6200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels\n[pid=32552][err] [0530/120740.827:INFO:CONSOLE:0] \"[.WebGL-0x3c44001e6200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels\", source: https://wafflestack-app.vercel.app/#landing (0)\n[pid=32552][err] [0530/120740.854:ERROR:gpu\\command_buffer\\service\\gl_utils.cc:430] [.WebGL-0x3c44001e6200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels\n[pid=32552][err] [0530/120740.923:INFO:CONSOLE:0] \"[.WebGL-0x3c44001e6200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels\", source: https://wafflestack-app.vercel.app/#landing (0)\n[pid=32552][err] [0530/120740.926:ERROR:gpu\\command_buffer\\service\\gl_utils.cc:430] [.WebGL-0x3c44001e6200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels\n[pid=32552][err] [0530/120740.932:INFO:CONSOLE:0] \"[.WebGL-0x3c44001e6200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels\", source: https://wafflestack-app.vercel.app/#landing (0)\n[pid=32552][err] [0530/120740.937:ERROR:gpu\\command_buffer\\service\\gl_utils.cc:430] [.WebGL-0x3c44001e6200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)\n[pid=32552][err] [0530/120740.942:INFO:CONSOLE:0] \"[.WebGL-0x3c44001e6200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)\", source: https://wafflestack-app.vercel.app/#landing (0)\n[pid=32552][err] [0530/120749.412:INFO:CONSOLE:401] \"[wafflestack] build 2026-05-09-72fe066-cache-bust\", source: https://wafflestack-app.vercel.app/assets/index-mUI7ORG1.js (401)\n[pid=32552] <gracefully close start>"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:07:44.744Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\BARAK\\Projects\\base44\\qa\\report\\01-landing-Landing-page-sm-49f11-—-Hebrew-tagline-is-visible-chromium-mobile\\error-context.md"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 11,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 10241,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-05-30T09:10:06.144Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "flaky"
+                }
+              ],
+              "id": "c6d9a8e5b4c3be54e58a-cc6ce1cc95e6a8e66d48",
+              "file": "01-landing.spec.ts",
+              "line": 56,
+              "column": 3
+            },
+            {
+              "title": "TC-LAND-03 — primary CTA button is present and clickable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 11,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 7156,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:10:17.041Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c6d9a8e5b4c3be54e58a-8b6cbe7528222ef2e933",
+              "file": "01-landing.spec.ts",
+              "line": 69,
+              "column": 3
+            },
+            {
+              "title": "TC-LAND-04 — no JS console errors on load",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 11,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 4805,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:10:24.226Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c6d9a8e5b4c3be54e58a-a308d6b877435e18eebe",
+              "file": "01-landing.spec.ts",
+              "line": 95,
+              "column": 3
+            },
+            {
+              "title": "TC-LAND-05 — zero axe critical violations",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 11,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 10575,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[a11y] All violations on landing page: [\n  {\n    \"id\": \"landmark-one-main\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure the document has a main landmark\",\n    \"nodes\": 1\n  },\n  {\n    \"id\": \"region\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure all page content is contained by landmarks\",\n    \"nodes\": 23\n  }\n]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:10:29.069Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c6d9a8e5b4c3be54e58a-7d6507f03156d261761f",
+              "file": "01-landing.spec.ts",
+              "line": 120,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "02-auth.spec.ts",
+      "file": "02-auth.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Auth flow — form interaction",
+          "file": "02-auth.spec.ts",
+          "line": 21,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-AUTH-01 — register form is visible",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 12686,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:17.292Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "42ee48a5561f1ffbe298-327c6de721d0e1c8abc7",
+              "file": "02-auth.spec.ts",
+              "line": 38,
+              "column": 3
+            },
+            {
+              "title": "TC-AUTH-02 — username and password fields accept input",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 7338,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:30.384Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "42ee48a5561f1ffbe298-db6fe2a092b92dd18770",
+              "file": "02-auth.spec.ts",
+              "line": 58,
+              "column": 3
+            },
+            {
+              "title": "TC-AUTH-03 — form submit does not crash the page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 26507,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:37.755Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "42ee48a5561f1ffbe298-c812f837f6b9794d78f2",
+              "file": "02-auth.spec.ts",
+              "line": 95,
+              "column": 3
+            },
+            {
+              "title": "TC-AUTH-04 — login/register toggle switches form mode",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 3380,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:07:04.310Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "42ee48a5561f1ffbe298-a3f403d39428da1689a1",
+              "file": "02-auth.spec.ts",
+              "line": 141,
+              "column": 3
+            },
+            {
+              "title": "TC-AUTH-01 — register form is visible",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 3,
+                      "status": "timedOut",
+                      "duration": 65627,
+                      "error": {
+                        "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 60000ms.\u001b[39m",
+                        "stack": "\u001b[31mTearing down \"context\" exceeded the test timeout of 60000ms.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 60000ms.\u001b[39m"
+                        },
+                        {
+                          "message": "Error: browserContext.close: Test ended.\nBrowser logs:\n\n<launching> C:\\Users\\BARAK\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1223\\chrome-headless-shell-win64\\chrome-headless-shell.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --enable-unsafe-swiftshader --user-data-dir=C:\\Users\\BARAK\\AppData\\Local\\Temp\\playwright_chromiumdev_profile-rToVSp --remote-debugging-pipe --no-startup-window\n<launched> pid=14648\n[pid=14648][err] [0530/120749.525:INFO:CONSOLE:401] \"[wafflestack] build 2026-05-09-72fe066-cache-bust\", source: https://wafflestack-app.vercel.app/assets/index-mUI7ORG1.js (401)\n[pid=14648] <gracefully close start>"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:07:43.780Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\BARAK\\Projects\\base44\\qa\\report\\02-auth-Auth-flow-—-form-i-34dc5--—-register-form-is-visible-chromium-mobile\\error-context.md"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 9,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 2838,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-05-30T09:09:29.523Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "flaky"
+                }
+              ],
+              "id": "42ee48a5561f1ffbe298-0cec6bbcf784a6960e59",
+              "file": "02-auth.spec.ts",
+              "line": 38,
+              "column": 3
+            },
+            {
+              "title": "TC-AUTH-02 — username and password fields accept input",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 11783,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:09:32.961Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "42ee48a5561f1ffbe298-d84eee82a68aea91f691",
+              "file": "02-auth.spec.ts",
+              "line": 58,
+              "column": 3
+            },
+            {
+              "title": "TC-AUTH-03 — form submit does not crash the page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 9302,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:09:44.774Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "42ee48a5561f1ffbe298-8eab1d6e94f841d823b8",
+              "file": "02-auth.spec.ts",
+              "line": 95,
+              "column": 3
+            },
+            {
+              "title": "TC-AUTH-04 — login/register toggle switches form mode",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 4953,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:09:54.112Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "42ee48a5561f1ffbe298-f97cbbb46f52ef6d97d1",
+              "file": "02-auth.spec.ts",
+              "line": 141,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "03-quiz-golden-path.spec.ts",
+      "file": "03-quiz-golden-path.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Quiz golden path",
+          "file": "03-quiz-golden-path.spec.ts",
+          "line": 53,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-QUIZ-01 — app reaches a study view past landing",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                      "location": {
+                        "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                        "line": 55,
+                        "column": 26
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 2328,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:17.369Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                            "line": 55,
+                            "column": 26
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d91228833444aaa69f0f-868bde4c9cca41717de6",
+              "file": "03-quiz-golden-path.spec.ts",
+              "line": 66,
+              "column": 3
+            },
+            {
+              "title": "TC-QUIZ-02 — question text (Hebrew or KaTeX) is visible",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                      "location": {
+                        "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                        "line": 55,
+                        "column": 26
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 10767,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:20.235Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                            "line": 55,
+                            "column": 26
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d91228833444aaa69f0f-02de29ba890cc266bd9a",
+              "file": "03-quiz-golden-path.spec.ts",
+              "line": 94,
+              "column": 3
+            },
+            {
+              "title": "TC-QUIZ-03 — 4 answer options visible with min 44px touch target",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                      "location": {
+                        "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                        "line": 55,
+                        "column": 26
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 1809,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:31.037Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                            "line": 55,
+                            "column": 26
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d91228833444aaa69f0f-9ec4269be5dd911a55df",
+              "file": "03-quiz-golden-path.spec.ts",
+              "line": 124,
+              "column": 3
+            },
+            {
+              "title": "TC-QUIZ-04 — selecting an answer produces visible feedback",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                      "location": {
+                        "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                        "line": 55,
+                        "column": 26
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 3688,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:32.876Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                            "line": 55,
+                            "column": 26
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d91228833444aaa69f0f-b3fe7ecf72d702f87e23",
+              "file": "03-quiz-golden-path.spec.ts",
+              "line": 157,
+              "column": 3
+            },
+            {
+              "title": "TC-QUIZ-05 — progress indicator is visible",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                      "location": {
+                        "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                        "line": 55,
+                        "column": 26
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 934,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:36.596Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                            "line": 55,
+                            "column": 26
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d91228833444aaa69f0f-d34663f7450b0d738f1a",
+              "file": "03-quiz-golden-path.spec.ts",
+              "line": 199,
+              "column": 3
+            },
+            {
+              "title": "TC-QUIZ-01 — app reaches a study view past landing",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                      "location": {
+                        "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                        "line": 55,
+                        "column": 26
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 1345,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:07:48.003Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                            "line": 55,
+                            "column": 26
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d91228833444aaa69f0f-f970de187333854196d4",
+              "file": "03-quiz-golden-path.spec.ts",
+              "line": 66,
+              "column": 3
+            },
+            {
+              "title": "TC-QUIZ-02 — question text (Hebrew or KaTeX) is visible",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                      "location": {
+                        "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                        "line": 55,
+                        "column": 26
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 2,
+                      "status": "timedOut",
+                      "duration": 66742,
+                      "error": {
+                        "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 60000ms.\u001b[39m",
+                        "stack": "\u001b[31mTearing down \"context\" exceeded the test timeout of 60000ms.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 60000ms.\u001b[39m"
+                        },
+                        {
+                          "message": "Error: browserContext.close: Protocol error (Target.disposeBrowserContext): Failed to find context with id DCC154197B3B6A564ADFE1E601EF0F7A"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:07:49.990Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                            "line": 55,
+                            "column": 26
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\BARAK\\Projects\\base44\\qa\\report\\03-quiz-golden-path-Quiz-g-60da3--Hebrew-or-KaTeX-is-visible-chromium-mobile\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\BARAK\\Projects\\base44\\qa\\report\\03-quiz-golden-path-Quiz-g-60da3--Hebrew-or-KaTeX-is-visible-chromium-mobile\\error-context.md"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 587,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-05-30T09:09:28.128Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                            "line": 55,
+                            "column": 26
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "flaky"
+                }
+              ],
+              "id": "d91228833444aaa69f0f-fa9c30b2d77f08abb5b0",
+              "file": "03-quiz-golden-path.spec.ts",
+              "line": 94,
+              "column": 3
+            },
+            {
+              "title": "TC-QUIZ-03 — 4 answer options visible with min 44px touch target",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                      "location": {
+                        "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                        "line": 55,
+                        "column": 26
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 486,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:09:29.093Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                            "line": 55,
+                            "column": 26
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d91228833444aaa69f0f-ac9f9a6c8b0848193a34",
+              "file": "03-quiz-golden-path.spec.ts",
+              "line": 124,
+              "column": 3
+            },
+            {
+              "title": "TC-QUIZ-04 — selecting an answer produces visible feedback",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                      "location": {
+                        "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                        "line": 55,
+                        "column": 26
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 778,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:09:29.610Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                            "line": 55,
+                            "column": 26
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d91228833444aaa69f0f-8ad3d31a34abf80ab3a2",
+              "file": "03-quiz-golden-path.spec.ts",
+              "line": 157,
+              "column": 3
+            },
+            {
+              "title": "TC-QUIZ-05 — progress indicator is visible",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                      "location": {
+                        "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                        "line": 55,
+                        "column": 26
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 2,
+                      "status": "skipped",
+                      "duration": 621,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:09:30.432Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "Study view requires auth — set QA_TEST_PASSWORD env var",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\03-quiz-golden-path.spec.ts",
+                            "line": 55,
+                            "column": 26
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d91228833444aaa69f0f-c9535db38519a350029e",
+              "file": "03-quiz-golden-path.spec.ts",
+              "line": 199,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "04-rtl-hebrew.spec.ts",
+      "file": "04-rtl-hebrew.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "RTL / Hebrew UX",
+          "file": "04-rtl-hebrew.spec.ts",
+          "line": 15,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-RTL-01 — document direction is RTL",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 12457,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:17.299Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "366be322e1964639a183-330e355cb53815e1f656",
+              "file": "04-rtl-hebrew.spec.ts",
+              "line": 26,
+              "column": 3
+            },
+            {
+              "title": "TC-RTL-02 — no horizontal overflow on landing page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 7395,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:30.306Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "366be322e1964639a183-c6391faef31ff8b9774d",
+              "file": "04-rtl-hebrew.spec.ts",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "TC-RTL-03 — Hebrew characters rendered in DOM",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 29825,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:37.739Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "366be322e1964639a183-bbaaa84bd458c3ff811a",
+              "file": "04-rtl-hebrew.spec.ts",
+              "line": 58,
+              "column": 3
+            },
+            {
+              "title": "TC-RTL-04 — text input accepts Hebrew characters",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\04-rtl-hebrew.spec.ts",
+                        "line": 87,
+                        "column": 12
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "skipped",
+                      "duration": 12221,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[TC-RTL-04] No text input on landing page — skipping\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:07:07.599Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\04-rtl-hebrew.spec.ts",
+                            "line": 87,
+                            "column": 12
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "366be322e1964639a183-3d9ecdc0c26ac2e36879",
+              "file": "04-rtl-hebrew.spec.ts",
+              "line": 81,
+              "column": 3
+            },
+            {
+              "title": "TC-RTL-01 — document direction is RTL",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 65942,
+                      "error": {
+                        "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 60000ms.\u001b[39m",
+                        "stack": "\u001b[31mTearing down \"context\" exceeded the test timeout of 60000ms.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTearing down \"context\" exceeded the test timeout of 60000ms.\u001b[39m"
+                        },
+                        {
+                          "message": "Error: browserContext.close: Test ended.\nBrowser logs:\n\n<launching> C:\\Users\\BARAK\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1223\\chrome-headless-shell-win64\\chrome-headless-shell.exe --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --enable-unsafe-swiftshader --user-data-dir=C:\\Users\\BARAK\\AppData\\Local\\Temp\\playwright_chromiumdev_profile-RsXMl6 --remote-debugging-pipe --no-startup-window\n<launched> pid=28020\n[pid=28020][err] [0530/120749.980:INFO:CONSOLE:401] \"[wafflestack] build 2026-05-09-72fe066-cache-bust\", source: https://wafflestack-app.vercel.app/assets/index-mUI7ORG1.js (401)\n[pid=28020][err] [0530/120750.751:ERROR:gpu\\command_buffer\\service\\gl_utils.cc:430] [.WebGL-0x64540019a200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels\n[pid=28020][err] [0530/120750.789:INFO:CONSOLE:0] \"[.WebGL-0x64540019a200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels\", source: https://wafflestack-app.vercel.app/#landing (0)\n[pid=28020][err] [0530/120750.817:ERROR:gpu\\command_buffer\\service\\gl_utils.cc:430] [.WebGL-0x64540019a200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels\n[pid=28020][err] [0530/120750.890:INFO:CONSOLE:0] \"[.WebGL-0x64540019a200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels\", source: https://wafflestack-app.vercel.app/#landing (0)\n[pid=28020][err] [0530/120750.892:ERROR:gpu\\command_buffer\\service\\gl_utils.cc:430] [.WebGL-0x64540019a200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels\n[pid=28020][err] [0530/120750.899:INFO:CONSOLE:0] \"[.WebGL-0x64540019a200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels\", source: https://wafflestack-app.vercel.app/#landing (0)\n[pid=28020][err] [0530/120750.910:ERROR:gpu\\command_buffer\\service\\gl_utils.cc:430] [.WebGL-0x64540019a200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)\n[pid=28020][err] [0530/120750.917:INFO:CONSOLE:0] \"[.WebGL-0x64540019a200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)\", source: https://wafflestack-app.vercel.app/#landing (0)\n[pid=28020] <gracefully close start>"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:07:47.650Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\BARAK\\Projects\\base44\\qa\\report\\04-rtl-hebrew-RTL-Hebrew-U-2fa51-—-document-direction-is-RTL-chromium-mobile\\error-context.md"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 10,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 9771,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-05-30T09:09:48.828Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "flaky"
+                }
+              ],
+              "id": "366be322e1964639a183-d6064791b8f8ffcd44a0",
+              "file": "04-rtl-hebrew.spec.ts",
+              "line": 26,
+              "column": 3
+            },
+            {
+              "title": "TC-RTL-02 — no horizontal overflow on landing page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 10,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5282,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:09:59.173Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "366be322e1964639a183-f654cb7f4931c4648c9c",
+              "file": "04-rtl-hebrew.spec.ts",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "TC-RTL-03 — Hebrew characters rendered in DOM",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 10,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 11798,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:10:04.483Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "366be322e1964639a183-a056007b59ce39f4e96d",
+              "file": "04-rtl-hebrew.spec.ts",
+              "line": 58,
+              "column": 3
+            },
+            {
+              "title": "TC-RTL-04 — text input accepts Hebrew characters",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "location": {
+                        "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\04-rtl-hebrew.spec.ts",
+                        "line": 87,
+                        "column": 12
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 10,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 6245,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[TC-RTL-04] No text input on landing page — skipping\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:10:16.341Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "location": {
+                            "file": "C:\\Users\\BARAK\\Projects\\base44\\qa\\specs\\04-rtl-hebrew.spec.ts",
+                            "line": 87,
+                            "column": 12
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "366be322e1964639a183-a7947a2802916f505946",
+              "file": "04-rtl-hebrew.spec.ts",
+              "line": 81,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "05-a11y-audit.spec.ts",
+      "file": "05-a11y-audit.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Accessibility audit",
+          "file": "05-a11y-audit.spec.ts",
+          "line": 61,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-A11Y-01 — landing page: zero critical a11y violations",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 28489,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "\n[a11y:landing] 2 violations total: \n  CRITICAL : 0 \n  SERIOUS  : 0 \n  OTHER    : 2 \n  Details  : [\n  {\n    \"id\": \"landmark-one-main\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure the document has a main landmark\",\n    \"nodeCount\": 1\n  },\n  {\n    \"id\": \"region\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure all page content is contained by landmarks\",\n    \"nodeCount\": 23\n  }\n]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:06:38.118Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9c97cde9a1525344eabb-0be2f46b5f9a9bff0d9c",
+              "file": "05-a11y-audit.spec.ts",
+              "line": 70,
+              "column": 3
+            },
+            {
+              "title": "TC-A11Y-02 — study/quiz view: zero critical a11y violations",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 17592,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "\n[a11y:study-view] 3 violations total: \n  CRITICAL : 0 \n  SERIOUS  : 0 \n  OTHER    : 3 \n  Details  : [\n  {\n    \"id\": \"landmark-one-main\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure the document has a main landmark\",\n    \"nodeCount\": 1\n  },\n  {\n    \"id\": \"page-has-heading-one\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure that the page, or at least one of its frames contains a level-one heading\",\n    \"nodeCount\": 1\n  },\n  {\n    \"id\": \"region\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure all page content is contained by landmarks\",\n    \"nodeCount\": 3\n  }\n]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:07:06.658Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9c97cde9a1525344eabb-dd187a0130fed72ce29a",
+              "file": "05-a11y-audit.spec.ts",
+              "line": 83,
+              "column": 3
+            },
+            {
+              "title": "TC-A11Y-01 — landing page: zero critical a11y violations",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 16442,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "\n[a11y:landing] 2 violations total: \n  CRITICAL : 0 \n  SERIOUS  : 0 \n  OTHER    : 2 \n  Details  : [\n  {\n    \"id\": \"landmark-one-main\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure the document has a main landmark\",\n    \"nodeCount\": 1\n  },\n  {\n    \"id\": \"region\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure all page content is contained by landmarks\",\n    \"nodeCount\": 23\n  }\n]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:09:31.480Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9c97cde9a1525344eabb-9fe72b4c725ea3e66253",
+              "file": "05-a11y-audit.spec.ts",
+              "line": 70,
+              "column": 3
+            },
+            {
+              "title": "TC-A11Y-02 — study/quiz view: zero critical a11y violations",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-mobile",
+                  "projectName": "chromium-mobile",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 10762,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "\n[a11y:study-view] 3 violations total: \n  CRITICAL : 0 \n  SERIOUS  : 0 \n  OTHER    : 3 \n  Details  : [\n  {\n    \"id\": \"landmark-one-main\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure the document has a main landmark\",\n    \"nodeCount\": 1\n  },\n  {\n    \"id\": \"page-has-heading-one\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure that the page, or at least one of its frames contains a level-one heading\",\n    \"nodeCount\": 1\n  },\n  {\n    \"id\": \"region\",\n    \"impact\": \"moderate\",\n    \"description\": \"Ensure all page content is contained by landmarks\",\n    \"nodeCount\": 3\n  }\n]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-05-30T09:09:47.950Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9c97cde9a1525344eabb-c50d78bc129d3af77bab",
+              "file": "05-a11y-audit.spec.ts",
+              "line": 83,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-05-30T09:06:15.062Z",
+    "duration": 267953.71499999997,
+    "expected": 25,
+    "skipped": 11,
+    "unexpected": 0,
+    "flaky": 4
+  }
+}
