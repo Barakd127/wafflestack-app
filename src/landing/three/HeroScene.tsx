@@ -163,27 +163,29 @@ function CyclingBuilding() {
     prepared.forEach(p => { p.wrapper.visible = false })
   }, [prepared])
 
-  useFrame((_, delta) => {
+  useFrame(() => {
     if (!root.current || !ready) return
-    // Only the newest mounted loop animates. Ghost loops left over from HMR /
-    // Fast Refresh hold a stale gen and bail here → no N× speed-up ever.
-    if ((window as unknown as Record<string, number>)[HERO_LOOP_GEN_KEY] !== myGen.current) return
+    // NOTE: no loop-generation bail needed anymore. The rotation below is an
+    // absolute function of time that we ASSIGN, so even if several loops run
+    // they all set the same angle — they can't speed each other up.
     const s = animRef.current
 
     // Bobbing (recentred — TARGET_FIT_SIZE 4.2 means model is taller; pull
     // down so it sits in the visual centre instead of overshooting upward)
     root.current.position.y = -1.8 + Math.sin(performance.now() * 0.0008) * 0.08
 
-    // SLOW CONTINUOUS SPIN — applied EVERY frame, INCLUDING during the
-    // crossfade. The old code returned early inside the fade branch, which
-    // FROZE rotation: a building dissolved into the next one at a static angle.
-    // Because each GLB faces a different way, that frozen swap read as a fast,
-    // 'crazy' flip at every transition (user 2026-05-30: the switch between
-    // buildings is the jarring part). Running the gentle spin through the
-    // dissolve makes the swap read as continuous motion instead of a flip.
-    // delta clamped so a backgrounded tab can't burst on refocus.
-    const clamped = Math.min(delta, MAX_DELTA)
-    root.current.rotation.y += clamped * ROTATION_SPEED
+    // BULLETPROOF SLOW SPIN — absolute time-based angle, SET (not +=).
+    // The whole 'super-fast spin' saga came from `rotation.y += speed*delta`:
+    // if more than one useFrame loop ever touched the group (HMR ghosts,
+    // StrictMode double-mount, a stray subscription), each ADDED its increment
+    // every frame, so N loops = N× speed. By deriving the angle as a pure
+    // function of time and ASSIGNING it, any number of loops all compute the
+    // SAME value — accumulation, and therefore the N× speed-up, is
+    // mathematically impossible. This kills the entire bug class regardless of
+    // how many loops run. Applied every frame, including during the crossfade,
+    // so the building swap happens inside continuous motion (no frozen flip).
+    // Per user 2026-05-30 (≈20th report).
+    root.current.rotation.y = (performance.now() / 1000) * ROTATION_SPEED
     root.current.rotation.z = 0
 
     if (s.fadeStart >= 0) {
