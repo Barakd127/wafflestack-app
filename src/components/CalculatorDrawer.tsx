@@ -170,6 +170,10 @@ export default function CalculatorDrawer() {
   const [formula, setFormula] = useState<Formula | null>(null)
   const [vals, setVals] = useState<Record<string, string>>({})
   const [copied, setCopied] = useState(false)
+  // True when opened from a canvas/notebook equation inside the mindmap iframe.
+  // In that mode there is no live math-field, so inserts are posted back to the
+  // iframe to land as a canvas equation object instead of writing wsActiveMathField.
+  const [canvasMode, setCanvasMode] = useState(false)
   // When ON (default), the "הכנס תוצאה" action also pastes the substitution
   // step into the equation, so the Arsenal card shows formula → substitution
   // → result. Uncheck to paste only formula + result. Per user 2026-05-28.
@@ -178,7 +182,7 @@ export default function CalculatorDrawer() {
 
   useEffect(() => {
     const onOpen = (e: Event) => {
-      const detail = (e as CustomEvent).detail as { formulaId?: string } | undefined
+      const detail = (e as CustomEvent).detail as { formulaId?: string; canvas?: boolean } | undefined
       const id = detail?.formulaId
       if (!id) return
       const f = findFormula(id)
@@ -186,6 +190,7 @@ export default function CalculatorDrawer() {
       setFormula(f)
       setVals({})
       setCopied(false)
+      setCanvasMode(!!detail?.canvas)
     }
     window.addEventListener('ws-open-calc', onOpen)
     return () => window.removeEventListener('ws-open-calc', onOpen)
@@ -271,6 +276,16 @@ export default function CalculatorDrawer() {
   // mf.value directly (full replace) rather than executeCommand-insert at the
   // cursor, which is what caused the inline concatenation.
   const appendRowsToField = (newRows: string[]) => {
+    // Canvas/notebook context: no live math-field. Post the rows (wrapped as one
+    // gathered block when multi-row) back to the mindmap iframe, which drops it
+    // as an equation object via ftbInsert. Per user 2026-05-30 (Bug 2).
+    if (canvasMode) {
+      const value = newRows.length > 1
+        ? '\\begin{gathered}' + newRows.join(' \\\\ ') + '\\end{gathered}'
+        : (newRows[0] ?? '')
+      if (value) window.dispatchEvent(new CustomEvent('ws-insert-canvas-eq', { detail: { latex: value } }))
+      return
+    }
     const mf = window.wsActiveMathField
     if (!mf) return
     const newBlock = newRows.join(' \\\\ ')
@@ -295,7 +310,7 @@ export default function CalculatorDrawer() {
 
   const insertIntoField = () => {
     if (result == null) return
-    if (!window.wsActiveMathField) return
+    if (!canvasMode && !window.wsActiveMathField) return
     // Worked-solution rows: formula / substitution (if checkbox on) / = result.
     const res = formatResult(result)
     const parts = [formula.latex]
@@ -306,7 +321,7 @@ export default function CalculatorDrawer() {
   }
 
   const insertFormulaIntoField = () => {
-    if (!window.wsActiveMathField) return
+    if (!canvasMode && !window.wsActiveMathField) return
     appendRowsToField([formula.latex])
     closeAndReturn()
   }
