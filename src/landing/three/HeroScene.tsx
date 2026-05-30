@@ -26,7 +26,7 @@ const BUILDINGS = [
 const ROTATION_SPEED = 0.18                 // rad/s → full turn ≈ 35s (gentle)
 const MAX_DELTA = 1 / 30                     // clamp: never integrate > 1 frame
 const SECONDS_PER_BUILDING = 16.0           // crossfade cadence per model
-const FADE_DURATION = 1.0                   // seconds for crossfade (smoother)
+const FADE_DURATION = 1.8                   // longer, softer dissolve (less abrupt swap)
 // Each building gets normalised so its largest dimension fits this many world
 // units. Tuned for the 640×520 frameless hero — building should dominate the
 // space, so TARGET_FIT_SIZE matches a large fraction of vertical viewport.
@@ -174,6 +174,18 @@ function CyclingBuilding() {
     // down so it sits in the visual centre instead of overshooting upward)
     root.current.position.y = -1.8 + Math.sin(performance.now() * 0.0008) * 0.08
 
+    // SLOW CONTINUOUS SPIN — applied EVERY frame, INCLUDING during the
+    // crossfade. The old code returned early inside the fade branch, which
+    // FROZE rotation: a building dissolved into the next one at a static angle.
+    // Because each GLB faces a different way, that frozen swap read as a fast,
+    // 'crazy' flip at every transition (user 2026-05-30: the switch between
+    // buildings is the jarring part). Running the gentle spin through the
+    // dissolve makes the swap read as continuous motion instead of a flip.
+    // delta clamped so a backgrounded tab can't burst on refocus.
+    const clamped = Math.min(delta, MAX_DELTA)
+    root.current.rotation.y += clamped * ROTATION_SPEED
+    root.current.rotation.z = 0
+
     if (s.fadeStart >= 0) {
       const elapsed = (performance.now() / 1000) - s.fadeStart
       const half = FADE_DURATION / 2
@@ -182,18 +194,13 @@ function CyclingBuilding() {
         const op = Math.max(0, 1 - (elapsed / half))
         cur.materials.forEach(m => { m.opacity = op })
       } else if (elapsed < FADE_DURATION) {
-        // Mid-fade: swap visible model + start fading the next IN.
+        // Mid-fade: swap visible model + start fading the next IN. Rotation has
+        // already advanced this frame (above), so the swap is hidden inside
+        // smooth continuous motion — no frozen-angle flip.
         if (cur.wrapper.visible) {
           cur.wrapper.visible = false
           cur.materials.forEach(m => { m.opacity = 0 })
           s.index = (s.index + 1) % prepared.length
-          // DO NOT reset rotation.y to 0 here. The old code snapped it from
-          // ~2π back to 0; even though 2π and 0 are the same angle, the
-          // building is still partially visible mid-crossfade and carries a
-          // rotation.z wobble offset, so the snap rendered as a fast 'spin'
-          // once per ~30-50s cycle. Keep rotation continuous; just re-baseline
-          // the full-rotation counter to the current angle. Per user
-          // 2026-05-28 (flagged many times).
           if (root.current) s.lastFullRotY = root.current.rotation.y
           s.cycleStartTime = performance.now() / 1000  // mark new model's start
           const next = prepared[s.index]
@@ -209,19 +216,11 @@ function CyclingBuilding() {
         s.fadeStart = -1
         s.rotationsDone = 0
       }
-      return
+      return  // rotation already applied this frame; skip the start-fade check
     }
 
-    // Slow continuous spin. delta is clamped so a backgrounded tab (which
-    // returns a multi-second delta on refocus) can advance at most one frame's
-    // worth — no aggressive burst. No reset of rotation.y (the old 2π→0 snap
-    // was the other spin source).
-    const clamped = Math.min(delta, MAX_DELTA)
-    root.current.rotation.y += clamped * ROTATION_SPEED
-    root.current.rotation.z = 0
     const t = performance.now() / 1000
-    // Time-based crossfade — swap to the next building every
-    // SECONDS_PER_BUILDING. No rotation counting involved.
+    // Time-based crossfade — swap to the next building every SECONDS_PER_BUILDING.
     if (t - s.cycleStartTime >= SECONDS_PER_BUILDING) {
       s.fadeStart = performance.now() / 1000
     }
