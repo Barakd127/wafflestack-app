@@ -30,6 +30,15 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   const [mindmapOpen, setMindmapOpen] = useState(false)
   const [splitPct, setSplitPct] = useState(45)  // mind map width %
   const [copied, setCopied] = useState<string | null>(null)
+  // Transient toast shown after queuing/adding a node to the mind map. Gives
+  // clear feedback even when the split is NOT open (per user 2026-05-30).
+  const [mapToast, setMapToast] = useState<string | null>(null)
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const showMapToast = (msg: string) => {
+    setMapToast(msg)
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    toastTimerRef.current = setTimeout(() => setMapToast(null), 2200)
+  }
   const completedRef = useRef(false)
   const mindmapRef = useRef<HTMLIFrameElement>(null)
   const draggingRef = useRef(false)
@@ -187,17 +196,12 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
     } catch { /* localStorage full / disabled — ignore */ }
 
     // Also try live postMessage if the iframe IS already mounted; gives instant feedback.
-    if (mindmapOpen) {
-      const ok = sendToMindMap(text, kind, mode)
-      if (ok) {
-        setCopied(sourceLabel)
-        setTimeout(() => setCopied(null), 1500)
-        return
-      }
-    }
-    // Otherwise just toast that it's queued.
+    // Either way, queue above guarantees the node lands when the map next opens,
+    // so we always show the success toast regardless of split state.
+    if (mindmapOpen) sendToMindMap(text, kind, mode)
     setCopied(sourceLabel)
     setTimeout(() => setCopied(null), 1500)
+    showMapToast('נוסף למפה שלי')
   }
 
   const handleCopyFormula = (formula: string) => {
@@ -577,17 +581,18 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             }}>
               <KatexFormula latex={slide.formula} />
             </div>
-            {mindmapOpen && (
-              <button
-                className="ws-formula-copy"
-                onClick={() => handleCopyFormula(slide.formula!)}
-                title="הוסף את הנוסחה למפת המושגים"
-                style={formulaCopyBtnStyle(copied === 'formula')}
-              >
-                {copied === 'formula' ? '✓' : '🧠+'}
-                <span className="cm-label">{copied === 'formula' ? 'נוסף' : 'הוסף למפה'}</span>
-              </button>
-            )}
+            {/* Always available — even without an open split. confirmInsert
+                queues to localStorage so the mindmap drains it on next open.
+                Per user 2026-05-30: add formulas to my map without split-screen. */}
+            <button
+              className="ws-formula-copy"
+              onClick={() => handleCopyFormula(slide.formula!)}
+              title="הוסף את הנוסחה למפה שלי"
+              style={formulaCopyBtnStyle(copied === 'formula')}
+            >
+              {copied === 'formula' ? '✓' : '➕'}
+              <span className="cm-label">{copied === 'formula' ? 'נוסף' : 'הוסף למפה שלי'}</span>
+            </button>
           </div>
         )}
       </div>
@@ -845,6 +850,29 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Add-to-map toast — confirms the formula/title was queued to the
+          user's mind map, shown whether or not the split is open. */}
+      {mapToast && (
+        <div
+          dir="rtl"
+          role="status"
+          aria-live="polite"
+          style={{
+            position: 'fixed', bottom: 28, insetInlineStart: '50%',
+            transform: 'translateX(-50%)', zIndex: 1200,
+            background: 'rgba(16,185,129,0.96)', color: '#fff',
+            borderRadius: 14, padding: '12px 22px',
+            fontFamily: "'Rubik','Assistant',sans-serif", fontSize: 15, fontWeight: 700,
+            boxShadow: '0 10px 30px rgba(16,185,129,0.4)',
+            display: 'flex', alignItems: 'center', gap: 8,
+            pointerEvents: 'none',
+          }}
+        >
+          <span style={{ fontSize: 18 }}>🧠</span>
+          <span>{mapToast}</span>
         </div>
       )}
     </div>
