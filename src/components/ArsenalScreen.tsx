@@ -9,7 +9,8 @@ import { createElement, useState, useMemo, useRef, useEffect } from 'react'
 import {
   useArsenalStore, KIND_META,
   serializeEquation, deserializeEquation, looksLikeMath,
-  type ArsenalEntry, type ArsenalKind, type EquationData,
+  deserializeTable,
+  type ArsenalEntry, type ArsenalKind, type EquationData, type TableData,
 } from '../store/arsenalStore'
 import { useTutorialStep } from '../hooks/useTutorialStep'
 import CommunityArsenalTab from './CommunityArsenalTab'
@@ -300,6 +301,7 @@ export default function ArsenalScreen() {
     trick:    entries.filter(e => e.kind === 'trick').length,
     tip:      entries.filter(e => e.kind === 'tip').length,
     equation: entries.filter(e => e.kind === 'equation').length,
+    table:    entries.filter(e => e.kind === 'table').length,
     pinned:   entries.filter(e => e.pinned).length,
   }), [entries])
 
@@ -335,7 +337,7 @@ export default function ArsenalScreen() {
     // — never populate the textarea with the raw JSON `{"label":"…","latex":"…"}`,
     // which is what caused the wipe-to-empty regression in PR #60. Per plan
     // curried-waddling-pelican Part C.
-    if (entry.kind === 'equation') return
+    if (entry.kind === 'equation' || entry.kind === 'table') return
     setEditingId(entry.id)
     setEditingText(entry.text)
   }
@@ -475,6 +477,10 @@ export default function ArsenalScreen() {
           selected={kindFilter === 'equation'} onClick={() => setKindFilter('equation')}
           color={KIND_META.equation.color} bg={KIND_META.equation.bg}
           tip={showHints ? KIND_META.equation.description : undefined} />
+        <FilterPill label="טבלאות" icon={KIND_META.table.icon} count={counts.table}
+          selected={kindFilter === 'table'} onClick={() => setKindFilter('table')}
+          color={KIND_META.table.color} bg={KIND_META.table.bg}
+          tip={showHints ? KIND_META.table.description : undefined} />
         <FilterPill label="מוצמדים" icon="📍" count={counts.pinned}
           selected={kindFilter === 'pinned'} onClick={() => setKindFilter('pinned')}
           color="#92400e" bg="rgba(251,191,36,0.18)"
@@ -660,11 +666,17 @@ function ArsenalCard({
   // Local state for inline equation editing (equation kind only)
   const [editingEq, setEditingEq] = useState(false)
   const isEquation = entry.kind === 'equation'
+  const isTable = entry.kind === 'table'
 
   // Parse equation payload once (memoized on entry.text)
   const eqData = useMemo(
     () => isEquation ? deserializeEquation(entry.text) : null,
     [isEquation, entry.text],
+  )
+  // Parse table payload once (table kind only).
+  const tableData = useMemo(
+    () => isTable ? deserializeTable(entry.text) : null,
+    [isTable, entry.text],
   )
 
   const handleStartEdit = () => {
@@ -743,6 +755,8 @@ function ArsenalCard({
         ) : (
           <EquationCardBody eqData={eqData} rawText={entry.text} onToggleNumbered={handleToggleNumbered} />
         )
+      ) : isTable ? (
+        <TableCardBody data={tableData} />
       ) : isEditing ? (
         <textarea
           autoFocus
@@ -806,7 +820,9 @@ function ArsenalCard({
                 >
                   📌
                 </button>
-                <button onClick={handleStartEdit} style={iconBtn('rgba(127,155,217,0.12)', TEXT_LIGHT)} title="ערוך">✏️</button>
+                {!isTable && (
+                  <button onClick={handleStartEdit} style={iconBtn('rgba(127,155,217,0.12)', TEXT_LIGHT)} title="ערוך">✏️</button>
+                )}
                 {/* "המר לנוסחה" reclassify — shown only when text passes math
                     heuristic AND the entry is not already equation kind.
                     Lets users fix broken auto-extracted gotcha entries in one tap. */}
@@ -819,7 +835,7 @@ function ArsenalCard({
                     Σ המר
                   </button>
                 )}
-                {canShare && (
+                {canShare && !isTable && (
                   <button
                     onClick={onShare}
                     disabled={sharing}
@@ -848,6 +864,68 @@ function ArsenalCard({
           )}
         </div>
       </div>
+    </div>
+  )
+}
+
+// ── Table card body ───────────────────────────────────────────────────────────
+/** Read-only preview of a table-kind card. Mirrors the canvas table look from
+ *  public/mindmap.html: app-blue gradient header, alternating data rows, and a
+ *  tinted+bold right-most "parameter" column when paramCol is set. */
+function TableCardBody({ data }: { data: TableData | null }) {
+  if (!data || data.cols.length === 0) {
+    return <div style={{ flex: 1, fontSize: 12, color: TEXT_LIGHT }}>טבלה לא תקינה</div>
+  }
+  const { cols, rows, paramCol } = data
+  const paramIdx = paramCol ? cols.length - 1 : -1
+  return (
+    <div dir="ltr" style={{
+      flex: 1, overflow: 'auto', maxHeight: 220,
+      borderRadius: 10, border: '1px solid rgba(31,62,108,0.15)',
+    }}>
+      {/* dir=ltr so columns keep canvas order (cols[0] left → param column on
+          the right), matching the whiteboard. Cell text uses dir=auto so Hebrew
+          still resolves right-to-left within each cell. */}
+      <table style={{
+        borderCollapse: 'collapse', width: '100%',
+        fontFamily: "'Assistant', sans-serif", fontSize: 12,
+      }}>
+        <thead>
+          <tr>
+            {cols.map((c, i) => (
+              <th key={i} dir="auto" style={{
+                background: 'linear-gradient(90deg,#1F3E6C,#3351CA)',
+                color: '#fff', fontWeight: 700, padding: '5px 8px',
+                textAlign: 'center', border: '1px solid rgba(255,255,255,0.18)',
+                whiteSpace: 'nowrap',
+              }}>{c.name || ' '}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, ri) => (
+            <tr key={ri}>
+              {cols.map((_, ci) => {
+                const isParam = ci === paramIdx
+                const even = ri % 2 === 0
+                const bg = isParam
+                  ? (even ? '#eef2fb' : '#e4eaf7')
+                  : (even ? '#ffffff' : '#f8f8ff')
+                return (
+                  <td key={ci} dir="auto" style={{
+                    background: bg,
+                    color: isParam ? '#1F3E6C' : '#1a1a1a',
+                    fontWeight: isParam ? 700 : 400,
+                    textAlign: isParam ? 'right' : 'center',
+                    padding: '4px 8px', border: '1px solid #d1d5db',
+                    whiteSpace: 'nowrap',
+                  }}>{row[ci] ?? ''}</td>
+                )
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }

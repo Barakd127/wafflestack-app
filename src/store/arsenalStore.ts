@@ -12,7 +12,7 @@
  */
 import { create } from 'zustand'
 
-export type ArsenalKind = 'gotcha' | 'trick' | 'tip' | 'equation'
+export type ArsenalKind = 'gotcha' | 'trick' | 'tip' | 'equation' | 'table'
 
 export interface ArsenalEntry {
   id: string
@@ -59,12 +59,13 @@ function potionStorageKey(userId: string): string {
 function loadPotionState(userId: string): { potionsUsed: Record<ArsenalKind, number> } {
   try {
     const raw = localStorage.getItem(potionStorageKey(userId))
-    if (!raw) return { potionsUsed: { gotcha: 0, trick: 0, tip: 0, equation: 0 } }
+    if (!raw) return { potionsUsed: { gotcha: 0, trick: 0, tip: 0, equation: 0, table: 0 } }
     const parsed = JSON.parse(raw) as { potionsUsed: Record<string, number> }
-    // Backfill equation key for existing stored potion states
+    // Backfill new keys for existing stored potion states
     if (!('equation' in parsed.potionsUsed)) parsed.potionsUsed.equation = 0
+    if (!('table' in parsed.potionsUsed)) parsed.potionsUsed.table = 0
     return parsed as { potionsUsed: Record<ArsenalKind, number> }
-  } catch { return { potionsUsed: { gotcha: 0, trick: 0, tip: 0, equation: 0 } } }
+  } catch { return { potionsUsed: { gotcha: 0, trick: 0, tip: 0, equation: 0, table: 0 } } }
 }
 
 function savePotionState(userId: string, data: { potionsUsed: Record<ArsenalKind, number> }): void {
@@ -94,7 +95,7 @@ function makeId(): string {
 export const useArsenalStore = create<ArsenalState>((set, get) => ({
   entries: [],
   currentUserId: null,
-  potionsUsed: { gotcha: 0, trick: 0, tip: 0, equation: 0 },
+  potionsUsed: { gotcha: 0, trick: 0, tip: 0, equation: 0, table: 0 },
   activePotion: null,
   potionActivatedAt: null,
   memoryTeaRemaining: 0,
@@ -254,6 +255,69 @@ export function deserializeEquation(text: string): EquationData | null {
 }
 
 /**
+ * Table entries store the whiteboard table object as JSON in `ArsenalEntry.text`:
+ *   {"cols":[{"name":"x","w":100}],"rows":[["1"],["2"]],"headerBg":"#1F3E6C","paramCol":true}
+ * Mirrors the table object shape inside public/mindmap.html. Kept here so the
+ * Arsenal card preview and the cross-frame `ws-arsenal-add-table` bridge share
+ * one canonical (de)serializer.
+ */
+export interface TableCol { name: string; w: number }
+export interface TableData {
+  cols: TableCol[]
+  rows: string[][]
+  headerBg: string
+  /** Right-most column rendered as a tinted/bold parameter (row-label) column. */
+  paramCol: boolean
+}
+
+export function serializeTable(t: {
+  cols: { name?: unknown; w?: unknown }[]
+  rows: unknown[][]
+  headerBg?: unknown
+  paramCol?: unknown
+}): string {
+  const cols: TableCol[] = (Array.isArray(t.cols) ? t.cols : []).map(c => ({
+    name: typeof c?.name === 'string' ? c.name : '',
+    w: typeof c?.w === 'number' && c.w > 0 ? c.w : 100,
+  }))
+  const rows: string[][] = (Array.isArray(t.rows) ? t.rows : []).map(r =>
+    (Array.isArray(r) ? r : []).map(cell => (cell == null ? '' : String(cell)))
+  )
+  return JSON.stringify({
+    cols,
+    rows,
+    headerBg: typeof t.headerBg === 'string' ? t.headerBg : '#1F3E6C',
+    paramCol: t.paramCol === true,
+  })
+}
+
+export function deserializeTable(text: string): TableData | null {
+  try {
+    const parsed = JSON.parse(text) as unknown
+    if (typeof parsed !== 'object' || parsed === null) return null
+    const p = parsed as { cols?: unknown; rows?: unknown; headerBg?: unknown; paramCol?: unknown }
+    if (!Array.isArray(p.cols) || !Array.isArray(p.rows)) return null
+    const cols: TableCol[] = p.cols.map(c => {
+      const cc = c as { name?: unknown; w?: unknown }
+      return {
+        name: typeof cc?.name === 'string' ? cc.name : '',
+        w: typeof cc?.w === 'number' && cc.w > 0 ? cc.w : 100,
+      }
+    })
+    const rows: string[][] = (p.rows as unknown[]).map(r =>
+      (Array.isArray(r) ? r : []).map(cell => (cell == null ? '' : String(cell)))
+    )
+    return {
+      cols,
+      rows,
+      // Backward-compat: old generic indigo falls back to the app navy.
+      headerBg: typeof p.headerBg === 'string' ? p.headerBg : '#1F3E6C',
+      paramCol: p.paramCol === true,
+    }
+  } catch { return null }
+}
+
+/**
  * Returns true when text looks like a math formula worth auto-classifying
  * as `equation` kind. Requires an '=' sign PLUS at least one unambiguous
  * math signal (LaTeX commands, Unicode sub/superscripts, Greek symbols, etc.).
@@ -331,6 +395,16 @@ export const KIND_META: Record<ArsenalKind, {
     border: 'rgba(242,169,62,0.40)',
     description: 'נוסחה מתמטית — נכתבת דרך מקלדת הנוסחאות ומוצגת כ-KaTeX. אפשר להוסיף תווית בעברית מעל הנוסחה.',
   },
+  // "Table" — a whiteboard table saved from the canvas. Navy/app-blue palette.
+  // Added 2026-05-30: stores cols/rows/headerBg/paramCol as JSON in `text`.
+  table: {
+    label: 'טבלה',
+    icon: '▦',
+    color: '#1F3E6C',
+    bg: 'rgba(31,62,108,0.10)',
+    border: 'rgba(31,62,108,0.35)',
+    description: 'טבלה שנשמרה מהקנבס — נשמרת עם הכותרת, השורות ועמודת הפרמטרים. מוצגת כתצוגה מקדימה לקריאה בלבד.',
+  },
 }
 
 export const POTION_META: Record<ArsenalKind, {
@@ -340,4 +414,5 @@ export const POTION_META: Record<ArsenalKind, {
   trick:    { name: 'Speed Tonic',  nameHe: 'טוניק מהירות', effect: 'חידון בניין הבא: XP ×1.5 (5 דקות)',       icon: '⚗️', color: '#7c3aed', threshold: 3 },
   tip:      { name: 'Memory Tea',   nameHe: 'תה זיכרון',    effect: '3 שאלות הבאות: XP ×2',                    icon: '🍵', color: '#1e40af', threshold: 3 },
   equation: { name: 'Formula Bank', nameHe: 'בנק נוסחאות',  effect: '',                                         icon: 'Σ',  color: '#c97c18', threshold: 99 },
+  table:    { name: 'Table Vault',  nameHe: 'כספת טבלאות',  effect: '',                                         icon: '▦',  color: '#1F3E6C', threshold: 99 },
 }

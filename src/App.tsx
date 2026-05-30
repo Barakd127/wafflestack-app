@@ -21,6 +21,7 @@ import WaffleStackKeyboard from './components/WaffleStackKeyboard'
 import CalculatorDrawer from './components/CalculatorDrawer'
 import { setKeyboardOpen } from './lib/uiStacks'
 import { useLearningStore } from './store/learningStore'
+import { useArsenalStore, serializeTable } from './store/arsenalStore'
 
 const LandingPage = lazy(() => import('./landing/LandingPage'))
 // Notebook view is now a different render-mode of mindmap.html (loaded as an
@@ -103,6 +104,21 @@ function App() {
         const fromCanvas = d.source === 'canvas'
         calcFrameRef.current = fromCanvas ? e.source : null
         window.dispatchEvent(new CustomEvent('ws-open-calc', { detail: { formulaId: d.formulaId, canvas: fromCanvas } }))
+      } else if (d.type === 'ws-arsenal-add-table' && d.table && typeof d.table === 'object') {
+        // Cross-frame bridge: mindmap.html (iframe) posts this when the user
+        // picks "Save to Arsenal" on a canvas table. Serialize + add as a
+        // 'table'-kind entry. Hydrate the store first if the user hasn't opened
+        // the Arsenal yet this session (otherwise addEntry can't persist).
+        const store = useArsenalStore.getState()
+        if (!store.currentUserId) {
+          const uid = (typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default'
+          store.hydrate(uid)
+        }
+        useArsenalStore.getState().addEntry({
+          kind: 'table',
+          text: serializeTable(d.table as Parameters<typeof serializeTable>[0]),
+          source: 'manual',
+        })
       }
     }
     // The CalculatorDrawer fires this when its insert buttons run in canvas
