@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { Moon, Sun } from 'lucide-react'
 import StudyHub from './components/StudyHub'
 import MindMapCanvas from './components/MindMapCanvas'
@@ -51,6 +51,10 @@ function App() {
   })
   const [mindmapFrom, setMindmapFrom] = useState<string>('study')
   const [loggedIn, setLoggedIn] = useState(false)
+  // When the calculator is opened from a canvas/notebook equation inside the
+  // mindmap iframe, remember that frame so the CalculatorDrawer's insert can be
+  // posted back into it (it has no live math-field to write into). See Bug 2.
+  const calcFrameRef = useRef<MessageEventSource | null>(null)
 
   const openMindMap = (from: string) => {
     setMindmapFrom(from)
@@ -94,11 +98,28 @@ function App() {
         // Cross-frame bridge: mindmap.html (iframe) posts this when the user
         // clicks a rendered equation that matched a library formula. Re-dispatch
         // as the local ws-open-calc CustomEvent the CalculatorDrawer listens for.
-        window.dispatchEvent(new CustomEvent('ws-open-calc', { detail: { formulaId: d.formulaId } }))
+        // source:'canvas' → no live math-field; remember the frame so the
+        // drawer's insert is posted back into it as a canvas/notebook equation.
+        const fromCanvas = d.source === 'canvas'
+        calcFrameRef.current = fromCanvas ? e.source : null
+        window.dispatchEvent(new CustomEvent('ws-open-calc', { detail: { formulaId: d.formulaId, canvas: fromCanvas } }))
+      }
+    }
+    // The CalculatorDrawer fires this when its insert buttons run in canvas
+    // context. Forward the built LaTeX back into the originating iframe.
+    const onCanvasInsert = (ev: Event) => {
+      const latex = (ev as CustomEvent).detail?.latex
+      const frame = calcFrameRef.current
+      if (typeof latex === 'string' && frame) {
+        try { (frame as Window).postMessage({ type: 'ws-canvas-insert-eq', latex }, '*') } catch { /* */ }
       }
     }
     window.addEventListener('message', onMessage)
-    return () => window.removeEventListener('message', onMessage)
+    window.addEventListener('ws-insert-canvas-eq', onCanvasInsert)
+    return () => {
+      window.removeEventListener('message', onMessage)
+      window.removeEventListener('ws-insert-canvas-eq', onCanvasInsert)
+    }
   }, [])
 
   // Hash-driven navigation: <a href="#study"> on the landing page (and
