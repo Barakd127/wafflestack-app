@@ -796,7 +796,7 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
       <div class="wbt-popover" id="wbt-pop-insert" role="menu">
         <button class="wbt-pop-item" data-tool="text"   onclick="wbTool('text');wbClosePopovers()" title="טקסט [T]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5,6 5,4 19,4 19,6"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="9" y1="20" x2="15" y2="20"/></svg><span>טקסט</span></button>
         <button class="wbt-pop-item" data-tool="sticky" onclick="wbTool('sticky');wbClosePopovers()" title="פתק [S]"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><polyline points="16,4 16,8 20,8"/></svg><span>פתק</span></button>
-        <button class="wbt-pop-item" data-tool="table"  onclick="wbTool('table');wbClosePopovers()" title="טבלה"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="4" x2="9" y2="20"/><line x1="15" y1="4" x2="15" y2="20"/></svg><span>טבלה</span></button>
+        <button class="wbt-pop-item" data-tool="table"  onclick="wbOpenTableSizePicker(event)" title="טבלה"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="4" x2="9" y2="20"/><line x1="15" y1="4" x2="15" y2="20"/></svg><span>טבלה</span></button>
         <button class="wbt-pop-item" onclick="wbOpenEquationModal();wbClosePopovers()" title="משוואה"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14L11 12l8 8H5"/></svg><span>משוואה</span></button>
       </div>
     </div>
@@ -895,8 +895,20 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
   <div class="wb-ctx-item" onclick="wbTblInsertColLeft()">+ Insert Column Left</div>
   <div class="wb-ctx-item" onclick="wbTblDeleteCol()">− Delete Column</div>
   <div class="wb-sep" style="height:1px;background:rgba(255,255,255,.08);margin:4px 0;"></div>
+  <div class="wb-ctx-item" id="wb-tbl-paramcol" onclick="wbTblToggleParamCol()">⌗ עמודת פרמטרים</div>
+  <div class="wb-ctx-item" onclick="wbTblSaveToArsenal()">⭐ שמור ל-Arsenal</div>
+  <div class="wb-sep" style="height:1px;background:rgba(255,255,255,.08);margin:4px 0;"></div>
   <div class="wb-ctx-item danger" onclick="wbTblDeleteTable()">🗑 Delete Table</div>
 </div>
+
+<!-- Word-like table size picker (hover N×M grid). MAXR×MAXC cells. -->
+<div id="wb-tbl-size" style="display:none;position:fixed;z-index:1001;background:#1e1e2e;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,.5);">
+  <div id="wb-tbl-size-grid" style="display:grid;grid-template-columns:repeat(8,16px);gap:2px;"></div>
+  <div id="wb-tbl-size-label" style="margin-top:6px;text-align:center;font-size:11px;color:rgba(255,255,255,.85);">0 × 0</div>
+</div>
+
+<!-- Lightweight toast (table → Arsenal confirmation, etc.) -->
+<div id="wb-toast" style="display:none;position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:2000;background:#1F3E6C;color:#fff;font-size:13px;padding:8px 16px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.4);"></div>
 
 <!-- Pomodoro Timer Widget -->
 <div id="pomo-widget" style="display:none">
@@ -3454,31 +3466,42 @@ function drawObj(ctx,o,selected){
     lines.forEach((line,i)=>ctx.fillText(line,o.x+6,o.y+16+i*14));
   }else if(o.type==='table'){
     const cols=o.cols||[],rowH=o.rowH||30;
-    const hdrBg=o.headerBg||'#6366f1';
     const totalW=(cols).reduce((s,c)=>s+(c.w||80),0);
-    // ── Header row (ALL columns colored, like Word) ──
+    // RTL: parameter/label column is the right-most column = last index.
+    const paramIdx=o.paramCol?cols.length-1:-1;
+    // ── Header row: app-blue gradient (navy → indigo), white text, like Word ──
+    const hdrGrad=ctx.createLinearGradient(o.x,0,o.x+totalW,0);
+    hdrGrad.addColorStop(0,'#1F3E6C');hdrGrad.addColorStop(1,'#3351CA');
+    ctx.fillStyle=hdrGrad;ctx.fillRect(o.x,o.y,totalW,rowH);
     let x=o.x;
     for(let i=0;i<cols.length;i++){
-      ctx.fillStyle=hdrBg; // reset for EACH cell — fixes single-cell color bug
-      ctx.fillRect(x,o.y,cols[i].w,rowH);
-      ctx.fillStyle='rgba(255,255,255,.2)';
-      ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=0.5;
+      ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=0.5;
       ctx.strokeRect(x,o.y,cols[i].w,rowH);
       ctx.fillStyle='#fff';ctx.font='bold 11px Inter';ctx.textAlign='center';
       ctx.fillText(cols[i].name,x+cols[i].w/2,o.y+rowH/2+4);
       x+=cols[i].w;
     }
     // Outer header border
-    ctx.strokeStyle=hdrBg;ctx.lineWidth=1;ctx.strokeRect(o.x,o.y,totalW,rowH);
+    ctx.strokeStyle='#1F3E6C';ctx.lineWidth=1;ctx.strokeRect(o.x,o.y,totalW,rowH);
     // ── Data rows ──
     (o.rows||[]).forEach((row,ri)=>{
       x=o.x;
       for(let ci=0;ci<cols.length;ci++){
-        const bg=ri%2===0?'#ffffff':'#f8f8ff'; // alternating rows like Word
+        const isParam=ci===paramIdx;
+        // Param column gets a subtle blue tint; others alternate white/off-white.
+        let bg=ri%2===0?'#ffffff':'#f8f8ff';
+        if(isParam)bg=ri%2===0?'#eef2fb':'#e4eaf7';
         ctx.fillStyle=bg;ctx.fillRect(x,o.y+rowH*(ri+1),cols[ci].w,rowH);
         ctx.strokeStyle='#d1d5db';ctx.lineWidth=0.8;ctx.strokeRect(x,o.y+rowH*(ri+1),cols[ci].w,rowH);
         const txt=row[ci]||'';
-        if(txt){ctx.fillStyle='#1a1a1a';ctx.font='12px Inter';ctx.textAlign='center';ctx.fillText(txt,x+cols[ci].w/2,o.y+rowH*(ri+1)+rowH/2+4);}
+        if(txt){
+          ctx.fillStyle=isParam?'#1F3E6C':'#1a1a1a';
+          ctx.font=isParam?'bold 12px Inter':'12px Inter';
+          // Param cells read as RTL row-labels → right-aligned; data stays centered.
+          ctx.textAlign=isParam?'right':'center';
+          const tx=isParam?x+cols[ci].w-6:x+cols[ci].w/2;
+          ctx.fillText(txt,tx,o.y+rowH*(ri+1)+rowH/2+4);
+        }
         x+=cols[ci].w;
       }
     });
@@ -3835,8 +3858,12 @@ canvas.addEventListener('mousedown',e=>{
     const o={id:uid(),type:'sticky',x:sc.x-80,y:sc.y-50,w:160,h:100,text:''};
     WB.scene.push(o);WB.selId=o.id;wbPush();wbRedraw();wboFocus(o.id);
   }else if(WB.tool==='table'){
-    const o={id:uid(),type:'table',x:sc.x,y:sc.y,cols:[{name:'Column 1',w:100},{name:'Column 2',w:100}],rows:[['',''],['',''],['','']],rowH:30,headerBg:'#6366f1'};
+    const sz=WB._pendingTableSize||{rows:3,cols:2};
+    const cols=[];for(let i=0;i<sz.cols;i++)cols.push({name:'עמודה '+(i+1),w:100});
+    const rows=[];for(let r=0;r<sz.rows;r++)rows.push(cols.map(()=>''));
+    const o={id:uid(),type:'table',x:sc.x,y:sc.y,cols,rows,rowH:30,headerBg:'#1F3E6C',paramCol:false};
     WB.scene.push(o);WB.selId=o.id;wbPush();wbRedraw();
+    WB._pendingTableSize=null;
     wbTool('select');
   }else if(WB.tool==='eraser'){
     // Start a drag-erase stroke. Each mousemove erases along the path;
@@ -4098,6 +4125,8 @@ canvas.addEventListener('contextmenu',e=>{
       WB.selId=o.id;
       const cell=hitTableCell(o,sc.x,sc.y);
       _tblCtxCell={tableId:o.id,row:cell?cell.row:0,col:cell?cell.col:0};
+      const pcItem=document.getElementById('wb-tbl-paramcol');
+      if(pcItem)pcItem.textContent=(o.paramCol?'✓ ':'⌗ ')+'עמודת פרמטרים';
       const menu=document.getElementById('wb-tbl-menu');
       menu.style.left=e.clientX+'px';menu.style.top=e.clientY+'px';menu.style.display='block';
       document.addEventListener('click',closeWBTblMenu);
@@ -4286,6 +4315,78 @@ function wbTblInsertColRight(){const t=WB.scene.find(x=>x.id===_tblCtxCell.table
 function wbTblInsertColLeft(){const t=WB.scene.find(x=>x.id===_tblCtxCell.tableId);if(t){t.cols.splice(_tblCtxCell.col,0,{name:'',w:80});t.rows.forEach(r=>r.splice(_tblCtxCell.col,0,''));wbPush();wbRedraw();}closeWBTblMenu();}
 function wbTblDeleteCol(){const t=WB.scene.find(x=>x.id===_tblCtxCell.tableId);if(t&&t.cols.length>1){t.cols.splice(_tblCtxCell.col,1);t.rows.forEach(r=>r.splice(_tblCtxCell.col,1));wbPush();wbRedraw();}closeWBTblMenu();}
 function wbTblDeleteTable(){WB.scene=WB.scene.filter(x=>x.id!==_tblCtxCell.tableId);WB.selId=null;wbPush();wbRedraw();closeWBTblMenu();}
+function wbTblToggleParamCol(){const t=WB.scene.find(x=>x.id===_tblCtxCell.tableId);if(t){t.paramCol=!t.paramCol;wbPush();wbRedraw();}closeWBTblMenu();}
+function wbTblSaveToArsenal(){
+  const t=WB.scene.find(x=>x.id===_tblCtxCell.tableId);
+  if(t){
+    const payload={cols:t.cols,rows:t.rows,headerBg:t.headerBg||'#1F3E6C',paramCol:!!t.paramCol};
+    try{(window.parent||window).postMessage({type:'ws-arsenal-add-table',table:payload},'*');}catch(_){}
+    wbToast('⭐ הטבלה נשמרה ל-Arsenal');
+  }
+  closeWBTblMenu();
+}
+
+// ── Word-like N×M size picker ──────────────────────────────
+const _TBL_MAXR=8,_TBL_MAXC=8;
+let _tblSizeBuilt=false;
+function _buildTblSizeGrid(){
+  if(_tblSizeBuilt)return;
+  const grid=document.getElementById('wb-tbl-size-grid');
+  const label=document.getElementById('wb-tbl-size-label');
+  for(let r=1;r<=_TBL_MAXR;r++){
+    for(let c=1;c<=_TBL_MAXC;c++){
+      const cell=document.createElement('div');
+      cell.dataset.r=r;cell.dataset.c=c;
+      cell.style.cssText='width:16px;height:16px;border:1px solid rgba(255,255,255,.25);border-radius:2px;background:rgba(255,255,255,.05);cursor:pointer;';
+      cell.addEventListener('mouseenter',()=>{_tblSizeHighlight(r,c);label.textContent=c+' × '+r;});
+      cell.addEventListener('click',()=>{_pickTblSize(r,c);});
+      grid.appendChild(cell);
+    }
+  }
+  _tblSizeBuilt=true;
+}
+function _tblSizeHighlight(hr,hc){
+  document.querySelectorAll('#wb-tbl-size-grid > div').forEach(cell=>{
+    const r=+cell.dataset.r,c=+cell.dataset.c;
+    const on=r<=hr&&c<=hc;
+    cell.style.background=on?'#3351CA':'rgba(255,255,255,.05)';
+    cell.style.borderColor=on?'#3351CA':'rgba(255,255,255,.25)';
+  });
+}
+function _pickTblSize(rows,colsN){
+  WB._pendingTableSize={rows,cols:colsN};
+  document.getElementById('wb-tbl-size').style.display='none';
+  wbClosePopovers();
+  wbTool('table');
+  wbToast('לחץ על הקנבס כדי למקם טבלה '+colsN+'×'+rows);
+}
+function wbOpenTableSizePicker(ev){
+  _buildTblSizeGrid();
+  const pop=document.getElementById('wb-tbl-size');
+  // Anchor under the clicked toolbar item.
+  const r=ev&&ev.currentTarget?ev.currentTarget.getBoundingClientRect():{left:120,bottom:120};
+  pop.style.left=Math.min(r.left,window.innerWidth-170)+'px';
+  pop.style.top=(r.bottom+6)+'px';
+  pop.style.display='block';
+  _tblSizeHighlight(0,0);
+  document.getElementById('wb-tbl-size-label').textContent='0 × 0';
+  // Close on outside click (next tick so this click doesn't immediately close it).
+  setTimeout(()=>{
+    const off=(e)=>{if(!e.target.closest('#wb-tbl-size')){pop.style.display='none';document.removeEventListener('mousedown',off);}};
+    document.addEventListener('mousedown',off);
+  },0);
+  if(ev){ev.stopPropagation();}
+}
+
+// ── Lightweight toast ──────────────────────────────────────
+let _wbToastTimer=null;
+function wbToast(msg){
+  const el=document.getElementById('wb-toast');
+  if(!el)return;
+  el.textContent=msg;el.style.display='block';
+  if(_wbToastTimer)clearTimeout(_wbToastTimer);
+  _wbToastTimer=setTimeout(()=>{el.style.display='none';},2200);
+}
 
 // ═══════════════════════════════════════════════════════════
 // TEMPLATES
