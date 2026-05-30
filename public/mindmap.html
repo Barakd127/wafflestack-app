@@ -3059,7 +3059,16 @@ function wbFitCanvasToWrap(){
     const c=document.getElementById('wb-canvas'), w=document.getElementById('wb-canvas-wrap');
     if(!c||!w)return;
     const cw=Math.max(1,w.clientWidth), ch=Math.max(1,w.clientHeight);
-    if(c.width!==cw||c.height!==ch){ c.width=cw; c.height=ch; if(redraw)wbRedraw(); }
+    if(c.width!==cw||c.height!==ch){
+      c.width=cw; c.height=ch;
+      if(redraw){
+        wbRedraw();
+        // Reposition HTML overlays (equation divs, object layer) to match the
+        // new bitmap size — otherwise they drift after a split-pane resize.
+        if(typeof wbRedrawEquationLayer==='function') wbRedrawEquationLayer();
+        if(typeof wboSync==='function') wboSync();
+      }
+    }
   };
   fit(false);
   wbRedraw();
@@ -3083,6 +3092,25 @@ function openWB(cnId){
   document.getElementById('wb-node-title').textContent=cn.text||'Canvas';
   document.getElementById('wb-overlay').classList.add('open');
   wbFitCanvasToWrap();
+}
+
+// Convert a mouse/pointer event into CANVAS-BITMAP pixel coordinates, robust to
+// any layout (full-screen OR narrow split pane). We deliberately do NOT use
+// e.offsetX/offsetY: those are relative to e.target, so an event bubbling from
+// an overlay child (equation div, object layer — both pointer-events:all) reports
+// coords relative to the CHILD, not the canvas → handles/marquee/popovers float
+// off in the split pane. getBoundingClientRect()+(bitmap/CSS) scaling always
+// yields true canvas-bitmap coords, matching the WB.vp draw transform exactly.
+// Per user 2026-05-30 (Issue B: features break in half-screen).
+function wbEvtXY(e){
+  const c=document.getElementById('wb-canvas');
+  if(!c) return {x:e.offsetX||0,y:e.offsetY||0};
+  const r=c.getBoundingClientRect();
+  const cx=(e.clientX!=null)?e.clientX:(e.touches&&e.touches[0]?e.touches[0].clientX:0);
+  const cy=(e.clientY!=null)?e.clientY:(e.touches&&e.touches[0]?e.touches[0].clientY:0);
+  // Scale CSS-pixel offset into bitmap pixels (handles bitmap≠CSS-box size).
+  const sx=r.width?(c.width/r.width):1, sy=r.height?(c.height/r.height):1;
+  return { x:(cx-r.left)*sx, y:(cy-r.top)*sy };
 }
 
 function sc2scene(sx,sy){return{x:(sx-WB.vp.x)/WB.vp.s,y:(sy-WB.vp.y)/WB.vp.s};}
@@ -3781,8 +3809,9 @@ function hitConnector(o,sx,sy){
 
 canvas.addEventListener('mousedown',e=>{
   if(e.button===2)return;
+  const P=wbEvtXY(e);
   if(WB.spacePanning||e.button===1){
-    WB.panning=true;WB.panStartX=e.offsetX;WB.panStartY=e.offsetY;
+    WB.panning=true;WB.panStartX=P.x;WB.panStartY=P.y;
     document.getElementById('wb-canvas-wrap').classList.add('cur-panning');
     return;
   }
@@ -3791,21 +3820,21 @@ canvas.addEventListener('mousedown',e=>{
   if(WB._connDelBtn&&WB.tool==='select'){
     const btn=WB._connDelBtn;
     const bx=btn.x*WB.vp.s+WB.vp.x,by=btn.y*WB.vp.s+WB.vp.y;
-    if(Math.hypot(e.offsetX-bx,e.offsetY-by)<10){
+    if(Math.hypot(P.x-bx,P.y-by)<10){
       WB.scene=WB.scene.filter(x=>x.id!==btn.connId);WB.selId=null;WB._connDelBtn=null;wbPush();wbRedraw();return;
     }
   }
 
   // Contact point click → start connecting in ANY mode
-  const _cpHit=findContactPointHit(e.offsetX,e.offsetY,10);
-  if(_cpHit){const sc2=sc2scene(e.offsetX,e.offsetY);WB.drag={type:'connecting',fromId:_cpHit.objId,fromAnchor:_cpHit.anchor,mx:sc2.x,my:sc2.y};return;}
+  const _cpHit=findContactPointHit(P.x,P.y,10);
+  if(_cpHit){const sc2=sc2scene(P.x,P.y);WB.drag={type:'connecting',fromId:_cpHit.objId,fromAnchor:_cpHit.anchor,mx:sc2.x,my:sc2.y};return;}
 
   if(WB.tool==='connect'){
-    const sc=sc2scene(e.offsetX,e.offsetY);
+    const sc=sc2scene(P.x,P.y);
     const anc=findNearestAnchor(sc.x,sc.y,null,25/WB.vp.s);
     if(anc){WB.drag={type:'connecting',fromId:anc.objId,fromAnchor:anc.anchor,mx:sc.x,my:sc.y};return;}
   }
-  const sc=sc2scene(e.offsetX,e.offsetY);
+  const sc=sc2scene(P.x,P.y);
   let hit=null;
   // Check connectors first (they have no BB, need special hit-test)
   for(let i=WB.scene.length-1;i>=0;i--){if(WB.scene[i].type==='connector'&&hitConnector(WB.scene[i],sc.x,sc.y)){hit=WB.scene[i];break;}}
@@ -3814,30 +3843,30 @@ canvas.addEventListener('mousedown',e=>{
   if(WB.tool==='select'){
     if(hit&&hit.id===WB.selId){
       if(WB._handlePos){
-        const h=hitHandle(e.offsetX,e.offsetY,WB._handlePos);
+        const h=hitHandle(P.x,P.y,WB._handlePos);
         if(h){
           WB.drag={
             type:'resize',obj:hit,handle:h,
-            startSx:e.offsetX,startSy:e.offsetY,
+            startSx:P.x,startSy:P.y,
             orig:{x:hit.x||hit.cx||0,y:hit.y||hit.cy||0,w:hit.w,h:hit.h,cx:hit.cx,cy:hit.cy,rx:hit.rx,ry:hit.ry}
           };
           return;
         }
       }
-      if(['text','sticky'].includes(hit.type)){startTextEdit(hit,e.offsetX,e.offsetY);return;}
+      if(['text','sticky'].includes(hit.type)){startTextEdit(hit,P.x,P.y);return;}
     }
     if(hit){
       WB.selId=hit.id;
       // Click on a single object clears any prior multi-selection.
       WB.multiSel=[];
       const bb=objBB(hit);
-      if(bb){WB.drag={type:'move',obj:hit,sx:e.offsetX,sy:e.offsetY,ox:hit.x||hit.cx||0,oy:hit.y||hit.cy||0};}
+      if(bb){WB.drag={type:'move',obj:hit,sx:P.x,sy:P.y,ox:hit.x||hit.cx||0,oy:hit.y||hit.cy||0};}
     }else{
       // Click on empty whiteboard → start a marquee. Box drawn in wbRedraw,
       // committed on mouseup.
       WB.selId=null;
       WB.multiSel=[];
-      WB.drag={type:'marquee', sx:e.offsetX, sy:e.offsetY, ex:e.offsetX, ey:e.offsetY, sceneStart:{x:sc.x,y:sc.y}};
+      WB.drag={type:'marquee', sx:P.x, sy:P.y, ex:P.x, ey:P.y, sceneStart:{x:sc.x,y:sc.y}};
       document.querySelectorAll('.wbo').forEach(x=>x.classList.remove('wbo-sel'));
     }
     wbRedraw();
@@ -3877,13 +3906,14 @@ canvas.addEventListener('mousedown',e=>{
 });
 
 canvas.addEventListener('mousemove',e=>{
-  const sc=sc2scene(e.offsetX,e.offsetY);
-  WB._lastMouse={x:e.offsetX,y:e.offsetY};
+  const P=wbEvtXY(e);
+  const sc=sc2scene(P.x,P.y);
+  WB._lastMouse={x:P.x,y:P.y};
 
   if(WB.panning){
-    const dx=e.offsetX-WB.panStartX,dy=e.offsetY-WB.panStartY;
+    const dx=P.x-WB.panStartX,dy=P.y-WB.panStartY;
     WB.vp.x+=dx;WB.vp.y+=dy;
-    WB.panStartX=e.offsetX;WB.panStartY=e.offsetY;
+    WB.panStartX=P.x;WB.panStartY=P.y;
     wbRedraw();return;
   }
 
@@ -3905,7 +3935,7 @@ canvas.addEventListener('mousemove',e=>{
     if(WB._hoverObjId!==hov){WB._hoverObjId=hov;wbRedraw();}
 
     if(WB.selId&&WB._handlePos){
-      const h=hitHandle(e.offsetX,e.offsetY,WB._handlePos);
+      const h=hitHandle(P.x,P.y,WB._handlePos);
       if(h){
         // Corner handles → resize cursor; Edge midpoints → crosshair (connect)
         const resizeCursors={TL:'nwse-resize',TR:'nesw-resize',BL:'nesw-resize',BR:'nwse-resize'};
@@ -3921,15 +3951,15 @@ canvas.addEventListener('mousemove',e=>{
       }
     }
     if(WB._hoveredHandlePos){WB._hoveredHandlePos=null;wbRedraw();}
-    if(findContactPointHit(e.offsetX,e.offsetY,10)){canvas.style.cursor='crosshair';}
+    if(findContactPointHit(P.x,P.y,10)){canvas.style.cursor='crosshair';}
     else canvas.style.cursor='default';
   }
 
   if(WB.drag&&WB.drag.type==='connecting'){WB.drag.mx=sc.x;WB.drag.my=sc.y;wbRedraw();return;}
 
   if(WB.drag&&WB.drag.type==='resize'){
-    const dx=(e.offsetX-WB.drag.startSx)/WB.vp.s;
-    const dy=(e.offsetY-WB.drag.startSy)/WB.vp.s;
+    const dx=(P.x-WB.drag.startSx)/WB.vp.s;
+    const dy=(P.y-WB.drag.startSy)/WB.vp.s;
     const o=WB.drag.obj;
     const shift=e.shiftKey;
 
@@ -3988,8 +4018,8 @@ canvas.addEventListener('mousemove',e=>{
     }
     wbRedraw();
   }else if(WB.drag&&WB.drag.type==='move'){
-    const dx=(e.offsetX-WB.drag.sx)/WB.vp.s;
-    const dy=(e.offsetY-WB.drag.sy)/WB.vp.s;
+    const dx=(P.x-WB.drag.sx)/WB.vp.s;
+    const dy=(P.y-WB.drag.sy)/WB.vp.s;
     if(WB.drag.obj.type==='circle'){
       WB.drag.obj.cx=WB.drag.ox+dx;WB.drag.obj.cy=WB.drag.oy+dy;
     }else{
@@ -3997,7 +4027,7 @@ canvas.addEventListener('mousemove',e=>{
     }
     wbRedraw();
   }else if(WB.drag&&WB.drag.type==='marquee'){
-    WB.drag.ex=e.offsetX;WB.drag.ey=e.offsetY;wbRedraw();
+    WB.drag.ex=P.x;WB.drag.ey=P.y;wbRedraw();
   }else if(WB.drag&&WB.drag.type==='pen'){
     WB.penPts.push(sc);wbRedraw();
   }else if(WB.drag&&WB.drag.type==='draw'){
@@ -4025,7 +4055,8 @@ canvas.addEventListener('mouseup',e=>{
   document.getElementById('wb-canvas-wrap').classList.remove('cur-panning');
   canvas.style.cursor='default';
 
-  const sc=sc2scene(e.offsetX,e.offsetY);
+  const P=wbEvtXY(e);
+  const sc=sc2scene(P.x,P.y);
   if(WB.erasing){
     WB.erasing=false;
     if(WB._erasedAny){WB._erasedAny=false;wbPush();}
@@ -4097,7 +4128,7 @@ canvas.addEventListener('mouseup',e=>{
     if(WB.penPts.length>1){
       const o={id:uid(),type:'pen',pts:WB.penPts,color:WB.strokeColor,size:WB.size};
       WB.scene.push(o);WB.selId=o.id;WB.labelObj=o;
-      startTextEdit(o,e.offsetX,e.offsetY);wbPush();
+      startTextEdit(o,P.x,P.y);wbPush();
     }
     WB.penPts=null;
   }else if(d.type==='draw'){
@@ -4106,7 +4137,7 @@ canvas.addEventListener('mouseup',e=>{
       WB.selId=d.preview.id;
       wbPush();wbRedraw();
       if(WB_DOM_TYPES.has(d.preview.type)){wboFocus(d.preview.id);}
-      else{WB.labelObj=d.preview;startTextEdit(d.preview,e.offsetX,e.offsetY);}
+      else{WB.labelObj=d.preview;startTextEdit(d.preview,P.x,P.y);}
     }
   }else if(d.type==='resize'){
     wbPush();
@@ -4117,7 +4148,8 @@ canvas.addEventListener('mouseup',e=>{
 canvas.addEventListener('contextmenu',e=>{
   e.preventDefault();
   if(WB.tool!=='select')return;
-  const sc=sc2scene(e.offsetX,e.offsetY);
+  const P=wbEvtXY(e);
+  const sc=sc2scene(P.x,P.y);
   // Check if right-clicking on a table
   for(let i=WB.scene.length-1;i>=0;i--){
     const o=WB.scene[i];
@@ -4142,10 +4174,12 @@ canvas.addEventListener('contextmenu',e=>{
 canvas.addEventListener('wheel',e=>{
   e.preventDefault();
   const factor=e.deltaY>0?1/1.1:1.1;
-  // FIX #16: compute mouse scene position BEFORE changing scale (old scale), then reanchor
-  const mouseX=(e.offsetX-WB.vp.x)/WB.vp.s;const mouseY=(e.offsetY-WB.vp.y)/WB.vp.s;
+  // FIX #16: compute mouse scene position BEFORE changing scale (old scale), then reanchor.
+  // Use true canvas-bitmap coords so zoom anchors under the cursor in split layout too.
+  const P=wbEvtXY(e);
+  const mouseX=(P.x-WB.vp.x)/WB.vp.s;const mouseY=(P.y-WB.vp.y)/WB.vp.s;
   WB.vp.s=Math.max(0.2,Math.min(4,WB.vp.s*factor));
-  WB.vp.x=e.offsetX-mouseX*WB.vp.s;WB.vp.y=e.offsetY-mouseY*WB.vp.s;
+  WB.vp.x=P.x-mouseX*WB.vp.s;WB.vp.y=P.y-mouseY*WB.vp.s;
   wbRedraw();
 });
 
@@ -4167,24 +4201,26 @@ function startTextEdit(o,sx,sy){
 
 canvas.addEventListener('click',e=>{
   if(WB.tool !== 'select') return;
-  const sc=sc2scene(e.offsetX,e.offsetY);
+  const P=wbEvtXY(e);
+  const sc=sc2scene(P.x,P.y);
   for(let i=WB.scene.length-1;i>=0;i--){
     const o=WB.scene[i];
     if(o.type!=='table') continue;
     const hit=hitTableCell(o,sc.x,sc.y);
-    if(hit){startEditTableCell(o,hit.row,hit.col,e.offsetX,e.offsetY);return;}
+    if(hit){startEditTableCell(o,hit.row,hit.col,P.x,P.y);return;}
   }
 });
 
 canvas.addEventListener('dblclick',e=>{
-  const sc=sc2scene(e.offsetX,e.offsetY);
+  const P=wbEvtXY(e);
+  const sc=sc2scene(P.x,P.y);
   for(let i=WB.scene.length-1;i>=0;i--){
     const o=WB.scene[i];
     if(['rect','circle','arrow','line'].includes(o.type)){
-      if(hitObj(o,sc.x,sc.y)){startTextEdit(o,e.offsetX,e.offsetY);return;}
+      if(hitObj(o,sc.x,sc.y)){startTextEdit(o,P.x,P.y);return;}
     }
     if(o.type!=='table')continue;
-    const hit=hitTableCell(o,sc.x,sc.y);if(hit){startEditTableCell(o,hit.row,hit.col,e.offsetX,e.offsetY);return;}
+    const hit=hitTableCell(o,sc.x,sc.y);if(hit){startEditTableCell(o,hit.row,hit.col,P.x,P.y);return;}
   }
 });
 
