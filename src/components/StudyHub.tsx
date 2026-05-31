@@ -1947,7 +1947,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
             padding: '28px 28px 22px',
             display: 'flex', flexDirection: 'column',
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 6 }}>כמעט שם!</div>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 6 }}>תרגול</div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
               {!hasAnyProgress ? (
                 <>בוא נתחיל בהתחלה<br />{currentTopicName}</>
@@ -1984,7 +1984,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
             display: 'flex', flexDirection: 'column',
             position: 'relative',
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_MED, marginBottom: 16, textAlign: 'right' }}>לוח לבן דיגיטלי</div>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_MED, marginBottom: 16, textAlign: 'right' }}>לימוד חומר</div>
             {/* Whiteboard area with glassmorphism */}
             <div style={{
               flex: 1,
