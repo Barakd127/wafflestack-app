@@ -3414,19 +3414,33 @@ function wbRedrawEquationLayer(){
     // The fitted w/h persist on `o` → survive reload, move and select.
     const EQ_PAD = 14; // px of breathing room around the formula (scene units)
     function fitEqBox(){
-      const katexEl = content.querySelector('.katex') || content;
-      if(!katexEl) return;
-      const rect = katexEl.getBoundingClientRect();
-      // KaTeX renders at its natural (unscaled) size inside the eq layer; the
-      // .wb-eq-div is sized in screen px as (o.w * WB.vp.s). To make the box
-      // wrap the formula at the current zoom, store o.w/o.h in scene units so
-      // that o.w * s == natural content px. Divide measured px by s. fitEqBox
-      // re-runs on every wbRedraw, so it self-corrects across zoom levels.
+      if(!content) return;
+      // Measure the CONTENT WRAPPER, not the inner .katex span: for multi-row
+      // blocks (\begin{gathered}) KaTeX's outer .katex element reports only the
+      // baseline row height via getBoundingClientRect, while the real rows
+      // overflow it — so measuring .katex undercounts the height badly. The
+      // content wrapper's box does enclose every row.
+      //
+      // The wrapper also sits in a flex box whose width/height are pinned to
+      // the (possibly too-small) current o.w/o.h, which would clamp the
+      // measurement. So briefly unconstrain the div, read the natural content
+      // size, then restore. KaTeX renders at natural (unscaled) px; the
+      // .wb-eq-div is sized as (o.w * WB.vp.s), so store o.w/o.h in scene units
+      // (natural px / scale). fitEqBox re-runs on every wbRedraw → self-corrects
+      // across zoom levels.
       const s = WB.vp.s || 1;
-      const cwPx = Math.max(rect.width, katexEl.scrollWidth, 1);
-      const chPx = Math.max(rect.height, katexEl.scrollHeight, 1);
+      const prevW = div.style.width, prevH = div.style.height;
+      const prevWS = content.style.whiteSpace;
+      div.style.width = 'auto'; div.style.height = 'auto';
+      content.style.whiteSpace = 'nowrap';
+      const cr = content.getBoundingClientRect();
+      const cwPx = Math.max(cr.width, content.scrollWidth, 1);
+      const chPx = Math.max(cr.height, content.scrollHeight, 1);
+      content.style.whiteSpace = prevWS;
       const newW = Math.ceil(cwPx / s + EQ_PAD * 2);
       const newH = Math.ceil(chPx / s + EQ_PAD * 2);
+      // restore the pinned size before the size-change branch decides final px
+      div.style.width = prevW; div.style.height = prevH;
       if(!newW || !newH) return;
       // Only persist + relayout when the size actually changed, to avoid an
       // infinite redraw loop.
