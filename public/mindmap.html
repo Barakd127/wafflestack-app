@@ -3459,8 +3459,14 @@ function wbRedrawEquationLayer(){
     }
     // Measure on next frame (KaTeX may finish layout async) and once more after
     // fonts settle, so multi-row \begin{gathered} blocks are sized correctly.
+    // Also schedule via setTimeout: requestAnimationFrame is paused while the
+    // tab/iframe is hidden (background), so a rAF-only fit would never run for
+    // an equation added off-screen. The timers fire regardless of visibility
+    // and fitEqBox is idempotent (no-op once the size already matches).
     requestAnimationFrame(fitEqBox);
     if(window.katex) requestAnimationFrame(()=>requestAnimationFrame(fitEqBox));
+    setTimeout(fitEqBox, 0);
+    setTimeout(fitEqBox, 60);
 
     // Drag
     div.addEventListener('mousedown', e => {
