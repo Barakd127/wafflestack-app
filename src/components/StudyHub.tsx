@@ -324,6 +324,7 @@ import { loadProgressMerged } from '../lib/syncProgress'
 import quizBankData from '../data/quiz-bank.json'
 import LessonScreen from './LessonScreen'
 import { LESSON_CONTENT } from '../data/lesson-content'
+import { HEBREW_LABELS } from '../data/topicLabels'
 import { MeanVisual } from './LessonVisuals'
 import SamplingDistribution from './SamplingDistribution'
 import ArsenalScreen, { normalizeMathGlyphs } from './ArsenalScreen'
@@ -371,34 +372,8 @@ const COURSES: CourseDef[] = [
   { id: 'anova',   label: 'ניתוח שונות / רב-משתנית', icon: '📐', desc: 'ANOVA, MANOVA, רגרסיה מרובה, מודלים מורכבים', active: false, bg: 'linear-gradient(135deg,#67C29E,#229E69)' },
 ]
 
-// Hebrew labels for each topic (quiz-bank concept field is English)
-const HEBREW_LABELS: Record<string, string> = {
-  // Original 10 (have quiz banks in quiz-bank.json)
-  'mean':                  'ממוצע',
-  'median':                'חציון',
-  'std-dev':               'שונות וסטיית תקן',
-  'probability':           'הסתברות',
-  'regression':            'רגרסיה ליניארית',
-  'correlation':           'מתאם (סקירה)',
-  'binomial':              'התפלגות בינומית',
-  'hypothesis-testing':    'התפלגות נורמלית',
-  'sampling':              'דגימה',
-  'confidence-intervals':  'רווחי סמך',
-  // 11 new lesson topics added 2026-05-04 to match the 30111 syllabus
-  'intro':                 'הקדמה לסטטיסטיקה',
-  'variable-types':        'סוגי משתנים וסולמות',
-  'data-presentation':     'הצגת נתונים',
-  'distribution-shapes':   'צורות התפלגות',
-  'weighted-combined':     'ממוצע משוקלל ושונות מצורפת',
-  'observation-changes':   'הוספה והחסרה של תצפיות',
-  'linear-transformations': 'טרנספורמציות ליניאריות',
-  'percentiles':           'אחוזונים ומיקום יחסי',
-  'combinatorics':         'קומבינטוריקה',
-  'discrete-rv':           'משתנה מקרי בדיד',
-  'pearson':               'מתאם פירסון',
-  'spearman':              'מתאם ספירמן',
-  'cramer':                'מתאם קרמר',
-}
+// Hebrew labels for each topic now live in ../data/topicLabels (shared with
+// PersonalPlanWizard). Imported at top of file as HEBREW_LABELS.
 
 // Extract topics from quiz-bank data
 // Build the topic picker from BOTH quiz-bank.json AND lesson-content.ts so
@@ -1842,7 +1817,11 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
   const [planWizardOpen, setPlanWizardOpen] = useState(false)
   return (
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
-      <PersonalPlanWizard open={planWizardOpen} onClose={() => setPlanWizardOpen(false)} />
+      <PersonalPlanWizard
+        open={planWizardOpen}
+        onClose={() => setPlanWizardOpen(false)}
+        onSelectTopic={onSelectTopic}
+      />
       <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* Personal study plan CTA / banner — opens 3-step intake wizard. */}

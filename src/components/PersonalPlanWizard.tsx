@@ -14,6 +14,7 @@ import {
   type MotivationProfile,
 } from '../data/personalPlanTypes'
 import { generatePlan } from '../lib/generatePlan'
+import { HEBREW_LABELS } from '../data/topicLabels'
 
 // Hebrew labels for the 13 active Stat-A topic ids (subset of HEBREW_LABELS).
 const TOPIC_OPTIONS: { id: string; label: string }[] = [
@@ -56,9 +57,12 @@ const MOTIVATION_OPTIONS: { id: MotivationProfile; label: string; emoji: string 
 interface PersonalPlanWizardProps {
   open: boolean
   onClose: () => void
+  // Navigate to a topic's learning screen. Wired by HomeScreen; when present,
+  // the success-step rows + main CTA become clickable links into each topic.
+  onSelectTopic?: (topicId: string) => void
 }
 
-export default function PersonalPlanWizard({ open, onClose }: PersonalPlanWizardProps) {
+export default function PersonalPlanWizard({ open, onClose, onSelectTopic }: PersonalPlanWizardProps) {
   const existing = useLearningStore(s => s.intakeAnswers)
   const setPersonalPlan = useLearningStore(s => s.setPersonalPlan)
   const setExamDate = useLearningStore(s => s.setExamDate)
@@ -311,7 +315,7 @@ export default function PersonalPlanWizard({ open, onClose }: PersonalPlanWizard
 
         {/* STEP 4 — Done */}
         {step === 4 && (
-          <SuccessPanel onClose={onClose} />
+          <SuccessPanel onClose={onClose} onSelectTopic={onSelectTopic} />
         )}
 
         {/* Nav footer */}
@@ -382,10 +386,18 @@ function OptionCard({ selected, onClick, emoji, label, sub }: {
   )
 }
 
-function SuccessPanel({ onClose }: { onClose: () => void }) {
+function SuccessPanel({ onClose, onSelectTopic }: {
+  onClose: () => void
+  onSelectTopic?: (topicId: string) => void
+}) {
   const plan = useLearningStore(s => s.personalPlan)
   if (!plan) return null
   const first = plan.sequence.slice(0, 3)
+  // Navigate into a topic's learning screen, then close the wizard.
+  const go = (topicId: string) => {
+    onSelectTopic?.(topicId)
+    onClose()
+  }
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{
@@ -404,21 +416,47 @@ function SuccessPanel({ onClose }: { onClose: () => void }) {
         textAlign: 'right', marginBottom: 22,
       }}>
         <div style={{ fontSize: 12, color: '#7F9BD9', fontWeight: 700, marginBottom: 8 }}>שלושת הצעדים הראשונים:</div>
-        {first.map((s, i) => (
-          <div key={s.topicId} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 0' }}>
-            <div style={{
-              width: 24, height: 24, borderRadius: 12,
-              background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
-              color: '#0B1B3E', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 700,
-            }}>{i + 1}</div>
-            <div style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#0B1B3E' }}>{s.topicId}</div>
-            {s.hint && <div style={{ fontSize: 11, color: '#5b6f93' }}>{s.hint}</div>}
-          </div>
-        ))}
+        {first.map((s, i) => {
+          const label = HEBREW_LABELS[s.topicId] || s.topicId
+          const clickable = !!onSelectTopic
+          return (
+            <button
+              key={s.topicId}
+              type="button"
+              dir="rtl"
+              disabled={!clickable}
+              onClick={() => go(s.topicId)}
+              onMouseEnter={e => { if (clickable) e.currentTarget.style.background = 'rgba(31,62,108,0.06)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+              style={{
+                width: '100%', background: 'transparent', border: 0,
+                display: 'flex', alignItems: 'center', gap: 10, padding: '6px 4px',
+                borderRadius: 8, textAlign: 'right',
+                fontFamily: 'inherit', cursor: clickable ? 'pointer' : 'default',
+                transition: 'background 0.15s',
+              }}
+            >
+              <div style={{
+                width: 24, height: 24, borderRadius: 12, flexShrink: 0,
+                background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+                color: '#0B1B3E', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 12, fontWeight: 700,
+              }}>{i + 1}</div>
+              <div style={{
+                flex: 1, fontSize: 13, fontWeight: 600,
+                color: clickable ? '#1F3E6C' : '#0B1B3E',
+                textDecoration: clickable ? 'underline' : 'none',
+                textUnderlineOffset: 3,
+              }}>{label}</div>
+              {s.hint && <div style={{ fontSize: 11, color: '#5b6f93' }}>{s.hint}</div>}
+              {clickable && <div style={{ fontSize: 13, color: '#7F9BD9', flexShrink: 0 }}>←</div>}
+            </button>
+          )
+        })}
       </div>
       <button
-        type="button" onClick={onClose}
+        type="button"
+        onClick={() => (first[0] && onSelectTopic ? go(first[0].topicId) : onClose())}
         style={{
           background: 'linear-gradient(135deg,#1F3E6C,#254A9F)', color: '#fff',
           border: 0, borderRadius: 12, padding: '12px 32px',
