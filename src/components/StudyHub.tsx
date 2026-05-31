@@ -482,11 +482,11 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
 
   return (
     <div dir="rtl" style={{
-      width: '100%', height: '100%',
+      width: '100%', minHeight: '100vh',
       background: 'linear-gradient(145deg, #c8dcff 0%, #d6e8ff 35%, #e8f0ff 65%, #bdd4ff 100%)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontFamily: "'Rubik', 'Assistant', sans-serif",
-      position: 'relative', overflow: 'hidden',
+      position: 'fixed', inset: 0, overflow: 'auto',
     }}>
       {/* Ambient glow blobs behind the card */}
       <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(51,81,202,0.18) 0%, transparent 70%)', top: '10%', right: '15%', filter: 'blur(60px)', pointerEvents: 'none' }} />
@@ -500,40 +500,22 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
           borderRadius: 28,
           padding: '40px 44px',
         }}>
-          {/* Logo — Kenney-style top-down city SVG */}
+          {/* Logo — Kenney city image */}
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-              {/* Top-down city grid — transparent bg, WaffleStack palette */}
-              <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                {/* Road grid */}
-                <rect x="0" y="30" width="72" height="12" fill="#CBD5E1" rx="2"/>
-                <rect x="30" y="0" width="12" height="72" fill="#CBD5E1" rx="2"/>
-                {/* Road center lines */}
-                <line x1="36" y1="2" x2="36" y2="28" stroke="white" strokeWidth="1.5" strokeDasharray="4 3"/>
-                <line x1="36" y1="44" x2="36" y2="70" stroke="white" strokeWidth="1.5" strokeDasharray="4 3"/>
-                <line x1="2" y1="36" x2="28" y2="36" stroke="white" strokeWidth="1.5" strokeDasharray="4 3"/>
-                <line x1="44" y1="36" x2="70" y2="36" stroke="white" strokeWidth="1.5" strokeDasharray="4 3"/>
-                {/* Top-left block: park + building */}
-                <rect x="3" y="3" width="24" height="24" fill="#86EFAC" rx="3"/>
-                <rect x="8" y="8" width="10" height="10" fill="#254A9F" rx="2"/>
-                <rect x="10" y="10" width="6" height="6" fill="#3B82F6" rx="1"/>
-                <rect x="16" y="12" width="8" height="8" fill="#1F3E6C" rx="2"/>
-                {/* Top-right block: buildings */}
-                <rect x="45" y="3" width="24" height="24" fill="#BFDBFE" rx="3"/>
-                <rect x="48" y="6" width="8" height="14" fill="#3351CA" rx="2"/>
-                <rect x="58" y="10" width="8" height="10" fill="#254A9F" rx="2"/>
-                <rect x="50" y="18" width="14" height="6" fill="#1E40AF" rx="1"/>
-                {/* Bottom-left block: buildings */}
-                <rect x="3" y="45" width="24" height="24" fill="#BFDBFE" rx="3"/>
-                <rect x="6" y="48" width="10" height="18" fill="#1F3E6C" rx="2"/>
-                <rect x="8" y="50" width="6" height="6" fill="#60A5FA" rx="1"/>
-                <rect x="18" y="54" width="7" height="12" fill="#3351CA" rx="2"/>
-                {/* Bottom-right block: park + small building */}
-                <rect x="45" y="45" width="24" height="24" fill="#86EFAC" rx="3"/>
-                <rect x="54" y="52" width="10" height="10" fill="#D4AF37" rx="2"/>
-                <rect x="56" y="54" width="6" height="6" fill="#FDE68A" rx="1"/>
-                <rect x="47" y="57" width="6" height="8" fill="#254A9F" rx="2"/>
-              </svg>
+              <img
+                src="/kenney-city.png"
+                alt="WaffleStack city"
+                width={180}
+                height={120}
+                style={{
+                  borderRadius: 14,
+                  objectFit: 'cover',
+                  objectPosition: 'center 20%',
+                  boxShadow: '0 4px 16px rgba(31,62,108,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
+                  border: '1px solid rgba(255,255,255,0.4)',
+                }}
+              />
             </div>
             <div style={{ fontWeight: 800, fontSize: 26, color: '#1F3E6C' }}>WaffleStack</div>
             <div style={{ fontSize: 13, color: '#7F9BD9', marginTop: 4 }}>פלטפורמת למידה לסטטיסטיקה</div>
@@ -2008,9 +1990,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
                 </svg>
               </div>
               <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_DARK, lineHeight: 1.9, textAlign: 'right', marginTop: 40 }}>
-                היי, היום אנחנו הולכים לכבוש את<br />
-                {'\''}חציון ושכיח{'\''}  ולפתוח את מגדל השעון<br />
-                בעיר שלך!
+                בוא נמפה את הנושאים בקורס שלך
               </div>
             </div>
             {/* CTA button */}
