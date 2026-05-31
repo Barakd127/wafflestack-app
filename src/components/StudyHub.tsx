@@ -2517,12 +2517,20 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }} dir="rtl">
       {xpBurst !== null && <XpBurst amount={xpBurst} onDone={() => setXpBurst(null)} />}
 
-      {/* Fullscreen FAB stack (visible only when fullscreen / chrome hidden):
-          - bottom:200 → back-to-split FAB (split-study-mindmap)
-          - bottom:140 → home FAB (go to study home)
-          - bottom: 80 → restore-chrome chip (stay in lesson)
-          - bottom:  5 → TutorFAB (App.tsx)
-          Per user 2026-05-24 — three exit paths all visible. */}
+      {/* Fullscreen FAB stack (visible only when fullscreen / chrome hidden).
+          ISSUE 4 (2026-05-31): these left-edge FABs used to sit at left:12 and
+          the home FAB at top:12 — that covered the ∑Formulas rail (a 34px-wide
+          full-height toggle on the LEFT edge of the mindmap/canvas iframe), the
+          top scrollbar, and the canvas prev/next nav pill. Fixes:
+            • left lane pushed to FAB_LEFT (52) so it clears the 34px ∑Formulas
+              rail with a comfortable gap.
+            • home FAB moved OUT of the top corner and into the bottom-left
+              stack so it never overlaps the top scrollbar / nav pill.
+            • vertical stack (above TutorFAB which ends ~bottom 76):
+                bottom: 90  → ☰ הצג כלי לימוד
+                bottom:150  → ⊟ פיצול מסך
+                bottom:210  → 🏠 דף הבית
+              60px steps keep 44px-min FABs from touching. */}
       {fullscreen && onToggleFullscreen && (
         <>
           <button
@@ -2532,7 +2540,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             aria-expanded={splitMenuOpen}
             title="פיצול מסך — בחר כלי לחלונית התחתונה"
             style={{
-              position: 'fixed', bottom: 200, left: 12, zIndex: 300,
+              position: 'fixed', bottom: 150, left: 52, zIndex: 300,
               background: 'linear-gradient(135deg,#4ECDC4,#3FB8AF)',
               color: '#0B1B3E',
               border: 0, borderRadius: 14,
@@ -2563,7 +2571,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 aria-label="בחר כלי לחלונית התחתונה"
                 dir="rtl"
                 style={{
-                  position: 'fixed', bottom: 252, left: 12, zIndex: 306,
+                  position: 'fixed', bottom: 202, left: 52, zIndex: 306,
                   background: '#FBF8F1',
                   border: '1px solid rgba(212,175,55,0.55)',
                   borderRadius: 12,
@@ -2618,10 +2626,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             aria-label="חזרה לדף הבית"
             title="חזרה לדף הבית"
             style={{
-              // TOP-left in fullscreen (topbar is hidden so the corner is free)
-              // — keeps Home reachable without stacking over the bottom-left
-              // FABs. Per user 2026-05-29.
-              position: 'fixed', top: 12, left: 12, zIndex: 300,
+              // ISSUE 4 (2026-05-31): moved from top:12 (which covered the top
+              // scrollbar + canvas nav pill) into the bottom-left lane, top of
+              // the stack, clear of the ∑Formulas rail (left:52).
+              position: 'fixed', bottom: 210, left: 52, zIndex: 300,
               background: 'linear-gradient(135deg,#D4AF37,#b8941f)',
               color: '#1F2640',
               border: 0, borderRadius: 14,
@@ -2641,8 +2649,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             aria-label="הצג כלי לימוד (סרגל צד + סרגל עליון)"
             title="הצג סרגלים"
             style={{
-              position: 'fixed', bottom: 80,
-              left: 12,
+              // ISSUE 4 (2026-05-31): left:12→52 clears the ∑Formulas rail.
+              position: 'fixed', bottom: 90,
+              left: 52,
               zIndex: 300,
               background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
               color: '#0B1B3E',
