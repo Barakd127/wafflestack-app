@@ -480,7 +480,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
               <img
-                src="/building-figma.png"
+                src="/high-tech.png"
                 alt="WaffleStack city"
                 width={180}
                 height={120}
@@ -2474,7 +2474,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
 
   const handleSkip = () => {
     const next = [...dotStates]
-    next[currentQ] = 'wrong'
+    // Skipping / pressing "הבא" without answering must NOT penalize: leave the
+    // question UNANSWERED ('empty'), so it stays revisitable and never counts as
+    // wrong. Applies to every topic quiz (shared LearningScreen). Per user
+    // 2026-05-31: advancing should treat the question as not-yet-answered.
+    if (next[currentQ] === 'current') next[currentQ] = 'empty'
     setDotStates(next)
     goNext(next)
   }
@@ -2703,7 +2707,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           viewport. The floating "הצג כלי לימוד" chip above restores it. */}
       {!fullscreen && (
       <div className="ws-quiz-topbar" style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', borderBottom: '1px solid rgba(127,155,217,0.30)', boxShadow: '0 2px 6px rgba(18,36,96,0.15)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12, zIndex: 10 }}>
-        <img src={`${import.meta.env.BASE_URL}building-figma.png`} alt="" style={{ width: 34, height: 26, objectFit: 'cover', borderRadius: 5 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+        <img src={`${import.meta.env.BASE_URL}high-tech.png`} alt="" style={{ width: 34, height: 26, objectFit: 'cover', borderRadius: 5 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
         <div style={{ flex: 1 }}>
           <div style={{ height: 6, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
             <div style={{ width: `${isDone ? 100 : ((currentQ)/total)*100}%`, height: '100%', background: 'rgba(212,175,55,0.75)', borderRadius: 10, transition: 'width 0.4s' }} />
