@@ -95,8 +95,12 @@ html.dark {
 body {
   margin: 0;
   overflow: hidden;
-  background: #000;
+  /* App base color, NOT black. Body shows only at scroll edges / overscroll /
+     layout gaps; pure #000 there read as jarring "black areas" (user
+     2026-05-31). Use the light app tint in light mode, deep navy in dark. */
+  background: #EAF2FF;
 }
+html.dark body { background: #0B1B3E; }
 
 #root {
   width: 100vw;
@@ -346,3 +350,152 @@ html.dark :focus-visible {
 }
 .ws-tooltip-desc { color: #9aa4c7; font-size: 11px; margin-top: 2px; }
 @keyframes wsTooltipFadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+
+/* ── Liquid Glass — Hybrid Button System ────────────────────────────────── */
+/*
+ * Hybrid pattern (Apple-accurate):
+ *   - Glass cards   → ws-glass-card  (course cards, topic cards)
+ *   - Solid pill buttons → ws-solid-pill (sidebar nav active state — keep solid, add sheen)
+ *   - Icon chips    → ws-icon-chip   (sidebar icon badges)
+ * Specular highlight via ::before pseudo — no JS needed.
+ * backdrop-filter degrades gracefully: no blur = still readable.
+ */
+
+/* ── Glass Card (course cards, topic cards) ── */
+.ws-glass-card {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  background: var(--sh-glass-card) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.18) !important;
+  border-right-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow:
+    0 8px 32px rgba(31, 62, 108, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(31, 62, 108, 0.06) !important;
+  transition: transform 0.18s cubic-bezier(.22,1,.36,1), box-shadow 0.18s, border-color 0.18s !important;
+}
+/* Specular highlight streak */
+.ws-glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,0.28) 0%,
+    rgba(255,255,255,0.08) 40%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+/* All card children sit above pseudo */
+.ws-glass-card > * { position: relative; z-index: 1; }
+
+.ws-glass-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow:
+    0 16px 40px rgba(31, 62, 108, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(31, 62, 108, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+}
+.ws-glass-card:active {
+  transform: scale(0.98) translateY(0) !important;
+  box-shadow:
+    0 4px 16px rgba(31, 62, 108, 0.14),
+    inset 0 2px 4px rgba(31, 62, 108, 0.08) !important;
+}
+
+/* Dark mode glass card */
+html.dark .ws-glass-card {
+  border-color: rgba(255,255,255,0.14) !important;
+  border-bottom-color: rgba(0,0,0,0.2) !important;
+  border-right-color: rgba(0,0,0,0.2) !important;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 -1px 0 rgba(0,0,0,0.2) !important;
+}
+html.dark .ws-glass-card::before {
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,0.10) 0%,
+    rgba(255,255,255,0.03) 40%,
+    transparent 60%
+  );
+}
+html.dark .ws-glass-card:hover {
+  border-color: rgba(255,255,255,0.22) !important;
+  box-shadow:
+    0 16px 40px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+
+/* ── Icon Chip (sidebar icon badges) ── */
+.ws-icon-chip {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.15s, background 0.15s, border-color 0.15s;
+}
+.ws-icon-chip::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 5%; right: 5%;
+  height: 45%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+  border-radius: 10px 10px 50% 50%;
+  pointer-events: none;
+}
+.ws-icon-chip--active {
+  background: rgba(255,215,0,0.15) !important;
+  border-color: rgba(255,215,0,0.45) !important;
+  box-shadow: 0 2px 10px rgba(255,215,0,0.2), inset 0 1px 0 rgba(255,215,0,0.3) !important;
+}
+.ws-icon-chip--inactive {
+  background: rgba(255,255,255,0.10) !important;
+  border-color: rgba(255,255,255,0.18) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2) !important;
+}
+
+/* ── Solid CTA Button with glass sheen (hybrid: solid color + specular) ── */
+/*
+ * Apple hybrid pattern: pill buttons stay SOLID colored (readable, tappable)
+ * but get a specular highlight streak on the top half = premium feel without
+ * losing contrast or legibility.
+ */
+.ws-cta-btn {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(.22,1,.36,1), box-shadow 0.15s, filter 0.15s;
+}
+.ws-cta-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 48%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.30), transparent);
+  border-radius: 999px 999px 50% 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.ws-cta-btn > * { position: relative; z-index: 1; }
+.ws-cta-btn:hover  { transform: translateY(-1px); filter: brightness(1.08); }
+.ws-cta-btn:active { transform: scale(0.97); filter: brightness(0.96); }
+
+/* ── Reduced motion — kill specular + heavy blur ── */
+@media (prefers-reduced-motion: reduce) {
+  .ws-glass-card, .ws-glass-card:hover, .ws-glass-card:active {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition: none !important;
+  }
+  .ws-glass-card::before { display: none; }
+}
