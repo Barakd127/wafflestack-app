@@ -14,7 +14,7 @@ import type {
  * Kept as a self-contained constant so this module stays pure and unit-testable
  * (no circular import with the store).
  */
-const TOPIC_ORDER: string[] = [
+export const TOPIC_ORDER: string[] = [
   'intro',
   'variable-types',
   'mean',

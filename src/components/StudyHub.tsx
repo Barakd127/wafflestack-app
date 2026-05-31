@@ -324,6 +324,8 @@ import { loadProgressMerged } from '../lib/syncProgress'
 import quizBankData from '../data/quiz-bank.json'
 import LessonScreen from './LessonScreen'
 import { LESSON_CONTENT } from '../data/lesson-content'
+import { HEBREW_LABELS } from '../data/topicLabels'
+import { TOPIC_ORDER } from '../lib/generatePlan'
 import { MeanVisual } from './LessonVisuals'
 import SamplingDistribution from './SamplingDistribution'
 import ArsenalScreen, { normalizeMathGlyphs } from './ArsenalScreen'
@@ -371,34 +373,8 @@ const COURSES: CourseDef[] = [
   { id: 'anova',   label: 'ניתוח שונות / רב-משתנית', icon: '📐', desc: 'ANOVA, MANOVA, רגרסיה מרובה, מודלים מורכבים', active: false, bg: 'linear-gradient(135deg,#67C29E,#229E69)' },
 ]
 
-// Hebrew labels for each topic (quiz-bank concept field is English)
-const HEBREW_LABELS: Record<string, string> = {
-  // Original 10 (have quiz banks in quiz-bank.json)
-  'mean':                  'ממוצע',
-  'median':                'חציון',
-  'std-dev':               'שונות וסטיית תקן',
-  'probability':           'הסתברות',
-  'regression':            'רגרסיה ליניארית',
-  'correlation':           'מתאם (סקירה)',
-  'binomial':              'התפלגות בינומית',
-  'hypothesis-testing':    'התפלגות נורמלית',
-  'sampling':              'דגימה',
-  'confidence-intervals':  'רווחי סמך',
-  // 11 new lesson topics added 2026-05-04 to match the 30111 syllabus
-  'intro':                 'הקדמה לסטטיסטיקה',
-  'variable-types':        'סוגי משתנים וסולמות',
-  'data-presentation':     'הצגת נתונים',
-  'distribution-shapes':   'צורות התפלגות',
-  'weighted-combined':     'ממוצע משוקלל ושונות מצורפת',
-  'observation-changes':   'הוספה והחסרה של תצפיות',
-  'linear-transformations': 'טרנספורמציות ליניאריות',
-  'percentiles':           'אחוזונים ומיקום יחסי',
-  'combinatorics':         'קומבינטוריקה',
-  'discrete-rv':           'משתנה מקרי בדיד',
-  'pearson':               'מתאם פירסון',
-  'spearman':              'מתאם ספירמן',
-  'cramer':                'מתאם קרמר',
-}
+// Hebrew labels for each topic now live in ../data/topicLabels (shared with
+// PersonalPlanWizard). Imported at top of file as HEBREW_LABELS.
 
 // Extract topics from quiz-bank data
 // Build the topic picker from BOTH quiz-bank.json AND lesson-content.ts so
@@ -1837,12 +1813,54 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
   const level = Math.floor(xp / XP_PER_LEVEL) + 1
   const xpInLevel = xp % XP_PER_LEVEL
   const topicsMastered = useLearningStore(s => s.completedLessons.length)
+  const completedLessons = useLearningStore(s => s.completedLessons)
+  const answeredIds = useLearningStore(s => s.answeredIds)
   const personalPlan = useLearningStore(s => s.personalPlan)
   const clearPersonalPlan = useLearningStore(s => s.clearPersonalPlan)
   const [planWizardOpen, setPlanWizardOpen] = useState(false)
+
+  // ── Progress-driven home content ──────────────────────────────────────────
+  // Ordered topic list: prefer the user's personal plan, else the canonical
+  // easy-first course order (same chain the plan generator uses).
+  const planOrder = personalPlan?.sequence?.map(s => s.topicId).filter(Boolean) ?? []
+  const topicOrder = planOrder.length ? planOrder : TOPIC_ORDER
+  const completedSet = new Set(completedLessons)
+  // Current = the topic right AFTER the furthest-completed one. This puts the
+  // user's position in the MIDDLE of the timeline — a done topic BEFORE it and
+  // an upcoming topic AFTER it (user 2026-05-31: "where the person is should be
+  // in the middle, with a before and an after"). Brand-new user → first topic;
+  // everything done → last topic. Using furthest-done (not first-incomplete)
+  // handles non-linear completion so a finished topic never appears "ahead".
+  const completedIdxs = topicOrder.map((t, i) => (completedSet.has(t) ? i : -1)).filter(i => i >= 0)
+  const lastDoneIdx = completedIdxs.length ? Math.max(...completedIdxs) : -1
+  const currentIdx = Math.min(lastDoneIdx + 1, topicOrder.length - 1)
+  const currentTopicId = topicOrder[currentIdx]
+  const currentTopicName = HEBREW_LABELS[currentTopicId] || currentTopicId
+  // Per-topic answered count — answers are stored as `studyhub-q<id>`.
+  const currentTopicQuestions: Array<{ id: string }> =
+    (quizBankData.topics as Record<string, any>)[currentTopicId]?.questions ?? []
+  const answeredInTopic = currentTopicQuestions.filter(q => answeredIds.includes(`studyhub-q${q.id}`)).length
+  const remainingInTopic = Math.max(0, currentTopicQuestions.length - answeredInTopic)
+  const studyhubAnswered = answeredIds.some(id => id.startsWith('studyhub-q'))
+  const hasAnyProgress = completedLessons.length > 0 || studyhubAnswered
+  const topicPct = currentTopicQuestions.length
+    ? Math.round((answeredInTopic / currentTopicQuestions.length) * 100)
+    : 0
+  // Up to 3 timeline stages centered on the current topic, clamped at edges.
+  const windowStart = Math.max(0, Math.min(currentIdx - 1, topicOrder.length - 3))
+  const timelineSlice = topicOrder.slice(windowStart, windowStart + 3).map(tid => ({
+    topicId: tid,
+    name: HEBREW_LABELS[tid] || tid,
+    state: (tid === currentTopicId ? 'current' : completedSet.has(tid) ? 'done' : 'upcoming') as 'current' | 'done' | 'upcoming',
+  }))
+
   return (
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
-      <PersonalPlanWizard open={planWizardOpen} onClose={() => setPlanWizardOpen(false)} />
+      <PersonalPlanWizard
+        open={planWizardOpen}
+        onClose={() => setPlanWizardOpen(false)}
+        onSelectTopic={onSelectTopic}
+      />
       <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* Personal study plan CTA / banner — opens 3-step intake wizard. */}
@@ -1931,7 +1949,13 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
           }}>
             <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 6 }}>כמעט שם!</div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
-              נשארו לך רק 2 שאלות בקורס<br />סטטיסטיקה תיאורית
+              {!hasAnyProgress ? (
+                <>בוא נתחיל בהתחלה<br />{currentTopicName}</>
+              ) : answeredInTopic > 0 && remainingInTopic > 0 ? (
+                <>נשארו לך עוד {remainingInTopic} שאלות<br />{currentTopicName}</>
+              ) : (
+                <>נמשיך מאיפה שעצרת<br />{currentTopicName}</>
+              )}
             </div>
             {/* Rotating 3D hero — same Kenney-building cycler as the landing
                 page, scaled to ~150px tall to fit the home card. Replaces the
@@ -1941,12 +1965,12 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
                 <HeroScene />
               </Suspense>
             </div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginBottom: 8, textAlign: 'right' }}>המבנה הבא בעירך</div>
-            {/* Progress bar */}
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginBottom: 8, textAlign: 'right' }}>הצעה למבנה הבא בעירך</div>
+            {/* Progress bar — reflects answered share of the current topic */}
             <div style={{ height: 7, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden', marginBottom: 16 }}>
-              <div style={{ width: '63%', height: '100%', background: 'rgba(212,175,55,0.7)', borderRadius: 10 }} />
+              <div style={{ width: `${topicPct}%`, height: '100%', background: 'rgba(212,175,55,0.7)', borderRadius: 10, transition: 'width 0.4s' }} />
             </div>
-            <button onClick={onGoLearning}
+            <button onClick={() => onSelectTopic(currentTopicId)}
               className="ws-cta-btn"
               style={{ background: BUTTON_COLOR, color: '#fff', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, fontFamily: "'Rubik', sans-serif", boxShadow: '0px 4px 14px rgba(51,81,202,0.35), inset 0 1px 0 rgba(255,255,255,0.25)' }}>
               המשך ←
@@ -2013,65 +2037,62 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
             {/* Connector line */}
             <div style={{ position: 'absolute', left: '10%', right: '10%', top: 28, height: 1, border: '1px solid #F4C52E', zIndex: 0 }} />
 
-            {/* Stage: ממוצע (הושלם) — satisfying green check */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 1 }}>
-              <div style={{
-                width: 38, height: 38,
-                background: 'linear-gradient(135deg, #34A853 0%, #22833F 100%)',
-                borderRadius: '50%',
-                boxShadow: '0 4px 12px rgba(52,168,83,0.4), inset 0 1px 0 rgba(255,255,255,0.25)',
-                border: '2px solid rgba(255,255,255,0.85)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {/* Proper-orientation check ✓ (no Y-flip) */}
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 8.5l3.2 3.2L13 4.5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+            {/* Stages — progress-driven slice centered on the current topic.
+                done = green check · current = gold gem · upcoming = small node. */}
+            {timelineSlice.map(stage => (
+              <div key={stage.topicId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 1 }}>
+                {stage.state === 'done' ? (
+                  <div style={{
+                    width: 38, height: 38,
+                    background: 'linear-gradient(135deg, #34A853 0%, #22833F 100%)',
+                    borderRadius: '50%',
+                    boxShadow: '0 4px 12px rgba(52,168,83,0.4), inset 0 1px 0 rgba(255,255,255,0.25)',
+                    border: '2px solid rgba(255,255,255,0.85)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {/* Proper-orientation check ✓ (no Y-flip) */}
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                      <path d="M3 8.5l3.2 3.2L13 4.5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                ) : stage.state === 'current' ? (
+                  <div style={{
+                    width: 35, height: 35,
+                    background: 'linear-gradient(115.34deg, rgba(255,194,0,0.35) -8.31%, rgba(154,106,4,0.5) 168.93%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: 24,
+                    boxShadow: '0px 3px 5.8px rgba(142,122,59,0.5)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {/* Gold gem */}
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                      <polygon points="9,2 15,7 9,16 3,7" fill="rgba(212,175,55,0.8)" stroke="rgba(212,175,55,1)" strokeWidth="1" />
+                      <polygon points="9,2 15,7 9,10 3,7" fill="rgba(255,220,80,0.5)" />
+                    </svg>
+                  </div>
+                ) : (
+                  <div style={{
+                    width: 27, height: 27,
+                    background: 'linear-gradient(34.36deg, #E6C55D -10.48%, #806E34 267.01%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: 24,
+                    boxShadow: '0px 3px 5.8px rgba(142,122,59,0.5)',
+                    transform: 'matrix(1,0,0,-1,0,0)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <rect x="4" y="2" width="6" height="8" rx="1" fill="rgba(255,255,255,0.5)" />
+                      <path d="M5 5.5h4M5 7.5h3" stroke="rgba(255,255,255,0.8)" strokeWidth="1" />
+                      <circle cx="7" cy="11" r="1.5" fill="rgba(255,255,255,0.5)" />
+                    </svg>
+                  </div>
+                )}
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: stage.state === 'current' ? 16 : 14, color: TEXT_DARK, textAlign: 'center', fontWeight: stage.state === 'upcoming' ? 400 : 600 }}>{stage.name}</div>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: stage.state === 'done' ? '#22833F' : TEXT_LIGHT, fontWeight: stage.state === 'done' ? 600 : 400 }}>
+                  {stage.state === 'done' ? '✓ הושלם' : stage.state === 'current' ? '(עכשיו)' : '(בקרוב)'}
+                </div>
               </div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 14, color: TEXT_DARK, textAlign: 'center', fontWeight: 600 }}>ממוצע</div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: '#22833F', fontWeight: 600 }}>✓ הושלם</div>
-            </div>
-
-            {/* Stage: חציון ושכיח (עכשיו) */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 1 }}>
-              <div style={{
-                width: 35, height: 35,
-                background: 'linear-gradient(115.34deg, rgba(255,194,0,0.35) -8.31%, rgba(154,106,4,0.5) 168.93%)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: 24,
-                boxShadow: '0px 3px 5.8px rgba(142,122,59,0.5)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {/* Gold gem */}
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <polygon points="9,2 15,7 9,16 3,7" fill="rgba(212,175,55,0.8)" stroke="rgba(212,175,55,1)" strokeWidth="1" />
-                  <polygon points="9,2 15,7 9,10 3,7" fill="rgba(255,220,80,0.5)" />
-                </svg>
-              </div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, fontWeight: 600, color: TEXT_DARK, textAlign: 'center' }}>חציון ושכיח</div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT }}>(עכשיו)</div>
-            </div>
-
-            {/* Stage: סטיית תקן (בקרוב) */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 1 }}>
-              <div style={{
-                width: 27, height: 27,
-                background: 'linear-gradient(34.36deg, #E6C55D -10.48%, #806E34 267.01%)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: 24,
-                boxShadow: '0px 3px 5.8px rgba(142,122,59,0.5)',
-                transform: 'matrix(1,0,0,-1,0,0)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <rect x="4" y="2" width="6" height="8" rx="1" fill="rgba(255,255,255,0.5)" />
-                  <path d="M5 5.5h4M5 7.5h3" stroke="rgba(255,255,255,0.8)" strokeWidth="1" />
-                  <circle cx="7" cy="11" r="1.5" fill="rgba(255,255,255,0.5)" />
-                </svg>
-              </div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 14, color: TEXT_DARK, textAlign: 'center' }}>סטיית תקן</div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT }}>(בקרוב)</div>
-            </div>
+            ))}
           </div>
         </div>
 
