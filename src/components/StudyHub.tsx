@@ -326,6 +326,7 @@ import LessonScreen from './LessonScreen'
 import { LESSON_CONTENT } from '../data/lesson-content'
 import { HEBREW_LABELS } from '../data/topicLabels'
 import { TOPIC_ORDER } from '../lib/generatePlan'
+import { MathText } from '../lib/mathRender'
 import { MeanVisual } from './LessonVisuals'
 import SamplingDistribution from './SamplingDistribution'
 import ArsenalScreen, { normalizeMathGlyphs } from './ArsenalScreen'
@@ -1800,11 +1801,12 @@ function TopBar({ title, onLogout, darkMode, onToggleDark }: { title: string; on
 }
 
 // ── Home screen ────────────────────────────────────────────────────────────────
-function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
+function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onStartPractice }: {
   onGoLearning: () => void
   onGoWorld: () => void
   onGoMindmap: () => void
   onSelectTopic: (topicId: string) => void
+  onStartPractice: (topicId: string) => void
 }) {
   const xp = useLearningStore(s => s.xp)
   const totalCorrect = useLearningStore(s => s.totalCorrect)
@@ -1970,10 +1972,13 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
             <div style={{ height: 7, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden', marginBottom: 16 }}>
               <div style={{ width: `${topicPct}%`, height: '100%', background: 'rgba(212,175,55,0.7)', borderRadius: 10, transition: 'width 0.4s' }} />
             </div>
-            <button onClick={() => onSelectTopic(currentTopicId)}
+            {/* Brand-new user (zero progress) → jump straight into the intro
+                practice quiz, bypassing the difficulty picker. Returning users
+                keep the existing picker flow so they can pick difficulty / resume. */}
+            <button onClick={() => (hasAnyProgress ? onSelectTopic(currentTopicId) : onStartPractice(currentTopicId))}
               className="ws-cta-btn"
               style={{ background: BUTTON_COLOR, color: '#fff', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, fontFamily: "'Rubik', sans-serif", boxShadow: '0px 4px 14px rgba(51,81,202,0.35), inset 0 1px 0 rgba(255,255,255,0.25)' }}>
-              המשך ←
+              {hasAnyProgress ? 'המשך ←' : 'בוא נתרגל ←'}
             </button>
           </div>
 
@@ -3128,7 +3133,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               </div>
 
               <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 19, color: 'var(--sh-q-text-color)', lineHeight: 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: 16, width: '100%' }}>
-                {q.text}
+                <MathText text={q.text} />
               </div>
 
               {((q as any).format === 'mc' && Array.isArray((q as any).options)) ? (
@@ -3207,7 +3212,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         }}>
                           {letter}
                         </span>
-                        <span style={{ lineHeight: 1.5, textAlign: 'center' }}>{opt}</span>
+                        <span style={{ lineHeight: 1.5, textAlign: 'center' }}><MathText text={opt} /></span>
                         {marker && (
                           <span style={{
                             fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20,
@@ -3559,6 +3564,16 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
     setInternalView(mode === 'lesson' ? 'lesson' : 'quiz-intro')
   }
 
+  // Brand-new user path: skip the QuizIntroCard difficulty picker and drop the
+  // learner straight into the practice quiz (all difficulties). Used by the
+  // home "תרגול" CTA when the user has zero progress, so a first session lands
+  // immediately on the intro practice questions instead of an extra picker.
+  const handleStartPractice = (topicId: string, difficulty: DifficultyFilter = 'all') => {
+    setSelectedTopic(topicId)
+    setQuizDifficulty(difficulty)
+    setInternalView('learning')
+  }
+
   const handleProgressUpdate = (updated: UserProgress) => {
     setUserProgress(updated)
   }
@@ -3688,6 +3703,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
             onGoWorld={() => onViewChange('3d')}
             onGoMindmap={() => onViewChange('mindmap')}
             onSelectTopic={(topicId) => handleSelectTopic(topicId, 'quiz')}
+            onStartPractice={(topicId) => handleStartPractice(topicId)}
           />
         )}
         {internalView === 'courses' && (

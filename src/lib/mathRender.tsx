@@ -142,6 +142,37 @@ export function KatexInline({ latex, displayMode = false, style }: {
   return <div ref={ref} dir="ltr" style={{ direction: 'ltr', unicodeBidi: 'isolate', display: 'inline-block', ...style }} />
 }
 
+/** Render a mixed Hebrew/plain string that may contain inline `$…$` math
+ *  segments. Plain runs render as-is (inherit the surrounding RTL flow);
+ *  each `$…$` run renders as LTR-isolated KaTeX via {@link KatexInline}.
+ *
+ *  Used by the quiz renderer so a question/option like
+ *    "הערך $\bar{X}=110$ הוא סטטיסטי" / "$\mu$ של אוכלוסיה"
+ *  shows real notation instead of plain "X=110". No `$` in the string → the
+ *  text is returned verbatim (zero overhead for non-math options). */
+export function MathText({ text, style }: { text?: string; style?: React.CSSProperties }) {
+  if (!text) return null
+  if (!text.includes('$')) return <>{text}</>
+  // Split on `$…$` runs, keeping the delimiters so we can tell math from text.
+  const parts = text.split(/(\$[^$]+\$)/g)
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.length >= 2 && part.startsWith('$') && part.endsWith('$')) {
+          return (
+            <KatexInline
+              key={i}
+              latex={part.slice(1, -1)}
+              style={{ verticalAlign: 'middle', ...style }}
+            />
+          )
+        }
+        return <React.Fragment key={i}>{part}</React.Fragment>
+      })}
+    </>
+  )
+}
+
 function KatexLine({ latex }: { latex: string }) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
