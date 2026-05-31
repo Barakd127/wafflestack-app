@@ -1863,7 +1863,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
         onClose={() => setPlanWizardOpen(false)}
         onSelectTopic={onSelectTopic}
       />
-      <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
 
         {/* Personal study plan CTA / banner — opens 3-step intake wizard. */}
         {!personalPlan ? (
@@ -1941,16 +1941,16 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             ready to be wired into a dedicated motivation tab in the future. */}
 
         {/* ── ROW 1 ──────────────────────────────────── */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'stretch' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, alignItems: 'stretch' }}>
 
           {/* Card: כמעט שם! */}
           <div className="ws-glass-card" style={{
             borderRadius: CARD_RADIUS,
-            padding: '28px 28px 22px',
+            padding: '40px 40px 32px',
             display: 'flex', flexDirection: 'column',
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 6 }}>תרגול</div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 28, color: TEXT_DARK, marginBottom: 8 }}>תרגול</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 19, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 20 }}>
               {!hasAnyProgress ? (
                 <>בוא נתחיל בהתחלה<br />{currentTopicName}</>
               ) : answeredInTopic > 0 && remainingInTopic > 0 ? (
@@ -1962,7 +1962,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             {/* Rotating 3D hero — same Kenney-building cycler as the landing
                 page, scaled to ~150px tall to fit the home card. Replaces the
                 old static temple PNG with the live cycling preview. */}
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 16, minHeight: 150, height: 150, borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 16, minHeight: 240, height: 240, borderRadius: 12, overflow: 'hidden' }}>
               <Suspense fallback={<div style={{ color: 'rgba(31,41,55,0.4)', fontSize: 12 }}>טוען…</div>}>
                 <HeroScene />
               </Suspense>
@@ -1977,7 +1977,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 keep the existing picker flow so they can pick difficulty / resume. */}
             <button onClick={() => (hasAnyProgress ? onSelectTopic(currentTopicId) : onStartPractice(currentTopicId))}
               className="ws-cta-btn"
-              style={{ background: BUTTON_COLOR, color: '#fff', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, fontFamily: "'Rubik', sans-serif", boxShadow: '0px 4px 14px rgba(51,81,202,0.35), inset 0 1px 0 rgba(255,255,255,0.25)' }}>
+              style={{ background: BUTTON_COLOR, color: '#fff', borderRadius: 24, padding: '15px 0', fontWeight: 600, fontSize: 18, fontFamily: "'Rubik', sans-serif", boxShadow: '0px 4px 14px rgba(51,81,202,0.35), inset 0 1px 0 rgba(255,255,255,0.25)' }}>
               {hasAnyProgress ? 'המשך ←' : 'בוא נתרגל ←'}
             </button>
           </div>
@@ -1985,11 +1985,11 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
           {/* Card: לוח לבן דיגיטלי */}
           <div className="ws-glass-card" style={{
             borderRadius: CARD_RADIUS,
-            padding: '28px 28px 24px',
+            padding: '40px 40px 32px',
             display: 'flex', flexDirection: 'column',
             position: 'relative',
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_MED, marginBottom: 16, textAlign: 'right' }}>לימוד חומר</div>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 28, color: TEXT_MED, marginBottom: 18, textAlign: 'right' }}>לימוד חומר</div>
             {/* Whiteboard area with glassmorphism */}
             <div style={{
               flex: 1,
@@ -2000,7 +2000,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
               padding: '20px 24px',
               position: 'relative',
               overflow: 'hidden',
-              minHeight: 160,
+              minHeight: 280,
             }}>
               {/* "טיפ" label */}
               <div style={{ position: 'absolute', top: 16, left: 20, fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_TIP }}>טיפ</div>
@@ -2018,12 +2018,12 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                   <ellipse cx="35" cy="35" rx="18" ry="16" fill="rgba(51,81,202,0.3)" />
                 </svg>
               </div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_DARK, lineHeight: 1.9, textAlign: 'right', marginTop: 40 }}>
+              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 22, color: TEXT_DARK, lineHeight: 1.9, textAlign: 'right', marginTop: 48 }}>
                 בוא נמפה את הנושאים בקורס שלך
               </div>
             </div>
             {/* CTA button */}
-            <button onClick={onGoMindmap} style={{ marginTop: 12, background: 'linear-gradient(90deg,#254A9F,#3351CA)', color:'#fff', border:'none', borderRadius:24, padding:'10px 0', fontWeight:600, fontSize:15, cursor:'pointer', fontFamily:"'Rubik',sans-serif", width:'100%', boxShadow:'0px 2px 6px rgba(51,81,202,0.4)' }}>
+            <button onClick={onGoMindmap} style={{ marginTop: 14, background: 'linear-gradient(90deg,#254A9F,#3351CA)', color:'#fff', border:'none', borderRadius:24, padding:'15px 0', fontWeight:600, fontSize:17, cursor:'pointer', fontFamily:"'Rubik',sans-serif", width:'100%', boxShadow:'0px 2px 6px rgba(51,81,202,0.4)' }}>
               🗺 פתח מפת מושגים
             </button>
           </div>
