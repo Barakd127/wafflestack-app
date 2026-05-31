@@ -16,8 +16,8 @@ export type Style = 'theory-first' | 'practice-first' | 'mixed'
 export type MotivationProfile =
   | 'streak'
   | 'mastery'
-  | 'competition'
   | 'understanding'
+  | 'structured'
 
 export interface IntakeAnswers {
   goal: Goal

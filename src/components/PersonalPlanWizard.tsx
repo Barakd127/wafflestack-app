@@ -47,10 +47,10 @@ const STYLE_OPTIONS: { id: Style; label: string; sub: string; emoji: string }[] 
 ]
 
 const MOTIVATION_OPTIONS: { id: MotivationProfile; label: string; emoji: string }[] = [
-  { id: 'streak', label: 'רצף ימים גדל', emoji: '🔥' },
+  { id: 'streak', label: 'רצף ימים', emoji: '🔥' },
   { id: 'mastery', label: 'לסיים נושאים ב-100%', emoji: '🏆' },
-  { id: 'competition', label: 'לעקוף אחרים בטבלה', emoji: '🥇' },
   { id: 'understanding', label: 'להבין באמת', emoji: '💡' },
+  { id: 'structured', label: 'תכנית מסודרת', emoji: '🗂️' },
 ]
 
 interface PersonalPlanWizardProps {
@@ -66,13 +66,18 @@ export default function PersonalPlanWizard({ open, onClose }: PersonalPlanWizard
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
   const [answers, setAnswers] = useState<IntakeAnswers>(existing ?? DEFAULT_INTAKE)
 
-  // Reset to pre-filled state every time the modal opens.
+  // Reset to pre-filled state every time the modal opens. Depend on `open`
+  // ONLY — NOT `existing`. finish() calls setPersonalPlan(), which updates the
+  // store's intakeAnswers (= `existing`); if `existing` were a dep, that update
+  // would re-fire this effect mid-flow and snap the wizard back to step 1
+  // instead of showing the success step (step 4). Per user 2026-05-31.
   useEffect(() => {
     if (open) {
       setAnswers(existing ?? DEFAULT_INTAKE)
       setStep(1)
     }
-  }, [open, existing])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   if (!open) return null
 
