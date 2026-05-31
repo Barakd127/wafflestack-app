@@ -480,7 +480,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
               <img
-                src="/kenney-city.png"
+                src="/building-figma.png"
                 alt="WaffleStack city"
                 width={180}
                 height={120}
