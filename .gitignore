@@ -51,3 +51,4 @@ bot.py
 *-out.txt
 tsc-errors.txt
 .vercel
+tutorials/output/
