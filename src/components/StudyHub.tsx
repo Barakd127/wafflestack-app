@@ -483,36 +483,77 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
   return (
     <div dir="rtl" style={{
       width: '100%', height: '100%',
-      background: 'linear-gradient(160deg, #EBF1FF 0%, #D6E4FF 40%, #C4DCFF 100%)',
+      background: 'linear-gradient(145deg, #c8dcff 0%, #d6e8ff 35%, #e8f0ff 65%, #bdd4ff 100%)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontFamily: "'Rubik', 'Assistant', sans-serif",
+      position: 'relative', overflow: 'hidden',
     }}>
-      <div style={{ width: '100%', maxWidth: 900, padding: 24, display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+      {/* Ambient glow blobs behind the card */}
+      <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(51,81,202,0.18) 0%, transparent 70%)', top: '10%', right: '15%', filter: 'blur(60px)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(131,178,248,0.22) 0%, transparent 70%)', bottom: '15%', left: '20%', filter: 'blur(50px)', pointerEvents: 'none' }} />
 
-        {/* Auth card */}
-        <div style={{
-          flex: 1, background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(16px)',
-          borderRadius: 24, padding: '36px 40px',
-          boxShadow: '0 8px 40px rgba(31,62,108,0.18)',
-          border: '1px solid rgba(255,255,255,0.6)',
+      <div style={{ width: '100%', maxWidth: 900, padding: 24, display: 'flex', gap: 24, alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+
+        {/* Auth card — liquid glass */}
+        <div className="ws-glass-card" style={{
+          flex: 1,
+          borderRadius: 28,
+          padding: '40px 44px',
         }}>
-          {/* Logo */}
+          {/* Logo — Kenney-style top-down city SVG */}
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <div style={{ fontSize: 42, marginBottom: 6 }}>🏙️</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+              {/* Top-down city grid — transparent bg, WaffleStack palette */}
+              <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                {/* Road grid */}
+                <rect x="0" y="30" width="72" height="12" fill="#CBD5E1" rx="2"/>
+                <rect x="30" y="0" width="12" height="72" fill="#CBD5E1" rx="2"/>
+                {/* Road center lines */}
+                <line x1="36" y1="2" x2="36" y2="28" stroke="white" strokeWidth="1.5" strokeDasharray="4 3"/>
+                <line x1="36" y1="44" x2="36" y2="70" stroke="white" strokeWidth="1.5" strokeDasharray="4 3"/>
+                <line x1="2" y1="36" x2="28" y2="36" stroke="white" strokeWidth="1.5" strokeDasharray="4 3"/>
+                <line x1="44" y1="36" x2="70" y2="36" stroke="white" strokeWidth="1.5" strokeDasharray="4 3"/>
+                {/* Top-left block: park + building */}
+                <rect x="3" y="3" width="24" height="24" fill="#86EFAC" rx="3"/>
+                <rect x="8" y="8" width="10" height="10" fill="#254A9F" rx="2"/>
+                <rect x="10" y="10" width="6" height="6" fill="#3B82F6" rx="1"/>
+                <rect x="16" y="12" width="8" height="8" fill="#1F3E6C" rx="2"/>
+                {/* Top-right block: buildings */}
+                <rect x="45" y="3" width="24" height="24" fill="#BFDBFE" rx="3"/>
+                <rect x="48" y="6" width="8" height="14" fill="#3351CA" rx="2"/>
+                <rect x="58" y="10" width="8" height="10" fill="#254A9F" rx="2"/>
+                <rect x="50" y="18" width="14" height="6" fill="#1E40AF" rx="1"/>
+                {/* Bottom-left block: buildings */}
+                <rect x="3" y="45" width="24" height="24" fill="#BFDBFE" rx="3"/>
+                <rect x="6" y="48" width="10" height="18" fill="#1F3E6C" rx="2"/>
+                <rect x="8" y="50" width="6" height="6" fill="#60A5FA" rx="1"/>
+                <rect x="18" y="54" width="7" height="12" fill="#3351CA" rx="2"/>
+                {/* Bottom-right block: park + small building */}
+                <rect x="45" y="45" width="24" height="24" fill="#86EFAC" rx="3"/>
+                <rect x="54" y="52" width="10" height="10" fill="#D4AF37" rx="2"/>
+                <rect x="56" y="54" width="6" height="6" fill="#FDE68A" rx="1"/>
+                <rect x="47" y="57" width="6" height="8" fill="#254A9F" rx="2"/>
+              </svg>
+            </div>
             <div style={{ fontWeight: 800, fontSize: 26, color: '#1F3E6C' }}>WaffleStack</div>
             <div style={{ fontSize: 13, color: '#7F9BD9', marginTop: 4 }}>פלטפורמת למידה לסטטיסטיקה</div>
           </div>
 
-          {/* Mode tabs */}
-          <div style={{ display: 'flex', borderRadius: 12, background: 'rgba(31,62,108,0.07)', padding: 4, marginBottom: 24, gap: 4 }}>
+          {/* Mode tabs — glass pill */}
+          <div style={{ display: 'flex', borderRadius: 14, background: 'rgba(31,62,108,0.07)', padding: 4, marginBottom: 24, gap: 4, backdropFilter: 'blur(8px)' }}>
             {(['login', 'register'] as const).map(m => (
-              <button key={m} onClick={() => { setMode(m); setError('') }} style={{
-                flex: 1, padding: '9px 0', border: 'none', borderRadius: 9, cursor: 'pointer',
-                background: mode === m ? '#1F3E6C' : 'transparent',
-                color: mode === m ? '#fff' : '#1F3E6C',
-                fontWeight: 600, fontSize: 14, transition: 'all 0.2s',
-                fontFamily: "'Rubik', sans-serif",
-              }}>
+              <button key={m} onClick={() => { setMode(m); setError('') }}
+                className={mode === m ? 'ws-cta-btn' : ''}
+                style={{
+                  flex: 1, padding: '10px 0', borderRadius: 10, cursor: 'pointer',
+                  background: mode === m ? 'linear-gradient(135deg,#1F3E6C,#254A9F)' : 'transparent',
+                  border: mode === m ? '1px solid rgba(255,255,255,0.2)' : '1px solid transparent',
+                  color: mode === m ? '#fff' : '#1F3E6C',
+                  fontWeight: 600, fontSize: 14,
+                  boxShadow: mode === m ? '0 4px 14px rgba(31,62,108,0.3), inset 0 1px 0 rgba(255,255,255,0.25)' : 'none',
+                  transition: 'all 0.2s',
+                  fontFamily: "'Rubik', sans-serif",
+                }}>
                 {m === 'login' ? '🔑 כניסה' : '✨ הרשמה'}
               </button>
             ))}
@@ -524,7 +565,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                 <label style={{ fontSize: 12, color: '#7F9BD9', fontWeight: 600, display: 'block', marginBottom: 5 }}>שם מלא</label>
                 <input value={displayName} onChange={e => setDisplayName(e.target.value)}
                   placeholder="ישראל ישראלי"
-                  style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #C4DCFF', borderRadius: 10, fontSize: 15, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C' }} />
+                  style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(196,220,255,0.8)', borderRadius: 12, fontSize: 15, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', transition: 'border-color 0.15s' }} />
               </div>
             )}
             <div>
@@ -532,34 +573,37 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
               <input value={username} onChange={e => setUsername(e.target.value)} required
                 placeholder="username"
                 autoComplete="username"
-                style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #C4DCFF', borderRadius: 10, fontSize: 15, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', direction: 'ltr' }} />
+                style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(196,220,255,0.8)', borderRadius: 12, fontSize: 16, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', direction: 'ltr', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', transition: 'border-color 0.15s' }} />
             </div>
             <div>
               <label style={{ fontSize: 12, color: '#7F9BD9', fontWeight: 600, display: 'block', marginBottom: 5 }}>סיסמה</label>
               <input value={password} onChange={e => setPassword(e.target.value)} required
                 type="password" placeholder="••••••"
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #C4DCFF', borderRadius: 10, fontSize: 15, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', direction: 'ltr' }} />
+                style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(196,220,255,0.8)', borderRadius: 12, fontSize: 16, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', direction: 'ltr', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', transition: 'border-color 0.15s' }} />
             </div>
-            {error && <div style={{ background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.3)', borderRadius: 8, padding: '8px 12px', color: '#d32f2f', fontSize: 13, textAlign: 'center' }}>{error}</div>}
-            <button type="submit" disabled={loading} style={{
-              marginTop: 4, padding: '13px 0', background: 'linear-gradient(135deg,#1F3E6C,#254A9F)',
-              color: '#fff', border: 'none', borderRadius: 12, fontSize: 16, fontWeight: 700,
-              cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
-              fontFamily: "'Rubik', sans-serif", boxShadow: '0 4px 16px rgba(31,62,108,0.3)',
-            }}>
+            {error && <div style={{ background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.3)', borderRadius: 10, padding: '10px 14px', color: '#d32f2f', fontSize: 13, textAlign: 'center' }}>{error}</div>}
+            <button type="submit" disabled={loading}
+              className="ws-cta-btn"
+              style={{
+                marginTop: 6, padding: '14px 0',
+                background: 'linear-gradient(135deg,#1F3E6C,#254A9F)',
+                color: '#fff', borderRadius: 14, fontSize: 16, fontWeight: 700,
+                cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
+                fontFamily: "'Rubik', sans-serif",
+                boxShadow: '0 6px 20px rgba(31,62,108,0.35), inset 0 1px 0 rgba(255,255,255,0.25)',
+                width: '100%',
+              }}>
               {loading ? '...' : mode === 'login' ? 'כניסה →' : 'צור חשבון →'}
             </button>
           </form>
         </div>
 
-        {/* Student quick-login panel (shown if students exist) */}
+        {/* Student quick-login panel */}
         {existingUsers.length > 0 && (
-          <div style={{
-            width: 240, background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(14px)',
+          <div className="ws-glass-card" style={{
+            width: 240,
             borderRadius: 20, padding: '24px 20px',
-            boxShadow: '0 8px 32px rgba(31,62,108,0.12)',
-            border: '1px solid rgba(255,255,255,0.6)',
             flexShrink: 0,
           }}>
             <div style={{ fontWeight: 700, fontSize: 14, color: '#1F3E6C', marginBottom: 14, textAlign: 'right' }}>
@@ -568,15 +612,12 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {existingUsers.map(u => (
                 <button key={u.userId} onClick={() => handleQuickLogin(u.userId)}
+                  className="ws-glass-card"
                   style={{
-                    padding: '10px 14px', background: 'rgba(31,62,108,0.06)',
-                    border: '1px solid rgba(31,62,108,0.12)', borderRadius: 10,
+                    padding: '10px 14px', borderRadius: 10,
                     display: 'flex', alignItems: 'center', gap: 10,
                     cursor: 'pointer', textAlign: 'right', width: '100%',
-                    transition: 'all 0.15s',
                   }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(31,62,108,0.12)' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(31,62,108,0.06)' }}
                 >
                   <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#254A9F,#7F9BD9)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
                     {(u.displayName || u.username).slice(0, 1).toUpperCase()}
@@ -892,21 +933,15 @@ function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
           <button
             key={c.id}
             onClick={() => pickCourse(c)}
+            className="ws-glass-card"
             style={{
-              position: 'relative',
-              border: 0,
               borderRadius: 22,
               padding: '28px 24px',
-              background: GLASS_CARD,
-              boxShadow: CARD_SHADOW,
               cursor: 'pointer',
               textAlign: 'right',
               fontFamily: "'Rubik', sans-serif",
               direction: 'rtl',
-              transition: 'transform 0.18s, box-shadow 0.18s',
             }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 12px 32px rgba(31,62,108,0.18)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = CARD_SHADOW }}
           >
             {/* Icon chip */}
             <div style={{
@@ -1623,16 +1658,17 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
               onMouseEnter={e => { if (!isActive && !locked) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)' }}
               onMouseLeave={e => { if (!isActive && !locked) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
             >
-              <span style={{
-                width: 32, height: 32, flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: isActive ? '#FFD700' : 'rgba(255,255,255,0.92)',
-                background: isActive ? 'rgba(255,215,0,0.12)' : 'rgba(255,255,255,0.08)',
-                borderRadius: 10,
-                border: '1px solid ' + (isActive ? 'rgba(255,215,0,0.35)' : 'rgba(255,255,255,0.14)'),
-                transition: 'color 0.15s, background 0.15s, transform 0.15s',
-                transform: isActive ? 'scale(1.06)' : 'scale(1)',
-              }}>{renderIcon(item.iconKey)}</span>
+              <span
+                className={`ws-icon-chip ${isActive ? 'ws-icon-chip--active' : 'ws-icon-chip--inactive'}`}
+                style={{
+                  width: 32, height: 32, flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: isActive ? '#FFD700' : 'rgba(255,255,255,0.92)',
+                  borderRadius: 10,
+                  border: '1px solid',
+                  transition: 'color 0.15s, background 0.15s, transform 0.15s',
+                  transform: isActive ? 'scale(1.06)' : 'scale(1)',
+                }}>{renderIcon(item.iconKey)}</span>
               {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
               {locked && (
                 <span aria-hidden="true" style={{
@@ -1906,14 +1942,10 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
         <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'stretch' }}>
 
           {/* Card: כמעט שם! */}
-          <div style={{
-            background: GLASS_CARD,
-            backdropFilter: 'blur(20px)',
-            boxShadow: CARD_SHADOW,
+          <div className="ws-glass-card" style={{
             borderRadius: CARD_RADIUS,
             padding: '28px 28px 22px',
             display: 'flex', flexDirection: 'column',
-            border: '1px solid rgba(255,255,255,0.5)',
           }}>
             <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 6 }}>כמעט שם!</div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
@@ -1933,20 +1965,17 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic }: {
               <div style={{ width: '63%', height: '100%', background: 'rgba(212,175,55,0.7)', borderRadius: 10 }} />
             </div>
             <button onClick={onGoLearning}
-              style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, cursor: 'pointer', fontFamily: "'Rubik', sans-serif", boxShadow: '0px 2px 6px #8DA7FF' }}>
+              className="ws-cta-btn"
+              style={{ background: BUTTON_COLOR, color: '#fff', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, fontFamily: "'Rubik', sans-serif", boxShadow: '0px 4px 14px rgba(51,81,202,0.35), inset 0 1px 0 rgba(255,255,255,0.25)' }}>
               המשך ←
             </button>
           </div>
 
           {/* Card: לוח לבן דיגיטלי */}
-          <div style={{
-            background: GLASS_CARD,
-            backdropFilter: 'blur(20px)',
-            boxShadow: CARD_SHADOW,
+          <div className="ws-glass-card" style={{
             borderRadius: CARD_RADIUS,
             padding: '28px 28px 24px',
             display: 'flex', flexDirection: 'column',
-            border: '1px solid rgba(255,255,255,0.5)',
             position: 'relative',
           }}>
             <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_MED, marginBottom: 16, textAlign: 'right' }}>לוח לבן דיגיטלי</div>

@@ -47,3 +47,8 @@ export default defineConfig({
     },
   ],
 });
+
+// NOTE on landscape: phone-landscape width (e.g. 844px) exceeds the app's own
+// mobile breakpoint (max-width: 768px), so landscape renders the desktop sidebar
+// layout — already covered by chromium-desktop. A dedicated landscape project
+// would only produce skips, so it is intentionally omitted.
