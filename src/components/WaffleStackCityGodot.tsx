@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Tooltip from './Tooltip'
+import { useLearningStore } from '../store/learningStore'
 
 /**
  * Godot-powered 3D city. Hosted at /godot/index.html and embedded in an
@@ -13,8 +14,15 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null)
   const [tip, setTip] = useState(0)
 
-  const userId = (typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default'
-  const src = `/godot/index.html?userId=${encodeURIComponent(userId)}`
+  // Admin flag drives whether the Godot build palette (admin/dev tools) shows.
+  // Students get the curated learning-progression UI; admins get the full
+  // palette + free placement + clear. Read live from the learning store.
+  const adminMode = useLearningStore(s => s.adminMode)
+  const storeUserName = useLearningStore(s => s.userName)
+
+  const userId = storeUserName || (typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default'
+  // admin=1 unlocks the raw palette inside Godot; omitted/0 = student mode.
+  const src = `/godot/index.html?userId=${encodeURIComponent(userId)}&admin=${adminMode ? 1 : 0}`
 
   // Listen for progress / ready messages from the Godot iframe
   useEffect(() => {
