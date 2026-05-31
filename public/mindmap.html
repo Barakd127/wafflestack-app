@@ -1886,6 +1886,35 @@ function mmFitVisibleSubtree(rootId){
   requestAnimationFrame(step);
 }
 
+// On-open view: center + zoom on the LAST-clicked node (MM.sel is persisted in
+// the save blob, §mmSerializeForSave), instead of fit-to-all which dumps the
+// focused node in a corner (user 2026-05-31, images 3 vs 4). Falls back to
+// mmFitView() for first-ever open with no selection, or if positions aren't
+// populated yet. Must run AFTER mmTidyLayout has populated node x/y.
+function mmInitialFocus(_tries){
+  if(!MM || !MM.nodes) { return; }
+  // Bail+retry if the iframe's #app hasn't been laid out yet (clientWidth 0).
+  // Without this, mmFitVisibleSubtree would compute pan from a 0-width view
+  // and slam the map to the corner. Retry a few frames, then give up.
+  const appEl = document.getElementById('app');
+  const tries = _tries || 0;
+  if((!appEl || appEl.clientWidth <= 0) && tries < 20){
+    return requestAnimationFrame(function(){ mmInitialFocus(tries + 1); });
+  }
+  // Prefer the persisted selection; default to root so the very first open
+  // still centers on something sensible rather than top-left at zoom 1.
+  let target = (MM.sel && MM.nodes[MM.sel]) ? MM.sel : MM.root;
+  const n = target ? MM.nodes[target] : null;
+  // If autozoom is disabled, mmFitVisibleSubtree no-ops — so fall back to a
+  // plain fit so the user isn't left at zoom 1 / pan 0 (root in the corner).
+  const autoOff = localStorage.getItem('mmAutoZoom') === 'off';
+  if(!autoOff && n && isFinite(n.x) && isFinite(n.y)){
+    mmFitVisibleSubtree(target);
+  } else {
+    mmFitView();
+  }
+}
+
 function mmZoomBy(factor){
   MM.zoom=clamp(MM.zoom*factor,0.2,3);mmApplyTransform();mmRender();
 }
@@ -5443,6 +5472,15 @@ function wboFocus(id){
 
 wbInit();
 mmRender();
+
+// On open, center+zoom on the last-clicked node (MM.sel) rather than fit-all.
+// Deferred via double-rAF so the iframe's #app has real dimensions and
+// mmTidyLayout (inside mmRender) has populated node x/y before we measure.
+requestAnimationFrame(function(){
+  requestAnimationFrame(function(){
+    try { mmInitialFocus(); } catch(e) { try { mmFitView(); } catch(_){} }
+  });
+});
 
 // Context menu HTML
 document.getElementById('ctx-menu').innerHTML=`
