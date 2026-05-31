@@ -92,6 +92,14 @@ html.dark {
   box-sizing: border-box;
 }
 
+/* Global UI scale — make the app render 25% larger by default, matching what
+   the user liked at browser-zoom 125% ("the new 100%"). Modern Chromium `zoom`
+   reflows and adjusts viewport units (vh/vw), so #root:100vh still fills the
+   screen without clipping. Per user 2026-06-01. */
+:root {
+  zoom: 1.25;
+}
+
 body {
   margin: 0;
   overflow: hidden;
