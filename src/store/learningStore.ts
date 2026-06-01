@@ -285,6 +285,21 @@ export const BUILDING_UNLOCK_CHAIN: Record<string, string | null> = {
   bank: 'market',     // Regression
   'city-hall': 'bank',// Binomial
   news: 'city-hall',  // Confidence Intervals
+  // ── 8 ADVANCED stat-buildings (P4) ───────────────────────────────────────
+  // These mirror the advanced landmarks in the Godot building registry
+  // (BuildingData.STATS_CATALOG). ids match the Godot stats ids EXACTLY so the
+  // Godot bridge (GameState.ADVANCED_TO_BASE) auto-spawns each advanced
+  // landmark once its base topic-building reaches level 2. Each `requires`
+  // points at the closest existing topic-building so the unlock chain stays
+  // coherent and these enter `buildingProgress`/`INITIAL_BUILDING_PROGRESS`.
+  zscore:   'hospital', // Z-Score      ← Normal distribution
+  variance: 'traffic',  // Variance     ← Std Dev
+  iqr:      'housing',  // IQR          ← Median
+  pvalue:   'research', // P-Value      ← Hypothesis Testing
+  ttest:    'research', // T-Test       ← Hypothesis Testing
+  anova:    'research', // ANOVA        ← Hypothesis Testing
+  chisq:    'research', // Chi-Square   ← Hypothesis Testing
+  clt:      'news',     // CLT          ← Confidence Intervals
 }
 
 export interface BuildingProgress {
