@@ -154,13 +154,15 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   >(null)
 
   // Send a node into the mind map via postMessage. Equations render as KaTeX nodes.
-  // `connectMode`: 'connected' (default — adds as child of root, connection
-  // line drawn) | 'free' (creates a disconnected node so the user can decide
-  // later where to connect it).
+  // `connectMode`:
+  //   'central' → child of the ROOT central topic
+  //   'current' → child of the currently-selected node (fallback root)
+  //   'free'    → disconnected node (user connects later)
+  // ('connected' kept as a legacy alias for 'central'.)
   const sendToMindMap = (
     text: string,
     kind: 'text' | 'equation' = 'text',
-    connectMode: 'connected' | 'free' = 'connected',
+    connectMode: 'central' | 'current' | 'free' | 'connected' = 'central',
   ) => {
     const win = mindmapRef.current?.contentWindow
     if (!win) return false
@@ -179,7 +181,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   //  (b) localStorage queue — when iframe is closed/not yet mounted. The
   //      mindmap.html drains the queue on load. User no longer needs to
   //      open the split first. Per user 2026-05-24.
-  const confirmInsert = (mode: 'connected' | 'free') => {
+  const confirmInsert = (mode: 'central' | 'current' | 'free') => {
     if (!pendingInsert) return
     const { text, kind, sourceLabel } = pendingInsert
     setPendingInsert(null)
@@ -802,16 +804,14 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               </h3>
             </div>
             <p style={{ margin: '6px 0 18px', fontSize: 14, color: TEXT_MED, lineHeight: 1.6 }}>
-              {pendingInsert.kind === 'equation'
-                ? 'בחרו אם הנוסחה הזו נקשרת לנושא הנוכחי שלכם, או שתעמוד בענף משלה ותתחברו אליה אחר כך.'
-                : 'בחרו אם הכותרת הזו נקשרת לנושא הנוכחי שלכם, או שתעמוד בענף משלה ותתחברו אליה אחר כך.'}
+              בחרו איפה להוסיף את {pendingInsert.kind === 'equation' ? 'הנוסחה' : 'הכותרת'} במפת החשיבה שלכם.
             </p>
             <div style={{ background: 'rgba(127,155,217,0.10)', borderRadius: 10, padding: '10px 14px', marginBottom: 18, fontSize: 14, color: TEXT_DARK, direction: pendingInsert.kind === 'equation' ? 'ltr' : 'rtl', textAlign: 'center', fontFamily: pendingInsert.kind === 'equation' ? "'Inter','Consolas',monospace" : 'inherit' }}>
               {pendingInsert.text}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <button
-                onClick={() => confirmInsert('connected')}
+                onClick={() => confirmInsert('central')}
                 style={{
                   background: BUTTON_COLOR, color: '#fff', border: 'none',
                   borderRadius: 12, padding: '12px 18px', cursor: 'pointer',
@@ -821,8 +821,22 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                   textAlign: 'right',
                 }}
               >
+                <span style={{ fontSize: 18 }}>🎯</span>
+                <span style={{ flex: 1, textAlign: 'right' }}>הוסף לנושא המרכזי</span>
+              </button>
+              <button
+                onClick={() => confirmInsert('current')}
+                style={{
+                  background: '#fff', color: TEXT_DARK,
+                  border: '1.5px solid rgba(127,155,217,0.50)',
+                  borderRadius: 12, padding: '12px 18px', cursor: 'pointer',
+                  fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                  textAlign: 'right',
+                }}
+              >
                 <span style={{ fontSize: 18 }}>🔗</span>
-                <span style={{ flex: 1, textAlign: 'right' }}>חבר עכשיו לנושא הנוכחי</span>
+                <span style={{ flex: 1, textAlign: 'right' }}>הוסף לנושא הנוכחי</span>
               </button>
               <button
                 onClick={() => confirmInsert('free')}
@@ -836,7 +850,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 }}
               >
                 <span style={{ fontSize: 18 }}>✨</span>
-                <span style={{ flex: 1, textAlign: 'right' }}>התחל ענף חדש (אחבר אחר כך)</span>
+                <span style={{ flex: 1, textAlign: 'right' }}>הוסף נושא צף (אחבר אחר כך)</span>
               </button>
               <button
                 onClick={() => setPendingInsert(null)}
