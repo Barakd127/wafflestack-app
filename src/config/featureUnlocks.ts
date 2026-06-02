@@ -28,58 +28,78 @@ export interface UnlockRule {
   tier: number
   xp?: number
   topicsCompleted?: number
+  /**
+   * Unlock as soon as a SPECIFIC lesson/topic id appears in completedLessons
+   * (e.g. 'intro'). Lets us anchor early unlocks to a concrete milestone —
+   * "finish the intro lesson → unlock the mindmap" — rather than a raw XP gate.
+   * ORs with xp / topicsCompleted: meeting ANY criterion unlocks the feature.
+   */
+  requiresLesson?: string
   description: string
   descriptionHe: string
 }
 
+// ── Generous, motivating ladder ─────────────────────────────────────────────
+// The core study loop (theory + practice + sidebar home/courses + hints +
+// streaks) has NO rule here → always unlocked. Everything below is a *reward*
+// that lands quickly and feels celebratory, NOT a wall. Thresholds were tuned
+// down from the original steep version so a learner hits a new unlock almost
+// every short session. Rules OR together (xp OR topicsCompleted OR a specific
+// lesson) — meeting any one criterion is enough.
+//
+// ~XP intuition: a correct answer is 10-20 XP, finishing a lesson is +5 XP,
+// so "10 correct answers" ≈ 100-150 XP and "1 topic" is one entry in
+// completedLessons.
 export const FEATURE_UNLOCKS: UnlockRule[] = [
-  // Tier 1 — First win (≥10 XP and ≥1 lesson read; spec says "5 min, 1 lesson, 1 correct")
-  { feature: 'arsenal',          tier: 1, xp: 10,                            description: 'Answer your first question correctly',  descriptionHe: 'ענה נכון על שאלה ראשונה כדי לפתוח את הארסנל' },
-  { feature: 'pomodoro',         tier: 1, xp: 10,                            description: 'Answer your first question correctly',  descriptionHe: 'ענה נכון על שאלה ראשונה כדי לפתוח את שעון הפומודורו' },
+  // Tier 1 — First win. Finish the very first lesson (intro) OR a single
+  // correct answer (10 XP) lights up the first reward features.
+  { feature: 'arsenal',          tier: 1, xp: 10, requiresLesson: 'intro',   description: 'Finish the intro lesson or answer one question',  descriptionHe: 'סיים את שיעור הפתיחה או ענה נכון על שאלה אחת כדי לפתוח את הארסנל' },
+  { feature: 'pomodoro',         tier: 1, xp: 10, requiresLesson: 'intro',   description: 'Finish the intro lesson or answer one question',  descriptionHe: 'סיים את שיעור הפתיחה או ענה נכון על שאלה אחת כדי לפתוח את שעון הפומודורו' },
 
-  // Tier 2 — Habit (50 XP OR 1 topic completed)
-  { feature: 'ai-tutor',         tier: 2, xp: 50, topicsCompleted: 1,        description: 'Reach 50 XP or finish 1 topic',         descriptionHe: 'הגע ל-50 נק׳ או סיים נושא אחד כדי לפתוח את המורה הפרטי' },
-  { feature: 'mindmap-view',     tier: 2, xp: 50, topicsCompleted: 1,        description: 'Reach 50 XP or finish 1 topic',         descriptionHe: 'הגע ל-50 נק׳ או סיים נושא אחד כדי לראות את מפת הלמידה' },
+  // Tier 2 — Mindmap is the headline early reward: finish the intro lesson and
+  // you can see your learning map immediately (also unlocks at 30 XP).
+  { feature: 'mindmap-view',     tier: 2, xp: 30, requiresLesson: 'intro',   description: 'Finish the intro lesson to see your learning map',  descriptionHe: 'סיים את שיעור הפתיחה כדי לראות את מפת הלמידה שלך' },
+  { feature: 'ai-tutor',         tier: 2, xp: 30, topicsCompleted: 1,        description: 'Reach 30 XP or finish 1 topic',         descriptionHe: 'הגע ל-30 נק׳ או סיים נושא אחד כדי לפתוח את המורה הפרטי' },
 
-  // Tier 3 — Active note-taking (100 XP OR 2 topics completed)
-  { feature: 'notebook',         tier: 3, xp: 100, topicsCompleted: 2,       description: 'Reach 100 XP or finish 2 topics',       descriptionHe: 'הגע ל-100 נק׳ או סיים 2 נושאים כדי לפתוח את המחברת' },
-  { feature: 'mindmap-edit',     tier: 3, xp: 100, topicsCompleted: 2,       description: 'Reach 100 XP or finish 2 topics',       descriptionHe: 'הגע ל-100 נק׳ או סיים 2 נושאים כדי לערוך את מפת החשיבה' },
-  { feature: 'paper-styles',     tier: 3, xp: 100, topicsCompleted: 2,       description: 'Reach 100 XP or finish 2 topics',       descriptionHe: 'הגע ל-100 נק׳ או סיים 2 נושאים כדי להחליף סגנון נייר' },
+  // Tier 3 — Note-taking surfaces (50 XP OR 1 topic).
+  { feature: 'notebook',         tier: 3, xp: 50, topicsCompleted: 1,        description: 'Reach 50 XP or finish 1 topic',         descriptionHe: 'הגע ל-50 נק׳ או סיים נושא אחד כדי לפתוח את המחברת' },
+  { feature: 'mindmap-edit',     tier: 3, xp: 50, topicsCompleted: 1,        description: 'Reach 50 XP or finish 1 topic',         descriptionHe: 'הגע ל-50 נק׳ או סיים נושא אחד כדי לערוך את מפת החשיבה' },
+  { feature: 'paper-styles',     tier: 3, xp: 50, topicsCompleted: 1,        description: 'Reach 50 XP or finish 1 topic',         descriptionHe: 'הגע ל-50 נק׳ או סיים נושא אחד כדי להחליף סגנון נייר' },
 
-  // Tier 4 — Math at hand (200 XP OR 3 topics completed)
-  { feature: 'math-widget',      tier: 4, xp: 200, topicsCompleted: 3,       description: 'Reach 200 XP or finish 3 topics',       descriptionHe: 'הגע ל-200 נק׳ או סיים 3 נושאים כדי לפתוח את עורך המשוואות' },
-  { feature: 'formula-library',  tier: 4, xp: 200, topicsCompleted: 3,       description: 'Reach 200 XP or finish 3 topics',       descriptionHe: 'הגע ל-200 נק׳ או סיים 3 נושאים כדי לפתוח את ספריית הנוסחאות' },
-  { feature: 'highlighter',      tier: 4, xp: 200, topicsCompleted: 3,       description: 'Reach 200 XP or finish 3 topics',       descriptionHe: 'הגע ל-200 נק׳ או סיים 3 נושאים כדי לפתוח את המסמן' },
+  // Tier 4 — Canvas / whiteboard after ~10 correct answers (≈100 XP) or 1 topic.
+  { feature: 'whiteboard-basic', tier: 4, xp: 100, topicsCompleted: 1,       description: 'Answer ~10 questions (100 XP) to unlock the canvas',         descriptionHe: 'ענה על כ-10 שאלות (100 נק׳) כדי לפתוח את לוח הציור' },
+  { feature: 'shapes',           tier: 4, xp: 100, topicsCompleted: 1,       description: 'Answer ~10 questions or finish 1 topic',descriptionHe: 'ענה על כ-10 שאלות (100 נק׳) כדי לפתוח את כלי הצורות' },
+  { feature: 'highlighter',      tier: 4, xp: 100, topicsCompleted: 1,       description: 'Answer ~10 questions or finish 1 topic',descriptionHe: 'ענה על כ-10 שאלות (100 נק׳) כדי לפתוח את המסמן' },
 
-  // Tier 5 — Visual thinking (400 XP OR 5 topics completed)
-  { feature: 'whiteboard-basic', tier: 5, xp: 400, topicsCompleted: 5,       description: 'Reach 400 XP or finish 5 topics',       descriptionHe: 'הגע ל-400 נק׳ או סיים 5 נושאים כדי לפתוח את לוח הציור' },
-  { feature: 'shapes',           tier: 5, xp: 400, topicsCompleted: 5,       description: 'Reach 400 XP or finish 5 topics',       descriptionHe: 'הגע ל-400 נק׳ או סיים 5 נושאים כדי לפתוח את כלי הצורות' },
+  // Tier 5 — Math tools (150 XP OR 2 topics).
+  { feature: 'math-widget',      tier: 5, xp: 150, topicsCompleted: 2,       description: 'Reach 150 XP or finish 2 topics',       descriptionHe: 'הגע ל-150 נק׳ או סיים 2 נושאים כדי לפתוח את עורך המשוואות' },
+  { feature: 'formula-library',  tier: 5, xp: 150, topicsCompleted: 2,       description: 'Reach 150 XP or finish 2 topics',       descriptionHe: 'הגע ל-150 נק׳ או סיים 2 נושאים כדי לפתוח את ספריית הנוסחאות' },
 
-  // Tier 6 — Layout & structure (600 XP OR 7 topics completed)
-  { feature: 'templates',        tier: 6, xp: 600, topicsCompleted: 7,       description: 'Reach 600 XP or finish 7 topics',       descriptionHe: 'הגע ל-600 נק׳ או סיים 7 נושאים כדי לפתוח את התבניות' },
-  { feature: 'whiteboard-full',  tier: 6, xp: 600, topicsCompleted: 7,       description: 'Reach 600 XP or finish 7 topics',       descriptionHe: 'הגע ל-600 נק׳ או סיים 7 נושאים כדי לפתוח את לוח הציור המלא' },
-  { feature: 'color-picker',     tier: 6, xp: 600, topicsCompleted: 7,       description: 'Reach 600 XP or finish 7 topics',       descriptionHe: 'הגע ל-600 נק׳ או סיים 7 נושאים כדי לפתוח את בורר הצבעים' },
+  // Tier 6 — City build + coins after a real habit (3 topics OR 250 XP).
+  { feature: 'city-editor',      tier: 6, xp: 250, topicsCompleted: 3,       description: 'Reach 250 XP or finish 3 topics',       descriptionHe: 'הגע ל-250 נק׳ או סיים 3 נושאים כדי לפתוח את עורך העיר' },
+  { feature: 'coins-store',      tier: 6, xp: 250, topicsCompleted: 3,       description: 'Reach 250 XP or finish 3 topics',       descriptionHe: 'הגע ל-250 נק׳ או סיים 3 נושאים כדי לפתוח את חנות המטבעות' },
+  { feature: 'city-themes',      tier: 6, xp: 250, topicsCompleted: 3,       description: 'Reach 250 XP or finish 3 topics',       descriptionHe: 'הגע ל-250 נק׳ או סיים 3 נושאים כדי לפתוח ערכות נושא לעיר' },
 
-  // Tier 7 — Multi-surface workflow (1000 XP OR 9 topics completed)
-  { feature: 'split-screen',          tier: 7, xp: 1000, topicsCompleted: 9, description: 'Reach 1000 XP or finish 9 topics',      descriptionHe: 'הגע ל-1000 נק׳ או סיים 9 נושאים כדי לפתוח פיצול מסך' },
-  { feature: 'cross-link',            tier: 7, xp: 1000, topicsCompleted: 9, description: 'Reach 1000 XP or finish 9 topics',      descriptionHe: 'הגע ל-1000 נק׳ או סיים 9 נושאים כדי לפתוח קישור בין מסמכים' },
-  { feature: 'global-search',         tier: 7, xp: 1000, topicsCompleted: 9, description: 'Reach 1000 XP or finish 9 topics',      descriptionHe: 'הגע ל-1000 נק׳ או סיים 9 נושאים כדי לפתוח חיפוש גלובלי' },
-  { feature: 'drawing-board-full',    tier: 7, xp: 1000, topicsCompleted: 9, description: 'Reach 1000 XP or finish 9 topics',      descriptionHe: 'הגע ל-1000 נק׳ או סיים 9 נושאים כדי לפתוח את לוח הציור המלא' },
+  // Tier 7 — Layout & structure (400 XP OR 4 topics).
+  { feature: 'templates',        tier: 7, xp: 400, topicsCompleted: 4,       description: 'Reach 400 XP or finish 4 topics',       descriptionHe: 'הגע ל-400 נק׳ או סיים 4 נושאים כדי לפתוח את התבניות' },
+  { feature: 'whiteboard-full',  tier: 7, xp: 400, topicsCompleted: 4,       description: 'Reach 400 XP or finish 4 topics',       descriptionHe: 'הגע ל-400 נק׳ או סיים 4 נושאים כדי לפתוח את לוח הציור המלא' },
+  { feature: 'color-picker',     tier: 7, xp: 400, topicsCompleted: 4,       description: 'Reach 400 XP or finish 4 topics',       descriptionHe: 'הגע ל-400 נק׳ או סיים 4 נושאים כדי לפתוח את בורר הצבעים' },
 
-  // Tier 8 — City mastery (1500 XP OR 12 topics completed)
-  { feature: 'city-editor',      tier: 8, xp: 1500, topicsCompleted: 12,     description: 'Reach 1500 XP or finish 12 topics',     descriptionHe: 'הגע ל-1500 נק׳ או סיים 12 נושאים כדי לפתוח את עורך העיר' },
-  { feature: 'coins-store',      tier: 8, xp: 1500, topicsCompleted: 12,     description: 'Reach 1500 XP or finish 12 topics',     descriptionHe: 'הגע ל-1500 נק׳ או סיים 12 נושאים כדי לפתוח את חנות המטבעות' },
-  { feature: 'city-themes',      tier: 8, xp: 1500, topicsCompleted: 12,     description: 'Reach 1500 XP or finish 12 topics',     descriptionHe: 'הגע ל-1500 נק׳ או סיים 12 נושאים כדי לפתוח ערכות נושא לעיר' },
+  // Tier 8 — Multi-surface workflow (600 XP OR 6 topics).
+  { feature: 'split-screen',          tier: 8, xp: 600, topicsCompleted: 6,  description: 'Reach 600 XP or finish 6 topics',      descriptionHe: 'הגע ל-600 נק׳ או סיים 6 נושאים כדי לפתוח פיצול מסך' },
+  { feature: 'cross-link',            tier: 8, xp: 600, topicsCompleted: 6,  description: 'Reach 600 XP or finish 6 topics',      descriptionHe: 'הגע ל-600 נק׳ או סיים 6 נושאים כדי לפתוח קישור בין מסמכים' },
+  { feature: 'global-search',         tier: 8, xp: 600, topicsCompleted: 6,  description: 'Reach 600 XP or finish 6 topics',      descriptionHe: 'הגע ל-600 נק׳ או סיים 6 נושאים כדי לפתוח חיפוש גלובלי' },
+  { feature: 'drawing-board-full',    tier: 8, xp: 600, topicsCompleted: 6,  description: 'Reach 600 XP or finish 6 topics',      descriptionHe: 'הגע ל-600 נק׳ או סיים 6 נושאים כדי לפתוח את לוח הציור המלא' },
 
-  // Tier 9 — Stat-B unlocked (all 18 Stat-A topics completed; we only have 10 today, use 10+ as proxy)
-  { feature: 'stat-b-native',        tier: 9, topicsCompleted: 18,            description: 'Finish all Stat-A topics',              descriptionHe: 'סיים את כל נושאי סטטיסטיקה א׳ כדי לפתוח את סטטיסטיקה ב׳' },
-  { feature: 'cross-course-quiz',    tier: 9, topicsCompleted: 18,            description: 'Finish all Stat-A topics',              descriptionHe: 'סיים את כל נושאי סטטיסטיקה א׳ כדי לפתוח חידוני בין-קורסים' },
+  // Tier 9 — Stat-B unlocked (finish all Stat-A topics; 10 topics today).
+  { feature: 'stat-b-native',        tier: 9, topicsCompleted: 10,            description: 'Finish all Stat-A topics',              descriptionHe: 'סיים את כל נושאי סטטיסטיקה א׳ כדי לפתוח את סטטיסטיקה ב׳' },
+  { feature: 'cross-course-quiz',    tier: 9, topicsCompleted: 10,            description: 'Finish all Stat-A topics',              descriptionHe: 'סיים את כל נושאי סטטיסטיקה א׳ כדי לפתוח חידוני בין-קורסים' },
 
-  // Tier 10 — Expert tools (~3000 XP)
-  { feature: 'methods',              tier: 10, xp: 3000,                      description: 'Reach 3000 XP — master both courses',   descriptionHe: 'הגע ל-3000 נק׳ ושלוט בשני הקורסים כדי לפתוח שיטות מחקר' },
-  { feature: 'anova',                tier: 10, xp: 3000,                      description: 'Reach 3000 XP — master both courses',   descriptionHe: 'הגע ל-3000 נק׳ ושלוט בשני הקורסים כדי לפתוח ניתוח שונות' },
-  { feature: 'custom-topic',         tier: 10, xp: 3000,                      description: 'Reach 3000 XP — master both courses',   descriptionHe: 'הגע ל-3000 נק׳ ושלוט בשני הקורסים כדי ליצור נושא מותאם' },
-  { feature: 'community-curated',    tier: 10, xp: 3000,                      description: 'Reach 3000 XP — master both courses',   descriptionHe: 'הגע ל-3000 נק׳ ושלוט בשני הקורסים כדי לפתוח ארסנל קהילתי' },
+  // Tier 10 — Expert tools (1200 XP OR 10 topics).
+  { feature: 'methods',              tier: 10, xp: 1200, topicsCompleted: 10, description: 'Reach 1200 XP or master every topic',   descriptionHe: 'הגע ל-1200 נק׳ או שלוט בכל הנושאים כדי לפתוח שיטות מחקר' },
+  { feature: 'anova',                tier: 10, xp: 1200, topicsCompleted: 10, description: 'Reach 1200 XP or master every topic',   descriptionHe: 'הגע ל-1200 נק׳ או שלוט בכל הנושאים כדי לפתוח ניתוח שונות' },
+  { feature: 'custom-topic',         tier: 10, xp: 1200, topicsCompleted: 10, description: 'Reach 1200 XP or master every topic',   descriptionHe: 'הגע ל-1200 נק׳ או שלוט בכל הנושאים כדי ליצור נושא מותאם' },
+  { feature: 'community-curated',    tier: 10, xp: 1200, topicsCompleted: 10, description: 'Reach 1200 XP or master every topic',   descriptionHe: 'הגע ל-1200 נק׳ או שלוט בכל הנושאים כדי לפתוח ארסנל קהילתי' },
 ]
 
 export const FEATURE_UNLOCKS_BY_ID: Record<string, UnlockRule> = Object.fromEntries(
@@ -91,14 +111,21 @@ export const FEATURE_UNLOCKS_BY_ID: Record<string, UnlockRule> = Object.fromEntr
  * satisfied. Either xp OR topicsCompleted (whichever is present) qualifies —
  * meeting any threshold is enough.
  */
+// Lesson ids that count as onboarding, NOT real statistics topics. They drive
+// `requiresLesson` unlocks but must NOT inflate the `topicsCompleted` count
+// (otherwise finishing the 1-minute intro would unlock mid-ladder features).
+const NON_TOPIC_LESSONS = new Set(['intro'])
+
 export function evaluateUnlocks(state: { xp: number; completedLessons: string[] }): FeatureId[] {
   const xp = state.xp ?? 0
-  const topics = (state.completedLessons ?? []).length
+  const completed = state.completedLessons ?? []
+  const topics = completed.filter(id => !NON_TOPIC_LESSONS.has(id)).length
   const out: FeatureId[] = []
   for (const rule of FEATURE_UNLOCKS) {
     let ok = false
     if (rule.xp !== undefined && xp >= rule.xp) ok = true
     if (rule.topicsCompleted !== undefined && topics >= rule.topicsCompleted) ok = true
+    if (rule.requiresLesson !== undefined && completed.includes(rule.requiresLesson)) ok = true
     if (ok) out.push(rule.feature)
   }
   return out

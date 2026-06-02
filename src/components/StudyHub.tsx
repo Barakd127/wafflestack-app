@@ -3,6 +3,7 @@ import { useLearningStore } from '../store/learningStore'
 import { FEATURE_UNLOCKS_BY_ID, type FeatureId } from '../config/featureUnlocks'
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
+import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp } from '../lib/helpRequests'
 
 // Lazy-load interactive graph components (per-topic visualizations).
 // Each component is ~300-450 LOC of pure SVG + KaTeX; lazy keeps the bundle
@@ -2238,6 +2239,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   // MC-mode: tracks which option index the user clicked for the current question.
   // Null while unanswered; reset on question change. Used for green/red feedback.
   const [mcSelected, setMcSelected] = useState<number | null>(null)
+  // ── Ask-a-Human ("🙋 שאל בן אדם") ──────────────────────────────────────────
+  // Per-questionId map: 'sending' while writing to the relay, 'pending' once
+  // queued (waiting on a human), 'answered' when a reply arrives.
+  const [helpState, setHelpState] = useState<Record<string, 'sending' | 'pending' | 'answered'>>({})
+  const [helpAnswer, setHelpAnswer] = useState<Record<string, string>>({})
   // Two-mode layout:
   //   tab === 'none'  → calm centered card, tabs row is the LAUNCHER.
   //   tab !== 'none'  → companion tool fills the screen; question becomes a
@@ -2365,6 +2371,51 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     setUserAnswers(prev => ({ ...prev, [currentQ]: answer }))
     setPhase('review')
   }
+
+  // ── Ask-a-Human: package {question, topic, attempt, userId, ts} → relay ──────
+  // Stable per-question id so re-asking doesn't duplicate the queue entry.
+  const helpId = q ? `studyhub-q${q.id}` : ''
+  const helpStatus = helpState[helpId] ?? (helpId && hasPendingHelp(helpId) ? 'pending' : undefined)
+
+  const handleAskHuman = async () => {
+    if (!q || !helpId) return
+    if (helpStatus === 'sending' || helpStatus === 'pending' || helpStatus === 'answered') return
+    setHelpState(prev => ({ ...prev, [helpId]: 'sending' }))
+    // Capture the student's current attempt (typed answer or chosen MC option).
+    const attempt = answer.trim()
+      ? answer.trim()
+      : mcSelected !== null && Array.isArray((q as any).options)
+        ? `בחר/ה: ${(q as any).options[mcSelected]}`
+        : null
+    try {
+      await submitHelpRequest({
+        questionId: helpId,
+        question: q.text,
+        topicId: selectedTopic ?? q.topic ?? null,
+        attempt,
+        userId: userId ?? null,
+      })
+    } catch {
+      /* submit always queues locally; ignore mirror errors */
+    }
+    setHelpState(prev => ({ ...prev, [helpId]: 'pending' }))
+  }
+
+  // Poll for a human reply to whichever question the student is viewing, if it
+  // was escalated. Surfaces the answer inline when it lands.
+  useEffect(() => {
+    if (!helpId || helpStatus !== 'pending') return
+    let cancelled = false
+    const check = async () => {
+      const ans = await fetchHelpAnswer(helpId)
+      if (cancelled || !ans) return
+      setHelpAnswer(prev => ({ ...prev, [helpId]: ans }))
+      setHelpState(prev => ({ ...prev, [helpId]: 'answered' }))
+    }
+    void check()
+    const t = setInterval(check, 30000)
+    return () => { cancelled = true; clearInterval(t) }
+  }, [helpId, helpStatus])
 
   // Auto-check numeric answers with ±0.3 tolerance. Returns {correct, expected}
   // when the model answer contains a recognisable number, otherwise null and
@@ -3251,6 +3302,56 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   />
                 </div>
               )}
+
+              {/* ── 🙋 שאל בן אדם — escalate a stuck question to Barak ── */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }} dir="rtl">
+                {(!helpStatus) && (
+                  <button
+                    type="button"
+                    onClick={handleAskHuman}
+                    title="נשלח לברק בקשת עזרה על השאלה הזו"
+                    style={{
+                      alignSelf: 'flex-start',
+                      display: 'inline-flex', alignItems: 'center', gap: 8,
+                      background: 'rgba(212,175,55,0.12)', color: '#9A7B1A',
+                      border: '1.5px dashed rgba(212,175,55,0.6)', borderRadius: 20,
+                      padding: '8px 18px', cursor: 'pointer',
+                      fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
+                    }}
+                  >
+                    🙋 שאל בן אדם
+                  </button>
+                )}
+                {helpStatus === 'sending' && (
+                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>שולח…</div>
+                )}
+                {helpStatus === 'pending' && (
+                  <div style={{
+                    alignSelf: 'flex-start',
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    background: 'rgba(51,81,202,0.10)', color: BUTTON_COLOR,
+                    border: '1.5px solid rgba(51,81,202,0.3)', borderRadius: 20,
+                    padding: '8px 16px',
+                    fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600,
+                  }}>
+                    🙋 נשלח — ממתין לתשובה מבן אדם
+                  </div>
+                )}
+                {helpStatus === 'answered' && (
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(52,168,83,0.10), rgba(52,168,83,0.04))',
+                    border: '1.5px solid rgba(52,168,83,0.35)', borderRadius: 12,
+                    padding: '12px 16px', textAlign: 'right',
+                  }}>
+                    <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700, color: '#1E7E34', marginBottom: 6 }}>
+                      🙋 תשובה מבן אדם:
+                    </div>
+                    <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+                      {helpAnswer[helpId]}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_LIGHT, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleSkip}>דלג</span>
