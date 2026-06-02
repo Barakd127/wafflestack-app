@@ -21,8 +21,38 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
   const storeUserName = useLearningStore(s => s.userName)
 
   const userId = storeUserName || (typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default'
+
+  // Mobile detection → Godot reads ?mobile=1 (GameState.is_mobile) to start the
+  // camera zoomed-in and enlarge touch targets. Cover both narrow viewports and
+  // touch-capable devices. Computed once (the iframe src is fixed after mount).
+  const isMobile =
+    typeof window !== 'undefined' &&
+    (Math.min(window.innerWidth, window.innerHeight) <= 600 ||
+      ('ontouchstart' in window && window.innerWidth <= 900))
+
   // admin=1 unlocks the raw palette inside Godot; omitted/0 = student mode.
-  const src = `/godot/index.html?userId=${encodeURIComponent(userId)}&admin=${adminMode ? 1 : 0}`
+  // mobile=1 → zoomed-in camera + touch-sized HUD inside Godot.
+  //
+  // ── CROSS-DEVICE CITY SAVE (status) ──────────────────────────────────────────
+  // The city layout is persisted by Godot to localStorage under the CANONICAL
+  // per-user key `wafflestack-city-placements-<userId>` (see GameState.gd
+  // `_placements_key()`). Because the key is keyed by userId — not the device —
+  // the SAME user sees the SAME city on every browser/tab on a given device, and
+  // phone and laptop share the city ONLY if they share that browser's storage.
+  //
+  // True cross-DEVICE sync is NOT yet wired: the Supabase `progress` row
+  // (src/lib/syncProgress.ts) mirrors UserProgress (xp/topics/streaks/preferences)
+  // but has NO column for city placements, and Godot writes localStorage directly
+  // rather than through the React progressStore. To enable phone↔laptop city sync:
+  //   1. Add a `city_placements` JSONB column to the Supabase `progress` table
+  //      (DB migration — human action), OR stash the placements inside the existing
+  //      free-form `preferences` JSON that already syncs.
+  //   2. On mount here, read `wafflestack-city-placements-<userId>` from localStorage
+  //      and merge it into the progressStore payload so queueRemotePush ships it.
+  //   3. On `godot-ready`, pull the remote placements back into that same localStorage
+  //      key BEFORE the Godot iframe reads it (it reads in GameState._ready()).
+  // The data is intentionally kept in ONE canonical key — do not fork it.
+  const src = `/godot/index.html?userId=${encodeURIComponent(userId)}&admin=${adminMode ? 1 : 0}${isMobile ? '&mobile=1' : ''}`
 
   // Listen for progress / ready messages from the Godot iframe
   useEffect(() => {
