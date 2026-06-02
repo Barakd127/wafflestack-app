@@ -381,6 +381,12 @@ interface LearningState {
   // Exam date for risk score calculation (ISO date string YYYY-MM-DD or null)
   examDate: string | null
 
+  // Per-topic target-date overrides for the personal plan (topicId → ISO date
+  // YYYY-MM-DD). Default targets are derived on the fly from the plan sequence
+  // + examDate; an entry here means the user extended/edited that topic's date
+  // (e.g. via "בקש הארכה"). Persisted so extensions survive reloads.
+  planTargets: Record<string, string>
+
   // Mistake Autopsy: latest error tag per question id + aggregate counts
   errorTags: Record<string, string>
   errorTagCounts: Record<string, number>
@@ -413,6 +419,13 @@ interface LearningState {
   resetProgress: () => void
   completeOnboarding: (name: string) => void
   setExamDate: (date: string | null) => void
+  // Set an explicit target date (YYYY-MM-DD) for a plan topic. Clamped to
+  // examDate when one is set (a target can't fall after the exam).
+  setPlanTarget: (topicId: string, date: string) => void
+  // Push a plan topic's target date later by `days`, starting from its current
+  // (override or derived) target. Capped at examDate. `derivedTarget` is the
+  // fallback when no override exists yet (the RiskBoard computes it).
+  extendPlanTarget: (topicId: string, days: number, derivedTarget: string) => void
   recordErrorTag: (questionId: string, tag: string) => void
   toggleAdminMode: () => void
   unlockFeature: (id: FeatureId) => void
@@ -461,6 +474,7 @@ export const useLearningStore = create<LearningState>()(
       buildingProgress: INITIAL_BUILDING_PROGRESS,
       completedLessons: [],
       examDate: null,
+      planTargets: {},
       adminMode: false,
       errorTags: {},
       errorTagCounts: {},
@@ -693,6 +707,23 @@ export const useLearningStore = create<LearningState>()(
       completeOnboarding: (name: string) => set({ userName: name, onboardingCompleted: true }),
       // examDate is NOT reset on resetProgress — it's real-world metadata, not learning state
       setExamDate: (date: string | null) => set({ examDate: date }),
+
+      setPlanTarget: (topicId, date) => {
+        const { examDate, planTargets } = get()
+        // A target can never fall after the exam.
+        const clamped = examDate && date > examDate ? examDate : date
+        set({ planTargets: { ...planTargets, [topicId]: clamped } })
+      },
+      extendPlanTarget: (topicId, days, derivedTarget) => {
+        const { examDate, planTargets } = get()
+        const base = planTargets[topicId] ?? derivedTarget
+        // Add `days` to the current target (YYYY-MM-DD, UTC-safe).
+        const dt = new Date(base + 'T00:00:00Z')
+        dt.setUTCDate(dt.getUTCDate() + days)
+        let next = dt.toISOString().slice(0, 10)
+        if (examDate && next > examDate) next = examDate
+        set({ planTargets: { ...planTargets, [topicId]: next } })
+      },
       recordErrorTag: (questionId: string, tag: string) => {
         const { errorTags, errorTagCounts } = get()
         set({
@@ -744,9 +775,12 @@ export const useLearningStore = create<LearningState>()(
           personalPlan: plan,
           intakeAnswers: answers,
           planHistory: archived,
+          // A fresh plan invalidates any per-topic target overrides — they were
+          // anchored to the previous sequence/exam window.
+          planTargets: {},
         })
       },
-      clearPersonalPlan: () => set({ personalPlan: null, intakeAnswers: null }),
+      clearPersonalPlan: () => set({ personalPlan: null, intakeAnswers: null, planTargets: {} }),
     }),
     {
       name: 'wafflestack-learning',
