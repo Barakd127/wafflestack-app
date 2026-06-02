@@ -1951,8 +1951,8 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
           }}>
             <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 6 }}>תרגול</div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
-              {!hasAnyProgress ? (
-                <>בוא נתחיל בהתחלה<br />{currentTopicName}</>
+              {completedLessons.length === 0 ? (
+                <>בואו נתחיל בהתחלה<br />{currentTopicName}</>
               ) : answeredInTopic > 0 && remainingInTopic > 0 ? (
                 <>נשארו לך עוד {remainingInTopic} שאלות<br />{currentTopicName}</>
               ) : (
@@ -1975,10 +1975,10 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             {/* Brand-new user (zero progress) → jump straight into the intro
                 practice quiz, bypassing the difficulty picker. Returning users
                 keep the existing picker flow so they can pick difficulty / resume. */}
-            <button onClick={() => (hasAnyProgress ? onSelectTopic(currentTopicId) : onStartPractice(currentTopicId))}
+            <button onClick={() => (completedLessons.length > 0 ? onSelectTopic(currentTopicId) : onStartPractice(currentTopicId))}
               className="ws-cta-btn"
               style={{ background: BUTTON_COLOR, color: '#fff', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, fontFamily: "'Rubik', sans-serif", boxShadow: '0px 4px 14px rgba(51,81,202,0.35), inset 0 1px 0 rgba(255,255,255,0.25)' }}>
-              {hasAnyProgress ? 'המשך ←' : 'בוא נתרגל ←'}
+              {completedLessons.length > 0 ? 'המשך ←' : 'בוא נתרגל ←'}
             </button>
           </div>
 
