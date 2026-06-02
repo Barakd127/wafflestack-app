@@ -2970,8 +2970,24 @@ let WB={
   _editingEqId:null,clipboard:null
 };
 
+// "משוואה" toolbar button. Per user 2026-06: no more raw-LaTeX editor.
+// Instead open the ∑Formulas picker; choosing a formula opens the calculator
+// (see ftbInsert → mmTryOpenCalcForLatex).
 function wbOpenEquationModal(){
-  openEquationModal(null,'insertWB');
+  wbOpenFormulaPicker();
+}
+
+// Expand the ∑Formulas sidebar (the formula library / picker). Idempotent —
+// always ends in the expanded state regardless of prior toggle state.
+function wbOpenFormulaPicker(){
+  const tb=document.getElementById('formula-toolbox');
+  if(!tb) return;
+  tb.classList.remove('collapsed');
+  const icon=document.getElementById('ftb-toggle-icon');
+  if(icon) icon.textContent='◀';
+  // Focus the search box so the student can type to filter immediately.
+  const s=document.getElementById('ftb-search');
+  if(s) setTimeout(()=>{ try{ s.focus(); }catch(_){} }, 60);
 }
 
 function wbInit(){
@@ -3318,7 +3334,7 @@ function wbRedraw(){
   }
   if(WB.drag&&WB.drag.type==='draw'&&WB.drag.preview){
     ctx.save();ctx.translate(WB.vp.x,WB.vp.y);ctx.scale(WB.vp.s,WB.vp.s);
-    drawObj(ctx,WB.drag.preview,false);ctx.restore();
+    drawObj(ctx,WB.drag.preview,false,true);ctx.restore();
   }
   if(WB.tool==='eraser'&&WB._lastMouse){
     // Erase-radius preview ring (scene-space 12px → screen). Reinforces the CSS cursor.
@@ -3540,8 +3556,16 @@ function wbRedrawEquationLayer(){
   }
 }
 
-function drawObj(ctx,o,selected){
+function drawObj(ctx,o,selected,force){
   if(o.type==='equation')return;
+  // DOM-overlay types (rect/circle/sticky/text) are rendered as live HTML
+  // elements by wboSync() so their text is editable. Drawing them on the
+  // canvas too would double-render them (a static ghost copy behind the
+  // editable overlay) — the root cause of the "note is broken" bug. Skip
+  // them here UNLESS they're locked template-scene objects (which wboSync
+  // intentionally does NOT build a DOM node for) or this is a live drag
+  // preview (force=true) that has no DOM element yet.
+  if(!force&&WB_DOM_TYPES.has(o.type)&&!o.locked)return;
   if(o.type==='rect'){
     ctx.fillStyle=o.fill||'#fff';
     if(o.fill&&o.fill!=='none')ctx.fillRect(o.x,o.y,o.w,o.h);
@@ -4628,7 +4652,10 @@ function renderThumb(cnId, cnvs){
   const offX=(cw-sw*scale)/2-minX*scale+pad*scale;
   const offY=(ch-sh*scale)/2-minY*scale+pad*scale;
   ctx.save();ctx.translate(offX,offY);ctx.scale(scale,scale);
-  for(const o of scene){try{drawObj(ctx,o,false);}catch(err){}}
+  // force=true: this is a static thumbnail (no DOM overlay layer), so every
+  // object type — including the DOM-overlay types rect/circle/sticky/text —
+  // must be painted directly onto the preview canvas.
+  for(const o of scene){try{drawObj(ctx,o,false,true);}catch(err){}}
   ctx.restore();
 }
 
@@ -5810,6 +5837,10 @@ function ftbInsert(latex){
     nbInsertMathWidget(latex);
     return;
   }
+  // Canvas/whiteboard mode: picking a library formula opens the calculator
+  // (formula + number entry) rather than dropping raw LaTeX. Per user 2026-06.
+  // Falls through to the canvas-equation insert only if no library match.
+  if(typeof mmTryOpenCalcForLatex === 'function' && mmTryOpenCalcForLatex(latex)) return;
   // Mindmap/canvas mode: insert as equation into center of whiteboard canvas
   const cnvs=document.getElementById('wb-canvas');
   if(!cnvs)return;
@@ -6934,12 +6965,14 @@ window.addEventListener('message', function(e){
     }
     var root = MM.nodes[MM.root];
     if (!root) { console.warn('ws-add-node: no root'); return; }
-    var siblings = root.childIds ? root.childIds.length : 0;
     var kind = d.kind === 'equation' ? 'equation' : 'text';
-    // connectMode === 'free' → place far from root with NO parent so the
-    // user can decide later where to connect it. 'connected' (default)
-    // adds as a child of root with a connection line drawn automatically.
-    var freeMode = d.connectMode === 'free';
+    // connectMode controls where the new node attaches:
+    //   'free'    → far from root with NO parent (user connects later)
+    //   'current' → child of the currently-selected node (MM.sel), or root if none
+    //   'central' → child of the ROOT central topic
+    //   (default / legacy 'connected') → child of root
+    var mode = d.connectMode;
+    var freeMode = mode === 'free';
     var x, y, parentId;
     if (freeMode) {
       // Drop in the upper-left corner of the canvas, with random jitter so
@@ -6949,9 +6982,16 @@ window.addEventListener('message', function(e){
       y = root.y - 200 + freeCount * 80;
       parentId = null;
     } else {
-      x = root.x + 260;
-      y = root.y + (siblings - 2) * 70 + (Math.random() * 30 - 15);
-      parentId = MM.root;
+      // Choose the parent: 'current' → selected node (fallback root); else root.
+      if (mode === 'current' && MM.sel && MM.nodes[MM.sel]) {
+        parentId = MM.sel;
+      } else {
+        parentId = MM.root;
+      }
+      var parentNode = MM.nodes[parentId] || root;
+      var siblings = parentNode.childIds ? parentNode.childIds.length : 0;
+      x = parentNode.x + 260;
+      y = parentNode.y + (siblings - 2) * 70 + (Math.random() * 30 - 15);
     }
     var node = mmNode(kind, d.text || '', x, y, parentId);
     if (kind === 'equation' && d.latex) { node.latex = d.latex; }
