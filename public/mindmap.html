@@ -674,6 +674,7 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
     <button class="tb-btn" onclick="mmAddEquation()">&#8721; Equation</button>
     <button class="tb-btn" onclick="mmAddCanvas()">&#11036; Canvas</button>
     <button class="tb-btn" onclick="mmAddSummary()" title="סיכום קבוצת אחים (Ctrl-click)">&#8944; Summary</button>
+    <button class="tb-btn" onclick="mmLoadReadyMap('descriptive-stats','manual')" title="טען מפת מושגים מוכנה — ההערות והעריכות שלך נשמרות">🗺️ טען מפה מוכנה</button>
     <button class="tb-btn" onclick="wsGoDrawing()" title="פתח לוח ציור (Excalidraw) במסך מלא">🎨 לוח ציור</button>
   </div>
   <div class="ribbon-group" id="ribbon-view" style="display:none">
@@ -1103,6 +1104,208 @@ function buildSeedMap() {
   }
 }
 
+// ── Ready-map importer (XMind-parity Phase 1) ───────────────────────────────
+// Builds a pre-populated, content-rich topic map from a canonical JSON spec
+// (public/mindmaps/<id>.json). Each spec node: {text, note?, formula?, color?,
+// children?[]}. Imported nodes are tagged with origin:'seed' + a stable
+// seedKey ('<mapId>/<indexPath>'), so a re-import can UPSERT them without
+// clobbering anything the student edited.
+//
+// MERGE RULES (when {merge:true}, the default):
+//   • Match existing imported nodes by seedKey.
+//   • If a matched node has userEdited===true, leave its text/body/latex alone
+//     (the student owns it) — but still reconcile structure (keep it, recurse).
+//   • If not userEdited, refresh text/body/latex from the spec.
+//   • Student-authored nodes (no .origin) are NEVER touched or removed.
+//   • New spec nodes (no matching seedKey) are created and attached.
+function mmFindBySeedKey(seedKey){
+  for(const id in MM.nodes){
+    if(MM.nodes[id] && MM.nodes[id].seedKey === seedKey) return MM.nodes[id];
+  }
+  return null;
+}
+
+// Recursively upsert one spec node under parentId. Returns the node's id.
+function _mmImportNode(spec, parentId, mapId, indexPath, merge){
+  const seedKey = mapId + '/' + indexPath;
+  const isEquation = !!(spec.formula && String(spec.formula).trim());
+  const type = isEquation ? 'equation' : 'branch';
+  let node = merge ? mmFindBySeedKey(seedKey) : null;
+
+  if(node){
+    // Existing seeded node — upsert in place (preserve id + student edits).
+    if(!node.userEdited){
+      node.text = spec.text || node.text;
+      if(spec.note != null) node.body = spec.note;
+      if(isEquation){ node.type = 'equation'; node.latex = spec.formula; }
+    }
+    if(spec.color && !node.userEdited) node.color = spec.color;
+    // Re-attach under the correct parent if it drifted (shouldn't normally).
+    if(node.parentId !== parentId){
+      const oldP = node.parentId && MM.nodes[node.parentId];
+      if(oldP && Array.isArray(oldP.childIds)){
+        oldP.childIds = oldP.childIds.filter(cid => cid !== node.id);
+      }
+      node.parentId = parentId;
+      const newP = MM.nodes[parentId];
+      if(newP && Array.isArray(newP.childIds) && newP.childIds.indexOf(node.id) === -1){
+        newP.childIds.push(node.id);
+      }
+    }
+  } else {
+    // Fresh node. mmNode auto-pushes onto parent.childIds.
+    const color = spec.color || (MM.nodes[parentId] ? MM.nodes[parentId].color : '#60a5fa');
+    node = mmNode(type, spec.text || '', 0, 0, parentId, color);
+    if(spec.note != null) node.body = spec.note;
+    if(isEquation) node.latex = spec.formula;
+    node.origin = 'seed';
+    node.seedKey = seedKey;
+  }
+
+  // Recurse into children.
+  const kids = Array.isArray(spec.children) ? spec.children : [];
+  kids.forEach((c, i) => _mmImportNode(c, node.id, mapId, indexPath + '.' + i, merge));
+  return node.id;
+}
+
+// Public entry. spec = parsed JSON {id,title,root:{text,...,children}}.
+// opts.merge (default true) keeps student edits; opts.focus (default true)
+// re-centers via the existing auto-focus after build.
+function mmImportTopicMap(spec, opts){
+  opts = opts || {};
+  const merge = opts.merge !== false;
+  if(!spec || !spec.root) return false;
+  const mapId = spec.id || 'map';
+
+  if(!MM || !MM.nodes) {
+    MM = { nodes:{}, root:'root', sel:null, multiSel:[], zoom:1, panX:0, panY:0, orientation:'tb', zones:[], selectedZoneId:null };
+  }
+
+  // PRISTINE-SEED RESET: a brand-new map that was just filled by buildSeedMap()
+  // (COURSE_SEED) is a placeholder, NOT student work — none of its nodes carry
+  // origin/seedKey, none are userEdited, and nothing has been imported yet.
+  // In that case start from a clean root so we don't end up with COURSE_SEED
+  // and the ready-map living side by side. A map the student has touched
+  // (any userEdited node, any own/imported node) is left intact → merge path.
+  if(merge && (!Array.isArray(MM.importedMaps) || MM.importedMaps.length === 0)){
+    let pristineSeed = true;
+    for(const id in MM.nodes){
+      const nd = MM.nodes[id];
+      if(!nd) continue;
+      if(nd.userEdited || nd.origin || nd.seedKey){ pristineSeed = false; break; }
+      // A note/equation/canvas the student authored also means "not pristine".
+      if((nd.body && nd.body.trim()) || nd.type === 'canvas'){ pristineSeed = false; break; }
+    }
+    if(pristineSeed){
+      MM.nodes = {};
+      MM.zones = [];
+      MM.multiSel = [];
+      MM.mmAutoCollapsed = false;
+      // root rebuilt below from spec.root
+    }
+  }
+
+  // Ensure a root node exists. If we're importing into an empty/seeded map,
+  // adopt this map's root identity onto MM.root so it becomes the central topic.
+  let rootNode = MM.nodes[MM.root];
+  const rootSeedKey = mapId + '/root';
+  if(!rootNode){
+    MM.nodes.root = { id:'root', type:'root', text: spec.root.text || 'מפה',
+      color: spec.root.color || '#312e81', parentId:null, childIds:[],
+      collapsed:false, W:160, H:46, origin:'seed', seedKey: rootSeedKey };
+    MM.root = 'root';
+    rootNode = MM.nodes.root;
+  } else if(rootNode.origin === 'seed' || rootNode.seedKey === rootSeedKey ||
+            (!rootNode.userEdited && (!rootNode.childIds || rootNode.childIds.length === 0))){
+    // Adopt root as this map's root when it's the placeholder/seed root.
+    if(!rootNode.userEdited){
+      rootNode.text = spec.root.text || rootNode.text;
+      if(spec.root.color) rootNode.color = spec.root.color;
+    }
+    rootNode.origin = rootNode.origin || 'seed';
+    rootNode.seedKey = rootSeedKey;
+  }
+
+  const kids = Array.isArray(spec.root.children) ? spec.root.children : [];
+  kids.forEach((c, i) => _mmImportNode(c, MM.root, mapId, String(i), merge));
+
+  // Record the import so we don't double-import on subsequent opens.
+  if(!Array.isArray(MM.importedMaps)) MM.importedMaps = [];
+  if(MM.importedMaps.indexOf(mapId) === -1) MM.importedMaps.push(mapId);
+
+  // Collapse deep levels on a brand-new import so the first view isn't a wall
+  // of text (only when the map had no prior auto-collapse state).
+  if(!MM.mmAutoCollapsed && typeof mmCollapseBelowDepth === 'function'){
+    try { mmCollapseBelowDepth(1); } catch(e){}
+    MM.mmAutoCollapsed = true;
+  }
+
+  // Layout → select first main topic → center via existing auto-focus → save.
+  if(typeof mmTidyLayout === 'function'){ try { mmTidyLayout(); } catch(e){} }
+  const firstTopic = (rootNode.childIds && rootNode.childIds[0]) || MM.root;
+  MM.sel = firstTopic;
+  if(typeof mmPushHistory === 'function') mmPushHistory();
+  if(typeof mmRender === 'function') mmRender();
+  if(opts.focus !== false){
+    // Center on root so the whole tree is in view (root has all branches).
+    const focusTarget = MM.root;
+    MM.sel = firstTopic;
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        try {
+          if(typeof mmFitVisibleSubtree === 'function') mmFitVisibleSubtree(focusTarget);
+          else if(typeof mmInitialFocus === 'function') mmInitialFocus();
+        } catch(e){ try{ mmFitView(); }catch(_){} }
+      });
+    });
+  }
+  try { localStorage.setItem(MM_SAVE_KEY, mmSerializeForSave()); } catch(e){}
+  return true;
+}
+
+// Fetch the ready-map JSON and import it. mode 'auto' (first-open, only if the
+// map hasn't been imported yet) vs 'manual' (button — always re-import, shows
+// a toast confirming student notes were preserved).
+function mmLoadReadyMap(mapId, mode){
+  mapId = mapId || 'descriptive-stats';
+  mode = mode || 'manual';
+  if(mode === 'auto' && Array.isArray(MM.importedMaps) && MM.importedMaps.indexOf(mapId) !== -1){
+    return; // already imported once — don't re-seed on top of a working map
+  }
+  fetch('mindmaps/' + mapId + '.json', {cache:'no-store'})
+    .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
+    .then(function(spec){
+      const ok = mmImportTopicMap(spec, {merge:true, focus:true});
+      if(ok && mode === 'manual' && typeof mmShowToast === 'function'){
+        mmShowToast('המפה נטענה (ההערות שלך נשמרו) ✓');
+      }
+    })
+    .catch(function(err){ console.warn('mmLoadReadyMap failed', err); });
+}
+
+// Small reusable toast (mirrors the ws-add-node pill).
+function mmShowToast(msg){
+  try {
+    var pill = document.createElement('div');
+    pill.textContent = msg;
+    pill.style.cssText = 'position:fixed;top:18px;left:50%;transform:translateX(-50%);'+
+      'background:#10b981;color:#fff;padding:8px 18px;border-radius:14px;'+
+      'font-family:sans-serif;font-size:13px;font-weight:600;z-index:99999;'+
+      'box-shadow:0 6px 22px rgba(16,185,129,0.4);direction:rtl;'+
+      'animation:wsAddNoteFlash 1.8s ease forwards;';
+    if(!document.getElementById('mm-toast-kf')){
+      var st = document.createElement('style');
+      st.id = 'mm-toast-kf';
+      st.textContent = '@keyframes wsAddNoteFlash{0%{opacity:0;transform:translateX(-50%) translateY(-8px);}'+
+        '12%{opacity:1;transform:translateX(-50%) translateY(0);}'+
+        '85%{opacity:1;}100%{opacity:0;transform:translateX(-50%) translateY(-4px);}}';
+      document.head.appendChild(st);
+    }
+    document.body.appendChild(pill);
+    setTimeout(function(){ pill.remove(); }, 1800);
+  } catch(e){}
+}
+
 function initMM(){
   // Try to load saved mind map for this user
   try {
@@ -1206,6 +1409,7 @@ function mmSerializeForSave(){
       searchMatches: [],
       searchIdx: 0,
       mmAutoCollapsed: MM.mmAutoCollapsed,
+      importedMaps: Array.isArray(MM.importedMaps) ? MM.importedMaps : [],
       zones: Array.isArray(MM.zones) ? MM.zones : [],
       nodes: {}
     };
@@ -1289,7 +1493,7 @@ function mmRender(){
       lbl.ondblclick = (e)=>{
         e.stopPropagation();
         const v = prompt('תווית הסיכום:', n.text || 'סיכום');
-        if(v !== null){ n.text = v.trim() || n.text; mmPushHistory(); mmRender(); }
+        if(v !== null){ n.text = v.trim() || n.text; if(n.origin==='seed') n.userEdited=true; mmPushHistory(); mmRender(); }
       };
       lbl.oncontextmenu = (e)=>{
         e.preventDefault();
@@ -2842,7 +3046,9 @@ function startEditNode(n,el){
   input.onblur=()=>{
     const newText=input.value.trim()||n.text;
     const changed = newText !== n.text;
-    n.text=newText;mmPushHistory();input.remove();mmRender();
+    n.text=newText;
+    if(changed && n.origin==='seed') n.userEdited=true; // merge-safe: protect from re-import
+    mmPushHistory();input.remove();mmRender();
     if(changed && typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('edit-text');
   };
   input.onkeydown=e=>{
@@ -5514,6 +5720,21 @@ requestAnimationFrame(function(){
   });
 });
 
+// First-open auto-load of the ready-map (XMind-parity Phase 1). If this user's
+// map has never imported the descriptive-stats ready-map, load it now. The
+// import is merge-safe, so this never clobbers a student's own work on later
+// opens (it's recorded in MM.importedMaps and won't re-fire). mmLoadReadyMap
+// runs its own layout + auto-focus once the JSON arrives.
+try {
+  if(typeof mmLoadReadyMap === 'function'){
+    var _alreadyImported = Array.isArray(MM.importedMaps) &&
+      MM.importedMaps.indexOf('descriptive-stats') !== -1;
+    if(!_alreadyImported){
+      mmLoadReadyMap('descriptive-stats', 'auto');
+    }
+  }
+} catch(e){ /* non-blocking */ }
+
 // Context menu HTML
 document.getElementById('ctx-menu').innerHTML=`
   <div class="ctx-item" onclick="ctxFn('edit')">Edit</div>
@@ -6287,6 +6508,7 @@ function openNoteEditor(nodeId){
   function commit(){
     n.text = (titleInput.value || '').trim() || n.text;
     n.body = body.value;
+    if(n.origin==='seed') n.userEdited=true; // merge-safe: student owns this node now
     if(typeof nbSave === 'function') nbSave();
     if(typeof mmRender === 'function') mmRender();
     if(typeof NB !== 'undefined' && NB.active && typeof nbRender === 'function') nbRender();
@@ -6309,6 +6531,7 @@ function openNoteEditor(nodeId){
     if(persist && !dirty){ /* one final commit anyway in case of timer race */
       n.text = (titleInput.value || '').trim() || n.text;
       n.body = body.value;
+      if(n.origin==='seed') n.userEdited=true;
       if(typeof nbSave === 'function') nbSave();
       if(typeof mmRender === 'function') mmRender();
     }
