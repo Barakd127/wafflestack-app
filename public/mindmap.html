@@ -674,7 +674,7 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
     <button class="tb-btn" onclick="mmAddEquation()">&#8721; Equation</button>
     <button class="tb-btn" onclick="mmAddCanvas()">&#11036; Canvas</button>
     <button class="tb-btn" onclick="mmAddSummary()" title="סיכום קבוצת אחים (Ctrl-click)">&#8944; Summary</button>
-    <button class="tb-btn" onclick="mmLoadReadyMap('descriptive-stats','manual')" title="טען מפת מושגים מוכנה — ההערות והעריכות שלך נשמרות">🗺️ טען מפה מוכנה</button>
+    <button class="tb-btn" onclick="mmLoadReadyMap(mmCurrentReadyMapId(),'manual')" title="טען מפת מושגים מוכנה — ההערות והעריכות שלך נשמרות">🗺️ טען מפה מוכנה</button>
     <button class="tb-btn" onclick="wsGoDrawing()" title="פתח לוח ציור (Excalidraw) במסך מלא">🎨 לוח ציור</button>
   </div>
   <div class="ribbon-group" id="ribbon-view" style="display:none">
@@ -966,6 +966,12 @@ const WB_DOM_TYPES = new Set(['rect','circle','sticky','text']);
 // ── Per-user auto-save keys ────────────────────────────────────────────────────
 const _MM_USER_ID = new URLSearchParams(location.search).get('userId') || 'default';
 const MM_SAVE_KEY = 'mm-data-' + _MM_USER_ID;
+// Phase-2 ready-map: the host passes ?topic=<topicId> (e.g. ?topic=regression)
+// when the mind map is opened from a specific lesson/quiz topic. When present,
+// the first-open auto-load and the "טען מפה מוכנה" button target that topic's
+// per-topic ready-map (mindmaps/<topicId>.json) instead of the generic
+// descriptive-stats overview. Empty when opened as the general/overview map.
+const _MM_TOPIC = (new URLSearchParams(location.search).get('topic') || '').trim();
 // Per-scene whiteboard key (Issue 4): when the host iframe passes ?wbScene=<id>
 // (e.g. wbScene=q-mean_001), the canvas auto-saves to a distinct localStorage
 // slot so each question gets its own canvas. Falls back to the legacy shared
@@ -1263,11 +1269,21 @@ function mmImportTopicMap(spec, opts){
   return true;
 }
 
+// Resolve which ready-map id applies right now: the per-topic map when a
+// ?topic=<topicId> context was passed, else the generic descriptive-stats
+// overview. Used by both the toolbar button and the first-open auto-load so a
+// student always (re)loads the map for the topic they're actually studying.
+function mmCurrentReadyMapId(){
+  return _MM_TOPIC ? _MM_TOPIC : 'descriptive-stats';
+}
+
 // Fetch the ready-map JSON and import it. mode 'auto' (first-open, only if the
 // map hasn't been imported yet) vs 'manual' (button — always re-import, shows
-// a toast confirming student notes were preserved).
+// a toast confirming student notes were preserved). Each mapId is tracked
+// separately in MM.importedMaps, so loading topic B never wipes topic A's
+// imported nodes (merge-safe upsert keyed on '<mapId>/<indexPath>').
 function mmLoadReadyMap(mapId, mode){
-  mapId = mapId || 'descriptive-stats';
+  mapId = mapId || mmCurrentReadyMapId();
   mode = mode || 'manual';
   if(mode === 'auto' && Array.isArray(MM.importedMaps) && MM.importedMaps.indexOf(mapId) !== -1){
     return; // already imported once — don't re-seed on top of a working map
@@ -5720,17 +5736,21 @@ requestAnimationFrame(function(){
   });
 });
 
-// First-open auto-load of the ready-map (XMind-parity Phase 1). If this user's
-// map has never imported the descriptive-stats ready-map, load it now. The
-// import is merge-safe, so this never clobbers a student's own work on later
-// opens (it's recorded in MM.importedMaps and won't re-fire). mmLoadReadyMap
-// runs its own layout + auto-focus once the JSON arrives.
+// First-open auto-load of the ready-map (XMind-parity Phase 1 + Phase 2). If
+// this user's map has never imported the relevant ready-map, load it now. When
+// the host passed ?topic=<topicId> we load THAT topic's per-topic map
+// (mindmaps/<topicId>.json); otherwise we load the generic descriptive-stats
+// overview. The import is merge-safe and tracked per-mapId in MM.importedMaps,
+// so this never clobbers a student's own work and never re-fires for a topic
+// that already loaded — yet opening a NEW topic still auto-loads ITS map.
+// mmLoadReadyMap runs its own layout + auto-focus once the JSON arrives.
 try {
   if(typeof mmLoadReadyMap === 'function'){
+    var _readyMapId = mmCurrentReadyMapId();
     var _alreadyImported = Array.isArray(MM.importedMaps) &&
-      MM.importedMaps.indexOf('descriptive-stats') !== -1;
+      MM.importedMaps.indexOf(_readyMapId) !== -1;
     if(!_alreadyImported){
-      mmLoadReadyMap('descriptive-stats', 'auto');
+      mmLoadReadyMap(_readyMapId, 'auto');
     }
   }
 } catch(e){ /* non-blocking */ }
