@@ -340,6 +340,7 @@ import Ribbon from './Ribbon'
 import { RiskBoard } from './RiskBoard'
 import MistakeAutopsy, { type ErrorTag } from './MistakeAutopsy'
 import PersonalPlanWizard from './PersonalPlanWizard'
+import IntroTutorialVideo from './IntroTutorialVideo'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d' | 'drawing') => void
@@ -1939,6 +1940,9 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             home was too crowded. The 2-min challenge card (leftmost) stays
             accessible via the TwoMinChallengeCard preserved in motivation/,
             ready to be wired into a dedicated motivation tab in the future. */}
+
+        {/* Onboarding tutorial video — replay card + first-visit auto-modal. */}
+        <IntroTutorialVideo />
 
         {/* ── ROW 1 ──────────────────────────────────── */}
         <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'stretch' }}>
