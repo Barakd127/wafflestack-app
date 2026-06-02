@@ -1720,8 +1720,13 @@ function TopBar({ title, onLogout, darkMode, onToggleDark }: { title: string; on
         margin: 0,
         letterSpacing: '-0.5px',
         textShadow: '0 1px 4px rgba(255,255,255,0.8)',
+        // Shrink + ellipsize so the actions (logout etc.) never overlap the
+        // title on narrow widths. Per user 2026-06-02.
+        flex: '1 1 auto', minWidth: 0,
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        marginInlineEnd: 16,
       }}>{title}</h1>
-      <div className="ws-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 14 }} dir="ltr">
+      <div className="ws-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }} dir="ltr">
         {/* Dark-mode toggle, integrated into topbar per user 2026-05-24
             (was a floating fixed button at top-right obscuring sidebar icons). */}
         {onToggleDark && (
