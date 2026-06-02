@@ -1771,6 +1771,11 @@ function mmIsVisible(id){
   // §25 Zone: zoned (free-positioned) nodes are always visible regardless
   // of ancestor collapse state — they're an explicit escape hatch.
   if(n.zoneId) return true;
+  // Free/detached nodes (added via "התחל ענף חדש — אחבר אחר כך", parentId null)
+  // have no ancestor chain to the root. Without this they failed the parent
+  // lookup below and rendered ONLY as an invisible minimap dot (user
+  // 2026-06-01). Treat any parent-less non-root node as a visible top-level node.
+  if(!n.parentId) return true;
   const p=MM.nodes[n.parentId];
   if(!p)return false;
   if(p.collapsed)return false;
