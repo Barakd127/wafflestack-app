@@ -2854,7 +2854,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             {tab === 'mindmap' && (
               <iframe
                 key="quiz-mm"
-                src={`${import.meta.env.BASE_URL}mindmap.html?userId=${userId || 'default'}`}
+                src={`${import.meta.env.BASE_URL}mindmap.html?userId=${userId || 'default'}${selectedTopic ? `&topic=${encodeURIComponent(selectedTopic)}` : ''}`}
                 title="מפת חשיבה — תוך כדי תרגול"
                 style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
                 allow="clipboard-read; clipboard-write"
