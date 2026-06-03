@@ -678,6 +678,8 @@ body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
     <button class="tb-btn" onclick="wsGoDrawing()" title="פתח לוח ציור (Excalidraw) במסך מלא">🎨 לוח ציור</button>
   </div>
   <div class="ribbon-group" id="ribbon-view" style="display:none">
+    <button class="tb-btn" onclick="mmMacroView()" title="מבט-על: כווץ הכול לענפים הראשיים">&#9776; מבט-על</button>
+    <button class="tb-btn" onclick="mmFocusSelected()" title="מיקוד: פתח רק את הענף הנבחר, כווץ השאר">&#9678; מיקוד</button>
     <button class="tb-btn" onclick="mmCollapseAll()">&#8863; Collapse</button>
     <button class="tb-btn" onclick="mmFitView()">&#8993; Fit</button>
     <button class="tb-btn" onclick="mmAutoLayout()" title="Auto-arrange tree">&#8862; Layout</button>
@@ -1537,6 +1539,18 @@ function mmRender(){
     nodeDiv.style.color=n.type==='root'?'#1a1a1a':'white';
     nodeDiv.style.cursor='pointer';
     if(n.type==='equation'){renderKatex(n.latex||'\\frac{x}{2}',nodeDiv);}
+    else if(n.type==='image' && n.src){
+      // Image node: show the picture itself, no bubble background.
+      nodeDiv.textContent='';
+      nodeDiv.style.background='transparent';
+      nodeDiv.style.padding='0';
+      nodeDiv.style.overflow='hidden';
+      const img=document.createElement('img');
+      img.src=n.src;
+      img.draggable=false;
+      img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:10px;display:block;pointer-events:none';
+      nodeDiv.appendChild(img);
+    }
     else{nodeDiv.textContent=n.text;}
     nodeDiv.oncontextmenu=e=>{e.preventDefault();showNodeActions(e,n.id);};
     nodeDiv.onclick=(e)=>{
@@ -1585,7 +1599,10 @@ function mmRender(){
     if(n.childIds.length>0){
       const tog=document.createElement('div');
       tog.className='node-toggle';
-      tog.textContent=n.collapsed?'+':'-';
+      // Collapsed → show "+N" (N = hidden direct children) so the user knows
+      // how much depth is folded; expanded → "−".
+      const hiddenCount=n.childIds.filter(c=>MM.nodes[c]&&MM.nodes[c].type!=='summary').length;
+      tog.textContent=n.collapsed?('+'+hiddenCount):'−';
       tog.onclick=e=>{
         e.stopPropagation();
         n.collapsed=!n.collapsed;
@@ -1966,6 +1983,9 @@ function mmRender(){
     }
   }
   svg.innerHTML=svgCode;
+  // Re-draw summary frames/braces AFTER connectors replace svg innerHTML
+  // (the early call at top positions labels; this call keeps the frame visible).
+  if(typeof mmRenderSummaries === 'function') mmRenderSummaries();
   // Render thumbnails for canvas nodes
   for(const cid in MM.nodes){
     const cn=MM.nodes[cid];
@@ -2389,6 +2409,83 @@ function mmFocusBranch(id){
       }
     });
   });
+}
+
+// Toolbar "מבט-על": collapse everything to the main branches (depth 1) so the
+// whole map reads at macro scale, then fit to screen.
+function mmMacroView(){
+  if(typeof mmCollapseBelowDepth==='function') mmCollapseBelowDepth(1);
+  MM.mmAutoCollapsed = true;
+  mmRender();
+  if(typeof mmFitView==='function') mmFitView();
+}
+
+// Toolbar "מיקוד": focus the selected branch — collapse every branch, then
+// expand only root→selected and the selected node's direct children. Always
+// runs (ignores the mmFocusBranch auto opt-out flag).
+function mmFocusSelected(){
+  const id = (MM.sel && MM.nodes[MM.sel]) ? MM.sel : MM.root;
+  if(!id) return;
+  Object.values(MM.nodes).forEach(n=>{ if(n.childIds && n.childIds.length) n.collapsed=true; });
+  let cur=id;
+  while(cur){ const n=MM.nodes[cur]; if(n) n.collapsed=false; cur=n && n.parentId; }
+  mmRender();
+  if(typeof mmEnsureSelVisible==='function') mmEnsureSelVisible();
+}
+
+// ── Topic clipboard (Ctrl+C / Ctrl+X / Ctrl+V) — move/copy/cut subtrees ──
+let _mmClip = null; // { mode:'copy'|'cut', roots:[oldId], nodes:{oldId:snapshot} }
+
+function _mmCollectSubtree(rootId, out){
+  const n = MM.nodes[rootId]; if(!n) return;
+  out[rootId] = JSON.parse(JSON.stringify(n));
+  (n.childIds||[]).forEach(c=>{ if(MM.nodes[c] && MM.nodes[c].type!=='summary') _mmCollectSubtree(c, out); });
+}
+
+function mmClipboardCopy(mode){
+  // roots = multi-selection if any, else the single selection. Exclude root +
+  // summaries (images ARE copyable).
+  let roots = ((MM.multiSel && MM.multiSel.length) ? MM.multiSel.slice() : (MM.sel?[MM.sel]:[]))
+            .filter(id => id && id!==MM.root && MM.nodes[id] && MM.nodes[id].type!=='summary');
+  // drop any root that is a descendant of another selected root
+  const descOfSelected = (id)=>{ let p=MM.nodes[id] && MM.nodes[id].parentId; while(p){ if(roots.includes(p)) return true; p=MM.nodes[p] && MM.nodes[p].parentId; } return false; };
+  roots = roots.filter(id => !descOfSelected(id));
+  if(!roots.length) return;
+  const nodes = {}; roots.forEach(r => _mmCollectSubtree(r, nodes));
+  _mmClip = { mode, roots, nodes };
+}
+
+function mmClipboardPaste(){
+  if(!_mmClip) return;
+  const target = (MM.sel && MM.nodes[MM.sel]) ? MM.sel : MM.root;
+  // Guard: don't paste a CUT subtree into itself (would orphan the target).
+  if(_mmClip.mode==='cut' && _mmClip.nodes[target]) return;
+  const idMap = {};
+  for(const oldId in _mmClip.nodes) idMap[oldId] = uid();
+  let firstNew = null;
+  for(const oldId in _mmClip.nodes){
+    const src = _mmClip.nodes[oldId];
+    const c = JSON.parse(JSON.stringify(src));
+    c.id = idMap[oldId];
+    c.childIds = (src.childIds||[]).filter(ci => idMap[ci]).map(ci => idMap[ci]);
+    c.parentId = _mmClip.roots.includes(oldId) ? target : (idMap[src.parentId] || target);
+    if(c.origin) { delete c.origin; delete c.seedKey; } // pasted copies are user-owned
+    MM.nodes[c.id] = c;
+    if(!firstNew) firstNew = c.id;
+  }
+  const tgt = MM.nodes[target];
+  if(tgt){ _mmClip.roots.forEach(r => tgt.childIds.push(idMap[r])); tgt.collapsed = false; }
+  if(_mmClip.mode==='cut'){
+    for(const oldId in _mmClip.nodes){
+      const n = MM.nodes[oldId]; if(!n) continue;
+      if(n.parentId && MM.nodes[n.parentId]) MM.nodes[n.parentId].childIds = MM.nodes[n.parentId].childIds.filter(x => x!==oldId);
+      delete MM.nodes[oldId];
+    }
+    _mmClip = null; // cut consumed
+  }
+  MM.sel = firstNew; MM.multiSel = [];
+  if(typeof mmTidyLayout==='function'){ try{ mmTidyLayout(); }catch(e){} }
+  mmPushHistory(); mmRender(); if(typeof mmEnsureSelVisible==='function') mmEnsureSelVisible();
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -3052,13 +3149,17 @@ function handleSearchKey(e){
   }
 }
 
-function startEditNode(n,el){
+function startEditNode(n,el,initialChar){
   const div=el.querySelector('.node-div');
   const input=document.createElement('input');
-  input.type='text';input.value=n.text;
+  // Type-to-edit: if a printable char triggered editing, start fresh with that
+  // char (X-Mind style) instead of keeping+selecting the old text.
+  input.type='text';input.value=(typeof initialChar==='string'&&initialChar.length===1)?initialChar:n.text;
   input.style.cssText=`position:absolute;left:${el.offsetLeft}px;top:${el.offsetTop}px;width:${div.offsetWidth}px;height:${div.offsetHeight}px;border:2px solid #6366f1;border-radius:20px;padding:5px 16px;background:#fff;color:#1a1a1a;font-family:Inter,sans-serif;font-size:12px;font-weight:500;outline:none;z-index:100`;
   document.getElementById('viewport').appendChild(input);
-  input.focus();input.select();
+  input.focus();
+  if(typeof initialChar==='string'&&initialChar.length===1){ input.setSelectionRange(input.value.length,input.value.length); }
+  else { input.select(); }
   input.onblur=()=>{
     const newText=input.value.trim()||n.text;
     const changed = newText !== n.text;
@@ -5238,28 +5339,100 @@ document.addEventListener('keydown', e => {
     MM.multiSel = all;
     MM.sel = all[0] || null;
     mmRender();
+  } else if((e.ctrlKey||e.metaKey)&&(e.key==='c'||e.key==='C')){
+    e.preventDefault(); mmClipboardCopy('copy');
+  } else if((e.ctrlKey||e.metaKey)&&(e.key==='x'||e.key==='X')){
+    e.preventDefault(); mmClipboardCopy('cut');
+  } else if((e.ctrlKey||e.metaKey)&&(e.key==='v'||e.key==='V')){
+    // Internal node clipboard wins; if empty, fall through to the native
+    // 'paste' event (image paste, feature 6).
+    if(_mmClip){ e.preventDefault(); mmClipboardPaste(); }
   } else if(e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='ArrowUp'||e.key==='ArrowDown'){
-    // Arrow-key navigation between topics and side topics
+    // SPATIAL arrow-key navigation: jump to the nearest VISIBLE node that lies
+    // in the pressed direction by on-screen position. Works for both TB and LR
+    // layouts — Right really means "the topic to the right", Up/Down walk the
+    // subtopic column. (Replaces the old topological right=child mapping.)
     e.preventDefault();
-    if(!MM.sel){MM.sel=MM.root;mmRender();mmEnsureSelVisible();return;}
-    const cur=MM.nodes[MM.sel];if(!cur)return;
-    let nextId=null;
-    if(e.key==='ArrowRight'){
-      if(!cur.collapsed&&cur.childIds.length){nextId=cur.childIds[0];}
-    } else if(e.key==='ArrowLeft'){
-      if(cur.parentId)nextId=cur.parentId;
-    } else if(e.key==='ArrowUp'||e.key==='ArrowDown'){
-      if(cur.parentId){
-        const sibs=MM.nodes[cur.parentId].childIds.filter(id=>MM.nodes[id]);
-        const idx=sibs.indexOf(MM.sel);
-        if(idx>=0){
-          const step=e.key==='ArrowDown'?1:-1;
-          nextId=sibs[(idx+step+sibs.length)%sibs.length];
-        }
+    if(!MM.sel||!MM.nodes[MM.sel]){MM.sel=MM.root;mmRender();mmEnsureSelVisible();return;}
+    const cur=MM.nodes[MM.sel];
+    const cx=cur.x+(cur.W||140)/2, cy=cur.y+(cur.H||40)/2;
+    const dir=e.key;
+    let best=null, bestScore=Infinity;
+    for(const id in MM.nodes){
+      if(id===MM.sel) continue;
+      const m=MM.nodes[id];
+      if(!m || m.type==='summary') continue;
+      if(typeof mmIsVisible==='function' && !mmIsVisible(id)) continue;
+      const mx=m.x+(m.W||140)/2, my=m.y+(m.H||40)/2;
+      const dx=mx-cx, dy=my-cy;
+      let along, perp;
+      if(dir==='ArrowRight'){ if(dx<=4) continue; along=dx; perp=Math.abs(dy); }
+      else if(dir==='ArrowLeft'){ if(dx>=-4) continue; along=-dx; perp=Math.abs(dy); }
+      else if(dir==='ArrowDown'){ if(dy<=4) continue; along=dy; perp=Math.abs(dx); }
+      else { if(dy>=-4) continue; along=-dy; perp=Math.abs(dx); }
+      if(perp > along*2.5 + 40) continue;          // keep within a directional cone
+      const score=along + perp*0.6;                 // nearest along axis, gentle perp penalty
+      if(score<bestScore){ bestScore=score; best=id; }
+    }
+    if(best){ MM.sel=best; MM.multiSel=[]; mmRender(); mmEnsureSelVisible(); }
+  } else if(e.key===' '){
+    // Space = toggle collapse/expand of the selected topic (fast keyboard fold)
+    if(MM.sel && MM.nodes[MM.sel]){
+      const n=MM.nodes[MM.sel];
+      if(n.childIds && n.childIds.length){ e.preventDefault(); n.collapsed=!n.collapsed; mmRender(); mmEnsureSelVisible(); }
+    }
+  } else if(MM.sel && MM.nodes[MM.sel] && !e.ctrlKey && !e.metaKey && !e.altKey && e.key && e.key.length===1){
+    // Type-to-edit: a single printable key on the selected topic opens the editor
+    // seeded with that char — no F2 / double-click needed.
+    const n=MM.nodes[MM.sel];
+    if(n && n.type!=='summary' && n.type!=='image' && n.type!=='canvas'){
+      if(n.type==='equation'){ e.preventDefault(); openEquationModal(n.id,'edit'); }
+      else {
+        const el=document.getElementById('nw_'+MM.sel);
+        if(el){ e.preventDefault(); startEditNode(n, el, e.key); }
       }
     }
-    if(nextId&&MM.nodes[nextId]){MM.sel=nextId;mmRender();mmEnsureSelVisible();}
   }
+});
+
+// ── Paste images into the map (feature 6) ──
+// If a topic is selected → image becomes its child. Otherwise → floating node
+// near the current viewport center (draggable + connectable like any node).
+document.addEventListener('paste', e=>{
+  const wb=document.getElementById('wb-overlay');
+  if(wb && wb.classList.contains('open')) return;
+  const ae=document.activeElement, tag=ae&&ae.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||(ae&&ae.isContentEditable)) return;
+  const items=(e.clipboardData&&e.clipboardData.items)||[];
+  let file=null;
+  for(const it of items){ if(it.type && it.type.indexOf('image')===0){ file=it.getAsFile(); break; } }
+  if(!file) return;
+  e.preventDefault();
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const dataUrl=ev.target.result;
+    const probe=new Image();
+    probe.onload=()=>{
+      const maxW=180;
+      const ratio=(probe.naturalWidth? probe.naturalHeight/probe.naturalWidth : 0.7);
+      const W=Math.min(maxW, probe.naturalWidth||maxW);
+      const H=Math.max(40, Math.round(W*ratio));
+      const sel=(MM.sel&&MM.nodes[MM.sel])?MM.nodes[MM.sel]:null;
+      const node={id:uid(),type:'image',text:'',src:dataUrl,x:0,y:0,color:'#ffffff',parentId:sel?sel.id:null,childIds:[],collapsed:false,W,H};
+      if(sel){ sel.childIds.push(node.id); sel.collapsed=false; }
+      else {
+        const app=document.getElementById('app');
+        const cxS=(app?app.clientWidth:800)/2, cyS=(app?app.clientHeight:600)/2;
+        node.x=(cxS-MM.panX)/MM.zoom - W/2;
+        node.y=(cyS-MM.panY)/MM.zoom - H/2;
+      }
+      MM.nodes[node.id]=node; MM.sel=node.id; MM.multiSel=[];
+      if(node.parentId && typeof mmTidyLayout==='function'){ try{ mmTidyLayout(); }catch(err){} }
+      mmPushHistory(); mmRender(); if(typeof mmEnsureSelVisible==='function') mmEnsureSelVisible();
+    };
+    probe.src=dataUrl;
+  };
+  reader.readAsDataURL(file);
 });
 
 // Pan viewport so the currently selected node is on screen (used by arrow-key nav)
@@ -6565,30 +6738,28 @@ function openNoteEditor(nodeId){
 // MM.multiSel must contain 2+ siblings sharing a parent.
 // ═══════════════════════════════════════════════════════════
 function mmAddSummary(){
-  const sel = (MM.multiSel && MM.multiSel.length >= 2)
-    ? MM.multiSel.filter(id => MM.nodes[id])
-    : [];
-  if(sel.length < 2){
-    alert('בחר 2 או יותר אחים (Ctrl-click) ואז לחץ Summary');
-    return;
+  let sel = null, parentId = null;
+  // Mode 1 — single topic selected with subtopics → auto-summarize its children.
+  if(MM.sel && MM.nodes[MM.sel] && (!MM.multiSel || MM.multiSel.length < 2)){
+    const node = MM.nodes[MM.sel];
+    const kids = (node.childIds||[]).filter(id => MM.nodes[id] && MM.nodes[id].type!=='summary' && MM.nodes[id].type!=='image');
+    if(kids.length >= 1){ sel = kids; parentId = node.id; }
   }
-  const parents = new Set(sel.map(id => MM.nodes[id].parentId));
-  if(parents.size !== 1){
-    alert('כל הצמתים שנבחרו צריכים להיות אחים (אותו צומת אב)');
-    return;
+  // Mode 2 — 2+ sibling nodes multi-selected → summarize that group.
+  if(!sel){
+    sel = (MM.multiSel && MM.multiSel.length >= 2) ? MM.multiSel.filter(id => MM.nodes[id]) : [];
+    if(sel.length < 2){ alert('בחר נושא שיש לו תת-נושאים, או סמן 2+ אחים (Ctrl-click), ואז לחץ Summary'); return; }
+    const parents = new Set(sel.map(id => MM.nodes[id].parentId));
+    if(parents.size !== 1){ alert('הצמתים שנבחרו צריכים להיות אחים (אותו צומת אב)'); return; }
+    parentId = sel[0] && MM.nodes[sel[0]].parentId;
   }
-  const parentId = sel[0] && MM.nodes[sel[0]].parentId;
   if(!parentId){ alert('לא ניתן לסכם את צומת השורש'); return; }
-  // Position: just to the right of the rightmost target
-  const targets = sel.map(id => MM.nodes[id]);
-  const right = Math.max(...targets.map(t => t.x + (t.W||140)));
-  const cy = (Math.min(...targets.map(t => t.y)) + Math.max(...targets.map(t => t.y + (t.H||40)))) / 2;
   const text = prompt('תווית הסיכום:', 'סיכום') || 'סיכום';
-  const s = mmNode('summary', text, right + 80, cy - 14, parentId, '#6366f1');
-  s.targetIds = sel.slice();
-  s.W = 100; s.H = 28;
+  const s = mmNode('summary', text, 0, 0, parentId, '#6366f1');
+  s.targetIds = sel.slice();           // group this summary covers (auto for single-topic)
+  s.W = 110; s.H = 28;
   mmPushHistory();
-  if(typeof mmRender === 'function') mmRender();
+  if(typeof mmRender === 'function') mmRender();  // mmRenderSummaries places it by flow
 }
 
 // Helper called from mmRender after the main loop draws the brace SVG path
@@ -6596,32 +6767,43 @@ function mmAddSummary(){
 function mmRenderSummaries(){
   const svg = document.getElementById('svg-layer'); if(!svg) return;
   const vp = document.getElementById('viewport'); if(!vp) return;
+  const orient = (typeof mmOrient === 'function') ? mmOrient() : 'lr';
   let extra = '';
   for(const id in MM.nodes){
     const s = MM.nodes[id];
     if(s.type !== 'summary') continue;
-    if(!Array.isArray(s.targetIds) || s.targetIds.length < 2) continue;
+    if(!Array.isArray(s.targetIds) || s.targetIds.length < 1) continue;
     const targets = s.targetIds.map(tid => MM.nodes[tid]).filter(Boolean);
-    if(targets.length < 2) continue;
-    const top    = Math.min(...targets.map(t => t.y));
-    const bot    = Math.max(...targets.map(t => t.y + (t.H||40)));
-    const right  = Math.max(...targets.map(t => t.x + (t.W||140)));
-    const braceX = right + 22;
-    const midY   = (top + bot) / 2;
-    const labelX = braceX + 30;
-    // Cubic-Bezier curly brace: two arms meeting at midY pointing inward
-    const armH = (bot - top) / 2;
-    const ctrl = Math.min(40, armH * 0.6);
-    const d = [
-      `M ${braceX-8},${top}`,
-      `C ${braceX-8},${top+ctrl} ${braceX},${top+ctrl} ${braceX},${midY-2}`,
-      `L ${braceX+10},${midY}`,
-      `L ${braceX},${midY+2}`,
-      `C ${braceX},${bot-ctrl} ${braceX-8},${bot-ctrl} ${braceX-8},${bot}`,
-    ].join(' ');
-    extra += `<path d="${d}" stroke="#6366f1" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.85"/>`;
-    // Update the summary node's runtime position so its label renders next to brace
-    s.x = labelX; s.y = midY - (s.H||28)/2;
+    if(!targets.length) continue;
+    const left  = Math.min(...targets.map(t => t.x));
+    const right = Math.max(...targets.map(t => t.x + (t.W||140)));
+    const top   = Math.min(...targets.map(t => t.y));
+    const bot   = Math.max(...targets.map(t => t.y + (t.H||40)));
+    const pad   = 10;
+    // Visible frame around the summarized group (both orientations).
+    extra += `<rect x="${left-pad}" y="${top-pad}" width="${(right-left)+pad*2}" height="${(bot-top)+pad*2}" rx="14" ry="14" fill="rgba(99,102,241,0.06)" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="6 5" opacity="0.9"/>`;
+    if(orient === 'tb'){
+      // Flow = top→bottom → summary sits BELOW the group, connector drops down.
+      const cx = (left + right) / 2;
+      const frameBot = bot + pad;
+      const labelY = frameBot + 34;
+      extra += `<path d="M ${cx},${frameBot} L ${cx},${labelY-4}" stroke="#6366f1" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.85"/>`;
+      s.x = cx - (s.W||110)/2; s.y = labelY - (s.H||28)/2;
+    } else {
+      // Flow = left→right → curly brace on the right, label beside it.
+      const braceX = right + 22;
+      const midY   = (top + bot) / 2;
+      const ctrl   = Math.min(40, ((bot - top) / 2) * 0.6);
+      const d = [
+        `M ${braceX-8},${top}`,
+        `C ${braceX-8},${top+ctrl} ${braceX},${top+ctrl} ${braceX},${midY-2}`,
+        `L ${braceX+10},${midY}`,
+        `L ${braceX},${midY+2}`,
+        `C ${braceX},${bot-ctrl} ${braceX-8},${bot-ctrl} ${braceX-8},${bot}`,
+      ].join(' ');
+      extra += `<path d="${d}" stroke="#6366f1" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.85"/>`;
+      s.x = braceX + 30; s.y = midY - (s.H||28)/2;
+    }
   }
   if(extra) svg.innerHTML += extra;
 }
