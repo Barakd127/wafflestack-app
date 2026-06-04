@@ -121,6 +121,13 @@ body.light #topbar .tb-btn, body.light #topbar .tb-ribbon-tab{background:rgba(25
 body.light #ribbon-panel .tb-btn{background:#fff!important;color:#1F3E6C!important;
   border:1px solid rgba(31,62,108,.22)!important;box-shadow:0 2px 6px rgba(31,62,108,.12)!important}
 body.light #ribbon-panel .tb-btn:hover{background:#EAF0FB!important}
+/* ── מחשבות sheet theme: rounder/bolder font + gold accents (distinct from
+   the studies sheet) ── */
+.mm-thoughts .node-div{ font-family:'Rubik','Heebo','Assistant',sans-serif !important; font-weight:700 !important; letter-spacing:.3px }
+.mm-thoughts .node-div.node-root{ font-family:'Rubik','Heebo',sans-serif !important; font-weight:800 !important; letter-spacing:.4px;
+  box-shadow:0 0 0 2px rgba(212,175,55,.55), 0 6px 20px rgba(212,175,55,.35) !important }
+.mm-thoughts #canvas-area::after{ border-color:rgba(212,175,55,.4); box-shadow:inset 0 0 0 1px rgba(255,255,255,.6), inset 0 2px 30px rgba(212,175,55,.06) }
+.mm-thoughts #mm-sheet-bar{ box-shadow:0 6px 22px rgba(212,175,55,.28), inset 0 1px 0 rgba(255,255,255,.7) }
 #viewport{position:absolute;top:0;left:0;transform-origin:0 0}
 /* v17: SVG is now INSIDE #viewport so it transforms with it. Use model coords (no zoom/pan). */
 #svg-layer{position:absolute;top:0;left:0;width:20000px;height:20000px;pointer-events:none;overflow:visible;z-index:0}
@@ -677,19 +684,15 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <button class="tb-btn" id="back-home-btn" onclick="wsGoHome()" title="חזרה לדף הבית" aria-label="חזרה לדף הבית"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span class="tb-label">חזרה לדף הבית</span></button>
   </div>
   <div class="tb-center">
-    <button class="tb-btn" id="nb-toggle-btn" onclick="nbToggle()" title="עבור בין מפת חשיבה למחברת" aria-label="עבור בין מפת חשיבה למחברת"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h11"/></svg><span class="tb-label">מחברת</span></button>
+    <button class="tb-btn" id="nb-toggle-btn" onclick="nbToggle()" title="עבור בין מפת חשיבה למחברת" aria-label="עבור בין מפת חשיבה למחברת"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1.5"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="12" y1="8" x2="16" y2="8"/><line x1="12" y1="12" x2="16" y2="12"/><line x1="12" y1="16" x2="16" y2="16"/></svg><span class="tb-label">מחברת</span></button>
     <div class="tb-div"></div>
-    <button class="tb-ribbon-tab" id="rtab-split"     onclick="toggleRibbon('split')"     title="פצל מסך — בחר פאנל" aria-label="פצל מסך — בחר פאנל"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="12" y1="4" x2="12" y2="20"/></svg><span class="tb-chev">▾</span><span class="tb-label">פצל</span></button>
+    <button class="tb-ribbon-tab" id="rtab-split"     onclick="toggleRibbon('split')"     title="פצל מסך — בחר פאנל" aria-label="פצל מסך — בחר פאנל"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="7.5" height="14" rx="1.5"/><rect x="13.5" y="5" width="7.5" height="14" rx="1.5"/></svg><span class="tb-chev">▾</span><span class="tb-label">פצל</span></button>
     <button class="tb-ribbon-tab" id="rtab-add"       onclick="toggleRibbon('add')"       title="הוסף אלמנטים למפה" aria-label="הוסף אלמנטים למפה"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span class="tb-chev">▾</span><span class="tb-label">הוסף</span></button>
     <button class="tb-ribbon-tab" id="rtab-view"      onclick="toggleRibbon('view')"      title="כלי תצוגה ופריסה" aria-label="כלי תצוגה ופריסה"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span class="tb-chev">▾</span><span class="tb-label">תצוגה</span></button>
     <button class="tb-ribbon-tab" id="rtab-templates" onclick="toggleRibbon('templates')" title="תבניות סטטיסטיות" aria-label="תבניות סטטיסטיות"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="tb-chev">▾</span><span class="tb-label">תבניות</span></button>
     <button class="tb-ribbon-tab" id="rtab-files"     onclick="toggleRibbon('files')"     title="ייצוא, ייבוא, ניקוי" aria-label="ייצוא, ייבוא וניקוי"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="tb-chev">▾</span><span class="tb-label">קבצים</span></button>
     <div class="tb-div"></div>
-    <button class="tb-btn" id="add-equation-btn" onclick="mmAddEquation()" title="הוסף משוואה (LaTeX)" aria-label="הוסף משוואה" style="font-family:'Cambria Math',serif;font-size:18px;font-weight:700"><span aria-hidden>&#931;</span><span class="tb-label">משוואה</span></button>
-    <button class="tb-btn" id="zone-create-btn" onclick="mmStartZoneCreate()" title="צור אזור — נקודות חופשיות" aria-label="צור אזור — נקודות חופשיות"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2" stroke-dasharray="3 2"/><path d="M17 17l4 4"/><path d="M21 17v4h-4"/></svg><span class="tb-label">צור אזור</span></button>
-    <button class="tb-btn" id="tidy-layout-btn" onclick="mmAutoLayout();mmFitView&&mmFitView()" title="סדר מחדש את הצמתים" aria-label="סדר מחדש את הצמתים" style="background:linear-gradient(135deg,rgba(212,175,55,.85),rgba(255,193,7,.85));border-color:rgba(212,175,55,.9);color:#1a1a2e;font-weight:700"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><polyline points="21 3 21 8 16 8"/><polyline points="3 21 3 16 8 16"/></svg><span class="tb-label">סדר מחדש</span></button>
     <button class="tb-btn" onclick="openSearch()" title="חיפוש (Ctrl+F)" aria-label="חיפוש בצמתי המפה"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg></button>
-    <button class="tb-btn" id="pomo-topbar-btn" onclick="pomoToggleWidget()" title="פומודורו" aria-label="טיימר פומודורו"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><line x1="9" y1="3" x2="15" y2="3"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="13" x2="15" y2="15"/></svg></button>
     <button class="tb-btn" onclick="mmTourStart()" title="סיור מודרך" aria-label="התחל סיור מודרך"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l10-5 10 5-10 5z"/><path d="M6 11v5c0 1 2.5 3 6 3s6-2 6-3v-5"/></svg></button>
   </div>
 <div class="tb-right" style="display:none"></div>
@@ -707,6 +710,7 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <button class="tb-btn" onclick="mmAddEquation()">&#8721; Equation</button>
     <button class="tb-btn" onclick="mmAddCanvas()">&#11036; Canvas</button>
     <button class="tb-btn" onclick="mmAddSummary()" title="סיכום קבוצת אחים (Ctrl-click)">&#8944; Summary</button>
+    <button class="tb-btn" id="zone-create-btn" onclick="mmStartZoneCreate()" title="צור אזור — נקודות חופשיות"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="3" y="3" width="14" height="14" rx="2" stroke-dasharray="3 2"/><path d="M17 17l4 4"/><path d="M21 17v4h-4"/></svg> צור אזור</button>
     <button class="tb-btn" onclick="mmLoadReadyMap(mmCurrentReadyMapId(),'manual')" title="טען מפת מושגים מוכנה — ההערות והעריכות שלך נשמרות">🗺️ טען מפה מוכנה</button>
     <button class="tb-btn" onclick="wsGoDrawing()" title="פתח לוח ציור (Excalidraw) במסך מלא">🎨 לוח ציור</button>
   </div>
@@ -1436,8 +1440,9 @@ function initMM(){
 
 // Free-association / life-planner starter for the "מחשבות" sheet.
 function mmSeedThoughts(){
-  MM = {nodes:{}, root:'', sel:null, multiSel:[], zoom:1, panX:0, panY:0, orientation:'tb', zones:[], selectedZoneId:null, importedMaps:[]};
-  const root = mmNode('root','מחשבות',0,0,null,'#7C3AED');
+  // 'lr' → children fan out to BOTH sides (free-association feel), vs studies' tb.
+  MM = {nodes:{}, root:'', sel:null, multiSel:[], zoom:1, panX:0, panY:0, orientation:'lr', zones:[], selectedZoneId:null, importedMaps:[]};
+  const root = mmNode('root','מחשבות',0,0,null,'#D4AF37');   // gold root
   MM.root = root.id;
   const defs = [
     ['רעיונות','#6366f1'], ['מטרות','#10B981'], ['רגשות','#F59E0B'],
@@ -1450,18 +1455,31 @@ function mmSeedThoughts(){
 
 // Switch the active sheet: save the current map, point the save key at the new
 // sheet, load (or seed) it, then re-render at macro scale.
+// Per-sheet visual theme (font + gold accents for מחשבות).
+function mmApplySheetTheme(){
+  document.body.classList.toggle('mm-thoughts', _mmSheets.active === 'thoughts');
+}
 function mmSwitchSheet(id){
   if(!id || id === _mmSheets.active) return;
   try { localStorage.setItem(_mmCurrentSaveKey, mmSerializeForSave()); } catch(e){}
-  _mmSheets.active = id;
-  _mmCurrentSaveKey = _mmSheetKey(id);
-  mmSaveSheetsReg();
-  MM_HISTORY = [];
-  initMM();                       // loads this sheet's slot, or seeds it
-  if(typeof mmTidyLayout === 'function'){ try{ mmTidyLayout(); }catch(e){} }
-  if(typeof mmRender === 'function') mmRender();
-  if(typeof mmRenderSheetBar === 'function') mmRenderSheetBar();
-  setTimeout(function(){ try{ if(typeof mmFitView==='function') mmFitView(); }catch(e){} }, 120);
+  // Smooth cross-fade between sheets.
+  const app = document.getElementById('app');
+  if(app){ app.style.transition = 'opacity .2s ease'; app.style.opacity = '0'; }
+  setTimeout(function(){
+    _mmSheets.active = id;
+    _mmCurrentSaveKey = _mmSheetKey(id);
+    mmSaveSheetsReg();
+    MM_HISTORY = [];
+    initMM();                       // loads this sheet's slot, or seeds it
+    mmApplySheetTheme();
+    if(typeof mmTidyLayout === 'function'){ try{ mmTidyLayout(); }catch(e){} }
+    if(typeof mmRender === 'function') mmRender();
+    if(typeof mmRenderSheetBar === 'function') mmRenderSheetBar();
+    setTimeout(function(){
+      try{ if(typeof mmFitView==='function') mmFitView(); }catch(e){}
+      if(app){ app.style.opacity = '1'; }
+    }, 60);
+  }, 180);
 }
 
 // Blank starter for a user-created sheet — single central node.
@@ -5443,6 +5461,7 @@ setTimeout(() => {
 
 // Sheet tab bar (לימודים / מחשבות / +) — render once on boot.
 if (typeof mmRenderSheetBar === 'function') mmRenderSheetBar();
+if (typeof mmApplySheetTheme === 'function') mmApplySheetTheme();
 
 // FIX #9: Global keyboard shortcuts for mind map (Tab, Enter, Delete, F2, Ctrl+Z, Ctrl+Y)
 // These were listed on the node-actions panel buttons but had no actual implementation.
