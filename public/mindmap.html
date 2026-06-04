@@ -111,8 +111,16 @@ body:not(.light) #canvas-area::after{border-color:rgba(255,255,255,.12);
   background:linear-gradient(135deg,#FFD86B,#F5C842)!important;color:#1F3E6C!important;
   border-color:#E6A800!important;box-shadow:0 3px 10px rgba(245,200,66,.5)!important}
 .tb-btn svg, .tb-ribbon-tab svg{width:19px!important;height:19px!important;stroke-width:2!important}
-body.light .tb-btn, body.light .tb-ribbon-tab{background:rgba(255,255,255,.22)!important;
+/* White text ONLY on the blue topbar (it stays blue in light mode). */
+body.light #topbar .tb-btn, body.light #topbar .tb-ribbon-tab{background:rgba(255,255,255,.22)!important;
   border-color:rgba(255,255,255,.35)!important;color:#fff!important}
+/* Ribbon-popup buttons sit on a panel, not the blue bar — give them readable
+   contrast (dark text on light panel / light text on dark panel). */
+#ribbon-panel .tb-btn{background:rgba(255,255,255,.14)!important;color:#fff!important;
+  border-color:rgba(255,255,255,.25)!important}
+body.light #ribbon-panel .tb-btn{background:#fff!important;color:#1F3E6C!important;
+  border:1px solid rgba(31,62,108,.22)!important;box-shadow:0 2px 6px rgba(31,62,108,.12)!important}
+body.light #ribbon-panel .tb-btn:hover{background:#EAF0FB!important}
 #viewport{position:absolute;top:0;left:0;transform-origin:0 0}
 /* v17: SVG is now INSIDE #viewport so it transforms with it. Use model coords (no zoom/pan). */
 #svg-layer{position:absolute;top:0;left:0;width:20000px;height:20000px;pointer-events:none;overflow:visible;z-index:0}
