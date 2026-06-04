@@ -2450,9 +2450,13 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   // Navigate to any question by clicking its dot
   const navigateToQuestion = (index: number) => {
     if (index === currentQ) return
+    if (index < 0 || index >= questions.length) return
     const state = dotStates[index]
-    // Can only jump to answered or current questions (not future unvisited ones)
-    if (state === 'empty') return
+    // Block only FORWARD jumps to unseen questions. Going BACK is always allowed
+    // — including to a skipped ('empty') earlier question (user: "must be able to
+    // go back!"). Previously any 'empty' target was blocked, so back-to-skipped
+    // silently failed.
+    if (state === 'empty' && index > currentQ) return
     // Save current in-progress answer before leaving
     if (answer.trim()) setUserAnswers(prev => ({ ...prev, [currentQ]: answer }))
     setCurrentQ(index)
