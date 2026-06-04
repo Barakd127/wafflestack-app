@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { MathText } from '../lib/mathRender'
 
 export type ErrorTag = 'confused-terms' | 'calculation-error' | 'careless' | 'concept-unclear'
 
@@ -17,9 +18,11 @@ const TAGS: {
 
 interface Props {
   onDone: (tag: ErrorTag | null) => void
+  correctAnswer?: string   // the right option's text
+  explanation?: string     // why it's right (q.answer)
 }
 
-export default function MistakeAutopsy({ onDone }: Props) {
+export default function MistakeAutopsy({ onDone, correctAnswer, explanation }: Props) {
   const [selected, setSelected] = useState<ErrorTag | null>(null)
   const [confirmed, setConfirmed] = useState(false)
 
@@ -87,6 +90,21 @@ export default function MistakeAutopsy({ onDone }: Props) {
             עוזר לנו לתזמן את החזרה בצורה חכמה יותר
           </div>
         </div>
+
+        {/* The correct answer + explanation — so a wrong answer actually teaches
+            (was: categorize the error then advance, never seeing the right one). */}
+        {(correctAnswer || explanation) && (
+          <div style={{ background: 'linear-gradient(135deg, rgba(52,168,83,0.12), rgba(52,168,83,0.05))', border: '1.5px solid rgba(52,168,83,0.4)', borderRadius: 12, padding: '12px 14px', marginBottom: 16, textAlign: 'right' }} dir="rtl">
+            {correctAnswer && (
+              <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 14, color: '#1E7E34', marginBottom: explanation ? 6 : 0 }}>
+                ✓ התשובה הנכונה: <span style={{ fontWeight: 600, color: 'var(--sh-text-dark)' }}><MathText text={correctAnswer} /></span>
+              </div>
+            )}
+            {explanation && (
+              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: 'var(--sh-text-dark)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}><MathText text={explanation} /></div>
+            )}
+          </div>
+        )}
 
         {/* 2×2 grid of tiles */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>

@@ -2310,6 +2310,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   const [autopsyDots, setAutopsyDots] = useState<Array<'empty' | 'current' | 'correct' | 'wrong' | 'future'> | null>(null)
   // "תרגל את הטעויות" — when set, the question list is restricted to these ids.
   const [retryWrongIds, setRetryWrongIds] = useState<string[] | null>(null)
+  // Consecutive-correct streak → combo bonus XP + a flame indicator.
+  const [streak, setStreak] = useState(0)
 
   // When any companion tool opens → auto-float the question card on desktop,
   // or switch to bottom-sheet mode on mobile. Closing tool → back to normal.
@@ -2548,6 +2550,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     // 2026-05-31: advancing should treat the question as not-yet-answered.
     if (next[currentQ] === 'current') next[currentQ] = 'empty'
     setDotStates(next)
+    setStreak(0)   // skipping breaks the combo
     goNext(next)
   }
 
@@ -2569,6 +2572,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
 
   const handleReset = () => {
     setRetryWrongIds(null)        // full topic again
+    setStreak(0)
     setCurrentQ(0)
     setAnswer('')
     setMcSelected(null)
@@ -2580,9 +2584,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   // mistakes). dotStates is set to the wrong-count explicitly so it matches the
   // filtered question list on the next render.
   const handleRetryWrong = () => {
-    const wrongIds = questions.filter((_: any, i: number) => dotStates[i] === 'wrong').map((qq: any) => qq.id)
+    // Everything not answered correctly — wrong AND skipped (skip leaves 'empty').
+    const wrongIds = questions.filter((_: any, i: number) => dotStates[i] !== 'correct').map((qq: any) => qq.id)
     if (!wrongIds.length) { handleReset(); return }
     setRetryWrongIds(wrongIds)
+    setStreak(0)
     setCurrentQ(0)
     setAnswer('')
     setMcSelected(null)
@@ -2608,6 +2614,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     if (correct && xpReward > 0 && useArsenalStore.getState().activePotion === 'tip') {
       xpReward = xpReward * 2
       useArsenalStore.getState().consumeMemoryTea()
+    }
+    // Combo streak: +5 bonus XP at 3, 5, then every 5 in a row. Wrong resets it.
+    if (correct) {
+      const newStreak = streak + 1
+      setStreak(newStreak)
+      if (newStreak === 3 || newStreak === 5 || (newStreak >= 10 && newStreak % 5 === 0)) xpReward += 5
+    } else {
+      setStreak(0)
     }
     recordAnswer(`studyhub-q${q.id}`, correct, xpReward)
 
@@ -2819,7 +2833,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             <div style={{ width: `${isDone ? 100 : ((currentQ)/total)*100}%`, height: '100%', background: 'rgba(212,175,55,0.75)', borderRadius: 10, transition: 'width 0.4s' }} />
           </div>
           <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT, marginTop: 2 }}>
-            {answeredCount} / {total} · {correctCount} ✓
+            {answeredCount} / {total} · {correctCount} ✓{streak >= 2 ? <span style={{ color: '#FF7A1A', fontWeight: 800 }}> · 🔥{streak}</span> : null}
           </div>
         </div>
         <div className="ws-quiz-topic" style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: TEXT_DARK }}>
@@ -3219,7 +3233,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 {total - correctCount > 0 && (
                   <button onClick={handleRetryWrong}
                     style={{ background: 'linear-gradient(135deg,#EA4335,#C5221F)', color: '#fff', border: 'none', borderRadius: 24, padding: '12px 28px', fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px rgba(234,67,53,0.4)', minHeight: 44 }}>
-                    🔁 תרגל את הטעויות ({total - correctCount})
+                    🔁 תרגל מה שפספסת ({total - correctCount})
                   </button>
                 )}
                 <button onClick={() => {
@@ -3647,7 +3661,13 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       </div>{/* end content wrap */}
 
       {/* Mistake Autopsy overlay — shown after wrong self-assessment */}
-      {autopsyOpen && <MistakeAutopsy onDone={handleAutopsyDone} />}
+      {autopsyOpen && (
+        <MistakeAutopsy
+          onDone={handleAutopsyDone}
+          correctAnswer={Array.isArray((q as any)?.options) && typeof (q as any)?.correctIndex === 'number' ? (q as any).options[(q as any).correctIndex] : undefined}
+          explanation={(q as any)?.answer}
+        />
+      )}
 
     </div>
   )
