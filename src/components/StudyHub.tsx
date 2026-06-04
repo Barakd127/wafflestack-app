@@ -2600,7 +2600,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     if (correct && xpReward > 0) setXpBurst(xpReward)
 
     if (correct) {
-      setTimeout(() => goNext(nextDots), 900)
+      // Give time to READ the explanation we now reveal on correct answers
+      // (was a 900ms blink-and-skip). The "שאלה הבאה" button advances sooner.
+      const hasExplain = !!(q as any).answer
+      setTimeout(() => goNext(nextDots), hasExplain ? 4500 : 900)
     } else {
       // Wrong — keep feedback visible briefly, then open Mistake Autopsy
       setTimeout(() => {
@@ -3201,6 +3204,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                      w/o scrolling alongside the 25vh question card. Per user
                      2026-05-24: max-width + auto margins to center the grid
                      so answers don't push right of the question text. ── */
+                <>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14, maxWidth: 640, marginInline: 'auto', placeItems: 'stretch', justifyItems: 'stretch' }} dir="rtl">
                   {((q as any).options as string[]).map((opt: string, idx: number) => {
                     const correctIdx: number = (q as any).correctIndex
@@ -3286,6 +3290,19 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     )
                   })}
                 </div>
+                {/* Reinforcement on a CORRECT answer — show the explanation.
+                    Was missing: correct answers auto-skipped with zero learning,
+                    despite the setup screen promising "הסבר על כל שאלה". */}
+                {mcSelected !== null && mcSelected === (q as any).correctIndex && (q as any).answer ? (
+                  <div style={{ maxWidth: 640, margin: '0 auto 14px', background: 'linear-gradient(135deg, rgba(52,168,83,0.12), rgba(52,168,83,0.05))', border: '1.5px solid rgba(52,168,83,0.4)', borderRadius: 12, padding: '12px 16px', textAlign: 'right', direction: 'rtl' }} dir="rtl">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 14, color: '#1E7E34' }}>✓ נכון! הנה למה:</div>
+                      <ArsenalQuizCaptureChip explanation={(q as any).answer} topicId={selectedTopic} />
+                    </div>
+                    <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_DARK, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}><MathText text={(q as any).answer} /></div>
+                  </div>
+                ) : null}
+                </>
               ) : (
                 <div style={{ border: `2px solid ${answer.trim() ? '#3351CA' : '#C8D0E0'}`, borderRadius: 12, overflow: 'hidden', marginBottom: 18, transition: 'border-color 0.2s' }}>
                   <textarea
