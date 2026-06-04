@@ -2308,6 +2308,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   // Mistake Autopsy: shown after a wrong self-assessment before advancing
   const [autopsyOpen, setAutopsyOpen] = useState(false)
   const [autopsyDots, setAutopsyDots] = useState<Array<'empty' | 'current' | 'correct' | 'wrong' | 'future'> | null>(null)
+  // "תרגל את הטעויות" — when set, the question list is restricted to these ids.
+  const [retryWrongIds, setRetryWrongIds] = useState<string[] | null>(null)
 
   // When any companion tool opens → auto-float the question card on desktop,
   // or switch to bottom-sheet mode on mobile. Closing tool → back to normal.
@@ -2346,6 +2348,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   const questions = selectedTopic && (quizBankData.topics as Record<string, any>)[selectedTopic]
     ? [...(quizBankData.topics as Record<string, any>)[selectedTopic].questions]
         .filter((q: any) => difficultyFilter === 'all' || q.difficulty === difficultyFilter)
+        .filter((q: any) => !retryWrongIds || retryWrongIds.includes(q.id))
         .sort((a: any, b: any) => (DIFFICULTY_ORDER[a.difficulty] ?? 1) - (DIFFICULTY_ORDER[b.difficulty] ?? 1))
         .map((q: any) => ({
           id: q.id,
@@ -2565,11 +2568,26 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   }
 
   const handleReset = () => {
+    setRetryWrongIds(null)        // full topic again
     setCurrentQ(0)
     setAnswer('')
     setMcSelected(null)
     setPhase('write')
-    setDotStates(QUESTIONS.map((_, i) => i === 0 ? 'current' : 'empty'))
+    setDotStates(questions.map((_: any, i: number) => i === 0 ? 'current' : 'empty'))
+  }
+
+  // Re-run only the questions answered wrong this session (spaced practice of
+  // mistakes). dotStates is set to the wrong-count explicitly so it matches the
+  // filtered question list on the next render.
+  const handleRetryWrong = () => {
+    const wrongIds = questions.filter((_: any, i: number) => dotStates[i] === 'wrong').map((qq: any) => qq.id)
+    if (!wrongIds.length) { handleReset(); return }
+    setRetryWrongIds(wrongIds)
+    setCurrentQ(0)
+    setAnswer('')
+    setMcSelected(null)
+    setPhase('write')
+    setDotStates(wrongIds.map((_: string, i: number) => i === 0 ? 'current' : 'empty'))
   }
 
   // MC click handler — commits the answer immediately, shows green/red feedback,
@@ -3190,7 +3208,20 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>XP הרווחת</div>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 14, marginTop: 4 }}>
+              {/* Accuracy headline */}
+              {total > 0 && (
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 15, color: TEXT_LIGHT, marginTop: -4 }}>
+                  דיוק: <span style={{ fontWeight: 800, color: correctCount / total >= 0.7 ? '#34A853' : '#D4AF37' }}>{Math.round((correctCount / total) * 100)}%</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 12, marginTop: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
+                {/* Retry only the mistakes — spaced practice of errors. */}
+                {total - correctCount > 0 && (
+                  <button onClick={handleRetryWrong}
+                    style={{ background: 'linear-gradient(135deg,#EA4335,#C5221F)', color: '#fff', border: 'none', borderRadius: 24, padding: '12px 28px', fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px rgba(234,67,53,0.4)', minHeight: 44 }}>
+                    🔁 תרגל את הטעויות ({total - correctCount})
+                  </button>
+                )}
                 <button onClick={() => {
                   handleQuizComplete()
                   onBack()
