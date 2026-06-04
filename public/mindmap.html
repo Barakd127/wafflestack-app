@@ -623,17 +623,19 @@ body.light #note-editor-footer{border-top-color:rgba(0,0,0,.08);color:rgba(0,0,0
 
 /* ═══ Summary node label ═══ */
 .summary-label{
-  position:absolute; padding:6px 14px;
-  border-radius:18px; font-size:11px; font-weight:600;
-  background:rgba(99,102,241,.12);
-  border:1.5px solid rgba(99,102,241,.5);
-  color:#1a1f2e; cursor:pointer;
+  position:absolute; padding:7px 16px;
+  border-radius:16px; font-size:12px; font-weight:700;
+  background:linear-gradient(135deg,#6366f1,#4E71DA);
+  border:1px solid rgba(255,255,255,.35);
+  color:#ffffff; cursor:pointer;
   font-family:'Rubik','Inter',sans-serif; direction:rtl;
-  user-select:none;
-  white-space:nowrap;
+  user-select:none; white-space:nowrap;
+  box-shadow:0 3px 10px rgba(78,113,218,.35), inset 0 1px 0 rgba(255,255,255,.25);
+  display:flex; align-items:center; gap:6px;
 }
-body:not(.light) .summary-label{color:#e9ecf3;background:rgba(99,102,241,.18)}
-.summary-label.selected{outline:2.5px solid #D4AF37;outline-offset:2px}
+.summary-label::before{ content:'\2211'; font-weight:700; opacity:.9; font-size:13px; }
+body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#6366f1,#4E71DA)}
+.summary-label.selected{outline:2.5px solid #D4AF37;outline-offset:2px;box-shadow:0 4px 14px rgba(78,113,218,.5)}
 </style>
 </head>
 <body>
