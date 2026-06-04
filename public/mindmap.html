@@ -970,6 +970,20 @@ const WB_DOM_TYPES = new Set(['rect','circle','sticky','text']);
 // ── Per-user auto-save keys ────────────────────────────────────────────────────
 const _MM_USER_ID = new URLSearchParams(location.search).get('userId') || 'default';
 const MM_SAVE_KEY = 'mm-data-' + _MM_USER_ID;
+
+// ── Sheets (XMind-style multi-map tabs) ──────────────────────────────────────
+// Each sheet is an independent map with its own storage slot. The legacy
+// 'studies' sheet keeps the original MM_SAVE_KEY so existing maps survive.
+const MM_SHEETS_KEY = 'mm-sheets-' + _MM_USER_ID;
+function _mmSheetKey(id){ return id === 'studies' ? MM_SAVE_KEY : (MM_SAVE_KEY + '-' + id); }
+function mmLoadSheetsReg(){
+  try { const r = JSON.parse(localStorage.getItem(MM_SHEETS_KEY)); if(r && Array.isArray(r.sheets) && r.sheets.length) return r; } catch(e){}
+  return { active: 'studies', sheets: [ {id:'studies', name:'לימודים'}, {id:'thoughts', name:'מחשבות'} ] };
+}
+function mmSaveSheetsReg(){ try { localStorage.setItem(MM_SHEETS_KEY, JSON.stringify(_mmSheets)); } catch(e){} }
+let _mmSheets = mmLoadSheetsReg();
+// Active sheet's storage key — all save/load funnels through this (not the const).
+let _mmCurrentSaveKey = _mmSheetKey(_mmSheets.active);
 // Phase-2 ready-map: the host passes ?topic=<topicId> (e.g. ?topic=regression)
 // when the mind map is opened from a specific lesson/quiz topic. When present,
 // the first-open auto-load and the "טען מפה מוכנה" button target that topic's
@@ -1269,7 +1283,7 @@ function mmImportTopicMap(spec, opts){
       });
     });
   }
-  try { localStorage.setItem(MM_SAVE_KEY, mmSerializeForSave()); } catch(e){}
+  try { localStorage.setItem(_mmCurrentSaveKey, mmSerializeForSave()); } catch(e){}
   return true;
 }
 
@@ -1329,7 +1343,7 @@ function mmShowToast(msg){
 function initMM(){
   // Try to load saved mind map for this user
   try {
-    const saved = localStorage.getItem(MM_SAVE_KEY);
+    const saved = localStorage.getItem(_mmCurrentSaveKey);
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed && parsed.nodes && parsed.root) {
@@ -1374,14 +1388,102 @@ function initMM(){
     }
   } catch(e) { /* fall through to fresh init */ }
 
-  // Fresh / empty: seed the curriculum tree.
-  try { buildSeedMap(); }
+  // Fresh / empty: seed per active sheet. 'thoughts' → free-association starter;
+  // everything else → the statistics curriculum tree.
+  try {
+    if(_mmSheets.active === 'studies') buildSeedMap();
+    else if(_mmSheets.active === 'thoughts') mmSeedThoughts();
+    else mmSeedBlank();
+  }
   catch(e) {
     console.warn('seed failed, falling back to blank root', e);
     MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,orientation:'tb',zones:[],selectedZoneId:null};
     MM.nodes.root=mmNode('root','סטטיסטיקה',100,100,null,'#312e81');
   }
   MM_HISTORY=[cloneMMForHistory()];
+}
+
+// Free-association / life-planner starter for the "מחשבות" sheet.
+function mmSeedThoughts(){
+  MM = {nodes:{}, root:'', sel:null, multiSel:[], zoom:1, panX:0, panY:0, orientation:'tb', zones:[], selectedZoneId:null, importedMaps:[]};
+  const root = mmNode('root','מחשבות',0,0,null,'#7C3AED');
+  MM.root = root.id;
+  const defs = [
+    ['רעיונות','#6366f1'], ['מטרות','#10B981'], ['רגשות','#F59E0B'],
+    ['תכניות','#4E71DA'], ['שאלות פתוחות','#EF4444'], ['השראה','#EC4899']
+  ];
+  defs.forEach(function(d){ mmNode('branch', d[0], 0, 0, MM.root, d[1]); });
+  MM.sel = MM.root;
+  MM.mmAutoCollapsed = true;
+}
+
+// Switch the active sheet: save the current map, point the save key at the new
+// sheet, load (or seed) it, then re-render at macro scale.
+function mmSwitchSheet(id){
+  if(!id || id === _mmSheets.active) return;
+  try { localStorage.setItem(_mmCurrentSaveKey, mmSerializeForSave()); } catch(e){}
+  _mmSheets.active = id;
+  _mmCurrentSaveKey = _mmSheetKey(id);
+  mmSaveSheetsReg();
+  MM_HISTORY = [];
+  initMM();                       // loads this sheet's slot, or seeds it
+  if(typeof mmTidyLayout === 'function'){ try{ mmTidyLayout(); }catch(e){} }
+  if(typeof mmRender === 'function') mmRender();
+  if(typeof mmRenderSheetBar === 'function') mmRenderSheetBar();
+  setTimeout(function(){ try{ if(typeof mmFitView==='function') mmFitView(); }catch(e){} }, 120);
+}
+
+// Blank starter for a user-created sheet — single central node.
+function mmSeedBlank(){
+  MM = {nodes:{}, root:'', sel:null, multiSel:[], zoom:1, panX:0, panY:0, orientation:'tb', zones:[], selectedZoneId:null, importedMaps:[]};
+  const root = mmNode('root','נושא מרכזי',0,0,null,'#4E71DA');
+  MM.root = root.id; MM.sel = root.id; MM.mmAutoCollapsed = true;
+}
+
+// ── Sheet tab bar (XMind-style) — fixed pill row, top-center ──
+function mmRenderSheetBar(){
+  let bar = document.getElementById('mm-sheet-bar');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'mm-sheet-bar';
+    bar.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:450;display:flex;gap:6px;align-items:center;background:rgba(255,255,255,.92);padding:5px 8px;border-radius:14px;box-shadow:0 3px 12px rgba(31,62,108,.18);direction:rtl;font-family:Rubik,Inter,sans-serif;backdrop-filter:blur(6px)';
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML = '';
+  _mmSheets.sheets.forEach(function(s){
+    const tab = document.createElement('button');
+    const active = s.id === _mmSheets.active;
+    tab.textContent = s.name;
+    tab.title = active ? '' : 'מעבר לגיליון ' + s.name;
+    tab.style.cssText = 'border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;padding:6px 16px;border-radius:10px;white-space:nowrap;'+(active?'background:linear-gradient(135deg,#4E71DA,#3351CA);color:#fff;box-shadow:0 2px 6px rgba(78,113,218,.4);':'background:transparent;color:#4E71DA;');
+    tab.onclick = function(){ mmSwitchSheet(s.id); };
+    // double-click to rename (not for the two defaults' ids? allow rename of any)
+    tab.ondblclick = function(e){ e.stopPropagation(); mmRenameSheet(s.id); };
+    bar.appendChild(tab);
+  });
+  const add = document.createElement('button');
+  add.textContent = '＋';
+  add.title = 'גיליון חדש';
+  add.style.cssText = 'border:none;cursor:pointer;font-size:16px;font-weight:700;color:#7a8aa8;background:transparent;padding:4px 9px;border-radius:8px;';
+  add.onclick = mmAddSheet;
+  bar.appendChild(add);
+}
+
+function mmAddSheet(){
+  const name = (prompt('שם הגיליון החדש:','גיליון חדש') || '').trim();
+  if(!name) return;
+  const id = 'sheet-' + Math.abs(Date.now()).toString(36);
+  _mmSheets.sheets.push({ id:id, name:name });
+  mmSaveSheetsReg();
+  mmSwitchSheet(id);
+}
+
+function mmRenameSheet(id){
+  const s = _mmSheets.sheets.find(function(x){ return x.id === id; });
+  if(!s) return;
+  const name = (prompt('שם הגיליון:', s.name) || '').trim();
+  if(!name) return;
+  s.name = name; mmSaveSheetsReg(); mmRenderSheetBar();
 }
 
 function cloneMMForHistory(){return JSON.parse(JSON.stringify(MM));}
@@ -1461,7 +1563,7 @@ function mmRender(){
 
   // Auto-save after each render (debounced 600ms) — topology only (no x/y).
   clearTimeout(_mmSaveTimer);
-  _mmSaveTimer = setTimeout(function(){ try{ localStorage.setItem(MM_SAVE_KEY, mmSerializeForSave()); }catch(e){} }, 600);
+  _mmSaveTimer = setTimeout(function(){ try{ localStorage.setItem(_mmCurrentSaveKey, mmSerializeForSave()); }catch(e){} }, 600);
 
   // Empty-state hint: when the map has only the root node (or fewer), show
   // an onboarding tip so first-time users know what to do.
@@ -5275,6 +5377,9 @@ setTimeout(() => {
   } catch (e) { /* layout not ready; mmInitialFocus covers it */ }
 }, 550);
 
+// Sheet tab bar (לימודים / מחשבות / +) — render once on boot.
+if (typeof mmRenderSheetBar === 'function') mmRenderSheetBar();
+
 // FIX #9: Global keyboard shortcuts for mind map (Tab, Enter, Delete, F2, Ctrl+Z, Ctrl+Y)
 // These were listed on the node-actions panel buttons but had no actual implementation.
 document.addEventListener('keydown', e => {
@@ -5944,7 +6049,9 @@ requestAnimationFrame(function(){
 // that already loaded — yet opening a NEW topic still auto-loads ITS map.
 // mmLoadReadyMap runs its own layout + auto-focus once the JSON arrives.
 try {
-  if(typeof mmLoadReadyMap === 'function'){
+  // Only the 'studies' sheet auto-loads the statistics ready-map. The
+  // 'מחשבות' / custom sheets stay free-form (their own seed, no curriculum).
+  if(typeof mmLoadReadyMap === 'function' && _mmSheets.active === 'studies'){
     var _readyMapId = mmCurrentReadyMapId();
     var _alreadyImported = Array.isArray(MM.importedMaps) &&
       MM.importedMaps.indexOf(_readyMapId) !== -1;
@@ -6953,7 +7060,7 @@ function mmTourRender(){
 // ═══════════════════════════════════════════════════════════
 function mmClearAll(){
   if(!confirm('למחוק את כל המפה? הפעולה לא הפיכה.')) return;
-  try{ localStorage.removeItem(MM_SAVE_KEY); }catch(e){}
+  try{ localStorage.removeItem(_mmCurrentSaveKey); }catch(e){}
   MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,searchMatches:[],searchIdx:0,zones:[],selectedZoneId:null};
   MM.nodes.root = mmNode('root','Untitled',100,100,null,'#60a5fa');
   MM_HISTORY=[cloneMMForHistory()];
@@ -6997,7 +7104,7 @@ function nbToggle(){
 
 function nbSave(){
   clearTimeout(_mmSaveTimer);
-  _mmSaveTimer = setTimeout(()=>{ try{ localStorage.setItem(MM_SAVE_KEY, (typeof mmSerializeForSave==='function' ? mmSerializeForSave() : JSON.stringify(MM))); }catch(e){} }, 500);
+  _mmSaveTimer = setTimeout(()=>{ try{ localStorage.setItem(_mmCurrentSaveKey, (typeof mmSerializeForSave==='function' ? mmSerializeForSave() : JSON.stringify(MM))); }catch(e){} }, 500);
 }
 
 function nbCommitHistory(){
