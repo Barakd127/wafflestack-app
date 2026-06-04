@@ -2613,6 +2613,26 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     }
   }
 
+  // Keyboard answering for MCQ: press A–D or 1–4 to choose (matches the letter
+  // pill on each card). Speeds up practice; ignored while typing in a field.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return
+      const ae = document.activeElement as HTMLElement | null
+      const tag = ae?.tagName
+      if (tag === 'TEXTAREA' || tag === 'INPUT' || ae?.isContentEditable) return
+      if (!q || (q as any).format !== 'mc' || !Array.isArray((q as any).options)) return
+      if (mcSelected !== null) return // already answered
+      const opts = (q as any).options as string[]
+      let idx = -1
+      if (e.key >= '1' && e.key <= '9') idx = parseInt(e.key, 10) - 1
+      else { const k = e.key.toLowerCase(); if (k >= 'a' && k <= 'z') idx = k.charCodeAt(0) - 97 }
+      if (idx >= 0 && idx < opts.length) { e.preventDefault(); handleMcChoose(idx) }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [q, mcSelected])
+
   const isDone = phase === 'done'
 
   return (
@@ -3290,6 +3310,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     )
                   })}
                 </div>
+                {mcSelected === null && (
+                  <div style={{ textAlign: 'center', fontSize: 12, color: 'rgba(31,62,108,0.55)', marginBottom: 10, fontFamily: "'Assistant', sans-serif" }} dir="rtl">💡 אפשר גם במקלדת — לחצו A–D או 1–4</div>
+                )}
                 {/* Reinforcement on a CORRECT answer — show the explanation.
                     Was missing: correct answers auto-skipped with zero learning,
                     despite the setup screen promising "הסבר על כל שאלה". */}
