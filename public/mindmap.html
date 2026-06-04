@@ -2562,24 +2562,42 @@ function mmClipboardCopy(mode){
 
 function mmClipboardPaste(){
   if(!_mmClip) return;
-  const target = (MM.sel && MM.nodes[MM.sel]) ? MM.sel : MM.root;
+  // Target rule (user 2026-06): a topic is selected → paste as its CHILD.
+  // Nothing selected → paste as a FLOATING topic at the viewport centre.
+  const hasTarget = !!(MM.sel && MM.nodes[MM.sel]);
+  const target = hasTarget ? MM.sel : null;
   // Guard: don't paste a CUT subtree into itself (would orphan the target).
-  if(_mmClip.mode==='cut' && _mmClip.nodes[target]) return;
+  if(_mmClip.mode==='cut' && target && _mmClip.nodes[target]) return;
+  // Floating anchor in world coords (viewport centre).
+  let fx=0, fy=0;
+  if(!hasTarget){
+    const app=document.getElementById('app');
+    const cxS=(app?app.clientWidth:800)/2, cyS=(app?app.clientHeight:600)/2;
+    fx=(cxS-MM.panX)/MM.zoom; fy=(cyS-MM.panY)/MM.zoom;
+  }
   const idMap = {};
   for(const oldId in _mmClip.nodes) idMap[oldId] = uid();
-  let firstNew = null;
+  let firstNew = null, rootIdx = 0;
   for(const oldId in _mmClip.nodes){
     const src = _mmClip.nodes[oldId];
     const c = JSON.parse(JSON.stringify(src));
     c.id = idMap[oldId];
     c.childIds = (src.childIds||[]).filter(ci => idMap[ci]).map(ci => idMap[ci]);
-    c.parentId = _mmClip.roots.includes(oldId) ? target : (idMap[src.parentId] || target);
+    const isRoot = _mmClip.roots.includes(oldId);
+    if(isRoot){
+      if(hasTarget){ c.parentId = target; }
+      else { c.parentId = null; c.x = fx + rootIdx*190; c.y = fy + rootIdx*70; rootIdx++; }  // floating, fanned
+    } else {
+      c.parentId = idMap[src.parentId] || (hasTarget ? target : null);
+    }
     if(c.origin) { delete c.origin; delete c.seedKey; } // pasted copies are user-owned
     MM.nodes[c.id] = c;
     if(!firstNew) firstNew = c.id;
   }
-  const tgt = MM.nodes[target];
-  if(tgt){ _mmClip.roots.forEach(r => tgt.childIds.push(idMap[r])); tgt.collapsed = false; }
+  if(hasTarget){
+    const tgt = MM.nodes[target];
+    if(tgt){ _mmClip.roots.forEach(r => tgt.childIds.push(idMap[r])); tgt.collapsed = false; }
+  }
   if(_mmClip.mode==='cut'){
     for(const oldId in _mmClip.nodes){
       const n = MM.nodes[oldId]; if(!n) continue;
