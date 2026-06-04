@@ -1353,13 +1353,14 @@ function initMM(){
             if (!n.W) n.W = (n.type === 'canvas' ? 220 : 140);
             if (!n.H) n.H = (n.type === 'canvas' ? 145 : 40);
           }
-          // First-load auto-collapse: keep only root + depth-1 children
-          // visible. Direct-children-only expansion (§24) handles subsequent
-          // reveals. One-shot per user via mmAutoCollapsed flag.
-          if (!MM.mmAutoCollapsed) {
-            mmCollapseBelowDepth(1);
-            MM.mmAutoCollapsed = true;
-          }
+          // ALWAYS open at macro scale: only root + main branches visible,
+          // deep levels folded. A full zoomed-out tree has no value (user
+          // 2026-06) — the user expands one branch at a time on demand.
+          mmCollapseBelowDepth(1);
+          MM.mmAutoCollapsed = true;
+          // Select root so the post-load fit frames the whole macro view
+          // (the main branches) rather than a deep, now-hidden node.
+          MM.sel = MM.root; MM.multiSel = [];
           // Run tidy layout to compute positions from topology before render.
           if (typeof mmTidyLayout === 'function') {
             try { mmTidyLayout(); } catch(e) { /* render will retry */ }
@@ -5252,6 +5253,16 @@ function ctxFn(action){
 
 // Init
 initMM();
+
+// Force a centered macro fit once the DOM is sized and any initial-focus pass
+// has run. The saved map opens collapsed to main branches (user 2026-06: a full
+// zoomed-out tree has no value); frame those branches centered, not top-left.
+setTimeout(() => {
+  try {
+    if (typeof mmRender === 'function') mmRender();
+    if (typeof mmFitView === 'function') mmFitView();
+  } catch (e) { /* layout not ready; mmInitialFocus covers it */ }
+}, 550);
 
 // FIX #9: Global keyboard shortcuts for mind map (Tab, Enter, Delete, F2, Ctrl+Z, Ctrl+Y)
 // These were listed on the node-actions panel buttons but had no actual implementation.
