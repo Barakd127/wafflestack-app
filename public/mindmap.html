@@ -3044,15 +3044,23 @@ function mmDrawMinimap(){
   for(let x=0;x<W;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
   for(let y=0;y<H;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
 
-  const ids=Object.keys(MM.nodes);
+  // Only VISIBLE nodes with finite positions — hidden/collapsed children have
+  // no x/y after tidy layout and would poison the bbox into NaN (blank map).
+  let ids=Object.keys(MM.nodes).filter(id=>{
+    const n=MM.nodes[id];
+    if(!n || !isFinite(n.x) || !isFinite(n.y)) return false;
+    if(id===MM.root) return true;
+    return (typeof mmIsVisible!=='function') || mmIsVisible(id);
+  });
   if(!ids.length){mmSetupMinimapNav();return;}
+  const visSet=new Set(ids);
 
-  // Bounding box with padding
+  // Bounding box with padding (visible nodes only)
   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   for(const id of ids){
     const n=MM.nodes[id];
-    minX=Math.min(minX,n.x);maxX=Math.max(maxX,n.x+200);
-    minY=Math.min(minY,n.y);maxY=Math.max(maxY,n.y+40);
+    minX=Math.min(minX,n.x);maxX=Math.max(maxX,n.x+(n.W||140));
+    minY=Math.min(minY,n.y);maxY=Math.max(maxY,n.y+(n.H||40));
   }
   const pad=100;
   minX-=pad;minY-=pad;maxX+=pad;maxY+=pad;
@@ -3065,8 +3073,8 @@ function mmDrawMinimap(){
   ctx.strokeStyle='rgba(160,160,220,.2)';ctx.lineWidth=0.6;
   for(const id of ids){
     const n=MM.nodes[id];
-    if(n.parent&&MM.nodes[n.parent]){
-      const p=MM.nodes[n.parent];
+    if(n.parentId && MM.nodes[n.parentId] && visSet.has(n.parentId)){
+      const p=MM.nodes[n.parentId];
       ctx.beginPath();
       ctx.moveTo(offX+p.x*scale,offY+p.y*scale);
       ctx.lineTo(offX+n.x*scale,offY+n.y*scale);
@@ -3088,8 +3096,9 @@ function mmDrawMinimap(){
     }
   }
 
-  // Draw viewport indicator rectangle
-  const ca=document.getElementById('canvas-area');
+  // Draw viewport indicator rectangle (the marker of what's on screen).
+  // Fall back across container ids — the pan/zoom window is #app.
+  const ca=document.getElementById('canvas-area')||document.getElementById('app')||document.getElementById('viewport');
   if(ca){
     const vLeft=-MM.panX/MM.zoom,vTop=-MM.panY/MM.zoom;
     const vRight=vLeft+ca.clientWidth/MM.zoom,vBottom=vTop+ca.clientHeight/MM.zoom;
@@ -5359,33 +5368,37 @@ document.addEventListener('keydown', e => {
     // 'paste' event (image paste, feature 6).
     if(_mmClip){ e.preventDefault(); mmClipboardPaste(); }
   } else if(e.key==='ArrowLeft'||e.key==='ArrowRight'||e.key==='ArrowUp'||e.key==='ArrowDown'){
-    // SPATIAL arrow-key navigation: jump to the nearest VISIBLE node that lies
-    // in the pressed direction by on-screen position. Works for both TB and LR
-    // layouts — Right really means "the topic to the right", Up/Down walk the
-    // subtopic column. (Replaces the old topological right=child mapping.)
+    // Hierarchy-aware nav (X-Mind): Left/Right move between SIBLINGS on the same
+    // level; Up = parent; Down = enter children (first child, expanding if
+    // collapsed). e.g. "יסודות" + Right → "מדדי מרכז" (next sibling).
     e.preventDefault();
     if(!MM.sel||!MM.nodes[MM.sel]){MM.sel=MM.root;mmRender();mmEnsureSelVisible();return;}
     const cur=MM.nodes[MM.sel];
-    const cx=cur.x+(cur.W||140)/2, cy=cur.y+(cur.H||40)/2;
-    const dir=e.key;
-    let best=null, bestScore=Infinity;
-    for(const id in MM.nodes){
-      if(id===MM.sel) continue;
-      const m=MM.nodes[id];
-      if(!m || m.type==='summary') continue;
-      if(typeof mmIsVisible==='function' && !mmIsVisible(id)) continue;
-      const mx=m.x+(m.W||140)/2, my=m.y+(m.H||40)/2;
-      const dx=mx-cx, dy=my-cy;
-      let along, perp;
-      if(dir==='ArrowRight'){ if(dx<=4) continue; along=dx; perp=Math.abs(dy); }
-      else if(dir==='ArrowLeft'){ if(dx>=-4) continue; along=-dx; perp=Math.abs(dy); }
-      else if(dir==='ArrowDown'){ if(dy<=4) continue; along=dy; perp=Math.abs(dx); }
-      else { if(dy>=-4) continue; along=-dy; perp=Math.abs(dx); }
-      if(perp > along*2.5 + 40) continue;          // keep within a directional cone
-      const score=along + perp*0.6;                 // nearest along axis, gentle perp penalty
-      if(score<bestScore){ bestScore=score; best=id; }
+    const tb=(typeof mmOrient==='function'?mmOrient():'lr')==='tb';
+    const sibAxis=(a,b)=> tb ? (MM.nodes[a].x-MM.nodes[b].x) : (MM.nodes[a].y-MM.nodes[b].y);
+    let next=null, didExpand=false;
+    if(e.key==='ArrowUp'){
+      if(cur.parentId) next=cur.parentId;
+    } else if(e.key==='ArrowDown'){
+      const kids=(cur.childIds||[]).filter(c=>MM.nodes[c] && MM.nodes[c].type!=='summary');
+      if(kids.length){
+        if(cur.collapsed){ cur.collapsed=false; didExpand=true; }
+        next=kids[0];                                 // childIds order ≈ visual order
+      }
+    } else {
+      const pid=cur.parentId;
+      if(pid && MM.nodes[pid]){
+        const sibs=MM.nodes[pid].childIds.filter(c=>MM.nodes[c] && MM.nodes[c].type!=='summary');
+        sibs.sort(sibAxis);                           // visual left→right (TB) order
+        const idx=sibs.indexOf(MM.sel);
+        if(idx>=0){
+          const ni=idx+(e.key==='ArrowRight'?1:-1);   // Right = next sibling rightward
+          if(ni>=0 && ni<sibs.length) next=sibs[ni];
+        }
+      }
     }
-    if(best){ MM.sel=best; MM.multiSel=[]; mmRender(); mmEnsureSelVisible(); }
+    if(next && MM.nodes[next]){ MM.sel=next; MM.multiSel=[]; mmRender(); mmEnsureSelVisible(); }
+    else if(didExpand){ mmRender(); }
   } else if(e.key===' '){
     // Space = toggle collapse/expand of the selected topic (fast keyboard fold)
     if(MM.sel && MM.nodes[MM.sel]){
