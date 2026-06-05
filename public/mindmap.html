@@ -347,6 +347,7 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 #wb-canvas-wrap.cur-text #wb-canvas{cursor:text}
 #wb-canvas-wrap.cur-eraser #wb-canvas{cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='rgba(99,102,241,0.12)' stroke='%236366f1' stroke-width='1.5'/></svg>") 12 12, crosshair}
 #wb-canvas-wrap.cur-connect #wb-canvas{cursor:crosshair}
+#wb-canvas-wrap.cur-crosshair #wb-canvas{cursor:crosshair}
 
 /* Inline label editor after shape draw */
 #wb-ti{position:absolute;display:none;outline:none;padding:2px 4px;font-family:'Inter',sans-serif;
@@ -3570,10 +3571,13 @@ function wbTool(name){
   document.querySelectorAll('.wbt[data-tool],.wbt-pop-item[data-tool]').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll(`[data-tool="${name}"]`).forEach(b=>b.classList.add('on'));
   WB.tool=name;
-  document.getElementById('wb-canvas-wrap').className='cur-select';
-  if(name==='text')document.getElementById('wb-canvas-wrap').className='cur-text';
-  if(name==='eraser')document.getElementById('wb-canvas-wrap').className='cur-eraser';
-  if(name==='connect')document.getElementById('wb-canvas-wrap').className='cur-connect';
+  const wrap=document.getElementById('wb-canvas-wrap');
+  // Cursor signals the active mode consistently across tools.
+  if(name==='text') wrap.className='cur-text';
+  else if(name==='eraser') wrap.className='cur-eraser';
+  else if(name==='connect') wrap.className='cur-connect';
+  else if(name==='pen'||name==='rect'||name==='circle'||name==='line'||name==='arrow'||name==='sticky'||name==='table') wrap.className='cur-crosshair';
+  else wrap.className='cur-select';
   wbRedraw();
 }
 
@@ -4424,6 +4428,7 @@ function wbCommitMarquee(){
 
 canvas.addEventListener('keydown',e=>{
   if(e.code==='Space'){WB.spacePanning=true;document.getElementById('wb-canvas-wrap').classList.add('cur-panning');}
+  if(e.key==='Escape'){ WB.selId=null; WB.multiSel=[]; WB._connDelBtn=null; if(WB.tool!=='select') wbTool('select'); else wbRedraw(); }
   if(e.code==='KeyZ'&&e.ctrlKey){e.preventDefault();wbUndo();}
   if(e.code==='KeyY'&&e.ctrlKey){e.preventDefault();wbRedo();}
   if((e.key==='Delete'||e.key==='Backspace')&&document.activeElement===canvas){
@@ -4479,6 +4484,16 @@ canvas.addEventListener('keydown',e=>{
       startEditTableCell(o,0,0,sx,sy);
     } else if(o){
       startTextEdit(o,0,0);
+    }
+  }
+  // Single-key tool shortcuts (match the button titles [V][P][E][R][C][L][A][K][T][S]).
+  // Skipped when a modifier is held or focus is in a text field.
+  if(!e.ctrlKey && !e.metaKey && !e.altKey && e.key && e.key.length===1){
+    const ae=document.activeElement, tag=ae&&ae.tagName;
+    if(tag!=='INPUT' && tag!=='TEXTAREA' && !(ae&&ae.isContentEditable)){
+      const map={v:'select',p:'pen',e:'eraser',r:'rect',c:'circle',l:'line',a:'arrow',k:'connect',t:'text',s:'sticky'};
+      const tool=map[e.key.toLowerCase()];
+      if(tool){ e.preventDefault(); wbTool(tool); }
     }
   }
 });
