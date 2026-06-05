@@ -943,7 +943,7 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
 </div>
 
 <!-- Word-like table size picker (hover N×M grid). MAXR×MAXC cells. -->
-<div id="wb-tbl-size" style="display:none;position:fixed;z-index:1001;background:#1e1e2e;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,.5);">
+<div id="wb-tbl-size" style="display:none;position:fixed;z-index:100010;background:#1e1e2e;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:8px;box-shadow:0 4px 20px rgba(0,0,0,.5);">
   <div id="wb-tbl-size-grid" style="display:grid;grid-template-columns:repeat(8,16px);gap:2px;"></div>
   <div id="wb-tbl-size-label" style="margin-top:6px;text-align:center;font-size:11px;color:rgba(255,255,255,.85);">0 × 0</div>
 </div>
@@ -7692,7 +7692,13 @@ setTimeout(mmDrainPendingAdds, 2500);
 // These let buttons inside the iframe ask the React host to navigate.
 // MindMapCanvas.tsx listens for these messages and dispatches view changes.
 function wsGoHome(){
-  try { window.parent.postMessage({type:'ws-go-home'}, '*'); } catch(_){}
+  if (window.parent && window.parent !== window) {
+    try { window.parent.postMessage({type:'ws-go-home'}, '*'); } catch(_){}
+  } else {
+    // Standalone (opened directly, no host app to return to) — "home" recenters
+    // the map so the button is never dead.
+    try { if (typeof mmFitView === 'function') mmFitView(); } catch(_){}
+  }
 }
 function wsOpenSplit(){
   try { window.parent.postMessage({type:'ws-split', initial:'mindmap'}, '*'); } catch(_){}

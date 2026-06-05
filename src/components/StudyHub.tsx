@@ -2926,12 +2926,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     user jump back to a prior question's canvas without losing
                     work. */}
                 <div style={{
-                  position: 'absolute', top: 6, insetInlineStart: 6, zIndex: 10,
+                  // Bottom of the canvas pane (was top:6 → overlapped the quiz
+                  // options just above the split divider). Per user 2026-06.
+                  position: 'absolute', bottom: 8, insetInlineStart: 8, zIndex: 10,
                   display: 'flex', alignItems: 'center', gap: 6,
-                  background: 'rgba(13,22,40,0.78)', backdropFilter: 'blur(6px)',
+                  background: 'rgba(13,22,40,0.82)', backdropFilter: 'blur(6px)',
                   border: '1px solid rgba(212,175,55,0.35)', borderRadius: 999,
                   padding: '4px 10px', fontFamily: "'Rubik', sans-serif",
-                  fontSize: 12, color: '#e9edf7',
+                  fontSize: 12, color: '#e9edf7', boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
                 }}>
                   <button
                     onClick={() => setCurrentQ((i: number) => Math.max(0, i - 1))}
@@ -3198,8 +3200,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             {/* Card body — height/scroll scales with mode */}
             <div style={{
               padding: '20px 22px 18px',
-              maxHeight: (!isMobile && !floatMode && tab !== 'none' && !isDone) ? 'min(44vh, 360px)' : (floatMode || (isMobile && tab !== 'none' && !isDone)) ? 'calc(100vh - 280px)' : 'min(60vh, 520px)',
+              maxHeight: (!isMobile && !floatMode && tab !== 'none' && !isDone) ? 'min(50vh, 440px)' : (floatMode || (isMobile && tab !== 'none' && !isDone)) ? 'calc(100vh - 280px)' : 'min(60vh, 520px)',
               overflowY: 'auto',
+              paddingBottom: 8,
               flex: (floatMode || (isMobile && tab !== 'none' && !isDone)) ? 1 : 'unset',
             }}>
 
