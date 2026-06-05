@@ -3036,7 +3036,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             // Raised from 25vh because long stems + 4 MC options + KaTeX
             // were getting cropped (option D invisible). Internal scroll
             // on the inner card if needed.
-            ? { flexShrink: 0, zIndex: 2, display: 'flex', flexDirection: 'column', maxHeight: '38vh', overflow: 'hidden' }
+            ? { flexShrink: 0, zIndex: 2, display: 'flex', flexDirection: 'column', maxHeight: 'min(56vh, 520px)', overflow: 'hidden' }
             : tab === 'none' || isDone
             // Padding tightened per user 2026-05-24 — was 18px top / 12px bot
             // creating a big empty gap between the companion-tab chips above
@@ -3063,13 +3063,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   background: 'var(--sh-q-card-bg, #ffffff)',
                   borderRadius: 0,
                   borderBottom: '1px solid rgba(127,155,217,0.22)',
-                  overflow: 'auto',           // scroll if question + MC options exceed cap
+                  overflow: 'hidden',         // card is a flex column; its body is the sole scroller
                   display: 'flex', flexDirection: 'column',
-                  // Was 25vh — too tight: header strip (~40px) + question stem +
-                  // 4 MC options + KaTeX often clipped, hiding option D entirely.
-                  // 38vh gives full options room while still leaving ~62vh for
-                  // the canvas/mindmap pane beneath.
-                  maxHeight: '38vh',
+                  // Sole height authority for the split quiz pane. 38vh starved
+                  // stem + 4 MC options + KaTeX (option C/D clipped behind the
+                  // canvas toolbar). min(56vh,520px) fits four options; the body
+                  // below scrolls if a stem is unusually long. Canvas still gets
+                  // the remaining ~44vh.
+                  maxHeight: 'min(56vh, 520px)',
                   minHeight: '180px',
                 }
               : tab === 'none' || isDone
@@ -3200,10 +3201,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             {/* Card body — height/scroll scales with mode */}
             <div style={{
               padding: '20px 22px 18px',
-              maxHeight: (!isMobile && !floatMode && tab !== 'none' && !isDone) ? 'min(50vh, 440px)' : (floatMode || (isMobile && tab !== 'none' && !isDone)) ? 'calc(100vh - 280px)' : 'min(60vh, 520px)',
+              maxHeight: (!isMobile && !floatMode && tab !== 'none' && !isDone) ? 'none' : (floatMode || (isMobile && tab !== 'none' && !isDone)) ? 'calc(100vh - 280px)' : 'min(60vh, 520px)',
               overflowY: 'auto',
               paddingBottom: 8,
-              flex: (floatMode || (isMobile && tab !== 'none' && !isDone)) ? 1 : 'unset',
+              flex: (floatMode || (isMobile && tab !== 'none' && !isDone) || (!isMobile && !floatMode && tab !== 'none' && !isDone)) ? 1 : 'unset',
+              minHeight: 0,
             }}>
 
           {isDone ? (
