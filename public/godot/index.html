@@ -111,6 +111,42 @@ body {
 
 		<script src="index.js"></script>
 		<script>
+// ── WebGL context-loss guard ────────────────────────────────────────────────
+// Godot Web has no recovery path for a lost WebGL context: when the GPU resets
+// (common on integrated GPUs — e.g. Intel Iris Xe — once shadow casters / draw
+// calls / VRAM climb past the driver's budget) the canvas goes black or the
+// main loop wedges and the game "freezes" with no error. We can't restore the
+// context for Godot, but we CAN detect it, tell the parent app, and offer a
+// clean reload instead of a silent hang. preventDefault() is required or the
+// browser won't fire contextrestored at all.
+(function () {
+  const cv = document.getElementById('canvas');
+  if (!cv) return;
+  let lost = false;
+  cv.addEventListener('webglcontextlost', function (e) {
+    e.preventDefault();
+    lost = true;
+    try { window.parent.postMessage({ type: 'godot-context-lost' }, '*'); } catch (_) {}
+    let ov = document.getElementById('ws-ctx-lost');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.id = 'ws-ctx-lost';
+      ov.setAttribute('dir', 'rtl');
+      ov.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(13,13,26,0.92);color:#fff;font-family:system-ui,Arial,sans-serif;text-align:center;padding:24px;';
+      ov.innerHTML = '<div style="font-size:40px">🏙️</div>'
+        + '<div style="font-size:18px;font-weight:700">הרינדור של העיר נתקל בעומס</div>'
+        + '<div style="font-size:14px;opacity:.8;max-width:340px;line-height:1.6">כרטיס המסך אִתחל את עצמו (קורה כשיש הרבה בניינים). טעינה מחדש תחזיר את העיר — הבנייה שלך נשמרה.</div>'
+        + '<button id="ws-ctx-reload" style="background:linear-gradient(135deg,#D4AF37,#b8941f);border:none;color:#1F2640;font-weight:800;font-size:15px;padding:11px 26px;border-radius:12px;cursor:pointer">טען מחדש את העיר</button>';
+      document.body.appendChild(ov);
+      document.getElementById('ws-ctx-reload').addEventListener('click', function () { window.location.reload(); });
+    }
+  }, false);
+  cv.addEventListener('webglcontextrestored', function () {
+    // Godot can't rebuild its GL state on the fly — a reload is the only clean
+    // recovery, so do it automatically once the context comes back.
+    if (lost) window.location.reload();
+  }, false);
+})();
 const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11498488,"index.wasm":37695054},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 // Cache-bust the data pack so a new build is always fetched (the pck is the only
 // file whose CONTENT changes between exports; the wasm is identical). Bump this
