@@ -2689,7 +2689,78 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 bottom:150  → ⊟ פיצול מסך
                 bottom:210  → 🏠 דף הבית
               60px steps keep 44px-min FABs from touching. */}
-      {fullscreen && onToggleFullscreen && (
+      {/* MOBILE (≤768px): the three stacked FABs above overlapped the answer
+          cards. Collapse them into ONE round menu FAB whose popover offers the
+          same actions (home / show-tools / split-pane picker). */}
+      {fullscreen && onToggleFullscreen && isMobile && (
+        <>
+          <button
+            onClick={() => setSplitMenuOpen(o => !o)}
+            aria-label="תפריט כלים"
+            aria-haspopup="menu"
+            aria-expanded={splitMenuOpen}
+            title="תפריט כלים"
+            style={{
+              position: 'fixed', bottom: 96, left: 16, zIndex: 300,
+              width: 52, height: 52, borderRadius: '50%',
+              background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+              color: '#0B1B3E', border: 0,
+              boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 22, cursor: 'pointer',
+            }}
+          >
+            {splitMenuOpen ? '✕' : '⋮'}
+          </button>
+          {splitMenuOpen && (
+            <>
+              <div onClick={() => setSplitMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 305, background: 'transparent' }} />
+              <div
+                role="menu" aria-label="תפריט כלים" dir="rtl"
+                style={{
+                  position: 'fixed', bottom: 156, left: 16, zIndex: 306,
+                  background: '#FBF8F1', border: '1px solid rgba(212,175,55,0.55)',
+                  borderRadius: 12, boxShadow: '0 10px 28px rgba(11,27,62,0.30)',
+                  padding: 6, minWidth: 200, fontFamily: "'Rubik', sans-serif",
+                }}
+              >
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    try { onBack() } catch(_){}
+                    try { window.location.hash = '#study' } catch(_){}
+                    setSplitMenuOpen(false)
+                  }}
+                  style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'start', background: 'transparent', border: '1px solid transparent', borderRadius: 8, padding: '11px 10px', color: '#1F3E6C', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 44 }}
+                >🏠 דף הבית</button>
+                <button
+                  role="menuitem"
+                  onClick={() => { onToggleFullscreen(); setSplitMenuOpen(false) }}
+                  style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'start', background: 'transparent', border: '1px solid transparent', borderRadius: 8, padding: '11px 10px', color: '#1F3E6C', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 44 }}
+                >☰ הצג כלי לימוד</button>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#1F3E6C', opacity: 0.6, padding: '8px 10px 4px', borderTop: '1px solid rgba(212,175,55,0.3)', marginTop: 4 }}>פיצול מסך</div>
+                {([
+                  ['mindmap',    '🧠 מפת חשיבה'],
+                  ['canvas',     '✏️ קנבס'],
+                  ['excalidraw', '🎨 לוח ציור'],
+                  ['arsenal',    '🎯 הארסנל שלי'],
+                ] as const)
+                  .filter(([key]) => key !== tab)
+                  .map(([key, label]) => (
+                    <button
+                      key={key} role="menuitem"
+                      onClick={() => { handleSetTab(key as typeof tab); setSplitMenuOpen(false) }}
+                      style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'start', background: 'transparent', border: '1px solid transparent', borderRadius: 8, padding: '10px 10px', color: '#1F3E6C', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 40 }}
+                    >{label}</button>
+                  ))}
+              </div>
+            </>
+          )}
+        </>
+      )}
+
+      {/* DESKTOP: the original three-FAB stack. */}
+      {fullscreen && onToggleFullscreen && !isMobile && (
         <>
           <button
             onClick={() => setSplitMenuOpen(o => !o)}
@@ -3203,7 +3274,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               padding: '20px 22px 18px',
               maxHeight: (!isMobile && !floatMode && tab !== 'none' && !isDone) ? 'none' : (floatMode || (isMobile && tab !== 'none' && !isDone)) ? 'calc(100vh - 280px)' : 'min(60vh, 520px)',
               overflowY: 'auto',
-              paddingBottom: 8,
+              // On mobile fullscreen the bottom-left FABs (menu + chat) sit over
+              // the answer grid — add a safe bottom zone so answers scroll clear.
+              paddingBottom: (isMobile && fullscreen) ? 'calc(110px + env(safe-area-inset-bottom))' : 8,
               flex: (floatMode || (isMobile && tab !== 'none' && !isDone) || (!isMobile && !floatMode && tab !== 'none' && !isDone)) ? 1 : 'unset',
               minHeight: 0,
             }}>
@@ -3832,7 +3905,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
           onClick={() => setMobileSidebarOpen(o => !o)}
           aria-label={mobileSidebarOpen ? 'סגור תפריט' : 'פתח תפריט'}
           style={{
-            position: 'fixed', top: 12, right: 64, zIndex: 250,
+            position: 'fixed', top: 12, right: 12, zIndex: 250,
             width: 44, height: 44, borderRadius: 12,
             background: 'rgba(51,81,202,0.85)',
             border: '1px solid rgba(99,162,255,0.5)',

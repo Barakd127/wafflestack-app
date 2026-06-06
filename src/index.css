@@ -310,7 +310,9 @@ html.dark :focus-visible {
 
 /* ── Button overlap guards ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .ws-topbar h1 { padding-inline-start: 56px !important; }
+  /* Hamburger now hugs the top-right corner (right:12, 44px wide). Reserve the
+     title's inline-start (right edge in RTL) so the heading never runs under it. */
+  .ws-topbar h1 { padding-inline-start: 64px !important; }
   .ws-lesson-mindmap-pane { display: none !important; }
 }
 
