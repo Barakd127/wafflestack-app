@@ -2701,7 +2701,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             aria-expanded={splitMenuOpen}
             title="תפריט כלים"
             style={{
-              position: 'fixed', bottom: 96, left: 16, zIndex: 300,
+              position: 'fixed', top: 64, left: 16, zIndex: 300,
               width: 52, height: 52, borderRadius: '50%',
               background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
               color: '#0B1B3E', border: 0,
@@ -2718,7 +2718,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               <div
                 role="menu" aria-label="תפריט כלים" dir="rtl"
                 style={{
-                  position: 'fixed', bottom: 156, left: 16, zIndex: 306,
+                  position: 'fixed', top: 124, left: 16, zIndex: 306,
                   background: '#FBF8F1', border: '1px solid rgba(212,175,55,0.55)',
                   borderRadius: 12, boxShadow: '0 10px 28px rgba(11,27,62,0.30)',
                   padding: 6, minWidth: 200, fontFamily: "'Rubik', sans-serif",
@@ -2950,6 +2950,48 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       </div>
       )}{/* end !fullscreen topbar guard */}
 
+      {/* ── Quick-switch (תרגיל ⇄ קנבס) ──────────────────────────────────────
+          On MOBILE a side-by-side split is too cramped and was rendering blank,
+          so the canvas opens as a reliable FULL-SCREEN overlay and a pill flips
+          between the exercise and the canvas. On DESKTOP the same pill drives
+          the existing side-by-side split (handleSetTab). */}
+      {!isDone && isMobile && tab === 'canvas' && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 400, background: '#0d1628' }}>
+          <iframe
+            key={`qs-wb-${q?.id || currentQ}`}
+            src={`${import.meta.env.BASE_URL}mindmap.html?mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
+            title="קנבס לשאלה"
+            style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
+            allow="clipboard-read; clipboard-write"
+          />
+        </div>
+      )}
+      {!isDone && (
+        <div role="tablist" aria-label="מעבר מהיר בין תרגיל לקנבס" style={{
+          position: 'fixed', bottom: isMobile ? 14 : 18, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 402, display: 'flex', gap: 4, padding: 4,
+          background: 'rgba(13,22,40,0.92)', borderRadius: 999,
+          boxShadow: '0 6px 20px rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
+        }}>
+          {([['none', '📝 תרגיל'], ['canvas', '✏️ קנבס']] as const).map(([key, label]) => {
+            const active = key === 'none' ? tab === 'none' : tab === 'canvas'
+            return (
+              <button
+                key={key} role="tab" aria-selected={active}
+                onClick={() => handleSetTab(key === 'none' ? 'none' : 'canvas')}
+                style={{
+                  border: 'none', borderRadius: 999, padding: '8px 18px', cursor: 'pointer',
+                  fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700, minHeight: 40,
+                  background: active ? 'linear-gradient(135deg,#F5C842,#D4AF37)' : 'transparent',
+                  color: active ? '#0B1B3E' : 'rgba(255,255,255,0.85)',
+                  transition: 'all 0.15s',
+                }}
+              >{label}</button>
+            )
+          })}
+        </div>
+      )}
+
       {/* Two-mode layout — calm focus when tab='none', tool-fullscreen with
           docked chip when a companion tool is active.
           Per user: when desktop split is active, the QUESTION card renders
@@ -2990,7 +3032,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 allow="clipboard-read; clipboard-write"
               />
             )}
-            {tab === 'canvas' && (
+            {tab === 'canvas' && !isMobile && (
               <>
                 {/* Per-question canvas navigation (Issue 4): each question gets
                     its own wb scene, persisted under wb-scene-q-<id>. Lets the
@@ -3274,9 +3316,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               padding: '20px 22px 18px',
               maxHeight: (!isMobile && !floatMode && tab !== 'none' && !isDone) ? 'none' : (floatMode || (isMobile && tab !== 'none' && !isDone)) ? 'calc(100vh - 280px)' : 'min(60vh, 520px)',
               overflowY: 'auto',
-              // On mobile fullscreen the bottom-left FABs (menu + chat) sit over
-              // the answer grid — add a safe bottom zone so answers scroll clear.
-              paddingBottom: (isMobile && fullscreen) ? 'calc(110px + env(safe-area-inset-bottom))' : 8,
+              // Bottom zone on mobile so the quick-switch pill (bottom-center)
+              // never covers the last answer/content.
+              paddingBottom: isMobile ? 'calc(70px + env(safe-area-inset-bottom))' : 8,
               flex: (floatMode || (isMobile && tab !== 'none' && !isDone) || (!isMobile && !floatMode && tab !== 'none' && !isDone)) ? 1 : 'unset',
               minHeight: 0,
             }}>
