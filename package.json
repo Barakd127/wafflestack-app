@@ -1,5 +1,5 @@
 {
-  "name": "base44",
+  "name": "wafflestack",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -39,6 +39,10 @@
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@gltf-transform/cli": "^4.3.0",
+    "@gltf-transform/core": "^4.3.0",
+    "@gltf-transform/functions": "^4.3.0",
+    "@playwright/test": "^1.60.0",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "@types/seedrandom": "^3.0.8",
