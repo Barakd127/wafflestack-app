@@ -717,10 +717,10 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <button class="tb-btn" onclick="wsOpenSplitStudy()" title="הוסף את הארסנל לצד המפה (זמין דרך אזור הלמידה)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-inline-end:5px"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M9 19h6"/><path d="M12 14v5"/></svg>הארסנל שלי</button>
   </div>
   <div class="ribbon-group" id="ribbon-add">
-    <button class="tb-btn" onclick="mmAddChild()">+ Branch</button>
-    <button class="tb-btn" onclick="mmAddEquation()">&#8721; Equation</button>
-    <button class="tb-btn" onclick="mmAddCanvas()">&#11036; Canvas</button>
-    <button class="tb-btn" onclick="mmAddSummary()" title="סיכום קבוצת אחים (Ctrl-click)">&#8944; Summary</button>
+    <button class="tb-btn" onclick="mmAddChild()">+ ענף</button>
+    <button class="tb-btn" onclick="mmAddEquation()">&#8721; משוואה</button>
+    <button class="tb-btn" onclick="mmAddCanvas()">&#11036; קנבס</button>
+    <button class="tb-btn" onclick="mmAddSummary()" title="סיכום קבוצת אחים (Ctrl-click)">&#8944; סיכום</button>
     <button class="tb-btn" id="zone-create-btn" onclick="mmStartZoneCreate()" title="צור אזור — נקודות חופשיות"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="3" y="3" width="14" height="14" rx="2" stroke-dasharray="3 2"/><path d="M17 17l4 4"/><path d="M21 17v4h-4"/></svg> צור אזור</button>
     <button class="tb-btn" onclick="mmLoadReadyMap(mmCurrentReadyMapId(),'manual')" title="טען מפת מושגים מוכנה — ההערות והעריכות שלך נשמרות">🗺️ טען מפה מוכנה</button>
     <button class="tb-btn" onclick="wsGoDrawing()" title="פתח לוח ציור (Excalidraw) במסך מלא">🎨 לוח ציור</button>
@@ -728,24 +728,24 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
   <div class="ribbon-group" id="ribbon-view" style="display:none">
     <button class="tb-btn" onclick="mmMacroView()" title="מבט-על: כווץ הכול לענפים הראשיים">&#9776; מבט-על</button>
     <button class="tb-btn" onclick="mmFocusSelected()" title="מיקוד: פתח רק את הענף הנבחר, כווץ השאר">&#9678; מיקוד</button>
-    <button class="tb-btn" onclick="mmCollapseAll()">&#8863; Collapse</button>
-    <button class="tb-btn" onclick="mmFitView()">&#8993; Fit</button>
-    <button class="tb-btn" onclick="mmAutoLayout()" title="Auto-arrange tree">&#8862; Layout</button>
-    <button class="tb-btn" id="mm-orient-btn" onclick="mmToggleOrientation()" title="TB / LR">&#10695; TB/LR</button>
+    <button class="tb-btn" onclick="mmCollapseAll()">&#8863; כווץ</button>
+    <button class="tb-btn" onclick="mmFitView()">&#8993; התאם</button>
+    <button class="tb-btn" onclick="mmAutoLayout()" title="Auto-arrange tree">&#8862; סדר</button>
+    <button class="tb-btn" id="mm-orient-btn" onclick="mmToggleOrientation()" title="TB / LR">&#10695; כיוון</button>
   </div>
   <div class="ribbon-group" id="ribbon-templates" style="display:none">
-    <button class="tb-btn" onclick="applyTemplate('normal')">Normal Dist.</button>
-    <button class="tb-btn" onclick="applyTemplate('venn')">Venn</button>
-    <button class="tb-btn" onclick="applyTemplate('matrix')">2&#xD7;2 Matrix</button>
-    <button class="tb-btn" onclick="applyTemplate('timeline')">Timeline</button>
-    <button class="tb-btn" onclick="applyTemplate('freqtable')">Freq. Table</button>
-    <button class="tb-btn" onclick="applyTemplate('blank')">Blank Canvas</button>
+    <button class="tb-btn" onclick="applyTemplate('normal')">התפלגות נורמלית</button>
+    <button class="tb-btn" onclick="applyTemplate('venn')">ון</button>
+    <button class="tb-btn" onclick="applyTemplate('matrix')">מטריצה 2×2</button>
+    <button class="tb-btn" onclick="applyTemplate('timeline')">ציר זמן</button>
+    <button class="tb-btn" onclick="applyTemplate('freqtable')">טבלת תדרים</button>
+    <button class="tb-btn" onclick="applyTemplate('blank')">קנבס ריק</button>
   </div>
   <div class="ribbon-group" id="ribbon-files" style="display:none">
-    <button class="tb-btn" onclick="mmExportJSON()">&#128190; Export</button>
-    <button class="tb-btn" onclick="mmImportJSON()">&#128194; Import</button>
+    <button class="tb-btn" onclick="mmExportJSON()">&#128190; ייצוא</button>
+    <button class="tb-btn" onclick="mmImportJSON()">&#128194; ייבוא</button>
     <button class="tb-btn" onclick="mmExportPNG()">&#128444; PNG</button>
-    <button class="tb-btn" onclick="mmClearAll()" style="color:#f87171">&#128465; Clear</button>
+    <button class="tb-btn" onclick="mmClearAll()" style="color:#f87171">&#128465; נקה</button>
   </div>
 </div>
 
@@ -1534,6 +1534,53 @@ function mmRenderSheetBar(){
     tab.onmouseleave = function(){ tab.style.transform='none'; };
     tab.onclick = function(){ mmSwitchSheet(s.id); };
     tab.ondblclick = function(e){ e.stopPropagation(); mmRenameSheet(s.id); };
+
+    // Right-click context menu: שכפל / מחק
+    tab.oncontextmenu = function(e){
+      e.preventDefault(); e.stopPropagation();
+      const old = document.getElementById('_mm_sheet_ctx');
+      if(old) old.remove();
+      const menu = document.createElement('div');
+      menu.id = '_mm_sheet_ctx';
+      menu.style.cssText = 'position:fixed;z-index:10000;background:#1a1a2e;border:1px solid rgba(212,175,55,.4);border-radius:8px;padding:4px;font-family:Inter,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:120px;direction:rtl;';
+      menu.style.left = e.clientX + 'px';
+      menu.style.top  = e.clientY + 'px';
+      [
+        { label:'🔁 שכפל', fn: function(){ mmDuplicateSheet(s.id); } },
+        { label:'🗑 מחק',   fn: function(){ mmDeleteSheet(s.id); }, danger: true },
+      ].forEach(function(item){
+        const btn = document.createElement('button');
+        btn.textContent = item.label;
+        btn.style.cssText = 'display:block;width:100%;padding:8px 14px;background:none;border:none;color:'+(item.danger?'#f87171':'white')+';cursor:pointer;text-align:right;font-family:inherit;font-size:13px;border-radius:5px;';
+        btn.onmouseenter = function(){ btn.style.background='rgba(255,255,255,.1)'; };
+        btn.onmouseleave = function(){ btn.style.background='none'; };
+        btn.onclick = function(){ menu.remove(); item.fn(); };
+        menu.appendChild(btn);
+      });
+      document.body.appendChild(menu);
+      var closeCtx = function(ev){ if(!menu.contains(ev.target)){menu.remove();document.removeEventListener('click',closeCtx);} };
+      setTimeout(function(){ document.addEventListener('click',closeCtx); }, 0);
+    };
+
+    // Drag to reorder sheets
+    tab.draggable = true;
+    tab.ondragstart = function(e){ e.dataTransfer.setData('text/plain', s.id); tab.style.opacity='0.5'; };
+    tab.ondragend   = function(){ tab.style.opacity='1'; };
+    tab.ondragover  = function(e){ e.preventDefault(); tab.style.background='rgba(212,175,55,.3)'; };
+    tab.ondragleave = function(){ tab.style.background = active ? 'linear-gradient(135deg,'+col[0]+','+col[1]+')' : 'rgba(255,255,255,.5)'; };
+    tab.ondrop      = function(e){
+      e.preventDefault();
+      tab.style.background = active ? 'linear-gradient(135deg,'+col[0]+','+col[1]+')' : 'rgba(255,255,255,.5)';
+      const fromId = e.dataTransfer.getData('text/plain');
+      if(fromId === s.id) return;
+      const fromIdx = _mmSheets.sheets.findIndex(function(x){ return x.id===fromId; });
+      const toIdx   = _mmSheets.sheets.findIndex(function(x){ return x.id===s.id; });
+      if(fromIdx<0||toIdx<0) return;
+      const moved = _mmSheets.sheets.splice(fromIdx,1)[0];
+      _mmSheets.sheets.splice(toIdx,0,moved);
+      mmSaveSheetsReg(); mmRenderSheetBar();
+    };
+
     bar.appendChild(tab);
   });
   const add = document.createElement('button');
@@ -1559,6 +1606,31 @@ function mmRenameSheet(id){
   const name = (prompt('שם הגיליון:', s.name) || '').trim();
   if(!name) return;
   s.name = name; mmSaveSheetsReg(); mmRenderSheetBar();
+}
+
+function mmDuplicateSheet(id){
+  const s = _mmSheets.sheets.find(function(x){ return x.id===id; });
+  if(!s) return;
+  const newId   = 'sheet-' + Math.abs(Date.now()).toString(36);
+  const newName = s.name + ' (עותק)';
+  _mmSheets.sheets.push({ id:newId, name:newName });
+  try{
+    const data = localStorage.getItem(_mmSheetKey(id));
+    if(data) localStorage.setItem(_mmSheetKey(newId), data);
+  } catch(e){}
+  mmSaveSheetsReg();
+  mmSwitchSheet(newId);
+}
+
+function mmDeleteSheet(id){
+  if(_mmSheets.sheets.length <= 1){ alert('לא ניתן למחוק את הגיליון האחרון'); return; }
+  const s = _mmSheets.sheets.find(function(x){ return x.id===id; });
+  if(!s || !confirm('למחוק את הגיליון "'+s.name+'"?')) return;
+  _mmSheets.sheets = _mmSheets.sheets.filter(function(x){ return x.id!==id; });
+  try{ localStorage.removeItem(_mmSheetKey(id)); } catch(e){}
+  mmSaveSheetsReg();
+  if(_mmSheets.active === id) mmSwitchSheet(_mmSheets.sheets[0].id);
+  else mmRenderSheetBar();
 }
 
 function cloneMMForHistory(){return JSON.parse(JSON.stringify(MM));}
@@ -3363,6 +3435,18 @@ function startEditNode(n,el,initialChar){
   // char (X-Mind style) instead of keeping+selecting the old text.
   input.type='text';input.value=(typeof initialChar==='string'&&initialChar.length===1)?initialChar:n.text;
   input.style.cssText=`position:absolute;left:${el.offsetLeft}px;top:${el.offsetTop}px;width:${div.offsetWidth}px;height:${div.offsetHeight}px;border:2px solid #6366f1;border-radius:20px;padding:5px 16px;background:#fff;color:#1a1a1a;font-family:Inter,sans-serif;font-size:12px;font-weight:500;outline:none;z-index:100`;
+  // Auto-expand input as user types — show full text without truncation
+  const _mmMeasure = document.createElement('span');
+  _mmMeasure.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;font-family:Inter,sans-serif;font-size:12px;font-weight:500;padding:5px 16px;pointer-events:none;';
+  document.body.appendChild(_mmMeasure);
+  const _mmMinW = div.offsetWidth;
+  input.oninput = function(){
+    _mmMeasure.textContent = input.value || ' ';
+    const w = Math.max(_mmMinW, _mmMeasure.offsetWidth + 8);
+    input.style.width = w + 'px';
+    input.style.left = (el.offsetLeft - Math.max(0, w - _mmMinW) / 2) + 'px';
+  };
+  const _mmCleanMeasure = function(){ _mmMeasure.remove(); };
   document.getElementById('viewport').appendChild(input);
   input.focus();
   if(typeof initialChar==='string'&&initialChar.length===1){ input.setSelectionRange(input.value.length,input.value.length); }
@@ -3374,10 +3458,11 @@ function startEditNode(n,el,initialChar){
     if(changed && n.origin==='seed') n.userEdited=true; // merge-safe: protect from re-import
     mmPushHistory();input.remove();mmRender();
     if(changed && typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('edit-text');
+    _mmCleanMeasure();
   };
   input.onkeydown=e=>{
     if(e.key==='Enter'){input.blur();return;}
-    if(e.key==='Escape'){input.remove();mmRender();}
+    if(e.key==='Escape'){input.remove();_mmCleanMeasure();mmRender();}
   };
 }
 
