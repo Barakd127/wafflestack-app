@@ -275,7 +275,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   // Graceful fallback when no lesson is authored yet
   if (!lesson || total === 0) {
     return (
-      <div dir="rtl" style={{ flex: 1, overflow: 'auto', padding: '32px 40px', fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
+      <div data-tour="theory-screen" dir="rtl" style={{ flex: 1, overflow: 'auto', padding: '32px 40px', fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
         <button onClick={onBack} style={backLinkStyle}>→ חזרה לבחירת נושא</button>
         <div style={{ ...glassCardStyle, padding: 40, marginTop: 24, textAlign: 'center' }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>📖</div>
@@ -728,7 +728,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
 
   // ── Split layout (mind map on the left in LTR DOM, RTL still works) ─────────
   return (
-    <div ref={containerRef} dir="ltr" style={{
+    <div ref={containerRef} data-tour="theory-screen" dir="ltr" style={{
       flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0,
       background: 'transparent',
     }}>

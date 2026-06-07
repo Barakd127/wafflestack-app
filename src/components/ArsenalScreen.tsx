@@ -376,7 +376,7 @@ export default function ArsenalScreen() {
   })
 
   return (
-    <div dir="rtl" style={{
+    <div data-tour="arsenal-screen" dir="rtl" style={{
       flex: 1, overflow: 'auto', padding: '32px 40px',
       fontFamily: "'Rubik', 'Assistant', sans-serif",
       background: 'linear-gradient(135deg, rgba(245,158,11,0.05) 0%, rgba(99,102,241,0.04) 50%, rgba(168,85,247,0.05) 100%)',

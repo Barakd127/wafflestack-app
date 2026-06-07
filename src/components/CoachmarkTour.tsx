@@ -50,30 +50,34 @@ const TOUR_STEPS: Record<string, TourStep[]> = {
     { id: 'mm-5', target: 'help-btn',  title: 'חזרה על הסיור',         body: 'לחץ על "?" בכל עת לחזרה על ההדרכה הזו.' },
   ],
 
-  // ── Macro-tier tours (auto-open on unlock + replayable from launcher) ──────
+  // ── Macro-tier tours ───────────────────────────────────────────────────────
+  // Each step's `action` NAVIGATES the app into the real screen, then the
+  // spotlight lands on the live element there. The tour overlay persists across
+  // navigation and re-measures, so the user is actually taken into each screen.
   'tour-basic': [
-    { id: 'b-1', target: 'center',      title: '🌱 פתחת את הצעדים הראשונים!', body: 'אספת מספיק נקודות כדי לפתוח את כלי הלמידה הבסיסיים. בוא נראה אותם.' },
-    { id: 'b-2', target: 'arsenal-btn', title: 'הארסנל שלך', body: 'אוסף הנוסחאות, ההגדרות והקלפים שצברת. כל מה שלמדת — במקום אחד.' },
-    { id: 'b-3', target: 'theory-btn',  title: 'תיאוריה', body: 'קרא את החומר לפני שאתה מתרגל. אפשר לחזור לכאן בכל רגע.' },
-    { id: 'b-4', target: 'tour-btn',    title: 'הסיורים שלך', body: 'בכל פעם שתפתח שלב חדש — ייפתח סיור שמראה מה חדש. לחזרה לחץ על 🎓.' },
+    { id: 'b-1', target: 'center',       title: '🌱 פתחת את הצעדים הראשונים!', body: 'אספת מספיק נקודות כדי לפתוח כלי למידה חדשים. בוא ניקח אותך אליהם — צעד אחר צעד.' },
+    { id: 'b-2', target: 'center',       title: '📦 הארסנל שלך', body: 'הבאנו אותך לארסנל — כאן נאסף כל מה שלמדת: נוסחאות, הגדרות וטריקים.', action: 'nav-arsenal' },
+    { id: 'b-3', target: 'center',       title: '📚 תיאוריה', body: 'וזה מסך התיאוריה — קוראים כאן את החומר לפני שמתרגלים.', action: 'nav-theory' },
+    { id: 'b-4', target: 'practice-tab', title: '📝 תרגול', body: 'וכאן מתרגלים. הבאנו אותך לתרגול לדוגמה — נסה לענות!', action: 'nav-practice' },
+    { id: 'b-5', target: 'center',       title: 'אפשר להתחיל! 🎯', body: 'תמיד אפשר לפתוח את הסיור שוב דרך 🎓 בתפריט.' },
   ],
 
   'tour-intermediate': [
-    { id: 'i-1', target: 'center',     title: '✏️ פתחת את כלי הקנבס!', body: 'עכשיו יש לך לוח ציור, מסמן, צורות ועורך משוואות. בוא נראה איפה.' },
-    { id: 'i-2', target: 'canvas-tab', title: 'הקנבס', body: 'מעבר מהיר בין התרגיל לבין לוח הציור — כתוב, צייר ופתור ביד חופשית.' },
-    { id: 'i-3', target: 'formula-btn',title: 'נוסחאות', body: 'הצב נוסחאות מוכנות מספריית הנוסחאות ישירות על הקנבס.' },
-    { id: 'i-4', target: 'center',     title: 'המשך לאסוף', body: 'ככל שתתקדם ייפתחו עוד כלים — העיר שלך, תבניות וצבעים. בהצלחה!' },
+    { id: 'i-1', target: 'center',       title: '✏️ נפתחו כלי הקנבס!', body: 'יש לך עכשיו לוח ציור, מסמן, צורות ועורך משוואות. נראה איך משתמשים בהם בתוך תרגול.' },
+    { id: 'i-2', target: 'practice-tab', title: '1. נכנסים לתרגול', body: 'הבאנו אותך לתרגול לדוגמה.', action: 'nav-practice' },
+    { id: 'i-3', target: 'canvas-tab',   title: '2. עוברים לקנבס', body: 'לחיצה כאן פותחת לוח ציור לצד התרגיל.' },
+    { id: 'i-4', target: 'canvas-frame', title: '3. כותבים ופותרים', body: 'מציבים נוסחאות, מציירים ופותרים ביד חופשית — ממש כאן.', action: 'switch-canvas' },
+    { id: 'i-5', target: 'center',       title: 'מעולה! 🚀', body: 'המשך לאסוף נקודות — ייפתחו עוד כלים: העיר שלך, תבניות וצבעים.' },
   ],
 
-  // ── Flagship demo (= the Advanced tour). Drives the UI as the user advances ─
+  // ── Flagship demo (= the Advanced tour). Walks the FULL workflow live ──────
   'tour-advanced': [
-    { id: 'a-1', target: 'center',      title: '🚀 ברוך הבא לטיר המתקדם!', body: 'פתחת את זרימת העבודה המלאה. בוא נראה אותה מקצה לקצה.' },
-    { id: 'a-2', target: 'theory-btn',  title: '1. מתחילים בתיאוריה', body: 'קוראים את החומר. כאן נמצא ההסבר המלא של הנושא.' },
-    { id: 'a-3', target: 'split-btn',   title: '2. פותחים פיצול מסך', body: 'לחיצה כאן פותחת שני חלונות זה לצד זה — חומר מצד אחד, כלי עבודה מהשני.', action: 'open-split' },
-    { id: 'a-4', target: 'practice-btn',title: '3. דלג לתרגול', body: 'אותו פיצול עובד גם במסך התרגול — פתרון ליד השאלה.', action: 'go-practice' },
-    { id: 'a-5', target: 'canvas-tab',  title: '4. החלף לקנבס', body: 'בלחיצה אחת עוברים מהתרגיל ללוח הציור.', action: 'switch-canvas' },
-    { id: 'a-6', target: 'canvas-frame',title: '5. נוסחה + תרגולים על הקנבס', body: 'מציבים נוסחה, כותבים את הפתרון ופותרים את התרגולים — הכל ליד הקנבס.', action: 'open-formula' },
-    { id: 'a-7', target: 'center',      title: 'זהו — אתה מוכן! 🎉', body: 'הטיר המתקדם פתוח. שלב את התיאוריה, הפיצול והקנבס בכל תרגול.' },
+    { id: 'a-1', target: 'center',         title: '🚀 ברוך הבא לטיר המתקדם!', body: 'נעבור יחד את כל זרימת העבודה — מתיאוריה, דרך תרגול, ועד פתרון על הקנבס.' },
+    { id: 'a-2', target: 'center',         title: '1. מתחילים בתיאוריה', body: 'הבאנו אותך למסך התיאוריה. כאן קוראים את החומר.', action: 'nav-theory' },
+    { id: 'a-3', target: 'practice-tab',   title: '2. דלג לתרגול', body: 'עכשיו עוברים לתרגל את מה שקראנו — הנה התרגול.', action: 'nav-practice' },
+    { id: 'a-4', target: 'canvas-tab',     title: '3. פיצול עם קנבס', body: 'בלחיצה אחת פותחים לוח ציור לצד התרגיל — חצי שאלה, חצי פתרון.' },
+    { id: 'a-5', target: 'canvas-frame',   title: '4. נוסחה + תרגולים', body: 'מציבים את הנוסחה, כותבים את הפתרון ופותרים את התרגולים — הכל ליד הקנבס.', action: 'switch-canvas' },
+    { id: 'a-6', target: 'center',         title: 'זהו — אתה מוכן! 🎉', body: 'שילבת תיאוריה, תרגול וקנבס. ככה לומדים מתקדם.' },
   ],
 }
 

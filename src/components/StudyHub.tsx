@@ -2323,18 +2323,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     }
   }, [fullscreen, onToggleFullscreen])
 
-  // Register tour actions so the flagship 🚀 demo can DRIVE the workflow (open
-  // split menu, jump to practice, switch to canvas) as the user advances steps.
-  // Best-effort: each only fires when LearningScreen is mounted; otherwise the
-  // tour step just narrates + points (CoachmarkTour falls back gracefully).
+  // Register the in-practice 'switch-canvas' tour action so guided tours can
+  // open the canvas (full-screen on mobile, side-by-side on desktop) and
+  // spotlight it. Only active while LearningScreen is mounted.
   useEffect(() => {
-    const cleanups = [
-      registerTourAction('open-split',    () => setSplitMenuOpen(true)),
-      registerTourAction('go-practice',   () => { setSplitMenuOpen(false); handleSetTab('none') }),
-      registerTourAction('switch-canvas', () => handleSetTab('canvas')),
-      registerTourAction('open-formula',  () => handleSetTab('canvas')),
-    ]
-    return () => cleanups.forEach(fn => fn())
+    const cleanup = registerTourAction('switch-canvas', () => handleSetTab('canvas'))
+    return cleanup
   }, [handleSetTab])
 
   // Esc to exit fullscreen (don't hijack when editing inside a textarea)
@@ -3089,6 +3083,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   >הבא →</button>
                 </div>
                 <iframe
+                  data-tour="canvas-frame"
                   // Per-question scene key: changing q.id remounts the iframe so
                   // mindmap.html loads the matching wb-scene-q-<id> from
                   // localStorage. wbScene query param is read inside mindmap.html.
@@ -3909,6 +3904,23 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
     setQuizDifficulty(difficulty)
     setInternalView('learning')
   }
+
+  // Register NAVIGATION tour actions so guided tours can take the user INTO the
+  // real screens (arsenal / theory / practice / canvas / mindmap) and spotlight
+  // them there — not just narrate. The tour overlay lives above StudyHub, so it
+  // persists across these view changes and re-measures the new target.
+  useEffect(() => {
+    const demoTopic = () => selectedTopic || Object.keys(quizBankData.topics)[0]
+    const cleanups = [
+      registerTourAction('nav-arsenal',  () => setInternalView('arsenal')),
+      registerTourAction('nav-theory',   () => handleSelectTopic(demoTopic(), 'lesson')),
+      registerTourAction('nav-practice', () => handleStartPractice(demoTopic())),
+      registerTourAction('nav-mindmap',  () => onViewChange('mindmap')),
+      registerTourAction('nav-home',     () => setInternalView('home')),
+    ]
+    return () => cleanups.forEach(fn => fn())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTopic])
 
   const handleProgressUpdate = (updated: UserProgress) => {
     setUserProgress(updated)
