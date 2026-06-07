@@ -235,12 +235,16 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 .cn-resize:hover{opacity:1}
 
 /* ── Formula Toolbox ── */
-#formula-toolbox{position:absolute;left:0;top:0;height:100%;z-index:50;display:flex;pointer-events:none}
-#ftb-toggle{width:34px;min-height:100%;background:rgba(26,26,46,.8);border-right:1px solid rgba(212,175,55,.15);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;cursor:pointer;pointer-events:all;padding-top:16px;gap:6px;color:#D4AF37;font-size:11px;user-select:none;transition:all .15s}
+/* Pinned to the RIGHT edge (was left) so the canvas's bottom-left FABs — the
+   orange tutor FAB + the home/split/tools stack — no longer cover the formula
+   library when it's open. row-reverse keeps the 34px toggle on the right edge
+   with the panel expanding leftward. Per user 2026-06-07. */
+#formula-toolbox{position:absolute;right:0;top:0;height:100%;z-index:50;display:flex;flex-direction:row-reverse;pointer-events:none}
+#ftb-toggle{width:34px;min-height:100%;background:rgba(26,26,46,.8);border-left:1px solid rgba(212,175,55,.15);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;cursor:pointer;pointer-events:all;padding-top:16px;gap:6px;color:#D4AF37;font-size:11px;user-select:none;transition:all .15s}
 #ftb-toggle:hover{background:rgba(212,175,55,.15);color:#D4AF37;box-shadow:inset 0 0 12px rgba(212,175,55,.1)}
 #ftb-toggle-icon{font-size:14px;transition:transform .2s}
 #ftb-toggle-label{writing-mode:vertical-lr;transform:rotate(180deg);font-weight:600;letter-spacing:.5px;margin-top:4px}
-#ftb-panel{width:268px;height:100%;background:rgba(26,26,46,.95);border-right:1px solid rgba(212,175,55,.15);display:flex;flex-direction:column;overflow:hidden;pointer-events:all;transition:width .22s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(12px)}
+#ftb-panel{width:268px;height:100%;background:rgba(26,26,46,.95);border-left:1px solid rgba(212,175,55,.15);display:flex;flex-direction:column;overflow:hidden;pointer-events:all;transition:width .22s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(12px)}
 #formula-toolbox.collapsed #ftb-panel{width:0}
 #formula-toolbox.collapsed #ftb-toggle-icon{transform:rotate(180deg)}
 #ftb-search-wrap{padding:10px 10px 6px;flex-shrink:0}

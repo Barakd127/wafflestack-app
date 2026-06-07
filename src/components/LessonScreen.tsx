@@ -593,7 +593,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               style={formulaCopyBtnStyle(copied === 'formula')}
             >
               {copied === 'formula' ? '✓' : '➕'}
-              <span className="cm-label">{copied === 'formula' ? 'נוסף' : 'הוסף למפה שלי'}</span>
+              <span className="cm-label">{copied === 'formula' ? 'נוסף' : 'הוסף למפה'}</span>
             </button>
           </div>
         )}
@@ -707,15 +707,14 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           in the sticky strip at the top of the slide card (above). The strip
           stays visible regardless of scroll, and 'הקודם' / 'הבא' labels make
           the function unambiguous. */}
-      {/* Hover styles for the formula copy button */}
+      {/* Formula copy button. Label is ALWAYS visible (was hover-only → showed a
+          bare purple ➕ that users found cryptic). Per user 2026-06-07. */}
       <style>{`
         .ws-formula-copy { transition: all 0.2s ease; }
         .ws-formula-copy:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(99,102,241,0.4) !important; }
-        .ws-formula-copy:hover .cm-label { max-width: 140px; opacity: 1; margin-inline-start: 6px; }
         .ws-formula-copy .cm-label {
-          max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
-          transition: max-width 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
-          display: inline-block;
+          max-width: 160px; opacity: 1; margin-inline-start: 6px;
+          overflow: hidden; white-space: nowrap; display: inline-block;
         }
       `}</style>
     </div>

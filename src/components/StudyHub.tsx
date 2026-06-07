@@ -408,6 +408,22 @@ const QUIZ_TOPICS = (() => {
   return [...quizEntries, ...lessonOnly]
 })()
 
+// ── Topic taxonomy — parent groups → subtopics ────────────────────────────────
+// Clusters the ~23 flat topics into 7 parent "topics" so the תיאוריה selector
+// reads as topic → subtopic (e.g. ממוצע/חציון under מדדי מרכז). Subtopic order
+// follows the canonical TOPIC_ORDER. Any topic NOT listed here falls into a
+// "נוספים" catch-all so nothing is ever hidden. Per user 2026-06-07.
+interface TopicGroup { id: string; labelHe: string; emoji: string; topicIds: string[] }
+const TOPIC_GROUPS: TopicGroup[] = [
+  { id: 'intro',        labelHe: 'מבוא',           emoji: '🚪', topicIds: ['intro', 'variable-types'] },
+  { id: 'central',      labelHe: 'מדדי מרכז',      emoji: '🎯', topicIds: ['mean', 'median', 'weighted-combined'] },
+  { id: 'spread',       labelHe: 'מדדי פיזור',     emoji: '📏', topicIds: ['std-dev', 'observation-changes', 'linear-transformations', 'percentiles'] },
+  { id: 'presentation', labelHe: 'הצגת נתונים',    emoji: '📊', topicIds: ['data-presentation', 'distribution-shapes'] },
+  { id: 'probability',  labelHe: 'הסתברות',        emoji: '🎲', topicIds: ['probability', 'combinatorics', 'discrete-rv', 'binomial'] },
+  { id: 'inference',    labelHe: 'הסקה סטטיסטית',  emoji: '🔬', topicIds: ['sampling', 'hypothesis-testing', 'confidence-intervals'] },
+  { id: 'association',  labelHe: 'קשר בין משתנים', emoji: '🔗', topicIds: ['correlation', 'pearson', 'spearman', 'cramer', 'regression'] },
+]
+
 // ── Design tokens — driven by CSS custom properties for dark/light mode ────────
 const PAGE_BG       = 'var(--sh-page-bg)'
 const SIDEBAR_BG    = 'var(--sh-sidebar-bg)'
@@ -998,6 +1014,155 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
   const hintByTopic = new Map<string, string>(
     personalPlan?.sequence.filter(s => s.hint).map(s => [s.topicId, s.hint as string]) ?? []
   )
+  const [viewMode, setViewMode] = useState<'list' | 'mindmap'>('list')
+
+  // Build the parent→subtopic structure. Ungrouped topics fall into "נוספים".
+  type TopicItem = (typeof QUIZ_TOPICS)[number]
+  const topicById = new Map<string, TopicItem>(sortedTopics.map(t => [t.id, t]))
+  const groupedSections: Array<{ id: string; labelHe: string; emoji: string; topics: TopicItem[] }> =
+    TOPIC_GROUPS.map(g => ({
+      id: g.id, labelHe: g.labelHe, emoji: g.emoji,
+      topics: g.topicIds.map(id => topicById.get(id)).filter((t): t is TopicItem => !!t),
+    })).filter(s => s.topics.length > 0)
+  const groupedIds = new Set(TOPIC_GROUPS.flatMap(g => g.topicIds))
+  const extraTopics = sortedTopics.filter(t => !groupedIds.has(t.id))
+  if (extraTopics.length) groupedSections.push({ id: 'extra', labelHe: 'נוספים', emoji: '✨', topics: extraTopics })
+
+  const renderTopicCard = (topic: TopicItem) => {
+    const progress = userProgress.topics[topic.id]
+    const planHint = hintByTopic.get(topic.id)
+    const isMastered = progress?.mastered
+    const bestScore = progress?.bestScore || 0
+    const sessionsAttempted = progress?.sessionsAttempted || 0
+    return (
+      <div
+        key={topic.id}
+        className="ws-topic-card"
+        style={{
+          background: GLASS_CARD,
+          backdropFilter: 'blur(20px)',
+          border: `2px solid ${isMastered ? 'rgba(212,175,55,0.6)' : 'rgba(255,255,255,0.3)'}`,
+          borderRadius: CARD_RADIUS,
+          padding: 24,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+          textAlign: 'right',
+          transition: 'all 0.3s',
+          boxShadow: CARD_SHADOW,
+        }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'
+          ;(e.currentTarget as HTMLElement).style.boxShadow = `0 12px 40px rgba(51,81,202,0.25)`
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+          ;(e.currentTarget as HTMLElement).style.boxShadow = CARD_SHADOW
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+          <div style={{ fontSize: 32 }}>{isMastered ? '⭐' : '📖'}</div>
+          <div>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>
+              {topic.label}
+            </div>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginTop: 4 }}>
+              {topic.building}
+            </div>
+          </div>
+        </div>
+
+        {planHint && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(245,200,66,0.22), rgba(212,175,55,0.12))',
+            border: '1px solid rgba(212,175,55,0.5)',
+            borderRadius: 10, padding: '6px 10px',
+            fontFamily: "'Rubik', sans-serif", fontSize: 12,
+            color: '#8a6d1c', fontWeight: 600, textAlign: 'right',
+          }}>
+            🎯 {planHint}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
+          <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: TEXT_MED }}>
+              {sessionsAttempted}
+            </div>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>סשנים</div>
+          </div>
+          <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: bestScore > 85 ? '#34A853' : TEXT_MED }}>
+              {bestScore}%
+            </div>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ציון הטוב</div>
+          </div>
+          <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: '#D4AF37' }}>
+              {topic.questionCount}
+            </div>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>שאלות</div>
+          </div>
+        </div>
+
+        {isMastered && (
+          <div style={{
+            background: 'rgba(212,175,55,0.15)',
+            border: '1px solid rgba(212,175,55,0.4)',
+            borderRadius: 8,
+            padding: '6px 10px',
+            fontFamily: "'Rubik', sans-serif",
+            fontSize: 12,
+            color: '#D4AF37',
+            fontWeight: 600,
+            textAlign: 'center',
+          }}>
+            ✅ הושגת שליטה!
+          </div>
+        )}
+
+        {/* Lesson / Quiz action buttons */}
+        <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+          <button
+            onClick={() => onSelectTopic(topic.id, 'lesson')}
+            style={{
+              flex: 1,
+              background: BUTTON_COLOR,
+              color: '#fff',
+              border: 'none',
+              borderRadius: 14,
+              padding: '10px 0',
+              fontWeight: 600,
+              fontSize: 14,
+              cursor: 'pointer',
+              fontFamily: "'Rubik', sans-serif",
+              boxShadow: '0px 2px 6px rgba(51,81,202,0.35)',
+            }}
+          >
+            📚 תיאוריה
+          </button>
+          <button
+            onClick={() => onSelectTopic(topic.id, 'quiz')}
+            style={{
+              flex: 1,
+              background: 'rgba(255,255,255,0.7)',
+              color: TEXT_DARK,
+              border: '1px solid rgba(127,155,217,0.4)',
+              borderRadius: 14,
+              padding: '10px 0',
+              fontWeight: 600,
+              fontSize: 14,
+              cursor: 'pointer',
+              fontFamily: "'Rubik', sans-serif",
+            }}
+          >
+            📝 תרגול
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }}>
       <button
@@ -1023,143 +1188,100 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
         בחר נושא ללמוד 📚
       </h2>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20, maxWidth: 1200 }}>
-        {sortedTopics.map(topic => {
-          const progress = userProgress.topics[topic.id]
-          const planHint = hintByTopic.get(topic.id)
-          const isMastered = progress?.mastered
-          const bestScore = progress?.bestScore || 0
-          const sessionsAttempted = progress?.sessionsAttempted || 0
-
-          return (
-            <div
-              key={topic.id}
-              className="ws-topic-card"
-              style={{
-                background: GLASS_CARD,
-                backdropFilter: 'blur(20px)',
-                border: `2px solid ${isMastered ? 'rgba(212,175,55,0.6)' : 'rgba(255,255,255,0.3)'}`,
-                borderRadius: CARD_RADIUS,
-                padding: 24,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 16,
-                textAlign: 'right',
-                transition: 'all 0.3s',
-                boxShadow: CARD_SHADOW,
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'
-                ;(e.currentTarget as HTMLElement).style.boxShadow = `0 12px 40px rgba(51,81,202,0.25)`
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-                ;(e.currentTarget as HTMLElement).style.boxShadow = CARD_SHADOW
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                <div style={{ fontSize: 32 }}>{isMastered ? '⭐' : '📖'}</div>
-                <div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>
-                    {topic.label}
-                  </div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginTop: 4 }}>
-                    {topic.building}
-                  </div>
-                </div>
-              </div>
-
-              {planHint && (
-                <div style={{
-                  background: 'linear-gradient(135deg, rgba(245,200,66,0.22), rgba(212,175,55,0.12))',
-                  border: '1px solid rgba(212,175,55,0.5)',
-                  borderRadius: 10, padding: '6px 10px',
-                  fontFamily: "'Rubik', sans-serif", fontSize: 12,
-                  color: '#8a6d1c', fontWeight: 600, textAlign: 'right',
-                }}>
-                  🎯 {planHint}
-                </div>
-              )}
-
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-                <div style={{ textAlign: 'center', flex: 1 }}>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: TEXT_MED }}>
-                    {sessionsAttempted}
-                  </div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>סשנים</div>
-                </div>
-                <div style={{ textAlign: 'center', flex: 1 }}>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: bestScore > 85 ? '#34A853' : TEXT_MED }}>
-                    {bestScore}%
-                  </div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ציון הטוב</div>
-                </div>
-                <div style={{ textAlign: 'center', flex: 1 }}>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: '#D4AF37' }}>
-                    {topic.questionCount}
-                  </div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>שאלות</div>
-                </div>
-              </div>
-
-              {isMastered && (
-                <div style={{
-                  background: 'rgba(212,175,55,0.15)',
-                  border: '1px solid rgba(212,175,55,0.4)',
-                  borderRadius: 8,
-                  padding: '6px 10px',
-                  fontFamily: "'Rubik', sans-serif",
-                  fontSize: 12,
-                  color: '#D4AF37',
-                  fontWeight: 600,
-                  textAlign: 'center',
-                }}>
-                  ✅ הושגת שליטה!
-                </div>
-              )}
-
-              {/* Lesson / Quiz action buttons */}
-              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                <button
-                  onClick={() => onSelectTopic(topic.id, 'lesson')}
-                  style={{
-                    flex: 1,
-                    background: BUTTON_COLOR,
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 14,
-                    padding: '10px 0',
-                    fontWeight: 600,
-                    fontSize: 14,
-                    cursor: 'pointer',
-                    fontFamily: "'Rubik', sans-serif",
-                    boxShadow: '0px 2px 6px rgba(51,81,202,0.35)',
-                  }}
-                >
-                  📚 תיאוריה
-                </button>
-                <button
-                  onClick={() => onSelectTopic(topic.id, 'quiz')}
-                  style={{
-                    flex: 1,
-                    background: 'rgba(255,255,255,0.7)',
-                    color: TEXT_DARK,
-                    border: '1px solid rgba(127,155,217,0.4)',
-                    borderRadius: 14,
-                    padding: '10px 0',
-                    fontWeight: 600,
-                    fontSize: 14,
-                    cursor: 'pointer',
-                    fontFamily: "'Rubik', sans-serif",
-                  }}
-                >
-                  📝 תרגול
-                </button>
-              </div>
-            </div>
-          )
-        })}
+      {/* List ⇄ Mindmap toggle */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 24, background: 'rgba(127,155,217,0.12)', padding: 4, borderRadius: 999, width: 'fit-content' }}>
+        {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => (
+          <button key={m} onClick={() => setViewMode(m)} style={{
+            border: 'none', borderRadius: 999, padding: '7px 18px', cursor: 'pointer',
+            fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700,
+            background: viewMode === m ? BUTTON_COLOR : 'transparent',
+            color: viewMode === m ? '#fff' : TEXT_MED, transition: 'all 0.15s',
+          }}>{lbl}</button>
+        ))}
       </div>
+
+      {viewMode === 'list' ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 30, maxWidth: 1200 }}>
+          {groupedSections.map(section => {
+            const masteredCount = section.topics.filter(t => userProgress.topics[t.id]?.mastered).length
+            return (
+              <div key={section.id}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 24 }}>{section.emoji}</span>
+                  <h3 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 21, fontWeight: 800, color: TEXT_DARK, margin: 0 }}>{section.labelHe}</h3>
+                  <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT, background: 'rgba(127,155,217,0.12)', borderRadius: 999, padding: '2px 10px' }}>
+                    {masteredCount}/{section.topics.length} נושאים
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
+                  {section.topics.map(renderTopicCard)}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <TopicMindmap groups={groupedSections} userProgress={userProgress} onSelectTopic={onSelectTopic} />
+      )}
+    </div>
+  )
+}
+
+// ── Topic mindmap view — built-in visual tree (no iframe) ─────────────────────
+// Each parent group is a node branching to its subtopic leaves via a small gold
+// connector spine. Clicking a leaf opens that topic's lesson. RTL + responsive.
+function TopicMindmap({ groups, userProgress, onSelectTopic }: {
+  groups: Array<{ id: string; labelHe: string; emoji: string; topics: (typeof QUIZ_TOPICS) }>
+  userProgress: UserProgress
+  onSelectTopic: (id: string, mode: 'lesson' | 'quiz') => void
+}) {
+  const GOLD = 'rgba(212,175,55,0.55)'
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24, maxWidth: 1200, alignItems: 'start' }}>
+      {groups.map(g => (
+        <div key={g.id} style={{
+          background: GLASS_CARD, border: '1px solid rgba(127,155,217,0.25)',
+          borderRadius: 18, padding: '16px 18px', boxShadow: CARD_SHADOW,
+        }}>
+          {/* parent node */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: 'linear-gradient(135deg,#3351CA,#254A9F)', color: '#fff',
+            borderRadius: 12, padding: '8px 14px',
+            fontFamily: "'Rubik', sans-serif", fontWeight: 800, fontSize: 15,
+            boxShadow: '0 3px 10px rgba(51,81,202,0.3)',
+          }}>
+            <span style={{ fontSize: 18 }}>{g.emoji}</span>{g.labelHe}
+          </div>
+          {/* subtopic leaves with a connector spine */}
+          <div style={{ position: 'relative', paddingInlineStart: 22, marginTop: 12 }}>
+            <div style={{ position: 'absolute', insetInlineStart: 8, top: -4, bottom: 18, width: 2, background: GOLD }} />
+            {g.topics.map(t => {
+              const mastered = userProgress.topics[t.id]?.mastered
+              return (
+                <div key={t.id} style={{ position: 'relative', marginBottom: 8 }}>
+                  <div style={{ position: 'absolute', insetInlineStart: -14, top: '50%', width: 14, height: 2, background: GOLD }} />
+                  <button
+                    onClick={() => onSelectTopic(t.id, 'lesson')}
+                    title={`פתח תיאוריה — ${t.label}`}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start',
+                      background: mastered ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.6)',
+                      border: `1.5px solid ${mastered ? 'rgba(212,175,55,0.6)' : 'rgba(127,155,217,0.35)'}`,
+                      borderRadius: 10, padding: '8px 12px', cursor: 'pointer',
+                      fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600, color: TEXT_DARK,
+                    }}
+                  >
+                    <span>{mastered ? '⭐' : '📖'}</span>
+                    <span style={{ flex: 1 }}>{t.label}</span>
+                    <span style={{ fontSize: 11, color: TEXT_LIGHT }}>{t.questionCount > 0 ? `${t.questionCount} ש׳` : 'תיאוריה'}</span>
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -2969,7 +3091,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           />
         </div>
       )}
-      {!isDone && (
+      {/* Quick-switch pill — MOBILE ONLY. On desktop the 5-surface bottom row
+          (below) already provides תרגיל/קנבס switching, and both at bottom-center
+          collided. The pill exists for mobile, where that row is hidden. */}
+      {!isDone && isMobile && (
         <div role="tablist" aria-label="מעבר מהיר בין תרגיל לקנבס" style={{
           position: 'fixed', bottom: isMobile ? 14 : 18, left: '50%', transform: 'translateX(-50%)',
           zIndex: 402, display: 'flex', gap: 4, padding: 4,
@@ -3737,9 +3862,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         {tab === 'none' && !isDone && <div style={{ flex: 1, minHeight: 0 }} />}
 
         {/* ── Tab row: tool launcher / switcher ──────────────────────────────
-             Hidden on mobile when a tool is open (bottom sheet covers it).
-             On desktop it sits below the canvas with a dark gradient. */}
-        {!isDone && !(isMobile && tab !== 'none') && (
+             DESKTOP ONLY — on mobile the quick-switch pill (above) is the single
+             bottom switcher; this full row stays on desktop and the two no longer
+             collide at bottom-center. The ⋮ split-menu covers other surfaces on
+             mobile. */}
+        {!isDone && !isMobile && (
           <div style={{
             // Was 12/16 → 6/6 per user 2026-05-24 to remove the big empty band
             // between the tab chips and the quiz card.
