@@ -17,7 +17,7 @@ body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1
    Toggled by wsToggleTheme() and synced with the parent app's
    wafflestack-dark-mode localStorage key. */
 body.light{background:#f3f4f6}
-body.light #canvas-area{background:#fafafa}
+body.light #canvas-area{background:linear-gradient(160deg,#1F3E6C 0%,#254A9F 100%)}
 body.light #bottom-bar{background:#fff;border-top:1px solid rgba(0,0,0,.08);color:rgba(0,0,0,.55)}
 body.light #node-count,body.light #zoom-display{color:rgba(0,0,0,.65)}
 body.light .zoom-btn{background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.10);color:#1f3e6c}
@@ -88,7 +88,7 @@ body.light .tb-ribbon-tab:focus-visible,body.light .tb-btn:focus-visible{outline
 
 /* ── App ── */
 #app{height:calc(100vh - 52px - 36px);position:relative;overflow:hidden}
-#canvas-area{width:100%;height:100%;overflow:hidden;background:#f8f7f4;cursor:grab;position:relative;transition:background .3s;overflow:hidden}
+#canvas-area{width:100%;height:100%;overflow:hidden;background:linear-gradient(160deg,#1F3E6C 0%,#254A9F 100%);cursor:grab;position:relative;transition:background .3s;overflow:hidden}
 #canvas-area.panning{cursor:grabbing}
 /* XMind-style light canvas frame: a soft inset border + side highlights so the
    map sits inside a framed sheet, not edge-to-edge. pointer-events:none so it
@@ -1712,6 +1712,17 @@ function mmSerializeForSave(){
   }
 }
 
+// Measure a node's text once (shared canvas ctx, no DOM reflow) and return a
+// bubble width that fits it: text + horizontal padding, clamped to a sane range.
+let _mmMeasCtx=null;
+function mmFitNodeWidth(text){
+  if(text==null) return 90;
+  if(!_mmMeasCtx){ const c=document.createElement('canvas'); _mmMeasCtx=c.getContext('2d'); }
+  _mmMeasCtx.font="500 12px 'Rubik','Heebo','Assistant',sans-serif";
+  const w=_mmMeasCtx.measureText(String(text)).width;
+  return Math.max(90, Math.min(300, Math.round(w + 42)));
+}
+
 function mmRender(){
   // §24: positions are derived. Recompute via tidy-tree unless an animation
   // is currently easing positions (window._mmAnimating is set by
@@ -1795,6 +1806,9 @@ function mmRender(){
     const div=document.createElement('div');
     div.className='node-wrap'+(n.collapsed?' collapsed':'');
     div.id='nw_'+id;
+    // Fit node width to its text so long Hebrew names don't overflow the bubble
+    // (also keeps connector attach geometry aligned with the visible node).
+    if(n.type==='text' || n.type==='root'){ const fw=mmFitNodeWidth(n.text); if(fw) n.W=fw; }
     div.style.left=n.x+'px';div.style.top=n.y+'px';div.style.width=n.W+'px';div.style.height=n.H+'px';
     const nodeDiv=document.createElement('div');
     nodeDiv.className='node-div'+((sel||multiSel)?' selected':'')+(n.type==='equation'?' eq-node':'')+(n.type==='root'?' node-root':'');
@@ -5643,6 +5657,30 @@ document.addEventListener('keydown', e => {
   } else if(e.key==='Escape'){
     // Esc clears multi-selection
     if (MM.multiSel && MM.multiSel.length) { MM.multiSel = []; mmRender(); }
+  } else if(e.altKey && (e.key==='ArrowLeft'||e.key==='ArrowRight') && MM.sel){
+    // Reorder the selected node among its siblings: swap screen position with
+    // the nearest sibling on the chosen side (works the same in RTL because it
+    // operates on actual x). Keeps childIds order in sync with x.
+    const n = MM.nodes[MM.sel];
+    const p = (n && n.parentId) ? MM.nodes[n.parentId] : null;
+    if(p && Array.isArray(p.childIds) && p.childIds.length > 1){
+      e.preventDefault();
+      const right = e.key==='ArrowRight';
+      let best = null;
+      for(const id of p.childIds){
+        if(id===MM.sel) continue;
+        const m = MM.nodes[id]; if(!m) continue;
+        if(right ? m.x > n.x : m.x < n.x){
+          if(!best || (right ? m.x < best.x : m.x > best.x)) best = m;
+        }
+      }
+      if(best){
+        const tx = n.x; n.x = best.x; best.x = tx;
+        p.childIds.sort((a,b)=> (MM.nodes[a]?MM.nodes[a].x:0) - (MM.nodes[b]?MM.nodes[b].x:0));
+        mmPushHistory(); mmRender();
+      }
+    }
+    return;
   } else if(e.key==='F2' && MM.sel){
     e.preventDefault();
     const n=MM.nodes[MM.sel];
@@ -7164,9 +7202,9 @@ const MM_TOUR_STEPS = [
   },
   {
     id: 'edit-text',
-    title: 'ערוך טקסט',
-    body: 'בחר את הצומת החדש (קליק) ולחץ F2, או לחץ פעמיים, כדי לשנות את הטקסט שלו. שמירה אוטומטית.',
-    highlight: null,
+    title: 'תן שם לענף',
+    body: 'הענף החדש נבחר אוטומטית — פשוט התחל להקליד כדי לתת לו שם. שמירה אוטומטית.',
+    highlight: '.node-div.selected',
   },
   {
     id: 'drag-node',

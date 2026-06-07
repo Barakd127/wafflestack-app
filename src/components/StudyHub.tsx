@@ -1228,61 +1228,114 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
   )
 }
 
-// ── Topic mindmap view — built-in visual tree (no iframe) ─────────────────────
-// Each parent group is a node branching to its subtopic leaves via a small gold
-// connector spine. Clicking a leaf opens that topic's lesson. RTL + responsive.
+// ── Topic mindmap view — a REAL mindmap matching "מפת הלמידה שלי" ──────────────
+// Central root → group branches → topic sub-branches, drawn with curved SVG
+// connectors on the app's blue background. Clicking a topic leaf opens its
+// lesson. Horizontally scrollable when wide. Mirrors the mindmap.html aesthetic.
 function TopicMindmap({ groups, userProgress, onSelectTopic }: {
   groups: Array<{ id: string; labelHe: string; emoji: string; topics: (typeof QUIZ_TOPICS) }>
   userProgress: UserProgress
   onSelectTopic: (id: string, mode: 'lesson' | 'quiz') => void
 }) {
-  const GOLD = 'rgba(212,175,55,0.55)'
+  // Branch colours cycle like the real mindmap (blue / red alternating spine).
+  const BRANCH_COLORS = ['#3351CA', '#C0392B', '#2563EB', '#B23B6E', '#1E7F6B', '#7C5CBF', '#C77D2E']
+  const COL_W = 196
+  const ROOT_TOP = 16, ROOT_H = 46
+  const GROUP_TOP = 132, GROUP_H = 42
+  const TOPIC_TOP0 = 232, TOPIC_STEP = 50, TOPIC_H = 38
+  const cols = Math.max(groups.length, 1)
+  const W = Math.max(cols * COL_W, 560)
+  const maxTopics = Math.max(1, ...groups.map(g => g.topics.length))
+  const H = TOPIC_TOP0 + maxTopics * TOPIC_STEP + 24
+  const rootX = W / 2
+  const colX = (i: number) => i * COL_W + COL_W / 2
+
+  // Bezier from (x1,y1) down to (x2,y2) with a vertical control midpoint.
+  const curve = (x1: number, y1: number, x2: number, y2: number) => {
+    const my = (y1 + y2) / 2
+    return `M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}`
+  }
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24, maxWidth: 1200, alignItems: 'start' }}>
-      {groups.map(g => (
-        <div key={g.id} style={{
-          background: GLASS_CARD, border: '1px solid rgba(127,155,217,0.25)',
-          borderRadius: 18, padding: '16px 18px', boxShadow: CARD_SHADOW,
-        }}>
-          {/* parent node */}
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            background: 'linear-gradient(135deg,#3351CA,#254A9F)', color: '#fff',
-            borderRadius: 12, padding: '8px 14px',
-            fontFamily: "'Rubik', sans-serif", fontWeight: 800, fontSize: 15,
-            boxShadow: '0 3px 10px rgba(51,81,202,0.3)',
-          }}>
-            <span style={{ fontSize: 18 }}>{g.emoji}</span>{g.labelHe}
-          </div>
-          {/* subtopic leaves with a connector spine */}
-          <div style={{ position: 'relative', paddingInlineStart: 22, marginTop: 12 }}>
-            <div style={{ position: 'absolute', insetInlineStart: 8, top: -4, bottom: 18, width: 2, background: GOLD }} />
-            {g.topics.map(t => {
-              const mastered = userProgress.topics[t.id]?.mastered
-              return (
-                <div key={t.id} style={{ position: 'relative', marginBottom: 8 }}>
-                  <div style={{ position: 'absolute', insetInlineStart: -14, top: '50%', width: 14, height: 2, background: GOLD }} />
-                  <button
-                    onClick={() => onSelectTopic(t.id, 'lesson')}
-                    title={`פתח תיאוריה — ${t.label}`}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'start',
-                      background: mastered ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.6)',
-                      border: `1.5px solid ${mastered ? 'rgba(212,175,55,0.6)' : 'rgba(127,155,217,0.35)'}`,
-                      borderRadius: 10, padding: '8px 12px', cursor: 'pointer',
-                      fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600, color: TEXT_DARK,
-                    }}
-                  >
-                    <span>{mastered ? '⭐' : '📖'}</span>
-                    <span style={{ flex: 1 }}>{t.label}</span>
-                    <span style={{ fontSize: 11, color: TEXT_LIGHT }}>{t.questionCount > 0 ? `${t.questionCount} ש׳` : 'תיאוריה'}</span>
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      ))}
+    <div style={{
+      position: 'relative', width: '100%', overflowX: 'auto', overflowY: 'hidden',
+      background: 'linear-gradient(160deg,#1F3E6C 0%,#254A9F 100%)',
+      borderRadius: 18, boxShadow: CARD_SHADOW, padding: 4,
+    }}>
+      <div style={{ position: 'relative', width: W, height: H, margin: '0 auto' }} dir="rtl">
+        {/* Connectors */}
+        <svg width={W} height={H} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+          {groups.map((g, i) => {
+            const c = BRANCH_COLORS[i % BRANCH_COLORS.length]
+            const gx = colX(i)
+            return (
+              <g key={g.id}>
+                <path d={curve(rootX, ROOT_TOP + ROOT_H, gx, GROUP_TOP)} fill="none" stroke={c} strokeWidth={2.5} opacity={0.9} />
+                {g.topics.map((t, j) => (
+                  <path key={t.id} d={curve(gx, GROUP_TOP + GROUP_H, gx, TOPIC_TOP0 + j * TOPIC_STEP + TOPIC_H / 2)}
+                    fill="none" stroke={c} strokeWidth={1.8} opacity={0.55} />
+                ))}
+              </g>
+            )
+          })}
+        </svg>
+
+        {/* Root */}
+        <div style={{
+          position: 'absolute', left: rootX, top: ROOT_TOP, transform: 'translateX(-50%)',
+          height: ROOT_H, display: 'flex', alignItems: 'center', gap: 8, padding: '0 22px',
+          background: 'linear-gradient(135deg,#FFFFFF,#EEF2FB)', color: '#1F2640',
+          borderRadius: 23, border: '2px solid rgba(212,175,55,0.7)', whiteSpace: 'nowrap',
+          fontFamily: "'Rubik', sans-serif", fontWeight: 800, fontSize: 16,
+          boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
+        }}>📊 סטטיסטיקה</div>
+
+        {/* Group branches */}
+        {groups.map((g, i) => {
+          const c = BRANCH_COLORS[i % BRANCH_COLORS.length]
+          return (
+            <div key={g.id} style={{
+              position: 'absolute', left: colX(i), top: GROUP_TOP, transform: 'translateX(-50%)',
+              height: GROUP_H, maxWidth: COL_W - 12, display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px',
+              background: c, color: '#fff', borderRadius: 21, whiteSpace: 'nowrap',
+              overflow: 'hidden', textOverflow: 'ellipsis',
+              fontFamily: "'Rubik', sans-serif", fontWeight: 800, fontSize: 14,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.28)',
+            }}>
+              <span style={{ fontSize: 16 }}>{g.emoji}</span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{g.labelHe}</span>
+            </div>
+          )
+        })}
+
+        {/* Topic sub-branches */}
+        {groups.map((g, i) =>
+          g.topics.map((t, j) => {
+            const mastered = userProgress.topics[t.id]?.mastered
+            return (
+              <button
+                key={t.id}
+                onClick={() => onSelectTopic(t.id, 'lesson')}
+                title={`פתח תיאוריה — ${t.label}`}
+                style={{
+                  position: 'absolute', left: colX(i), top: TOPIC_TOP0 + j * TOPIC_STEP,
+                  transform: 'translateX(-50%)', height: TOPIC_H, maxWidth: COL_W - 16,
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '0 12px', cursor: 'pointer',
+                  background: mastered ? 'linear-gradient(135deg,#F7D774,#E9B949)' : 'rgba(255,255,255,0.95)',
+                  color: '#1F2640', borderRadius: 19,
+                  border: `1.5px solid ${mastered ? '#E6A800' : 'rgba(255,255,255,0.6)'}`,
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 12.5,
+                  boxShadow: '0 3px 9px rgba(0,0,0,0.22)',
+                }}
+              >
+                <span style={{ fontSize: 13 }}>{mastered ? '⭐' : '📖'}</span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.label}</span>
+              </button>
+            )
+          })
+        )}
+      </div>
     </div>
   )
 }
