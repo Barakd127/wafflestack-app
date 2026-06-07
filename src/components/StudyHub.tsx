@@ -1017,6 +1017,19 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
   )
   const [viewMode, setViewMode] = useState<'list' | 'mindmap'>('list')
 
+  // The מפה tab embeds the real interactive mindmap (mindmap.html). When a topic
+  // node's 📖/📝 chip is clicked it posts {type:'ws-open-topic', topicId, mode}
+  // — route it to the lesson / practice via the same handler the cards use.
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      const d = e.data as { type?: string; topicId?: string; mode?: string }
+      if (!d || d.type !== 'ws-open-topic' || !d.topicId) return
+      onSelectTopic(d.topicId, d.mode === 'quiz' ? 'quiz' : 'lesson')
+    }
+    window.addEventListener('message', onMsg)
+    return () => window.removeEventListener('message', onMsg)
+  }, [onSelectTopic])
+
   // Build the parent→subtopic structure. Ungrouped topics fall into "נוספים".
   type TopicItem = (typeof QUIZ_TOPICS)[number]
   const topicById = new Map<string, TopicItem>(sortedTopics.map(t => [t.id, t]))
@@ -1222,7 +1235,14 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
           })}
         </div>
       ) : (
-        <TopicMindmap groups={groupedSections} userProgress={userProgress} onSelectTopic={onSelectTopic} />
+        // The real interactive mindmap (same map as מפת הלמידה שלי). Topic nodes
+        // carry 📖/📝 chips that open theory/practice; sub-topics can be added.
+        <iframe
+          src={`${import.meta.env.BASE_URL}mindmap.html`}
+          title="מפת הנושאים"
+          style={{ width: '100%', height: '72vh', border: 'none', borderRadius: 16, boxShadow: CARD_SHADOW, display: 'block' }}
+          allow="clipboard-read; clipboard-write"
+        />
       )}
     </div>
   )

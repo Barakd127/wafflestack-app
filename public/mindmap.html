@@ -631,6 +631,22 @@ body.light .nb-empty{color:rgba(0,0,0,.45)}
 }
 body.light .node-note-badge{background:rgba(255,255,255,.95)}
 
+/* ═══ Topic links (📖 תיאוריה / 📝 תרגול) on topic-mapped nodes ═══ */
+.node-topic-links{
+  position:absolute; top:100%; left:50%; transform:translateX(-50%);
+  margin-top:6px; display:flex; gap:6px; white-space:nowrap; z-index:6;
+  opacity:0; pointer-events:none; transition:opacity .15s;
+}
+.node-wrap:hover .node-topic-links,
+.node-wrap:has(.node-div.selected) .node-topic-links{opacity:1; pointer-events:auto}
+.ntl-chip{
+  background:#fff; border:1px solid rgba(31,62,108,.28); color:#1F3E6C;
+  font-family:'Rubik','Heebo','Assistant',sans-serif; font-size:11px; font-weight:700;
+  border-radius:999px; padding:3px 10px; cursor:pointer;
+  box-shadow:0 3px 10px rgba(31,62,108,.2);
+}
+.ntl-chip:hover{background:#EAF0FB; border-color:rgba(31,62,108,.5); transform:translateY(-1px)}
+
 /* ═══ Note editor popover ═══ */
 #note-editor-overlay{
   position:fixed; inset:0; z-index:9000;
@@ -1110,30 +1126,30 @@ const COURSE_SEED = {
       text: 'סטטיסטיקה תיאורית', color: '#1d4ed8',
       children: [
         { text: 'יסודות', color: '#3b82f6', children: [
-          { text: 'מבוא לסטטיסטיקה' },
-          { text: 'סוגי משתנים' },
-          { text: 'הצגת נתונים' },
+          { text: 'מבוא לסטטיסטיקה', topicId: 'intro' },
+          { text: 'סוגי משתנים', topicId: 'variable-types' },
+          { text: 'הצגת נתונים', topicId: 'data-presentation' },
         ]},
         { text: 'מדדי מרכז', color: '#0ea5e9', children: [
-          { text: 'ממוצע' },
-          { text: 'חציון' },
-          { text: 'צורות התפלגות' },
+          { text: 'ממוצע', topicId: 'mean' },
+          { text: 'חציון', topicId: 'median' },
+          { text: 'צורות התפלגות', topicId: 'distribution-shapes' },
         ]},
         { text: 'מדדי פיזור', color: '#06b6d4', children: [
-          { text: 'סטיית תקן' },
-          { text: 'אחוזונים' },
+          { text: 'סטיית תקן', topicId: 'std-dev' },
+          { text: 'אחוזונים', topicId: 'percentiles' },
         ]},
         { text: 'חישובי הרחבה', color: '#14b8a6', children: [
-          { text: 'ממוצע משוקלל ומשולב' },
-          { text: 'השפעת תצפיות' },
-          { text: 'טרנספורמציות ליניאריות' },
+          { text: 'ממוצע משוקלל ומשולב', topicId: 'weighted-combined' },
+          { text: 'השפעת תצפיות', topicId: 'observation-changes' },
+          { text: 'טרנספורמציות ליניאריות', topicId: 'linear-transformations' },
         ]},
         { text: 'מתאם ורגרסיה', color: '#10b981', children: [
-          { text: 'מתאם' },
-          { text: 'מתאם פירסון' },
-          { text: 'מתאם ספירמן' },
-          { text: 'מקדם קרמר' },
-          { text: 'רגרסיה ליניארית' },
+          { text: 'מתאם', topicId: 'correlation' },
+          { text: 'מתאם פירסון', topicId: 'pearson' },
+          { text: 'מתאם ספירמן', topicId: 'spearman' },
+          { text: 'מקדם קרמר', topicId: 'cramer' },
+          { text: 'רגרסיה ליניארית', topicId: 'regression' },
         ]},
       ],
     },
@@ -1141,17 +1157,17 @@ const COURSE_SEED = {
       text: 'סטטיסטיקה היסקית', color: '#b91c1c',
       children: [
         { text: 'הסתברות', color: '#dc2626', children: [
-          { text: 'הסתברות' },
-          { text: 'קומבינטוריקה' },
+          { text: 'הסתברות', topicId: 'probability' },
+          { text: 'קומבינטוריקה', topicId: 'combinatorics' },
         ]},
         { text: 'משתנים מקריים', color: '#ea580c', children: [
-          { text: 'משתנה מקרי בדיד' },
-          { text: 'התפלגות בינומית' },
+          { text: 'משתנה מקרי בדיד', topicId: 'discrete-rv' },
+          { text: 'התפלגות בינומית', topicId: 'binomial' },
         ]},
         { text: 'דגימה והסקה', color: '#f59e0b', children: [
-          { text: 'דגימה ושגיאת תקן' },
-          { text: 'רווחי סמך' },
-          { text: 'בדיקת השערות' },
+          { text: 'דגימה ושגיאת תקן', topicId: 'sampling' },
+          { text: 'רווחי סמך', topicId: 'confidence-intervals' },
+          { text: 'בדיקת השערות', topicId: 'hypothesis-testing' },
         ]},
       ],
     },
@@ -1167,6 +1183,7 @@ function _seedNode(spec, parentId, depth, slot, totalSiblings) {
   const y = py + 80 + slot * 56;
   const color = spec.color || (parentId && MM.nodes[parentId] ? MM.nodes[parentId].color : '#60a5fa');
   const node = mmNode('branch', spec.text, x, y, parentId, color);
+  if (spec.topicId) node.topicId = spec.topicId;
   if (spec.children && spec.children.length) {
     spec.children.forEach((c, i) => _seedNode(c, node.id, depth + 1, i, spec.children.length));
   }
@@ -1224,6 +1241,7 @@ function _mmImportNode(spec, parentId, mapId, indexPath, merge){
       if(isEquation){ node.type = 'equation'; node.latex = spec.formula; }
     }
     if(spec.color && !node.userEdited) node.color = spec.color;
+    if(spec.topicId) node.topicId = spec.topicId;
     // Re-attach under the correct parent if it drifted (shouldn't normally).
     if(node.parentId !== parentId){
       const oldP = node.parentId && MM.nodes[node.parentId];
@@ -1241,6 +1259,7 @@ function _mmImportNode(spec, parentId, mapId, indexPath, merge){
     const color = spec.color || (MM.nodes[parentId] ? MM.nodes[parentId].color : '#60a5fa');
     node = mmNode(type, spec.text || '', 0, 0, parentId, color);
     if(spec.note != null) node.body = spec.note;
+    if(spec.topicId) node.topicId = spec.topicId;
     if(isEquation) node.latex = spec.formula;
     node.origin = 'seed';
     node.seedKey = seedKey;
@@ -1950,6 +1969,24 @@ function mmRender(){
       noteBtn.textContent = hasNote ? '📝' : '＋';
       noteBtn.onclick = (e)=>{ e.stopPropagation(); openNoteEditor(n.id); if(typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('add-note'); };
       div.appendChild(noteBtn);
+    }
+
+    // ── Topic links — nodes mapped to an app topic (topicId) get 📖 תיאוריה /
+    //    📝 תרגול chips (shown on hover/selection). Clicking opens that topic in
+    //    the host app via postMessage. Adding sub-branches still works normally. ──
+    if(n.topicId){
+      const links = document.createElement('div');
+      links.className = 'node-topic-links';
+      const mkChip = (label, mode)=>{
+        const b = document.createElement('div');
+        b.className = 'ntl-chip';
+        b.textContent = label;
+        b.onclick = (e)=>{ e.stopPropagation(); try{ (window.parent||window).postMessage({type:'ws-open-topic', topicId:n.topicId, mode:mode}, '*'); }catch(_){} };
+        return b;
+      };
+      links.appendChild(mkChip('📖 תיאוריה','lesson'));
+      links.appendChild(mkChip('📝 תרגול','quiz'));
+      div.appendChild(links);
     }
 
     // ── Node drag: REORDER + REPARENT only (§24, X-Mind tidy-tree mode) ──
