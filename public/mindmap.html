@@ -17,7 +17,8 @@ body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1
    Toggled by wsToggleTheme() and synced with the parent app's
    wafflestack-dark-mode localStorage key. */
 body.light{background:#f3f4f6}
-body.light #canvas-area{background:linear-gradient(160deg,#D8E7FA 0%,#A2B6EA 70%,#8FA4E2 100%)}
+body.light #canvas-area{background:#E4EFFE}
+body.light #app{background:linear-gradient(160deg,#D8E7FA 0%,#A2B6EA 70%,#8FA4E2 100%)}
 body.light #bottom-bar{background:#fff;border-top:1px solid rgba(0,0,0,.08);color:rgba(0,0,0,.55)}
 body.light #node-count,body.light #zoom-display{color:rgba(0,0,0,.65)}
 body.light .zoom-btn{background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.10);color:#1f3e6c}
@@ -91,16 +92,17 @@ body.light .tb-ribbon-tab:focus-visible,body.light .tb-btn:focus-visible{outline
 #search-input:focus{border-color:#6366f1;box-shadow:0 0 0 2px rgba(99,102,241,.2)}
 
 /* ── App ── */
-#app{height:calc(100vh - 52px - 36px);position:relative;overflow:hidden}
-#canvas-area{width:100%;height:100%;overflow:hidden;background:linear-gradient(160deg,#D8E7FA 0%,#A2B6EA 70%,#8FA4E2 100%);cursor:grab;position:relative;transition:background .3s;overflow:hidden}
+/* #app paints the MARGIN (lavender). #canvas-area is the inner SHEET (#E4EFFE),
+   inset 14px so the lavender shows only as a clean frame around the mindmap. */
+#app{height:calc(100vh - 52px - 36px);position:relative;overflow:hidden;background:linear-gradient(160deg,#D8E7FA 0%,#A2B6EA 70%,#8FA4E2 100%)}
+#canvas-area{position:absolute;inset:14px;border-radius:18px;overflow:hidden;background:#E4EFFE;cursor:grab;transition:background .3s}
 #canvas-area.panning{cursor:grabbing}
 /* XMind-style light canvas frame: a soft inset border + side highlights so the
    map sits inside a framed sheet, not edge-to-edge. pointer-events:none so it
    never blocks panning/clicks. */
-#canvas-area::after{content:'';position:absolute;inset:10px;border-radius:16px;
-  border:1.5px solid rgba(31,62,108,.12);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.6), inset 0 2px 26px rgba(31,62,108,.05),
-             0 0 0 9999px rgba(31,62,108,.015);
+#canvas-area::after{content:'';position:absolute;inset:0;border-radius:18px;
+  border:1.5px solid rgba(31,62,108,.10);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.6), inset 0 2px 26px rgba(31,62,108,.05);
   pointer-events:none;z-index:1}
 body:not(.light) #canvas-area::after{border-color:rgba(255,255,255,.12);
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), inset 0 2px 26px rgba(0,0,0,.18)}

@@ -310,10 +310,17 @@ export default function CoachmarkTour() {
   const r = targetRect!
   const cx = r.left + r.width / 2
   const cy = r.top + r.height / 2
-  // Place tooltip below by default; flip above if too close to bottom.
+  // Place tooltip below by default; flip above if too close to bottom. We
+  // compute the card's TOP-LEFT directly (no translateY flip) and CLAMP it fully
+  // inside the viewport so later / edge-anchored steps are never cut off.
   const fitsBelow = r.bottom + TOOLTIP_GAP + 200 < H
-  const tooltipTop  = fitsBelow ? r.bottom + TOOLTIP_GAP : r.top - TOOLTIP_GAP
-  const tooltipXform = fitsBelow ? 'translateX(-50%)' : 'translateX(-50%) translateY(-100%)'
+  const EST_H = 230
+  let cardTop = fitsBelow ? r.bottom + TOOLTIP_GAP : r.top - TOOLTIP_GAP - EST_H
+  cardTop = Math.max(12, Math.min(cardTop, H - EST_H - 12))
+  const halfW = TOOLTIP_W / 2
+  const cardLeft = Math.max(halfW + 8, Math.min(cx, W - halfW - 8))
+  const tooltipTop = cardTop
+  const tooltipXform = 'translateX(-50%)'
 
   // Arrow geometry: a short, bold pointer sitting between the target and the
   // tooltip, pointing AT the target. Bounces toward the target to draw the eye.
@@ -373,9 +380,10 @@ export default function CoachmarkTour() {
         style={{
           ...cardStyle,
           position: 'absolute',
-          left: cx,
+          left: cardLeft,
           top: tooltipTop,
           transform: tooltipXform,
+          maxHeight: 'calc(100vh - 24px)', overflowY: 'auto',
         }}
       >
         {cardContent}

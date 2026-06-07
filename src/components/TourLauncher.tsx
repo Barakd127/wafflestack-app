@@ -136,24 +136,27 @@ export default function TourLauncher() {
                             style={{
                               display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'right',
                               cursor: 'pointer',
-                              background: isNew ? 'rgba(99,102,241,0.08)' : 'transparent',
+                              background: locked ? 'rgba(31,38,64,0.05)' : (isNew ? 'rgba(99,102,241,0.08)' : 'transparent'),
                               border: isNew ? '1px solid rgba(99,102,241,0.45)' : '1px solid transparent',
                               borderRadius: 9, padding: '8px 10px', marginBottom: 2, fontFamily: 'inherit',
-                              opacity: locked ? 0.7 : 1,
+                              opacity: locked ? 0.5 : 1,
+                              filter: locked ? 'grayscale(0.8)' : 'none',
                             }}
                           >
-                            <span style={{ fontSize: 18, lineHeight: 1, width: 22, textAlign: 'center' }}>{meta?.emoji}</span>
+                            <span style={{ fontSize: 18, lineHeight: 1, width: 22, textAlign: 'center', position: 'relative' }}>
+                              {locked ? '🔒' : meta?.emoji}
+                            </span>
                             <span style={{ flex: 1, minWidth: 0 }}>
                               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <span style={{ fontWeight: 700, fontSize: 13, color: '#1F2640' }}>{meta?.labelHe}</span>
-                                {locked && <span title="עדיין לא נפתח — תצוגה מקדימה" style={{ fontSize: 10 }}>🔒</span>}
+                                <span style={{ fontWeight: 700, fontSize: 13, color: locked ? '#8b90a0' : '#1F2640' }}>{meta?.labelHe}</span>
+                                {locked && <span style={{ fontSize: 9, fontWeight: 700, color: '#6b7280', background: 'rgba(31,38,64,0.08)', borderRadius: 999, padding: '1px 6px' }}>נעול</span>}
                                 {isNew && <span style={{ fontSize: 9, fontWeight: 700, color: '#fff', background: '#6366f1', borderRadius: 999, padding: '1px 6px' }}>חדש ✨</span>}
                               </span>
-                              <span style={{ display: 'block', fontSize: 10.5, color: '#6b7280', marginTop: 1, lineHeight: 1.35 }}>
+                              <span style={{ display: 'block', fontSize: 10.5, color: locked ? '#9aa0ad' : '#6b7280', marginTop: 1, lineHeight: 1.35 }}>
                                 {FEATURE_UNLOCKS_BY_ID[fid]?.descriptionHe}
                               </span>
                             </span>
-                            <span style={{ fontSize: 14, color: '#6366f1' }}>▸</span>
+                            <span style={{ fontSize: 14, color: locked ? '#b6bac6' : '#6366f1' }}>{locked ? '🔒' : '▸'}</span>
                           </button>
                         )
                       })}
