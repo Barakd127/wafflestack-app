@@ -336,6 +336,8 @@ import { useArsenalStore, quickAddArsenal, looksLikeMath, serializeEquation } fr
 import PotionInventory from './PotionInventory'
 import { useTutorialStep } from '../hooks/useTutorialStep'
 import { useTutorialStore } from '../store/tutorialStore'
+import { registerTourAction } from './CoachmarkTour'
+import TourLauncher from './TourLauncher'
 import Tooltip from './Tooltip'
 import Ribbon from './Ribbon'
 import { RiskBoard } from './RiskBoard'
@@ -712,7 +714,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
             התחל תרגול ({counts[selected]} שאלות) ←
           </button>
           {hasLesson && (
-            <button onClick={onReadLesson} style={{
+            <button data-tour="theory-btn" onClick={onReadLesson} style={{
               background: 'rgba(255,255,255,0.6)', color: TEXT_DARK,
               border: '1px solid rgba(127,155,217,0.4)',
               borderRadius: 24, padding: '12px 22px',
@@ -1497,25 +1499,27 @@ function ExternalLinkPanel({ course }: { course: CourseDef }) {
 }
 
 // ── Sidebar ────────────────────────────────────────────────────────────────────
-function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNotebook, width = 247 }: {
+function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNotebook, onOpenTours, width = 247 }: {
   active: InternalView
   onNav: (v: InternalView) => void
   onGoWorld: () => void
   onGoMindmap: () => void
   onGoDrawing: () => void
   onGoNotebook: () => void
+  onOpenTours: () => void
   width?: number
 }) {
   // EduCity-style clean line icons. SVG with stroke-currentColor so the
   // active-state gold tint applies uniformly. No emoji, no gradient chips.
   // Each icon is a 22x22 viewBox 24, 1.8 stroke, rounded line caps.
-  type IconKey = 'home' | 'book' | 'trophy' | 'map' | 'globe'
+  type IconKey = 'home' | 'book' | 'trophy' | 'map' | 'globe' | 'tour'
   const items: Array<{ id: InternalView | null; label: string; iconKey: IconKey; action?: string; feature?: FeatureId }> = [
     { id: 'home',     label: 'דף הבית',           iconKey: 'home' },
     { id: 'courses', label: 'אזור למידה',        iconKey: 'book' },
     { id: 'arsenal',  label: 'הארסנל שלי',        iconKey: 'trophy', feature: 'arsenal' },
     { id: null,       label: 'מפת הלמידה שלי',    iconKey: 'map',   action: 'mindmap', feature: 'mindmap-view' },
     { id: null,       label: 'העולם שלי',         iconKey: 'globe', action: 'world' },
+    { id: null,       label: 'סיורים מודרכים',    iconKey: 'tour',  action: 'tours' },
   ]
   // Subscribe to gating state once per render so each row knows lock status.
   const _adminMode = useLearningStore(s => s.adminMode)
@@ -1542,6 +1546,8 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
         return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v16"/><path d="M15 6v16"/></svg>
       case 'globe':
         return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 0 1 0 18"/><path d="M12 3a13 13 0 0 0 0 18"/></svg>
+      case 'tour':
+        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M5 21V4"/><path d="M5 4l9 3-9 3"/><path d="M5 13l11 3-11 3" opacity="0.55"/></svg>
     }
   }
 
@@ -1592,6 +1598,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
                 if (item.action === 'mindmap') { onGoMindmap(); return }
                 if (item.action === 'drawing') { onGoDrawing(); return }
                 if (item.action === 'notebook') { onGoNotebook(); return }
+                if (item.action === 'tours') { onOpenTours(); return }
                 if (item.id !== null) onNav(item.id)
               }}
               title={locked ? lockTip : (collapsed ? item.label : undefined)}
@@ -1775,21 +1782,7 @@ function TopBar({ title, onLogout, darkMode, onToggleDark }: { title: string; on
         {/* Ribbon C — Account (label hidden per user 2026-05-24) */}
         <Ribbon label="חשבון" hideLabel>
           <span className="hidden md:inline" style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_DARK }}>שלום, {userName}</span>
-          <Tooltip label="סיור מודרך" description="הפעל מחדש את ההדרכה">
-            <button
-              onClick={() => {
-                useTutorialStore.getState().setEnabled(true)
-                useTutorialStore.getState().reset()
-              }}
-              style={{
-                background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.3)',
-                borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
-                color: '#6366f1', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
-              }}
-            >
-              🎓 סיור
-            </button>
-          </Tooltip>
+          <TourLauncher />
           {onLogout && (
             <Tooltip label="יציאה" description="התנתק מהחשבון">
               <button onClick={onLogout} style={{
@@ -2330,6 +2323,20 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     }
   }, [fullscreen, onToggleFullscreen])
 
+  // Register tour actions so the flagship 🚀 demo can DRIVE the workflow (open
+  // split menu, jump to practice, switch to canvas) as the user advances steps.
+  // Best-effort: each only fires when LearningScreen is mounted; otherwise the
+  // tour step just narrates + points (CoachmarkTour falls back gracefully).
+  useEffect(() => {
+    const cleanups = [
+      registerTourAction('open-split',    () => setSplitMenuOpen(true)),
+      registerTourAction('go-practice',   () => { setSplitMenuOpen(false); handleSetTab('none') }),
+      registerTourAction('switch-canvas', () => handleSetTab('canvas')),
+      registerTourAction('open-formula',  () => handleSetTab('canvas')),
+    ]
+    return () => cleanups.forEach(fn => fn())
+  }, [handleSetTab])
+
   // Esc to exit fullscreen (don't hijack when editing inside a textarea)
   useEffect(() => {
     if (!fullscreen || !onToggleFullscreen) return
@@ -2695,6 +2702,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       {fullscreen && onToggleFullscreen && isMobile && (
         <>
           <button
+            data-tour="split-btn"
             onClick={() => setSplitMenuOpen(o => !o)}
             aria-label="תפריט כלים"
             aria-haspopup="menu"
@@ -2763,6 +2771,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       {fullscreen && onToggleFullscreen && !isMobile && (
         <>
           <button
+            data-tour="split-btn"
             onClick={() => setSplitMenuOpen(o => !o)}
             aria-label="פיצול מסך — בחר כלי לחלונית התחתונה"
             aria-haspopup="menu"
@@ -2956,7 +2965,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           between the exercise and the canvas. On DESKTOP the same pill drives
           the existing side-by-side split (handleSetTab). */}
       {!isDone && isMobile && tab === 'canvas' && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 400, background: '#0d1628' }}>
+        <div data-tour="canvas-frame" style={{ position: 'fixed', inset: 0, zIndex: 400, background: '#0d1628' }}>
           <iframe
             key={`qs-wb-${q?.id || currentQ}`}
             src={`${import.meta.env.BASE_URL}mindmap.html?mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
@@ -2978,6 +2987,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             return (
               <button
                 key={key} role="tab" aria-selected={active}
+                data-tour={key === 'canvas' ? 'canvas-tab' : 'practice-tab'}
                 onClick={() => handleSetTab(key === 'none' ? 'none' : 'canvas')}
                 style={{
                   border: 'none', borderRadius: 999, padding: '8px 18px', cursor: 'pointer',
@@ -3251,6 +3261,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               {!isDone && (q as any).difficulty && <QuizDifficultyBadge level={(q as any).difficulty} xp={q.xp} />}
               {!isDone && (
                 <button
+                  data-tour="practice-btn"
                   onClick={navNext}
                   disabled={isLastQ && !canGoNextQ}
                   aria-label="שאלה הבאה"
@@ -4000,6 +4011,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
           onGoMindmap={() => { onViewChange('mindmap'); if (isMobile) setMobileSidebarOpen(false) }}
           onGoDrawing={() => { onViewChange('drawing'); if (isMobile) setMobileSidebarOpen(false) }}
           onGoNotebook={() => { window.location.hash = '#notebook'; if (isMobile) setMobileSidebarOpen(false) }}
+          onOpenTours={() => { useTutorialStore.getState().setLauncherOpen(true); if (isMobile) setMobileSidebarOpen(false) }}
           width={isMobile ? 260 : sidebarWidth}
         />
         {/* Sidebar resize handle — on the left edge (RTL: left is outer edge) */}

@@ -25,12 +25,24 @@ interface TutorialState {
   enabled: boolean
   activeStepId: string | null
   activeTour: ActiveTour | null
+  /**
+   * A macro-tier tour that has unlocked but was NOT auto-opened (because one
+   * tour already auto-opened this session). Drives a gentle pulse on the 🎓
+   * סיור button so the student can open it when ready. Session-only (not
+   * persisted) — purely a nudge.
+   */
+  pendingTourId: string | null
+  setPendingTour: (tourId: string | null) => void
+  /** Whether the 🎓 tour launcher panel is open. Lets any entry point (topbar
+   * button on desktop, hamburger-menu item on mobile) open the same launcher. */
+  launcherOpen: boolean
+  setLauncherOpen: (open: boolean) => void
   hasSeen: (stepId: string) => boolean
   markSeen: (stepId: string) => void
   setActive: (stepId: string | null) => void
   setEnabled: (enabled: boolean) => void
   reset: () => void
-  startTour: (id: string, steps: string[]) => void
+  startTour: (id: string, steps: string[], force?: boolean) => void
   advanceTour: () => void
   retreatTour: () => void
   closeTour: () => void
@@ -72,6 +84,11 @@ export const useTutorialStore = create<TutorialState>((set, get) => ({
   enabled: loadEnabled(),
   activeStepId: null,
   activeTour: null,
+  pendingTourId: null,
+  launcherOpen: false,
+
+  setPendingTour: (tourId) => set({ pendingTourId: tourId }),
+  setLauncherOpen: (open) => set({ launcherOpen: open }),
 
   hasSeen: (stepId) => !!get().seen[stepId],
 
@@ -94,8 +111,10 @@ export const useTutorialStore = create<TutorialState>((set, get) => ({
     set({ seen: {}, activeStepId: null, activeTour: null })
   },
 
-  startTour: (id, steps) => {
-    if (get().hasCompletedTour(id)) return
+  startTour: (id, steps, force = false) => {
+    // Auto-open (force=false) fires once: skip if already seen/completed.
+    // Launcher replay (force=true) always re-runs, even a completed tour.
+    if (!force && get().hasCompletedTour(id)) return
     set({ activeTour: { id, steps, currentIndex: 0 } })
   },
 

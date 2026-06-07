@@ -10,15 +10,38 @@ export function registerTourRef(id: string, ref: React.RefObject<HTMLElement | n
   return () => { tourRefs.delete(id) }
 }
 
+// ── Module-level action registry ─────────────────────────────────────────────
+// Components register callbacks (open a menu, switch a tab) so a tour step can
+// actually DEMONSTRATE a workflow — the UI moves as the user advances. Actions
+// must be defensive (no-op when not applicable) since the launcher can replay a
+// tour from any screen.
+const tourActions = new Map<string, () => void>()
+
+export function registerTourAction(id: string, fn: () => void): () => void {
+  tourActions.set(id, fn)
+  return () => { if (tourActions.get(id) === fn) tourActions.delete(id) }
+}
+
+/**
+ * Step ids for a tour, in order. Launchers/triggers pass this to
+ * `startTour(id, steps, force)` so the store knows the tour length (advanceTour
+ * ends when currentIndex+1 >= steps.length). Rendering reads TOUR_STEPS by id.
+ */
+export function tourStepIds(id: string): string[] {
+  return (TOUR_STEPS[id] ?? []).map(s => s.id)
+}
+
 // ── Tour step definitions ─────────────────────────────────────────────────────
 interface TourStep {
   id: string
-  target: string  // ref key, or 'center' for modal-only (no spotlight)
+  target: string        // ref key, or 'center' for modal-only (no spotlight)
   title: string
   body: string
+  action?: string       // optional registered action key to run on step enter
 }
 
 const TOUR_STEPS: Record<string, TourStep[]> = {
+  // Legacy in-mindmap tour (kept).
   mindmap: [
     { id: 'mm-1', target: 'back-btn',  title: 'ניווט בתוך ה-iframe',  body: 'בתוך המפה: גרור להזזה, גלגלת עכבר לזום פנימה/החוצה.' },
     { id: 'mm-2', target: 'split-btn', title: 'מצב מפוצל',             body: 'לחץ כאן לצפייה במפת המושגים ובעיר בו-זמנית.' },
@@ -26,11 +49,46 @@ const TOUR_STEPS: Record<string, TourStep[]> = {
     { id: 'mm-4', target: 'center',    title: 'סגירת המפה',            body: 'לסגירה — לחץ על כפתור "← דף הבית" בפינה הימנית העליונה.' },
     { id: 'mm-5', target: 'help-btn',  title: 'חזרה על הסיור',         body: 'לחץ על "?" בכל עת לחזרה על ההדרכה הזו.' },
   ],
+
+  // ── Macro-tier tours (auto-open on unlock + replayable from launcher) ──────
+  'tour-basic': [
+    { id: 'b-1', target: 'center',      title: '🌱 פתחת את הצעדים הראשונים!', body: 'אספת מספיק נקודות כדי לפתוח את כלי הלמידה הבסיסיים. בוא נראה אותם.' },
+    { id: 'b-2', target: 'arsenal-btn', title: 'הארסנל שלך', body: 'אוסף הנוסחאות, ההגדרות והקלפים שצברת. כל מה שלמדת — במקום אחד.' },
+    { id: 'b-3', target: 'theory-btn',  title: 'תיאוריה', body: 'קרא את החומר לפני שאתה מתרגל. אפשר לחזור לכאן בכל רגע.' },
+    { id: 'b-4', target: 'tour-btn',    title: 'הסיורים שלך', body: 'בכל פעם שתפתח שלב חדש — ייפתח סיור שמראה מה חדש. לחזרה לחץ על 🎓.' },
+  ],
+
+  'tour-intermediate': [
+    { id: 'i-1', target: 'center',     title: '✏️ פתחת את כלי הקנבס!', body: 'עכשיו יש לך לוח ציור, מסמן, צורות ועורך משוואות. בוא נראה איפה.' },
+    { id: 'i-2', target: 'canvas-tab', title: 'הקנבס', body: 'מעבר מהיר בין התרגיל לבין לוח הציור — כתוב, צייר ופתור ביד חופשית.' },
+    { id: 'i-3', target: 'formula-btn',title: 'נוסחאות', body: 'הצב נוסחאות מוכנות מספריית הנוסחאות ישירות על הקנבס.' },
+    { id: 'i-4', target: 'center',     title: 'המשך לאסוף', body: 'ככל שתתקדם ייפתחו עוד כלים — העיר שלך, תבניות וצבעים. בהצלחה!' },
+  ],
+
+  // ── Flagship demo (= the Advanced tour). Drives the UI as the user advances ─
+  'tour-advanced': [
+    { id: 'a-1', target: 'center',      title: '🚀 ברוך הבא לטיר המתקדם!', body: 'פתחת את זרימת העבודה המלאה. בוא נראה אותה מקצה לקצה.' },
+    { id: 'a-2', target: 'theory-btn',  title: '1. מתחילים בתיאוריה', body: 'קוראים את החומר. כאן נמצא ההסבר המלא של הנושא.' },
+    { id: 'a-3', target: 'split-btn',   title: '2. פותחים פיצול מסך', body: 'לחיצה כאן פותחת שני חלונות זה לצד זה — חומר מצד אחד, כלי עבודה מהשני.', action: 'open-split' },
+    { id: 'a-4', target: 'practice-btn',title: '3. דלג לתרגול', body: 'אותו פיצול עובד גם במסך התרגול — פתרון ליד השאלה.', action: 'go-practice' },
+    { id: 'a-5', target: 'canvas-tab',  title: '4. החלף לקנבס', body: 'בלחיצה אחת עוברים מהתרגיל ללוח הציור.', action: 'switch-canvas' },
+    { id: 'a-6', target: 'canvas-frame',title: '5. נוסחה + תרגולים על הקנבס', body: 'מציבים נוסחה, כותבים את הפתרון ופותרים את התרגולים — הכל ליד הקנבס.', action: 'open-formula' },
+    { id: 'a-7', target: 'center',      title: 'זהו — אתה מוכן! 🎉', body: 'הטיר המתקדם פתוח. שלב את התיאוריה, הפיצול והקנבס בכל תרגול.' },
+  ],
 }
 
 const PADDING = 8
-const TOOLTIP_W = 280
-const TOOLTIP_GAP = 12
+const TOOLTIP_W = 300
+const TOOLTIP_GAP = 22   // extra gap leaves room for the arrow between tooltip & target
+
+// One-time keyframes for the pulsing spotlight + bouncing arrow.
+const TOUR_CSS = `
+@keyframes ws-tour-ring     { 0%,100% { opacity:.95; } 50% { opacity:.35; } }
+@keyframes ws-tour-halo     { 0% { r:0; opacity:.5; } 100% { r:46; opacity:0; } }
+@keyframes ws-tour-bounce   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@keyframes ws-tour-bounceUp { 0%,100% { transform: translateY(0); } 50% { transform: translateY(9px); } }
+@keyframes ws-tour-dash     { to { stroke-dashoffset: -28; } }
+`
 
 export default function CoachmarkTour() {
   const activeTour  = useTutorialStore(s => s.activeTour)
@@ -38,7 +96,7 @@ export default function CoachmarkTour() {
   const retreatTour = useTutorialStore(s => s.retreatTour)
   const closeTour   = useTutorialStore(s => s.closeTour)
 
-  // Re-measure on tick so spotlights track moving elements
+  // Re-measure on tick so spotlights track moving / newly-mounted elements.
   const [, force] = useState(0)
   useEffect(() => {
     if (!activeTour) return
@@ -46,13 +104,25 @@ export default function CoachmarkTour() {
     return () => clearInterval(id)
   }, [activeTour])
 
-  // Escape closes the tour
+  // Escape closes the tour.
   useEffect(() => {
     if (!activeTour) return
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') closeTour() }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [activeTour, closeTour])
+
+  // Run a step's registered action once, when that step becomes active. This is
+  // what makes the flagship demo actually open the split menu / switch tabs.
+  const tourId = activeTour?.id
+  const stepIdx = activeTour?.currentIndex
+  useEffect(() => {
+    if (tourId == null || stepIdx == null) return
+    const step = TOUR_STEPS[tourId]?.[stepIdx]
+    if (!step?.action) return
+    const fn = tourActions.get(step.action)
+    if (fn) { try { fn() } catch { /* action is best-effort */ } }
+  }, [tourId, stepIdx])
 
   if (!activeTour) return null
 
@@ -68,12 +138,16 @@ export default function CoachmarkTour() {
   const W = window.innerWidth
   const H = window.innerHeight
 
-  // Resolve target rect
+  // Resolve target rect. Prefer a registered ref; fall back to a DOM element
+  // tagged `data-tour="<key>"` (lets large components opt in by adding a single
+  // attribute instead of threading a React ref through deep JSX).
   let targetRect: DOMRect | null = null
   if (step.target !== 'center') {
     const ref = tourRefs.get(step.target)
-    if (ref?.current) {
-      const r = ref.current.getBoundingClientRect()
+    const el: HTMLElement | null = ref?.current
+      ?? document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`)
+    if (el) {
+      const r = el.getBoundingClientRect()
       if (r.width > 0 && r.height > 0) targetRect = r
     }
   }
@@ -81,7 +155,7 @@ export default function CoachmarkTour() {
   const isCentered = step.target === 'center' || !targetRect
 
   const navRow = (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginTop: 12 }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginTop: 14 }}>
       <button
         onClick={retreatTour}
         disabled={isFirst}
@@ -91,7 +165,7 @@ export default function CoachmarkTour() {
           color: isFirst ? '#4a5568' : '#a5b4fc',
           fontSize: 12,
           cursor: isFirst ? 'not-allowed' : 'pointer',
-          padding: '5px 10px',
+          padding: '6px 12px',
           borderRadius: 8,
           fontFamily: "'Rubik', sans-serif",
         }}
@@ -113,10 +187,10 @@ export default function CoachmarkTour() {
         style={{
           background: 'linear-gradient(135deg, #5b8bff, #6c63ff)',
           border: 'none', color: '#fff',
-          fontSize: 13, fontWeight: 600, padding: '7px 16px',
+          fontSize: 14, fontWeight: 700, padding: '9px 20px',
           borderRadius: 999, cursor: 'pointer',
           fontFamily: "'Rubik', sans-serif",
-          boxShadow: '0 4px 14px rgba(91,139,255,0.45)',
+          boxShadow: '0 4px 16px rgba(91,139,255,0.5)',
         }}
       >
         {isLast ? 'סיום ✓' : 'הבא →'}
@@ -124,11 +198,31 @@ export default function CoachmarkTour() {
     </div>
   )
 
+  // Progress dots — a more prominent indicator than "x / n" text alone.
+  const dots = (
+    <div style={{ display: 'flex', gap: 5, marginTop: 10, justifyContent: 'flex-start' }}>
+      {steps.map((s, i) => (
+        <span key={s.id} style={{
+          width: i === activeTour.currentIndex ? 18 : 7, height: 7, borderRadius: 999,
+          background: i === activeTour.currentIndex ? 'linear-gradient(90deg,#D4AF37,#f0c651)' : 'rgba(255,255,255,0.22)',
+          transition: 'width .25s',
+        }} />
+      ))}
+    </div>
+  )
+
   const cardContent = (
     <>
-      <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, letterSpacing: '-0.2px' }}>{step.title}</div>
-      <div style={{ fontSize: 13, lineHeight: 1.5, color: '#cbd5ff', marginBottom: 4 }}>{step.body}</div>
-      <div style={{ fontSize: 11, color: '#6b7280' }}>{activeTour.currentIndex + 1} / {steps.length}</div>
+      <div style={{
+        display: 'inline-block', fontSize: 11, fontWeight: 700, color: '#0d1320',
+        background: 'linear-gradient(90deg,#D4AF37,#f0c651)', padding: '2px 9px',
+        borderRadius: 999, marginBottom: 8, letterSpacing: '.3px',
+      }}>
+        שלב {activeTour.currentIndex + 1} מתוך {steps.length}
+      </div>
+      <div style={{ fontWeight: 800, fontSize: 17, marginBottom: 7, letterSpacing: '-0.2px', lineHeight: 1.25 }}>{step.title}</div>
+      <div style={{ fontSize: 14, lineHeight: 1.6, color: '#d3dcff' }}>{step.body}</div>
+      {dots}
       {navRow}
     </>
   )
@@ -136,14 +230,14 @@ export default function CoachmarkTour() {
   const cardStyle: React.CSSProperties = {
     width: TOOLTIP_W,
     maxWidth: 'calc(100vw - 24px)',
-    background: 'rgba(20,24,40,0.97)',
-    border: '1px solid rgba(99,162,255,0.45)',
-    borderRadius: 14,
-    padding: '14px 16px',
+    background: 'linear-gradient(160deg, rgba(24,28,48,0.985), rgba(16,19,34,0.985))',
+    border: '1px solid rgba(120,170,255,0.5)',
+    borderRadius: 16,
+    padding: '16px 18px',
     color: '#f1f5ff',
-    boxShadow: '0 20px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04)',
+    boxShadow: '0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.18), 0 0 40px rgba(91,139,255,0.18)',
     fontFamily: "'Rubik', sans-serif",
-    backdropFilter: 'blur(8px)',
+    backdropFilter: 'blur(10px)',
   }
 
   if (isCentered) {
@@ -154,21 +248,37 @@ export default function CoachmarkTour() {
         style={{
           position: 'fixed', inset: 0, zIndex: 10_001,
           pointerEvents: 'auto',
-          background: 'rgba(8,12,28,0.65)',
+          background: 'rgba(6,9,22,0.72)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
       >
-        <div dir="rtl" style={cardStyle}>{cardContent}</div>
+        <style>{TOUR_CSS}</style>
+        <div dir="rtl" style={{ ...cardStyle, animation: 'ws-tour-bounce 2.4s ease-in-out infinite' }}>{cardContent}</div>
       </div>
     )
   }
 
   const r = targetRect!
   const cx = r.left + r.width / 2
-  // Place tooltip below by default; flip above if too close to bottom
-  const fitsBelow = r.bottom + TOOLTIP_GAP + 160 < H
+  const cy = r.top + r.height / 2
+  // Place tooltip below by default; flip above if too close to bottom.
+  const fitsBelow = r.bottom + TOOLTIP_GAP + 200 < H
   const tooltipTop  = fitsBelow ? r.bottom + TOOLTIP_GAP : r.top - TOOLTIP_GAP
   const tooltipXform = fitsBelow ? 'translateX(-50%)' : 'translateX(-50%) translateY(-100%)'
+
+  // Arrow geometry: a short, bold pointer sitting between the target and the
+  // tooltip, pointing AT the target. Bounces toward the target to draw the eye.
+  const arrowGap = 6
+  const arrowLen = 34
+  const arrowX = cx
+  const arrowTailY = fitsBelow ? r.bottom + arrowGap + arrowLen : r.top - arrowGap - arrowLen
+  const arrowHeadY = fitsBelow ? r.bottom + arrowGap : r.top - arrowGap
+  const headSize = 13
+  // Triangle arrowhead pointing toward the target edge.
+  const headPath = fitsBelow
+    ? `M ${arrowX - headSize} ${arrowHeadY + headSize} L ${arrowX} ${arrowHeadY} L ${arrowX + headSize} ${arrowHeadY + headSize} Z`
+    : `M ${arrowX - headSize} ${arrowHeadY - headSize} L ${arrowX} ${arrowHeadY} L ${arrowX + headSize} ${arrowHeadY - headSize} Z`
+  const bounceAnim = fitsBelow ? 'ws-tour-bounceUp 1s ease-in-out infinite' : 'ws-tour-bounce 1s ease-in-out infinite'
 
   return (
     <div
@@ -176,6 +286,7 @@ export default function CoachmarkTour() {
       aria-label={step.title}
       style={{ position: 'fixed', inset: 0, zIndex: 10_001, pointerEvents: 'auto' }}
     >
+      <style>{TOUR_CSS}</style>
       <svg width={W} height={H} style={{ position: 'absolute', inset: 0, pointerEvents: 'auto' }}>
         <defs>
           <mask id="tour-spotlight-mask">
@@ -183,18 +294,30 @@ export default function CoachmarkTour() {
             <rect
               x={r.left - PADDING} y={r.top - PADDING}
               width={r.width + PADDING * 2} height={r.height + PADDING * 2}
-              rx={10} fill="black"
+              rx={12} fill="black"
             />
           </mask>
         </defs>
-        <rect x={0} y={0} width={W} height={H} fill="rgba(8,12,28,0.65)" mask="url(#tour-spotlight-mask)" />
+        {/* Dimmed backdrop with the target cut out */}
+        <rect x={0} y={0} width={W} height={H} fill="rgba(6,9,22,0.72)" mask="url(#tour-spotlight-mask)" />
+        {/* Expanding halo around the target */}
+        <circle cx={cx} cy={cy} r={0} fill="none" stroke="rgba(212,175,55,0.9)" strokeWidth={2}
+          style={{ animation: 'ws-tour-halo 1.6s ease-out infinite' }} />
+        {/* Pulsing spotlight ring */}
         <rect
           x={r.left - PADDING} y={r.top - PADDING}
           width={r.width + PADDING * 2} height={r.height + PADDING * 2}
-          rx={10} fill="none"
-          stroke="rgba(99,162,255,0.95)" strokeWidth={2}
-          style={{ filter: 'drop-shadow(0 0 8px rgba(99,162,255,0.55))' }}
+          rx={12} fill="none"
+          stroke="#D4AF37" strokeWidth={3}
+          style={{ filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.7))', animation: 'ws-tour-ring 1.3s ease-in-out infinite' }}
         />
+        {/* Bouncing arrow pointing at the target */}
+        <g style={{ animation: bounceAnim, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }}>
+          <line x1={arrowX} y1={arrowTailY} x2={arrowX} y2={arrowHeadY}
+            stroke="#D4AF37" strokeWidth={5} strokeLinecap="round"
+            strokeDasharray="7 7" style={{ animation: 'ws-tour-dash .7s linear infinite' }} />
+          <path d={headPath} fill="#D4AF37" />
+        </g>
       </svg>
       <div
         dir="rtl"

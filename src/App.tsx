@@ -16,6 +16,7 @@ import { TutorFAB } from './components/AITutor/TutorFAB'
 import { TutorDrawer } from './components/AITutor/TutorDrawer'
 import FeatureGate from './components/FeatureGate'
 import UnlockToast from './components/UnlockToast'
+import TierTourTrigger from './components/TierTourTrigger'
 import VirtualKeyboardCloser from './components/VirtualKeyboardCloser'
 import WaffleStackKeyboard from './components/WaffleStackKeyboard'
 import CalculatorDrawer from './components/CalculatorDrawer'
@@ -415,6 +416,9 @@ function App() {
 
       {/* Global unlock celebration toast (drains learningStore.newlyUnlocked). */}
       <UnlockToast />
+      {/* Auto-opens a macro-tier guided tour the first time that tier unlocks
+          (one per session; rest pulse the 🎓 סיור button). No UI of its own. */}
+      {loggedIn && <TierTourTrigger />}
       {/* Floating ✕ button visible whenever MathLive's virtual keyboard is
           open. Closes via API + on Escape + on route change. Per user 2026-05-25. */}
       <VirtualKeyboardCloser />

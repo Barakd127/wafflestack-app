@@ -39,67 +39,94 @@ export interface UnlockRule {
   descriptionHe: string
 }
 
-// ── Generous, motivating ladder ─────────────────────────────────────────────
+// ── One-at-a-time progression continuum ─────────────────────────────────────
 // The core study loop (theory + practice + sidebar home/courses + hints +
 // streaks) has NO rule here → always unlocked. Everything below is a *reward*
-// that lands quickly and feels celebratory, NOT a wall. Thresholds were tuned
-// down from the original steep version so a learner hits a new unlock almost
-// every short session. Rules OR together (xp OR topicsCompleted OR a specific
-// lesson) — meeting any one criterion is enough.
+// that the learner collects ONE AT A TIME along a smooth XP curve — never in
+// clusters. Each feature has a UNIQUE xp threshold (monotonically increasing),
+// so no two features ever unlock at the same moment.
 //
-// ~XP intuition: a correct answer is 10-20 XP, finishing a lesson is +5 XP,
-// so "10 correct answers" ≈ 100-150 XP and "1 topic" is one entry in
-// completedLessons.
+// Design contract (see Vault spec + plan snazzy-sauteeing-charm.md):
+//   • XP is the single smooth axis (a correct answer = 10-20 XP → fine grain).
+//   • Each `tier` is now the feature's ORDINAL position in the continuum (1..28),
+//     NOT a shared band. macroTierForFeature() groups them into basic/inter/adv.
+//   • `topicsCompleted` is kept ONLY where it's semantically the real gate
+//     (stat-b-native / cross-course-quiz = "finish all Stat-A topics"). It was
+//     removed from every XP-driven rule because an OR'd topic gate is exactly
+//     what made features pop in clusters when a topic completed.
+//   • `requiresLesson:'intro'` stays on the first couple so finishing the
+//     1-minute intro still lights up the very first reward.
+// Rules still OR together (xp OR topicsCompleted OR a specific lesson) — but
+// since each xp value is unique, they fire sequentially.
 export const FEATURE_UNLOCKS: UnlockRule[] = [
-  // Tier 1 — First win. Finish the very first lesson (intro) OR a single
-  // correct answer (10 XP) lights up the first reward features.
-  { feature: 'arsenal',          tier: 1, xp: 10, requiresLesson: 'intro',   description: 'Finish the intro lesson or answer one question',  descriptionHe: 'סיים את שיעור הפתיחה או ענה נכון על שאלה אחת כדי לפתוח את הארסנל' },
-  { feature: 'pomodoro',         tier: 1, xp: 10, requiresLesson: 'intro',   description: 'Finish the intro lesson or answer one question',  descriptionHe: 'סיים את שיעור הפתיחה או ענה נכון על שאלה אחת כדי לפתוח את שעון הפומודורו' },
+  // ── Basic band (ordinals 1-7) — tight spacing for early momentum ──────────
+  { feature: 'arsenal',          tier: 1,  xp: 10,  requiresLesson: 'intro', description: 'Finish the intro lesson or answer one question', descriptionHe: 'סיים את שיעור הפתיחה או ענה נכון על שאלה אחת — נפתח הארסנל' },
+  { feature: 'pomodoro',         tier: 2,  xp: 20,                            description: 'Reach 20 XP',  descriptionHe: 'הגע ל-20 נק׳ כדי לפתוח את שעון הפומודורו' },
+  { feature: 'mindmap-view',     tier: 3,  xp: 35,  requiresLesson: 'intro', description: 'Finish the intro lesson or reach 35 XP', descriptionHe: 'סיים את שיעור הפתיחה או הגע ל-35 נק׳ — תראה את מפת הלמידה שלך' },
+  { feature: 'ai-tutor',         tier: 4,  xp: 50,                            description: 'Reach 50 XP',  descriptionHe: 'הגע ל-50 נק׳ כדי לפתוח את המורה הפרטי' },
+  { feature: 'notebook',         tier: 5,  xp: 70,                            description: 'Reach 70 XP',  descriptionHe: 'הגע ל-70 נק׳ כדי לפתוח את המחברת' },
+  { feature: 'mindmap-edit',     tier: 6,  xp: 95,                            description: 'Reach 95 XP',  descriptionHe: 'הגע ל-95 נק׳ כדי לערוך את מפת החשיבה' },
+  { feature: 'paper-styles',     tier: 7,  xp: 120,                           description: 'Reach 120 XP', descriptionHe: 'הגע ל-120 נק׳ כדי להחליף סגנון נייר' },
 
-  // Tier 2 — Mindmap is the headline early reward: finish the intro lesson and
-  // you can see your learning map immediately (also unlocks at 30 XP).
-  { feature: 'mindmap-view',     tier: 2, xp: 30, requiresLesson: 'intro',   description: 'Finish the intro lesson to see your learning map',  descriptionHe: 'סיים את שיעור הפתיחה כדי לראות את מפת הלמידה שלך' },
-  { feature: 'ai-tutor',         tier: 2, xp: 30, topicsCompleted: 1,        description: 'Reach 30 XP or finish 1 topic',         descriptionHe: 'הגע ל-30 נק׳ או סיים נושא אחד כדי לפתוח את המורה הפרטי' },
+  // ── Intermediate band (ordinals 8-18) — widening spacing ──────────────────
+  { feature: 'highlighter',      tier: 8,  xp: 150,                           description: 'Reach 150 XP', descriptionHe: 'הגע ל-150 נק׳ כדי לפתוח את המסמן' },
+  { feature: 'whiteboard-basic', tier: 9,  xp: 185,                           description: 'Reach 185 XP', descriptionHe: 'הגע ל-185 נק׳ כדי לפתוח את לוח הציור' },
+  { feature: 'shapes',           tier: 10, xp: 225,                           description: 'Reach 225 XP', descriptionHe: 'הגע ל-225 נק׳ כדי לפתוח את כלי הצורות' },
+  { feature: 'math-widget',      tier: 11, xp: 270,                           description: 'Reach 270 XP', descriptionHe: 'הגע ל-270 נק׳ כדי לפתוח את עורך המשוואות' },
+  { feature: 'formula-library',  tier: 12, xp: 320,                           description: 'Reach 320 XP', descriptionHe: 'הגע ל-320 נק׳ כדי לפתוח את ספריית הנוסחאות' },
+  { feature: 'color-picker',     tier: 13, xp: 375,                           description: 'Reach 375 XP', descriptionHe: 'הגע ל-375 נק׳ כדי לפתוח את בורר הצבעים' },
+  { feature: 'templates',        tier: 14, xp: 435,                           description: 'Reach 435 XP', descriptionHe: 'הגע ל-435 נק׳ כדי לפתוח את התבניות' },
+  { feature: 'whiteboard-full',  tier: 15, xp: 500,                           description: 'Reach 500 XP', descriptionHe: 'הגע ל-500 נק׳ כדי לפתוח את לוח הציור המלא' },
+  { feature: 'city-editor',      tier: 16, xp: 570,                           description: 'Reach 570 XP', descriptionHe: 'הגע ל-570 נק׳ כדי לפתוח את עורך העיר' },
+  { feature: 'coins-store',      tier: 17, xp: 645,                           description: 'Reach 645 XP', descriptionHe: 'הגע ל-645 נק׳ כדי לפתוח את חנות המטבעות' },
+  { feature: 'city-themes',      tier: 18, xp: 725,                           description: 'Reach 725 XP', descriptionHe: 'הגע ל-725 נק׳ כדי לפתוח ערכות נושא לעיר' },
 
-  // Tier 3 — Note-taking surfaces (50 XP OR 1 topic).
-  { feature: 'notebook',         tier: 3, xp: 50, topicsCompleted: 1,        description: 'Reach 50 XP or finish 1 topic',         descriptionHe: 'הגע ל-50 נק׳ או סיים נושא אחד כדי לפתוח את המחברת' },
-  { feature: 'mindmap-edit',     tier: 3, xp: 50, topicsCompleted: 1,        description: 'Reach 50 XP or finish 1 topic',         descriptionHe: 'הגע ל-50 נק׳ או סיים נושא אחד כדי לערוך את מפת החשיבה' },
-  { feature: 'paper-styles',     tier: 3, xp: 50, topicsCompleted: 1,        description: 'Reach 50 XP or finish 1 topic',         descriptionHe: 'הגע ל-50 נק׳ או סיים נושא אחד כדי להחליף סגנון נייר' },
+  // ── Advanced band (ordinals 19-28) — aspirational; split-screen leads ─────
+  { feature: 'split-screen',         tier: 19, xp: 810,                       description: 'Reach 810 XP', descriptionHe: 'הגע ל-810 נק׳ כדי לפתוח פיצול מסך' },
+  { feature: 'cross-link',           tier: 20, xp: 900,                       description: 'Reach 900 XP', descriptionHe: 'הגע ל-900 נק׳ כדי לפתוח קישור בין מסמכים' },
+  { feature: 'global-search',        tier: 21, xp: 995,                       description: 'Reach 995 XP', descriptionHe: 'הגע ל-995 נק׳ כדי לפתוח חיפוש גלובלי' },
+  { feature: 'drawing-board-full',   tier: 22, xp: 1095,                      description: 'Reach 1095 XP', descriptionHe: 'הגע ל-1095 נק׳ כדי לפתוח את לוח הציור המלא' },
+  // Semantic gate: Stat-B opens by finishing all Stat-A topics (10), not raw XP.
+  { feature: 'stat-b-native',        tier: 23, topicsCompleted: 10,           description: 'Finish all Stat-A topics', descriptionHe: 'סיים את כל נושאי סטטיסטיקה א׳ כדי לפתוח את סטטיסטיקה ב׳' },
+  { feature: 'cross-course-quiz',    tier: 24, xp: 1320, topicsCompleted: 10, description: 'Finish all Stat-A topics or reach 1320 XP', descriptionHe: 'סיים את כל נושאי סטטיסטיקה א׳ (או הגע ל-1320 נק׳) כדי לפתוח חידוני בין-קורסים' },
+  { feature: 'methods',              tier: 25, xp: 1200,                      description: 'Reach 1200 XP', descriptionHe: 'הגע ל-1200 נק׳ כדי לפתוח שיטות מחקר' },
+  { feature: 'anova',                tier: 26, xp: 1340,                      description: 'Reach 1340 XP', descriptionHe: 'הגע ל-1340 נק׳ כדי לפתוח ניתוח שונות' },
+  { feature: 'custom-topic',         tier: 27, xp: 1480,                      description: 'Reach 1480 XP', descriptionHe: 'הגע ל-1480 נק׳ כדי ליצור נושא מותאם' },
+  { feature: 'community-curated',    tier: 28, xp: 1620,                      description: 'Reach 1620 XP', descriptionHe: 'הגע ל-1620 נק׳ כדי לפתוח ארסנל קהילתי' },
+]
 
-  // Tier 4 — Canvas / whiteboard after ~10 correct answers (≈100 XP) or 1 topic.
-  { feature: 'whiteboard-basic', tier: 4, xp: 100, topicsCompleted: 1,       description: 'Answer ~10 questions (100 XP) to unlock the canvas',         descriptionHe: 'ענה על כ-10 שאלות (100 נק׳) כדי לפתוח את לוח הציור' },
-  { feature: 'shapes',           tier: 4, xp: 100, topicsCompleted: 1,       description: 'Answer ~10 questions or finish 1 topic',descriptionHe: 'ענה על כ-10 שאלות (100 נק׳) כדי לפתוח את כלי הצורות' },
-  { feature: 'highlighter',      tier: 4, xp: 100, topicsCompleted: 1,       description: 'Answer ~10 questions or finish 1 topic',descriptionHe: 'ענה על כ-10 שאלות (100 נק׳) כדי לפתוח את המסמן' },
+// ── Macro-tier grouping (label + tour layer over the continuum) ─────────────
+// The 28-feature continuum is grouped into 3 macro tiers for: (a) the 🎓 סיור
+// launcher tabs, (b) the auto-open-tour-on-unlock trigger. A macro tier owns a
+// contiguous span of ordinals.
+export type MacroTier = 'basic' | 'intermediate' | 'advanced'
 
-  // Tier 5 — Math tools (150 XP OR 2 topics).
-  { feature: 'math-widget',      tier: 5, xp: 150, topicsCompleted: 2,       description: 'Reach 150 XP or finish 2 topics',       descriptionHe: 'הגע ל-150 נק׳ או סיים 2 נושאים כדי לפתוח את עורך המשוואות' },
-  { feature: 'formula-library',  tier: 5, xp: 150, topicsCompleted: 2,       description: 'Reach 150 XP or finish 2 topics',       descriptionHe: 'הגע ל-150 נק׳ או סיים 2 נושאים כדי לפתוח את ספריית הנוסחאות' },
+/** Ordinal (rule.tier) → macro tier. basic = 1-7, intermediate = 8-18, advanced = 19-28. */
+export function macroTierForOrdinal(ordinal: number): MacroTier {
+  if (ordinal <= 7) return 'basic'
+  if (ordinal <= 18) return 'intermediate'
+  return 'advanced'
+}
 
-  // Tier 6 — City build + coins after a real habit (3 topics OR 250 XP).
-  { feature: 'city-editor',      tier: 6, xp: 250, topicsCompleted: 3,       description: 'Reach 250 XP or finish 3 topics',       descriptionHe: 'הגע ל-250 נק׳ או סיים 3 נושאים כדי לפתוח את עורך העיר' },
-  { feature: 'coins-store',      tier: 6, xp: 250, topicsCompleted: 3,       description: 'Reach 250 XP or finish 3 topics',       descriptionHe: 'הגע ל-250 נק׳ או סיים 3 נושאים כדי לפתוח את חנות המטבעות' },
-  { feature: 'city-themes',      tier: 6, xp: 250, topicsCompleted: 3,       description: 'Reach 250 XP or finish 3 topics',       descriptionHe: 'הגע ל-250 נק׳ או סיים 3 נושאים כדי לפתוח ערכות נושא לעיר' },
+/** Which macro tier a feature belongs to (null if the id has no rule). */
+export function macroTierForFeature(id: FeatureId): MacroTier | null {
+  const rule = FEATURE_UNLOCKS_BY_ID[id]
+  return rule ? macroTierForOrdinal(rule.tier) : null
+}
 
-  // Tier 7 — Layout & structure (400 XP OR 4 topics).
-  { feature: 'templates',        tier: 7, xp: 400, topicsCompleted: 4,       description: 'Reach 400 XP or finish 4 topics',       descriptionHe: 'הגע ל-400 נק׳ או סיים 4 נושאים כדי לפתוח את התבניות' },
-  { feature: 'whiteboard-full',  tier: 7, xp: 400, topicsCompleted: 4,       description: 'Reach 400 XP or finish 4 topics',       descriptionHe: 'הגע ל-400 נק׳ או סיים 4 נושאים כדי לפתוח את לוח הציור המלא' },
-  { feature: 'color-picker',     tier: 7, xp: 400, topicsCompleted: 4,       description: 'Reach 400 XP or finish 4 topics',       descriptionHe: 'הגע ל-400 נק׳ או סיים 4 נושאים כדי לפתוח את בורר הצבעים' },
+export interface MacroTierMeta {
+  id: MacroTier
+  tourId: string
+  emoji: string
+  labelHe: string
+  descHe: string
+}
 
-  // Tier 8 — Multi-surface workflow (600 XP OR 6 topics).
-  { feature: 'split-screen',          tier: 8, xp: 600, topicsCompleted: 6,  description: 'Reach 600 XP or finish 6 topics',      descriptionHe: 'הגע ל-600 נק׳ או סיים 6 נושאים כדי לפתוח פיצול מסך' },
-  { feature: 'cross-link',            tier: 8, xp: 600, topicsCompleted: 6,  description: 'Reach 600 XP or finish 6 topics',      descriptionHe: 'הגע ל-600 נק׳ או סיים 6 נושאים כדי לפתוח קישור בין מסמכים' },
-  { feature: 'global-search',         tier: 8, xp: 600, topicsCompleted: 6,  description: 'Reach 600 XP or finish 6 topics',      descriptionHe: 'הגע ל-600 נק׳ או סיים 6 נושאים כדי לפתוח חיפוש גלובלי' },
-  { feature: 'drawing-board-full',    tier: 8, xp: 600, topicsCompleted: 6,  description: 'Reach 600 XP or finish 6 topics',      descriptionHe: 'הגע ל-600 נק׳ או סיים 6 נושאים כדי לפתוח את לוח הציור המלא' },
-
-  // Tier 9 — Stat-B unlocked (finish all Stat-A topics; 10 topics today).
-  { feature: 'stat-b-native',        tier: 9, topicsCompleted: 10,            description: 'Finish all Stat-A topics',              descriptionHe: 'סיים את כל נושאי סטטיסטיקה א׳ כדי לפתוח את סטטיסטיקה ב׳' },
-  { feature: 'cross-course-quiz',    tier: 9, topicsCompleted: 10,            description: 'Finish all Stat-A topics',              descriptionHe: 'סיים את כל נושאי סטטיסטיקה א׳ כדי לפתוח חידוני בין-קורסים' },
-
-  // Tier 10 — Expert tools (1200 XP OR 10 topics).
-  { feature: 'methods',              tier: 10, xp: 1200, topicsCompleted: 10, description: 'Reach 1200 XP or master every topic',   descriptionHe: 'הגע ל-1200 נק׳ או שלוט בכל הנושאים כדי לפתוח שיטות מחקר' },
-  { feature: 'anova',                tier: 10, xp: 1200, topicsCompleted: 10, description: 'Reach 1200 XP or master every topic',   descriptionHe: 'הגע ל-1200 נק׳ או שלוט בכל הנושאים כדי לפתוח ניתוח שונות' },
-  { feature: 'custom-topic',         tier: 10, xp: 1200, topicsCompleted: 10, description: 'Reach 1200 XP or master every topic',   descriptionHe: 'הגע ל-1200 נק׳ או שלוט בכל הנושאים כדי ליצור נושא מותאם' },
-  { feature: 'community-curated',    tier: 10, xp: 1200, topicsCompleted: 10, description: 'Reach 1200 XP or master every topic',   descriptionHe: 'הגע ל-1200 נק׳ או שלוט בכל הנושאים כדי לפתוח ארסנל קהילתי' },
+/** Drives the launcher tabs + auto-open trigger. Order = display order. */
+export const MACRO_TIERS: MacroTierMeta[] = [
+  { id: 'basic',        tourId: 'tour-basic',        emoji: '🌱', labelHe: 'בסיסי',  descHe: 'הצעדים הראשונים — ארסנל, מחברת, מפת מושגים ומורה פרטי' },
+  { id: 'intermediate', tourId: 'tour-intermediate', emoji: '✏️', labelHe: 'בינוני',  descHe: 'כלי הקנבס — מסמן, צורות, עורך משוואות, ספריית נוסחאות והעיר' },
+  { id: 'advanced',     tourId: 'tour-advanced',     emoji: '🚀', labelHe: 'מתקדם',  descHe: 'זרימת העבודה המלאה — פיצול מסך עם תיאוריה, קנבס ותרגול' },
 ]
 
 export const FEATURE_UNLOCKS_BY_ID: Record<string, UnlockRule> = Object.fromEntries(
