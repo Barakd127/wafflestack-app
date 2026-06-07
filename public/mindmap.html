@@ -194,7 +194,7 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 
 /* ── Mind map nodes ── */
 .node-wrap{position:absolute;z-index:2}
-.node-div{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;user-select:none;box-shadow:0 2px 10px rgba(0,0,0,.22);transition:box-shadow .15s,transform .1s;min-width:50px;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.4}
+.node-div{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:500;white-space:normal;overflow-wrap:normal;text-align:center;cursor:pointer;user-select:none;box-shadow:0 2px 10px rgba(0,0,0,.22);transition:box-shadow .15s,transform .1s;min-width:50px;width:100%;height:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.25}
 /* Bidi: only TEXT nodes (not equations, not canvas wrappers) need plaintext
    detection so mixed Hebrew/English flows correctly per-substring.
    Equations + canvas titles MUST stay left-to-right. */
@@ -1712,15 +1712,31 @@ function mmSerializeForSave(){
   }
 }
 
-// Measure a node's text once (shared canvas ctx, no DOM reflow) and return a
-// bubble width that fits it: text + horizontal padding, clamped to a sane range.
+// Measure a node's text (shared canvas ctx, no DOM reflow) and return a bubble
+// {W,H} that FITS it WITHOUT growing too wide: short text → snug single-line
+// pill; long text → width capped and text wraps to 2-3 lines (height grows).
+// Capping the width keeps siblings from overlapping at their authored spacing.
 let _mmMeasCtx=null;
-function mmFitNodeWidth(text){
-  if(text==null) return 90;
+function mmFitNode(text){
+  if(text==null) return {W:90,H:40};
   if(!_mmMeasCtx){ const c=document.createElement('canvas'); _mmMeasCtx=c.getContext('2d'); }
   _mmMeasCtx.font="500 12px 'Rubik','Heebo','Assistant',sans-serif";
   const w=_mmMeasCtx.measureText(String(text)).width;
-  return Math.max(90, Math.min(300, Math.round(w + 42)));
+  const PAD=42, CAP=180, MINW=90;
+  if(w+PAD<=CAP) return {W:Math.max(MINW,Math.round(w+PAD)), H:40};
+  const innerW=CAP-PAD;
+  const lines=Math.min(3, Math.ceil(w/innerW));
+  return {W:CAP, H:26+lines*17};
+}
+
+// Fit EVERY text/root node's W/H to its label. Must run BEFORE a layout so the
+// tree spacing accounts for the real (capped) node widths and siblings don't
+// overlap.
+function mmFitAllNodes(){
+  for(const id in MM.nodes){
+    const n=MM.nodes[id];
+    if(n && (n.type==='text' || n.type==='root')){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
+  }
 }
 
 function mmRender(){
@@ -1808,7 +1824,7 @@ function mmRender(){
     div.id='nw_'+id;
     // Fit node width to its text so long Hebrew names don't overflow the bubble
     // (also keeps connector attach geometry aligned with the visible node).
-    if(n.type==='text' || n.type==='root'){ const fw=mmFitNodeWidth(n.text); if(fw) n.W=fw; }
+    if(n.type==='text' || n.type==='root'){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
     div.style.left=n.x+'px';div.style.top=n.y+'px';div.style.width=n.W+'px';div.style.height=n.H+'px';
     const nodeDiv=document.createElement('div');
     nodeDiv.className='node-div'+((sel||multiSel)?' selected':'')+(n.type==='equation'?' eq-node':'')+(n.type==='root'?' node-root':'');
@@ -2813,6 +2829,7 @@ function mmTidyVisibleChildren(n){
 // to avoid an empty half.
 function mmTidyLayout(){
   if(!MM || !MM.nodes || !MM.root) return;
+  mmFitAllNodes();
   const root = MM.nodes[MM.root]; if(!root) return;
 
   // TB (top-bottom) mode: delegate to vertical layout that swaps axes — root
@@ -2902,6 +2919,7 @@ function mmTidyLayout(){
 // 2026-05-24 — TB/LR button was previously a no-op.
 function mmTidyLayoutTB(){
   const root = MM.nodes[MM.root]; if(!root) return;
+  mmFitAllNodes();
 
   function subtreeW(id){
     const n = MM.nodes[id]; if(!n) return 0;
