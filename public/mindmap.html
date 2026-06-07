@@ -602,6 +602,14 @@ body.light .nb-empty{color:rgba(0,0,0,.45)}
   0%,100%{box-shadow:0 0 0 0 rgba(91,139,255,.5)}
   50%{box-shadow:0 0 0 8px rgba(91,139,255,0)}
 }
+/* Spotlight overlay + bouncing arrow — matches the React CoachmarkTour look.
+   pointer-events:none so the user can still CLICK the highlighted control to
+   advance the tour. */
+#mm-tour-overlay{position:fixed;inset:0;z-index:9490;pointer-events:none}
+#mm-tour-card{z-index:9501}
+@keyframes mm-tour-ring{0%,100%{opacity:.95}50%{opacity:.35}}
+@keyframes mm-tour-arrowup{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes mm-tour-arrowdown{0%,100%{transform:translateY(0)}50%{transform:translateY(9px)}}
 
 /* ═══ Node note badge (X-Mind-style inline note) ═══ */
 .node-note-badge{
@@ -7151,8 +7159,8 @@ const MM_TOUR_STEPS = [
   {
     id: 'add-branch',
     title: 'הוסף ענף ראשון',
-    body: 'לחץ על הכפתור "+ Branch" בסרגל למעלה כדי להוסיף צומת חדש מתחת לשורש. הניסיון שלך מתחיל כאן.',
-    highlight: 'button[onclick="mmAddChild()"]',
+    body: 'פתח את לשונית "הוסף" בסרגל, ואז לחץ "+ ענף" כדי להוסיף צומת חדש מתחת לשורש. הניסיון שלך מתחיל כאן.',
+    highlight: '#rtab-add',
   },
   {
     id: 'edit-text',
@@ -7189,6 +7197,8 @@ function mmTourSkip(){
   MM_TOUR.active = false;
   const c = document.getElementById('mm-tour-card');
   if(c) c.remove();
+  const o = document.getElementById('mm-tour-overlay');
+  if(o) o.remove();
   document.querySelectorAll('.mm-tour-pulse').forEach(el => el.classList.remove('mm-tour-pulse'));
 }
 function mmTourCompleteIfStep(stepId){
@@ -7211,7 +7221,10 @@ function mmTourFinish(){
       <div class="mt-body">עכשיו אתה יודע את הפעולות הבסיסיות. הוסף ענפים, ערוך טקסט, גרור צמתים, רשום הערות, ועבור בין מפה למחברת.</div>
       <div class="mt-actions"><span></span><button class="mt-skip" onclick="mmTourSkip()">סגור</button></div>
     `;
+    card.style.left='50%'; card.style.right='auto'; card.style.transform='translateX(-50%)'; card.style.top='auto'; card.style.bottom='60px';
   }
+  const o = document.getElementById('mm-tour-overlay');
+  if(o) o.remove();
   document.querySelectorAll('.mm-tour-pulse').forEach(el => el.classList.remove('mm-tour-pulse'));
   setTimeout(mmTourSkip, 4000);
 }
@@ -7241,12 +7254,46 @@ function mmTourRender(){
       <div class="mt-progress">${dots}</div>
     </div>
   `;
-  // Highlight relevant UI element with a pulse animation
+  // ── Spotlight + bouncing arrow on the step's target (matches React tour) ──
+  let ov = document.getElementById('mm-tour-overlay');
+  let rect = null;
   if(cur.highlight){
-    try{
-      const el = document.querySelector(cur.highlight);
-      if(el) el.classList.add('mm-tour-pulse');
+    try{ const el = document.querySelector(cur.highlight);
+      if(el){ const r = el.getBoundingClientRect(); if(r.width>0 && r.height>0) rect = r; }
     }catch(e){}
+  }
+  if(rect){
+    if(!ov){ ov = document.createElementNS('http://www.w3.org/2000/svg','svg'); ov.id='mm-tour-overlay'; document.body.appendChild(ov); }
+    const W = window.innerWidth, H = window.innerHeight, P = 8;
+    ov.setAttribute('width', W); ov.setAttribute('height', H);
+    const cx = rect.left + rect.width/2;
+    const below = rect.bottom + 210 < H;     // place card+arrow below if room, else above
+    const gap = 6, len = 34, hs = 13;
+    const headY = below ? rect.bottom + gap : rect.top - gap;
+    const tailY = below ? rect.bottom + gap + len : rect.top - gap - len;
+    const headPath = below
+      ? `M ${cx-hs} ${headY+hs} L ${cx} ${headY} L ${cx+hs} ${headY+hs} Z`
+      : `M ${cx-hs} ${headY-hs} L ${cx} ${headY} L ${cx+hs} ${headY-hs} Z`;
+    const bounce = below ? 'mm-tour-arrowdown' : 'mm-tour-arrowup';
+    ov.innerHTML =
+      '<defs><mask id="mm-tour-mask">' +
+        '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="white"/>' +
+        '<rect x="'+(rect.left-P)+'" y="'+(rect.top-P)+'" width="'+(rect.width+2*P)+'" height="'+(rect.height+2*P)+'" rx="10" fill="black"/>' +
+      '</mask></defs>' +
+      '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="rgba(6,9,22,0.62)" mask="url(#mm-tour-mask)"/>' +
+      '<rect x="'+(rect.left-P)+'" y="'+(rect.top-P)+'" width="'+(rect.width+2*P)+'" height="'+(rect.height+2*P)+'" rx="10" fill="none" stroke="#D4AF37" stroke-width="3" style="filter:drop-shadow(0 0 10px rgba(212,175,55,.7));animation:mm-tour-ring 1.3s ease-in-out infinite"/>' +
+      '<g style="animation:'+bounce+' 1s ease-in-out infinite;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))">' +
+        '<line x1="'+cx+'" y1="'+tailY+'" x2="'+cx+'" y2="'+headY+'" stroke="#D4AF37" stroke-width="5" stroke-linecap="round"/>' +
+        '<path d="'+headPath+'" fill="#D4AF37"/>' +
+      '</g>';
+    // Anchor the card near the target (clear of the arrow).
+    card.style.left = cx + 'px'; card.style.right = 'auto'; card.style.bottom = 'auto';
+    card.style.transform = below ? 'translateX(-50%)' : 'translateX(-50%) translateY(-100%)';
+    card.style.top = (below ? rect.bottom + gap + len + 14 : rect.top - gap - len - 14) + 'px';
+  } else {
+    if(ov) ov.remove();
+    card.style.left = '50%'; card.style.right = 'auto';
+    card.style.transform = 'translateX(-50%)'; card.style.top = 'auto'; card.style.bottom = '60px';
   }
 }
 
@@ -7710,6 +7757,13 @@ function nbRender(){
 
 // Cross-frame "add to mind map" — parent app posts {type:'ws-add-node', text, latex?, kind?}
 // Registered at the top level (not inside the standalone-WB IIFE) so it works in mind map mode too.
+// Guided-tour demo: parent app asks the canvas to expand its ∑Formulas panel.
+window.addEventListener('message', function(e){
+  var d = e.data;
+  if (!d || typeof d !== 'object' || d.type !== 'ws-open-formula') return;
+  try { if (typeof wbOpenFormulaPicker === 'function') wbOpenFormulaPicker(); } catch(_){}
+});
+
 window.addEventListener('message', function(e){
   var d = e.data;
   if (!d || typeof d !== 'object' || d.type !== 'ws-add-node') return;

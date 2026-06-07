@@ -1,13 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { useLearningStore } from '../store/learningStore'
 import { useTutorialStore } from '../store/tutorialStore'
-import { macroTierForFeature, MACRO_TIERS, type FeatureId } from '../config/featureUnlocks'
-import { tourStepIds } from './CoachmarkTour'
+import { type FeatureId } from '../config/featureUnlocks'
+import { featureTourStepIds } from './CoachmarkTour'
 
 /**
  * TierTourTrigger — no UI. Watches `learningStore.newlyUnlocked` and, when a
- * freshly-unlocked feature belongs to a macro tier whose tour the user hasn't
- * completed, opens that tier's guided tour.
+ * feature freshly unlocks, opens THAT feature's guided demo (`feat-<id>`).
  *
  * Anti-bombard pacing (per product requirement "don't overwhelm the student"):
  *   • At most ONE tour auto-opens per page session (module flag below).
@@ -27,40 +26,38 @@ export default function TierTourTrigger() {
   const startTour      = useTutorialStore(s => s.startTour)
   const setPendingTour = useTutorialStore(s => s.setPendingTour)
 
-  const seenTours  = useRef<Set<string>>(new Set())
-  const tourToOpen = useRef<string | null>(null)
+  const seenFeats  = useRef<Set<string>>(new Set())
+  const featToOpen = useRef<FeatureId | null>(null)
 
-  // 1) Classify each fresh unlock into a macro-tier tour.
+  // 1) Classify each fresh unlock into its per-feature demo tour.
   useEffect(() => {
     if (adminMode || !newlyUnlocked || newlyUnlocked.length === 0) return
     const { hasCompletedTour } = useTutorialStore.getState()
-    for (const feat of newlyUnlocked) {
-      const tier = macroTierForFeature(feat as FeatureId)
-      if (!tier) continue
-      const meta = MACRO_TIERS.find(m => m.id === tier)
-      if (!meta || seenTours.current.has(meta.tourId)) continue
-      seenTours.current.add(meta.tourId)
-      if (hasCompletedTour(meta.tourId)) continue          // already toured this tier
-      if (!openedThisSession && !tourToOpen.current) {
-        tourToOpen.current = meta.tourId                   // first → auto-open after toast
+    for (const feat of newlyUnlocked as FeatureId[]) {
+      if (seenFeats.current.has(feat)) continue
+      seenFeats.current.add(feat)
+      const tourId = 'feat-' + feat
+      if (hasCompletedTour(tourId)) continue               // already saw this demo
+      if (!openedThisSession && !featToOpen.current) {
+        featToOpen.current = feat                          // first → auto-open after toast
       } else {
-        setPendingTour(meta.tourId)                        // rest → gentle pulse nudge
+        setPendingTour(tourId)                             // rest → gentle pulse nudge
       }
     }
   }, [newlyUnlocked, adminMode, setPendingTour])
 
-  // 2) Once the unlock toast queue empties, auto-open the queued tour (once).
+  // 2) Once the unlock toast queue empties, auto-open the queued demo (once).
   useEffect(() => {
     if (adminMode) return
     if (newlyUnlocked && newlyUnlocked.length > 0) return  // toast still showing
-    const tid = tourToOpen.current
-    if (!tid || openedThisSession) return
+    const feat = featToOpen.current
+    if (!feat || openedThisSession) return
     const timer = setTimeout(() => {
       if (openedThisSession) return
       if (useTutorialStore.getState().activeTour) return   // user already in a tour
       openedThisSession = true
-      tourToOpen.current = null
-      startTour(tid, tourStepIds(tid))                     // non-force: respects completion
+      featToOpen.current = null
+      startTour('feat-' + feat, featureTourStepIds(feat))  // non-force: respects completion
     }, 700)                                                 // small beat after toast exit
     return () => clearTimeout(timer)
   }, [newlyUnlocked, adminMode, startTour])

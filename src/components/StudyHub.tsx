@@ -336,6 +336,7 @@ import { useArsenalStore, quickAddArsenal, looksLikeMath, serializeEquation } fr
 import PotionInventory from './PotionInventory'
 import { useTutorialStep } from '../hooks/useTutorialStep'
 import { useTutorialStore } from '../store/tutorialStore'
+import { useTutorStore } from '../store/tutorStore'
 import { registerTourAction } from './CoachmarkTour'
 import TourLauncher from './TourLauncher'
 import Tooltip from './Tooltip'
@@ -2449,8 +2450,20 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   // open the canvas (full-screen on mobile, side-by-side on desktop) and
   // spotlight it. Only active while LearningScreen is mounted.
   useEffect(() => {
-    const cleanup = registerTourAction('switch-canvas', () => handleSetTab('canvas'))
-    return cleanup
+    const cleanups = [
+      registerTourAction('switch-canvas', () => handleSetTab('canvas')),
+      // Open the canvas, then tell the wb iframe to expand its ∑Formulas panel
+      // (mindmap.html listens for {type:'ws-open-formula'}). Demonstrates the
+      // formula library "live" inside split-screen.
+      registerTourAction('open-formula-panel', () => {
+        handleSetTab('canvas')
+        setTimeout(() => {
+          const f = document.querySelector<HTMLIFrameElement>('iframe[src*="mode=wb"]')
+          f?.contentWindow?.postMessage({ type: 'ws-open-formula' }, '*')
+        }, 900)
+      }),
+    ]
+    return () => cleanups.forEach(fn => fn())
   }, [handleSetTab])
 
   // Esc to exit fullscreen (don't hijack when editing inside a textarea)
@@ -4044,6 +4057,10 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
       registerTourAction('nav-practice', () => handleStartPractice(demoTopic())),
       registerTourAction('nav-mindmap',  () => onViewChange('mindmap')),
       registerTourAction('nav-home',     () => setInternalView('home')),
+      // Demonstration actions — actually USE the feature, not just navigate.
+      registerTourAction('nav-world',      () => onViewChange('3d')),
+      registerTourAction('open-tutor',     () => useTutorStore.getState().openDrawer()),
+      registerTourAction('start-pomodoro', () => window.dispatchEvent(new CustomEvent('ws-open-pomodoro'))),
     ]
     return () => cleanups.forEach(fn => fn())
     // eslint-disable-next-line react-hooks/exhaustive-deps

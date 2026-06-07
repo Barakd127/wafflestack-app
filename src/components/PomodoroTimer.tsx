@@ -90,6 +90,13 @@ export default function PomodoroTimer({ leftOffset: _leftOffset }: PomodoroTimer
     return () => { if (tickRef.current) window.clearInterval(tickRef.current) }
   }, [running, handleComplete])
 
+  // Guided-tour demo hook: open the timer and start a work session on demand.
+  useEffect(() => {
+    const onOpen = () => { setOpen(true); setMode('work'); setSecondsLeft(WORK_MIN * 60); setRunning(true) }
+    window.addEventListener('ws-open-pomodoro', onOpen)
+    return () => window.removeEventListener('ws-open-pomodoro', onOpen)
+  }, [])
+
   const handleReset = () => {
     setRunning(false)
     setSecondsLeft(mode === 'work' ? WORK_MIN * 60 : BREAK_MIN * 60)

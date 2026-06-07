@@ -122,12 +122,44 @@ export interface MacroTierMeta {
   descHe: string
 }
 
-/** Drives the launcher tabs + auto-open trigger. Order = display order. */
+/** Drives the launcher tier sections + auto-open trigger. Order = display order. */
 export const MACRO_TIERS: MacroTierMeta[] = [
   { id: 'basic',        tourId: 'tour-basic',        emoji: '🌱', labelHe: 'בסיסי',  descHe: 'הצעדים הראשונים — ארסנל, מחברת, מפת מושגים ומורה פרטי' },
   { id: 'intermediate', tourId: 'tour-intermediate', emoji: '✏️', labelHe: 'בינוני',  descHe: 'כלי הקנבס — מסמן, צורות, עורך משוואות, ספריית נוסחאות והעיר' },
   { id: 'advanced',     tourId: 'tour-advanced',     emoji: '🚀', labelHe: 'מתקדם',  descHe: 'זרימת העבודה המלאה — פיצול מסך עם תיאוריה, קנבס ותרגול' },
 ]
+
+/** Short display name + icon per feature — drives the per-feature tour launcher. */
+export const FEATURE_META: Record<FeatureId, { emoji: string; labelHe: string }> = {
+  'arsenal':            { emoji: '📦', labelHe: 'הארסנל שלי' },
+  'pomodoro':           { emoji: '⏱️', labelHe: 'שעון פומודורו' },
+  'ai-tutor':           { emoji: '🧑‍🏫', labelHe: 'מורה פרטי' },
+  'mindmap-view':       { emoji: '🗺️', labelHe: 'מפת מושגים' },
+  'mindmap-edit':       { emoji: '✏️', labelHe: 'עריכת מפה' },
+  'notebook':           { emoji: '📔', labelHe: 'מחברת' },
+  'paper-styles':       { emoji: '📄', labelHe: 'סגנונות נייר' },
+  'math-widget':        { emoji: '➗', labelHe: 'עורך משוואות' },
+  'formula-library':    { emoji: '∑',  labelHe: 'ספריית נוסחאות' },
+  'highlighter':        { emoji: '🖍️', labelHe: 'מסמן' },
+  'whiteboard-basic':   { emoji: '🎨', labelHe: 'לוח ציור' },
+  'shapes':             { emoji: '🔷', labelHe: 'צורות' },
+  'templates':          { emoji: '📐', labelHe: 'תבניות' },
+  'whiteboard-full':    { emoji: '🖌️', labelHe: 'לוח ציור מלא' },
+  'color-picker':       { emoji: '🌈', labelHe: 'בורר צבעים' },
+  'split-screen':       { emoji: '⊟',  labelHe: 'פיצול מסך' },
+  'cross-link':         { emoji: '🔗', labelHe: 'קישור בין מסמכים' },
+  'global-search':      { emoji: '🔍', labelHe: 'חיפוש גלובלי' },
+  'drawing-board-full': { emoji: '🖼️', labelHe: 'לוח שרטוט מלא' },
+  'city-editor':        { emoji: '🏙️', labelHe: 'העולם שלי' },
+  'coins-store':        { emoji: '🪙', labelHe: 'חנות מטבעות' },
+  'city-themes':        { emoji: '🏛️', labelHe: 'ערכות נושא לעיר' },
+  'stat-b-native':      { emoji: '📈', labelHe: 'סטטיסטיקה ב׳' },
+  'cross-course-quiz':  { emoji: '🎲', labelHe: 'חידון בין-קורסים' },
+  'methods':            { emoji: '🔬', labelHe: 'שיטות מחקר' },
+  'anova':              { emoji: '📊', labelHe: 'ניתוח שונות' },
+  'custom-topic':       { emoji: '➕', labelHe: 'נושא מותאם' },
+  'community-curated':  { emoji: '🌐', labelHe: 'ארסנל קהילתי' },
+}
 
 export const FEATURE_UNLOCKS_BY_ID: Record<string, UnlockRule> = Object.fromEntries(
   FEATURE_UNLOCKS.map(r => [r.feature, r])

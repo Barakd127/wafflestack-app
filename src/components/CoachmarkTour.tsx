@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useTutorialStore } from '../store/tutorialStore'
+import { FEATURE_META, FEATURE_UNLOCKS_BY_ID, type FeatureId } from '../config/featureUnlocks'
 
 // ── Module-level ref registry ────────────────────────────────────────────────
 // Components register their DOM refs here so CoachmarkTour can spotlight them.
@@ -50,35 +51,79 @@ const TOUR_STEPS: Record<string, TourStep[]> = {
     { id: 'mm-5', target: 'help-btn',  title: 'חזרה על הסיור',         body: 'לחץ על "?" בכל עת לחזרה על ההדרכה הזו.' },
   ],
 
-  // ── Macro-tier tours ───────────────────────────────────────────────────────
-  // Each step's `action` NAVIGATES the app into the real screen, then the
-  // spotlight lands on the live element there. The tour overlay persists across
-  // navigation and re-measures, so the user is actually taken into each screen.
-  'tour-basic': [
-    { id: 'b-1', target: 'center',       title: '🌱 פתחת את הצעדים הראשונים!', body: 'אספת מספיק נקודות כדי לפתוח כלי למידה חדשים. בוא ניקח אותך אליהם — צעד אחר צעד.' },
-    { id: 'b-2', target: 'center',       title: '📦 הארסנל שלך', body: 'הבאנו אותך לארסנל — כאן נאסף כל מה שלמדת: נוסחאות, הגדרות וטריקים.', action: 'nav-arsenal' },
-    { id: 'b-3', target: 'center',       title: '📚 תיאוריה', body: 'וזה מסך התיאוריה — קוראים כאן את החומר לפני שמתרגלים.', action: 'nav-theory' },
-    { id: 'b-4', target: 'practice-tab', title: '📝 תרגול', body: 'וכאן מתרגלים. הבאנו אותך לתרגול לדוגמה — נסה לענות!', action: 'nav-practice' },
-    { id: 'b-5', target: 'center',       title: 'אפשר להתחיל! 🎯', body: 'תמיד אפשר לפתוח את הסיור שוב דרך 🎓 בתפריט.' },
-  ],
+}
 
-  'tour-intermediate': [
-    { id: 'i-1', target: 'center',       title: '✏️ נפתחו כלי הקנבס!', body: 'יש לך עכשיו לוח ציור, מסמן, צורות ועורך משוואות. נראה איך משתמשים בהם בתוך תרגול.' },
-    { id: 'i-2', target: 'practice-tab', title: '1. נכנסים לתרגול', body: 'הבאנו אותך לתרגול לדוגמה.', action: 'nav-practice' },
-    { id: 'i-3', target: 'canvas-tab',   title: '2. עוברים לקנבס', body: 'לחיצה כאן פותחת לוח ציור לצד התרגיל.' },
-    { id: 'i-4', target: 'canvas-frame', title: '3. כותבים ופותרים', body: 'מציבים נוסחאות, מציירים ופותרים ביד חופשית — ממש כאן.', action: 'switch-canvas' },
-    { id: 'i-5', target: 'center',       title: 'מעולה! 🚀', body: 'המשך לאסוף נקודות — ייפתחו עוד כלים: העיר שלך, תבניות וצבעים.' },
+// ── Per-feature tours ─────────────────────────────────────────────────────────
+// One short demo per feature. Headline features get a rich LIVE demo whose
+// `action`s navigate into the real screen and actually USE the feature (open
+// the formula panel, start the timer, open the tutor…). Every other feature
+// falls back to a generated 1-step "you unlocked X" card (getFeatureSteps).
+// Tour id convention: `feat-<featureId>`.
+const FEATURE_TOURS: Partial<Record<FeatureId, TourStep[]>> = {
+  arsenal: [
+    { id: 'arsenal-1', target: 'center', title: '📦 הארסנל שלי', body: 'כאן נאסף כל מה שלמדת — נוסחאות, הגדרות, טעויות נפוצות וטריקים.' },
+    { id: 'arsenal-2', target: 'arsenal-screen', title: 'הנה הארסנל שלך', body: 'כל פריט הוא קלף. לחיצה על נוסחה פותחת אותה — אפשר להעתיק, לערוך ולהשתמש בה בתרגול.', action: 'nav-arsenal' },
   ],
+  pomodoro: [
+    { id: 'pomo-1', target: 'center', title: '⏱️ שעון פומודורו', body: 'טכניקת מיקוד: 25 דקות עבודה רצופה ואז הפסקה קצרה. עוזר להישאר מרוכז.' },
+    { id: 'pomo-2', target: 'center', title: 'הפעלנו לך סשן', body: 'הנה — שעון פומודורו רץ. ככה מתחילים סשן מיקוד לפני תרגול.', action: 'start-pomodoro' },
+  ],
+  'ai-tutor': [
+    { id: 'tutor-1', target: 'center', title: '🧑‍🏫 מורה פרטי', body: 'תקוע על שאלה? שאל את המורה הפרטי וקבל הסבר מותאם — בעברית.' },
+    { id: 'tutor-2', target: 'center', title: 'פתחנו לך אותו', body: 'כתוב כאן כל שאלה על החומר והמורה יענה. זמין בכל מסך.', action: 'open-tutor' },
+  ],
+  'mindmap-view': [
+    { id: 'mmv-1', target: 'center', title: '🗺️ מפת מושגים', body: 'תצוגה ויזואלית של כל הקורס כמפה — רואים איך הנושאים מתחברים.' },
+    { id: 'mmv-2', target: 'center', title: 'נכנסים למפה', body: 'הבאנו אותך למפה שלך. הסיור שבתוך המפה ידריך אותך מכאן.', action: 'nav-mindmap' },
+  ],
+  'formula-library': [
+    { id: 'fl-1', target: 'center', title: '∑ ספריית נוסחאות', body: 'מאגר נוסחאות מוכנות שמוצב ישר על הקנבס — בלי להקליד מחדש.' },
+    { id: 'fl-2', target: 'practice-tab', title: '1. נכנסים לתרגול', body: 'נתחיל מתוך תרגול.', action: 'nav-practice' },
+    { id: 'fl-3', target: 'canvas-tab', title: '2. פותחים קנבס', body: 'הקנבס נפתח לצד התרגיל.', action: 'switch-canvas' },
+    { id: 'fl-4', target: 'canvas-frame', title: '3. ספריית הנוסחאות', body: 'פתחנו את הספרייה (∑ מימין). לחיצה על נוסחה מציבה אותה ישר על הקנבס.', action: 'open-formula-panel' },
+  ],
+  'math-widget': [
+    { id: 'mw-1', target: 'center', title: '➗ עורך משוואות', body: 'כתוב משוואות משלך עם עורך מתמטי מלא — שורשים, שברים, סכומים.' },
+    { id: 'mw-2', target: 'canvas-frame', title: 'על הקנבס', body: 'פתחנו קנבס. מכאן מוסיפים משוואה משלך ופותרים ליד התרגיל.', action: 'switch-canvas' },
+  ],
+  'split-screen': [
+    { id: 'ss-1', target: 'center', title: '⊟ פיצול מסך — זרימת העבודה המלאה', body: 'הפיצ׳ר המתקדם: תיאוריה, תרגול וקנבס פתוחים יחד באותו מסך.' },
+    { id: 'ss-2', target: 'center', title: '1. קוראים תיאוריה', body: 'מתחילים בחומר.', action: 'nav-theory' },
+    { id: 'ss-3', target: 'practice-tab', title: '2. עוברים לתרגול', body: 'עכשיו לתרגל את מה שקראנו.', action: 'nav-practice' },
+    { id: 'ss-4', target: 'canvas-tab', title: '3. מוסיפים קנבס לצד', body: 'פותחים לוח ציור לצד התרגיל — שני חלונות יחד.' },
+    { id: 'ss-5', target: 'canvas-frame', title: '4. הכל יחד', body: 'עכשיו התרגיל והקנבס פתוחים זה לצד זה — פותרים ויזואלית בלי לעזוב את השאלה.', action: 'switch-canvas' },
+    { id: 'ss-6', target: 'center', title: 'זה הפיצול 🎉', body: 'תיאוריה + תרגול + קנבס במסך אחד. ככה עובדים מתקדם.' },
+  ],
+  'city-editor': [
+    { id: 'city-1', target: 'center', title: '🏙️ העולם שלי', body: 'עיר תלת-ממדית שנבנית ככל שאתה לומד — כל הישג בונה עוד בניין.' },
+    { id: 'city-2', target: 'center', title: 'נכנסים לעיר', body: 'הנה העולם שלך (נטען רגע…). בנה אותו ככל שתתקדם בקורס.', action: 'nav-world' },
+  ],
+}
 
-  // ── Flagship demo (= the Advanced tour). Walks the FULL workflow live ──────
-  'tour-advanced': [
-    { id: 'a-1', target: 'center',         title: '🚀 ברוך הבא לטיר המתקדם!', body: 'נעבור יחד את כל זרימת העבודה — מתיאוריה, דרך תרגול, ועד פתרון על הקנבס.' },
-    { id: 'a-2', target: 'center',         title: '1. מתחילים בתיאוריה', body: 'הבאנו אותך למסך התיאוריה. כאן קוראים את החומר.', action: 'nav-theory' },
-    { id: 'a-3', target: 'practice-tab',   title: '2. דלג לתרגול', body: 'עכשיו עוברים לתרגל את מה שקראנו — הנה התרגול.', action: 'nav-practice' },
-    { id: 'a-4', target: 'canvas-tab',     title: '3. פיצול עם קנבס', body: 'בלחיצה אחת פותחים לוח ציור לצד התרגיל — חצי שאלה, חצי פתרון.' },
-    { id: 'a-5', target: 'canvas-frame',   title: '4. נוסחה + תרגולים', body: 'מציבים את הנוסחה, כותבים את הפתרון ופותרים את התרגולים — הכל ליד הקנבס.', action: 'switch-canvas' },
-    { id: 'a-6', target: 'center',         title: 'זהו — אתה מוכן! 🎉', body: 'שילבת תיאוריה, תרגול וקנבס. ככה לומדים מתקדם.' },
-  ],
+// Generated fallback for a feature without a rich demo: a single "you unlocked
+// X" card built from FEATURE_META + the unlock rule's Hebrew description.
+function defaultFeatureSteps(fid: FeatureId): TourStep[] {
+  const meta = FEATURE_META[fid]
+  const desc = FEATURE_UNLOCKS_BY_ID[fid]?.descriptionHe ?? ''
+  return [{ id: `${fid}-default`, target: 'center', title: `${meta?.emoji ?? '🔓'} ${meta?.labelHe ?? fid}`, body: desc }]
+}
+
+/** Steps for a feature tour (rich demo or generated default). */
+export function getFeatureSteps(fid: FeatureId): TourStep[] {
+  return FEATURE_TOURS[fid] ?? defaultFeatureSteps(fid)
+}
+
+/** Step ids for a feature tour — pass to startTour('feat-'+fid, …). */
+export function featureTourStepIds(fid: FeatureId): string[] {
+  return getFeatureSteps(fid).map(s => s.id)
+}
+
+const FEAT_PREFIX = 'feat-'
+
+/** Resolve the active tour id (legacy TOUR_STEPS key OR `feat-<id>`) to steps. */
+function resolveSteps(tourId: string): TourStep[] | undefined {
+  if (tourId.startsWith(FEAT_PREFIX)) return getFeatureSteps(tourId.slice(FEAT_PREFIX.length) as FeatureId)
+  return TOUR_STEPS[tourId]
 }
 
 const PADDING = 8
@@ -122,7 +167,7 @@ export default function CoachmarkTour() {
   const stepIdx = activeTour?.currentIndex
   useEffect(() => {
     if (tourId == null || stepIdx == null) return
-    const step = TOUR_STEPS[tourId]?.[stepIdx]
+    const step = resolveSteps(tourId)?.[stepIdx]
     if (!step?.action) return
     const fn = tourActions.get(step.action)
     if (fn) { try { fn() } catch { /* action is best-effort */ } }
@@ -130,7 +175,7 @@ export default function CoachmarkTour() {
 
   if (!activeTour) return null
 
-  const steps = TOUR_STEPS[activeTour.id]
+  const steps = resolveSteps(activeTour.id)
   if (!steps) return null
 
   const step = steps[activeTour.currentIndex]
