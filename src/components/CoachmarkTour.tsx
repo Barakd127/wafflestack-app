@@ -48,7 +48,7 @@ const TOUR_STEPS: Record<string, TourStep[]> = {
   // works on any screen; the final step points at the 🎓 button (data-tour).
   'tour-basic': [
     { id: 'basic-1', target: 'center', title: '👋 ברוכים הבאים ל-WaffleStack', body: 'הופכים סטטיסטיקה למשחק בנייה. נסביר ב-30 שניות איך זה עובד.' },
-    { id: 'basic-2', target: 'center', title: '🎯 לומדים → צוברים XP', body: 'כל תשובה נכונה בתרגול מזכה אותך בנקודות XP. ככל שתתרגל, ה-XP גדל.' },
+    { id: 'basic-2', target: 'center', title: '🎯 לומדים ⟵ צוברים XP', body: 'כל תשובה נכונה בתרגול מזכה אותך בנקודות XP. ככל שתתרגל, ה-XP גדל.' },
     { id: 'basic-3', target: 'center', title: '🔒 XP פותח כלים', body: 'הכלים נפתחים אחד-אחד לפי XP: הארסנל, מפת המושגים, המורה הפרטי, הקנבס ועוד. מה שנעול (🔒) ייפתח כשתגיע לסף.' },
     { id: 'basic-4', target: 'center', title: '🧭 איפה הכל נמצא', body: 'הכלים שנפתחו מופיעים בסרגל הצד ובמתג התחתון שליד התרגיל. כלים נעולים מסומנים ב-🔒.' },
     { id: 'basic-5', target: 'tour-btn', title: '🎓 הסיורים תמיד כאן', body: 'בכל רגע אפשר לחזור לכפתור 🎓 כדי לראות הדגמה חיה של כל כלי שנפתח. קדימה — בהצלחה!' },

@@ -2148,11 +2148,13 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
         {/* ── ROW 1 ──────────────────────────────────── */}
         <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'stretch' }}>
 
-          {/* Card: כמעט שם! */}
+          {/* Card: כמעט שם! (תרגול) — order:2 so it sits on the LEFT in RTL,
+              after the study card. User asked to swap study↔practice. */}
           <div className="ws-glass-card" style={{
             borderRadius: CARD_RADIUS,
             padding: '28px 28px 22px',
             display: 'flex', flexDirection: 'column',
+            order: 2,
           }}>
             <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 6 }}>תרגול</div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
@@ -2187,12 +2189,13 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             </button>
           </div>
 
-          {/* Card: לוח לבן דיגיטלי */}
+          {/* Card: לימוד חומר — order:1 so it sits on the RIGHT in RTL (first). */}
           <div className="ws-glass-card" style={{
             borderRadius: CARD_RADIUS,
             padding: '28px 28px 24px',
             display: 'flex', flexDirection: 'column',
             position: 'relative',
+            order: 1,
           }}>
             <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_MED, marginBottom: 16, textAlign: 'right' }}>לימוד חומר</div>
             {/* Whiteboard area with glassmorphism */}
@@ -2227,9 +2230,11 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 בוא נמפה את הנושאים בקורס שלך
               </div>
             </div>
-            {/* CTA button */}
-            <button onClick={onGoMindmap} style={{ marginTop: 12, background: 'linear-gradient(90deg,#254A9F,#3351CA)', color:'#fff', border:'none', borderRadius:24, padding:'10px 0', fontWeight:600, fontSize:15, cursor:'pointer', fontFamily:"'Rubik',sans-serif", width:'100%', boxShadow:'0px 2px 6px rgba(51,81,202,0.4)' }}>
-              🗺 פתח מפת מושגים
+            {/* CTA button — liquid-glass to match the תרגול card's ws-cta-btn.
+                Map starts collapsed, so the label is "בוא נלמד" (let's learn). */}
+            <button onClick={onGoMindmap} className="ws-cta-btn"
+              style={{ marginTop: 12, background: BUTTON_COLOR, color:'#fff', border:'none', borderRadius:24, padding:'11px 0', fontWeight:600, fontSize:16, cursor:'pointer', fontFamily:"'Rubik',sans-serif", width:'100%', boxShadow:'0px 4px 14px rgba(51,81,202,0.35), inset 0 1px 0 rgba(255,255,255,0.25)' }}>
+              📖 בוא נלמד ←
             </button>
           </div>
         </div>
