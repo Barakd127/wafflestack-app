@@ -1238,7 +1238,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
         // The real interactive mindmap (same map as מפת הלמידה שלי). Topic nodes
         // carry 📖/📝 chips that open theory/practice; sub-topics can be added.
         <iframe
-          src={`${import.meta.env.BASE_URL}mindmap.html`}
+          src={`${import.meta.env.BASE_URL}mindmap.html?scene=topics`}
           title="מפת הנושאים"
           style={{ width: '100%', height: '72vh', border: 'none', borderRadius: 16, boxShadow: CARD_SHADOW, display: 'block' }}
           allow="clipboard-read; clipboard-write"

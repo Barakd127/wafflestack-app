@@ -1045,6 +1045,8 @@ const WB_DOM_TYPES = new Set(['rect','circle','sticky','text']);
 
 // ── Per-user auto-save keys ────────────────────────────────────────────────────
 const _MM_USER_ID = new URLSearchParams(location.search).get('userId') || 'default';
+// ?scene=topics → the host's "מפה" tab: a dedicated course-topic-tree overview.
+const _MM_TOPIC_SCENE = new URLSearchParams(location.search).get('scene') === 'topics';
 const MM_SAVE_KEY = 'mm-data-' + _MM_USER_ID;
 
 // ── Sheets (XMind-style multi-map tabs) ──────────────────────────────────────
@@ -1420,6 +1422,12 @@ function mmShowToast(msg){
 }
 
 function initMM(){
+  // The host's "מפה" tab loads ?scene=topics — a dedicated TOPIC-OVERVIEW map
+  // that always shows the course topic tree (COURSE_SEED, matching the list),
+  // independent of the user's personal scratch sheets. Its own storage key keeps
+  // any sub-topics the user adds, but it never inherits the edited personal map.
+  if(_MM_TOPIC_SCENE){ _mmCurrentSaveKey = 'wafflestack-mm-topicmap-' + _MM_USER_ID; }
+
   // Try to load saved mind map for this user
   try {
     const saved = localStorage.getItem(_mmCurrentSaveKey);
@@ -1470,7 +1478,7 @@ function initMM(){
   // Fresh / empty: seed per active sheet. 'thoughts' → free-association starter;
   // everything else → the statistics curriculum tree.
   try {
-    if(_mmSheets.active === 'studies') buildSeedMap();
+    if(_MM_TOPIC_SCENE || _mmSheets.active === 'studies') buildSeedMap();
     else if(_mmSheets.active === 'thoughts') mmSeedThoughts();
     else mmSeedBlank();
   }
@@ -6351,7 +6359,7 @@ requestAnimationFrame(function(){
 try {
   // Only the 'studies' sheet auto-loads the statistics ready-map. The
   // 'מחשבות' / custom sheets stay free-form (their own seed, no curriculum).
-  if(typeof mmLoadReadyMap === 'function' && _mmSheets.active === 'studies'){
+  if(typeof mmLoadReadyMap === 'function' && _mmSheets.active === 'studies' && !_MM_TOPIC_SCENE){
     var _readyMapId = mmCurrentReadyMapId();
     var _alreadyImported = Array.isArray(MM.importedMaps) &&
       MM.importedMaps.indexOf(_readyMapId) !== -1;
