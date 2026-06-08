@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react'
 import { useLearningStore } from '../store/learningStore'
-import { FEATURE_UNLOCKS_BY_ID, type FeatureId } from '../config/featureUnlocks'
+import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../config/featureUnlocks'
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp } from '../lib/helpRequests'
@@ -1003,6 +1003,11 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
   // Re-order topics according to the user's personal plan when one exists.
   // Topics not in the plan trail at the end in their natural order.
   const personalPlan = useLearningStore(s => s.personalPlan)
+  // Map view is an unlock-ladder feature (mindmap-view, 35 XP). Lock the 🗺️ מפה
+  // toggle until it unlocks; adminMode flushes the gate.
+  const _unlockedFeatures = useLearningStore(s => s.unlockedFeatures)
+  const _adminMode = useLearningStore(s => s.adminMode)
+  const mapUnlocked = isFeatureUnlocked('mindmap-view', _unlockedFeatures, _adminMode)
   const sortedTopics = (() => {
     if (!personalPlan) return QUIZ_TOPICS
     const order = new Map(personalPlan.sequence.map((s, i) => [s.topicId, i]))
@@ -1204,14 +1209,20 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
 
       {/* List ⇄ Mindmap toggle */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 24, background: 'rgba(127,155,217,0.12)', padding: 4, borderRadius: 999, width: 'fit-content' }}>
-        {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => (
-          <button key={m} onClick={() => setViewMode(m)} style={{
-            border: 'none', borderRadius: 999, padding: '7px 18px', cursor: 'pointer',
-            fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700,
-            background: viewMode === m ? BUTTON_COLOR : 'transparent',
-            color: viewMode === m ? '#fff' : TEXT_MED, transition: 'all 0.15s',
-          }}>{lbl}</button>
-        ))}
+        {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => {
+          const locked = m === 'mindmap' && !mapUnlocked
+          const tip = locked ? FEATURE_UNLOCKS_BY_ID['mindmap-view']?.descriptionHe : undefined
+          return (
+            <button key={m} onClick={() => { if (!locked) setViewMode(m) }}
+              title={tip} aria-label={tip} aria-disabled={locked || undefined} style={{
+              border: 'none', borderRadius: 999, padding: '7px 18px', cursor: locked ? 'not-allowed' : 'pointer',
+              fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700,
+              background: viewMode === m ? BUTTON_COLOR : 'transparent',
+              color: viewMode === m ? '#fff' : TEXT_MED, transition: 'all 0.15s',
+              opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none',
+            }}>{locked ? '🔒 ' : ''}{lbl}</button>
+          )
+        })}
       </div>
 
       {viewMode === 'list' ? (
@@ -1720,12 +1731,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
   // Subscribe to gating state once per render so each row knows lock status.
   const _adminMode = useLearningStore(s => s.adminMode)
   const _unlockedFeatures = useLearningStore(s => s.unlockedFeatures)
-  const isLocked = (f?: FeatureId) => {
-    if (!f) return false
-    if (_adminMode) return false
-    if (!FEATURE_UNLOCKS_BY_ID[f]) return false
-    return !_unlockedFeatures.includes(f)
-  }
+  const isLocked = (f?: FeatureId) => !!f && !isFeatureUnlocked(f, _unlockedFeatures, _adminMode)
   const renderIcon = (k: IconKey) => {
     const stroke = 'currentColor'
     const sw = 1.8
@@ -2494,6 +2500,25 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   const recordAnswer = useLearningStore(s => s.recordAnswer)
   const recordErrorTag = useLearningStore(s => s.recordErrorTag)
 
+  // ── Feature gating for the companion-tool tabs + split FAB ──────────────────
+  // Each bottom-pane surface is an unlock-ladder feature; the split FAB itself is
+  // split-screen (810 XP). adminMode flushes every gate. One predicate
+  // (isFeatureUnlocked) drives the locked styling + the handleSetTab guard.
+  const _adminMode = useLearningStore(s => s.adminMode)
+  const _unlockedFeatures = useLearningStore(s => s.unlockedFeatures)
+  const TOOL_FEATURE: Partial<Record<typeof tab, FeatureId>> = {
+    mindmap: 'mindmap-edit', canvas: 'whiteboard-basic', excalidraw: 'whiteboard-full', arsenal: 'arsenal',
+  }
+  const toolLocked = (key: typeof tab): boolean => {
+    const f = TOOL_FEATURE[key]
+    return !!f && !isFeatureUnlocked(f, _unlockedFeatures, _adminMode)
+  }
+  const toolLockTip = (key: typeof tab): string | undefined => {
+    const f = TOOL_FEATURE[key]
+    return f ? FEATURE_UNLOCKS_BY_ID[f]?.descriptionHe : undefined
+  }
+  const splitLocked = !isFeatureUnlocked('split-screen', _unlockedFeatures, _adminMode)
+
   // Mistake Autopsy: shown after a wrong self-assessment before advancing
   const [autopsyOpen, setAutopsyOpen] = useState(false)
   const [autopsyDots, setAutopsyDots] = useState<Array<'empty' | 'current' | 'correct' | 'wrong' | 'future'> | null>(null)
@@ -2507,6 +2532,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   // Also auto-enter fullscreen (hides sidebar + topbar) on tab activation so
   // the canvas + question get full viewport. Closing tab → exit fullscreen.
   const handleSetTab = useCallback((newTab: typeof tab) => {
+    // Locked surface → no-op (gate every entry point at once).
+    if (newTab !== 'none') {
+      const f = TOOL_FEATURE[newTab]
+      if (f && !isFeatureUnlocked(f, _unlockedFeatures, _adminMode)) return
+    }
     setTab(newTab)
     setChipExpanded(true)
     if (newTab === 'none') {
@@ -2517,7 +2547,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       // Tab opened → auto-hide chrome if not already
       if (!fullscreen && onToggleFullscreen) onToggleFullscreen()
     }
-  }, [fullscreen, onToggleFullscreen])
+  }, [fullscreen, onToggleFullscreen, _unlockedFeatures, _adminMode])
 
   // Register the in-practice 'switch-canvas' tour action so guided tours can
   // open the canvas (full-screen on mobile, side-by-side on desktop) and
@@ -2956,13 +2986,17 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   ['arsenal',    '🎯 הארסנל שלי'],
                 ] as const)
                   .filter(([key]) => key !== tab)
-                  .map(([key, label]) => (
+                  .map(([key, label]) => {
+                    const locked = toolLocked(key as typeof tab)
+                    return (
                     <button
                       key={key} role="menuitem"
-                      onClick={() => { handleSetTab(key as typeof tab); setSplitMenuOpen(false) }}
-                      style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'start', background: 'transparent', border: '1px solid transparent', borderRadius: 8, padding: '10px 10px', color: '#1F3E6C', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 40 }}
-                    >{label}</button>
-                  ))}
+                      aria-disabled={locked || undefined}
+                      title={locked ? toolLockTip(key as typeof tab) : undefined}
+                      onClick={() => { if (locked) return; handleSetTab(key as typeof tab); setSplitMenuOpen(false) }}
+                      style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'start', background: 'transparent', border: '1px solid transparent', borderRadius: 8, padding: '10px 10px', color: '#1F3E6C', fontSize: 13, fontWeight: 600, cursor: locked ? 'not-allowed' : 'pointer', minHeight: 40, opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none' }}
+                    >{locked ? '🔒 ' : ''}{label}</button>
+                  )})}
               </div>
             </>
           )}
@@ -2974,11 +3008,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         <>
           <button
             data-tour="split-btn"
-            onClick={() => setSplitMenuOpen(o => !o)}
-            aria-label="פיצול מסך — בחר כלי לחלונית התחתונה"
+            onClick={() => { if (splitLocked) return; setSplitMenuOpen(o => !o) }}
+            aria-label={splitLocked ? FEATURE_UNLOCKS_BY_ID['split-screen']?.descriptionHe : 'פיצול מסך — בחר כלי לחלונית התחתונה'}
             aria-haspopup="menu"
             aria-expanded={splitMenuOpen}
-            title="פיצול מסך — בחר כלי לחלונית התחתונה"
+            aria-disabled={splitLocked || undefined}
+            title={splitLocked ? FEATURE_UNLOCKS_BY_ID['split-screen']?.descriptionHe : 'פיצול מסך — בחר כלי לחלונית התחתונה'}
             style={{
               position: 'fixed', bottom: 150, left: 52, zIndex: 300,
               background: 'linear-gradient(135deg,#4ECDC4,#3FB8AF)',
@@ -2987,13 +3022,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               padding: '8px 14px',
               fontFamily: "'Rubik', sans-serif",
               fontSize: 12, fontWeight: 800,
-              cursor: 'pointer',
+              cursor: splitLocked ? 'not-allowed' : 'pointer',
               boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
               display: 'flex', alignItems: 'center', gap: 6,
               minHeight: 44,
+              opacity: splitLocked ? 0.55 : 1, filter: splitLocked ? 'grayscale(0.85)' : 'none',
             }}
           >
-            ⊟ פיצול מסך {splitMenuOpen ? '▾' : '▸'}
+            {splitLocked ? '🔒 ' : '⊟ '}פיצול מסך {splitMenuOpen ? '▾' : '▸'}
           </button>
           {/* Swap-pane popover anchored above the FAB. תרגול stays locked on
               top; picking a surface swaps the BOTTOM pane via handleSetTab.
@@ -3030,11 +3066,15 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   ['arsenal',    '🎯 הארסנל שלי'],
                 ] as const)
                   .filter(([key]) => key !== tab)
-                  .map(([key, label]) => (
+                  .map(([key, label]) => {
+                    const locked = toolLocked(key as typeof tab)
+                    return (
                     <button
                       key={key}
                       role="menuitem"
-                      onClick={() => { handleSetTab(key as typeof tab); setSplitMenuOpen(false) }}
+                      aria-disabled={locked || undefined}
+                      title={locked ? toolLockTip(key as typeof tab) : undefined}
+                      onClick={() => { if (locked) return; handleSetTab(key as typeof tab); setSplitMenuOpen(false) }}
                       style={{
                         display: 'flex', alignItems: 'center', width: '100%',
                         textAlign: 'start',
@@ -3042,15 +3082,15 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         border: '1px solid transparent',
                         borderRadius: 8, padding: '9px 10px',
                         color: '#1F3E6C', fontFamily: "'Rubik', sans-serif",
-                        fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                        minHeight: 40,
+                        fontSize: 13, fontWeight: 600, cursor: locked ? 'not-allowed' : 'pointer',
+                        minHeight: 40, opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none',
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.16)'; e.currentTarget.style.borderColor = 'rgba(212,175,55,0.45)' }}
+                      onMouseEnter={e => { if (locked) return; e.currentTarget.style.background = 'rgba(212,175,55,0.16)'; e.currentTarget.style.borderColor = 'rgba(212,175,55,0.45)' }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent' }}
                     >
-                      {label}
+                      {locked ? '🔒 ' : ''}{label}
                     </button>
-                  ))}
+                  )})}
               </div>
             </>
           )}
@@ -3189,19 +3229,22 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         }}>
           {([['none', '📝 תרגיל'], ['canvas', '✏️ קנבס']] as const).map(([key, label]) => {
             const active = key === 'none' ? tab === 'none' : tab === 'canvas'
+            const locked = key === 'canvas' && toolLocked('canvas')
             return (
               <button
                 key={key} role="tab" aria-selected={active}
                 data-tour={key === 'canvas' ? 'canvas-tab' : 'practice-tab'}
-                onClick={() => handleSetTab(key === 'none' ? 'none' : 'canvas')}
+                aria-disabled={locked || undefined}
+                title={locked ? toolLockTip('canvas') : undefined}
+                onClick={() => { if (locked) return; handleSetTab(key === 'none' ? 'none' : 'canvas') }}
                 style={{
-                  border: 'none', borderRadius: 999, padding: '8px 18px', cursor: 'pointer',
+                  border: 'none', borderRadius: 999, padding: '8px 18px', cursor: locked ? 'not-allowed' : 'pointer',
                   fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700, minHeight: 40,
                   background: active ? 'linear-gradient(135deg,#F5C842,#D4AF37)' : 'transparent',
                   color: active ? '#0B1B3E' : 'rgba(255,255,255,0.85)',
-                  transition: 'all 0.15s',
+                  transition: 'all 0.15s', opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none',
                 }}
-              >{label}</button>
+              >{locked ? '🔒 ' : ''}{label}</button>
             )
           })}
         </div>
@@ -3978,23 +4021,26 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             ] as const).map(([key, label, hint]) => {
               const active = tab === key
               const onTool = tab !== 'none'
+              const locked = toolLocked(key as typeof tab)
               return (
                 <button
                   key={key}
-                  onClick={() => handleSetTab(key as typeof tab)}
-                  title={hint}
+                  onClick={() => { if (locked) return; handleSetTab(key as typeof tab) }}
+                  title={locked ? toolLockTip(key as typeof tab) : hint}
+                  aria-disabled={locked || undefined}
                   style={{
                     background: active ? BUTTON_COLOR : (onTool ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.5)'),
                     color: active ? '#fff' : TEXT_DARK,
                     border: `1.5px solid ${active ? BUTTON_COLOR : (onTool ? 'rgba(127,155,217,0.55)' : 'rgba(127,155,217,0.35)')}`,
                     borderRadius: 22, padding: '8px 18px',
                     fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600,
-                    cursor: 'pointer', transition: 'all 0.18s ease',
+                    cursor: locked ? 'not-allowed' : 'pointer', transition: 'all 0.18s ease',
                     boxShadow: active ? '0 4px 14px rgba(51,81,202,0.30)' : (onTool ? '0 2px 8px rgba(0,0,0,0.25)' : 'none'),
                     transform: active ? 'translateY(-1px)' : 'translateY(0)',
+                    opacity: locked ? 0.55 : 1, filter: locked ? 'grayscale(0.8)' : 'none',
                   }}
                 >
-                  {label}
+                  {locked ? '🔒 ' : ''}{label}
                 </button>
               )
             })}

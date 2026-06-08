@@ -192,3 +192,19 @@ export function evaluateUnlocks(state: { xp: number; completedLessons: string[] 
 
 /** All known feature ids (used by adminMode to flush every gate). */
 export const ALL_FEATURE_IDS: FeatureId[] = FEATURE_UNLOCKS.map(r => r.feature)
+
+/**
+ * Single source of truth for "is this control usable right now". A feature with
+ * NO unlock rule is always available; adminMode flushes every gate. Mirrors the
+ * inline check in FeatureGate so every gated control (sidebar, canvas switcher,
+ * map toggle, split FAB) shares one predicate.
+ */
+export function isFeatureUnlocked(
+  id: FeatureId,
+  unlockedFeatures: readonly string[] | undefined,
+  adminMode: boolean,
+): boolean {
+  if (adminMode) return true
+  if (!FEATURE_UNLOCKS_BY_ID[id]) return true // no rule → always open
+  return !!unlockedFeatures && unlockedFeatures.includes(id)
+}

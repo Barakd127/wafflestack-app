@@ -26,7 +26,7 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              בנה את <span className="ls-gold-gradient">עיר הסטטיסטיקה</span> שלך — וואפל אחד בכל פעם.
+              אם כבר סטטיסטיקה…<br />הפכו את הלמידה ל<span className="ls-gold-gradient">בניית מטרופוליס</span>!
             </motion.h1>
 
             <motion.p

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useTutorialStore } from '../store/tutorialStore'
 import { useLearningStore } from '../store/learningStore'
 import { MACRO_TIERS, FEATURE_UNLOCKS, FEATURE_META, FEATURE_UNLOCKS_BY_ID, macroTierForFeature, type MacroTier, type FeatureId } from '../config/featureUnlocks'
-import { featureTourStepIds } from './CoachmarkTour'
+import { featureTourStepIds, tourStepIds } from './CoachmarkTour'
 import Tooltip from './Tooltip'
 
 /**
@@ -48,6 +48,12 @@ export default function TourLauncher() {
 
   const launchFeature = (fid: FeatureId) => {
     startTour('feat-' + fid, featureTourStepIds(fid), true) // force = replay even if completed
+    setOpen(false)
+  }
+
+  // Always-on intro walkthrough — launchable regardless of XP/unlocks.
+  const launchBasic = () => {
+    startTour('tour-basic', tourStepIds('tour-basic'), true)
     setOpen(false)
   }
 
@@ -97,6 +103,27 @@ export default function TourLauncher() {
             <div style={{ fontWeight: 800, fontSize: 15, color: '#1F2640', marginBottom: 2 }}>סיורים מודרכים</div>
             <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>בחר פיצ׳ר וצפה בהדגמה חיה</div>
 
+            {/* Pinned always-on intro walkthrough — launchable at 0 XP, before
+                any feature unlocks. Sits above the tier sections. */}
+            <button
+              role="menuitem"
+              onClick={launchBasic}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'right',
+                cursor: 'pointer', marginBottom: 10,
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(99,102,241,0.05))',
+                border: '1px solid rgba(99,102,241,0.35)', borderRadius: 10, padding: '10px 12px',
+                fontFamily: 'inherit',
+              }}
+            >
+              <span style={{ fontSize: 20, width: 24, textAlign: 'center' }}>👋</span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: 'block', fontWeight: 800, fontSize: 13.5, color: '#1F2640' }}>סיור היכרות</span>
+                <span style={{ display: 'block', fontSize: 10.5, color: '#6b7280', marginTop: 1, lineHeight: 1.35 }}>איך לומדים, איך צוברים XP ואיך נפתחים כלים — תמיד זמין</span>
+              </span>
+              <span style={{ fontSize: 14, color: '#6366f1' }}>▸</span>
+            </button>
+
             {MACRO_TIERS.map(tier => {
               const feats = FEATURES_BY_TIER[tier.id]
               const have = unlockedCountFor(tier.id)
@@ -139,10 +166,11 @@ export default function TourLauncher() {
                           <button
                             key={fid}
                             role="menuitem"
-                            onClick={() => launchFeature(fid)}
+                            aria-disabled={locked || undefined}
+                            onClick={locked ? undefined : () => launchFeature(fid)}
                             style={{
                               display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'right',
-                              cursor: 'pointer',
+                              cursor: locked ? 'default' : 'pointer',
                               background: locked ? 'rgba(31,38,64,0.05)' : (isNew ? 'rgba(99,102,241,0.08)' : 'transparent'),
                               border: isNew ? '1px solid rgba(99,102,241,0.45)' : '1px solid transparent',
                               borderRadius: 9, padding: '8px 10px', marginBottom: 2, fontFamily: 'inherit',

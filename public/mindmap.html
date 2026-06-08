@@ -2411,7 +2411,10 @@ function mmFitView(){
   const app=document.getElementById('app');
   const windowW=Math.max(1, app?.clientWidth || 0);
   const windowH=Math.max(1, app?.clientHeight || 0);
-  const computed = Math.min(windowW/w, windowH/h, 1.5);
+  let computed = Math.min(windowW/w, windowH/h, 1.5);
+  // Topic-tree scene (the מפה tab): never zoom below a readable floor — the
+  // point is a FOCUSED view, not a shrunk-to-fit overview with tiny text.
+  if(typeof _MM_TOPIC_SCENE !== 'undefined' && _MM_TOPIC_SCENE) computed = Math.max(computed, 0.75);
   MM.zoom = isFinite(computed) && computed > 0 ? computed : 1;
   MM.panX = windowW/2 - (minX+maxX)/2 * MM.zoom;
   MM.panY = windowH/2 - (minY+maxY)/2 * MM.zoom;
@@ -2452,7 +2455,8 @@ function mmFitVisibleSubtree(rootId){
   const appEl = document.getElementById('app');
   if(!appEl) return;
   const windowW = appEl.clientWidth, windowH = appEl.clientHeight;
-  const targetZoom = Math.min(windowW/w, windowH/h, 1.4) * 0.95;
+  let targetZoom = Math.min(windowW/w, windowH/h, 1.4) * 0.95;
+  if(typeof _MM_TOPIC_SCENE !== 'undefined' && _MM_TOPIC_SCENE) targetZoom = Math.max(targetZoom, 0.75);
   const cx = (minX + maxX) / 2;
   const cy = (minY + maxY) / 2;
   const targetPanX = windowW/2 - cx * targetZoom;
