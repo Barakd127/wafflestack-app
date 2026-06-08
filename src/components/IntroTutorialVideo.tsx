@@ -2,25 +2,15 @@
 // new user (first visit), and a persistent "▶ סרטון הדרכה" card to replay it.
 // Video lives at public/videos/intro-tutorial.mp4 (720p, ~3MB, faststart).
 // Per user 2026-06-01.
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-const SEEN_KEY = 'ws-intro-video-seen'
 const SRC = `${import.meta.env.BASE_URL}videos/intro-tutorial.mp4`
 
 export default function IntroTutorialVideo() {
+  // The video is OPTIONAL — it never auto-opens. The first-run funnel uses the
+  // guided tour; this card just lets users watch the explainer if they want to.
   const [open, setOpen] = useState(false)
-
-  // Auto-open once for first-time users.
-  useEffect(() => {
-    try {
-      if (!localStorage.getItem(SEEN_KEY)) setOpen(true)
-    } catch { /* private mode */ }
-  }, [])
-
-  const close = () => {
-    setOpen(false)
-    try { localStorage.setItem(SEEN_KEY, '1') } catch { /* */ }
-  }
+  const close = () => setOpen(false)
 
   return (
     <>

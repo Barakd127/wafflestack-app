@@ -23,7 +23,8 @@ export interface IntakeAnswers {
   goal: Goal
   examDate: string | null   // YYYY-MM-DD
   dailyMinutes: number      // 5–120
-  style: Style
+  style: Style              // derived sequencing preference (theory/practice/mixed)
+  learningHelpers: string[] // multi-select: what helps the user learn (HELP_OPTIONS ids)
   knownTopics: string[]     // topic ids the user feels strong on
   weakTopics: string[]      // topic ids the user feels weak on
   motivationProfile: MotivationProfile | null
@@ -53,6 +54,7 @@ export const DEFAULT_INTAKE: IntakeAnswers = {
   examDate: null,
   dailyMinutes: 25,
   style: 'mixed',
+  learningHelpers: [],
   knownTopics: [],
   weakTopics: [],
   motivationProfile: null,

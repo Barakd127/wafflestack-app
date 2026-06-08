@@ -10,7 +10,6 @@ import {
   DEFAULT_INTAKE,
   type IntakeAnswers,
   type Goal,
-  type Style,
   type MotivationProfile,
 } from '../data/personalPlanTypes'
 import { generatePlan } from '../lib/generatePlan'
@@ -41,10 +40,18 @@ const GOAL_OPTIONS: { id: Goal; label: string; sub: string; emoji: string }[] = 
   { id: 'curious', label: 'סקרנות', sub: 'לא לומד פורמלית', emoji: '🌟' },
 ]
 
-const STYLE_OPTIONS: { id: Style; label: string; sub: string; emoji: string }[] = [
-  { id: 'theory-first', label: 'תיאוריה קודם', sub: 'לקרוא ואז לתרגל', emoji: '📖' },
-  { id: 'practice-first', label: 'תרגול קודם', sub: 'לקפוץ ישר לשאלות', emoji: '✍️' },
-  { id: 'mixed', label: 'תלוי בנושא', sub: 'גמיש לפי הצורך', emoji: '🎯' },
+// Multi-select: what helps the user learn. Stored as learningHelpers (ids).
+const HELP_OPTIONS: { id: string; label: string; sub: string; emoji: string }[] = [
+  { id: 'theory',     label: 'תיאוריה קודם',      sub: 'לקרוא ואז לתרגל',          emoji: '📖' },
+  { id: 'practice',   label: 'תרגול קודם',        sub: 'לקפוץ ישר לשאלות',         emoji: '✍️' },
+  { id: 'visual',     label: 'ויזואלי',           sub: 'מפות חשיבה ודיאגרמות',     emoji: '🗺️' },
+  { id: 'examples',   label: 'דוגמאות',           sub: 'מהחיים האמיתיים',          emoji: '💡' },
+  { id: 'video',      label: 'סרטונים',           sub: 'הסברים מצולמים',           emoji: '🎥' },
+  { id: 'summaries',  label: 'סיכומים קצרים',      sub: 'נקודות מפתח',              emoji: '📝' },
+  { id: 'repetition', label: 'חזרה ושינון',       sub: 'לחזור שוב ושוב',           emoji: '🔁' },
+  { id: 'color',      label: 'צבעים והדגשות',      sub: 'להבליט ויזואלית',          emoji: '🎨' },
+  { id: 'steps',      label: 'צעד-אחר-צעד',        sub: 'פירוק לחלקים קטנים',       emoji: '🧩' },
+  { id: 'tutor',      label: 'הסבר אישי',          sub: 'לשאול שאלות תוך כדי',       emoji: '🧑‍🏫' },
 ]
 
 const MOTIVATION_OPTIONS: { id: MotivationProfile; label: string; emoji: string }[] = [
@@ -88,6 +95,20 @@ export default function PersonalPlanWizard({ open, onClose, onSelectTopic }: Per
   const update = <K extends keyof IntakeAnswers>(key: K, value: IntakeAnswers[K]) =>
     setAnswers(prev => ({ ...prev, [key]: value }))
 
+  const toggleHelper = (id: string) => {
+    setAnswers(prev => {
+      const has = prev.learningHelpers.includes(id)
+      const learningHelpers = has
+        ? prev.learningHelpers.filter(h => h !== id)
+        : [...prev.learningHelpers, id]
+      // Keep the legacy single `style` roughly in sync for anything that reads it.
+      const t = learningHelpers.includes('theory')
+      const p = learningHelpers.includes('practice')
+      const style = t && !p ? 'theory-first' : p && !t ? 'practice-first' : 'mixed'
+      return { ...prev, learningHelpers, style }
+    })
+  }
+
   const toggleInList = (key: 'knownTopics' | 'weakTopics', topicId: string) => {
     setAnswers(prev => {
       const list = prev[key]
@@ -108,7 +129,7 @@ export default function PersonalPlanWizard({ open, onClose, onSelectTopic }: Per
       }
       return true
     }
-    if (step === 2) return answers.dailyMinutes >= 5 && !!answers.style
+    if (step === 2) return answers.dailyMinutes >= 5 && answers.learningHelpers.length > 0
     return true
   }
 
@@ -227,13 +248,14 @@ export default function PersonalPlanWizard({ open, onClose, onSelectTopic }: Per
               <span>5 דק׳</span><span>60 דק׳</span><span>120 דק׳</span>
             </div>
 
-            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>איך אתה לומד הכי טוב?</div>
-            <div style={{ display: 'grid', gap: 8 }}>
-              {STYLE_OPTIONS.map(s => (
+            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>מה עוזר לך ללמוד?</div>
+            <div style={{ fontSize: 12.5, color: '#5b6f93', marginBottom: 10 }}>אפשר לבחור כמה שרוצים — נתאים את החוויה אליך.</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {HELP_OPTIONS.map(s => (
                 <OptionCard
                   key={s.id}
-                  selected={answers.style === s.id}
-                  onClick={() => update('style', s.id)}
+                  selected={answers.learningHelpers.includes(s.id)}
+                  onClick={() => toggleHelper(s.id)}
                   emoji={s.emoji}
                   label={s.label}
                   sub={s.sub}
