@@ -337,7 +337,7 @@ import PotionInventory from './PotionInventory'
 import { useTutorialStep } from '../hooks/useTutorialStep'
 import { useTutorialStore } from '../store/tutorialStore'
 import { useTutorStore } from '../store/tutorStore'
-import { registerTourAction } from './CoachmarkTour'
+import { registerTourAction, tourStepIds } from './CoachmarkTour'
 import TourLauncher from './TourLauncher'
 import Tooltip from './Tooltip'
 import Ribbon from './Ribbon'
@@ -2023,6 +2023,48 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
   const clearPersonalPlan = useLearningStore(s => s.clearPersonalPlan)
   const [planWizardOpen, setPlanWizardOpen] = useState(false)
 
+  // ── First-run funnel ────────────────────────────────────────────────────────
+  // Brand-new user → auto-play the intro tour → its end opens the goals
+  // questionnaire → finishing/closing it lands them here with both home cards
+  // pulsing. Gated by per-user `onboardingCompleted` so it fires exactly once.
+  const onboardingCompleted = useLearningStore(s => s.onboardingCompleted)
+  const completeOnboarding   = useLearningStore(s => s.completeOnboarding)
+  const userName             = useLearningStore(s => s.userName)
+  const activeTour           = useTutorialStore(s => s.activeTour)
+  const [funnelStage, setFunnelStage] = useState<'idle' | 'active' | 'done'>('idle')
+  const [pulseCards, setPulseCards]   = useState(false)
+  const prevTourRef = useRef(activeTour)
+
+  // Kick off the funnel once for a brand-new user.
+  useEffect(() => {
+    if (onboardingCompleted || funnelStage !== 'idle') return
+    setFunnelStage('active')
+    // force=true: tour completion is stored globally, so a fresh account could
+    // otherwise be skipped if a previous user already saw the intro.
+    useTutorialStore.getState().startTour('tour-basic', tourStepIds('tour-basic'), true)
+  }, [onboardingCompleted, funnelStage])
+
+  // When the intro tour ends during the funnel → open the goals questionnaire
+  // AND mark onboarding complete immediately, so the funnel never re-loops even
+  // if the user abandons the questionnaire (it stays reachable via the banner).
+  useEffect(() => {
+    const prev = prevTourRef.current
+    prevTourRef.current = activeTour
+    if (funnelStage === 'active' && prev && prev.id === 'tour-basic' && !activeTour) {
+      if (!onboardingCompleted) completeOnboarding(userName || '')
+      setPlanWizardOpen(true)
+    }
+  }, [activeTour, funnelStage, onboardingCompleted, completeOnboarding, userName])
+
+  // Questionnaire closed (finished OR skipped) → land on home with both cards
+  // pulsing to point the user at the next action.
+  const finishFunnel = useCallback(() => {
+    if (funnelStage !== 'active') return
+    setFunnelStage('done')
+    setPulseCards(true)
+    window.setTimeout(() => setPulseCards(false), 6000)
+  }, [funnelStage])
+
   // ── Progress-driven home content ──────────────────────────────────────────
   // Ordered topic list: prefer the user's personal plan, else the canonical
   // easy-first course order (same chain the plan generator uses).
@@ -2062,9 +2104,10 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
       <PersonalPlanWizard
         open={planWizardOpen}
-        onClose={() => setPlanWizardOpen(false)}
+        onClose={() => { setPlanWizardOpen(false); finishFunnel() }}
         onSelectTopic={onSelectTopic}
       />
+      <style>{'@keyframes ws-card-pulse{0%,100%{box-shadow:0 0 0 0 rgba(51,81,202,0)}50%{box-shadow:0 0 0 6px rgba(51,81,202,0.28)}}'}</style>
       <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* Personal study plan CTA / banner — opens 3-step intake wizard. */}
@@ -2155,6 +2198,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             padding: '28px 28px 22px',
             display: 'flex', flexDirection: 'column',
             order: 2,
+            animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
             <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 6 }}>תרגול</div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
@@ -2196,6 +2240,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             display: 'flex', flexDirection: 'column',
             position: 'relative',
             order: 1,
+            animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
             <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_MED, marginBottom: 16, textAlign: 'right' }}>לימוד חומר</div>
             {/* Whiteboard area with glassmorphism */}

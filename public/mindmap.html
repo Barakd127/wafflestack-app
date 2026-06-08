@@ -5760,7 +5760,10 @@ document.addEventListener('keydown', e => {
       if(n&&el) startEditNode(n,el);
     }
     return;
-  } else if((e.ctrlKey||e.metaKey)&&e.key==='z'){
+  } else if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='z'||e.key==='Z')){
+    // Ctrl/Cmd+Shift+Z → redo (standard editor shortcut).
+    e.preventDefault(); mmRedo();
+  } else if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&(e.key==='z'||e.key==='Z')){
     e.preventDefault(); mmUndo();
   } else if((e.ctrlKey||e.metaKey)&&(e.key==='y'||e.key==='Y')){
     e.preventDefault(); mmRedo();
