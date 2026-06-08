@@ -3,7 +3,8 @@ import { useLearningStore } from '../store/learningStore'
 import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../config/featureUnlocks'
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
-import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp } from '../lib/helpRequests'
+import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
+import { toPng } from 'html-to-image'
 
 // Lazy-load interactive graph components (per-topic visualizations).
 // Each component is ~300-450 LOC of pure SVG + KaTeX; lazy keeps the bundle
@@ -447,6 +448,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
   const [displayName, setDisplayName] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [agreedIP, setAgreedIP] = useState(false)
   const existingUsers: User[] = []
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -462,6 +464,10 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
           setError('שם משתמש או סיסמה שגויים')
         }
       } else {
+        if (!agreedIP) {
+          setError('יש לאשר שהתוכן והמערכת הם קניין רוחני של ברק דקר כדי להמשיך')
+          return
+        }
         const result = await registerUser(username, password, displayName)
         if (typeof result === 'string') {
           setError(result)
@@ -562,14 +568,28 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(196,220,255,0.8)', borderRadius: 12, fontSize: 16, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', direction: 'ltr', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', transition: 'border-color 0.15s' }} />
             </div>
+            {mode === 'register' && (
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 9, cursor: 'pointer', fontSize: 12.5, color: '#5b6f93', lineHeight: 1.5, textAlign: 'right' }}>
+                <input
+                  type="checkbox"
+                  checked={agreedIP}
+                  onChange={e => setAgreedIP(e.target.checked)}
+                  style={{ marginTop: 2, width: 16, height: 16, accentColor: '#254A9F', flexShrink: 0, cursor: 'pointer' }}
+                />
+                <span>
+                  אני מאשר/ת שאני יודע/ת שהתוכן, התרגילים והמערכת הם <b style={{ color: '#1F3E6C' }}>קניין רוחני של ברק דקר</b> — ואין להעתיק, לשכפל או להפיץ ללא אישור בכתב.
+                </span>
+              </label>
+            )}
             {error && <div style={{ background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.3)', borderRadius: 10, padding: '10px 14px', color: '#d32f2f', fontSize: 13, textAlign: 'center' }}>{error}</div>}
-            <button type="submit" disabled={loading}
+            <button type="submit" disabled={loading || (mode === 'register' && !agreedIP)}
               className="ws-cta-btn"
               style={{
                 marginTop: 6, padding: '14px 0',
                 background: 'linear-gradient(135deg,#1F3E6C,#254A9F)',
                 color: '#fff', borderRadius: 14, fontSize: 16, fontWeight: 700,
-                cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
+                cursor: (loading || (mode === 'register' && !agreedIP)) ? 'not-allowed' : 'pointer',
+                opacity: (loading || (mode === 'register' && !agreedIP)) ? 0.6 : 1,
                 fontFamily: "'Rubik', sans-serif",
                 boxShadow: '0 6px 20px rgba(31,62,108,0.35), inset 0 1px 0 rgba(255,255,255,0.25)',
                 width: '100%',
@@ -2697,6 +2717,23 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     } catch {
       /* submit always queues locally; ignore mirror errors */
     }
+    // Best-effort: screenshot the question + email it to Barak via /api/ask-human.
+    // Capture BEFORE flipping to 'pending' so the card still shows the question.
+    let screenshot: string | null = null
+    try {
+      if (contentRowRef.current) {
+        screenshot = await toPng(contentRowRef.current, { cacheBust: true, backgroundColor: '#ffffff' })
+      }
+    } catch {
+      /* canvas/iframe taint or unsupported node — send without the image */
+    }
+    void emailHelpRequest({
+      question: q.text,
+      attempt,
+      userId: userId ?? null,
+      topicId: selectedTopic ?? q.topic ?? null,
+      screenshot,
+    })
     setHelpState(prev => ({ ...prev, [helpId]: 'pending' }))
   }
 

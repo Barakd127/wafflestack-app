@@ -183,3 +183,29 @@ export async function fetchHelpAnswer(questionId: string): Promise<string | null
   const local = loadQueue().find(r => r.id === questionId)
   return local?.status === 'answered' ? local.answer ?? null : null
 }
+
+/**
+ * Best-effort EMAIL relay → POSTs the stuck question + the student's confusion +
+ * a screenshot to the /api/ask-human serverless function, which emails Barak.
+ * Independent of the localStorage/Supabase queue above (that stays the durable
+ * source of truth). Fails silently when the function/key isn't available (e.g.
+ * the GitHub Pages mirror, or before RESEND_API_KEY is configured on Vercel).
+ */
+export async function emailHelpRequest(input: {
+  question: string
+  attempt: string | null
+  userId: string | null
+  topicId: string | null
+  screenshot: string | null // data:image/png;base64,...
+}): Promise<boolean> {
+  try {
+    const res = await fetch('/api/ask-human', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
