@@ -101,6 +101,9 @@ export default function TourLauncher() {
               const feats = FEATURES_BY_TIER[tier.id]
               const have = unlockedCountFor(tier.id)
               const isOpen = expanded[tier.id]
+              // Fully-locked tier (no unlocked feature, not admin) → off-coloured
+              // header that matches the locked feature rows below it.
+              const dim = have === 0 && !adminMode
               return (
                 <div key={tier.id} style={{ marginBottom: 8 }}>
                   {/* Tier section header */}
@@ -108,17 +111,21 @@ export default function TourLauncher() {
                     onClick={() => setExpanded(e => ({ ...e, [tier.id]: !e[tier.id] }))}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'right',
-                      cursor: 'pointer', background: 'rgba(99,102,241,0.06)',
-                      border: '1px solid rgba(99,102,241,0.18)', borderRadius: 10, padding: '8px 10px',
+                      cursor: 'pointer',
+                      background: dim ? 'rgba(31,38,64,0.05)' : 'rgba(99,102,241,0.06)',
+                      border: dim ? '1px solid rgba(31,38,64,0.12)' : '1px solid rgba(99,102,241,0.18)',
+                      borderRadius: 10, padding: '8px 10px',
                       fontFamily: 'inherit',
+                      opacity: dim ? 0.55 : 1,
+                      filter: dim ? 'grayscale(0.85)' : 'none',
                     }}
                   >
-                    <span style={{ fontSize: 18 }}>{tier.emoji}</span>
+                    <span style={{ fontSize: 18 }}>{dim ? '🔒' : tier.emoji}</span>
                     <span style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{ fontWeight: 800, fontSize: 13, color: '#1F2640' }}>{tier.labelHe}</span>
-                      <span style={{ fontSize: 10, color: '#16a34a', fontWeight: 600, marginInlineStart: 8 }}>{have}/{feats.length} פתוחים</span>
+                      <span style={{ fontWeight: 800, fontSize: 13, color: dim ? '#8b90a0' : '#1F2640' }}>{tier.labelHe}</span>
+                      <span style={{ fontSize: 10, color: dim ? '#9aa0ad' : '#16a34a', fontWeight: 600, marginInlineStart: 8 }}>{have}/{feats.length} פתוחים</span>
                     </span>
-                    <span style={{ fontSize: 13, color: '#6366f1', transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}>▸</span>
+                    <span style={{ fontSize: 13, color: dim ? '#b6bac6' : '#6366f1', transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}>▸</span>
                   </button>
 
                   {/* Feature rows */}

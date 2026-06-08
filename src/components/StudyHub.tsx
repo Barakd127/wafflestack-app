@@ -4160,14 +4160,18 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
 
   const handleLogout = () => {
     logoutUser()
+    useLearningStore.getState().hydrateForUser('default')
     setCurrentUser(null)
     onLoggedOut?.()
   }
 
-  // Hydrate the per-user arsenal whenever the active user changes.
+  // Hydrate per-user stores whenever the active user changes. learningStore
+  // (XP / unlocks / progress) and arsenalStore are both per-account now — a new
+  // account starts at 0 XP instead of inheriting the previous user's data.
   useEffect(() => {
     if (currentUser) {
       const userId = currentUser.userId || currentUser.username || 'default'
+      useLearningStore.getState().hydrateForUser(userId)
       useArsenalStore.getState().hydrate(userId)
     }
   }, [currentUser])

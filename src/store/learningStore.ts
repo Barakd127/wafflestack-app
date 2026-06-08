@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { evaluateUnlocks, ALL_FEATURE_IDS, FEATURE_UNLOCKS_BY_ID, type FeatureId } from '../config/featureUnlocks'
 import type { PersonalPlan, IntakeAnswers } from '../data/personalPlanTypes'
 
@@ -418,6 +418,8 @@ interface LearningState {
   clearNewAchievements: () => void
   resetProgress: () => void
   completeOnboarding: (name: string) => void
+  /** Switch the active account: reset to defaults + load that user's saved slice. */
+  hydrateForUser: (userId: string) => void
   setExamDate: (date: string | null) => void
   // Set an explicit target date (YYYY-MM-DD) for a plan topic. Clamped to
   // examDate when one is set (a target can't fall after the exam).
@@ -450,39 +452,38 @@ export function isBuildingUnlocked(state: LearningState, buildingId: string): bo
   return !!prog && prog.level >= 1
 }
 
+// ── Per-user persistence ──────────────────────────────────────────────────────
+// The store persists to `wafflestack-learning-${activeUserId}` (a USER-AWARE
+// key) so XP / unlocks / progress are isolated per account — mirrors arsenalStore
+// (`wafflestack-arsenal-v1-${userId}`). `hydrateForUser(userId)` (below) switches
+// the active user, resets to defaults, then reloads that user's slice.
+let _activeUserId = 'default'
+const userAwareStorage = {
+  getItem: (name: string): string | null => {
+    try { return localStorage.getItem(`${name}-${_activeUserId}`) } catch { return null }
+  },
+  setItem: (name: string, value: string): void => {
+    try { localStorage.setItem(`${name}-${_activeUserId}`, value) } catch { /* quota */ }
+  },
+  removeItem: (name: string): void => {
+    try { localStorage.removeItem(`${name}-${_activeUserId}`) } catch { /* quota */ }
+  },
+}
+
+// Fresh per-user defaults (new function each call so arrays/objects aren't shared).
+const makeLearningDefaults = () => ({
+  xp: 0, streak: 0, bestStreak: 0, totalAnswered: 0, totalCorrect: 0, lastStudied: null,
+  studyDays: 0, answeredIds: [], achievements: ACHIEVEMENTS, newAchievements: [], cards: {},
+  userName: '', onboardingCompleted: false, lastSessionDate: null, currentStreak: 0, longestStreak: 0,
+  dailyChallengeDate: null, dailyChallengeProgress: 0, buildingProgress: INITIAL_BUILDING_PROGRESS,
+  completedLessons: [], examDate: null, planTargets: {}, adminMode: false, errorTags: {}, errorTagCounts: {},
+  unlockedFeatures: [], newlyUnlocked: [], personalPlan: null, intakeAnswers: null, planHistory: [],
+})
+
 export const useLearningStore = create<LearningState>()(
   persist(
     (set, get) => ({
-      xp: 0,
-      streak: 0,
-      bestStreak: 0,
-      totalAnswered: 0,
-      totalCorrect: 0,
-      lastStudied: null,
-      studyDays: 0,
-      answeredIds: [],
-      achievements: ACHIEVEMENTS,
-      newAchievements: [],
-      cards: {},
-      userName: '',
-      onboardingCompleted: false,
-      lastSessionDate: null,
-      currentStreak: 0,
-      longestStreak: 0,
-      dailyChallengeDate: null,
-      dailyChallengeProgress: 0,
-      buildingProgress: INITIAL_BUILDING_PROGRESS,
-      completedLessons: [],
-      examDate: null,
-      planTargets: {},
-      adminMode: false,
-      errorTags: {},
-      errorTagCounts: {},
-      unlockedFeatures: [],
-      newlyUnlocked: [],
-      personalPlan: null,
-      intakeAnswers: null,
-      planHistory: [],
+      ...makeLearningDefaults(),
 
       recordAnswer: (questionId, correct, xpReward) => {
         const state = get()
@@ -705,6 +706,26 @@ export const useLearningStore = create<LearningState>()(
         completedLessons: [],
       }),
       completeOnboarding: (name: string) => set({ userName: name, onboardingCompleted: true }),
+
+      // Switch the active account: reset to fresh defaults, then load THIS user's
+      // persisted slice. New user → 0 XP / no unlocks; returning user → their data.
+      hydrateForUser: (userId: string) => {
+        const uid = userId || 'default'
+        _activeUserId = uid
+        // One-time migration: the first account to hydrate after the per-user
+        // upgrade inherits the legacy GLOBAL map (so existing progress isn't
+        // lost); the legacy key is then consumed so later accounts start clean.
+        try {
+          const legacy = localStorage.getItem('wafflestack-learning')
+          if (legacy) {
+            const userKey = `wafflestack-learning-${uid}`
+            if (!localStorage.getItem(userKey)) localStorage.setItem(userKey, legacy)
+            localStorage.removeItem('wafflestack-learning')
+          }
+        } catch { /* ignore */ }
+        set(makeLearningDefaults())
+        void useLearningStore.persist.rehydrate()
+      },
       // examDate is NOT reset on resetProgress — it's real-world metadata, not learning state
       setExamDate: (date: string | null) => set({ examDate: date }),
 
@@ -784,6 +805,7 @@ export const useLearningStore = create<LearningState>()(
     }),
     {
       name: 'wafflestack-learning',
+      storage: createJSONStorage(() => userAwareStorage),
       // After rehydrating, auto-heal stale unlockedFeatures: if admin is OFF
       // but the persisted list contains features the user shouldn't have
       // earned yet (left over from a previous admin-ON session), recompute
