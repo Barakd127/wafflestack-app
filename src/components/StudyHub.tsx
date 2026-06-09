@@ -346,6 +346,7 @@ import { RiskBoard } from './RiskBoard'
 import MistakeAutopsy, { type ErrorTag } from './MistakeAutopsy'
 import PersonalPlanWizard from './PersonalPlanWizard'
 import IntroTutorialVideo from './IntroTutorialVideo'
+import LearningInsights from './LearningInsights'
 
 interface StudyHubProps {
   onViewChange: (view: 'study' | 'mindmap' | '3d' | 'drawing') => void
@@ -2317,6 +2318,9 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             </button>
           </div>
         </div>
+
+        {/* ── LEARNING INSIGHTS — accuracy + what to strengthen ── */}
+        <LearningInsights />
 
         {/* ── LEARNING PATH STRIP ─────────────────────── */}
         <div style={{

@@ -625,6 +625,20 @@ body.light .nb-empty{color:rgba(0,0,0,.45)}
   z-index:5; user-select:none;
 }
 .node-wrap:hover .node-note-badge{opacity:1}
+/* Hover reorder chips: ◀ ▶ on a node's sides to shift it among its same-level
+   siblings (mirrors Alt+←/→). Hidden until hover; nudge-animate to hint moveability. */
+.node-reorder-chip{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;
+  background:rgba(91,139,255,.95);color:#fff;font-size:11px;line-height:22px;text-align:center;
+  cursor:pointer;opacity:0;pointer-events:none;z-index:11;box-shadow:0 2px 8px rgba(0,0,0,.32);
+  transition:opacity .15s ease,background .15s ease}
+.node-reorder-chip.left{left:-27px}
+.node-reorder-chip.right{right:-27px}
+.node-reorder-chip:hover{background:#3351ca}
+.node-wrap:hover .node-reorder-chip{opacity:1;pointer-events:auto}
+.node-wrap:hover .node-reorder-chip.left{animation:mm-nudge-left 1.2s ease-in-out infinite}
+.node-wrap:hover .node-reorder-chip.right{animation:mm-nudge-right 1.2s ease-in-out infinite}
+@keyframes mm-nudge-left{0%,100%{transform:translateY(-50%) translateX(0)}50%{transform:translateY(-50%) translateX(-4px)}}
+@keyframes mm-nudge-right{0%,100%{transform:translateY(-50%) translateX(0)}50%{transform:translateY(-50%) translateX(4px)}}
 .node-note-badge:hover{transform:scale(1.15);background:#fff}
 .node-note-badge.has-note{
   opacity:1; background:#fef3c7; border-color:#f59e0b;
@@ -747,7 +761,7 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <button class="tb-btn" onclick="wsOpenSplitStudy()" title="הוסף את הארסנל לצד המפה (זמין דרך אזור הלמידה)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-inline-end:5px"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M9 19h6"/><path d="M12 14v5"/></svg>הארסנל שלי</button>
   </div>
   <div class="ribbon-group" id="ribbon-add">
-    <button class="tb-btn" onclick="mmAddChild()">+ ענף</button>
+    <button class="tb-btn" id="mm-add-branch-btn" onclick="mmAddChild()">+ ענף</button>
     <button class="tb-btn" onclick="mmAddEquation()">&#8721; משוואה</button>
     <button class="tb-btn" onclick="mmAddCanvas()">&#11036; קנבס</button>
     <button class="tb-btn" onclick="mmAddSummary()" title="סיכום קבוצת אחים (Ctrl-click)">&#8944; סיכום</button>
@@ -1977,6 +1991,26 @@ function mmRender(){
       noteBtn.textContent = hasNote ? '📝' : '＋';
       noteBtn.onclick = (e)=>{ e.stopPropagation(); openNoteEditor(n.id); if(typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('add-note'); };
       div.appendChild(noteBtn);
+    }
+
+    // ── Hover reorder chips (◀ ▶) — shift this node left/right among its
+    //    same-level siblings (mirrors Alt+←/→). Only for non-root nodes that
+    //    actually have a sibling to swap with. ──
+    if(id !== MM.root && n.parentId){
+      const par = MM.nodes[n.parentId];
+      if(par && Array.isArray(par.childIds) && par.childIds.length > 1){
+        const mkChip = (right, glyph, side)=>{
+          const c = document.createElement('div');
+          c.className = 'node-reorder-chip ' + side;
+          c.textContent = glyph;
+          c.title = right ? 'הזז ימינה (Alt+→)' : 'הזז שמאלה (Alt+←)';
+          c.onmousedown = (e)=>{ e.stopPropagation(); };
+          c.onclick = (e)=>{ e.stopPropagation(); mmShiftSibling(id, right); };
+          div.appendChild(c);
+        };
+        mkChip(false, '◀', 'left');
+        mkChip(true, '▶', 'right');
+      }
     }
 
     // ── Topic links — nodes mapped to an app topic (topicId) get 📖 תיאוריה /
@@ -5417,6 +5451,8 @@ function toggleRibbon(name){
     if(el)el.style.display='flex';
     tab.classList.add('active');
     if(panel)panel.style.display='flex';
+    // Guided tour: opening the "הוסף" tab advances the tour to the +ענף step.
+    if(name==='add' && typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('open-add-tab');
   }else{
     if(panel)panel.style.display='none';
   }
@@ -5727,28 +5763,8 @@ document.addEventListener('keydown', e => {
     // Esc clears multi-selection
     if (MM.multiSel && MM.multiSel.length) { MM.multiSel = []; mmRender(); }
   } else if(e.altKey && (e.key==='ArrowLeft'||e.key==='ArrowRight') && MM.sel){
-    // Reorder the selected node among its siblings: swap screen position with
-    // the nearest sibling on the chosen side (works the same in RTL because it
-    // operates on actual x). Keeps childIds order in sync with x.
-    const n = MM.nodes[MM.sel];
-    const p = (n && n.parentId) ? MM.nodes[n.parentId] : null;
-    if(p && Array.isArray(p.childIds) && p.childIds.length > 1){
-      e.preventDefault();
-      const right = e.key==='ArrowRight';
-      let best = null;
-      for(const id of p.childIds){
-        if(id===MM.sel) continue;
-        const m = MM.nodes[id]; if(!m) continue;
-        if(right ? m.x > n.x : m.x < n.x){
-          if(!best || (right ? m.x < best.x : m.x > best.x)) best = m;
-        }
-      }
-      if(best){
-        const tx = n.x; n.x = best.x; best.x = tx;
-        p.childIds.sort((a,b)=> (MM.nodes[a]?MM.nodes[a].x:0) - (MM.nodes[b]?MM.nodes[b].x:0));
-        mmPushHistory(); mmRender();
-      }
-    }
+    e.preventDefault();
+    mmShiftSibling(MM.sel, e.key==='ArrowRight');
     return;
   } else if(e.key==='F2' && MM.sel){
     e.preventDefault();
@@ -7267,10 +7283,16 @@ function mmRenderSummaries(){
 const MM_TOUR_KEY = 'mm-tour-completed-v1';
 const MM_TOUR_STEPS = [
   {
+    id: 'open-add-tab',
+    title: 'פתח את לשונית "הוסף"',
+    body: 'לחץ על ➕ "הוסף" בסרגל העליון כדי לפתוח את כלי ההוספה.',
+    highlight: '#rtab-add',
+  },
+  {
     id: 'add-branch',
     title: 'הוסף ענף ראשון',
-    body: 'פתח את לשונית "הוסף" בסרגל, ואז לחץ "+ ענף" כדי להוסיף צומת חדש מתחת לשורש. הניסיון שלך מתחיל כאן.',
-    highlight: '#rtab-add',
+    body: 'עכשיו לחץ "+ ענף" כדי להוסיף צומת חדש מתחת לשורש. הניסיון שלך מתחיל כאן.',
+    highlight: '#mm-add-branch-btn',
   },
   {
     id: 'edit-text',
@@ -7297,6 +7319,28 @@ const MM_TOUR_STEPS = [
     highlight: '#nb-toggle-btn',
   },
 ];
+// Reorder a node among its siblings by swapping screen position with the nearest
+// sibling on the chosen side. Works in RTL (operates on real x). Shared by the
+// Alt+←/→ shortcut and the on-hover ◀ ▶ chips.
+function mmShiftSibling(id, right){
+  const n = MM.nodes[id];
+  const p = (n && n.parentId) ? MM.nodes[n.parentId] : null;
+  if(!p || !Array.isArray(p.childIds) || p.childIds.length < 2) return;
+  let best = null;
+  for(const cid of p.childIds){
+    if(cid===id) continue;
+    const m = MM.nodes[cid]; if(!m) continue;
+    if(right ? m.x > n.x : m.x < n.x){
+      if(!best || (right ? m.x < best.x : m.x > best.x)) best = m;
+    }
+  }
+  if(best){
+    const tx = n.x; n.x = best.x; best.x = tx;
+    p.childIds.sort((a,b)=> (MM.nodes[a]?MM.nodes[a].x:0) - (MM.nodes[b]?MM.nodes[b].x:0));
+    mmPushHistory(); mmRender();
+  }
+}
+
 let MM_TOUR = { active: false, step: 0 };
 
 function mmTourStart(){
@@ -7320,7 +7364,10 @@ function mmTourCompleteIfStep(stepId){
     try{ localStorage.setItem(MM_TOUR_KEY, '1'); }catch(e){}
     mmTourFinish();
   } else {
-    mmTourRender();
+    // Defer one frame: the just-added branch node (or the now-visible ribbon
+    // button) needs to be laid out before mmTourRender measures its rect for the
+    // spotlight + arrow. Without this the arrow couldn't find the new branch.
+    requestAnimationFrame(function(){ requestAnimationFrame(mmTourRender); });
   }
 }
 function mmTourFinish(){
@@ -7406,8 +7453,12 @@ function mmTourRender(){
         '<line x1="'+cx+'" y1="'+tailY+'" x2="'+cx+'" y2="'+headY+'" stroke="#D4AF37" stroke-width="5" stroke-linecap="round"/>' +
         '<path d="'+headPath+'" fill="#D4AF37"/>' +
       '</g>';
-    // Anchor the card near the target (clear of the arrow).
-    card.style.left = cx + 'px'; card.style.right = 'auto'; card.style.bottom = 'auto';
+    // Anchor the card near the target (clear of the arrow), but CLAMP it inside
+    // the viewport so it never spills off-screen when the branch sits near an
+    // edge (viewport-size aware). Card is 300px wide (#mm-tour-card).
+    const cardW = 300, margin = 12;
+    const clampedCx = Math.max(cardW/2 + margin, Math.min(W - cardW/2 - margin, cx));
+    card.style.left = clampedCx + 'px'; card.style.right = 'auto'; card.style.bottom = 'auto';
     card.style.transform = below ? 'translateX(-50%)' : 'translateX(-50%) translateY(-100%)';
     card.style.top = (below ? rect.bottom + gap + len + 14 : rect.top - gap - len - 14) + 'px';
   } else {
