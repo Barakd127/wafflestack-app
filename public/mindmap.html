@@ -1077,6 +1077,9 @@ const WB_DOM_TYPES = new Set(['rect','circle','sticky','text']);
 const _MM_USER_ID = new URLSearchParams(location.search).get('userId') || 'default';
 // ?scene=topics → the host's "מפה" tab: a dedicated course-topic-tree overview.
 const _MM_TOPIC_SCENE = new URLSearchParams(location.search).get('scene') === 'topics';
+// Admin (passed from the host app's adminMode). Admins may ADD sub-topics under
+// the skeleton; renaming/deleting skeleton nodes is blocked for everyone.
+const _MM_ADMIN = new URLSearchParams(location.search).get('admin') === '1';
 const MM_SAVE_KEY = 'mm-data-' + _MM_USER_ID;
 
 // ── Sheets (XMind-style multi-map tabs) ──────────────────────────────────────
@@ -1206,6 +1209,20 @@ const COURSE_SEED = {
   ],
 };
 
+// Set of every text in the centralized COURSE_SEED skeleton — used to (re)stamp
+// the `skeleton` lock onto loaded maps (incl. saves made before the flag existed).
+let _MM_SEED_TEXTS = null;
+function _seedTextSet(){
+  if(_MM_SEED_TEXTS) return _MM_SEED_TEXTS;
+  const s = new Set();
+  (function walk(spec){ if(!spec) return; if(spec.text) s.add(spec.text); (spec.children||[]).forEach(walk); })(COURSE_SEED);
+  _MM_SEED_TEXTS = s; return s;
+}
+function _restampSkeleton(){
+  const st = _seedTextSet();
+  for(const id in MM.nodes){ if(MM.nodes[id] && st.has(MM.nodes[id].text)) MM.nodes[id].skeleton = true; }
+}
+
 function _seedNode(spec, parentId, depth, slot, totalSiblings) {
   // Spread first-level branches horizontally; deeper levels stack vertically
   // by cluster index. Auto-layout will refine positioning afterwards.
@@ -1216,6 +1233,10 @@ function _seedNode(spec, parentId, depth, slot, totalSiblings) {
   const color = spec.color || (parentId && MM.nodes[parentId] ? MM.nodes[parentId].color : '#60a5fa');
   const node = mmNode('branch', spec.text, x, y, parentId, color);
   if (spec.topicId) node.topicId = spec.topicId;
+  // Skeleton = the centralized course structure (from COURSE_SEED). Its name is
+  // locked everywhere (no rename / delete, even for admin); only ADDING
+  // sub-topics under it is allowed, and that's admin-only.
+  node.skeleton = true;
   if (spec.children && spec.children.length) {
     spec.children.forEach((c, i) => _seedNode(c, node.id, depth + 1, i, spec.children.length));
   }
@@ -1228,7 +1249,7 @@ function buildSeedMap() {
   MM.nodes.root = {
     id: 'root', type: 'root', text: COURSE_SEED.text,
     x: 100, y: 100, color: COURSE_SEED.color, parentId: null,
-    childIds: [], collapsed: false, W: 160, H: 46,
+    childIds: [], collapsed: false, W: 160, H: 46, skeleton: true,
   };
   COURSE_SEED.children.forEach((c, i) => _seedNode(c, 'root', 1, i, COURSE_SEED.children.length));
   // Auto-layout if available (defined later in file).
@@ -1470,6 +1491,10 @@ function initMM(){
         const isEmpty = !root || !root.childIds || root.childIds.length === 0;
         if (!isEmpty) {
           MM = parsed;
+          // Centralized skeleton lock: re-stamp on the topic-overview map so the
+          // course structure stays name-locked even for maps saved before the
+          // flag existed. Admin-added sub-topics (not in COURSE_SEED) stay free.
+          if (_MM_TOPIC_SCENE) _restampSkeleton();
           if (!MM.searchMatches) MM.searchMatches = [];
           if (!MM.searchIdx) MM.searchIdx = 0;
           // §24 migration: legacy maps had persisted node.x / node.y.
@@ -2604,6 +2629,12 @@ function mmAddChild(parentId){
   const sel=parentId||MM.sel||MM.root;
   const parent=MM.nodes[sel];
   if(!parent)return;
+  // Adding sub-topics UNDER the centralized course skeleton is admin-only.
+  // (Personal / non-skeleton nodes stay freely expandable for anyone.)
+  if(parent.skeleton && _MM_TOPIC_SCENE && !_MM_ADMIN){
+    if(typeof mmShowToast==='function') mmShowToast('🔒 רק מנהל יכול להוסיף תתי-נושאים למבנה הקורס');
+    return;
+  }
   // Auto-expand the parent so the new child isn't immediately hidden by
   // mmIsVisible() — root cause of the "+ Branch added but invisible" bug.
   if(parent.collapsed) parent.collapsed=false;
@@ -3578,6 +3609,12 @@ function handleSearchKey(e){
 }
 
 function startEditNode(n,el,initialChar){
+  // Skeleton nodes (the centralized course structure) are name-locked for
+  // EVERYONE — admins included. Only sub-topics they add can be renamed.
+  if(n && n.skeleton && _MM_TOPIC_SCENE){
+    if(typeof mmShowToast==='function') mmShowToast('🔒 שם הנושא נעול — זהו חלק ממבנה הקורס');
+    return;
+  }
   const div=el.querySelector('.node-div');
   const input=document.createElement('input');
   // Type-to-edit: if a printable char triggered editing, start fresh with that
@@ -5703,7 +5740,7 @@ function ctxFn(action){
   else if(action==='addEquation'){const sel=MM.sel;MM.sel=n.id;mmAddEquation();MM.sel=sel;}
   else if(action==='addCanvas'){mmAddCanvas();}
   else if(action==='edit'){startEditNode(n,document.getElementById('nw_'+n.id));} // FIX #2c: use nw_ (node-wrap)
-  else if(action==='delete'){delete MM.nodes[n.id];if(n.parentId){const parent=MM.nodes[n.parentId];if(parent)parent.childIds=parent.childIds.filter(id=>id!==n.id);}MM.sel=null;mmPushHistory();mmRender();}
+  else if(action==='delete'){if(n.skeleton && _MM_TOPIC_SCENE){if(typeof mmShowToast==='function')mmShowToast('🔒 לא ניתן למחוק נושא ממבנה הקורס');return;}delete MM.nodes[n.id];if(n.parentId){const parent=MM.nodes[n.parentId];if(parent)parent.childIds=parent.childIds.filter(id=>id!==n.id);}MM.sel=null;mmPushHistory();mmRender();}
   closeCtxMenu();
 }
 
@@ -5751,7 +5788,7 @@ document.addEventListener('keydown', e => {
     // Batch delete: drop every multi-selected node + descendants. Falls back
     // to single-node deletion if nothing is multi-selected.
     if (MM.multiSel && MM.multiSel.length) {
-      const ids = MM.multiSel.filter(id => id !== MM.root);
+      const ids = MM.multiSel.filter(id => id !== MM.root && !(_MM_TOPIC_SCENE && MM.nodes[id] && MM.nodes[id].skeleton));
       // Also recursively gather descendants so we don't leave orphans
       const queue = ids.slice();
       const toDelete = new Set(ids);
@@ -5773,7 +5810,9 @@ document.addEventListener('keydown', e => {
       mmPushHistory(); mmRender();
     } else if(MM.sel&&MM.sel!==MM.root){
       const n=MM.nodes[MM.sel];
-      if(n){
+      if(n && n.skeleton && _MM_TOPIC_SCENE){
+        if(typeof mmShowToast==='function') mmShowToast('🔒 לא ניתן למחוק נושא ממבנה הקורס');
+      } else if(n){
         delete MM.nodes[MM.sel];
         if(n.parentId){const p=MM.nodes[n.parentId];if(p)p.childIds=p.childIds.filter(x=>x!==MM.sel);}
         MM.sel=null; mmPushHistory(); mmRender();
@@ -6164,6 +6203,7 @@ function naAction(action){
   else if(action==='equation'){ MM.sel=id; openEquationModal(null,'insert'); }
   else if(action==='canvas')  { MM.sel=id; mmAddCanvas(); }
   else if(action==='delete')  {
+    if(n.skeleton && _MM_TOPIC_SCENE){ if(typeof mmShowToast==='function') mmShowToast('🔒 לא ניתן למחוק נושא ממבנה הקורס'); return; }
     delete MM.nodes[id];
     if(n.parentId){ const p=MM.nodes[n.parentId]; if(p) p.childIds=p.childIds.filter(x=>x!==id); }
     MM.sel=null; mmPushHistory(); mmRender();
