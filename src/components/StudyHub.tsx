@@ -1745,7 +1745,9 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
     { id: 'home',     label: 'דף הבית',           iconKey: 'home' },
     { id: 'courses', label: 'אזור למידה',        iconKey: 'book' },
     { id: 'arsenal',  label: 'הארסנל שלי',        iconKey: 'trophy', feature: 'arsenal' },
-    { id: null,       label: 'מפת הלמידה שלי',    iconKey: 'map',   action: 'mindmap', feature: 'mindmap-view' },
+    // 'מפת הלמידה שלי' removed as a separate destination — the concept map now
+    // lives only inside אזור למידה (the 🗺️ מפה tab), framed as an upgrade of the
+    // learning area rather than a standalone screen. Per user 2026-06-09.
     { id: null,       label: 'העולם שלי',         iconKey: 'globe', action: 'world' },
     { id: null,       label: 'סיורים מודרכים',    iconKey: 'tour',  action: 'tours' },
   ]
