@@ -208,6 +208,22 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 .node-div.selected{outline:2.5px solid #D4AF37;outline-offset:2px;box-shadow:0 0 0 4px rgba(212,175,55,.3)}
 .mm-drop-target-glow .node-div{outline:3px solid #D4AF37 !important;outline-offset:3px;box-shadow:0 0 0 5px rgba(212,175,55,0.55), 0 0 18px 4px rgba(212,175,55,0.45) !important;transition:box-shadow 80ms ease-out}
 .node-div.node-root{background:#fff!important;color:#1a1a1a!important;border:2.5px solid #1a1a1a;font-size:14px;font-weight:700;padding:10px 22px;border-radius:12px;box-shadow:0 3px 14px rgba(0,0,0,.3)}
+/* Topic nodes (link to theory/practice) — polished gold liquid-glass so they
+   read as the "real" study destinations vs plain branches. */
+.node-div.node-topic{
+  background:linear-gradient(150deg,#FCE08A 0%,#F4C645 28%,#E0A82E 62%,#C68A18 100%)!important;
+  color:#fff!important;font-weight:700;letter-spacing:.2px;
+  border:1px solid rgba(255,255,255,.55);
+  text-shadow:0 1px 2px rgba(120,82,8,.55);
+  box-shadow:0 6px 18px rgba(176,128,24,.5), inset 0 1px 0 rgba(255,255,255,.75), inset 0 -3px 8px rgba(120,82,8,.4);
+  position:relative;overflow:hidden;
+}
+/* Glossy sheen sweep across the top — the "liquid glass" highlight. */
+.node-div.node-topic::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.42) 0%,rgba(255,255,255,.08) 42%,rgba(255,255,255,0) 60%);
+}
+.node-div.node-topic.selected{outline:2.5px solid #fff;outline-offset:2px;box-shadow:0 0 0 4px rgba(244,198,69,.55), 0 6px 18px rgba(176,128,24,.55)}
 .node-div.search-match{box-shadow:0 0 0 3px rgba(212,175,55,.6)!important}
 .node-div.eq-node{padding:8px 18px;min-width:80px}
 .node-div.eq-node .katex{font-size:1.1em}
@@ -1870,9 +1886,13 @@ function mmRender(){
     if(n.type==='text' || n.type==='root'){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
     div.style.left=n.x+'px';div.style.top=n.y+'px';div.style.width=n.W+'px';div.style.height=n.H+'px';
     const nodeDiv=document.createElement('div');
-    nodeDiv.className='node-div'+((sel||multiSel)?' selected':'')+(n.type==='equation'?' eq-node':'')+(n.type==='root'?' node-root':'');
+    // Topic nodes (mapped to a course topic → 📖 תיאוריה / 📝 תרגול) get a
+    // distinct GOLD liquid-glass treatment so they stand out from plain branches.
+    const isTopicNode = !!n.topicId;
+    nodeDiv.className='node-div'+((sel||multiSel)?' selected':'')+(n.type==='equation'?' eq-node':'')+(n.type==='root'?' node-root':'')+(isTopicNode?' node-topic':'');
     nodeDiv.id='nd_'+id;
-    nodeDiv.style.background=n.color||'#60a5fa';
+    // Topic nodes: let the .node-topic CSS gradient own the background.
+    if(!isTopicNode) nodeDiv.style.background=n.color||'#60a5fa';
     nodeDiv.style.color=n.type==='root'?'#1a1a1a':'white';
     nodeDiv.style.cursor='pointer';
     if(n.type==='equation'){renderKatex(n.latex||'\\frac{x}{2}',nodeDiv);}
