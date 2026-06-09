@@ -407,8 +407,14 @@ interface LearningState {
   intakeAnswers: IntakeAnswers | null
   planHistory: { plan: PersonalPlan; answers: IntakeAnswers }[]
 
+  // Count of full practice sessions finished (reaching the end of a quiz). The
+  // early features gate on this instead of cheap XP — see featureUnlocks.
+  practiceSessionsCompleted: number
+
   // Actions
   recordAnswer: (questionId: string, correct: boolean, xpReward: number) => void
+  /** Mark a full practice session finished + re-evaluate session-gated unlocks. */
+  completePracticeSession: () => void
   recordSM2Answer: (questionId: string, quality: number, xpReward: number) => void
   getNextQuestion: (topic?: string) => Question | null
   getDailyChallenge: () => Question[]
@@ -478,6 +484,7 @@ const makeLearningDefaults = () => ({
   dailyChallengeDate: null, dailyChallengeProgress: 0, buildingProgress: INITIAL_BUILDING_PROGRESS,
   completedLessons: [], examDate: null, planTargets: {}, adminMode: false, errorTags: {}, errorTagCounts: {},
   unlockedFeatures: [], newlyUnlocked: [], personalPlan: null, intakeAnswers: null, planHistory: [],
+  practiceSessionsCompleted: 0,
 })
 
 export const useLearningStore = create<LearningState>()(
@@ -537,8 +544,9 @@ export const useLearningStore = create<LearningState>()(
           return a
         })
 
-        // Evaluate feature unlocks against the NEW xp / completedLessons.
-        const evalState = { xp: newXp, completedLessons: state.completedLessons }
+        // Evaluate feature unlocks against the NEW xp / completedLessons /
+        // completed practice sessions.
+        const evalState = { xp: newXp, completedLessons: state.completedLessons, sessionsCompleted: state.practiceSessionsCompleted }
         const earnedFeatures = evaluateUnlocks(evalState)
         const freshFeatures = earnedFeatures.filter(f => !state.unlockedFeatures.includes(f))
 
@@ -561,6 +569,22 @@ export const useLearningStore = create<LearningState>()(
           newlyUnlocked: freshFeatures.length
             ? [...state.newlyUnlocked, ...freshFeatures]
             : state.newlyUnlocked,
+        })
+      },
+
+      // A full practice session finished (reached the end of a quiz). The early
+      // features now gate on this count (arsenal after 1, pomodoro after 2, …)
+      // instead of cheap XP, so tools are EARNED through real practice.
+      completePracticeSession: () => {
+        const state = get()
+        const sessions = state.practiceSessionsCompleted + 1
+        const evalState = { xp: state.xp, completedLessons: state.completedLessons, sessionsCompleted: sessions }
+        const earnedFeatures = evaluateUnlocks(evalState)
+        const freshFeatures = earnedFeatures.filter(f => !state.unlockedFeatures.includes(f))
+        set({
+          practiceSessionsCompleted: sessions,
+          unlockedFeatures: freshFeatures.length ? [...state.unlockedFeatures, ...freshFeatures] : state.unlockedFeatures,
+          newlyUnlocked: freshFeatures.length ? [...state.newlyUnlocked, ...freshFeatures] : state.newlyUnlocked,
         })
       },
 

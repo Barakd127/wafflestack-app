@@ -29,6 +29,12 @@ export interface UnlockRule {
   xp?: number
   topicsCompleted?: number
   /**
+   * Unlock after N FULL practice sessions finished (reaching the end of a quiz).
+   * The early/basic features use this so tools are EARNED through real practice
+   * instead of a cheap XP gate. ORs with the other criteria.
+   */
+  sessionsCompleted?: number
+  /**
    * Unlock as soon as a SPECIFIC lesson/topic id appears in completedLessons
    * (e.g. 'intro'). Lets us anchor early unlocks to a concrete milestone —
    * "finish the intro lesson → unlock the mindmap" — rather than a raw XP gate.
@@ -60,13 +66,15 @@ export interface UnlockRule {
 // since each xp value is unique, they fire sequentially.
 export const FEATURE_UNLOCKS: UnlockRule[] = [
   // ── Basic band (ordinals 1-7) — tight spacing for early momentum ──────────
-  { feature: 'arsenal',          tier: 1,  xp: 10,  requiresLesson: 'intro', description: 'Finish the intro lesson or answer one question', descriptionHe: 'סיים את שיעור הפתיחה או ענה נכון על שאלה אחת — נפתח הארסנל' },
-  { feature: 'pomodoro',         tier: 2,  xp: 20,                            description: 'Reach 20 XP',  descriptionHe: 'הגע ל-20 נק׳ כדי לפתוח את שעון הפומודורו' },
-  { feature: 'mindmap-view',     tier: 3,  xp: 35,  requiresLesson: 'intro', description: 'Finish the intro lesson or reach 35 XP', descriptionHe: 'סיים את שיעור הפתיחה או הגע ל-35 נק׳ — תראה את מפת הלמידה שלך' },
-  { feature: 'ai-tutor',         tier: 4,  xp: 50,                            description: 'Reach 50 XP',  descriptionHe: 'הגע ל-50 נק׳ כדי לפתוח את המורה הפרטי' },
-  { feature: 'notebook',         tier: 5,  xp: 70,                            description: 'Reach 70 XP',  descriptionHe: 'הגע ל-70 נק׳ כדי לפתוח את המחברת' },
-  { feature: 'mindmap-edit',     tier: 6,  xp: 95,                            description: 'Reach 95 XP',  descriptionHe: 'הגע ל-95 נק׳ כדי לערוך את מפת החשיבה' },
-  { feature: 'paper-styles',     tier: 7,  xp: 120,                           description: 'Reach 120 XP', descriptionHe: 'הגע ל-120 נק׳ כדי להחליף סגנון נייר' },
+  // Basic tier is EARNED through full practice sessions (finishing a quiz),
+  // NOT cheap XP — one tool unlocks per completed session. Per user 2026-06-09.
+  { feature: 'arsenal',          tier: 1,  sessionsCompleted: 1,  description: 'Finish 1 full practice session',  descriptionHe: 'סיים תרגול שלם אחד כדי לפתוח את הארסנל' },
+  { feature: 'pomodoro',         tier: 2,  sessionsCompleted: 2,  description: 'Finish 2 practice sessions',      descriptionHe: 'סיים 2 תרגולים שלמים כדי לפתוח את שעון הפומודורו' },
+  { feature: 'mindmap-view',     tier: 3,  sessionsCompleted: 3,  description: 'Finish 3 practice sessions',      descriptionHe: 'סיים 3 תרגולים שלמים כדי לראות את מפת הלמידה' },
+  { feature: 'ai-tutor',         tier: 4,  sessionsCompleted: 4,  description: 'Finish 4 practice sessions',      descriptionHe: 'סיים 4 תרגולים שלמים כדי לפתוח את המורה הפרטי' },
+  { feature: 'notebook',         tier: 5,  sessionsCompleted: 5,  description: 'Finish 5 practice sessions',      descriptionHe: 'סיים 5 תרגולים שלמים כדי לפתוח את המחברת' },
+  { feature: 'mindmap-edit',     tier: 6,  sessionsCompleted: 6,  description: 'Finish 6 practice sessions',      descriptionHe: 'סיים 6 תרגולים שלמים כדי לערוך את מפת החשיבה' },
+  { feature: 'paper-styles',     tier: 7,  sessionsCompleted: 7,  description: 'Finish 7 practice sessions',      descriptionHe: 'סיים 7 תרגולים שלמים כדי להחליף סגנון נייר' },
 
   // ── Intermediate band (ordinals 8-18) — widening spacing ──────────────────
   { feature: 'highlighter',      tier: 8,  xp: 150,                           description: 'Reach 150 XP', descriptionHe: 'הגע ל-150 נק׳ כדי לפתוח את המסמן' },
@@ -175,15 +183,17 @@ export const FEATURE_UNLOCKS_BY_ID: Record<string, UnlockRule> = Object.fromEntr
 // (otherwise finishing the 1-minute intro would unlock mid-ladder features).
 const NON_TOPIC_LESSONS = new Set(['intro'])
 
-export function evaluateUnlocks(state: { xp: number; completedLessons: string[] }): FeatureId[] {
+export function evaluateUnlocks(state: { xp: number; completedLessons: string[]; sessionsCompleted?: number }): FeatureId[] {
   const xp = state.xp ?? 0
   const completed = state.completedLessons ?? []
+  const sessions = state.sessionsCompleted ?? 0
   const topics = completed.filter(id => !NON_TOPIC_LESSONS.has(id)).length
   const out: FeatureId[] = []
   for (const rule of FEATURE_UNLOCKS) {
     let ok = false
     if (rule.xp !== undefined && xp >= rule.xp) ok = true
     if (rule.topicsCompleted !== undefined && topics >= rule.topicsCompleted) ok = true
+    if (rule.sessionsCompleted !== undefined && sessions >= rule.sessionsCompleted) ok = true
     if (rule.requiresLesson !== undefined && completed.includes(rule.requiresLesson)) ok = true
     if (ok) out.push(rule.feature)
   }

@@ -2055,26 +2055,28 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
   const [pulseCards, setPulseCards]   = useState(false)
   const prevTourRef = useRef(activeTour)
 
-  // Kick off the funnel once for a brand-new user.
+  // Kick off the funnel ONCE per user. Persist onboardingCompleted IMMEDIATELY
+  // (not at tour-end): HomeScreen unmounts/remounts on navigation, resetting the
+  // local funnelStage, so if we waited for the tour to finish, abandoning it
+  // would re-fire the intro on every visit to home. Marking it now guarantees
+  // exactly-once.
   useEffect(() => {
     if (onboardingCompleted || funnelStage !== 'idle') return
     setFunnelStage('active')
+    completeOnboarding(userName || '')
     // force=true: tour completion is stored globally, so a fresh account could
     // otherwise be skipped if a previous user already saw the intro.
     useTutorialStore.getState().startTour('tour-basic', tourStepIds('tour-basic'), true)
-  }, [onboardingCompleted, funnelStage])
+  }, [onboardingCompleted, funnelStage, completeOnboarding, userName])
 
-  // When the intro tour ends during the funnel → open the goals questionnaire
-  // AND mark onboarding complete immediately, so the funnel never re-loops even
-  // if the user abandons the questionnaire (it stays reachable via the banner).
+  // When the intro tour ends during the funnel → open the goals questionnaire.
   useEffect(() => {
     const prev = prevTourRef.current
     prevTourRef.current = activeTour
     if (funnelStage === 'active' && prev && prev.id === 'tour-basic' && !activeTour) {
-      if (!onboardingCompleted) completeOnboarding(userName || '')
       setPlanWizardOpen(true)
     }
-  }, [activeTour, funnelStage, onboardingCompleted, completeOnboarding, userName])
+  }, [activeTour, funnelStage])
 
   // Questionnaire closed (finished OR skipped) → land on home with both cards
   // pulsing to point the user at the next action.
@@ -2569,6 +2571,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   const contentRowRef = useRef<HTMLDivElement>(null)
   const recordAnswer = useLearningStore(s => s.recordAnswer)
   const recordErrorTag = useLearningStore(s => s.recordErrorTag)
+  const completePracticeSession = useLearningStore(s => s.completePracticeSession)
 
   // ── Feature gating for the companion-tool tabs + split FAB ──────────────────
   // Each bottom-pane surface is an unlock-ladder feature; the split FAB itself is
@@ -2889,6 +2892,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     const ni = currentQ + 1
     if (ni >= total) {
       setPhase('done')
+      // A full practice session finished → bump the counter that gates the
+      // basic-tier feature unlocks (arsenal after 1, pomodoro after 2, …).
+      completePracticeSession()
       return
     }
     const next = [...dots]
