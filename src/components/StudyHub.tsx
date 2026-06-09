@@ -2047,27 +2047,39 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
   // Brand-new user → auto-play the intro tour → its end opens the goals
   // questionnaire → finishing/closing it lands them here with both home cards
   // pulsing. Gated by per-user `onboardingCompleted` so it fires exactly once.
-  const onboardingCompleted = useLearningStore(s => s.onboardingCompleted)
-  const completeOnboarding   = useLearningStore(s => s.completeOnboarding)
-  const userName             = useLearningStore(s => s.userName)
   const activeTour           = useTutorialStore(s => s.activeTour)
   const [funnelStage, setFunnelStage] = useState<'idle' | 'active' | 'done'>('idle')
   const [pulseCards, setPulseCards]   = useState(false)
   const prevTourRef = useRef(activeTour)
 
-  // Kick off the funnel ONCE per user. Persist onboardingCompleted IMMEDIATELY
-  // (not at tour-end): HomeScreen unmounts/remounts on navigation, resetting the
-  // local funnelStage, so if we waited for the tour to finish, abandoning it
-  // would re-fire the intro on every visit to home. Marking it now guarantees
-  // exactly-once.
+  // Kick off the funnel ONCE per user. CRITICAL: defer the decision to the next
+  // frame and read state via getState(), NOT a reactive selector. On mount the
+  // persisted store hasn't merged yet (and this child's effect runs before the
+  // parent's hydrateForUser effect), so a reactive `onboardingCompleted` reads a
+  // transient `false` → the intro re-fired on every visit home. By rAF time all
+  // hydration effects have settled, so getState() returns the real value.
+  // We also persist onboardingCompleted immediately (not at tour-end) so the
+  // guard is durable even if the user abandons the tour.
   useEffect(() => {
-    if (onboardingCompleted || funnelStage !== 'idle') return
-    setFunnelStage('active')
-    completeOnboarding(userName || '')
-    // force=true: tour completion is stored globally, so a fresh account could
-    // otherwise be skipped if a previous user already saw the intro.
-    useTutorialStore.getState().startTour('tour-basic', tourStepIds('tour-basic'), true)
-  }, [onboardingCompleted, funnelStage, completeOnboarding, userName])
+    if (funnelStage !== 'idle') return
+    let cancelled = false
+    // Settle delay: auth resolution + per-user hydrateForUser + the async persist
+    // rehydrate can all land across several frames. Waiting ~700ms then reading
+    // getState() (NOT a reactive selector) guarantees we see the REAL persisted
+    // onboardingCompleted, never a transient default-false — which is what made
+    // the intro re-fire on every home visit.
+    const id = window.setTimeout(() => {
+      if (cancelled) return
+      const ls = useLearningStore.getState()
+      if (ls.onboardingCompleted) { setFunnelStage('done'); return }
+      setFunnelStage('active')
+      ls.completeOnboarding(ls.userName || '')
+      // force=true: tour completion is stored globally, so a fresh account could
+      // otherwise be skipped if a previous user already saw the intro.
+      useTutorialStore.getState().startTour('tour-basic', tourStepIds('tour-basic'), true)
+    }, 700)
+    return () => { cancelled = true; window.clearTimeout(id) }
+  }, [funnelStage])
 
   // When the intro tour ends during the funnel → open the goals questionnaire.
   useEffect(() => {

@@ -747,8 +747,21 @@ export const useLearningStore = create<LearningState>()(
             localStorage.removeItem('wafflestack-learning')
           }
         } catch { /* ignore */ }
-        set(makeLearningDefaults())
-        void useLearningStore.persist.rehydrate()
+        // Read this user's persisted slice BEFORE any set(). The persist
+        // middleware writes on EVERY set, so calling set(defaults) first would
+        // immediately CLOBBER the saved key with fresh defaults
+        // (onboardingCompleted:false, …) — and we'd then read back those
+        // defaults, permanently destroying the user's progress and re-firing the
+        // intro on every login. Read first, then apply defaults+slice in ONE set.
+        let persisted: Record<string, unknown> | null = null
+        try {
+          const raw = localStorage.getItem(`wafflestack-learning-${uid}`)
+          if (raw) {
+            const parsed = JSON.parse(raw)
+            if (parsed && parsed.state) persisted = parsed.state as Record<string, unknown>
+          }
+        } catch { /* corrupt slice — defaults stand */ }
+        set({ ...makeLearningDefaults(), ...(persisted ?? {}) })
       },
       // examDate is NOT reset on resetProgress — it's real-world metadata, not learning state
       setExamDate: (date: string | null) => set({ examDate: date }),
