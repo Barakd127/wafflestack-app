@@ -1740,6 +1740,8 @@ const primaryBtn: React.CSSProperties = {
   borderRadius: 22, padding: '10px 22px', cursor: 'pointer',
   fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 700,
   boxShadow: '0 4px 14px rgba(99,102,241,0.4)',
+  minHeight: 44,
+  transition: 'filter 0.15s, transform 0.15s',
 }
 
 const secondaryBtn: React.CSSProperties = {

@@ -49,18 +49,18 @@ const TOUR_STEPS: Record<string, TourStep[]> = {
   'tour-basic': [
     { id: 'basic-1', target: 'center', title: '👋 ברוכים הבאים ל-WaffleStack', body: 'הופכים סטטיסטיקה למשחק בנייה. נסביר ב-30 שניות איך זה עובד.' },
     { id: 'basic-2', target: 'center', title: '🎯 לומדים ⟵ צוברים XP', body: 'כל תשובה נכונה בתרגול מזכה אותך בנקודות XP. ככל שתתרגל, ה-XP גדל.' },
-    { id: 'basic-3', target: 'center', title: '🔒 XP פותח כלים', body: 'הכלים נפתחים אחד-אחד לפי XP: הארסנל, מפת המושגים, המורה הפרטי, הקנבס ועוד. מה שנעול (🔒) ייפתח כשתגיע לסף.' },
-    { id: 'basic-4', target: 'center', title: '🧭 איפה הכל נמצא', body: 'הכלים שנפתחו מופיעים בסרגל הצד ובמתג התחתון שליד התרגיל. כלים נעולים מסומנים ב-🔒.' },
-    { id: 'basic-5', target: 'tour-btn', title: '🎓 הסיורים תמיד כאן', body: 'בכל רגע אפשר לחזור לכפתור 🎓 כדי לראות הדגמה חיה של כל כלי שנפתח. קדימה — בהצלחה!' },
+    { id: 'basic-3', target: 'center', title: '🔒 XP פותח כלים', body: 'כלים כמו ארסנל, מפת מושגים ומורה פרטי נפתחים אוטומטית לפי XP. 🔒 = עוד קצת ולזה תגיע.' },
+    { id: 'basic-4', target: 'center', title: '🧭 איפה הכל נמצא', body: 'כל כלי שנפתח מופיע בסרגל הצד. כלים נעולים מסומנים ב-🔒 ומחכים לך.' },
+    { id: 'basic-5', target: 'center', title: '🎓 הסיורים תמיד כאן', body: 'לחץ על 🎓 בסרגל העליון בכל עת — תקבל הדגמה חיה של כל כלי שנפתח. בהצלחה!' },
   ],
 
   // Legacy in-mindmap tour (kept).
   mindmap: [
-    { id: 'mm-1', target: 'back-btn',  title: 'ניווט בתוך ה-iframe',  body: 'בתוך המפה: גרור להזזה, גלגלת עכבר לזום פנימה/החוצה.' },
-    { id: 'mm-2', target: 'split-btn', title: 'מצב מפוצל',             body: 'לחץ כאן לצפייה במפת המושגים ובעיר בו-זמנית.' },
-    { id: 'mm-3', target: 'center',    title: 'לחיצה על צומת',         body: 'לחיצה על כל צומת במפה תפתח את השיעור המתאים.' },
-    { id: 'mm-4', target: 'center',    title: 'סגירת המפה',            body: 'לסגירה — לחץ על כפתור "← דף הבית" בפינה הימנית העליונה.' },
-    { id: 'mm-5', target: 'help-btn',  title: 'חזרה על הסיור',         body: 'לחץ על "?" בכל עת לחזרה על ההדרכה הזו.' },
+    { id: 'mm-1', target: 'center',    title: 'ניווט במפה',            body: 'גרור להזזה, גלגלת עכבר (או Pinch) לזום פנימה/החוצה.' },
+    { id: 'mm-2', target: 'split-btn', title: 'מצב מפוצל',             body: 'לחץ כאן לצפייה במפה ובתרגיל בו-זמנית.' },
+    { id: 'mm-3', target: 'center',    title: 'לחיצה על צומת',         body: 'כל לחיצה על צומת במפה פותחת את השיעור המתאים.' },
+    { id: 'mm-4', target: 'center',    title: 'סגירת המפה',            body: 'ללחוץ על "← דף הבית" בפינה הימנית העליונה לחזרה.' },
+    { id: 'mm-5', target: 'center',    title: 'חזרה על הסיור',         body: 'אפשר להפעיל שוב את הסיור הזה דרך כפתור 🎓 בסרגל העליון.' },
   ],
 
 }
@@ -90,8 +90,8 @@ const FEATURE_TOURS: Partial<Record<FeatureId, TourStep[]>> = {
   ],
   'formula-library': [
     { id: 'fl-1', target: 'center', title: '∑ ספריית נוסחאות', body: 'מאגר נוסחאות מוכנות שמוצב ישר על הקנבס — בלי להקליד מחדש.' },
-    { id: 'fl-2', target: 'practice-tab', title: '1. נכנסים לתרגול', body: 'נתחיל מתוך תרגול.', action: 'nav-practice' },
-    { id: 'fl-3', target: 'canvas-tab', title: '2. פותחים קנבס', body: 'הקנבס נפתח לצד התרגיל.', action: 'switch-canvas' },
+    { id: 'fl-2', target: 'practice-tab', title: '1. נכנסים לתרגול', body: 'עוברים לתרגיל — משם ניפתח את ספריית הנוסחאות.', action: 'nav-practice' },
+    { id: 'fl-3', target: 'canvas-tab', title: '2. פותחים קנבס', body: 'הקנבס נפתח לצד — כאן נציב נוסחאות ישירות.', action: 'switch-canvas' },
     { id: 'fl-4', target: 'canvas-frame', title: '3. ספריית הנוסחאות', body: 'פתחנו את הספרייה (∑ מימין). לחיצה על נוסחה מציבה אותה ישר על הקנבס.', action: 'open-formula-panel' },
   ],
   'math-widget': [
@@ -100,8 +100,8 @@ const FEATURE_TOURS: Partial<Record<FeatureId, TourStep[]>> = {
   ],
   'split-screen': [
     { id: 'ss-1', target: 'center', title: '⊟ פיצול מסך — זרימת העבודה המלאה', body: 'הפיצ׳ר המתקדם: תיאוריה, תרגול וקנבס פתוחים יחד באותו מסך.' },
-    { id: 'ss-2', target: 'center', title: '1. קוראים תיאוריה', body: 'מתחילים בחומר.', action: 'nav-theory' },
-    { id: 'ss-3', target: 'practice-tab', title: '2. עוברים לתרגול', body: 'עכשיו לתרגל את מה שקראנו.', action: 'nav-practice' },
+    { id: 'ss-2', target: 'center', title: '1. קוראים תיאוריה', body: 'קוראים את החומר תחילה — המסך עובר לדף התיאוריה.', action: 'nav-theory' },
+    { id: 'ss-3', target: 'practice-tab', title: '2. עוברים לתרגול', body: 'עכשיו מתרגלים את מה שקראנו — לחצו על לשונית התרגיל.', action: 'nav-practice' },
     { id: 'ss-4', target: 'canvas-tab', title: '3. מוסיפים קנבס לצד', body: 'פותחים לוח ציור לצד התרגיל — שני חלונות יחד.' },
     { id: 'ss-5', target: 'canvas-frame', title: '4. הכל יחד', body: 'עכשיו התרגיל והקנבס פתוחים זה לצד זה — פותרים ויזואלית בלי לעזוב את השאלה.', action: 'switch-canvas' },
     { id: 'ss-6', target: 'center', title: 'זה הפיצול 🎉', body: 'תיאוריה + תרגול + קנבס במסך אחד. ככה עובדים מתקדם.' },

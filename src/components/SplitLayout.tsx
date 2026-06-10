@@ -61,8 +61,10 @@ export default function SplitLayout({ onBack, darkMode, initialRight = 'study' }
     background: active ? 'rgba(99,102,241,0.30)' : 'rgba(255,255,255,0.05)',
     border: `1px solid ${active ? 'rgba(99,102,241,0.65)' : 'rgba(255,255,255,0.12)'}`,
     color: active ? '#c7d2fe' : 'rgba(255,255,255,0.55)',
-    borderRadius: 8, padding: '4px 12px', cursor: 'pointer',
+    borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
     fontSize: 12, fontWeight: 600, fontFamily: 'inherit',
+    minHeight: 36,
+    transition: 'background 0.15s, color 0.15s, border-color 0.15s',
   })
 
   return (
@@ -124,10 +126,20 @@ export default function SplitLayout({ onBack, darkMode, initialRight = 'study' }
           <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginInlineEnd: 6 }}>
             🏙️ עיר 3D | בצד ימין:
           </span>
-          <button onClick={() => setRightTab('study')} style={tabBtnStyle(rightTab === 'study')}>
+          <button
+            onClick={() => setRightTab('study')}
+            style={tabBtnStyle(rightTab === 'study')}
+            onMouseEnter={e => { if (rightTab !== 'study') (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)' }}
+            onMouseLeave={e => { if (rightTab !== 'study') (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)' }}
+          >
             📚 לימוד
           </button>
-          <button onClick={() => setRightTab('mindmap')} style={tabBtnStyle(rightTab === 'mindmap')}>
+          <button
+            onClick={() => setRightTab('mindmap')}
+            style={tabBtnStyle(rightTab === 'mindmap')}
+            onMouseEnter={e => { if (rightTab !== 'mindmap') (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)' }}
+            onMouseLeave={e => { if (rightTab !== 'mindmap') (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)' }}
+          >
             🧠 מפת חשיבה
           </button>
         </div>

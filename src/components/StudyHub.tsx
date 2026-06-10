@@ -3978,7 +3978,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   <div style={{ width: 120 }} />
                 ) : (
                   <button onClick={handleReveal} disabled={!answer.trim()}
-                    style={{ background: answer.trim() ? BUTTON_COLOR : '#C8D0E0', color: '#fff', border: 'none', borderRadius: 24, padding: '10px 28px', fontFamily: "'Rubik', sans-serif", fontSize: 16, fontWeight: 700, cursor: answer.trim() ? 'pointer' : 'not-allowed', boxShadow: answer.trim() ? '0px 2px 6px #8DA7FF' : 'none', transition: 'all 0.2s' }}>
+                    style={{ background: answer.trim() ? BUTTON_COLOR : '#C8D0E0', color: answer.trim() ? '#fff' : 'rgba(100,110,140,0.75)', border: 'none', borderRadius: 24, padding: '10px 28px', fontFamily: "'Rubik', sans-serif", fontSize: 16, fontWeight: 700, cursor: answer.trim() ? 'pointer' : 'not-allowed', boxShadow: answer.trim() ? '0px 2px 6px #8DA7FF' : 'none', transition: 'all 0.2s', minHeight: 44, opacity: answer.trim() ? 1 : 0.65 }}>
                     בדוק תשובה ←
                   </button>
                 )}
@@ -4033,19 +4033,19 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   <div style={{ display: 'flex', gap: 12 }}>
                     {currentQ > 0 && (
                       <button onClick={() => navigateToQuestion(currentQ - 1)}
-                        style={{ background: 'rgba(51,81,202,0.08)', color: BUTTON_COLOR, border: `1.5px solid rgba(51,81,202,0.25)`, borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
-                        ← Previous
+                        style={{ background: 'rgba(51,81,202,0.08)', color: BUTTON_COLOR, border: `1.5px solid rgba(51,81,202,0.25)`, borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', minHeight: 44 }}>
+                        → הקודם
                       </button>
                     )}
                     {currentQ < total - 1 ? (
                       <button onClick={() => navigateToQuestion(currentQ + 1)}
-                        style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', boxShadow: '0 2px 8px rgba(51,81,202,0.3)' }}>
-                        Next →
+                        style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', boxShadow: '0 2px 8px rgba(51,81,202,0.3)', minHeight: 44 }}>
+                        הבא ←
                       </button>
                     ) : (
                       <button onClick={() => setPhase('done')}
-                        style={{ background: '#D4AF37', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
-                        Finish 🏆
+                        style={{ background: '#D4AF37', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', minHeight: 44 }}>
+                        סיום 🏆
                       </button>
                     )}
                   </div>
