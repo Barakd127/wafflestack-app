@@ -111,7 +111,36 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11458908,"index.wasm":37695054},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+// WebGL context-loss guard: Godot Web cannot recover a lost context (GPU
+// reset on integrated GPUs under load) — detect it, tell the parent app,
+// offer a clean reload instead of a silent freeze.
+(function () {
+  const cv = document.getElementById('canvas');
+  if (!cv) return;
+  let lost = false;
+  cv.addEventListener('webglcontextlost', function (e) {
+    e.preventDefault();
+    lost = true;
+    try { window.parent.postMessage({ type: 'godot-context-lost' }, '*'); } catch (_) {}
+    let ov = document.getElementById('ws-ctx-lost');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.id = 'ws-ctx-lost';
+      ov.setAttribute('dir', 'rtl');
+      ov.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(13,13,26,0.92);color:#fff;font-family:system-ui,Arial,sans-serif;text-align:center;padding:24px;';
+      ov.innerHTML = '<div style="font-size:40px">\ud83c\udfd9\ufe0f</div>'
+        + '<div style="font-size:18px;font-weight:700">\u05d4\u05e8\u05d9\u05e0\u05d3\u05d5\u05e8 \u05e9\u05dc \u05d4\u05e2\u05d9\u05e8 \u05e0\u05ea\u05e7\u05dc \u05d1\u05e2\u05d5\u05de\u05e1</div>'
+        + '<button id="ws-ctx-reload" style="background:linear-gradient(135deg,#D4AF37,#b8941f);border:none;color:#1F2640;font-weight:800;font-size:15px;padding:11px 26px;border-radius:12px;cursor:pointer">\u05d8\u05e2\u05df \u05de\u05d7\u05d3\u05e9 \u05d0\u05ea \u05d4\u05e2\u05d9\u05e8</button>';
+      document.body.appendChild(ov);
+      document.getElementById('ws-ctx-reload').addEventListener('click', function () { window.location.reload(); });
+    }
+  }, false);
+  cv.addEventListener('webglcontextrestored', function () {
+    if (lost) window.location.reload();
+  }, false);
+})();
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11503084,"index.wasm":37695054},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+GODOT_CONFIG.mainPack = "index.pck?v=modes1-20260610";
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -201,6 +230,7 @@ const engine = new Engine(GODOT_CONFIG);
 		setStatusMode('progress');
 		engine.startGame({
 			'onProgress': function (current, total) {
+				try { window.parent.postMessage({ type: 'godot-progress', current: current, total: total }, '*'); } catch(e) {}
 				if (current > 0 && total > 0) {
 					statusProgress.value = current;
 					statusProgress.max = total;
@@ -211,6 +241,7 @@ const engine = new Engine(GODOT_CONFIG);
 			},
 		}).then(() => {
 			setStatusMode('hidden');
+			try { window.parent.postMessage({ type: 'godot-ready' }, '*'); } catch(e) {}
 		}, displayFailureNotice);
 	}
 }());
