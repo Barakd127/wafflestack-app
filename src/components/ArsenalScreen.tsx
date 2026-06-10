@@ -1749,6 +1749,7 @@ const secondaryBtn: React.CSSProperties = {
   border: '1px solid rgba(127,155,217,0.4)',
   borderRadius: 22, padding: '10px 18px', cursor: 'pointer',
   fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
+  minHeight: 44,
 }
 
 function iconBtn(bg: string, color: string): React.CSSProperties {

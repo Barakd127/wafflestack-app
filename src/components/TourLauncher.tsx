@@ -26,6 +26,8 @@ export default function TourLauncher() {
   const startTour       = useTutorialStore(s => s.startTour)
   const pendingTourId   = useTutorialStore(s => s.pendingTourId)
   const setPendingTour  = useTutorialStore(s => s.setPendingTour)
+  const tipsEnabled     = useTutorialStore(s => s.enabled)
+  const setEnabled      = useTutorialStore(s => s.setEnabled)
   const unlocked        = useLearningStore(s => s.unlockedFeatures)
   const adminMode       = useLearningStore(s => s.adminMode)
   const setOpen = (v: boolean | ((o: boolean) => boolean)) =>
@@ -123,6 +125,26 @@ export default function TourLauncher() {
               </span>
               <span style={{ fontSize: 14, color: '#6366f1' }}>▸</span>
             </button>
+
+            {/* Tips toggle — lets users re-enable contextual coachmarks */}
+            <label
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                cursor: 'pointer', marginBottom: 10,
+                background: 'rgba(31,38,64,0.04)',
+                border: '1px solid rgba(31,38,64,0.10)', borderRadius: 10, padding: '10px 12px',
+                fontFamily: 'inherit',
+              }}
+            >
+              <span style={{ fontSize: 18, width: 24, textAlign: 'center' }}>💡</span>
+              <span style={{ flex: 1, fontWeight: 700, fontSize: 13, color: '#1F2640' }}>טיפים מודרכים</span>
+              <input
+                type="checkbox"
+                checked={tipsEnabled}
+                onChange={e => setEnabled(e.target.checked)}
+                style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#6366f1' }}
+              />
+            </label>
 
             {MACRO_TIERS.map(tier => {
               const feats = FEATURES_BY_TIER[tier.id]

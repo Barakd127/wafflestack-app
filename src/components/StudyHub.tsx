@@ -3592,7 +3592,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               }}>
               {/* Drag handle pill — visible when tool is active on desktop */}
               {tab !== 'none' && !isMobile && (
-                <span title={floatMode ? 'גרור' : 'גרור לחלון צף'} style={{ width: 28, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.35)', flexShrink: 0, marginLeft: -4, marginRight: 4 }} aria-hidden="true" />
+                <span title={floatMode ? 'גרור' : 'גרור לחלון צף'} style={{ width: 28, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.35)', flexShrink: 0, marginInlineStart: -4, marginRight: 4 }} aria-hidden="true" />
               )}
               {/* Mobile bottom-sheet drag pill at very top */}
               {isMobile && tab !== 'none' && !isDone && (
@@ -3655,7 +3655,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
                   }}
                 >
-                  ⤢
+                  ⤢ צף
                 </button>
               )}
               {/* Mobile: close-tool button instead of collapse chip */}
@@ -3664,9 +3664,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   onClick={() => handleSetTab('none')}
                   title="סגור כלי"
                   aria-label="סגור כלי וחזור לשאלה"
-                  style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 12, marginRight: 'auto' }}
+                  style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 12, marginRight: 'auto', minHeight: 40 }}
                 >
-                  ✕
+                  ✕ סגור
                 </button>
               )}
               {/* Desktop collapse chip — only when floating (not in split panel) */}
