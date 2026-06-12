@@ -52,7 +52,13 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
   //   3. On `godot-ready`, pull the remote placements back into that same localStorage
   //      key BEFORE the Godot iframe reads it (it reads in GameState._ready()).
   // The data is intentionally kept in ONE canonical key — do not fork it.
-  const src = `/godot/index.html?userId=${encodeURIComponent(userId)}&admin=${adminMode ? 1 : 0}${isMobile ? '&mobile=1' : ''}`
+  // cb= busts the browser's heuristic cache of the godot shell html: vercel.json
+  // sends no Cache-Control for .html, so Chrome was reviving a stale index.html
+  // whose un-tagged pck URL then hit the year-long immutable CDN copy — players
+  // kept seeing builds that were days old. Keyed to the session, not Date.now()
+  // per render, so re-renders don't reload the iframe.
+  const cacheBust = useRef(Date.now()).current
+  const src = `/godot/index.html?userId=${encodeURIComponent(userId)}&admin=${adminMode ? 1 : 0}${isMobile ? '&mobile=1' : ''}&cb=${cacheBust}`
 
   // Listen for progress / ready messages from the Godot iframe
   useEffect(() => {
