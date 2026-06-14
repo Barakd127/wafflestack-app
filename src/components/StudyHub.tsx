@@ -2264,8 +2264,8 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 practice quiz, bypassing the difficulty picker. Returning users
                 keep the existing picker flow so they can pick difficulty / resume. */}
             <button onClick={() => (completedLessons.length > 0 ? onSelectTopic(currentTopicId) : onStartPractice(currentTopicId))}
-              className="ws-cta-btn"
-              style={{ background: BUTTON_COLOR, color: '#fff', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, fontFamily: "'Rubik', sans-serif", boxShadow: '0px 4px 14px rgba(51,81,202,0.35), inset 0 1px 0 rgba(255,255,255,0.25)' }}>
+              className="ws-cta-btn ws-glass-btn"
+              style={{ borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, fontFamily: "'Rubik', sans-serif" }}>
               {completedLessons.length > 0 ? 'המשך ←' : 'בוא נתרגל ←'}
             </button>
           </div>
@@ -2314,8 +2314,8 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             </div>
             {/* CTA button — liquid-glass to match the תרגול card's ws-cta-btn.
                 Map starts collapsed, so the label is "בוא נלמד" (let's learn). */}
-            <button onClick={onGoMindmap} className="ws-cta-btn"
-              style={{ marginTop: 12, background: BUTTON_COLOR, color:'#fff', border:'none', borderRadius:24, padding:'11px 0', fontWeight:600, fontSize:16, cursor:'pointer', fontFamily:"'Rubik',sans-serif", width:'100%', boxShadow:'0px 4px 14px rgba(51,81,202,0.35), inset 0 1px 0 rgba(255,255,255,0.25)' }}>
+            <button onClick={onGoMindmap} className="ws-cta-btn ws-glass-btn"
+              style={{ marginTop: 12, border:'none', borderRadius:24, padding:'11px 0', fontWeight:600, fontSize:16, cursor:'pointer', fontFamily:"'Rubik',sans-serif", width:'100%' }}>
               📖 בוא נלמד ←
             </button>
           </div>
@@ -2454,9 +2454,9 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             </div>
 
             <div style={{ flex: 1 }} />
-            <button onClick={onGoWorld}
-              style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, cursor: 'pointer', fontFamily: "'Rubik', sans-serif", boxShadow: '0px 2px 6px #8DA7FF' }}>
-              כניסה לעולם 🌆
+            <button onClick={onGoWorld} className="ws-cta-btn ws-glass-btn"
+              style={{ border: 'none', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, cursor: 'pointer', fontFamily: "'Rubik', sans-serif" }}>
+              כניסה לעולם
             </button>
           </div>
         </div>

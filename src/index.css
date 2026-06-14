@@ -364,6 +364,20 @@ html.dark :focus-visible {
  */
 
 /* ── Glass Card (course cards, topic cards) ── */
+/* Liquid-glass CTA — frosted #9EB1E7 tint (matches the 3D-world UI), readable
+   navy text. !important overrides the inline navy background/white text on the
+   existing CTAs so they only need the class added. Pairs with .ws-cta-btn for
+   the specular sheen. */
+.ws-glass-btn {
+  background: rgba(158, 177, 231, 0.30) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(158, 177, 231, 0.55) !important;
+  color: #1F3E6C !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 18px rgba(110, 140, 210, 0.28) !important;
+}
+.ws-glass-btn:hover { background: rgba(158, 177, 231, 0.44) !important; }
+
 .ws-glass-card {
   position: relative;
   overflow: hidden;
