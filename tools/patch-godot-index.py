@@ -12,7 +12,7 @@ Patches applied (idempotent):
  2. WebGL context-loss guard (recovers from GPU resets instead of freezing)
  3. mainPack cache-bust tag + fileSizes correction (browsers cache the pck)
 """
-import io, os, re, sys, datetime
+import io, os, re, sys, datetime, hashlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HTML = os.path.join(ROOT, "public", "godot", "index.html")
@@ -88,17 +88,30 @@ else:
 
 # ── 3. cache-bust + fileSizes ────────────────────────────────────────────────
 pck_size = os.path.getsize(PCK)
+# CONTENT-HASH cache key: the ?v= query is the pck's md5, so the URL is STABLE
+# when the game is unchanged (a React-only deploy won't re-download the 100 MB
+# pck) and changes only when the pck changes. Pairs with vercel.json serving
+# *.pck `immutable` → unchanged pck = browser cache hit, no revalidation.
+pck_hash = hashlib.md5(io.open(PCK, "rb").read()).hexdigest()[:12]
 s = re.sub(r'"index\.pck":\d+', '"index.pck":%d' % pck_size, s)
 if "GODOT_CONFIG.mainPack" not in s:
     s = s.replace(
         "const GODOT_THREADS_ENABLED",
-        'GODOT_CONFIG.mainPack = "index.pck?v=%s";\nconst GODOT_THREADS_ENABLED' % tag,
+        'GODOT_CONFIG.mainPack = "index.pck?v=%s";\nconst GODOT_THREADS_ENABLED' % pck_hash,
         1,
     )
-    report.append("cache-bust: ADDED tag=%s" % tag)
+    report.append("cache-bust: ADDED hash=%s" % pck_hash)
 else:
-    s = re.sub(r'index\.pck\?v=[\w-]+', "index.pck?v=%s" % tag, s)
-    report.append("cache-bust: RETAGGED %s" % tag)
+    s = re.sub(r'index\.pck\?v=[\w-]+', "index.pck?v=%s" % pck_hash, s)
+    report.append("cache-bust: RETAGGED hash=%s" % pck_hash)
+# Human build marker (distinct from the content-hash cache key) — lets us poll
+# production to confirm a specific build is live.
+marker = "<!-- ws-build:%s -->" % tag
+if "ws-build:" in s:
+    s = re.sub(r'<!-- ws-build:[\w.\-]+ -->', marker, s)
+elif "</head>" in s:
+    s = s.replace("</head>", marker + "\n</head>", 1)
+report.append("build-marker: %s" % tag)
 report.append("fileSizes: pck=%d" % pck_size)
 
 if s != orig:
