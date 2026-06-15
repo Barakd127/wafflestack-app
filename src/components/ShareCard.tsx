@@ -36,7 +36,6 @@ export default function ShareCard({ xp, masteredCount, total, onClose }: Props) 
             <span style={{ fontSize: 32 }}>🏙️</span>
             <div>
               <div style={{ fontSize: 20, fontWeight: 800, color: '#4ECDC4', letterSpacing: 0.5 }}>WaffleStack</div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 1 }}>עיר הסטטיסטיקה</div>
             </div>
           </div>
 

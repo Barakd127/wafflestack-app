@@ -135,9 +135,6 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
               <div style={{ fontSize: 36, fontWeight: 800, color: '#A0B4EA', letterSpacing: -0.5, lineHeight: 1 }}>
                 WaffleStack
               </div>
-              <div style={{ fontSize: 13, color: 'rgba(160,180,234,0.65)', marginTop: 4, fontWeight: 400 }}>
-                עיר הסטטיסטיקה שלך
-              </div>
             </div>
           </div>
 
