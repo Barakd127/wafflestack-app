@@ -265,7 +265,7 @@ export function StdDevVisual() {
     const [fx] = toSVG(sub[0][0], 0); const [lx] = toSVG(sub[sub.length - 1][0], 0)
     const [, by] = toSVG(0, 0)
     const area = sub.map(([x, y]) => { const [sx, sy] = toSVG(x, y); return `${sx.toFixed(1)},${sy.toFixed(1)}` }).join(' ')
-    return <polygon key={`${from}-${to}`} points={`${fx},${by} ${area} ${lx},${by}`} fill={fill} opacity={0.4} />
+    return <polygon key={`${from}-${to}`} points={`${fx},${by} ${area} ${lx},${by}`} fill={fill} />
   }
   const [mx] = toSVG(mu, 0)
   return (
@@ -279,17 +279,17 @@ export function StdDevVisual() {
         <label style={LABEL_STYLE}>סטיית תקן σ: <strong>{sigma}</strong> <input type="range" min={3} max={20} value={sigma} onChange={e => setSigma(+e.target.value)} style={SLIDER()} /></label>
       </div>
       <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
-        {shadeZone(mu - 3 * sigma, mu + 3 * sigma, '#c7d2fe')}
-        {shadeZone(mu - 2 * sigma, mu + 2 * sigma, '#818cf8')}
-        {shadeZone(mu - sigma, mu + sigma, '#6366f1')}
-        <line x1={20} y1={H - 12} x2={W - 20} y2={H - 12} stroke="#d1d5db" strokeWidth={1} />
-        <path d={pathD} fill="none" stroke="#3730a3" strokeWidth={2} />
-        <line x1={mx} y1={8} x2={mx} y2={H - 12} stroke="#ef4444" strokeWidth={1.5} strokeDasharray="4,3" />
-        <text x={mx} y={6} textAnchor="middle" fontSize={9} fill="#ef4444">μ</text>
+        {shadeZone(mu - 3 * sigma, mu + 3 * sigma, 'rgba(31,62,108,0.12)')}
+        {shadeZone(mu - 2 * sigma, mu + 2 * sigma, 'rgba(212,160,23,0.18)')}
+        {shadeZone(mu - sigma, mu + sigma, 'rgba(212,160,23,0.30)')}
+        <line x1={20} y1={H - 12} x2={W - 20} y2={H - 12} stroke="rgba(31,62,108,0.3)" strokeWidth={1} />
+        <path d={pathD} fill="none" stroke="#1F3E6C" strokeWidth={2} />
+        <line x1={mx} y1={8} x2={mx} y2={H - 12} stroke="#D4A017" strokeWidth={1.5} strokeDasharray="4,3" />
+        <text x={mx} y={6} textAnchor="middle" fontSize={9} fill="#D4A017">μ</text>
       </svg>
       <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
-        {[['±1σ ≈ 68%', 'rgba(99,102,241,0.7)'], ['±2σ ≈ 95%', 'rgba(99,102,241,0.45)'], ['±3σ ≈ 99.7%', 'rgba(99,102,241,0.25)']].map(([label, bg]) => (
-          <span key={label} style={{ padding: '2px 8px', background: bg as string, color: label.startsWith('±3') ? '#4338ca' : '#fff', borderRadius: 6, fontSize: 12, fontWeight: 600 }}>{label}</span>
+        {[['±1σ ≈ 68%', 'rgba(212,160,23,0.30)'], ['±2σ ≈ 95%', 'rgba(212,160,23,0.18)'], ['±3σ ≈ 99.7%', 'rgba(31,62,108,0.12)']].map(([label, bg]) => (
+          <span key={label} style={{ padding: '2px 8px', background: bg as string, color: '#1F3E6C', borderRadius: 6, fontSize: 12, fontWeight: 600 }}>{label}</span>
         ))}
       </div>
     </div>
@@ -320,8 +320,8 @@ export function ProbabilityVisual() {
       </div>
       <div style={{ display: 'flex', gap: 12, marginBottom: 10, flexWrap: 'wrap' }}>
         <label style={LABEL_STYLE}>P(גשם ב'): <strong>{pa.toFixed(2)}</strong><input type="range" min={0} max={1} step={0.05} value={pa} onChange={e => setPaSafe(+e.target.value)} style={SLIDER()} /></label>
-        <label style={LABEL_STYLE}>P(גשם ג'): <strong>{pb.toFixed(2)}</strong><input type="range" min={0} max={1} step={0.05} value={pb} onChange={e => setPbSafe(+e.target.value)} style={SLIDER('#f59e0b')} /></label>
-        <label style={LABEL_STYLE}>P(שניהם): <strong>{inter.toFixed(2)}</strong><input type="range" min={0} max={1} step={0.05} value={pab} onChange={e => setPabSafe(+e.target.value)} style={SLIDER('#10b981')} /></label>
+        <label style={LABEL_STYLE}>P(גשם ג'): <strong>{pb.toFixed(2)}</strong><input type="range" min={0} max={1} step={0.05} value={pb} onChange={e => setPbSafe(+e.target.value)} style={SLIDER('#D4A017')} /></label>
+        <label style={LABEL_STYLE}>P(שניהם): <strong>{inter.toFixed(2)}</strong><input type="range" min={0} max={1} step={0.05} value={pab} onChange={e => setPabSafe(+e.target.value)} style={SLIDER('#1F3E6C')} /></label>
       </div>
       {(() => {
         const rA = Math.max(10, 46 * Math.sqrt(pa))
@@ -334,21 +334,21 @@ export function ProbabilityVisual() {
         const cxB = 150 + dist / 2
         return (
           <svg width="100%" viewBox="0 0 300 110">
-            <rect x={4} y={4} width={292} height={102} fill="rgba(99,102,241,0.04)" stroke="rgba(99,102,241,0.25)" strokeWidth={1} rx={6} />
-            <text x={14} y={16} fontSize={10} fill="#6366f1">Ω (כל הימים)</text>
-            <circle cx={cxA} cy={58} r={rA} fill="rgba(99,102,241,0.30)" stroke="#6366f1" strokeWidth={1.5} style={{ transition: 'cx 240ms ease-out, r 200ms ease-out' }} />
-            <circle cx={cxB} cy={58} r={rB} fill="rgba(245,158,11,0.30)" stroke="#f59e0b" strokeWidth={1.5} style={{ transition: 'cx 240ms ease-out, r 200ms ease-out' }} />
-            <text x={cxA - rA - 6} y={61} fontSize={13} fontWeight="bold" fill="#3730a3" textAnchor="end">גשם ב'</text>
-            <text x={cxB + rB + 6} y={61} fontSize={13} fontWeight="bold" fill="#92400e">גשם ג'</text>
-            {inter > 0.01 && <text x={150} y={61} fontSize={10} textAnchor="middle" fill="#065f46" fontWeight="bold">{inter.toFixed(2)}</text>}
+            <rect x={4} y={4} width={292} height={102} fill="rgba(31,62,108,0.05)" stroke="rgba(31,62,108,0.25)" strokeWidth={1} rx={6} />
+            <text x={14} y={16} fontSize={10} fill="#1F3E6C">Ω (כל הימים)</text>
+            <circle cx={cxA} cy={58} r={rA} fill="rgba(31,62,108,0.28)" stroke="#1F3E6C" strokeWidth={1.5} style={{ transition: 'cx 240ms ease-out, r 200ms ease-out' }} />
+            <circle cx={cxB} cy={58} r={rB} fill="rgba(212,160,23,0.32)" stroke="#D4A017" strokeWidth={1.5} style={{ transition: 'cx 240ms ease-out, r 200ms ease-out' }} />
+            <text x={cxA - rA - 6} y={61} fontSize={13} fontWeight="bold" fill="#1F3E6C" textAnchor="end">גשם ב'</text>
+            <text x={cxB + rB + 6} y={61} fontSize={13} fontWeight="bold" fill="#9A6B00">גשם ג'</text>
+            {inter > 0.01 && <text x={150} y={61} fontSize={10} textAnchor="middle" fill="#1F3E6C" fontWeight="bold">{inter.toFixed(2)}</text>}
           </svg>
         )
       })()}
       <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         <span style={BADGE()}>P(A∪B) = {union.toFixed(2)}</span>
-        <span style={BADGE({ background: 'rgba(16,185,129,0.1)', color: '#065f46' })}>P(A∩B) = {inter.toFixed(2)}</span>
-        <span style={BADGE({ background: 'rgba(245,158,11,0.1)', color: '#92400e' })}>P(A|B) = {cond}</span>
-        <span style={BADGE({ background: 'rgba(239,68,68,0.1)', color: '#b91c1c' })}>P(Aᶜ) = {(1 - pa).toFixed(2)}</span>
+        <span style={BADGE({ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C' })}>P(A∩B) = {inter.toFixed(2)}</span>
+        <span style={BADGE({ background: 'rgba(212,160,23,0.18)', color: '#9A6B00' })}>P(A|B) = {cond}</span>
+        <span style={BADGE({ background: 'rgba(224,138,30,0.12)', color: '#E08A1E' })}>P(Aᶜ) = {(1 - pa).toFixed(2)}</span>
       </div>
     </div>
   )
@@ -377,24 +377,24 @@ export function VennIndependentVisual() {
       </div>
       <div style={{ display: 'flex', gap: 12, marginBottom: 10, flexWrap: 'wrap' }}>
         <label style={LABEL_STYLE}>P(קוביה 1 = 6): <strong>{pa.toFixed(2)}</strong><input type="range" min={0.05} max={0.5} step={0.05} value={pa} onChange={e => setPa(+e.target.value)} style={SLIDER()} /></label>
-        <label style={LABEL_STYLE}>P(קוביה 2 = 6): <strong>{pb.toFixed(2)}</strong><input type="range" min={0.05} max={0.5} step={0.05} value={pb} onChange={e => setPb(+e.target.value)} style={SLIDER('#f59e0b')} /></label>
+        <label style={LABEL_STYLE}>P(קוביה 2 = 6): <strong>{pb.toFixed(2)}</strong><input type="range" min={0.05} max={0.5} step={0.05} value={pb} onChange={e => setPb(+e.target.value)} style={SLIDER('#D4A017')} /></label>
       </div>
       <svg width="100%" viewBox="0 0 300 130">
-        <rect x={4} y={4} width={292} height={122} fill="rgba(99,102,241,0.04)" stroke="rgba(99,102,241,0.25)" strokeWidth={1} rx={6} />
-        <text x={14} y={16} fontSize={10} fill="#6366f1">Ω = 36 צירופי קוביות</text>
-        <circle cx={cxA} cy={70} r={rA} fill="rgba(99,102,241,0.30)" stroke="#6366f1" strokeWidth={1.5} />
-        <circle cx={cxB} cy={70} r={rB} fill="rgba(245,158,11,0.30)" stroke="#f59e0b" strokeWidth={1.5} />
-        <text x={cxA - rA - 4} y={72} fontSize={12} fontWeight="bold" fill="#3730a3" textAnchor="end">A</text>
-        <text x={cxB + rB + 4} y={72} fontSize={12} fontWeight="bold" fill="#92400e">B</text>
-        {inter > 0.001 && <text x={150} y={72} fontSize={9} textAnchor="middle" fill="#065f46" fontWeight="bold">{inter.toFixed(3)}</text>}
-        <text x={150} y={120} textAnchor="middle" fontSize={11} fill="#065f46" fontWeight="bold">
+        <rect x={4} y={4} width={292} height={122} fill="rgba(31,62,108,0.05)" stroke="rgba(31,62,108,0.25)" strokeWidth={1} rx={6} />
+        <text x={14} y={16} fontSize={10} fill="#1F3E6C">Ω = 36 צירופי קוביות</text>
+        <circle cx={cxA} cy={70} r={rA} fill="rgba(31,62,108,0.28)" stroke="#1F3E6C" strokeWidth={1.5} />
+        <circle cx={cxB} cy={70} r={rB} fill="rgba(212,160,23,0.32)" stroke="#D4A017" strokeWidth={1.5} />
+        <text x={cxA - rA - 4} y={72} fontSize={12} fontWeight="bold" fill="#1F3E6C" textAnchor="end">A</text>
+        <text x={cxB + rB + 4} y={72} fontSize={12} fontWeight="bold" fill="#9A6B00">B</text>
+        {inter > 0.001 && <text x={150} y={72} fontSize={9} textAnchor="middle" fill="#1F3E6C" fontWeight="bold">{inter.toFixed(3)}</text>}
+        <text x={150} y={120} textAnchor="middle" fontSize={11} fill="#1F3E6C" fontWeight="bold">
           P(A∩B) = P(A)·P(B) = {pa.toFixed(2)}·{pb.toFixed(2)} = {inter.toFixed(3)}
         </text>
       </svg>
       <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        <span style={BADGE({ background: 'rgba(16,185,129,0.12)', color: '#065f46' })}>P(A∩B) = {inter.toFixed(3)}</span>
+        <span style={BADGE({ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C' })}>P(A∩B) = {inter.toFixed(3)}</span>
         <span style={BADGE()}>P(A∪B) = {union.toFixed(3)}</span>
-        <span style={BADGE({ background: 'rgba(245,158,11,0.1)', color: '#92400e' })}>P(A|B) = P(A) = {pa.toFixed(2)}</span>
+        <span style={BADGE({ background: 'rgba(212,160,23,0.18)', color: '#9A6B00' })}>P(A|B) = P(A) = {pa.toFixed(2)}</span>
       </div>
     </div>
   )
@@ -421,18 +421,18 @@ export function VennDisjointVisual() {
         <span style={{ fontSize: 13, color: '#6b7280' }}>P(בת) = 1 − P(בן) = <strong>{pb.toFixed(2)}</strong></span>
       </div>
       <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
-        <rect x={4} y={4} width={W - 8} height={H - 8} fill="rgba(99,102,241,0.04)" stroke="rgba(99,102,241,0.25)" strokeWidth={1} rx={6} />
-        <text x={14} y={16} fontSize={10} fill="#6366f1">Ω = כל הילדים</text>
-        <circle cx={cxA} cy={70} r={rA} fill="rgba(99,102,241,0.35)" stroke="#6366f1" strokeWidth={1.5} />
-        <circle cx={cxB} cy={70} r={rB} fill="rgba(236,72,153,0.35)" stroke="#ec4899" strokeWidth={1.5} />
-        <text x={cxA} y={74} fontSize={14} fontWeight="bold" fill="#3730a3" textAnchor="middle">בן</text>
-        <text x={cxB} y={74} fontSize={14} fontWeight="bold" fill="#9d174d" textAnchor="middle">בת</text>
-        <text x={150} y={120} textAnchor="middle" fontSize={11} fill="#b91c1c" fontWeight="bold">A ∩ B = ∅ &nbsp; ⇒ &nbsp; P(A∩B) = 0</text>
+        <rect x={4} y={4} width={W - 8} height={H - 8} fill="rgba(31,62,108,0.05)" stroke="rgba(31,62,108,0.25)" strokeWidth={1} rx={6} />
+        <text x={14} y={16} fontSize={10} fill="#1F3E6C">Ω = כל הילדים</text>
+        <circle cx={cxA} cy={70} r={rA} fill="rgba(31,62,108,0.28)" stroke="#1F3E6C" strokeWidth={1.5} />
+        <circle cx={cxB} cy={70} r={rB} fill="rgba(212,160,23,0.32)" stroke="#D4A017" strokeWidth={1.5} />
+        <text x={cxA} y={74} fontSize={14} fontWeight="bold" fill="#1F3E6C" textAnchor="middle">בן</text>
+        <text x={cxB} y={74} fontSize={14} fontWeight="bold" fill="#9A6B00" textAnchor="middle">בת</text>
+        <text x={150} y={120} textAnchor="middle" fontSize={11} fill="#E08A1E" fontWeight="bold">A ∩ B = ∅ &nbsp; ⇒ &nbsp; P(A∩B) = 0</text>
       </svg>
       <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        <span style={BADGE({ background: 'rgba(239,68,68,0.1)', color: '#b91c1c' })}>P(A∩B) = 0</span>
+        <span style={BADGE({ background: 'rgba(224,138,30,0.12)', color: '#E08A1E' })}>P(A∩B) = 0</span>
         <span style={BADGE()}>P(A∪B) = P(A)+P(B) = {total.toFixed(2)}</span>
-        <span style={BADGE({ background: 'rgba(245,158,11,0.1)', color: '#92400e' })}>P(A|B) = 0</span>
+        <span style={BADGE({ background: 'rgba(224,138,30,0.12)', color: '#E08A1E' })}>P(A|B) = 0</span>
       </div>
     </div>
   )
@@ -456,23 +456,23 @@ export function VennDependentVisual() {
         <strong>זכייה בהגרלה.</strong> B = "קניתי כרטיס", A = "זכיתי בהגרלה". אי אפשר לזכות בלי לקנות — לכן A מוכל לחלוטין ב-B (A ⊂ B). זה תלות מלאה: P(A|B) הוא הסתברות הזכייה לכרטיס, ו-P(B|A) = 1.
       </div>
       <div style={{ display: 'flex', gap: 12, marginBottom: 10, flexWrap: 'wrap' }}>
-        <label style={LABEL_STYLE}>P(קנייה): <strong>{pTicket.toFixed(2)}</strong><input type="range" min={0.1} max={0.9} step={0.05} value={pTicket} onChange={e => setPTicket(+e.target.value)} style={SLIDER('#f59e0b')} /></label>
+        <label style={LABEL_STYLE}>P(קנייה): <strong>{pTicket.toFixed(2)}</strong><input type="range" min={0.1} max={0.9} step={0.05} value={pTicket} onChange={e => setPTicket(+e.target.value)} style={SLIDER('#D4A017')} /></label>
         <label style={LABEL_STYLE}>P(זכייה|קנייה): <strong>{pWinGivenTicket.toFixed(2)}</strong><input type="range" min={0.05} max={0.9} step={0.05} value={pWinGivenTicket} onChange={e => setPWinGivenTicket(+e.target.value)} style={SLIDER()} /></label>
       </div>
       <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
-        <rect x={4} y={4} width={W - 8} height={H - 8} fill="rgba(99,102,241,0.04)" stroke="rgba(99,102,241,0.25)" strokeWidth={1} rx={6} />
-        <text x={14} y={16} fontSize={10} fill="#6366f1">Ω = כל האנשים</text>
-        <circle cx={cxB} cy={70} r={rB} fill="rgba(245,158,11,0.30)" stroke="#f59e0b" strokeWidth={1.5} />
-        <circle cx={cxA} cy={70} r={rA} fill="rgba(99,102,241,0.55)" stroke="#3730a3" strokeWidth={1.5} />
-        <text x={cxB} y={70 - rB + 14} fontSize={11} fontWeight="bold" fill="#92400e" textAnchor="middle">B = קניית כרטיס</text>
+        <rect x={4} y={4} width={W - 8} height={H - 8} fill="rgba(31,62,108,0.05)" stroke="rgba(31,62,108,0.25)" strokeWidth={1} rx={6} />
+        <text x={14} y={16} fontSize={10} fill="#1F3E6C">Ω = כל האנשים</text>
+        <circle cx={cxB} cy={70} r={rB} fill="rgba(212,160,23,0.32)" stroke="#D4A017" strokeWidth={1.5} />
+        <circle cx={cxA} cy={70} r={rA} fill="rgba(31,62,108,0.55)" stroke="#1F3E6C" strokeWidth={1.5} />
+        <text x={cxB} y={70 - rB + 14} fontSize={11} fontWeight="bold" fill="#9A6B00" textAnchor="middle">B = קניית כרטיס</text>
         <text x={cxA} y={74} fontSize={10} fontWeight="bold" fill="#fff" textAnchor="middle">A=זוכים</text>
-        <text x={150} y={120} textAnchor="middle" fontSize={11} fill="#3730a3" fontWeight="bold">A ⊂ B &nbsp; ⇒ &nbsp; P(A∩B) = P(A) = {pWin.toFixed(3)}</text>
+        <text x={150} y={120} textAnchor="middle" fontSize={11} fill="#1F3E6C" fontWeight="bold">A ⊂ B &nbsp; ⇒ &nbsp; P(A∩B) = P(A) = {pWin.toFixed(3)}</text>
       </svg>
       <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         <span style={BADGE()}>P(A) = {pWin.toFixed(3)}</span>
-        <span style={BADGE({ background: 'rgba(245,158,11,0.12)', color: '#92400e' })}>P(B) = {pTicket.toFixed(2)}</span>
-        <span style={BADGE({ background: 'rgba(16,185,129,0.12)', color: '#065f46' })}>P(A|B) = {pWinGivenTicket.toFixed(2)}</span>
-        <span style={BADGE({ background: 'rgba(239,68,68,0.1)', color: '#b91c1c' })}>P(B|A) = 1</span>
+        <span style={BADGE({ background: 'rgba(212,160,23,0.18)', color: '#9A6B00' })}>P(B) = {pTicket.toFixed(2)}</span>
+        <span style={BADGE({ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C' })}>P(A|B) = {pWinGivenTicket.toFixed(2)}</span>
+        <span style={BADGE({ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C' })}>P(B|A) = 1</span>
       </div>
     </div>
   )

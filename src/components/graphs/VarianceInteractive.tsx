@@ -42,7 +42,7 @@ export default function VarianceInteractive() {
   return (
     <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>שונות (Variance) — ריבועי הסטיות</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>כל ריבוע מציג את (xᵢ − מ̄)². השונות = שטח ממוצע של הריבועים.</p>
+      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>כל ריבוע מציג את (xᵢ − x̄)². השונות = שטח ממוצע של הריבועים.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>
@@ -52,14 +52,14 @@ export default function VarianceInteractive() {
           const cy = AXIS_Y - side / 2 - 18
           return (
             <rect key={`s${i}`} x={cx - side / 2} y={cy - side / 2} width={side} height={side}
-              fill="rgba(255,99,99,0.2)" stroke="#ff6363" strokeWidth={1.5} />
+              fill="rgba(212,160,23,0.20)" stroke="#D4A017" strokeWidth={1.5} />
           )
         })}
         <line x1={X0} y1={AXIS_Y} x2={X1} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" strokeWidth={2} />
-        <line x1={toX(mean)} y1={AXIS_Y - 100} x2={toX(mean)} y2={AXIS_Y + 40} stroke="#FFD700" strokeWidth={2} strokeDasharray="6 4" />
-        <text x={toX(mean)} y={AXIS_Y + 60} fill="#FFD700" fontSize={13} textAnchor="middle" fontWeight={700}>מ̄ = {mean.toFixed(2)}</text>
+        <line x1={toX(mean)} y1={AXIS_Y - 100} x2={toX(mean)} y2={AXIS_Y + 40} stroke="#D4A017" strokeWidth={2} strokeDasharray="6 4" />
+        <text x={toX(mean)} y={AXIS_Y + 60} fill="#D4A017" fontSize={13} textAnchor="middle" fontWeight={700}>x̄ = {mean.toFixed(2)}</text>
         {values.map((v, i) => (
-          <circle key={`d${i}`} cx={toX(v)} cy={AXIS_Y} r={10} fill="#60a5fa" stroke="#1F3E6C" strokeWidth={2}
+          <circle key={`d${i}`} cx={toX(v)} cy={AXIS_Y} r={10} fill="#2D5BA8" stroke="#1F3E6C" strokeWidth={2}
             onPointerDown={e => { setDrag(i); (e.target as Element).setPointerCapture(e.pointerId) }}
             style={{ cursor: 'grab' }} />
         ))}

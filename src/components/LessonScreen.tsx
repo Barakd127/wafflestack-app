@@ -549,10 +549,10 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                       <ellipse cx="7" cy="6.5" rx="3.5" ry="1.4" fill="#FFE3A8" opacity="0.55"/>
                     </svg>
                   </div>
-                  {/* MathLineBlock: lines that mix Hebrew + math render as
-                      a single KaTeX block (label + equation in one styled
-                      box). Pure-text lines stay as plain RTL text. Per user
-                      2026-05-24. */}
+                  {/* MathLineBlock renders each line in RTL flow; inline math
+                      ($…$ or auto-detected) stays LTR + bidi-isolated so Hebrew
+                      never flips and operators never mirror. The renderer owns
+                      direction per line — no unicodeBidi override here. */}
                   <MathLineBlock
                     text={bullet}
                     style={{
@@ -560,7 +560,6 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                       fontSize: 18.5, lineHeight: 1.85, color: TEXT_DARK,
                       whiteSpace: 'pre-wrap',
                       textAlign: 'right',
-                      unicodeBidi: 'plaintext',
                     }}
                   />
                 </div>

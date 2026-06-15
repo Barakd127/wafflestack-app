@@ -94,13 +94,12 @@ export default function StdDevInteractive() {
   const [draggingId, setDraggingId] = useState<number | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
 
-  // ── Stats: mean, sample variance (n−1 denominator), σ ─────────────────────
+  // ── Stats: mean, population variance (n denominator), σ ───────────────────
   const { mean, sigma } = useMemo(() => {
     if (points.length === 0) return { mean: 0, sigma: 0 }
     const m = points.reduce((s, p) => s + p.x, 0) / points.length
-    if (points.length < 2) return { mean: m, sigma: 0 }
     const variance =
-      points.reduce((s, p) => s + (p.x - m) ** 2, 0) / (points.length - 1)
+      points.reduce((s, p) => s + (p.x - m) ** 2, 0) / points.length
     return { mean: m, sigma: Math.sqrt(variance) }
   }, [points])
 
@@ -109,7 +108,7 @@ export default function StdDevInteractive() {
     return points.filter(p => Math.abs(p.x - mean) <= k * sigma).length
   }, [points, mean, sigma, k])
 
-  const latex = `\\sigma = \\sqrt{\\frac{\\sum (x_i - \\bar{x})^2}{n-1}} = ${sigma.toFixed(2)}`
+  const latex = `\\sigma = \\sqrt{\\frac{\\sum (x_i - \\bar{x})^2}{n}} = ${sigma.toFixed(2)}`
 
   function onPointerMove(e: React.PointerEvent<SVGSVGElement>) {
     if (draggingId === null) return
@@ -137,9 +136,9 @@ export default function StdDevInteractive() {
 
   // Pre-compute band colors for k=1,2,3 — for legend strip
   const BANDS = [
-    { k: 1, color: '#27AE60', label: '~68%' },
-    { k: 2, color: '#F39C12', label: '~95%' },
-    { k: 3, color: '#E74C3C', label: '~99.7%' },
+    { k: 1, color: '#D4A017', label: '~68%' },
+    { k: 2, color: '#E08A1E', label: '~95%' },
+    { k: 3, color: '#1F3E6C', label: '~99.7%' },
   ]
 
   return (
@@ -149,7 +148,7 @@ export default function StdDevInteractive() {
         background: 'rgba(255,255,255,0.06)',
         borderRadius: 16,
         padding: 20,
-        color: '#1F3E6C',
+        color: 'var(--sh-text-dark)',
         fontFamily: 'system-ui, sans-serif',
       }}
     >
@@ -176,8 +175,7 @@ export default function StdDevInteractive() {
             y={50}
             width={Math.max(0, bandRight - bandLeft)}
             height={AXIS_Y - 50}
-            fill="#7B5EA7"
-            opacity={0.25}
+            fill="rgba(212,160,23,0.28)"
           />
         )}
 
@@ -189,7 +187,7 @@ export default function StdDevInteractive() {
               y1={50}
               x2={bandLeft}
               y2={AXIS_Y}
-              stroke="#7B5EA7"
+              stroke="#D4A017"
               strokeWidth={2}
               strokeDasharray="5 3"
             />
@@ -198,7 +196,7 @@ export default function StdDevInteractive() {
               y1={50}
               x2={bandRight}
               y2={AXIS_Y}
-              stroke="#7B5EA7"
+              stroke="#D4A017"
               strokeWidth={2}
               strokeDasharray="5 3"
             />
@@ -264,13 +262,13 @@ export default function StdDevInteractive() {
               y1={AXIS_Y + 38}
               x2={xToPx(mean + sigma)}
               y2={AXIS_Y + 38}
-              stroke="#27AE60"
+              stroke="#1F3E6C"
               strokeWidth={3}
             />
             <text
               x={(meanPx + xToPx(mean + sigma)) / 2}
               y={AXIS_Y + 54}
-              fill="#27AE60"
+              fill="#1F3E6C"
               fontSize={12}
               fontWeight={600}
               textAnchor="middle"
@@ -288,13 +286,13 @@ export default function StdDevInteractive() {
           return (
             <g key={p.id} style={{ cursor: 'grab' }}>
               {isDragging && (
-                <circle cx={cx} cy={AXIS_Y} r={DOT_RADIUS + 6} fill="#4A90D9" opacity={0.3} />
+                <circle cx={cx} cy={AXIS_Y} r={DOT_RADIUS + 6} fill="#2D5BA8" opacity={0.3} />
               )}
               <circle
                 cx={cx}
                 cy={AXIS_Y}
                 r={DOT_RADIUS}
-                fill={inside ? '#4A90D9' : '#E74C3C'}
+                fill={inside ? '#2D5BA8' : '#E08A1E'}
                 stroke="#1F3E6C"
                 strokeWidth={2}
                 onPointerDown={e => {
@@ -327,9 +325,9 @@ export default function StdDevInteractive() {
           style={{ display: 'block', marginBottom: 6, fontSize: 14, opacity: 0.85 }}
         >
           מקדם k:{' '}
-          <span style={{ color: '#7B5EA7', fontWeight: 700 }}>{k.toFixed(1)}σ</span>
+          <span style={{ color: '#D4A017', fontWeight: 700 }}>{k.toFixed(1)}σ</span>
           {' — '}
-          <span style={{ color: '#27AE60' }}>
+          <span style={{ color: '#1F3E6C' }}>
             {withinBand}/{points.length} נקודות בטווח
           </span>
         </label>
