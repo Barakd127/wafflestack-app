@@ -42,10 +42,10 @@ export default function BinomialInteractive() {
         <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
         {probs.map((pr, k) => {
           const h = (pr / maxP) * (Y1 - Y0)
-          return <rect key={k} x={X0 + k * barW + 2} y={Y1 - h} width={barW - 4} height={h} fill="rgba(255,215,0,0.7)" stroke="#FFD700" strokeWidth={1} />
+          return <rect key={k} x={X0 + k * barW + 2} y={Y1 - h} width={barW - 4} height={h} fill="#2D5BA8" stroke="#1F3E6C" strokeWidth={1} />
         })}
-        <line x1={X0 + mean * barW + barW / 2} y1={Y0} x2={X0 + mean * barW + barW / 2} y2={Y1} stroke="#60a5fa" strokeWidth={2} strokeDasharray="4 4" />
-        <text x={X0 + mean * barW + barW / 2} y={Y0 - 4} fill="#60a5fa" fontSize={12} textAnchor="middle">μ = {mean.toFixed(1)}</text>
+        <line x1={X0 + mean * barW + barW / 2} y1={Y0} x2={X0 + mean * barW + barW / 2} y2={Y1} stroke="#D4A017" strokeWidth={2} strokeDasharray="4 4" />
+        <text x={X0 + mean * barW + barW / 2} y={Y0 - 4} fill="#D4A017" fontSize={12} textAnchor="middle">μ = {mean.toFixed(1)}</text>
       </svg>
       <div id="bin-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 8 }}>

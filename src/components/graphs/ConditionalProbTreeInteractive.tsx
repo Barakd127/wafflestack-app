@@ -56,30 +56,30 @@ export default function ConditionalProbTreeInteractive() {
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={ROOT.x} y1={ROOT.y} x2={L1A.x} y2={L1A.y} stroke="#FFD700" strokeWidth={widthA} opacity={0.6} />
-        <line x1={ROOT.x} y1={ROOT.y} x2={L1NA.x} y2={L1NA.y} stroke="#60a5fa" strokeWidth={widthNA} opacity={0.6} />
+        <line x1={ROOT.x} y1={ROOT.y} x2={L1A.x} y2={L1A.y} stroke="#1F3E6C" strokeWidth={widthA} opacity={0.6} />
+        <line x1={ROOT.x} y1={ROOT.y} x2={L1NA.x} y2={L1NA.y} stroke="#D4A017" strokeWidth={widthNA} opacity={0.6} />
 
-        <line x1={L1A.x + 30} y1={L1A.y} x2={L2(L1A, -40).x} y2={L2(L1A, -40).y} stroke="#FFD700" strokeWidth={wBA} opacity={0.6} />
-        <line x1={L1A.x + 30} y1={L1A.y} x2={L2(L1A, 40).x} y2={L2(L1A, 40).y} stroke="rgba(255,215,0,0.4)" strokeWidth={wNBA} opacity={0.6} />
+        <line x1={L1A.x + 30} y1={L1A.y} x2={L2(L1A, -40).x} y2={L2(L1A, -40).y} stroke="#1F3E6C" strokeWidth={wBA} opacity={0.6} />
+        <line x1={L1A.x + 30} y1={L1A.y} x2={L2(L1A, 40).x} y2={L2(L1A, 40).y} stroke="rgba(31,62,108,0.4)" strokeWidth={wNBA} opacity={0.6} />
 
-        <line x1={L1NA.x + 30} y1={L1NA.y} x2={L2(L1NA, -40).x} y2={L2(L1NA, -40).y} stroke="#60a5fa" strokeWidth={wBN} opacity={0.6} />
-        <line x1={L1NA.x + 30} y1={L1NA.y} x2={L2(L1NA, 40).x} y2={L2(L1NA, 40).y} stroke="rgba(96,165,250,0.4)" strokeWidth={wNBN} opacity={0.6} />
+        <line x1={L1NA.x + 30} y1={L1NA.y} x2={L2(L1NA, -40).x} y2={L2(L1NA, -40).y} stroke="#D4A017" strokeWidth={wBN} opacity={0.6} />
+        <line x1={L1NA.x + 30} y1={L1NA.y} x2={L2(L1NA, 40).x} y2={L2(L1NA, 40).y} stroke="rgba(212,160,23,0.4)" strokeWidth={wNBN} opacity={0.6} />
 
-        <circle cx={ROOT.x} cy={ROOT.y} r={6} fill="#1F3E6C" />
-        {lab(ROOT.x - 22, ROOT.y + 4, '·', '#fff')}
+        <circle cx={ROOT.x} cy={ROOT.y} r={6} fill="rgba(31,62,108,0.08)" stroke="#1F3E6C" />
+        {lab(ROOT.x - 22, ROOT.y + 4, '·', 'var(--sh-text-dark)')}
 
-        <rect x={L1A.x} y={L1A.y - 16} width={60} height={32} rx={6} fill="rgba(255,215,0,0.18)" stroke="#FFD700" />
-        {lab(L1A.x + 4, L1A.y - 2, `A: ${pA.toFixed(2)}`, '#FFD700')}
-        {lab(L1A.x + 4, L1A.y + 12, `P(B|A)=${pBA.toFixed(2)}`, 'rgba(31,62,108,0.7)', 9)}
+        <rect x={L1A.x} y={L1A.y - 16} width={60} height={32} rx={6} fill="rgba(31,62,108,0.08)" stroke="#1F3E6C" />
+        {lab(L1A.x + 4, L1A.y - 2, `A: ${pA.toFixed(2)}`, '#1F3E6C')}
+        {lab(L1A.x + 4, L1A.y + 12, `P(B|A)=${pBA.toFixed(2)}`, 'var(--sh-text-dark)', 9)}
 
-        <rect x={L1NA.x} y={L1NA.y - 16} width={60} height={32} rx={6} fill="rgba(96,165,250,0.18)" stroke="#60a5fa" />
-        {lab(L1NA.x + 4, L1NA.y - 2, `¬A: ${(1 - pA).toFixed(2)}`, '#60a5fa')}
-        {lab(L1NA.x + 4, L1NA.y + 12, `P(B|¬A)=${pBN.toFixed(2)}`, 'rgba(31,62,108,0.7)', 9)}
+        <rect x={L1NA.x} y={L1NA.y - 16} width={60} height={32} rx={6} fill="rgba(31,62,108,0.08)" stroke="#D4A017" />
+        {lab(L1NA.x + 4, L1NA.y - 2, `¬A: ${(1 - pA).toFixed(2)}`, '#9A6B00')}
+        {lab(L1NA.x + 4, L1NA.y + 12, `P(B|¬A)=${pBN.toFixed(2)}`, 'var(--sh-text-dark)', 9)}
 
-        {lab(L2(L1A, -40).x, L2(L1A, -40).y, `A∩B: ${pAB.toFixed(3)}`, '#FFD700')}
-        {lab(L2(L1A, 40).x, L2(L1A, 40).y, `A∩¬B: ${pANB.toFixed(3)}`, 'rgba(31,62,108,0.5)')}
-        {lab(L2(L1NA, -40).x, L2(L1NA, -40).y, `¬A∩B: ${pNAB.toFixed(3)}`, '#60a5fa')}
-        {lab(L2(L1NA, 40).x, L2(L1NA, 40).y, `¬A∩¬B: ${pNANB.toFixed(3)}`, 'rgba(31,62,108,0.5)')}
+        {lab(L2(L1A, -40).x, L2(L1A, -40).y, `A∩B: ${pAB.toFixed(3)}`, '#1F3E6C')}
+        {lab(L2(L1A, 40).x, L2(L1A, 40).y, `A∩¬B: ${pANB.toFixed(3)}`, 'var(--sh-text-dark)')}
+        {lab(L2(L1NA, -40).x, L2(L1NA, -40).y, `¬A∩B: ${pNAB.toFixed(3)}`, '#9A6B00')}
+        {lab(L2(L1NA, 40).x, L2(L1NA, 40).y, `¬A∩¬B: ${pNANB.toFixed(3)}`, 'var(--sh-text-dark)')}
       </svg>
 
       <div id="cond-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
@@ -91,7 +91,7 @@ export default function ConditionalProbTreeInteractive() {
       <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-between' }}>
         <span>P(B) = <b>{pB.toFixed(3)}</b></span>
         <span>P(A∩B) = <b>{pAB.toFixed(3)}</b></span>
-        <span style={{ color: '#FFD700' }}>P(A|B) = <b>{pAgB.toFixed(3)}</b></span>
+        <span style={{ color: '#D4A017' }}>P(A|B) = <b>{pAgB.toFixed(3)}</b></span>
       </div>
     </div>
   )

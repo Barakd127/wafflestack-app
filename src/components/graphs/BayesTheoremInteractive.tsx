@@ -51,41 +51,41 @@ export default function BayesTheoremInteractive() {
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         {/* Tree */}
-        {branch(rootX, rootY + 80, lvl1X, yH + 30, '#FFD700')}
-        {branch(rootX, rootY + 80, lvl1X, yNH + 30, '#60a5fa')}
-        {branch(lvl1X + 40, yH + 30, lvl2X, yEH + 12, '#FFD700')}
-        {branch(lvl1X + 40, yH + 30, lvl2X, yNEH + 12, '#FFD700')}
-        {branch(lvl1X + 40, yNH + 30, lvl2X, yENH + 12, '#60a5fa')}
-        {branch(lvl1X + 40, yNH + 30, lvl2X, yNENH + 12, '#60a5fa')}
+        {branch(rootX, rootY + 80, lvl1X, yH + 30, '#D4A017')}
+        {branch(rootX, rootY + 80, lvl1X, yNH + 30, '#1F3E6C')}
+        {branch(lvl1X + 40, yH + 30, lvl2X, yEH + 12, '#D4A017')}
+        {branch(lvl1X + 40, yH + 30, lvl2X, yNEH + 12, '#D4A017')}
+        {branch(lvl1X + 40, yNH + 30, lvl2X, yENH + 12, '#1F3E6C')}
+        {branch(lvl1X + 40, yNH + 30, lvl2X, yNENH + 12, '#1F3E6C')}
 
         {/* Root */}
         <text x={rootX} y={rootY + 78} fill="#1F3E6C" fontSize={13} fontWeight={700} textAnchor="end">התחלה</text>
 
         {/* Level 1 */}
-        <rect x={lvl1X} y={yH} width={80} height={36} rx={6} fill="rgba(255,215,0,0.18)" stroke="#FFD700" />
-        <text x={lvl1X + 40} y={yH + 16} fill="#FFD700" fontSize={12} textAnchor="middle">H</text>
+        <rect x={lvl1X} y={yH} width={80} height={36} rx={6} fill="rgba(212,160,23,0.30)" stroke="#D4A017" />
+        <text x={lvl1X + 40} y={yH + 16} fill="#9A6B00" fontSize={12} textAnchor="middle">H</text>
         <text x={lvl1X + 40} y={yH + 30} fill="#1F3E6C" fontSize={11} textAnchor="middle">{prior.toFixed(2)}</text>
 
-        <rect x={lvl1X} y={yNH} width={80} height={36} rx={6} fill="rgba(96,165,250,0.18)" stroke="#60a5fa" />
-        <text x={lvl1X + 40} y={yNH + 16} fill="#60a5fa" fontSize={12} textAnchor="middle">¬H</text>
+        <rect x={lvl1X} y={yNH} width={80} height={36} rx={6} fill="rgba(31,62,108,0.18)" stroke="#1F3E6C" />
+        <text x={lvl1X + 40} y={yNH + 16} fill="#1F3E6C" fontSize={12} textAnchor="middle">¬H</text>
         <text x={lvl1X + 40} y={yNH + 30} fill="#1F3E6C" fontSize={11} textAnchor="middle">{(1 - prior).toFixed(2)}</text>
 
         {/* Level 2 */}
-        <text x={lvl2X} y={yEH + 12} fill="#FFD700" fontSize={11}>E · {pHE.toFixed(3)}</text>
+        <text x={lvl2X} y={yEH + 12} fill="#9A6B00" fontSize={11}>E · {pHE.toFixed(3)}</text>
         <text x={lvl2X} y={yNEH + 12} fill="rgba(31,62,108,0.6)" fontSize={11}>¬E · {(prior * (1 - likely)).toFixed(3)}</text>
-        <text x={lvl2X} y={yENH + 12} fill="#60a5fa" fontSize={11}>E · {pNHE.toFixed(3)}</text>
+        <text x={lvl2X} y={yENH + 12} fill="#1F3E6C" fontSize={11}>E · {pNHE.toFixed(3)}</text>
         <text x={lvl2X} y={yNENH + 12} fill="rgba(31,62,108,0.6)" fontSize={11}>¬E · {((1 - prior) * (1 - fp)).toFixed(3)}</text>
 
         {/* Posterior bar */}
         <text x={PAD} y={H - 60} fill="rgba(31,62,108,0.8)" fontSize={12}>Prior P(H)</text>
-        <rect x={PAD + 90} y={H - 72} width={400 * prior} height={16} fill="#94a3b8" />
+        <rect x={PAD + 90} y={H - 72} width={400 * prior} height={16} fill="#2D5BA8" />
         <rect x={PAD + 90} y={H - 72} width={400} height={16} fill="none" stroke="rgba(31,62,108,0.3)" />
         <text x={PAD + 90 + 405} y={H - 60} fill="#1F3E6C" fontSize={12}>{prior.toFixed(3)}</text>
 
-        <text x={PAD} y={H - 30} fill="#FFD700" fontSize={12} fontWeight={700}>Posterior P(H|E)</text>
-        <rect x={PAD + 90} y={H - 42} width={400 * post} height={16} fill="#FFD700" />
+        <text x={PAD} y={H - 30} fill="#9A6B00" fontSize={12} fontWeight={700}>Posterior P(H|E)</text>
+        <rect x={PAD + 90} y={H - 42} width={400 * post} height={16} fill="#D4A017" />
         <rect x={PAD + 90} y={H - 42} width={400} height={16} fill="none" stroke="rgba(31,62,108,0.3)" />
-        <text x={PAD + 90 + 405} y={H - 30} fill="#FFD700" fontSize={12} fontWeight={700}>{post.toFixed(3)}</text>
+        <text x={PAD + 90 + 405} y={H - 30} fill="#9A6B00" fontSize={12} fontWeight={700}>{post.toFixed(3)}</text>
       </svg>
 
       <div id="bayes-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
