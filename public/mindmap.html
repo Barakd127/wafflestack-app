@@ -1477,7 +1477,11 @@ function initMM(){
   // that always shows the course topic tree (COURSE_SEED, matching the list),
   // independent of the user's personal scratch sheets. Its own storage key keeps
   // any sub-topics the user adds, but it never inherits the edited personal map.
-  if(_MM_TOPIC_SCENE){ _mmCurrentSaveKey = 'wafflestack-mm-topicmap-' + _MM_USER_ID; }
+  // Topic-overview scene uses a dedicated course-tree slot — but ONLY for the
+  // 'studies' sheet. The personal 'thoughts'/custom sheets must keep their own
+  // per-sheet slot even inside the topic scene, otherwise switching to מחשבות
+  // wrongly shows the locked course tree (user 2026-06-11).
+  if(_MM_TOPIC_SCENE && _mmSheets.active === 'studies'){ _mmCurrentSaveKey = 'wafflestack-mm-topicmap-' + _MM_USER_ID; }
 
   // Try to load saved mind map for this user
   try {
@@ -1494,7 +1498,7 @@ function initMM(){
           // Centralized skeleton lock: re-stamp on the topic-overview map so the
           // course structure stays name-locked even for maps saved before the
           // flag existed. Admin-added sub-topics (not in COURSE_SEED) stay free.
-          if (_MM_TOPIC_SCENE) _restampSkeleton();
+          if (_MM_TOPIC_SCENE && _mmSheets.active === 'studies') _restampSkeleton();
           if (!MM.searchMatches) MM.searchMatches = [];
           if (!MM.searchIdx) MM.searchIdx = 0;
           // §24 migration: legacy maps had persisted node.x / node.y.
@@ -1533,7 +1537,9 @@ function initMM(){
   // Fresh / empty: seed per active sheet. 'thoughts' → free-association starter;
   // everything else → the statistics curriculum tree.
   try {
-    if(_MM_TOPIC_SCENE || _mmSheets.active === 'studies') buildSeedMap();
+    // In the topic scene the only sheet that seeds the course tree is 'studies'
+    // (which always buildSeedMap()s anyway); 'thoughts'/custom keep their seeds.
+    if(_mmSheets.active === 'studies') buildSeedMap();
     else if(_mmSheets.active === 'thoughts') mmSeedThoughts();
     else mmSeedBlank();
   }
@@ -6769,17 +6775,11 @@ function ftbStar(id,btn){
   ftbRenderArsenal();
 }
 
-function ftbInsert(latex){
-  // Notebook mode: insert a live KaTeX-rendered math widget at the caret.
-  if(typeof NB !== 'undefined' && NB.active){
-    nbInsertMathWidget(latex);
-    return;
-  }
-  // Canvas/whiteboard mode: picking a library formula opens the calculator
-  // (formula + number entry) rather than dropping raw LaTeX. Per user 2026-06.
-  // Falls through to the canvas-equation insert only if no library match.
-  if(typeof mmTryOpenCalcForLatex === 'function' && mmTryOpenCalcForLatex(latex)) return;
-  // Mindmap/canvas mode: insert as equation into center of whiteboard canvas
+// Drop a PLAIN equation (raw symbolic LaTeX, no number substitution) into the
+// notebook caret or the centre of the whiteboard canvas. Shared by both the
+// "plain formula" affordance and the calculator's no-match fall-through.
+function _ftbDropEquation(latex){
+  if(typeof NB !== 'undefined' && NB.active){ nbInsertMathWidget(latex); return; }
   const cnvs=document.getElementById('wb-canvas');
   if(!cnvs)return;
   const cx=(cnvs.width/2-WB.vp.x)/WB.vp.s;
@@ -6788,10 +6788,24 @@ function ftbInsert(latex){
   const offset=WB.scene.filter(o=>o.type==='equation').length*40;
   const o={id:uid(),type:'equation',x:cx-100+offset%120,y:cy-20+(offset/120|0)*50,w:200,h:44,latex,locked:false};
   WB.scene.push(o);WB.selId=o.id;wbPush();wbRedraw();
-  // Show equation layer element
   wbRedrawEquationLayer();
-  // Auto-centre the viewport on the new equation so it can't land off-screen.
   wbCenterViewOnObject(o);
+}
+
+// Default insert (the ∑ button / formula body tap): a library formula opens the
+// calculator for number entry (per user 2026-06); non-library latex drops plain.
+function ftbInsert(latex){
+  if(typeof NB !== 'undefined' && NB.active){ nbInsertMathWidget(latex); return; }
+  if(typeof mmTryOpenCalcForLatex === 'function' && mmTryOpenCalcForLatex(latex)) return;
+  _ftbDropEquation(latex);
+}
+
+// Plain insert: ALWAYS drop the symbolic formula as-is (no numbers, no
+// calculator). Wired to the ↗ per-formula button so "paste a plain equation"
+// is directly available on the canvas (user 2026-06-11).
+function ftbInsertPlain(latex){
+  _ftbDropEquation(latex);
+  if(typeof mmShowToast === 'function') mmShowToast('נוסחה נוספה לקנבס');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -7111,15 +7125,25 @@ function ftbMakeItem(f,showStar=true){
   starBtn.title='Add to Arsenal';
   starBtn.onclick=e=>{e.stopPropagation();ftbStar(f.id,starBtn);};
 
+  // ↗ = drop the PLAIN formula (symbolic, no numbers) straight onto the canvas.
   const insBtn=document.createElement('button');
   insBtn.className='ftb-insert-btn';
-  insBtn.textContent='↗';insBtn.title='Insert into canvas';
-  insBtn.onclick=e=>{e.stopPropagation();ftbInsert(f.latex);};
+  insBtn.textContent='↗';insBtn.title='הוסף נוסחה לקנבס (ללא מספרים)';
+  insBtn.onclick=e=>{e.stopPropagation();ftbInsertPlain(f.latex);};
+
+  // 🔢 = open the calculator to substitute real numbers and compute.
+  const calcBtn=document.createElement('button');
+  calcBtn.className='ftb-insert-btn';
+  calcBtn.textContent='🔢';calcBtn.title='חשב עם מספרים (מחשבון)';
+  calcBtn.onclick=e=>{e.stopPropagation();ftbInsert(f.latex);};
 
   item.appendChild(formulaDiv);
   if(showStar)item.appendChild(starBtn);
+  item.appendChild(calcBtn);
   item.appendChild(insBtn);
-  item.onclick=()=>ftbInsert(f.latex);
+  // Body tap = plain drop (the common "paste this formula" case); the 🔢 button
+  // is there when the user wants to plug in numbers.
+  item.onclick=()=>ftbInsertPlain(f.latex);
   return item;
 }
 
