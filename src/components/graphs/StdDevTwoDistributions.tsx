@@ -40,16 +40,16 @@ export default function StdDevTwoDistributions() {
       <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>שתי התפלגויות — אותו מרכז, פיזור שונה</h3>
       <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור את הסטיות. ככל ש-σ גדלה, העקומה רחבה ושטוחה יותר. אותו μ — אך פיזור שונה לחלוטין.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <path d={curve(sigma1)} stroke="#60a5fa" strokeWidth={2.5} fill="rgba(96,165,250,0.18)" />
-        <path d={curve(sigma2)} stroke="#FFD700" strokeWidth={2.5} fill="rgba(255,215,0,0.14)" />
+        <path d={curve(sigma1)} stroke="#1F3E6C" strokeWidth={2.5} fill="rgba(31,62,108,0.18)" />
+        <path d={curve(sigma2)} stroke="#D4A017" strokeWidth={2.5} fill="rgba(212,160,23,0.20)" />
         <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
         <line x1={toPx(mu)} y1={Y0 - 6} x2={toPx(mu)} y2={Y1} stroke="rgba(31,62,108,0.4)" strokeDasharray="4 4" />
         <text x={toPx(mu)} y={Y0 - 10} fill="rgba(31,62,108,0.7)" fontSize={12} textAnchor="middle">μ = 0</text>
         {[-6, -4, -2, 0, 2, 4, 6].map(t => (
           <text key={t} x={toPx(t)} y={Y1 + 18} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{t}</text>
         ))}
-        <text x={X1 - 6} y={Y0 + 14} fill="#60a5fa" fontSize={12} textAnchor="end">σ₁ = {sigma1.toFixed(1)}</text>
-        <text x={X1 - 6} y={Y0 + 30} fill="#FFD700" fontSize={12} textAnchor="end">σ₂ = {sigma2.toFixed(1)}</text>
+        <text x={X1 - 6} y={Y0 + 14} fill="#1F3E6C" fontSize={12} textAnchor="end">σ₁ = {sigma1.toFixed(1)}</text>
+        <text x={X1 - 6} y={Y0 + 30} fill="#D4A017" fontSize={12} textAnchor="end">σ₂ = {sigma2.toFixed(1)}</text>
       </svg>
       <div id="two-dist-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>

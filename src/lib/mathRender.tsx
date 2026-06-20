@@ -99,21 +99,94 @@ export function lineToLatex(line: string): string | null {
     .replace(/≠/g, ' \\ne ')
 }
 
-/** React component: render a multi-line block. Each line that qualifies as
- *  a mixed-Hebrew equation renders as a KaTeX block. Other lines = plain text. */
+// A run is "math" worth LTR-isolating only if it actually carries a digit,
+// Latin letter, or a strong math symbol — so lone Hebrew-adjacent punctuation
+// (":", "—", ".") still flows RTL instead of becoming an LTR island.
+const STRONG_MATH_RE = /[0-9A-Za-z=<>+\-*/^_·×÷√∑Σπμσ≤≥≠∪∩∅⊂⊆⊇∈∉∞|]/
+
+/** Split a line into alternating Hebrew (RTL) and non-Hebrew (math/LTR) runs.
+ *  Whitespace sticks to the current run so equations keep their internal
+ *  spacing ("P(A) = 0.6" stays one LTR unit). */
+function bidiSafeSegments(line: string): Array<{ ltr: boolean; text: string }> {
+  const segs: Array<{ ltr: boolean; text: string }> = []
+  let buf = ''
+  let mode: 'heb' | 'math' | null = null
+  const flush = () => { if (buf) { segs.push({ ltr: mode === 'math', text: buf }); buf = '' } }
+  for (const ch of line) {
+    let m: 'heb' | 'math' = mode === 'heb' ? 'heb' : 'math'
+    if (!/\s/.test(ch)) m = HEBREW_RE.test(ch) ? 'heb' : 'math'
+    if (mode === null) mode = m
+    if (m !== mode) { flush(); mode = m }
+    buf += ch
+  }
+  flush()
+  return segs
+}
+
+/** Render ONE line in natural RTL flow with any math kept LTR + bidi-isolated.
+ *  - `$…$` runs → inline KaTeX (real notation), LTR-isolated.
+ *  - un-delimited lines → conservative fallback: maximal non-Hebrew runs that
+ *    carry digits/Latin/operators are wrapped LTR so `≤`/`≥`/`<`/`>`/parens
+ *    never mirror and runs never jump sides; Hebrew stays plain RTL. */
+function MathLine({ line }: { line: string }) {
+  if (!line) return <div dir="rtl">{' '}</div>
+
+  // 1) Explicit $…$ math — split keeping delimiters (same contract as MathText).
+  if (line.includes('$')) {
+    const parts = line.split(/(\$[^$]+\$)/g)
+    return (
+      <div dir="rtl" style={{ unicodeBidi: 'isolate', textAlign: 'right' }}>
+        {parts.map((part, i) =>
+          part.length >= 2 && part.startsWith('$') && part.endsWith('$')
+            ? <KatexInline key={i} latex={part.slice(1, -1)} style={{ verticalAlign: 'middle' }} />
+            : <React.Fragment key={i}>{part}</React.Fragment>
+        )}
+      </div>
+    )
+  }
+
+  // 2) No $ but Hebrew + math mixed — bidi-safe fallback. Wrap each math run in
+  //    an INLINE (not inline-block, which swallows adjacent spaces) LTR-isolated
+  //    span so operators never mirror; keep the spaces AROUND each run as plain
+  //    text nodes so word spacing stays natural ("b הוא", "ערך X").
+  if (HEBREW_RE.test(line) && STRONG_MATH_RE.test(line)) {
+    return (
+      <div dir="rtl" style={{ unicodeBidi: 'isolate', textAlign: 'right' }}>
+        {bidiSafeSegments(line).map((seg, i) => {
+          if (!(seg.ltr && STRONG_MATH_RE.test(seg.text))) {
+            return <React.Fragment key={i}>{seg.text}</React.Fragment>
+          }
+          const mm = seg.text.match(/^(\s*)([\s\S]*?)(\s*)$/)
+          const lead = mm ? mm[1] : ''
+          const core = mm ? mm[2] : seg.text
+          const trail = mm ? mm[3] : ''
+          return (
+            <React.Fragment key={i}>
+              {lead}
+              <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>{core}</span>
+              {trail}
+            </React.Fragment>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // 3) Plain line (pure Hebrew or pure math) — natural direction.
+  return <div dir="rtl" style={{ unicodeBidi: 'plaintext', textAlign: 'right' }}>{line}</div>
+}
+
+/** React component: render a multi-line block. Every line renders in RTL flow;
+ *  math (whether `$…$`-delimited or auto-detected) stays LTR + bidi-isolated so
+ *  Hebrew never flips and comparison operators never mirror. */
 export function MathLineBlock({ text, style }: { text: string; style?: React.CSSProperties }) {
-  const lines = text.split(/\n/)
+  const lines = String(text ?? '').split(/\n/)
   return (
     <div style={style}>
-      {lines.map((line, i) => {
-        const latex = lineToLatex(line)
-        if (latex === null) return <div key={i} dir="rtl" style={{ unicodeBidi: 'plaintext' }}>{line || ' '}</div>
-        return <KatexLine key={i} latex={latex} />
-      })}
+      {lines.map((line, i) => <MathLine key={i} line={line} />)}
     </div>
   )
 }
-
 /** Render a raw LaTeX string as KaTeX. Use this when you have only LaTeX
  *  (no Hebrew, no surrounding text) and just want the rendered equation. */
 export function KatexInline({ latex, displayMode = false, style }: {
@@ -173,26 +246,3 @@ export function MathText({ text, style }: { text?: string; style?: React.CSSProp
   )
 }
 
-function KatexLine({ latex }: { latex: string }) {
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const node = ref.current
-    if (!node) return
-    let cancelled = false
-    const render = () => {
-      if (cancelled) return
-      if (window.katex) {
-        try {
-          node.innerHTML = window.katex.renderToString(latex, {
-            throwOnError: false, displayMode: false, output: 'html',
-          })
-        } catch { node.textContent = latex }
-      } else {
-        setTimeout(render, 80)
-      }
-    }
-    render()
-    return () => { cancelled = true }
-  }, [latex])
-  return <div ref={ref} dir="ltr" style={{ direction: 'ltr', unicodeBidi: 'isolate', textAlign: 'center', padding: '4px 0' }} />
-}
