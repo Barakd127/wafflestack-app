@@ -102,6 +102,29 @@ body.light .tb-ribbon-tab:focus-visible,body.light .tb-btn:focus-visible{outline
   pointer-events:none;z-index:1}
 body:not(.light) #canvas-area::after{border-color:rgba(255,255,255,.12);
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), inset 0 2px 26px rgba(0,0,0,.18)}
+/* ── Iconic dry-erase whiteboard skin: brushed-aluminium frame, grey corner
+   brackets, and a marker tray with markers + eraser. All pointer-events:none. ── */
+#mm-board-frame{position:absolute;inset:5px;pointer-events:none;z-index:40;
+  border:16px solid transparent;
+  border-image:linear-gradient(135deg,#f6f7f9,#cbd0d7 22%,#eef0f3 45%,#b2b7c0 68%,#e3e6eb) 16 stretch;
+  box-shadow:0 12px 30px rgba(15,23,42,.30)}
+#mm-board-deco{position:absolute;inset:5px;pointer-events:none;z-index:41}
+.mm-corner{position:absolute;width:36px;height:36px;background:linear-gradient(135deg,#a4aab2,#ccd0d6 48%,#868c95);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 1px 3px rgba(0,0,0,.32)}
+.mm-corner.tl{top:0;left:0;border-radius:18px 3px 15px 3px}
+.mm-corner.tr{top:0;right:0;border-radius:3px 18px 3px 15px}
+.mm-corner.bl{bottom:0;left:0;border-radius:15px 3px 18px 3px}
+.mm-corner.br{bottom:0;right:0;border-radius:3px 15px 3px 18px}
+.mm-tray{position:absolute;left:56px;bottom:2px;display:flex;align-items:flex-end;gap:7px}
+.mm-marker{width:58px;height:11px;border-radius:6px;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.45)}
+.mm-marker::after{content:'';position:absolute;right:-5px;top:1.5px;width:8px;height:8px;border-radius:2px;background:#d4d4d4;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+.mm-marker.k{background:linear-gradient(180deg,#404040,#141414)}
+.mm-marker.b{background:linear-gradient(180deg,#3b82f6,#1d4ed8)}
+.mm-marker.r{background:linear-gradient(180deg,#ef4444,#b91c1c)}
+.mm-marker.g{background:linear-gradient(180deg,#22c55e,#15803d)}
+.mm-eraser{width:50px;height:22px;border-radius:4px;margin-left:9px;align-self:flex-end;
+  background:linear-gradient(180deg,#2b3340 0 56%,#eef1f5 56% 100%);
+  box-shadow:0 2px 5px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.25)}
 /* ── Liquid / salient toolbar: bigger glassy buttons + larger icons ── */
 .tb-btn, .tb-ribbon-tab{height:38px!important;min-width:38px!important;border-radius:12px!important;
   background:rgba(255,255,255,.16)!important;border:1px solid rgba(255,255,255,.28)!important;
@@ -196,6 +219,9 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 
 /* ── Mind map nodes ── */
 .node-wrap{position:absolute;z-index:2}
+/* Manual resize handle — bottom-right corner, visible on node hover. */
+.node-resize{position:absolute;right:-5px;bottom:-5px;width:14px;height:14px;border-radius:3px;cursor:nwse-resize;z-index:6;background:transparent;transition:background .12s,box-shadow .12s}
+.node-wrap:hover .node-resize{background:rgba(212,175,55,.95);box-shadow:0 0 0 2px rgba(255,255,255,.65)}
 .node-div{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:500;white-space:normal;overflow-wrap:normal;text-align:center;cursor:pointer;user-select:none;box-shadow:0 2px 10px rgba(0,0,0,.22);transition:box-shadow .15s,transform .1s;min-width:50px;width:100%;height:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.25}
 /* Bidi: only TEXT nodes (not equations, not canvas wrappers) need plaintext
    detection so mixed Hebrew/English flows correctly per-substring.
@@ -823,6 +849,17 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     </div>
     <div id="mm-h-scroll"><div class="sb-thumb" id="mm-h-thumb"></div></div>
     <div id="mm-v-scroll"><div class="sb-thumb" id="mm-v-thumb"></div></div>
+    <!-- Iconic whiteboard skin: aluminium frame + corner brackets + marker tray -->
+    <div id="mm-board-frame" aria-hidden="true"></div>
+    <div id="mm-board-deco" aria-hidden="true">
+      <span class="mm-corner tl"></span><span class="mm-corner tr"></span>
+      <span class="mm-corner bl"></span><span class="mm-corner br"></span>
+      <div class="mm-tray">
+        <span class="mm-marker k"></span><span class="mm-marker b"></span>
+        <span class="mm-marker r"></span><span class="mm-marker g"></span>
+        <span class="mm-eraser"></span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1477,7 +1514,11 @@ function initMM(){
   // that always shows the course topic tree (COURSE_SEED, matching the list),
   // independent of the user's personal scratch sheets. Its own storage key keeps
   // any sub-topics the user adds, but it never inherits the edited personal map.
-  if(_MM_TOPIC_SCENE){ _mmCurrentSaveKey = 'wafflestack-mm-topicmap-' + _MM_USER_ID; }
+  // Topic-overview scene uses a dedicated course-tree slot — but ONLY for the
+  // 'studies' sheet. The personal 'thoughts'/custom sheets must keep their own
+  // per-sheet slot even inside the topic scene, otherwise switching to מחשבות
+  // wrongly shows the locked course tree (user 2026-06-11).
+  if(_MM_TOPIC_SCENE && _mmSheets.active === 'studies'){ _mmCurrentSaveKey = 'wafflestack-mm-topicmap-' + _MM_USER_ID; }
 
   // Try to load saved mind map for this user
   try {
@@ -1494,7 +1535,7 @@ function initMM(){
           // Centralized skeleton lock: re-stamp on the topic-overview map so the
           // course structure stays name-locked even for maps saved before the
           // flag existed. Admin-added sub-topics (not in COURSE_SEED) stay free.
-          if (_MM_TOPIC_SCENE) _restampSkeleton();
+          if (_MM_TOPIC_SCENE && _mmSheets.active === 'studies') _restampSkeleton();
           if (!MM.searchMatches) MM.searchMatches = [];
           if (!MM.searchIdx) MM.searchIdx = 0;
           // §24 migration: legacy maps had persisted node.x / node.y.
@@ -1533,7 +1574,9 @@ function initMM(){
   // Fresh / empty: seed per active sheet. 'thoughts' → free-association starter;
   // everything else → the statistics curriculum tree.
   try {
-    if(_MM_TOPIC_SCENE || _mmSheets.active === 'studies') buildSeedMap();
+    // In the topic scene the only sheet that seeds the course tree is 'studies'
+    // (which always buildSeedMap()s anyway); 'thoughts'/custom keep their seeds.
+    if(_mmSheets.active === 'studies') buildSeedMap();
     else if(_mmSheets.active === 'thoughts') mmSeedThoughts();
     else mmSeedBlank();
   }
@@ -1819,7 +1862,7 @@ function mmFitNode(text){
 function mmFitAllNodes(){
   for(const id in MM.nodes){
     const n=MM.nodes[id];
-    if(n && (n.type==='text' || n.type==='root')){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
+    if(n && (n.type==='text' || n.type==='root') && !n.userSized){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
   }
 }
 
@@ -1908,7 +1951,7 @@ function mmRender(){
     div.id='nw_'+id;
     // Fit node width to its text so long Hebrew names don't overflow the bubble
     // (also keeps connector attach geometry aligned with the visible node).
-    if(n.type==='text' || n.type==='root'){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
+    if((n.type==='text' || n.type==='root') && !n.userSized){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
     div.style.left=n.x+'px';div.style.top=n.y+'px';div.style.width=n.W+'px';div.style.height=n.H+'px';
     const nodeDiv=document.createElement('div');
     // Topic nodes (mapped to a course topic → 📖 תיאוריה / 📝 תרגול) get a
@@ -2036,6 +2079,42 @@ function mmRender(){
       noteBtn.textContent = hasNote ? '📝' : '＋';
       noteBtn.onclick = (e)=>{ e.stopPropagation(); openNoteEditor(n.id); if(typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('add-note'); };
       div.appendChild(noteBtn);
+    }
+
+    // ── Manual resize handle (bottom-right). Drag = set W/H + mark userSized so
+    //    auto-size stops overriding. Double-click = revert to auto-fit. ──
+    if(n.type !== 'summary'){
+      const rz = document.createElement('div');
+      rz.className = 'node-resize';
+      rz.title = 'גרור לשינוי גודל · דאבל-קליק לאיפוס אוטומטי';
+      rz.addEventListener('mousedown', (ev)=>{
+        ev.stopPropagation(); ev.preventDefault();
+        const startX = ev.clientX, startY = ev.clientY;
+        const startW = n.W||140, startH = n.H||40;
+        const onMove = (mv)=>{
+          n.W = Math.max(50, Math.round(startW + (mv.clientX - startX)/MM.zoom));
+          n.H = Math.max(30, Math.round(startH + (mv.clientY - startY)/MM.zoom));
+          n.userSized = true;
+          const w = document.getElementById('nw_'+n.id);
+          if(w){ w.style.width = n.W+'px'; w.style.height = n.H+'px'; }
+        };
+        const onUp = ()=>{
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+          if(typeof mmTidyLayout==='function'){ try{ mmTidyLayout(); }catch(e){} }
+          if(typeof mmPushHistory==='function') mmPushHistory();
+          mmRender();
+        };
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
+      rz.addEventListener('dblclick', (ev)=>{
+        ev.stopPropagation(); ev.preventDefault();
+        n.userSized = false;
+        if(typeof mmPushHistory==='function') mmPushHistory();
+        mmRender();
+      });
+      div.appendChild(rz);
     }
 
     // ── Hover reorder chips (◀ ▶) — shift this node left/right among its
@@ -2229,6 +2308,7 @@ function mmRender(){
             const sw = (t._w) * MM.zoom;
             const sy = t._y * MM.zoom + MM.panY;
             const line = document.createElement('div');
+            line.id = 'mm-drop-line';
             line.style.cssText = [
               'position:absolute',
               'left:'+(sx-6)+'px',
@@ -2332,6 +2412,8 @@ function mmRender(){
           document.removeEventListener('touchmove', onTouchMove);
           document.removeEventListener('touchend', onUp);
           document.removeEventListener('touchcancel', onUp);
+          window.removeEventListener('blur', abortDrag);
+          document.removeEventListener('mouseleave', abortDrag);
 
           if(ghost){ ghost.remove(); ghost = null; }
           clearIndicator();
@@ -2352,6 +2434,22 @@ function mmRender(){
           }
         }
 
+        // Abort a drag whose mouseup never arrives (released outside the window /
+        // focus lost) — otherwise the gold drop-line bar sticks mid-tree and the
+        // leaked mousemove keeps repainting it. Cancels cleanly (no commit).
+        function abortDrag(){
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+          document.removeEventListener('touchmove', onTouchMove);
+          document.removeEventListener('touchend', onUp);
+          document.removeEventListener('touchcancel', onUp);
+          window.removeEventListener('blur', abortDrag);
+          document.removeEventListener('mouseleave', abortDrag);
+          if(ghost){ ghost.remove(); ghost = null; }
+          clearIndicator();
+          if(moved){ nodeObj.x = startNX; nodeObj.y = startNY; mmRender(); }
+        }
+
         if(isTouch){
           document.addEventListener('touchmove', onTouchMove, {passive:false});
           document.addEventListener('touchend', onUp);
@@ -2359,6 +2457,8 @@ function mmRender(){
         } else {
           document.addEventListener('mousemove', onMove);
           document.addEventListener('mouseup', onUp);
+          window.addEventListener('blur', abortDrag);
+          document.addEventListener('mouseleave', abortDrag);
         }
       }
 
@@ -3647,7 +3747,10 @@ function startEditNode(n,el,initialChar){
     _mmCleanMeasure();
   };
   input.onkeydown=e=>{
-    if(e.key==='Enter'){input.blur();return;}
+    // Enter commits + exits ONLY — stop it reaching the global keydown handler
+    // (blur() clears focus first, so its input-focus guard would otherwise pass
+    // and add a stray sibling node).
+    if(e.key==='Enter'){e.preventDefault();e.stopPropagation();input.blur();return;}
     if(e.key==='Escape'){input.remove();_mmCleanMeasure();mmRender();}
   };
 }
@@ -5761,6 +5864,60 @@ setTimeout(() => {
 if (typeof mmRenderSheetBar === 'function') mmRenderSheetBar();
 if (typeof mmApplySheetTheme === 'function') mmApplySheetTheme();
 
+// ── XMind-style branch copy / paste as a markdown outline ──────────────────
+// Alt+C copies the selected node + its whole subtree to the clipboard as nested
+// "- " bullets (2-space indent per level). Alt+V / Ctrl+V paste an indented
+// outline back in as a subtree under the selected node. Indentation = hierarchy.
+function mmSerializeSubtree(id, depth, out){
+  const n = MM.nodes[id]; if(!n) return;
+  out.push('  '.repeat(depth) + '- ' + String(n.text||'').replace(/\r?\n/g,' '));
+  (n.childIds||[]).forEach(cid => mmSerializeSubtree(cid, depth+1, out));
+}
+async function mmCopyBranch(){
+  const id = MM.sel; if(!id || !MM.nodes[id]) return;
+  const out = []; mmSerializeSubtree(id, 0, out);
+  const text = out.join('\n');
+  try { await navigator.clipboard.writeText(text); }
+  catch(e){
+    const ta=document.createElement('textarea');
+    ta.value=text; ta.style.cssText='position:fixed;opacity:0;pointer-events:none';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(_){}
+    ta.remove();
+  }
+}
+function mmParseOutline(text){
+  const items=[];
+  String(text).replace(/\r/g,'').split('\n').forEach(raw=>{
+    if(!raw.trim()) return;
+    const lead=(raw.match(/^[ \t]*/)||[''])[0].replace(/\t/g,'  ').length;
+    const txt=raw.replace(/^[ \t]*/,'').replace(/^[-*+]\s+/,'').trim();
+    if(txt) items.push({ depth: Math.floor(lead/2), text: txt });
+  });
+  return items;
+}
+function mmInsertOutline(items){
+  if(!items || !items.length || typeof mmNode!=='function') return;
+  const parentId = (MM.sel && MM.nodes[MM.sel]) ? MM.sel : MM.root;
+  const minDepth = Math.min.apply(null, items.map(i=>i.depth));
+  const lastAtDepth = { '-1': parentId };
+  items.forEach(it=>{
+    const d = it.depth - minDepth;
+    const pid = (d===0) ? parentId : (lastAtDepth[d-1] || parentId);
+    const par = MM.nodes[pid]; if(par && par.collapsed) par.collapsed = false;
+    const node = mmNode('branch', it.text, 0, 0, pid, mmPickColor(pid));
+    lastAtDepth[d] = node.id;
+    Object.keys(lastAtDepth).forEach(k=>{ if(Number(k) > d) delete lastAtDepth[k]; });
+  });
+  if(MM.nodes[parentId]) MM.nodes[parentId].collapsed = false;
+  if(typeof mmTidyLayout==='function'){ try{ mmTidyLayout(); }catch(e){} }
+  mmPushHistory(); mmRender();
+}
+async function mmPasteOutline(){
+  let text=''; try{ text = await navigator.clipboard.readText(); }catch(e){ text=''; }
+  if(text && text.trim()) mmInsertOutline(mmParseOutline(text));
+}
+
 // FIX #9: Global keyboard shortcuts for mind map (Tab, Enter, Delete, F2, Ctrl+Z, Ctrl+Y)
 // These were listed on the node-actions panel buttons but had no actual implementation.
 document.addEventListener('keydown', e => {
@@ -5768,6 +5925,9 @@ document.addEventListener('keydown', e => {
   if(document.getElementById('wb-overlay').classList.contains('open')) return;
   const tag = document.activeElement && document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'||document.activeElement.isContentEditable) return;
+
+  if(e.altKey && (e.key==='c'||e.key==='C')){ e.preventDefault(); mmCopyBranch(); return; }
+  if(e.altKey && (e.key==='v'||e.key==='V')){ e.preventDefault(); mmPasteOutline(); return; }
 
   if(e.key==='Tab'){
     e.preventDefault();
@@ -5927,7 +6087,12 @@ document.addEventListener('paste', e=>{
   const items=(e.clipboardData&&e.clipboardData.items)||[];
   let file=null;
   for(const it of items){ if(it.type && it.type.indexOf('image')===0){ file=it.getAsFile(); break; } }
-  if(!file) return;
+  if(!file){
+    // No image — treat clipboard text as an outline and paste it as a subtree.
+    const txt=(e.clipboardData&&e.clipboardData.getData('text/plain'))||'';
+    if(txt && txt.trim()){ e.preventDefault(); mmInsertOutline(mmParseOutline(txt)); }
+    return;
+  }
   e.preventDefault();
   const reader=new FileReader();
   reader.onload=ev=>{
@@ -6129,6 +6294,18 @@ function mmUpdateScrollbars(){
   const vPct=vRange>0?visT/vRange:0;
   vTh.style.height=th+'px';
   vTh.style.top=Math.max(0,Math.min(vtH-th,vPct*(vtH-th)))+'px';
+  // Only show a scrollbar when the actual visible content overflows the viewport;
+  // otherwise the faint always-on track reads as a stray grey bar.
+  let nx0=Infinity,nx1=-Infinity,ny0=Infinity,ny1=-Infinity;
+  for(const id in MM.nodes){
+    if(typeof mmIsVisible==='function' && !mmIsVisible(id) && id!==MM.root) continue;
+    const nn=MM.nodes[id];
+    nx0=Math.min(nx0,nn.x); nx1=Math.max(nx1,nn.x+(nn.W||140));
+    ny0=Math.min(ny0,nn.y); ny1=Math.max(ny1,nn.y+(nn.H||40));
+  }
+  const realW=(nx1-nx0)*MM.zoom, realH=(ny1-ny0)*MM.zoom;
+  hT.style.display=(isFinite(realW) && realW>vw+8)?'block':'none';
+  vT.style.display=(isFinite(realH) && realH>vh+8)?'block':'none';
 }
 // FIX #6: Removed unsafe mmApplyTransform reassignment patch — zoom-display update and
 // mmUpdateScrollbars() call are now baked into the original mmApplyTransform body above.
@@ -6769,17 +6946,11 @@ function ftbStar(id,btn){
   ftbRenderArsenal();
 }
 
-function ftbInsert(latex){
-  // Notebook mode: insert a live KaTeX-rendered math widget at the caret.
-  if(typeof NB !== 'undefined' && NB.active){
-    nbInsertMathWidget(latex);
-    return;
-  }
-  // Canvas/whiteboard mode: picking a library formula opens the calculator
-  // (formula + number entry) rather than dropping raw LaTeX. Per user 2026-06.
-  // Falls through to the canvas-equation insert only if no library match.
-  if(typeof mmTryOpenCalcForLatex === 'function' && mmTryOpenCalcForLatex(latex)) return;
-  // Mindmap/canvas mode: insert as equation into center of whiteboard canvas
+// Drop a PLAIN equation (raw symbolic LaTeX, no number substitution) into the
+// notebook caret or the centre of the whiteboard canvas. Shared by both the
+// "plain formula" affordance and the calculator's no-match fall-through.
+function _ftbDropEquation(latex){
+  if(typeof NB !== 'undefined' && NB.active){ nbInsertMathWidget(latex); return; }
   const cnvs=document.getElementById('wb-canvas');
   if(!cnvs)return;
   const cx=(cnvs.width/2-WB.vp.x)/WB.vp.s;
@@ -6788,10 +6959,24 @@ function ftbInsert(latex){
   const offset=WB.scene.filter(o=>o.type==='equation').length*40;
   const o={id:uid(),type:'equation',x:cx-100+offset%120,y:cy-20+(offset/120|0)*50,w:200,h:44,latex,locked:false};
   WB.scene.push(o);WB.selId=o.id;wbPush();wbRedraw();
-  // Show equation layer element
   wbRedrawEquationLayer();
-  // Auto-centre the viewport on the new equation so it can't land off-screen.
   wbCenterViewOnObject(o);
+}
+
+// Default insert (the ∑ button / formula body tap): a library formula opens the
+// calculator for number entry (per user 2026-06); non-library latex drops plain.
+function ftbInsert(latex){
+  if(typeof NB !== 'undefined' && NB.active){ nbInsertMathWidget(latex); return; }
+  if(typeof mmTryOpenCalcForLatex === 'function' && mmTryOpenCalcForLatex(latex)) return;
+  _ftbDropEquation(latex);
+}
+
+// Plain insert: ALWAYS drop the symbolic formula as-is (no numbers, no
+// calculator). Wired to the ↗ per-formula button so "paste a plain equation"
+// is directly available on the canvas (user 2026-06-11).
+function ftbInsertPlain(latex){
+  _ftbDropEquation(latex);
+  if(typeof mmShowToast === 'function') mmShowToast('נוסחה נוספה לקנבס');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -7111,15 +7296,25 @@ function ftbMakeItem(f,showStar=true){
   starBtn.title='Add to Arsenal';
   starBtn.onclick=e=>{e.stopPropagation();ftbStar(f.id,starBtn);};
 
+  // ↗ = drop the PLAIN formula (symbolic, no numbers) straight onto the canvas.
   const insBtn=document.createElement('button');
   insBtn.className='ftb-insert-btn';
-  insBtn.textContent='↗';insBtn.title='Insert into canvas';
-  insBtn.onclick=e=>{e.stopPropagation();ftbInsert(f.latex);};
+  insBtn.textContent='↗';insBtn.title='הוסף נוסחה לקנבס (ללא מספרים)';
+  insBtn.onclick=e=>{e.stopPropagation();ftbInsertPlain(f.latex);};
+
+  // 🔢 = open the calculator to substitute real numbers and compute.
+  const calcBtn=document.createElement('button');
+  calcBtn.className='ftb-insert-btn';
+  calcBtn.textContent='🔢';calcBtn.title='חשב עם מספרים (מחשבון)';
+  calcBtn.onclick=e=>{e.stopPropagation();ftbInsert(f.latex);};
 
   item.appendChild(formulaDiv);
   if(showStar)item.appendChild(starBtn);
+  item.appendChild(calcBtn);
   item.appendChild(insBtn);
-  item.onclick=()=>ftbInsert(f.latex);
+  // Body tap = plain drop (the common "paste this formula" case); the 🔢 button
+  // is there when the user wants to plug in numbers.
+  item.onclick=()=>ftbInsertPlain(f.latex);
   return item;
 }
 
