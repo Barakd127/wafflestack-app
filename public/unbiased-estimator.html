@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>אומדים חסרי הטיה — סטיית תקן</title>
+<style>
+  :root{
+    --navy:#1F3E6C; --navy-deep:#0B1B3E; --blue:#2D5BA8; --gold:#D4A017;
+    --amber:#E08A1E; --amber-deep:#C2410C; --ink:#1F3E6C; --muted:#6B7DA3;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:'Heebo','Assistant','Segoe UI',sans-serif;
+    color:var(--ink);
+    background:linear-gradient(160deg,#FFFFFF 0%,#EAF1FB 55%,#D8E7FA 100%);
+    min-height:100%;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:26px 22px 40px}
+  header h1{font-size:30px;font-weight:800;margin:0 0 6px;color:var(--navy)}
+  header h1 .acc{color:var(--gold)}
+  header p{margin:0 0 18px;font-size:16px;line-height:1.7;color:#33507f;max-width:780px}
+  .card{
+    background:rgba(255,255,255,0.72);
+    border:1px solid rgba(127,155,217,0.32);
+    border-radius:18px;
+    box-shadow:0 10px 30px rgba(31,62,108,0.10);
+    backdrop-filter:blur(8px);
+    padding:18px 20px 10px;
+  }
+  .controls{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-bottom:6px}
+  .ctl{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:var(--navy)}
+  .ctl input[type=range]{accent-color:var(--gold);width:170px}
+  .ctl .val{display:inline-block;min-width:26px;text-align:center;font-weight:800;color:var(--gold);font-size:17px}
+  .btn{
+    border:1px solid var(--navy);background:var(--navy);color:#fff;
+    border-radius:11px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer;
+    font-family:inherit;transition:transform .12s,box-shadow .12s;
+  }
+  .btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(31,62,108,0.25)}
+  .hint{font-size:13px;color:var(--muted);font-weight:600}
+  svg{width:100%;height:auto;display:block;touch-action:none;user-select:none}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:6px 0 12px}
+  .lg{
+    display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;
+    border:1.5px solid transparent;border-radius:12px;padding:7px 14px;font-size:15px;font-weight:700;
+    transition:all .15s;background:rgba(255,255,255,0.6);
+  }
+  .lg .sw{width:16px;height:16px;border-radius:4px}
+  .lg.off{opacity:.42;filter:grayscale(.6)}
+  .lg.biased{color:var(--amber-deep);border-color:rgba(224,138,30,0.5)}
+  .lg.unbiased{color:var(--navy);border-color:rgba(45,91,168,0.5)}
+  .lg.off{border-color:rgba(127,155,217,0.3)}
+  .caption{font-size:13.5px;color:#4a6597;line-height:1.7;margin:4px 2px 2px;text-align:center}
+  .caption b.s{color:var(--navy-deep)} .caption b.b{color:var(--amber-deep)} .caption b.u{color:var(--navy)}
+  .footnote{font-size:12px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.6}
+  /* math text stays LTR so it never mirrors inside RTL */
+  .ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>אומדים <span class="acc">חסרי הטיה</span> לסטיית התקן</h1>
+    <p>סימולציית מונטה־קרלו: שולפים שוב ושוב מדגם בגודל <span class="ltr" id="ntxt">n=4</span> מאוכלוסייה נורמלית, ומחשבים לכל מדגם שני אומדים לסטיית התקן — אחד שמחלק ב־<span class="ltr">n</span> (מוטה) ואחד שמחלק ב־<span class="ltr">n−1</span> (תיקון בֶּסֶל). הגרף מראה <b>איפה נופלת התוחלת</b> של כל אומד ביחס לסטיית התקן האמיתית.</p>
+  </header>
+
+  <div class="card">
+    <div class="controls">
+      <label class="ctl">גודל המדגם <span class="ltr">n</span>
+        <input type="range" id="nSlider" min="2" max="30" step="1" value="4" />
+        <span class="val" id="nVal">4</span>
+      </label>
+      <button class="btn" id="rerun">🎲 הרצה מחדש</button>
+      <span class="hint">לחיצה על אומד במקרא מבודדת אותו — אפשר לראות כל התפלגות בנפרד.</span>
+    </div>
+
+    <svg id="chart" viewBox="0 0 900 470" role="img" aria-label="התפלגות האומדים"></svg>
+
+    <div class="legend">
+      <div class="lg biased"  id="lgBiased"><span class="sw" style="background:#E08A1E"></span>אומד מוטה <span class="ltr">(÷n)</span></div>
+      <div class="lg unbiased" id="lgUnbiased"><span class="sw" style="background:#2D5BA8"></span>אומד בלתי מוטה <span class="ltr">(÷n−1)</span></div>
+    </div>
+
+    <div class="caption">
+      הקו השחור המקווקו = <b class="s">סטיית התקן האמיתית של האוכלוסייה</b>. הקווים הדקים = <b class="b">תוחלת האומד המוטה</b> ו<b class="u">תוחלת האומד הבלתי־מוטה</b>.
+    </div>
+  </div>
+
+  <div class="footnote">
+    התפלגות האוכלוסייה: נורמלית עם <span class="ltr">σ = 10</span>. ככל ש־<span class="ltr">n</span> קטן יותר — ההטיה כלפי מטה בולטת יותר; ככל ש־<span class="ltr">n</span> גדל — שני האומדים מתכנסים לערך האמיתי.
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const SIGMA = 10, MU = 0, NUM_SIMS = 12000;
+  const X_MAX = SIGMA * 2.2;          // axis up to 22
+  const BINS = 46;
+  const BIN_W = X_MAX / BINS;
+  const COL = {
+    biased:  { bar:'rgba(224,138,30,0.50)', line:'#C2410C', solid:'#E08A1E' },
+    unbiased:{ bar:'rgba(45,91,168,0.50)',  line:'#1F3E6C', solid:'#2D5BA8' },
+    sigma:'#0B1B3E', axis:'rgba(31,62,108,0.45)', tick:'rgba(31,62,108,0.6)'
+  };
+  const show = { biased:true, unbiased:true };
+  let data = { biased:[], unbiased:[] };
+
+  // ── geometry ──
+  const W=900,H=470, ML=46,MR=26,MT=34,MB=58;
+  const x0=ML, x1=W-MR, y0=H-MB, y1=MT;
+  const xPx = v => x0 + (v/X_MAX)*(x1-x0);
+
+  // ── sampling ──
+  function randn(){ let u=0,v=0; while(u===0)u=Math.random(); while(v===0)v=Math.random();
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+  function simulate(n){
+    const b=new Array(NUM_SIMS), ub=new Array(NUM_SIMS);
+    for(let s=0;s<NUM_SIMS;s++){
+      let sum=0; const vals=new Array(n);
+      for(let i=0;i<n;i++){ const x=MU+SIGMA*randn(); vals[i]=x; sum+=x; }
+      const m=sum/n; let ss=0;
+      for(let i=0;i<n;i++){ const d=vals[i]-m; ss+=d*d; }
+      b[s]=Math.sqrt(ss/n);
+      ub[s]=Math.sqrt(ss/(n-1));
+    }
+    data.biased=b; data.unbiased=ub;
+  }
+  const mean = a => { let s=0; for(let i=0;i<a.length;i++) s+=a[i]; return s/a.length; };
+  function hist(a){ const h=new Array(BINS).fill(0);
+    for(let i=0;i<a.length;i++){ let bi=(a[i]/BIN_W)|0; if(bi<0)bi=0; if(bi>=BINS)bi=BINS-1; h[bi]++; } return h; }
+
+  const NS='http://www.w3.org/2000/svg';
+  const el=(t,a)=>{ const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); return e; };
+  const chart=document.getElementById('chart');
+
+  function render(){
+    while(chart.firstChild) chart.removeChild(chart.firstChild);
+
+    const hb=hist(data.biased), hu=hist(data.unbiased);
+    let yMax=1;
+    for(let i=0;i<BINS;i++){
+      if(show.biased)   yMax=Math.max(yMax,hb[i]);
+      if(show.unbiased) yMax=Math.max(yMax,hu[i]);
+    }
+    const yPx = c => y0 - (c/yMax)*(y0-y1);
+
+    // axis baseline
+    chart.appendChild(el('line',{x1:x0,y1:y0,x2:x1,y2:y0,stroke:COL.axis,'stroke-width':1.5}));
+    // x ticks every 2 units
+    for(let t=0;t<=X_MAX;t+=2){
+      chart.appendChild(el('line',{x1:xPx(t),y1:y0,x2:xPx(t),y2:y0+5,stroke:COL.axis,'stroke-width':1}));
+      const tx=el('text',{x:xPx(t),y:y0+20,'text-anchor':'middle','font-size':12,fill:COL.tick}); tx.textContent=t;
+      chart.appendChild(tx);
+    }
+    const xlab=el('text',{x:(x0+x1)/2,y:H-12,'text-anchor':'middle','font-size':13,fill:COL.tick,'font-weight':600});
+    xlab.textContent='ערך האומד לסטיית התקן'; chart.appendChild(xlab);
+
+    // bars
+    const drawBars=(h,fill)=>{
+      for(let i=0;i<BINS;i++){
+        if(!h[i]) continue;
+        const bx=xPx(i*BIN_W), bw=Math.max(1,xPx(BIN_W)-xPx(0)-1), by=yPx(h[i]);
+        chart.appendChild(el('rect',{x:bx,y:by,width:bw,height:y0-by,fill:fill}));
+      }
+    };
+    if(show.biased)   drawBars(hb,COL.biased.bar);
+    if(show.unbiased) drawBars(hu,COL.unbiased.bar);
+
+    // true sigma reference line (always)
+    chart.appendChild(el('line',{x1:xPx(SIGMA),y1:y1-4,x2:xPx(SIGMA),y2:y0,stroke:COL.sigma,'stroke-width':2.5,'stroke-dasharray':'7 5'}));
+    const sLab=el('text',{x:xPx(SIGMA),y:y1-9,'text-anchor':'middle','font-size':13,'font-weight':800,fill:COL.sigma});
+    sLab.textContent='σ האמיתית'; chart.appendChild(sLab);
+
+    // expectation line per visible distribution (no text label — the caption +
+    // colour coding explain them; keeps the top of the chart clean).
+    const drawExp=(arr,c)=>{
+      const x=xPx(mean(arr));
+      chart.appendChild(el('line',{x1:x,y1:y1+4,x2:x,y2:y0,stroke:c,'stroke-width':2.5,'stroke-dasharray':'4 3'}));
+      // small diamond marker at the top so the expectation reads as a deliberate marker
+      chart.appendChild(el('path',{d:`M ${x} ${y1-2} l 5 5 l -5 5 l -5 -5 z`,fill:c}));
+    };
+    if(show.biased)   drawExp(data.biased,  COL.biased.line);
+    if(show.unbiased) drawExp(data.unbiased,COL.unbiased.line);
+  }
+
+  // ── controls ──
+  const nSlider=document.getElementById('nSlider'), nVal=document.getElementById('nVal'), ntxt=document.getElementById('ntxt');
+  function reSim(){ const n=+nSlider.value; nVal.textContent=n; ntxt.textContent='n='+n; simulate(n); render(); }
+  nSlider.addEventListener('input', reSim);
+  document.getElementById('rerun').addEventListener('click', ()=>{ simulate(+nSlider.value); render(); });
+
+  function toggle(key,node){ show[key]=!show[key]; node.classList.toggle('off',!show[key]); render(); }
+  const lgB=document.getElementById('lgBiased'), lgU=document.getElementById('lgUnbiased');
+  lgB.addEventListener('click', ()=>toggle('biased',lgB));
+  lgU.addEventListener('click', ()=>toggle('unbiased',lgU));
+
+  reSim();
+})();
+</script>
+</body>
+</html>
