@@ -482,9 +482,29 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           // so we don't fragment formulas. Slides that are already short
           // (< 80 chars) render as a single big bullet.
           const raw = String(slide.content || '').trim()
+          // Split prose into sentence bullets, but NEVER split inside a `$…$`
+          // math span — factorial "!", ellipsis "...", and "." inside LaTeX must
+          // not break the pair (else the `$` go unbalanced and KaTeX can't render,
+          // leaking raw "\cdot"/"$"). A boundary is a [.!?] + whitespace seen while
+          // an even number of `$` precede it (i.e. we are outside math).
+          const splitSentences = (s: string): string[] => {
+            const out: string[] = []
+            let last = 0, dollars = 0
+            for (let i = 0; i < s.length; i++) {
+              if (s[i] === '$') dollars++
+              if (dollars % 2 === 0 && /[.!?]/.test(s[i]) && i + 1 < s.length && /\s/.test(s[i + 1])) {
+                let j = i + 1
+                while (j < s.length && /\s/.test(s[j])) j++
+                out.push(s.slice(last, i + 1))
+                last = j; i = j - 1
+              }
+            }
+            if (last < s.length) out.push(s.slice(last))
+            return out
+          }
           const parts = raw.length < 80
             ? [raw]
-            : raw.split(/(?<=[.!?])\s+/).reduce((acc: string[], s) => {
+            : splitSentences(raw).reduce((acc: string[], s) => {
                 const t = s.trim(); if (!t) return acc
                 if (acc.length && t.length < 12) acc[acc.length - 1] += ' ' + t
                 else acc.push(t)
