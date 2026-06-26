@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <title>Mind Map v18</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Caveat:wght@500;600;700&family=Gveret+Levin&family=Fredoka:wght@400;500;600&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Casual handwritten node text (Barak 2026-06-26): Caveat for Latin (≈ the
+   Excalidraw look) + Gveret Levin for Hebrew handwriting; Fredoka/Assistant as
+   the legible casual fallback. One stack, the browser picks per-glyph. */
+:root{ --mm-hand:'Caveat','Gveret Levin','Fredoka','Assistant',sans-serif; }
+.node-div{ font-family:var(--mm-hand) !important; font-size:14px !important; font-weight:600 !important; letter-spacing:.2px; }
+.node-div.node-root{ font-size:17px !important; font-weight:700 !important; }
+</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
@@ -17,8 +25,8 @@ body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1
    Toggled by wsToggleTheme() and synced with the parent app's
    wafflestack-dark-mode localStorage key. */
 body.light{background:#f3f4f6}
-body.light #canvas-area{background:#E4EFFE}
-body.light #app{background:linear-gradient(160deg,#D8E7FA 0%,#A2B6EA 70%,#8FA4E2 100%)}
+body.light #canvas-area{background:#FCFDFF}
+body.light #app{background:linear-gradient(160deg,#FFFFFF 0%,#F1F5FD 60%,#E7EEFA 100%)}
 body.light #bottom-bar{background:#fff;border-top:1px solid rgba(0,0,0,.08);color:rgba(0,0,0,.55)}
 body.light #node-count,body.light #zoom-display{color:rgba(0,0,0,.65)}
 body.light .zoom-btn{background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.10);color:#1f3e6c}
@@ -90,8 +98,8 @@ body.light .tb-ribbon-tab:focus-visible,body.light .tb-btn:focus-visible{outline
 /* ── App ── */
 /* #app paints the MARGIN (lavender). #canvas-area is the inner SHEET (#E4EFFE),
    inset 14px so the lavender shows only as a clean frame around the mindmap. */
-#app{height:calc(100vh - 52px - 36px);position:relative;overflow:hidden;background:linear-gradient(160deg,#D8E7FA 0%,#A2B6EA 70%,#8FA4E2 100%)}
-#canvas-area{position:absolute;inset:14px;border-radius:18px;overflow:hidden;background:#E4EFFE;cursor:grab;transition:background .3s}
+#app{height:calc(100vh - 52px - 36px);position:relative;overflow:hidden;background:linear-gradient(160deg,#FFFFFF 0%,#F1F5FD 60%,#E7EEFA 100%)}
+#canvas-area{position:absolute;inset:14px;border-radius:18px;overflow:hidden;background:#FCFDFF;cursor:grab;transition:background .3s}
 #canvas-area.panning{cursor:grabbing}
 /* XMind-style light canvas frame: a soft inset border + side highlights so the
    map sits inside a framed sheet, not edge-to-edge. pointer-events:none so it
@@ -125,8 +133,8 @@ body.light #ribbon-panel .tb-btn{background:#fff!important;color:#1F3E6C!importa
 body.light #ribbon-panel .tb-btn:hover{background:#EAF0FB!important}
 /* ── מחשבות sheet theme: rounder/bolder font + gold accents (distinct from
    the studies sheet) ── */
-.mm-thoughts .node-div{ font-family:'Rubik','Heebo','Assistant',sans-serif !important; font-weight:700 !important; letter-spacing:.3px }
-.mm-thoughts .node-div.node-root{ font-family:'Rubik','Heebo',sans-serif !important; font-weight:800 !important; letter-spacing:.4px;
+.mm-thoughts .node-div{ font-family:var(--mm-hand) !important; font-weight:600 !important; letter-spacing:.3px }
+.mm-thoughts .node-div.node-root{ font-family:var(--mm-hand) !important; font-weight:700 !important; letter-spacing:.4px;
   box-shadow:0 0 0 2px rgba(212,175,55,.55), 0 6px 20px rgba(212,175,55,.35) !important }
 .mm-thoughts #canvas-area::after{ border-color:rgba(212,175,55,.4); box-shadow:inset 0 0 0 1px rgba(255,255,255,.6), inset 0 2px 30px rgba(212,175,55,.06) }
 .mm-thoughts #mm-sheet-bar{ box-shadow:0 6px 22px rgba(212,175,55,.28), inset 0 1px 0 rgba(255,255,255,.7) }
