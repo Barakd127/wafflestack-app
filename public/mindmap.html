@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <title>Mind Map v18</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Caveat:wght@500;600;700&family=Gveret+Levin&family=Fredoka:wght@400;500;600&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Casual handwritten node text (Barak 2026-06-26): Caveat for Latin (≈ the
+   Excalidraw look) + Gveret Levin for Hebrew handwriting; Fredoka/Assistant as
+   the legible casual fallback. One stack, the browser picks per-glyph. */
+:root{ --mm-hand:'Caveat','Gveret Levin','Fredoka','Assistant',sans-serif; }
+.node-div{ font-family:var(--mm-hand) !important; font-size:14px !important; font-weight:600 !important; letter-spacing:.2px; }
+.node-div.node-root{ font-size:17px !important; font-weight:700 !important; }
+</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
@@ -17,8 +25,8 @@ body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1
    Toggled by wsToggleTheme() and synced with the parent app's
    wafflestack-dark-mode localStorage key. */
 body.light{background:#f3f4f6}
-body.light #canvas-area{background:#E4EFFE}
-body.light #app{background:linear-gradient(160deg,#D8E7FA 0%,#A2B6EA 70%,#8FA4E2 100%)}
+body.light #canvas-area{background:#FCFDFF}
+body.light #app{background:linear-gradient(160deg,#FFFFFF 0%,#F1F5FD 60%,#E7EEFA 100%)}
 body.light #bottom-bar{background:#fff;border-top:1px solid rgba(0,0,0,.08);color:rgba(0,0,0,.55)}
 body.light #node-count,body.light #zoom-display{color:rgba(0,0,0,.65)}
 body.light .zoom-btn{background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.10);color:#1f3e6c}
@@ -90,8 +98,8 @@ body.light .tb-ribbon-tab:focus-visible,body.light .tb-btn:focus-visible{outline
 /* ── App ── */
 /* #app paints the MARGIN (lavender). #canvas-area is the inner SHEET (#E4EFFE),
    inset 14px so the lavender shows only as a clean frame around the mindmap. */
-#app{height:calc(100vh - 52px - 36px);position:relative;overflow:hidden;background:linear-gradient(160deg,#D8E7FA 0%,#A2B6EA 70%,#8FA4E2 100%)}
-#canvas-area{position:absolute;inset:14px;border-radius:18px;overflow:hidden;background:#E4EFFE;cursor:grab;transition:background .3s}
+#app{height:calc(100vh - 52px - 36px);position:relative;overflow:hidden;background:linear-gradient(160deg,#FFFFFF 0%,#F1F5FD 60%,#E7EEFA 100%)}
+#canvas-area{position:absolute;inset:14px;border-radius:18px;overflow:hidden;background:#FCFDFF;cursor:grab;transition:background .3s}
 #canvas-area.panning{cursor:grabbing}
 /* XMind-style light canvas frame: a soft inset border + side highlights so the
    map sits inside a framed sheet, not edge-to-edge. pointer-events:none so it
@@ -125,6 +133,16 @@ body:not(.light) #canvas-area::after{border-color:rgba(255,255,255,.12);
 .mm-eraser{width:50px;height:22px;border-radius:4px;margin-left:9px;align-self:flex-end;
   background:linear-gradient(180deg,#2b3340 0 56%,#eef1f5 56% 100%);
   box-shadow:0 2px 5px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.25)}
+/* ── Functional ink layer: highlighter + eraser draw over the mind map ── */
+#mm-ink{position:absolute;inset:0;z-index:35;pointer-events:none}
+#mm-ink.active{pointer-events:auto}
+/* The tray sits inside the (non-interactive) board deco — re-enable clicks on
+   just the markers + eraser so they become real tools. */
+.mm-tray{pointer-events:auto}
+.mm-marker,.mm-eraser{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
+.mm-marker:hover,.mm-eraser:hover{transform:translateY(-3px)}
+.mm-marker.on{transform:translateY(-8px);box-shadow:0 5px 12px rgba(0,0,0,.45),0 0 0 2px rgba(255,255,255,.85)}
+.mm-eraser.on{transform:translateY(-6px);box-shadow:0 5px 12px rgba(0,0,0,.45),0 0 0 2px rgba(255,255,255,.85)}
 /* ── Liquid / salient toolbar: bigger glassy buttons + larger icons ── */
 .tb-btn, .tb-ribbon-tab{height:38px!important;min-width:38px!important;border-radius:12px!important;
   background:rgba(255,255,255,.16)!important;border:1px solid rgba(255,255,255,.28)!important;
@@ -148,8 +166,8 @@ body.light #ribbon-panel .tb-btn{background:#fff!important;color:#1F3E6C!importa
 body.light #ribbon-panel .tb-btn:hover{background:#EAF0FB!important}
 /* ── מחשבות sheet theme: rounder/bolder font + gold accents (distinct from
    the studies sheet) ── */
-.mm-thoughts .node-div{ font-family:'Rubik','Heebo','Assistant',sans-serif !important; font-weight:700 !important; letter-spacing:.3px }
-.mm-thoughts .node-div.node-root{ font-family:'Rubik','Heebo',sans-serif !important; font-weight:800 !important; letter-spacing:.4px;
+.mm-thoughts .node-div{ font-family:var(--mm-hand) !important; font-weight:600 !important; letter-spacing:.3px }
+.mm-thoughts .node-div.node-root{ font-family:var(--mm-hand) !important; font-weight:700 !important; letter-spacing:.4px;
   box-shadow:0 0 0 2px rgba(212,175,55,.55), 0 6px 20px rgba(212,175,55,.35) !important }
 .mm-thoughts #canvas-area::after{ border-color:rgba(212,175,55,.4); box-shadow:inset 0 0 0 1px rgba(255,255,255,.6), inset 0 2px 30px rgba(212,175,55,.06) }
 .mm-thoughts #mm-sheet-bar{ box-shadow:0 6px 22px rgba(212,175,55,.28), inset 0 1px 0 rgba(255,255,255,.7) }
@@ -849,6 +867,7 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <div id="viewport">
       <svg id="svg-layer"></svg>
     </div>
+    <canvas id="mm-ink" aria-hidden="true"></canvas>
     <div id="mm-h-scroll"><div class="sb-thumb" id="mm-h-thumb"></div></div>
     <div id="mm-v-scroll"><div class="sb-thumb" id="mm-v-thumb"></div></div>
     <!-- Iconic whiteboard skin: aluminium frame + corner brackets + marker tray -->
@@ -1822,6 +1841,7 @@ function mmSerializeForSave(){
       mmAutoCollapsed: MM.mmAutoCollapsed,
       importedMaps: Array.isArray(MM.importedMaps) ? MM.importedMaps : [],
       zones: Array.isArray(MM.zones) ? MM.zones : [],
+      ink: Array.isArray(MM.ink) ? MM.ink : [],
       nodes: {}
     };
     for(const id in MM.nodes){
@@ -2564,6 +2584,7 @@ function mmApplyTransform(){
   // FIX #6: update zoom display and scrollbars here instead of patching via reassignment
   const zd=document.getElementById('zoom-display');
   if(zd) zd.textContent=Math.round(MM.zoom*100)+'%';
+  if(typeof mmInkRender==='function') mmInkRender();   // keep highlighter ink locked to the map
   if(typeof mmUpdateScrollbars==='function') mmUpdateScrollbars();
   // FIX (Phase 2.2): keep navigator viewport rectangle in sync with manual
   // pan and wheel-zoom — every transform change must redraw the minimap.
@@ -6139,6 +6160,108 @@ function mmEnsureSelVisible(){
 }
 
 // ═══════════════════════════════════════════════════════════
+// Highlighter + eraser ink layer (the marker tray, made functional)
+// Strokes live in MAP coordinates on MM.ink so they pan/zoom with the map
+// and persist per-sheet via mmSerializeForSave. Tools: pen (semi-transparent
+// highlighter, one per tray marker colour) + eraser (stroke-level).
+// ═══════════════════════════════════════════════════════════
+const MMInk = { tool:null, color:'#2563eb', size:16, drawing:false, cur:null, canvas:null, ctx:null };
+const MM_INK_COLORS = { k:'#1f2937', b:'#2563eb', r:'#dc2626', g:'#16a34a' };
+
+function mmInkInit(){
+  const ca=document.getElementById('canvas-area'); if(!ca) return;
+  const cv=document.getElementById('mm-ink'); if(!cv) return;
+  MMInk.canvas=cv; MMInk.ctx=cv.getContext('2d');
+  mmInkResize();
+  cv.addEventListener('pointerdown', mmInkDown);
+  cv.addEventListener('pointermove', mmInkMove);
+  window.addEventListener('pointerup', mmInkUp);
+  window.addEventListener('resize', mmInkResize);
+  document.querySelectorAll('.mm-marker').forEach(function(m){
+    const cls=[...m.classList].find(function(c){return MM_INK_COLORS[c];});
+    m.addEventListener('click', function(){ mmInkSetTool('pen', MM_INK_COLORS[cls]||'#2563eb', m); });
+  });
+  const er=document.querySelector('.mm-eraser');
+  if(er) er.addEventListener('click', function(){ mmInkSetTool('eraser', null, er); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && MMInk.tool) mmInkClearTool(); });
+}
+
+function mmInkResize(){
+  const cv=MMInk.canvas; if(!cv||!cv.parentElement) return;
+  const r=cv.parentElement.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  cv.width=Math.max(1,r.width*dpr); cv.height=Math.max(1,r.height*dpr);
+  cv.style.width=r.width+'px'; cv.style.height=r.height+'px';
+  if(MMInk.ctx) MMInk.ctx.setTransform(dpr,0,0,dpr,0,0);
+  mmInkRender();
+}
+
+function mmInkSetTool(tool, color, el){
+  const same = (MMInk.tool===tool && (tool!=='pen' || MMInk.color===color));
+  document.querySelectorAll('.mm-marker.on,.mm-eraser.on').forEach(function(x){x.classList.remove('on');});
+  if(same){ MMInk.tool=null; }
+  else { MMInk.tool=tool; if(color) MMInk.color=color; if(el) el.classList.add('on'); }
+  const cv=MMInk.canvas; if(!cv) return;
+  if(MMInk.tool){ cv.classList.add('active'); cv.style.cursor = (tool==='eraser'?'cell':'crosshair'); }
+  else { cv.classList.remove('active'); cv.style.cursor=''; }
+}
+function mmInkClearTool(){ if(MMInk.tool) mmInkSetTool(MMInk.tool, MMInk.color); }
+
+function _mmInkPt(e){
+  const r=MMInk.canvas.getBoundingClientRect();
+  return { x:((e.clientX-r.left)-MM.panX)/MM.zoom, y:((e.clientY-r.top)-MM.panY)/MM.zoom };
+}
+
+function mmInkDown(e){
+  if(!MMInk.tool) return;
+  e.preventDefault();
+  try{ MMInk.canvas.setPointerCapture(e.pointerId); }catch(_){}
+  if(!Array.isArray(MM.ink)) MM.ink=[];
+  MMInk.drawing=true;
+  if(MMInk.tool==='eraser'){ mmInkEraseAt(_mmInkPt(e)); return; }
+  MMInk.cur={ color:MMInk.color, size:MMInk.size, pts:[_mmInkPt(e)] };
+  mmInkRender();
+}
+function mmInkMove(e){
+  if(!MMInk.drawing) return;
+  const p=_mmInkPt(e);
+  if(MMInk.tool==='eraser'){ mmInkEraseAt(p); return; }
+  MMInk.cur.pts.push(p); mmInkRender();
+}
+function mmInkUp(){
+  if(!MMInk.drawing) return; MMInk.drawing=false;
+  if(MMInk.tool==='pen' && MMInk.cur && MMInk.cur.pts.length){ MM.ink.push(MMInk.cur); }
+  MMInk.cur=null; mmInkSave(); mmInkRender();
+}
+function mmInkEraseAt(p){
+  if(!Array.isArray(MM.ink)||!MM.ink.length) return;
+  const tol=16/(MM.zoom||1);
+  const before=MM.ink.length;
+  MM.ink=MM.ink.filter(function(s){ return !(s.pts||[]).some(function(pt){ return Math.hypot(pt.x-p.x,pt.y-p.y)<tol; }); });
+  if(MM.ink.length!==before) mmInkRender();
+}
+function mmInkRender(){
+  const ctx=MMInk.ctx, cv=MMInk.canvas; if(!ctx||!cv) return;
+  const w=parseFloat(cv.style.width)||cv.width, h=parseFloat(cv.style.height)||cv.height;
+  ctx.clearRect(0,0,w,h);
+  if(typeof MM==='undefined'||!MM) return;
+  const strokes=(Array.isArray(MM.ink)?MM.ink.slice():[]);
+  if(MMInk.cur) strokes.push(MMInk.cur);
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  for(const s of strokes){
+    const pts=s.pts||[]; if(!pts.length) continue;
+    ctx.globalAlpha=0.36; ctx.strokeStyle=s.color||'#2563eb'; ctx.lineWidth=Math.max(2,(s.size||16)*(MM.zoom||1));
+    ctx.beginPath();
+    for(let i=0;i<pts.length;i++){ const x=pts[i].x*MM.zoom+MM.panX, y=pts[i].y*MM.zoom+MM.panY; if(i)ctx.lineTo(x,y); else ctx.moveTo(x,y); }
+    if(pts.length===1){ const x=pts[0].x*MM.zoom+MM.panX, y=pts[0].y*MM.zoom+MM.panY; ctx.lineTo(x+0.1,y); }
+    ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+}
+let _mmInkSaveT=null;
+function mmInkSave(){ clearTimeout(_mmInkSaveT); _mmInkSaveT=setTimeout(function(){ try{ localStorage.setItem(_mmCurrentSaveKey, mmSerializeForSave()); }catch(e){} }, 400); }
+
+// ═══════════════════════════════════════════════════════════
 // v14 — MIND MAP NAVIGATION (scroll, right-click pan, zoom)
 // ═══════════════════════════════════════════════════════════
 (function(){
@@ -6147,6 +6270,7 @@ function mmEnsureSelVisible(){
 
   // Prevent context menu on canvas
   ca.addEventListener('contextmenu', e => e.preventDefault());
+  if(typeof mmInkInit==='function') mmInkInit();
 
   // FIX #1: Move spaceDown declaration BEFORE it is referenced in mousedown handler
   let spaceDown = false;
@@ -6160,6 +6284,9 @@ function mmEnsureSelVisible(){
   let marquee = null;            // {sx, sy, el} — screen-coord box
   let marqueeActive = false;
   ca.addEventListener('mousedown', e => {
+    // While a highlighter/eraser is active, the ink layer owns the pointer —
+    // don't pan or marquee-select underneath it.
+    if(typeof MMInk !== 'undefined' && MMInk.tool) return;
     const onNode = e.target.closest('.node-wrap,.cn-outer');
     if(e.button === 2 || (e.button === 0 && spaceDown && !onNode)) {
       panning = true; panActive = false;
