@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>Mind Map v18</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Caveat:wght@500;600;700&family=Gveret+Levin&family=Fredoka:wght@400;500;600&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playpen+Sans+Hebrew:wght@400;500;600;700&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-/* Casual handwritten node text (Barak 2026-06-26): Caveat for Latin (≈ the
-   Excalidraw look) + Gveret Levin for Hebrew handwriting; Fredoka/Assistant as
-   the legible casual fallback. One stack, the browser picks per-glyph. */
-:root{ --mm-hand:'Caveat','Gveret Levin','Fredoka','Assistant',sans-serif; }
+/* Casual handwritten node text (Barak 2026-06-26): Playpen Sans Hebrew —
+   one font covering BOTH Hebrew and Latin in a friendly hand-drawn style;
+   Assistant as the legible fallback. */
+:root{ --mm-hand:'Playpen Sans Hebrew','Assistant',sans-serif; }
 .node-div{ font-family:var(--mm-hand) !important; font-size:14px !important; font-weight:600 !important; letter-spacing:.2px; }
 .node-div.node-root{ font-size:17px !important; font-weight:700 !important; }
 </style>
@@ -110,6 +110,39 @@ body.light .tb-ribbon-tab:focus-visible,body.light .tb-btn:focus-visible{outline
   pointer-events:none;z-index:1}
 body:not(.light) #canvas-area::after{border-color:rgba(255,255,255,.12);
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), inset 0 2px 26px rgba(0,0,0,.18)}
+/* ── Iconic dry-erase whiteboard skin: brushed-aluminium frame, grey corner
+   brackets, and a marker tray with markers + eraser. All pointer-events:none. ── */
+#mm-board-frame{position:absolute;inset:5px;pointer-events:none;z-index:40;
+  border:16px solid transparent;
+  border-image:linear-gradient(135deg,#f6f7f9,#cbd0d7 22%,#eef0f3 45%,#b2b7c0 68%,#e3e6eb) 16 stretch;
+  box-shadow:0 12px 30px rgba(15,23,42,.30)}
+#mm-board-deco{position:absolute;inset:5px;pointer-events:none;z-index:41}
+.mm-corner{position:absolute;width:36px;height:36px;background:linear-gradient(135deg,#a4aab2,#ccd0d6 48%,#868c95);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 1px 3px rgba(0,0,0,.32)}
+.mm-corner.tl{top:0;left:0;border-radius:18px 3px 15px 3px}
+.mm-corner.tr{top:0;right:0;border-radius:3px 18px 3px 15px}
+.mm-corner.bl{bottom:0;left:0;border-radius:15px 3px 18px 3px}
+.mm-corner.br{bottom:0;right:0;border-radius:3px 15px 3px 18px}
+.mm-tray{position:absolute;left:56px;bottom:2px;display:flex;align-items:flex-end;gap:7px}
+.mm-marker{width:58px;height:11px;border-radius:6px;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.45)}
+.mm-marker::after{content:'';position:absolute;right:-5px;top:1.5px;width:8px;height:8px;border-radius:2px;background:#d4d4d4;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+.mm-marker.k{background:linear-gradient(180deg,#404040,#141414)}
+.mm-marker.b{background:linear-gradient(180deg,#3b82f6,#1d4ed8)}
+.mm-marker.r{background:linear-gradient(180deg,#ef4444,#b91c1c)}
+.mm-marker.g{background:linear-gradient(180deg,#22c55e,#15803d)}
+.mm-eraser{width:50px;height:22px;border-radius:4px;margin-left:9px;align-self:flex-end;
+  background:linear-gradient(180deg,#2b3340 0 56%,#eef1f5 56% 100%);
+  box-shadow:0 2px 5px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.25)}
+/* ── Functional ink layer: highlighter + eraser draw over the mind map ── */
+#mm-ink{position:absolute;inset:0;z-index:35;pointer-events:none}
+#mm-ink.active{pointer-events:auto}
+/* The tray sits inside the (non-interactive) board deco — re-enable clicks on
+   just the markers + eraser so they become real tools. */
+.mm-tray{pointer-events:auto}
+.mm-marker,.mm-eraser{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
+.mm-marker:hover,.mm-eraser:hover{transform:translateY(-3px)}
+.mm-marker.on{transform:translateY(-8px);box-shadow:0 5px 12px rgba(0,0,0,.45),0 0 0 2px rgba(255,255,255,.85)}
+.mm-eraser.on{transform:translateY(-6px);box-shadow:0 5px 12px rgba(0,0,0,.45),0 0 0 2px rgba(255,255,255,.85)}
 /* ── Liquid / salient toolbar: bigger glassy buttons + larger icons ── */
 .tb-btn, .tb-ribbon-tab{height:38px!important;min-width:38px!important;border-radius:12px!important;
   background:rgba(255,255,255,.16)!important;border:1px solid rgba(255,255,255,.28)!important;
@@ -204,6 +237,9 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 
 /* ── Mind map nodes ── */
 .node-wrap{position:absolute;z-index:2}
+/* Manual resize handle — bottom-right corner, visible on node hover. */
+.node-resize{position:absolute;right:-5px;bottom:-5px;width:14px;height:14px;border-radius:3px;cursor:nwse-resize;z-index:6;background:transparent;transition:background .12s,box-shadow .12s}
+.node-wrap:hover .node-resize{background:rgba(212,175,55,.95);box-shadow:0 0 0 2px rgba(255,255,255,.65)}
 .node-div{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:500;white-space:normal;overflow-wrap:normal;text-align:center;cursor:pointer;user-select:none;box-shadow:0 2px 10px rgba(0,0,0,.22);transition:box-shadow .15s,transform .1s;min-width:50px;width:100%;height:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.25}
 /* Bidi: only TEXT nodes (not equations, not canvas wrappers) need plaintext
    detection so mixed Hebrew/English flows correctly per-substring.
@@ -474,7 +510,9 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 /* ═══ v14: SCROLLBARS ═══ */
 #mm-h-scroll{position:absolute;bottom:4px;left:4px;right:16px;height:8px;border-radius:4px;background:rgba(0,0,0,.1);z-index:50}
 #mm-v-scroll{position:absolute;top:4px;right:4px;bottom:16px;width:8px;border-radius:4px;background:rgba(0,0,0,.1);z-index:50}
-.sb-thumb{position:absolute;background:rgba(0,0,0,.35);border-radius:4px;cursor:grab;min-width:24px;min-height:24px}
+.sb-thumb{position:absolute;background:rgba(0,0,0,.28);border-radius:4px;cursor:grab}
+#mm-h-scroll .sb-thumb{top:0;height:100%;min-width:24px}
+#mm-v-scroll .sb-thumb{left:0;width:100%;min-height:24px}
 .sb-thumb:active{cursor:grabbing;background:rgba(99,102,241,.7)}
 
 /* ═══ v14: WB TOOLBAR ICONS ═══ */
@@ -829,8 +867,20 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <div id="viewport">
       <svg id="svg-layer"></svg>
     </div>
+    <canvas id="mm-ink" aria-hidden="true"></canvas>
     <div id="mm-h-scroll"><div class="sb-thumb" id="mm-h-thumb"></div></div>
     <div id="mm-v-scroll"><div class="sb-thumb" id="mm-v-thumb"></div></div>
+    <!-- Iconic whiteboard skin: aluminium frame + corner brackets + marker tray -->
+    <div id="mm-board-frame" aria-hidden="true"></div>
+    <div id="mm-board-deco" aria-hidden="true">
+      <span class="mm-corner tl"></span><span class="mm-corner tr"></span>
+      <span class="mm-corner bl"></span><span class="mm-corner br"></span>
+      <div class="mm-tray">
+        <span class="mm-marker k"></span><span class="mm-marker b"></span>
+        <span class="mm-marker r"></span><span class="mm-marker g"></span>
+        <span class="mm-eraser"></span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1791,6 +1841,7 @@ function mmSerializeForSave(){
       mmAutoCollapsed: MM.mmAutoCollapsed,
       importedMaps: Array.isArray(MM.importedMaps) ? MM.importedMaps : [],
       zones: Array.isArray(MM.zones) ? MM.zones : [],
+      ink: Array.isArray(MM.ink) ? MM.ink : [],
       nodes: {}
     };
     for(const id in MM.nodes){
@@ -1833,7 +1884,7 @@ function mmFitNode(text){
 function mmFitAllNodes(){
   for(const id in MM.nodes){
     const n=MM.nodes[id];
-    if(n && (n.type==='text' || n.type==='root')){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
+    if(n && (n.type==='text' || n.type==='root') && !n.userSized){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
   }
 }
 
@@ -1922,7 +1973,7 @@ function mmRender(){
     div.id='nw_'+id;
     // Fit node width to its text so long Hebrew names don't overflow the bubble
     // (also keeps connector attach geometry aligned with the visible node).
-    if(n.type==='text' || n.type==='root'){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
+    if((n.type==='text' || n.type==='root') && !n.userSized){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
     div.style.left=n.x+'px';div.style.top=n.y+'px';div.style.width=n.W+'px';div.style.height=n.H+'px';
     const nodeDiv=document.createElement('div');
     // Topic nodes (mapped to a course topic → 📖 תיאוריה / 📝 תרגול) get a
@@ -2050,6 +2101,42 @@ function mmRender(){
       noteBtn.textContent = hasNote ? '📝' : '＋';
       noteBtn.onclick = (e)=>{ e.stopPropagation(); openNoteEditor(n.id); if(typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('add-note'); };
       div.appendChild(noteBtn);
+    }
+
+    // ── Manual resize handle (bottom-right). Drag = set W/H + mark userSized so
+    //    auto-size stops overriding. Double-click = revert to auto-fit. ──
+    if(n.type !== 'summary'){
+      const rz = document.createElement('div');
+      rz.className = 'node-resize';
+      rz.title = 'גרור לשינוי גודל · דאבל-קליק לאיפוס אוטומטי';
+      rz.addEventListener('mousedown', (ev)=>{
+        ev.stopPropagation(); ev.preventDefault();
+        const startX = ev.clientX, startY = ev.clientY;
+        const startW = n.W||140, startH = n.H||40;
+        const onMove = (mv)=>{
+          n.W = Math.max(50, Math.round(startW + (mv.clientX - startX)/MM.zoom));
+          n.H = Math.max(30, Math.round(startH + (mv.clientY - startY)/MM.zoom));
+          n.userSized = true;
+          const w = document.getElementById('nw_'+n.id);
+          if(w){ w.style.width = n.W+'px'; w.style.height = n.H+'px'; }
+        };
+        const onUp = ()=>{
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+          if(typeof mmTidyLayout==='function'){ try{ mmTidyLayout(); }catch(e){} }
+          if(typeof mmPushHistory==='function') mmPushHistory();
+          mmRender();
+        };
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
+      rz.addEventListener('dblclick', (ev)=>{
+        ev.stopPropagation(); ev.preventDefault();
+        n.userSized = false;
+        if(typeof mmPushHistory==='function') mmPushHistory();
+        mmRender();
+      });
+      div.appendChild(rz);
     }
 
     // ── Hover reorder chips (◀ ▶) — shift this node left/right among its
@@ -2243,6 +2330,7 @@ function mmRender(){
             const sw = (t._w) * MM.zoom;
             const sy = t._y * MM.zoom + MM.panY;
             const line = document.createElement('div');
+            line.id = 'mm-drop-line';
             line.style.cssText = [
               'position:absolute',
               'left:'+(sx-6)+'px',
@@ -2346,6 +2434,8 @@ function mmRender(){
           document.removeEventListener('touchmove', onTouchMove);
           document.removeEventListener('touchend', onUp);
           document.removeEventListener('touchcancel', onUp);
+          window.removeEventListener('blur', abortDrag);
+          document.removeEventListener('mouseleave', abortDrag);
 
           if(ghost){ ghost.remove(); ghost = null; }
           clearIndicator();
@@ -2366,6 +2456,22 @@ function mmRender(){
           }
         }
 
+        // Abort a drag whose mouseup never arrives (released outside the window /
+        // focus lost) — otherwise the gold drop-line bar sticks mid-tree and the
+        // leaked mousemove keeps repainting it. Cancels cleanly (no commit).
+        function abortDrag(){
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+          document.removeEventListener('touchmove', onTouchMove);
+          document.removeEventListener('touchend', onUp);
+          document.removeEventListener('touchcancel', onUp);
+          window.removeEventListener('blur', abortDrag);
+          document.removeEventListener('mouseleave', abortDrag);
+          if(ghost){ ghost.remove(); ghost = null; }
+          clearIndicator();
+          if(moved){ nodeObj.x = startNX; nodeObj.y = startNY; mmRender(); }
+        }
+
         if(isTouch){
           document.addEventListener('touchmove', onTouchMove, {passive:false});
           document.addEventListener('touchend', onUp);
@@ -2373,6 +2479,8 @@ function mmRender(){
         } else {
           document.addEventListener('mousemove', onMove);
           document.addEventListener('mouseup', onUp);
+          window.addEventListener('blur', abortDrag);
+          document.addEventListener('mouseleave', abortDrag);
         }
       }
 
@@ -2476,6 +2584,7 @@ function mmApplyTransform(){
   // FIX #6: update zoom display and scrollbars here instead of patching via reassignment
   const zd=document.getElementById('zoom-display');
   if(zd) zd.textContent=Math.round(MM.zoom*100)+'%';
+  if(typeof mmInkRender==='function') mmInkRender();   // keep highlighter ink locked to the map
   if(typeof mmUpdateScrollbars==='function') mmUpdateScrollbars();
   // FIX (Phase 2.2): keep navigator viewport rectangle in sync with manual
   // pan and wheel-zoom — every transform change must redraw the minimap.
@@ -3661,7 +3770,10 @@ function startEditNode(n,el,initialChar){
     _mmCleanMeasure();
   };
   input.onkeydown=e=>{
-    if(e.key==='Enter'){input.blur();return;}
+    // Enter commits + exits ONLY — stop it reaching the global keydown handler
+    // (blur() clears focus first, so its input-focus guard would otherwise pass
+    // and add a stray sibling node).
+    if(e.key==='Enter'){e.preventDefault();e.stopPropagation();input.blur();return;}
     if(e.key==='Escape'){input.remove();_mmCleanMeasure();mmRender();}
   };
 }
@@ -5775,6 +5887,60 @@ setTimeout(() => {
 if (typeof mmRenderSheetBar === 'function') mmRenderSheetBar();
 if (typeof mmApplySheetTheme === 'function') mmApplySheetTheme();
 
+// ── XMind-style branch copy / paste as a markdown outline ──────────────────
+// Alt+C copies the selected node + its whole subtree to the clipboard as nested
+// "- " bullets (2-space indent per level). Alt+V / Ctrl+V paste an indented
+// outline back in as a subtree under the selected node. Indentation = hierarchy.
+function mmSerializeSubtree(id, depth, out){
+  const n = MM.nodes[id]; if(!n) return;
+  out.push('  '.repeat(depth) + '- ' + String(n.text||'').replace(/\r?\n/g,' '));
+  (n.childIds||[]).forEach(cid => mmSerializeSubtree(cid, depth+1, out));
+}
+async function mmCopyBranch(){
+  const id = MM.sel; if(!id || !MM.nodes[id]) return;
+  const out = []; mmSerializeSubtree(id, 0, out);
+  const text = out.join('\n');
+  try { await navigator.clipboard.writeText(text); }
+  catch(e){
+    const ta=document.createElement('textarea');
+    ta.value=text; ta.style.cssText='position:fixed;opacity:0;pointer-events:none';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(_){}
+    ta.remove();
+  }
+}
+function mmParseOutline(text){
+  const items=[];
+  String(text).replace(/\r/g,'').split('\n').forEach(raw=>{
+    if(!raw.trim()) return;
+    const lead=(raw.match(/^[ \t]*/)||[''])[0].replace(/\t/g,'  ').length;
+    const txt=raw.replace(/^[ \t]*/,'').replace(/^[-*+]\s+/,'').trim();
+    if(txt) items.push({ depth: Math.floor(lead/2), text: txt });
+  });
+  return items;
+}
+function mmInsertOutline(items){
+  if(!items || !items.length || typeof mmNode!=='function') return;
+  const parentId = (MM.sel && MM.nodes[MM.sel]) ? MM.sel : MM.root;
+  const minDepth = Math.min.apply(null, items.map(i=>i.depth));
+  const lastAtDepth = { '-1': parentId };
+  items.forEach(it=>{
+    const d = it.depth - minDepth;
+    const pid = (d===0) ? parentId : (lastAtDepth[d-1] || parentId);
+    const par = MM.nodes[pid]; if(par && par.collapsed) par.collapsed = false;
+    const node = mmNode('branch', it.text, 0, 0, pid, mmPickColor(pid));
+    lastAtDepth[d] = node.id;
+    Object.keys(lastAtDepth).forEach(k=>{ if(Number(k) > d) delete lastAtDepth[k]; });
+  });
+  if(MM.nodes[parentId]) MM.nodes[parentId].collapsed = false;
+  if(typeof mmTidyLayout==='function'){ try{ mmTidyLayout(); }catch(e){} }
+  mmPushHistory(); mmRender();
+}
+async function mmPasteOutline(){
+  let text=''; try{ text = await navigator.clipboard.readText(); }catch(e){ text=''; }
+  if(text && text.trim()) mmInsertOutline(mmParseOutline(text));
+}
+
 // FIX #9: Global keyboard shortcuts for mind map (Tab, Enter, Delete, F2, Ctrl+Z, Ctrl+Y)
 // These were listed on the node-actions panel buttons but had no actual implementation.
 document.addEventListener('keydown', e => {
@@ -5782,6 +5948,9 @@ document.addEventListener('keydown', e => {
   if(document.getElementById('wb-overlay').classList.contains('open')) return;
   const tag = document.activeElement && document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'||document.activeElement.isContentEditable) return;
+
+  if(e.altKey && (e.key==='c'||e.key==='C')){ e.preventDefault(); mmCopyBranch(); return; }
+  if(e.altKey && (e.key==='v'||e.key==='V')){ e.preventDefault(); mmPasteOutline(); return; }
 
   if(e.key==='Tab'){
     e.preventDefault();
@@ -5941,7 +6110,12 @@ document.addEventListener('paste', e=>{
   const items=(e.clipboardData&&e.clipboardData.items)||[];
   let file=null;
   for(const it of items){ if(it.type && it.type.indexOf('image')===0){ file=it.getAsFile(); break; } }
-  if(!file) return;
+  if(!file){
+    // No image — treat clipboard text as an outline and paste it as a subtree.
+    const txt=(e.clipboardData&&e.clipboardData.getData('text/plain'))||'';
+    if(txt && txt.trim()){ e.preventDefault(); mmInsertOutline(mmParseOutline(txt)); }
+    return;
+  }
   e.preventDefault();
   const reader=new FileReader();
   reader.onload=ev=>{
@@ -5986,6 +6160,108 @@ function mmEnsureSelVisible(){
 }
 
 // ═══════════════════════════════════════════════════════════
+// Highlighter + eraser ink layer (the marker tray, made functional)
+// Strokes live in MAP coordinates on MM.ink so they pan/zoom with the map
+// and persist per-sheet via mmSerializeForSave. Tools: pen (semi-transparent
+// highlighter, one per tray marker colour) + eraser (stroke-level).
+// ═══════════════════════════════════════════════════════════
+const MMInk = { tool:null, color:'#2563eb', size:16, drawing:false, cur:null, canvas:null, ctx:null };
+const MM_INK_COLORS = { k:'#1f2937', b:'#2563eb', r:'#dc2626', g:'#16a34a' };
+
+function mmInkInit(){
+  const ca=document.getElementById('canvas-area'); if(!ca) return;
+  const cv=document.getElementById('mm-ink'); if(!cv) return;
+  MMInk.canvas=cv; MMInk.ctx=cv.getContext('2d');
+  mmInkResize();
+  cv.addEventListener('pointerdown', mmInkDown);
+  cv.addEventListener('pointermove', mmInkMove);
+  window.addEventListener('pointerup', mmInkUp);
+  window.addEventListener('resize', mmInkResize);
+  document.querySelectorAll('.mm-marker').forEach(function(m){
+    const cls=[...m.classList].find(function(c){return MM_INK_COLORS[c];});
+    m.addEventListener('click', function(){ mmInkSetTool('pen', MM_INK_COLORS[cls]||'#2563eb', m); });
+  });
+  const er=document.querySelector('.mm-eraser');
+  if(er) er.addEventListener('click', function(){ mmInkSetTool('eraser', null, er); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && MMInk.tool) mmInkClearTool(); });
+}
+
+function mmInkResize(){
+  const cv=MMInk.canvas; if(!cv||!cv.parentElement) return;
+  const r=cv.parentElement.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  cv.width=Math.max(1,r.width*dpr); cv.height=Math.max(1,r.height*dpr);
+  cv.style.width=r.width+'px'; cv.style.height=r.height+'px';
+  if(MMInk.ctx) MMInk.ctx.setTransform(dpr,0,0,dpr,0,0);
+  mmInkRender();
+}
+
+function mmInkSetTool(tool, color, el){
+  const same = (MMInk.tool===tool && (tool!=='pen' || MMInk.color===color));
+  document.querySelectorAll('.mm-marker.on,.mm-eraser.on').forEach(function(x){x.classList.remove('on');});
+  if(same){ MMInk.tool=null; }
+  else { MMInk.tool=tool; if(color) MMInk.color=color; if(el) el.classList.add('on'); }
+  const cv=MMInk.canvas; if(!cv) return;
+  if(MMInk.tool){ cv.classList.add('active'); cv.style.cursor = (tool==='eraser'?'cell':'crosshair'); }
+  else { cv.classList.remove('active'); cv.style.cursor=''; }
+}
+function mmInkClearTool(){ if(MMInk.tool) mmInkSetTool(MMInk.tool, MMInk.color); }
+
+function _mmInkPt(e){
+  const r=MMInk.canvas.getBoundingClientRect();
+  return { x:((e.clientX-r.left)-MM.panX)/MM.zoom, y:((e.clientY-r.top)-MM.panY)/MM.zoom };
+}
+
+function mmInkDown(e){
+  if(!MMInk.tool) return;
+  e.preventDefault();
+  try{ MMInk.canvas.setPointerCapture(e.pointerId); }catch(_){}
+  if(!Array.isArray(MM.ink)) MM.ink=[];
+  MMInk.drawing=true;
+  if(MMInk.tool==='eraser'){ mmInkEraseAt(_mmInkPt(e)); return; }
+  MMInk.cur={ color:MMInk.color, size:MMInk.size, pts:[_mmInkPt(e)] };
+  mmInkRender();
+}
+function mmInkMove(e){
+  if(!MMInk.drawing) return;
+  const p=_mmInkPt(e);
+  if(MMInk.tool==='eraser'){ mmInkEraseAt(p); return; }
+  MMInk.cur.pts.push(p); mmInkRender();
+}
+function mmInkUp(){
+  if(!MMInk.drawing) return; MMInk.drawing=false;
+  if(MMInk.tool==='pen' && MMInk.cur && MMInk.cur.pts.length){ MM.ink.push(MMInk.cur); }
+  MMInk.cur=null; mmInkSave(); mmInkRender();
+}
+function mmInkEraseAt(p){
+  if(!Array.isArray(MM.ink)||!MM.ink.length) return;
+  const tol=16/(MM.zoom||1);
+  const before=MM.ink.length;
+  MM.ink=MM.ink.filter(function(s){ return !(s.pts||[]).some(function(pt){ return Math.hypot(pt.x-p.x,pt.y-p.y)<tol; }); });
+  if(MM.ink.length!==before) mmInkRender();
+}
+function mmInkRender(){
+  const ctx=MMInk.ctx, cv=MMInk.canvas; if(!ctx||!cv) return;
+  const w=parseFloat(cv.style.width)||cv.width, h=parseFloat(cv.style.height)||cv.height;
+  ctx.clearRect(0,0,w,h);
+  if(typeof MM==='undefined'||!MM) return;
+  const strokes=(Array.isArray(MM.ink)?MM.ink.slice():[]);
+  if(MMInk.cur) strokes.push(MMInk.cur);
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  for(const s of strokes){
+    const pts=s.pts||[]; if(!pts.length) continue;
+    ctx.globalAlpha=0.36; ctx.strokeStyle=s.color||'#2563eb'; ctx.lineWidth=Math.max(2,(s.size||16)*(MM.zoom||1));
+    ctx.beginPath();
+    for(let i=0;i<pts.length;i++){ const x=pts[i].x*MM.zoom+MM.panX, y=pts[i].y*MM.zoom+MM.panY; if(i)ctx.lineTo(x,y); else ctx.moveTo(x,y); }
+    if(pts.length===1){ const x=pts[0].x*MM.zoom+MM.panX, y=pts[0].y*MM.zoom+MM.panY; ctx.lineTo(x+0.1,y); }
+    ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+}
+let _mmInkSaveT=null;
+function mmInkSave(){ clearTimeout(_mmInkSaveT); _mmInkSaveT=setTimeout(function(){ try{ localStorage.setItem(_mmCurrentSaveKey, mmSerializeForSave()); }catch(e){} }, 400); }
+
+// ═══════════════════════════════════════════════════════════
 // v14 — MIND MAP NAVIGATION (scroll, right-click pan, zoom)
 // ═══════════════════════════════════════════════════════════
 (function(){
@@ -5994,6 +6270,7 @@ function mmEnsureSelVisible(){
 
   // Prevent context menu on canvas
   ca.addEventListener('contextmenu', e => e.preventDefault());
+  if(typeof mmInkInit==='function') mmInkInit();
 
   // FIX #1: Move spaceDown declaration BEFORE it is referenced in mousedown handler
   let spaceDown = false;
@@ -6007,6 +6284,9 @@ function mmEnsureSelVisible(){
   let marquee = null;            // {sx, sy, el} — screen-coord box
   let marqueeActive = false;
   ca.addEventListener('mousedown', e => {
+    // While a highlighter/eraser is active, the ink layer owns the pointer —
+    // don't pan or marquee-select underneath it.
+    if(typeof MMInk !== 'undefined' && MMInk.tool) return;
     const onNode = e.target.closest('.node-wrap,.cn-outer');
     if(e.button === 2 || (e.button === 0 && spaceDown && !onNode)) {
       panning = true; panActive = false;
@@ -6143,6 +6423,18 @@ function mmUpdateScrollbars(){
   const vPct=vRange>0?visT/vRange:0;
   vTh.style.height=th+'px';
   vTh.style.top=Math.max(0,Math.min(vtH-th,vPct*(vtH-th)))+'px';
+  // Only show a scrollbar when the actual visible content overflows the viewport;
+  // otherwise the faint always-on track reads as a stray grey bar.
+  let nx0=Infinity,nx1=-Infinity,ny0=Infinity,ny1=-Infinity;
+  for(const id in MM.nodes){
+    if(typeof mmIsVisible==='function' && !mmIsVisible(id) && id!==MM.root) continue;
+    const nn=MM.nodes[id];
+    nx0=Math.min(nx0,nn.x); nx1=Math.max(nx1,nn.x+(nn.W||140));
+    ny0=Math.min(ny0,nn.y); ny1=Math.max(ny1,nn.y+(nn.H||40));
+  }
+  const realW=(nx1-nx0)*MM.zoom, realH=(ny1-ny0)*MM.zoom;
+  hT.style.display=(isFinite(realW) && realW>vw+8)?'block':'none';
+  vT.style.display=(isFinite(realH) && realH>vh+8)?'block':'none';
 }
 // FIX #6: Removed unsafe mmApplyTransform reassignment patch — zoom-display update and
 // mmUpdateScrollbars() call are now baked into the original mmApplyTransform body above.
