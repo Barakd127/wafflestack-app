@@ -1866,18 +1866,28 @@ function mmSerializeForSave(){
 // pill; long text → width capped and text wraps to 2-3 lines (height grows).
 // Capping the width keeps siblings from overlapping at their authored spacing.
 let _mmMeasCtx=null;
+// Hidden DOM probe that mirrors .node-div's box so we measure the REAL wrapped
+// size (true auto-fit, no clipping, no line-count guessing).
+let _mmMeasDiv=null;
+function _mmGetMeasDiv(){
+  if(_mmMeasDiv && _mmMeasDiv.isConnected) return _mmMeasDiv;
+  const d=document.createElement('div');
+  const fam=(getComputedStyle(document.documentElement).getPropertyValue('--mm-hand')||"'Playpen Sans Hebrew','Assistant',sans-serif").trim();
+  d.style.cssText='position:absolute;left:-99999px;top:0;visibility:hidden;pointer-events:none;'
+    +'font-family:'+fam+';font-size:14px;font-weight:600;letter-spacing:.2px;line-height:1.25;'
+    +'padding:5px 16px;box-sizing:border-box;overflow-wrap:anywhere;text-align:center';
+  document.body.appendChild(d);
+  _mmMeasDiv=d; return d;
+}
 function mmFitNode(text){
-  if(text==null) return {W:90,H:40};
-  if(!_mmMeasCtx){ const c=document.createElement('canvas'); _mmMeasCtx=c.getContext('2d'); }
-  // Measure in the ACTUAL render font (Playpen 14) so widths are correct — was
-  // Rubik 12, which under-measured and let long labels overflow on one line.
-  _mmMeasCtx.font="600 14px 'Playpen Sans Hebrew','Assistant',sans-serif";
-  const w=_mmMeasCtx.measureText(String(text)).width;
-  const PAD=40, CAP=230, MINW=90;
-  if(w+PAD<=CAP) return {W:Math.max(MINW,Math.round(w+PAD)), H:42};
-  const innerW=CAP-PAD;
-  const lines=Math.min(4, Math.ceil(w/innerW));
-  return {W:CAP, H:24+lines*20};
+  if(text==null) return {W:90,H:42};
+  const d=_mmGetMeasDiv();
+  const CAP=230, MINW=90, MINH=40;
+  d.style.whiteSpace='nowrap'; d.style.width='auto'; d.textContent=String(text);
+  const natW=d.offsetWidth;
+  if(natW<=CAP) return {W:Math.max(MINW,Math.round(natW)), H:Math.max(MINH,d.offsetHeight)};
+  d.style.whiteSpace='normal'; d.style.width=CAP+'px';
+  return {W:CAP, H:Math.max(MINH, Math.round(d.offsetHeight))};
 }
 
 // Fit EVERY text/root node's W/H to its label. Must run BEFORE a layout so the

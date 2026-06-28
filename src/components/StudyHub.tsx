@@ -1272,7 +1272,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
         // The real interactive mindmap (same map as מפת הלמידה שלי). Topic nodes
         // carry 📖/📝 chips that open theory/practice; sub-topics can be added.
         <iframe
-          src={`${import.meta.env.BASE_URL}mindmap.html?v=mm7-20260628&scene=topics&admin=${_adminMode ? '1' : '0'}`}
+          src={`${import.meta.env.BASE_URL}mindmap.html?v=mm8-20260628&scene=topics&admin=${_adminMode ? '1' : '0'}`}
           title="מפת הנושאים"
           style={{ width: '100%', height: 'calc(100vh - 150px)', border: 'none', borderRadius: 16, boxShadow: CARD_SHADOW, display: 'block' }}
           allow="clipboard-read; clipboard-write"
@@ -3323,7 +3323,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         <div data-tour="canvas-frame" style={{ position: 'fixed', inset: 0, zIndex: 400, background: '#0d1628' }}>
           <iframe
             key={`qs-wb-${q?.id || currentQ}`}
-            src={`${import.meta.env.BASE_URL}mindmap.html?v=mm7-20260628&mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
+            src={`${import.meta.env.BASE_URL}mindmap.html?v=mm8-20260628&mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
             title="קנבס לשאלה"
             style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
             allow="clipboard-read; clipboard-write"
@@ -3397,7 +3397,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             {tab === 'mindmap' && (
               <iframe
                 key="quiz-mm"
-                src={`${import.meta.env.BASE_URL}mindmap.html?v=mm7-20260628&userId=${userId || 'default'}${selectedTopic ? `&topic=${encodeURIComponent(selectedTopic)}` : ''}`}
+                src={`${import.meta.env.BASE_URL}mindmap.html?v=mm8-20260628&userId=${userId || 'default'}${selectedTopic ? `&topic=${encodeURIComponent(selectedTopic)}` : ''}`}
                 title="מפת חשיבה — תוך כדי תרגול"
                 style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
                 allow="clipboard-read; clipboard-write"
@@ -3455,7 +3455,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   // mindmap.html loads the matching wb-scene-q-<id> from
                   // localStorage. wbScene query param is read inside mindmap.html.
                   key={`quiz-wb-${q?.id || currentQ}`}
-                  src={`${import.meta.env.BASE_URL}mindmap.html?v=mm7-20260628&mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
+                  src={`${import.meta.env.BASE_URL}mindmap.html?v=mm8-20260628&mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
                   title={`קנבס לשאלה ${currentQ + 1}`}
                   style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
                   allow="clipboard-read; clipboard-write"
