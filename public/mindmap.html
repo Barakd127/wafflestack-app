@@ -9,7 +9,7 @@
    one font covering BOTH Hebrew and Latin in a friendly hand-drawn style;
    Assistant as the legible fallback. */
 :root{ --mm-hand:'Playpen Sans Hebrew','Assistant',sans-serif; }
-.node-div{ font-family:var(--mm-hand) !important; font-size:14px !important; font-weight:600 !important; letter-spacing:.2px; }
+.node-div{ font-family:var(--mm-hand) !important; font-size:14px !important; font-weight:600 !important; letter-spacing:.2px; white-space:normal !important; overflow-wrap:anywhere !important; text-align:center !important; }
 .node-div.node-root{ font-size:17px !important; font-weight:700 !important; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -1869,13 +1869,15 @@ let _mmMeasCtx=null;
 function mmFitNode(text){
   if(text==null) return {W:90,H:40};
   if(!_mmMeasCtx){ const c=document.createElement('canvas'); _mmMeasCtx=c.getContext('2d'); }
-  _mmMeasCtx.font="500 12px 'Rubik','Heebo','Assistant',sans-serif";
+  // Measure in the ACTUAL render font (Playpen 14) so widths are correct — was
+  // Rubik 12, which under-measured and let long labels overflow on one line.
+  _mmMeasCtx.font="600 14px 'Playpen Sans Hebrew','Assistant',sans-serif";
   const w=_mmMeasCtx.measureText(String(text)).width;
-  const PAD=42, CAP=180, MINW=90;
-  if(w+PAD<=CAP) return {W:Math.max(MINW,Math.round(w+PAD)), H:40};
+  const PAD=40, CAP=230, MINW=90;
+  if(w+PAD<=CAP) return {W:Math.max(MINW,Math.round(w+PAD)), H:42};
   const innerW=CAP-PAD;
-  const lines=Math.min(3, Math.ceil(w/innerW));
-  return {W:CAP, H:26+lines*17};
+  const lines=Math.min(4, Math.ceil(w/innerW));
+  return {W:CAP, H:24+lines*20};
 }
 
 // Fit EVERY text/root node's W/H to its label. Must run BEFORE a layout so the
@@ -1884,7 +1886,7 @@ function mmFitNode(text){
 function mmFitAllNodes(){
   for(const id in MM.nodes){
     const n=MM.nodes[id];
-    if(n && (n.type==='text' || n.type==='root') && !n.userSized){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
+    if(n && (n.type==='text' || n.type==='root' || n.type==='branch' || n.type==='topic') && !n.userSized){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
   }
 }
 
@@ -1973,7 +1975,7 @@ function mmRender(){
     div.id='nw_'+id;
     // Fit node width to its text so long Hebrew names don't overflow the bubble
     // (also keeps connector attach geometry aligned with the visible node).
-    if((n.type==='text' || n.type==='root') && !n.userSized){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
+    if((n.type==='text' || n.type==='root' || n.type==='branch' || n.type==='topic') && !n.userSized){ const f=mmFitNode(n.text); n.W=f.W; n.H=f.H; }
     div.style.left=n.x+'px';div.style.top=n.y+'px';div.style.width=n.W+'px';div.style.height=n.H+'px';
     const nodeDiv=document.createElement('div');
     // Topic nodes (mapped to a course topic → 📖 תיאוריה / 📝 תרגול) get a
