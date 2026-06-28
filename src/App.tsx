@@ -394,7 +394,7 @@ function App() {
         <FeatureGate id="notebook" mode="hide">
           <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: '#FBF8F1' }}>
             <iframe
-              src={`/mindmap.html?view=notebook&embed=1&userId=${encodeURIComponent((typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default')}`}
+              src={`/mindmap.html?v=mm6-20260627&view=notebook&embed=1&userId=${encodeURIComponent((typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default')}`}
               title="WaffleStack notebook"
               allow="autoplay; clipboard-write"
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
