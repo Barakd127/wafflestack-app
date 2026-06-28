@@ -27,7 +27,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   const [currentSlide, setCurrentSlide] = useState(0)
   // Theory defaults to FULL-SCREEN. User opens the side mind map explicitly
   // via the toggle when they want to take notes alongside the lesson.
-  const [mindmapOpen, setMindmapOpen] = useState(false)
+  const [mindmapOpen, setMindmapOpen] = useState(true)
   const [splitPct, setSplitPct] = useState(45)  // mind map width %
   const [copied, setCopied] = useState<string | null>(null)
   // Transient toast shown after queuing/adding a node to the mind map. Gives
