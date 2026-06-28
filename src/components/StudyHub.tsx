@@ -1204,7 +1204,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
   }
 
   return (
-    <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }}>
+    <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: viewMode === 'mindmap' ? '10px 24px 14px' : '32px 40px' }}>
       <button
         onClick={onBack}
         style={{
@@ -1214,7 +1214,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
           color: TEXT_DARK,
           fontFamily: "'Rubik', sans-serif",
           fontSize: 16,
-          marginBottom: 24,
+          marginBottom: viewMode === 'mindmap' ? 8 : 24,
           padding: 0,
           display: 'flex',
           alignItems: 'center',
@@ -1224,12 +1224,14 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
         → חזרה לדף הבית
       </button>
 
-      <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
-        בחר נושא ללמוד 📚
-      </h2>
+      {viewMode !== 'mindmap' && (
+        <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
+          בחר נושא ללמוד 📚
+        </h2>
+      )}
 
       {/* List ⇄ Mindmap toggle */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 24, background: 'rgba(127,155,217,0.12)', padding: 4, borderRadius: 999, width: 'fit-content' }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: viewMode === 'mindmap' ? 8 : 24, background: 'rgba(127,155,217,0.12)', padding: 4, borderRadius: 999, width: 'fit-content' }}>
         {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => {
           const locked = m === 'mindmap' && !mapUnlocked
           const tip = locked ? FEATURE_UNLOCKS_BY_ID['mindmap-view']?.descriptionHe : undefined
@@ -1272,7 +1274,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
         <iframe
           src={`${import.meta.env.BASE_URL}mindmap.html?v=mm6-20260627&scene=topics&admin=${_adminMode ? '1' : '0'}`}
           title="מפת הנושאים"
-          style={{ width: '100%', height: '72vh', border: 'none', borderRadius: 16, boxShadow: CARD_SHADOW, display: 'block' }}
+          style={{ width: '100%', height: 'calc(100vh - 150px)', border: 'none', borderRadius: 16, boxShadow: CARD_SHADOW, display: 'block' }}
           allow="clipboard-read; clipboard-write"
         />
       )}
