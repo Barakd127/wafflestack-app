@@ -1885,7 +1885,7 @@ function mmFitNode(text){
   const CAP=230, MINW=90, MINH=40;
   d.style.whiteSpace='nowrap'; d.style.width='auto'; d.textContent=String(text);
   const natW=d.offsetWidth;
-  if(natW<=CAP) return {W:Math.max(MINW,Math.round(natW)), H:Math.max(MINH,d.offsetHeight)};
+  if(natW<=CAP) return {W:Math.max(MINW,Math.round(natW)+3), H:Math.max(MINH,d.offsetHeight)};
   d.style.whiteSpace='normal'; d.style.width=CAP+'px';
   return {W:CAP, H:Math.max(MINH, Math.round(d.offsetHeight))};
 }
@@ -6283,6 +6283,15 @@ function mmInkSave(){ clearTimeout(_mmInkSaveT); _mmInkSaveT=setTimeout(function
   // Prevent context menu on canvas
   ca.addEventListener('contextmenu', e => e.preventDefault());
   if(typeof mmInkInit==='function') mmInkInit();
+  // Re-fit + re-render once the handwritten font finishes loading. Node widths
+  // are measured from the rendered font; if mmFitNode runs before Playpen loads
+  // it measures the narrower fallback -> a short word like "statistika" then
+  // overflows the too-small node and wraps. Re-measure when fonts are ready.
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){
+      try{ if(typeof mmFitAllNodes==='function') mmFitAllNodes(); if(typeof mmRender==='function') mmRender(); }catch(e){}
+    });
+  }
 
   // FIX #1: Move spaceDown declaration BEFORE it is referenced in mousedown handler
   let spaceDown = false;
