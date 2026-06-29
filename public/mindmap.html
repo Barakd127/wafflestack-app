@@ -830,6 +830,7 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <button class="tb-btn" id="zone-create-btn" onclick="mmStartZoneCreate()" title="צור אזור — נקודות חופשיות"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="3" y="3" width="14" height="14" rx="2" stroke-dasharray="3 2"/><path d="M17 17l4 4"/><path d="M21 17v4h-4"/></svg> צור אזור</button>
     <button class="tb-btn" onclick="mmLoadReadyMap(mmCurrentReadyMapId(),'manual')" title="טען מפת מושגים מוכנה — ההערות והעריכות שלך נשמרות">🗺️ טען מפה מוכנה</button>
     <button class="tb-btn" onclick="wsGoDrawing()" title="פתח לוח ציור (Excalidraw) במסך מלא">🎨 לוח ציור</button>
+    <button class="tb-btn" onclick="mmOpenConstellation()" title="קונסטלציה — חלון חיבור חופשי (שמש + קרניים): גרור רעיונות, צייר חיבורים, ערבב">&#10024; קונסטלציה</button>
   </div>
   <div class="ribbon-group" id="ribbon-view" style="display:none">
     <button class="tb-btn" onclick="mmMacroView()" title="מבט-על: כווץ הכול לענפים הראשיים">&#9776; מבט-על</button>
@@ -1842,6 +1843,7 @@ function mmSerializeForSave(){
       importedMaps: Array.isArray(MM.importedMaps) ? MM.importedMaps : [],
       zones: Array.isArray(MM.zones) ? MM.zones : [],
       ink: Array.isArray(MM.ink) ? MM.ink : [],
+      constellation: (MM.constellation && typeof MM.constellation === 'object') ? MM.constellation : null,
       nodes: {}
     };
     for(const id in MM.nodes){
@@ -2926,6 +2928,247 @@ function mmAddCanvas(){
   const n=mmNode('canvas','New Canvas',parent.x+MM_XSTEP,baseY,sel,mmPickColor(sel));
   mmFinishAdd(n,true);
 }
+
+// ═══════════════════════════════════════════════════════════
+// CONSTELLATION — free-association overlay ("sun + rays", like a local graph).
+// Self-contained: own DOM window over the map, light physics, drag + pin
+// (mouse AND touch), auto links + user-drawn free associations, connect two
+// nodes → offer to Blend, click a node → jump to it on the map.
+// State persists in MM.constellation (via mmSerializeForSave).
+// ═══════════════════════════════════════════════════════════
+let _cstRAF=null, _cstDrag=null, _cstLinkFrom=null, _cstSeq=0;
+function _cstState(){
+  if(!MM.constellation || typeof MM.constellation!=='object') MM.constellation={sun:null,nodes:{},links:[]};
+  if(!MM.constellation.nodes) MM.constellation.nodes={};
+  if(!Array.isArray(MM.constellation.links)) MM.constellation.links=[];
+  return MM.constellation;
+}
+function _cstUid(){ const S=_cstState(); let id; do{ id='c'+(++_cstSeq)+'_'+Math.floor(performance.now()); }while(S.nodes[id]); return id; }
+function _cstPersist(){
+  window._mmHostLoaded=true;
+  const S=MM.constellation; if(S&&S.nodes){ for(const k in S.nodes){ delete S.nodes[k].vx; delete S.nodes[k].vy; } }
+  try{
+    const _inObs=!!(window.parent&&window.parent!==window);
+    if(_inObs) window.parent.postMessage({type:'mm:save', data: mmSerializeForSave()}, '*');
+    else if(typeof _mmCurrentSaveKey!=='undefined') localStorage.setItem(_mmCurrentSaveKey, mmSerializeForSave());
+  }catch(e){}
+}
+function _cstInjectCSS(){
+  if(document.getElementById('cst-css')) return;
+  const s=document.createElement('style'); s.id='cst-css';
+  s.textContent=`
+.cst-overlay{position:fixed;inset:0;z-index:9000;background:rgba(20,18,30,0.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;}
+.cst-win{width:min(94vw,1000px);height:min(90vh,680px);background:linear-gradient(160deg,#fbf7ff,#f1edfa);border:1px solid #e3dcf5;border-radius:18px;box-shadow:0 20px 60px rgba(40,20,80,0.4);display:flex;flex-direction:column;overflow:hidden;}
+.cst-titlebar{display:flex;align-items:center;gap:7px;padding:9px 13px;border-bottom:1px solid #ece6f7;background:rgba(255,255,255,0.65);flex-wrap:wrap;}
+.cst-title{font-weight:600;color:#4c2c80;font-size:14px;}
+.cst-sun-label{color:#b06a1a;font-size:12px;}
+.cst-tb{border:1px solid #d9cef0;background:#fff;color:#5a3da0;border-radius:999px;padding:5px 10px;font-size:12px;cursor:pointer;}
+.cst-tb:hover{background:#f1ebfb;}
+.cst-tb.cst-primary{background:#7c3aed;color:#fff;border-color:#7c3aed;}
+.cst-canvas{position:relative;flex:1;overflow:hidden;background:radial-gradient(circle at 50% 45%,#fffdf6 0%,#f4eefc 60%,#e9e0f9 100%);touch-action:none;}
+.cst-links{position:absolute;inset:0;pointer-events:none;}
+.cst-sun{position:absolute;transform:translate(-50%,-50%);width:104px;height:104px;border-radius:50%;background:radial-gradient(circle,#ffe7a8,#ffb877);border:2px solid #ffcf86;box-shadow:0 0 36px rgba(255,176,90,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#7a4a12;font-weight:600;font-size:12px;text-align:center;padding:6px;pointer-events:none;}
+.cst-sun-t{margin-top:2px;max-width:88px;overflow:hidden;}
+.cst-node{position:absolute;transform:translate(-50%,-50%);background:#fff;border:1.5px solid #7c3aed;border-radius:999px;padding:5px 9px;font-size:12px;color:#33264d;display:flex;align-items:center;gap:6px;cursor:grab;box-shadow:0 2px 8px rgba(60,30,100,0.12);white-space:nowrap;user-select:none;-webkit-user-select:none;}
+.cst-node.pinned{box-shadow:0 0 0 2px #ffb877,0 2px 8px rgba(60,30,100,0.18);}
+.cst-pin{cursor:pointer;opacity:0.6;font-size:12px;}
+.cst-node.pinned .cst-pin{opacity:1;}
+.cst-lbl{cursor:pointer;max-width:150px;overflow:hidden;text-overflow:ellipsis;}
+.cst-lbl:hover{text-decoration:underline;}
+.cst-handle{cursor:crosshair;color:#7c3aed;font-weight:700;opacity:0.85;font-size:15px;line-height:1;}
+.cst-handle:hover{opacity:1;}
+.cst-hint{padding:7px 13px;border-top:1px solid #ece6f7;color:#7c6aa0;font-size:11px;background:rgba(255,255,255,0.65);}
+.cst-modal{position:absolute;inset:0;background:rgba(30,20,50,0.28);display:flex;align-items:center;justify-content:center;z-index:20;}
+.cst-modal-box{background:#fff;border:1px solid #e3dcf5;border-radius:14px;padding:16px;width:min(82%,380px);box-shadow:0 12px 40px rgba(40,20,80,0.3);}
+.cst-modal-lbl{font-size:13px;color:#4c2c80;margin-bottom:8px;}
+.cst-input{width:100%;box-sizing:border-box;border:1px solid #d9cef0;border-radius:8px;padding:8px;font-size:13px;}
+.cst-modal-row{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;}
+.cst-list{max-height:240px;overflow:auto;margin-top:8px;border:1px solid #eee;border-radius:8px;}
+.cst-list-it{padding:7px 10px;font-size:12px;cursor:pointer;border-bottom:1px solid #f3f0fa;}
+.cst-list-it:hover{background:#f3eefc;}
+.cst-toast{position:absolute;bottom:54px;left:50%;transform:translateX(-50%);background:#4c2c80;color:#fff;padding:8px 14px;border-radius:999px;font-size:12px;z-index:30;transition:opacity .4s;}
+@media(pointer:coarse){.cst-node{padding:8px 12px;gap:10px;font-size:13px;}.cst-pin,.cst-handle{font-size:19px;opacity:1;padding:2px;}.cst-lbl{max-width:130px;}.cst-tb{padding:8px 12px;font-size:13px;}}`;
+  document.head.appendChild(s);
+}
+function mmOpenConstellation(){
+  _cstInjectCSS();
+  const S=_cstState();
+  let ov=document.getElementById('cst-overlay'); if(ov) ov.remove();
+  ov=document.createElement('div'); ov.id='cst-overlay'; ov.className='cst-overlay'; ov.setAttribute('dir','rtl');
+  ov.innerHTML=`<div class="cst-win">
+    <div class="cst-titlebar">
+      <span class="cst-title">&#10024; קונסטלציה</span>
+      <span class="cst-sun-label" id="cst-sun-label"></span>
+      <span style="flex:1"></span>
+      <button class="cst-tb" id="cst-btn-sun">&#9728; שמש</button>
+      <button class="cst-tb" id="cst-btn-map">&#43; מהמפה</button>
+      <button class="cst-tb" id="cst-btn-branch">&#127807; משוך ענף</button>
+      <button class="cst-tb" id="cst-btn-new">&#43; צומת חדש</button>
+      <button class="cst-tb" id="cst-close">&#10005;</button>
+    </div>
+    <div class="cst-canvas" id="cst-canvas"><svg class="cst-links" id="cst-links"></svg></div>
+    <div class="cst-hint">גרור צומת &middot; &#128204; לנעוץ &middot; גרור מ-&#9702; אל צומת אחר = חיבור (מציע בלנדר) &middot; קליק על שם &rarr; קפיצה למפה</div>
+  </div>`;
+  document.body.appendChild(ov);
+  document.getElementById('cst-close').onclick=mmCloseConstellation;
+  document.getElementById('cst-btn-new').onclick=_cstAddNew;
+  document.getElementById('cst-btn-sun').onclick=_cstPickSun;
+  document.getElementById('cst-btn-map').onclick=()=>_cstPickFromMap(false);
+  document.getElementById('cst-btn-branch').onclick=()=>_cstPickFromMap(true);
+  const ca=document.getElementById('cst-canvas'); const cw=ca.clientWidth||640, ch=ca.clientHeight||420;
+  for(const id in S.nodes){ const nd=S.nodes[id]; if(typeof nd.x!=='number'||typeof nd.y!=='number'){ nd.x=cw/2+(Math.random()*220-110); nd.y=ch/2+(Math.random()*160-80); } }
+  document.addEventListener('mousemove',_cstMove); document.addEventListener('mouseup',_cstUp);
+  document.addEventListener('touchmove',_cstMove,{passive:false}); document.addEventListener('touchend',_cstUp);
+  document.addEventListener('touchcancel',_cstUp); // OS-cancelled touch (call/notification/palm) — clear stuck drag/link
+  _cstRender(); _cstStartPhysics();
+}
+function mmCloseConstellation(){
+  cancelAnimationFrame(_cstRAF); _cstRAF=null;
+  document.removeEventListener('mousemove',_cstMove); document.removeEventListener('mouseup',_cstUp);
+  document.removeEventListener('touchmove',_cstMove); document.removeEventListener('touchend',_cstUp);
+  document.removeEventListener('touchcancel',_cstUp);
+  const ov=document.getElementById('cst-overlay'); if(ov) ov.remove();
+  _cstPersist();
+}
+function _cstRender(){
+  const S=_cstState(); const ca=document.getElementById('cst-canvas'); if(!ca) return;
+  const cw=ca.clientWidth||640, ch=ca.clientHeight||420;
+  const lbl=document.getElementById('cst-sun-label'); if(lbl) lbl.textContent=S.sun?('☀ '+S.sun):'(אין שמש — לחץ "שמש")';
+  ca.querySelectorAll('.cst-node,.cst-sun').forEach(e=>e.remove());
+  if(S.sun){ const sun=document.createElement('div'); sun.className='cst-sun'; sun.style.left=(cw/2)+'px'; sun.style.top=(ch/2)+'px'; sun.innerHTML='<span>☀</span><span class="cst-sun-t"></span>'; sun.querySelector('.cst-sun-t').textContent=S.sun; ca.appendChild(sun); }
+  for(const id in S.nodes){
+    const nd=S.nodes[id];
+    const el=document.createElement('div'); el.className='cst-node'+(nd.pinned?' pinned':''); el.dataset.id=id;
+    el.style.left=nd.x+'px'; el.style.top=nd.y+'px'; el.style.borderColor=nd.color||'#7c3aed';
+    el.innerHTML='<span class="cst-pin" title="נעץ/שחרר">📌</span><span class="cst-lbl"></span><span class="cst-handle" title="גרור לחיבור">◦</span>';
+    el.querySelector('.cst-lbl').textContent=nd.text;
+    ca.appendChild(el); _cstWireNode(el,id);
+  }
+  _cstDrawLinks();
+}
+function _cstDrawLinks(){
+  const S=_cstState(); const svg=document.getElementById('cst-links'); const ca=document.getElementById('cst-canvas'); if(!svg||!ca) return;
+  const cw=ca.clientWidth||640, ch=ca.clientHeight||420; svg.setAttribute('width',cw); svg.setAttribute('height',ch);
+  let h='';
+  if(S.sun){ for(const id in S.nodes){ const n=S.nodes[id]; h+='<line x1="'+(cw/2)+'" y1="'+(ch/2)+'" x2="'+n.x+'" y2="'+n.y+'" stroke="#ffb877" stroke-opacity="0.5" stroke-width="1"/>'; } }
+  for(const l of S.links){ const a=S.nodes[l.a], b=S.nodes[l.b]; if(!a||!b) continue; const col=l.free?'#7c3aed':'#b9add6'; const dash=l.free?'6 5':''; h+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="'+(l.free?2:1.5)+'" stroke-dasharray="'+dash+'"/>'; }
+  svg.innerHTML=h;
+}
+function _cstStartPhysics(){
+  cancelAnimationFrame(_cstRAF);
+  const step=()=>{
+    const S=_cstState(); const ca=document.getElementById('cst-canvas'); if(!ca){ return; }
+    const cw=ca.clientWidth||640, ch=ca.clientHeight||420; const ids=Object.keys(S.nodes);
+    for(const id of ids){ const n=S.nodes[id]; if(n.vx===undefined){n.vx=0;n.vy=0;} }
+    for(const id of ids){
+      const n=S.nodes[id];
+      if(n.pinned||(_cstDrag&&_cstDrag.id===id)){ n.vx=0; n.vy=0; continue; }
+      let fx=0,fy=0;
+      if(S.sun){ const dx=(cw/2)-n.x, dy=(ch/2)-n.y; const d=Math.hypot(dx,dy)||1; const target=160; fx+=(dx/d)*(d-target)*0.0022; fy+=(dy/d)*(d-target)*0.0022; }
+      for(const oid of ids){ if(oid===id) continue; const o=S.nodes[oid]; let dx=n.x-o.x, dy=n.y-o.y; let d2=dx*dx+dy*dy; if(d2<1)d2=1; const d=Math.sqrt(d2); const f=1100/d2; fx+=(dx/d)*f; fy+=(dy/d)*f; }
+      n.vx=(n.vx+fx)*0.85; n.vy=(n.vy+fy)*0.85;
+      n.x+=n.vx; n.y+=n.vy;
+      n.x=Math.max(50,Math.min(cw-50,n.x)); n.y=Math.max(36,Math.min(ch-26,n.y));
+    }
+    _cstUpdatePositions();
+    _cstRAF=requestAnimationFrame(step);
+  };
+  _cstRAF=requestAnimationFrame(step);
+}
+function _cstUpdatePositions(){
+  const S=_cstState(); const ca=document.getElementById('cst-canvas'); if(!ca) return;
+  ca.querySelectorAll('.cst-node').forEach(el=>{ const n=S.nodes[el.dataset.id]; if(n){ el.style.left=n.x+'px'; el.style.top=n.y+'px'; } });
+  _cstDrawLinks();
+}
+function _cstXY(e){ const ca=document.getElementById('cst-canvas'); if(!ca) return {x:0,y:0}; const r=ca.getBoundingClientRect(); const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e; return {x:t.clientX-r.left, y:t.clientY-r.top}; }
+function _cstWireNode(el,id){
+  const S=_cstState();
+  const pin=el.querySelector('.cst-pin'), handle=el.querySelector('.cst-handle'), lbl=el.querySelector('.cst-lbl');
+  pin.onclick=(e)=>{ e.stopPropagation(); const n=S.nodes[id]; if(!n) return; n.pinned=!n.pinned; el.classList.toggle('pinned'); _cstPersist(); };
+  lbl.onclick=(e)=>{ e.stopPropagation(); _cstJump(id); };
+  const dragStart=(e)=>{ if(e.target===handle||e.target===pin) return; e.preventDefault(); e.stopPropagation(); const p=_cstXY(e); const n=S.nodes[id]; if(!n) return; _cstDrag={id, dx:p.x-n.x, dy:p.y-n.y}; };
+  el.addEventListener('mousedown',dragStart);
+  el.addEventListener('touchstart',dragStart,{passive:false});
+  const linkStart=(e)=>{ e.preventDefault(); e.stopPropagation(); _cstLinkFrom=id; };
+  handle.addEventListener('mousedown',linkStart);
+  handle.addEventListener('touchstart',linkStart,{passive:false});
+}
+function _cstMove(e){
+  if(!_cstDrag) return; const S=_cstState(); const n=S.nodes[_cstDrag.id]; if(!n){ _cstDrag=null; return; }
+  const p=_cstXY(e); n.x=p.x-_cstDrag.dx; n.y=p.y-_cstDrag.dy; n.vx=0; n.vy=0; _cstUpdatePositions(); if(e.cancelable) e.preventDefault();
+}
+function _cstUp(e){
+  if(_cstDrag){ _cstDrag=null; _cstPersist(); }
+  if(_cstLinkFrom){
+    const t=(e.changedTouches&&e.changedTouches[0])||e;
+    const tgt=document.elementFromPoint(t.clientX,t.clientY);
+    const nodeEl=tgt&&tgt.closest&&tgt.closest('.cst-node');
+    if(nodeEl&&nodeEl.dataset.id&&nodeEl.dataset.id!==_cstLinkFrom) _cstMakeLink(_cstLinkFrom,nodeEl.dataset.id);
+    _cstLinkFrom=null;
+  }
+}
+function _cstMakeLink(a,b){
+  const S=_cstState();
+  if(!S.links.some(l=>(l.a===a&&l.b===b)||(l.a===b&&l.b===a))) S.links.push({a,b,free:true});
+  _cstDrawLinks(); _cstPersist();
+  const ta=(S.nodes[a]&&S.nodes[a].text)||'', tb=(S.nodes[b]&&S.nodes[b].text)||'';
+  _cstConfirm('לערבב לשילוב חדש?\n'+ta+'  ×  '+tb, ()=>_cstBlend(ta,tb));
+}
+function _cstBlend(aText,bText){
+  try{
+    const root=MM.nodes[MM.root]; if(!root){ _cstToast('אין שורש'); return; }
+    const by=mmNextChildY(root);
+    const bl=mmNode('blender','🧉 Blend: '+String(aText).slice(0,24)+' × '+String(bText).slice(0,24)+' #blend', root.x+MM_XSTEP, by, MM.root, '#7c3aed');
+    mmNode('branch', aText, bl.x+MM_XSTEP, bl.y-24, bl.id, '#7c3aed');
+    mmNode('branch', bText, bl.x+MM_XSTEP, bl.y+24, bl.id, '#7c3aed');
+    mmFinishAdd(bl,false);
+    _cstToast('🧉 נשלח לבלנדר — השילובים יופיעו על המפה');
+  }catch(err){ _cstToast('שגיאה בבלנדר'); }
+}
+function _cstJump(cstId){
+  const nd=_cstState().nodes[cstId];
+  if(nd&&nd.mapId&&MM.nodes[nd.mapId]){ MM.sel=nd.mapId; mmCloseConstellation(); mmRender(); if(typeof panToNode==='function') panToNode(MM.nodes[nd.mapId]); }
+  else _cstToast('צומת חופשי — לא מקושר למפה');
+}
+function _cstAddNew(){
+  _cstPrompt('שם הצומת החדש:', '', (txt)=>{ if(!txt) return; const S=_cstState(); const ca=document.getElementById('cst-canvas'); const id=_cstUid(); S.nodes[id]={id, mapId:null, text:txt, x:(ca.clientWidth/2)+(Math.random()*140-70), y:(ca.clientHeight/2)+(Math.random()*140-70), pinned:false, color:'#7c3aed'}; _cstRender(); _cstPersist(); });
+}
+function _cstPickSun(){
+  _cstPrompt('שם השמש (הנושא המרכזי):', _cstState().sun||'', (txt)=>{ _cstState().sun=txt||null; _cstRender(); _cstPersist(); });
+}
+function _cstAddFromMap(mapId, branch){
+  const S=_cstState(); const ca=document.getElementById('cst-canvas');
+  const place=()=>({x:(ca.clientWidth/2)+(Math.random()*240-120), y:(ca.clientHeight/2)+(Math.random()*170-85)});
+  const addOne=(mid)=>{ for(const cid in S.nodes){ if(S.nodes[cid].mapId===mid) return cid; } const mn=MM.nodes[mid]; if(!mn) return null; const id=_cstUid(); const p=place(); S.nodes[id]={id, mapId:mid, text:mn.text, x:p.x, y:p.y, pinned:false, color:mn.color||'#7c3aed'}; return id; };
+  const rootCst=addOne(mapId);
+  if(branch&&rootCst){ const walk=(mid,parentCst)=>{ const mn=MM.nodes[mid]; if(!mn) return; for(const c of (mn.childIds||[])){ const cid=addOne(c); if(cid){ if(!S.links.some(l=>(l.a===parentCst&&l.b===cid)||(l.a===cid&&l.b===parentCst))) S.links.push({a:parentCst,b:cid,free:false}); walk(c,cid); } } }; walk(mapId,rootCst); }
+  _cstRender(); _cstPersist();
+}
+function _cstModal(inner){ const ov=document.getElementById('cst-overlay'); if(!ov) return null; const m=document.createElement('div'); m.className='cst-modal'; m.innerHTML='<div class="cst-modal-box" dir="rtl">'+inner+'</div>'; ov.appendChild(m); return m; }
+function _cstPrompt(label,val,cb){
+  const m=_cstModal('<div class="cst-modal-lbl"></div><input class="cst-input" id="cst-inp"><div class="cst-modal-row"><button class="cst-tb" id="cst-cancel">ביטול</button><button class="cst-tb cst-primary" id="cst-ok">אישור</button></div>'); if(!m) return;
+  m.querySelector('.cst-modal-lbl').textContent=label;
+  const inp=m.querySelector('#cst-inp'); inp.value=val||''; setTimeout(()=>inp.focus(),30);
+  const done=()=>{ const v=inp.value.trim(); m.remove(); cb(v); };
+  m.querySelector('#cst-cancel').onclick=()=>m.remove();
+  m.querySelector('#cst-ok').onclick=done;
+  inp.onkeydown=(e)=>{ if(e.key==='Enter') done(); else if(e.key==='Escape') m.remove(); };
+}
+function _cstConfirm(msg,cb){
+  const m=_cstModal('<div class="cst-modal-lbl" id="cst-cmsg" style="white-space:pre-line"></div><div class="cst-modal-row"><button class="cst-tb" id="cst-cno">לא</button><button class="cst-tb cst-primary" id="cst-cyes">🧉 בלנדר</button></div>'); if(!m) return;
+  m.querySelector('#cst-cmsg').textContent=msg;
+  m.querySelector('#cst-cno').onclick=()=>m.remove();
+  m.querySelector('#cst-cyes').onclick=()=>{ m.remove(); cb(); };
+}
+function _cstPickFromMap(branch){
+  const m=_cstModal('<div class="cst-modal-lbl">'+(branch?'משוך ענף מהמפה (כולל כל הילדים):':'הוסף צומת מהמפה:')+'</div><input class="cst-input" id="cst-search" placeholder="חיפוש..."><div class="cst-list" id="cst-list"></div><div class="cst-modal-row"><button class="cst-tb" id="cst-pclose">סגור</button></div>'); if(!m) return;
+  const list=m.querySelector('#cst-list'), search=m.querySelector('#cst-search');
+  const draw=(q)=>{ list.innerHTML=''; const ql=(q||'').toLowerCase(); let count=0;
+    for(const id in MM.nodes){ const n=MM.nodes[id]; if(!n||!n.text) continue; const t=String(n.text); if(/^\s*✅|^🔹|^💬/.test(t)) continue; if(ql&&t.toLowerCase().indexOf(ql)===-1) continue; const it=document.createElement('div'); it.className='cst-list-it'; it.textContent=t.slice(0,64); it.onclick=()=>{ _cstAddFromMap(id,branch); m.remove(); }; list.appendChild(it); if(++count>=100) break; } };
+  draw(''); setTimeout(()=>search.focus(),30); search.oninput=()=>draw(search.value);
+  m.querySelector('#cst-pclose').onclick=()=>m.remove();
+}
+function _cstToast(msg){ const ov=document.getElementById('cst-overlay')||document.body; const t=document.createElement('div'); t.className='cst-toast'; t.textContent=msg; ov.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),400); },2200); }
 
 function mmCollapseAll(collapse=true){
   Object.values(MM.nodes).forEach(n=>{if(n.type==='branch'||n.type==='equation'||n.type==='canvas')n.collapsed=collapse;});
@@ -6407,6 +6650,44 @@ function mmInkSave(){ clearTimeout(_mmInkSaveT); _mmInkSaveT=setTimeout(function
     }
     mmApplyTransform(); // mmApplyTransform now calls mmUpdateScrollbars() internally
   }, {passive: false});
+
+  // ── TOUCH: one-finger pan + two-finger pinch-zoom on the map (mobile / small screens). ──
+  try { ca.style.touchAction = 'none'; } catch(e){}
+  let tPan = false, tSX = 0, tSY = 0, tPX = 0, tPY = 0, pinch = null;
+  ca.addEventListener('touchstart', e => {
+    if (e.target.closest('.node-wrap,.cn-outer,.node-toggle,button,input,textarea,.node-note-badge,.mm-zone-handle')) return;
+    if (e.touches.length === 1) {
+      const t = e.touches[0]; tPan = true; pinch = null;
+      tSX = t.clientX; tSY = t.clientY; tPX = MM.panX; tPY = MM.panY;
+    } else if (e.touches.length === 2) {
+      tPan = false;
+      const a = e.touches[0], b = e.touches[1];
+      pinch = { d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) || 1, z: MM.zoom,
+                cx: (a.clientX + b.clientX) / 2, cy: (a.clientY + b.clientY) / 2, px: MM.panX, py: MM.panY };
+    }
+  }, {passive: false});
+  ca.addEventListener('touchmove', e => {
+    if (tPan && e.touches.length === 1) {
+      e.preventDefault();
+      const t = e.touches[0];
+      MM.panX = tPX + (t.clientX - tSX);
+      MM.panY = tPY + (t.clientY - tSY);
+      mmApplyTransform();
+    } else if (pinch && e.touches.length === 2) {
+      e.preventDefault();
+      const a = e.touches[0], b = e.touches[1];
+      const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+      const nz = Math.max(0.2, Math.min(3, pinch.z * (d / pinch.d)));
+      const rect = ca.getBoundingClientRect();
+      const mx = pinch.cx - rect.left, my = pinch.cy - rect.top;
+      const wx = (mx - pinch.px) / pinch.z, wy = (my - pinch.py) / pinch.z;
+      MM.zoom = nz; MM.panX = mx - wx * nz; MM.panY = my - wy * nz;
+      mmApplyTransform();
+    }
+  }, {passive: false});
+  const _tEnd = e => { if (!e.touches || e.touches.length === 0) { tPan = false; pinch = null; } };
+  ca.addEventListener('touchend', _tEnd);
+  ca.addEventListener('touchcancel', _tEnd);
 })();
 
 // ═══════════════════════════════════════════════════════════
