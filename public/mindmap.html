@@ -9,7 +9,7 @@
    one font covering BOTH Hebrew and Latin in a friendly hand-drawn style;
    Assistant as the legible fallback. */
 :root{ --mm-hand:'Playpen Sans Hebrew','Assistant',sans-serif; }
-.node-div{ font-family:var(--mm-hand) !important; font-size:14px !important; font-weight:600 !important; letter-spacing:.2px; white-space:normal !important; overflow-wrap:anywhere !important; text-align:center !important; }
+.node-div{ font-family:var(--mm-hand) !important; font-size:14px !important; font-weight:600 !important; letter-spacing:.2px; white-space:normal !important; overflow-wrap:normal !important; word-break:keep-all !important; text-align:center !important; }
 .node-div.node-root{ font-size:17px !important; font-weight:700 !important; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -1884,10 +1884,13 @@ function _mmGetMeasDiv(){
 function mmFitNode(text){
   if(text==null) return {W:90,H:42};
   const d=_mmGetMeasDiv();
-  const CAP=230, MINW=90, MINH=40;
+  const CAP=230, HARDMAX=360, MINW=90, MINH=40;
   d.style.whiteSpace='nowrap'; d.style.width='auto'; d.textContent=String(text);
   const natW=d.offsetWidth;
-  if(natW<=CAP) return {W:Math.max(MINW,Math.round(natW)+3), H:Math.max(MINH,d.offsetHeight)};
+  // A single unbroken token (no spaces, e.g. "סטטיסטיקה") must NEVER wrap mid-word —
+  // give it its full single-line width (up to a hard max) regardless of the soft cap.
+  const singleToken = !/\s/.test(String(text));
+  if(natW<=CAP || singleToken) return {W:Math.max(MINW,Math.min(HARDMAX,Math.round(natW)+3)), H:Math.max(MINH,d.offsetHeight)};
   d.style.whiteSpace='normal'; d.style.width=CAP+'px';
   return {W:CAP, H:Math.max(MINH, Math.round(d.offsetHeight))};
 }
@@ -3016,7 +3019,7 @@ function mmOpenConstellation(){
   document.getElementById('cst-btn-map').onclick=()=>_cstPickFromMap(false);
   document.getElementById('cst-btn-branch').onclick=()=>_cstPickFromMap(true);
   const ca=document.getElementById('cst-canvas'); const cw=ca.clientWidth||640, ch=ca.clientHeight||420;
-  for(const id in S.nodes){ const nd=S.nodes[id]; if(typeof nd.x!=='number'||typeof nd.y!=='number'){ nd.x=cw/2+(Math.random()*220-110); nd.y=ch/2+(Math.random()*160-80); } }
+  for(const id in S.nodes){ const nd=S.nodes[id]; if(typeof nd.x!=='number'||typeof nd.y!=='number'){ const p=_cstNextPos(); nd.x=p.x; nd.y=p.y; } }
   document.addEventListener('mousemove',_cstMove); document.addEventListener('mouseup',_cstUp);
   document.addEventListener('touchmove',_cstMove,{passive:false}); document.addEventListener('touchend',_cstUp);
   document.addEventListener('touchcancel',_cstUp); // OS-cancelled touch (call/notification/palm) — clear stuck drag/link
@@ -3055,25 +3058,20 @@ function _cstDrawLinks(){
   svg.innerHTML=h;
 }
 function _cstStartPhysics(){
-  cancelAnimationFrame(_cstRAF);
-  const step=()=>{
-    const S=_cstState(); const ca=document.getElementById('cst-canvas'); if(!ca){ return; }
-    const cw=ca.clientWidth||640, ch=ca.clientHeight||420; const ids=Object.keys(S.nodes);
-    for(const id of ids){ const n=S.nodes[id]; if(n.vx===undefined){n.vx=0;n.vy=0;} }
-    for(const id of ids){
-      const n=S.nodes[id];
-      if(n.pinned||(_cstDrag&&_cstDrag.id===id)){ n.vx=0; n.vy=0; continue; }
-      let fx=0,fy=0;
-      if(S.sun){ const dx=(cw/2)-n.x, dy=(ch/2)-n.y; const d=Math.hypot(dx,dy)||1; const target=160; fx+=(dx/d)*(d-target)*0.0022; fy+=(dy/d)*(d-target)*0.0022; }
-      for(const oid of ids){ if(oid===id) continue; const o=S.nodes[oid]; let dx=n.x-o.x, dy=n.y-o.y; let d2=dx*dx+dy*dy; if(d2<1)d2=1; const d=Math.sqrt(d2); const f=1100/d2; fx+=(dx/d)*f; fy+=(dy/d)*f; }
-      n.vx=(n.vx+fx)*0.85; n.vy=(n.vy+fy)*0.85;
-      n.x+=n.vx; n.y+=n.vy;
-      n.x=Math.max(50,Math.min(cw-50,n.x)); n.y=Math.max(36,Math.min(ch-26,n.y));
-    }
-    _cstUpdatePositions();
-    _cstRAF=requestAnimationFrame(step);
-  };
-  _cstRAF=requestAnimationFrame(step);
+  // STATIC mode: nodes stay exactly where they're placed / dragged — no auto-float,
+  // no drift. (Earlier this ran a spring+repulsion animation loop; removed per request.)
+  cancelAnimationFrame(_cstRAF); _cstRAF=null;
+}
+// Deterministic, non-overlapping placement (golden-angle spiral around the centre),
+// used when adding nodes so they spread out without any motion.
+function _cstNextPos(){
+  const S=_cstState(); const ca=document.getElementById('cst-canvas');
+  const cw=(ca&&ca.clientWidth)||640, ch=(ca&&ca.clientHeight)||420;
+  const i=Object.keys(S.nodes).length;
+  const ang=i*2.399963; const rad=80+i*22;
+  const maxR=Math.min(cw,ch)/2-60;
+  const r=maxR>90 ? (90+(rad-90)%(maxR-90)) : rad;
+  return { x: cw/2+Math.cos(ang)*r, y: ch/2+Math.sin(ang)*r };
 }
 function _cstUpdatePositions(){
   const S=_cstState(); const ca=document.getElementById('cst-canvas'); if(!ca) return;
@@ -3131,14 +3129,14 @@ function _cstJump(cstId){
   else _cstToast('צומת חופשי — לא מקושר למפה');
 }
 function _cstAddNew(){
-  _cstPrompt('שם הצומת החדש:', '', (txt)=>{ if(!txt) return; const S=_cstState(); const ca=document.getElementById('cst-canvas'); const id=_cstUid(); S.nodes[id]={id, mapId:null, text:txt, x:(ca.clientWidth/2)+(Math.random()*140-70), y:(ca.clientHeight/2)+(Math.random()*140-70), pinned:false, color:'#7c3aed'}; _cstRender(); _cstPersist(); });
+  _cstPrompt('שם הצומת החדש:', '', (txt)=>{ if(!txt) return; const S=_cstState(); const id=_cstUid(); const p=_cstNextPos(); S.nodes[id]={id, mapId:null, text:txt, x:p.x, y:p.y, pinned:false, color:'#7c3aed'}; _cstRender(); _cstPersist(); });
 }
 function _cstPickSun(){
   _cstPrompt('שם השמש (הנושא המרכזי):', _cstState().sun||'', (txt)=>{ _cstState().sun=txt||null; _cstRender(); _cstPersist(); });
 }
 function _cstAddFromMap(mapId, branch){
   const S=_cstState(); const ca=document.getElementById('cst-canvas');
-  const place=()=>({x:(ca.clientWidth/2)+(Math.random()*240-120), y:(ca.clientHeight/2)+(Math.random()*170-85)});
+  const place=()=>_cstNextPos();
   const addOne=(mid)=>{ for(const cid in S.nodes){ if(S.nodes[cid].mapId===mid) return cid; } const mn=MM.nodes[mid]; if(!mn) return null; const id=_cstUid(); const p=place(); S.nodes[id]={id, mapId:mid, text:mn.text, x:p.x, y:p.y, pinned:false, color:mn.color||'#7c3aed'}; return id; };
   const rootCst=addOne(mapId);
   if(branch&&rootCst){ const walk=(mid,parentCst)=>{ const mn=MM.nodes[mid]; if(!mn) return; for(const c of (mn.childIds||[])){ const cid=addOne(c); if(cid){ if(!S.links.some(l=>(l.a===parentCst&&l.b===cid)||(l.a===cid&&l.b===parentCst))) S.links.push({a:parentCst,b:cid,free:false}); walk(c,cid); } } }; walk(mapId,rootCst); }
