@@ -1204,49 +1204,48 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
   }
 
   return (
-    <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: viewMode === 'mindmap' ? '6px 12px 8px' : '32px 40px' }}>
-      <button
-        onClick={onBack}
-        style={{
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          color: TEXT_DARK,
-          fontFamily: "'Rubik', sans-serif",
-          fontSize: viewMode === 'mindmap' ? 13 : 16,
-          marginBottom: viewMode === 'mindmap' ? 2 : 24,
-          padding: 0,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-        }}
-      >
-        → חזרה לדף הבית
-      </button>
-
-      {viewMode !== 'mindmap' && (
-        <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
-          בחר נושא ללמוד 📚
-        </h2>
+    <div className="ws-screen-pad" style={viewMode === 'mindmap' ? { flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '5px 10px 8px' } : { flex: 1, overflow: 'auto', padding: '32px 40px' }}>
+      {viewMode === 'mindmap' ? (
+        /* Map view — compact ONE-LINE header (back + toggle), minimal height so the map fills the screen. */
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 5, flexShrink: 0 }}>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+            → חזרה
+          </button>
+          <div style={{ display: 'flex', gap: 4, background: 'rgba(127,155,217,0.12)', padding: 3, borderRadius: 999 }}>
+            {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => {
+              const locked = m === 'mindmap' && !mapUnlocked
+              const tip = locked ? FEATURE_UNLOCKS_BY_ID['mindmap-view']?.descriptionHe : undefined
+              return (
+                <button key={m} onClick={() => { if (!locked) setViewMode(m) }} title={tip} aria-label={tip} aria-disabled={locked || undefined}
+                  style={{ border: 'none', borderRadius: 999, padding: '4px 12px', cursor: locked ? 'not-allowed' : 'pointer', fontFamily: "'Rubik', sans-serif", fontSize: 12, fontWeight: 700, background: viewMode === m ? BUTTON_COLOR : 'transparent', color: viewMode === m ? '#fff' : TEXT_MED, transition: 'all 0.15s', opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none' }}>
+                  {locked ? '🔒 ' : ''}{lbl}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ) : (
+        <>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Rubik', sans-serif", fontSize: 16, marginBottom: 24, padding: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+            → חזרה לדף הבית
+          </button>
+          <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
+            בחר נושא ללמוד 📚
+          </h2>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 24, background: 'rgba(127,155,217,0.12)', padding: 4, borderRadius: 999, width: 'fit-content' }}>
+            {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => {
+              const locked = m === 'mindmap' && !mapUnlocked
+              const tip = locked ? FEATURE_UNLOCKS_BY_ID['mindmap-view']?.descriptionHe : undefined
+              return (
+                <button key={m} onClick={() => { if (!locked) setViewMode(m) }} title={tip} aria-label={tip} aria-disabled={locked || undefined}
+                  style={{ border: 'none', borderRadius: 999, padding: '7px 18px', cursor: locked ? 'not-allowed' : 'pointer', fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700, background: viewMode === m ? BUTTON_COLOR : 'transparent', color: viewMode === m ? '#fff' : TEXT_MED, transition: 'all 0.15s', opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none' }}>
+                  {locked ? '🔒 ' : ''}{lbl}
+                </button>
+              )
+            })}
+          </div>
+        </>
       )}
-
-      {/* List ⇄ Mindmap toggle */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: viewMode === 'mindmap' ? 6 : 24, background: 'rgba(127,155,217,0.12)', padding: viewMode === 'mindmap' ? 3 : 4, borderRadius: 999, width: 'fit-content' }}>
-        {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => {
-          const locked = m === 'mindmap' && !mapUnlocked
-          const tip = locked ? FEATURE_UNLOCKS_BY_ID['mindmap-view']?.descriptionHe : undefined
-          return (
-            <button key={m} onClick={() => { if (!locked) setViewMode(m) }}
-              title={tip} aria-label={tip} aria-disabled={locked || undefined} style={{
-              border: 'none', borderRadius: 999, padding: viewMode === 'mindmap' ? '4px 12px' : '7px 18px', cursor: locked ? 'not-allowed' : 'pointer',
-              fontFamily: "'Rubik', sans-serif", fontSize: viewMode === 'mindmap' ? 12 : 13, fontWeight: 700,
-              background: viewMode === m ? BUTTON_COLOR : 'transparent',
-              color: viewMode === m ? '#fff' : TEXT_MED, transition: 'all 0.15s',
-              opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none',
-            }}>{locked ? '🔒 ' : ''}{lbl}</button>
-          )
-        })}
-      </div>
 
       {viewMode === 'list' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 30, maxWidth: 1200 }}>
@@ -1274,7 +1273,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
         <iframe
           src={`${import.meta.env.BASE_URL}mindmap.html?v=mm9-20260628&scene=topics&admin=${_adminMode ? '1' : '0'}`}
           title="מפת הנושאים"
-          style={{ width: '100%', height: 'calc(100dvh - 96px)', border: 'none', borderRadius: 16, boxShadow: CARD_SHADOW, display: 'block' }}
+          style={{ width: '100%', flex: 1, minHeight: 0, border: 'none', borderRadius: 16, boxShadow: CARD_SHADOW, display: 'block' }}
           allow="clipboard-read; clipboard-write"
         />
       )}
