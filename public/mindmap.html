@@ -837,7 +837,7 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <button class="tb-btn" id="zone-create-btn" onclick="mmStartZoneCreate()" title="צור אזור — נקודות חופשיות"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="3" y="3" width="14" height="14" rx="2" stroke-dasharray="3 2"/><path d="M17 17l4 4"/><path d="M21 17v4h-4"/></svg> צור אזור</button>
     <button class="tb-btn" onclick="mmLoadReadyMap(mmCurrentReadyMapId(),'manual')" title="טען מפת מושגים מוכנה — ההערות והעריכות שלך נשמרות">🗺️ טען מפה מוכנה</button>
     <button class="tb-btn" onclick="wsGoDrawing()" title="פתח לוח ציור (Excalidraw) במסך מלא">🎨 לוח ציור</button>
-    <button class="tb-btn" onclick="mmOpenConstellation()" title="קונסטלציה — חלון חיבור חופשי (שמש + קרניים): גרור רעיונות, צייר חיבורים, ערבב">&#10024; קונסטלציה</button>
+    <button class="tb-btn" onclick="mmOpenConstellation()" title="אסוציאציות — חלון חיבור חופשי (שמש + קרניים): גרור רעיונות, צייר חיבורים, ערבב">&#10024; אסוציאציות</button>
   </div>
   <div class="ribbon-group" id="ribbon-view" style="display:none">
     <button class="tb-btn" onclick="mmMacroView()" title="מבט-על: כווץ הכול לענפים הראשיים">&#9776; מבט-על</button>
@@ -3016,7 +3016,7 @@ function mmOpenConstellation(){
   ov=document.createElement('div'); ov.id='cst-overlay'; ov.className='cst-overlay'; ov.setAttribute('dir','rtl');
   ov.innerHTML=`<div class="cst-win">
     <div class="cst-titlebar">
-      <span class="cst-title">&#10024; קונסטלציה</span>
+      <span class="cst-title">&#10024; אסוציאציות</span>
       <span class="cst-sun-label" id="cst-sun-label"></span>
       <span style="flex:1"></span>
       <button class="cst-tb" id="cst-btn-sun">&#9728; שמש</button>
