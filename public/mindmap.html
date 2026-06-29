@@ -278,6 +278,13 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 .node-wrap.collapsed .node-toggle{opacity:.8;background:rgba(212,175,55,.5)}
 /* Touch devices have no hover — surface the collapse handle by default (skill ux Touch HIGH) */
 @media (pointer:coarse){.node-toggle{opacity:.7}}
+/* Quick "branch out": one-tap + button to add a child sub-topic. Sits opposite the
+   collapse toggle; shows on hover/selection, and is always visible on touch. */
+.node-add{position:absolute;left:-13px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.65);background:#2e9e5b;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;z-index:6;opacity:0;transition:opacity .15s,transform .1s;user-select:none;line-height:1;box-shadow:0 1px 5px rgba(0,0,0,.3)}
+.node-wrap:hover .node-add{opacity:1}
+.node-wrap:has(.node-div.selected) .node-add{opacity:1}
+.node-add:hover{transform:translateY(-50%) scale(1.12)}
+@media (pointer:coarse){.node-add{opacity:.9;width:24px;height:24px;font-size:16px;left:-15px}}
 
 /* ── Canvas Capsule (Study Hub glassmorphic style) ── */
 .cn-outer{position:absolute;z-index:1}
@@ -2084,6 +2091,15 @@ function mmRender(){
       };
       div.appendChild(tog);
     }
+    // Quick "branch out": a + button to add a child sub-topic. One tap → grow.
+    if(n.type!=='canvas' && n.type!=='equation'){
+      const addBtn=document.createElement('div');
+      addBtn.className='node-add'; addBtn.textContent='+'; addBtn.title='הוסף תת-נושא';
+      addBtn.onmousedown=e=>e.stopPropagation();
+      addBtn.ontouchstart=e=>e.stopPropagation();
+      addBtn.onclick=e=>{ e.stopPropagation(); mmAddChild(id); };
+      div.appendChild(addBtn);
+    }
     if(n.type==='canvas'){
       nodeDiv.textContent='';
       nodeDiv.style.cssText=(nodeDiv.style.cssText||'')+';padding:0;overflow:hidden;position:relative;display:block;';
@@ -2503,12 +2519,12 @@ function mmRender(){
 
       nodeEl.addEventListener('mousedown', ev => {
         if(ev.button !== 0) return;
-        if(ev.target.closest('.node-toggle,button,input,.node-note-badge')) return;
+        if(ev.target.closest('.node-toggle,.node-add,button,input,.node-note-badge')) return;
         ev.stopPropagation();
         startDrag(ev.clientX, ev.clientY, false);
       });
       nodeEl.addEventListener('touchstart', ev => {
-        if(ev.target.closest('.node-toggle,button,input,.node-note-badge')) return;
+        if(ev.target.closest('.node-toggle,.node-add,button,input,.node-note-badge')) return;
         if(ev.touches.length !== 1) return;
         ev.stopPropagation();
         startDrag(ev.touches[0].clientX, ev.touches[0].clientY, true);
