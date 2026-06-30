@@ -816,6 +816,7 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <button class="tb-ribbon-tab" id="rtab-templates" onclick="toggleRibbon('templates')" title="תבניות סטטיסטיות" aria-label="תבניות סטטיסטיות"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="tb-chev">▾</span><span class="tb-label">תבניות</span></button>
     <button class="tb-ribbon-tab" id="rtab-files"     onclick="toggleRibbon('files')"     title="ייצוא, ייבוא, ניקוי" aria-label="ייצוא, ייבוא וניקוי"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="tb-chev">▾</span><span class="tb-label">קבצים</span></button>
     <div class="tb-div"></div>
+    <button class="tb-btn" onclick="mmOpenConstellation()" title="אסוציאציות — חלון חיבור חופשי (שמש + קרניים)" aria-label="אסוציאציות"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.4"/><circle cx="5" cy="6" r="1.5"/><circle cx="19" cy="7" r="1.5"/><circle cx="6" cy="18" r="1.5"/><circle cx="18" cy="17" r="1.5"/><line x1="12" y1="12" x2="5" y2="6"/><line x1="12" y1="12" x2="19" y2="7"/><line x1="12" y1="12" x2="6" y2="18"/><line x1="12" y1="12" x2="18" y2="17"/></svg></button>
     <button class="tb-btn" onclick="openSearch()" title="חיפוש (Ctrl+F)" aria-label="חיפוש בצמתי המפה"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg></button>
     <button class="tb-btn" onclick="mmTourStart()" title="סיור מודרך" aria-label="התחל סיור מודרך"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l10-5 10 5-10 5z"/><path d="M6 11v5c0 1 2.5 3 6 3s6-2 6-3v-5"/></svg></button>
   </div>
@@ -8896,6 +8897,9 @@ function mmAutoSizeNodes(){
         var natural2 = Math.ceil(span.offsetWidth) + 36;
         var newW2 = Math.max(80, Math.min(540, natural2));
         if (Math.abs((en.W||80) - newW2) > 2) { en.W = newW2; changed = true; }
+        var naturalH2 = Math.ceil(span.offsetHeight) + 22;
+        var newH2 = Math.max(40, Math.min(260, naturalH2));
+        if (Math.abs((en.H||40) - newH2) > 2) { en.H = newH2; changed = true; }
       }
     }
     if (changed && typeof mmRender === 'function') mmRender();
