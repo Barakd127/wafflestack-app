@@ -2956,7 +2956,7 @@ function mmAddCanvas(){
 // nodes → offer to Blend, click a node → jump to it on the map.
 // State persists in MM.constellation (via mmSerializeForSave).
 // ═══════════════════════════════════════════════════════════
-let _cstRAF=null, _cstDrag=null, _cstLinkFrom=null, _cstSeq=0, _cstSel=null, _cstEditing=null;
+let _cstRAF=null, _cstDrag=null, _cstLinkFrom=null, _cstSeq=0, _cstSel=null, _cstEditing=null, _cstView={tx:0,ty:0,k:1}, _cstHover=null, _cstPan=null;
 function _cstState(){
   if(!MM.constellation || typeof MM.constellation!=='object') MM.constellation={sun:null,nodes:{},links:[]};
   if(!MM.constellation.nodes) MM.constellation.nodes={};
@@ -3038,6 +3038,7 @@ function _cstInjectCSS(){
 .cst-handle{position:absolute;bottom:-6px;left:-6px;font-size:13px;color:#a78bfa;opacity:0;}
 .cst-node:hover .cst-handle{opacity:0.9;}
 .cst-node-input{color:#f0ecff;text-align:center;}
+.cst-stage{position:absolute;inset:0;transform-origin:0 0;will-change:transform;}.cst-links{overflow:visible;}.cst-canvas{cursor:grab;}.cst-canvas:active{cursor:grabbing;}.cst-node{transition:opacity .16s,transform .12s;}.cst-stage.cst-dimming .cst-node{opacity:0.14;}.cst-stage.cst-dimming .cst-node.cst-hl{opacity:1;}.cst-stage.cst-dimming .cst-sun{opacity:0.45;}
 @media(pointer:coarse){.cst-dot{width:16px;height:16px;}.cst-pin,.cst-handle{opacity:0.9;}.cst-lbl{max-width:100px;}}`;
   document.head.appendChild(s);
 }
@@ -3069,11 +3070,12 @@ function mmOpenConstellation(){
   const ca=document.getElementById('cst-canvas'); const cw=ca.clientWidth||640, ch=ca.clientHeight||420;
   for(const id in S.nodes){ const nd=S.nodes[id]; if(typeof nd.x!=='number'||typeof nd.y!=='number'){ const p=_cstNextPos(); nd.x=p.x; nd.y=p.y; } }
   document.addEventListener('mousemove',_cstMove); document.addEventListener('mouseup',_cstUp);
+  _cstView={tx:0,ty:0,k:1}; const _cca=document.getElementById('cst-canvas'); _cca.addEventListener('wheel',_cstWheel,{passive:false}); _cca.addEventListener('mousedown',_cstPanStart); _cca.addEventListener('touchstart',_cstPanStart,{passive:false});
   document.addEventListener('touchmove',_cstMove,{passive:false}); document.addEventListener('touchend',_cstUp);
   document.addEventListener('touchcancel',_cstUp); // OS-cancelled touch (call/notification/palm) — clear stuck drag/link
   _cstRender(); _cstStartPhysics();
 }
-function mmCloseConstellation(){ _cstSel=null; _cstEditing=null;
+function mmCloseConstellation(){ _cstSel=null; _cstEditing=null; _cstHover=null; _cstPan=null;
   cancelAnimationFrame(_cstRAF); _cstRAF=null;
   document.removeEventListener('mousemove',_cstMove); document.removeEventListener('mouseup',_cstUp);
   document.removeEventListener('touchmove',_cstMove); document.removeEventListener('touchend',_cstUp);
@@ -3085,15 +3087,15 @@ function _cstRender(){
   const S=_cstState(); const ca=document.getElementById('cst-canvas'); if(!ca) return;
   const cw=ca.clientWidth||640, ch=ca.clientHeight||420;
   const lbl=document.getElementById('cst-sun-label'); if(lbl) lbl.textContent=S.sun?('☀ '+S.sun):'(אין שמש — לחץ "שמש")';
-  ca.querySelectorAll('.cst-node,.cst-sun').forEach(e=>e.remove());
-  if(S.sun){ const sun=document.createElement('div'); sun.className='cst-sun'; sun.style.left=(cw/2)+'px'; sun.style.top=(ch/2)+'px'; sun.innerHTML='<span>☀</span><span class="cst-sun-t"></span>'; sun.querySelector('.cst-sun-t').textContent=S.sun; ca.appendChild(sun); }
+  const stage=_cstStage(); stage.querySelectorAll('.cst-node,.cst-sun').forEach(e=>e.remove());
+  if(S.sun){ const sun=document.createElement('div'); sun.className='cst-sun'; sun.style.left=(cw/2)+'px'; sun.style.top=(ch/2)+'px'; sun.innerHTML='<span>☀</span><span class="cst-sun-t"></span>'; sun.querySelector('.cst-sun-t').textContent=S.sun; stage.appendChild(sun); }
   for(const id in S.nodes){
     const nd=S.nodes[id];
     const el=document.createElement('div'); el.className='cst-node'+(nd.pinned?' pinned':'')+(id===_cstSel?' cst-sel':''); el.dataset.id=id;
     el.style.left=nd.x+'px'; el.style.top=nd.y+'px';
-    el.innerHTML='<span class="cst-dot"></span><span class="cst-pin" title="נעץ/שחרר">📌</span><span class="cst-lbl"></span><span class="cst-handle" title="גרור לחיבור">◦</span>'; el.querySelector(".cst-dot").style.background=nd.color||"#a78bfa";
+    el.innerHTML='<span class="cst-dot"></span><span class="cst-pin" title="נעץ/שחרר">📌</span><span class="cst-lbl"></span><span class="cst-handle" title="גרור לחיבור">◦</span>'; var _cdeg=S.links.reduce(function(a,l){return a+((l.a===id||l.b===id)?1:0)},0)+(S.sun?1:0); var _csz=Math.max(10,Math.min(28,10+_cdeg*3.2)); var _cd=el.querySelector(".cst-dot"); _cd.style.background=nd.color||"#a78bfa"; _cd.style.width=_csz+"px"; _cd.style.height=_csz+"px";
     el.querySelector('.cst-lbl').textContent=nd.text;
-    ca.appendChild(el); _cstWireNode(el,id);
+    stage.appendChild(el); _cstWireNode(el,id);
   }
   _cstDrawLinks();
 }
@@ -3101,8 +3103,8 @@ function _cstDrawLinks(){
   const S=_cstState(); const svg=document.getElementById('cst-links'); const ca=document.getElementById('cst-canvas'); if(!svg||!ca) return;
   const cw=ca.clientWidth||640, ch=ca.clientHeight||420; svg.setAttribute('width',cw); svg.setAttribute('height',ch);
   let h='';
-  if(S.sun){ for(const id in S.nodes){ const n=S.nodes[id]; h+='<line x1="'+(cw/2)+'" y1="'+(ch/2)+'" x2="'+n.x+'" y2="'+n.y+'" stroke="rgba(255,180,120,0.26)" stroke-width="1"/>'; } }
-  for(const l of S.links){ const a=S.nodes[l.a], b=S.nodes[l.b]; if(!a||!b) continue; const col=l.free?'rgba(167,139,250,0.6)':'rgba(255,255,255,0.16)'; const dash=''; h+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="1.2" stroke-dasharray="'+dash+'"/>'; }
+  const _hn=_cstHoverSet(S); if(S.sun){ for(const id in S.nodes){ const n=S.nodes[id]; const _o=_hn?(_hn.has(id)?0.45:0.04):0.26; h+='<line x1="'+(cw/2)+'" y1="'+(ch/2)+'" x2="'+n.x+'" y2="'+n.y+'" stroke="rgba(255,180,120,'+_o+')" stroke-width="1"/>'; } }
+  for(const l of S.links){ const a=S.nodes[l.a], b=S.nodes[l.b]; if(!a||!b) continue; const _inc=_cstHover?(l.a===_cstHover||l.b===_cstHover):true; const col=l.free?('rgba(167,139,250,'+(_inc?0.85:0.05)+')'):('rgba(255,255,255,'+(_inc?0.34:0.04)+')'); h+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="'+(_inc&&_cstHover?1.8:1.2)+'"/>'; }
   svg.innerHTML=h;
 }
 function _cstStartPhysics(){
@@ -3126,7 +3128,7 @@ function _cstUpdatePositions(){
   ca.querySelectorAll('.cst-node').forEach(el=>{ const n=S.nodes[el.dataset.id]; if(n){ el.style.left=n.x+'px'; el.style.top=n.y+'px'; } });
   _cstDrawLinks();
 }
-function _cstXY(e){ const ca=document.getElementById('cst-canvas'); if(!ca) return {x:0,y:0}; const r=ca.getBoundingClientRect(); const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e; return {x:t.clientX-r.left, y:t.clientY-r.top}; }
+function _cstXY(e){ const ca=document.getElementById('cst-canvas'); if(!ca) return {x:0,y:0}; const r=ca.getBoundingClientRect(); const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e; return {x:(t.clientX-r.left-_cstView.tx)/_cstView.k, y:(t.clientY-r.top-_cstView.ty)/_cstView.k}; }
 function _cstWireNode(el,id){
   const S=_cstState();
   const pin=el.querySelector('.cst-pin'), handle=el.querySelector('.cst-handle'), lbl=el.querySelector('.cst-lbl');
@@ -3136,16 +3138,17 @@ function _cstWireNode(el,id){
   el.addEventListener('mousedown',dragStart);
   el.addEventListener('touchstart',dragStart,{passive:false});
   el.addEventListener('dblclick',(e)=>{ e.stopPropagation(); _cstEditNode(id,false); });
+  el.addEventListener('mouseenter',()=>_cstSetHover(id)); el.addEventListener('mouseleave',()=>{ if(_cstHover===id) _cstSetHover(null); });
   const linkStart=(e)=>{ e.preventDefault(); e.stopPropagation(); _cstLinkFrom=id; };
   handle.addEventListener('mousedown',linkStart);
   handle.addEventListener('touchstart',linkStart,{passive:false});
 }
 function _cstMove(e){
-  if(!_cstDrag) return; const S=_cstState(); const n=S.nodes[_cstDrag.id]; if(!n){ _cstDrag=null; return; }
+  if(_cstPan){ const _t=(e.touches&&e.touches[0])||e; _cstView.tx=_cstPan.tx+(_t.clientX-_cstPan.sx); _cstView.ty=_cstPan.ty+(_t.clientY-_cstPan.sy); _cstApplyView(); if(e.cancelable)e.preventDefault(); return; } if(!_cstDrag) return; const S=_cstState(); const n=S.nodes[_cstDrag.id]; if(!n){ _cstDrag=null; return; }
   const p=_cstXY(e); n.x=p.x-_cstDrag.dx; n.y=p.y-_cstDrag.dy; n.vx=0; n.vy=0; _cstUpdatePositions(); if(e.cancelable) e.preventDefault();
 }
 function _cstUp(e){
-  if(_cstDrag){ _cstDrag=null; _cstPersist(); }
+  if(_cstPan){ _cstPan=null; } if(_cstDrag){ _cstDrag=null; _cstPersist(); }
   if(_cstLinkFrom){
     const t=(e.changedTouches&&e.changedTouches[0])||e;
     const tgt=document.elementFromPoint(t.clientX,t.clientY);
@@ -3181,6 +3184,12 @@ function _cstAddNew(){
   _cstPrompt('שם הצומת החדש:', '', (txt)=>{ if(!txt) return; const S=_cstState(); const id=_cstUid(); const p=_cstNextPos(); S.nodes[id]={id, mapId:null, text:txt, x:p.x, y:p.y, pinned:false, color:'#7c3aed'}; _cstRender(); _cstPersist(); });
 }
 // ── Associations keyboard flow: select + Tab(child)/Enter(sibling)/F2(rename)/Del ──
+function _cstStage(){ const ca=document.getElementById("cst-canvas"); let st=document.getElementById("cst-stage"); if(!st){ st=document.createElement("div"); st.id="cst-stage"; st.className="cst-stage"; ca.appendChild(st); const svg=document.getElementById("cst-links"); if(svg) st.appendChild(svg); } _cstApplyView(); return st; }
+function _cstApplyView(){ const st=document.getElementById("cst-stage"); if(st) st.style.transform="translate("+_cstView.tx+"px,"+_cstView.ty+"px) scale("+_cstView.k+")"; }
+function _cstHoverSet(S){ if(!_cstHover) return null; const s=new Set([_cstHover]); for(const l of S.links){ if(l.a===_cstHover)s.add(l.b); if(l.b===_cstHover)s.add(l.a); } return s; }
+function _cstSetHover(id){ _cstHover=id; const st=document.getElementById("cst-stage"); if(!st) return; const S=_cstState(); const nb=_cstHoverSet(S); if(id) st.classList.add("cst-dimming"); else st.classList.remove("cst-dimming"); st.querySelectorAll(".cst-node").forEach(el=>el.classList.toggle("cst-hl", !!(nb&&nb.has(el.dataset.id)))); _cstDrawLinks(); }
+function _cstWheel(e){ e.preventDefault(); const ca=document.getElementById("cst-canvas"); const r=ca.getBoundingClientRect(); const mx=e.clientX-r.left, my=e.clientY-r.top; const old=_cstView.k; const k=Math.max(0.35,Math.min(3,old*(e.deltaY<0?1.12:0.89))); _cstView.tx=mx-(mx-_cstView.tx)*(k/old); _cstView.ty=my-(my-_cstView.ty)*(k/old); _cstView.k=k; _cstApplyView(); }
+function _cstPanStart(e){ if(e.target.closest && e.target.closest(".cst-node")) return; const t=(e.touches&&e.touches[0])||e; _cstPan={sx:t.clientX, sy:t.clientY, tx:_cstView.tx, ty:_cstView.ty}; if(_cstSel){ _cstSel=null; _cstUpdateSel(); } }
 function _cstUpdateSel(){ document.querySelectorAll(".cst-node").forEach(el=>el.classList.toggle("cst-sel", el.dataset.id===_cstSel)); }
 function _cstSelect(id){ _cstSel=id; _cstUpdateSel(); }
 function _cstNewNode(parentId){
