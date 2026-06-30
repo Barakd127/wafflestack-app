@@ -335,7 +335,7 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
             />
           ) : (
             <iframe
-              src={`/mindmap.html?v=mm12-20260630&userId=${encodeURIComponent(userId)}&embed=1`}
+              src={`/mindmap.html?v=mm13-20260630&userId=${encodeURIComponent(userId)}&embed=1`}
               title="WaffleStack mindmap (embedded)"
               style={{
                 position: 'absolute',
