@@ -3037,7 +3037,7 @@ function _cstInjectCSS(){
 .cst-node:hover .cst-pin,.cst-node.pinned .cst-pin{opacity:0.95;}
 .cst-handle{position:absolute;bottom:-6px;left:-6px;font-size:13px;color:#7c3aed;opacity:0;}
 .cst-node:hover .cst-handle{opacity:0.9;}
-.cst-node-input{color:#33264d;text-align:center;}
+.cst-node-input{color:#33264d;text-align:center;}.cst-collapse{position:absolute;top:-8px;left:-8px;width:15px;height:15px;border-radius:50%;background:#fff;border:1px solid #cbbff0;color:#6a4fb0;font-size:12px;line-height:13px;text-align:center;cursor:pointer;font-weight:700;box-shadow:0 1px 3px rgba(60,40,90,0.28);z-index:4;}.cst-collapse:hover{background:#efe9fb;}.cst-node.cst-collapsed .cst-dot{box-shadow:0 0 0 3px rgba(124,58,237,0.22),0 1px 5px rgba(60,30,100,0.3)!important;}
 .cst-stage{position:absolute;inset:0;transform-origin:0 0;will-change:transform;}.cst-links{overflow:visible;}.cst-canvas{cursor:grab;}.cst-canvas:active{cursor:grabbing;}.cst-node{transition:opacity .16s,transform .12s;}.cst-stage.cst-dimming .cst-node{opacity:0.2;}.cst-stage.cst-dimming .cst-node.cst-hl{opacity:1;}.cst-stage.cst-dimming .cst-sun{opacity:0.55;}
 @media(pointer:coarse){.cst-dot{width:16px;height:16px;}.cst-pin,.cst-handle{opacity:0.9;}.cst-lbl{max-width:100px;}}`;
   document.head.appendChild(s);
@@ -3087,14 +3087,15 @@ function _cstRender(){
   const S=_cstState(); const ca=document.getElementById('cst-canvas'); if(!ca) return;
   const cw=ca.clientWidth||640, ch=ca.clientHeight||420;
   const lbl=document.getElementById('cst-sun-label'); if(lbl) lbl.textContent=S.sun?('☀ '+S.sun):'(אין שמש — לחץ "שמש")';
-  const stage=_cstStage(); stage.querySelectorAll('.cst-node,.cst-sun').forEach(e=>e.remove());
+  const stage=_cstStage(); stage.querySelectorAll('.cst-node,.cst-sun').forEach(e=>e.remove()); const _kids={}; for(const _k in S.nodes){ const _pp=S.nodes[_k].parentId; if(_pp&&S.nodes[_pp]) (_kids[_pp]=_kids[_pp]||[]).push(_k); }
   if(S.sun){ const sun=document.createElement('div'); sun.className='cst-sun'; sun.style.left=(cw/2)+'px'; sun.style.top=(ch/2)+'px'; sun.innerHTML='<span>☀</span><span class="cst-sun-t"></span>'; sun.querySelector('.cst-sun-t').textContent=S.sun; stage.appendChild(sun); }
   for(const id in S.nodes){
+    if(!_cstVisible(id)) continue;
     const nd=S.nodes[id];
     const el=document.createElement('div'); el.className='cst-node'+(nd.pinned?' pinned':'')+(id===_cstSel?' cst-sel':''); el.dataset.id=id;
     el.style.left=nd.x+'px'; el.style.top=nd.y+'px';
     el.innerHTML='<span class="cst-dot"></span><span class="cst-pin" title="נעץ/שחרר">📌</span><span class="cst-lbl"></span><span class="cst-handle" title="גרור לחיבור">◦</span>'; var _cdeg=S.links.reduce(function(a,l){return a+((l.a===id||l.b===id)?1:0)},0)+(S.sun?1:0); var _csz=Math.max(10,Math.min(28,10+_cdeg*3.2)); var _cd=el.querySelector(".cst-dot"); _cd.style.background=nd.color||"#a78bfa"; _cd.style.width=_csz+"px"; _cd.style.height=_csz+"px";
-    el.querySelector('.cst-lbl').textContent=nd.text;
+    el.querySelector('.cst-lbl').textContent=nd.text; if(_kids[id]&&_kids[id].length){ el.classList.add('cst-haskids'); if(nd.collapsed) el.classList.add('cst-collapsed'); const _cb=document.createElement('span'); _cb.className='cst-collapse'; _cb.textContent=nd.collapsed?'+':'\u2212'; _cb.title=nd.collapsed?'הרחב':'כווץ'; _cb.onclick=(ev)=>{ ev.stopPropagation(); nd.collapsed=!nd.collapsed; _cstRender(); _cstStartPhysics(); _cstPersist(); }; el.appendChild(_cb); }
     stage.appendChild(el); _cstWireNode(el,id);
   }
   _cstDrawLinks();
@@ -3103,8 +3104,8 @@ function _cstDrawLinks(){
   const S=_cstState(); const svg=document.getElementById('cst-links'); const ca=document.getElementById('cst-canvas'); if(!svg||!ca) return;
   const cw=ca.clientWidth||640, ch=ca.clientHeight||420; svg.setAttribute('width',cw); svg.setAttribute('height',ch);
   let h='';
-  const _hn=_cstHoverSet(S); if(S.sun){ for(const id in S.nodes){ const n=S.nodes[id]; const _o=_hn?(_hn.has(id)?0.45:0.04):0.26; h+='<line x1="'+(cw/2)+'" y1="'+(ch/2)+'" x2="'+n.x+'" y2="'+n.y+'" stroke="rgba(255,180,120,'+_o+')" stroke-width="1"/>'; } }
-  for(const l of S.links){ const a=S.nodes[l.a], b=S.nodes[l.b]; if(!a||!b) continue; const _inc=_cstHover?(l.a===_cstHover||l.b===_cstHover):true; const col=l.free?('rgba(124,58,237,'+(_inc?0.75:0.07)+')'):('rgba(150,130,195,'+(_inc?0.6:0.12)+')'); h+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="'+(_inc&&_cstHover?1.8:1.2)+'"/>'; }
+  const _hn=_cstHoverSet(S); if(S.sun){ for(const id in S.nodes){ const n=S.nodes[id]; if((n.parentId&&S.nodes[n.parentId])||!_cstVisible(id)) continue; const _o=_hn?(_hn.has(id)?0.45:0.04):0.26; h+='<line x1="'+(cw/2)+'" y1="'+(ch/2)+'" x2="'+n.x+'" y2="'+n.y+'" stroke="rgba(255,180,120,'+_o+')" stroke-width="1"/>'; } }
+  for(const l of S.links){ const a=S.nodes[l.a], b=S.nodes[l.b]; if(!a||!b||!_cstVisible(l.a)||!_cstVisible(l.b)) continue; const _inc=_cstHover?(l.a===_cstHover||l.b===_cstHover):true; const col=l.free?('rgba(124,58,237,'+(_inc?0.75:0.07)+')'):('rgba(150,130,195,'+(_inc?0.6:0.12)+')'); h+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="'+(_inc&&_cstHover?1.8:1.2)+'"/>'; }
   svg.innerHTML=h;
 }
 // Even radial placement: golden-angle / phyllotaxis (sunflower) around the sun,
@@ -3113,11 +3114,15 @@ function _cstDrawLinks(){
 function _cstLayout(){
   const S=_cstState(); const ca=document.getElementById("cst-canvas"); if(!ca) return;
   const cw=ca.clientWidth||640, ch=ca.clientHeight||420, cx=cw/2, cy=ch/2;
-  const ids=Object.keys(S.nodes); const N=ids.length;
-  const fit=Math.min(cw,ch)/2 - 64;
-  const C = N>1 ? fit/Math.sqrt(N-0.5) : 0;
-  const GA=2.399963229544; const r0=S.sun?60:0;
-  ids.forEach((id,i)=>{ const n=S.nodes[id]; const ang=i*GA; const rad=r0+C*Math.sqrt(i+0.5); n._tx=cx+Math.cos(ang)*rad; n._ty=cy+Math.sin(ang)*rad; });
+  const kids={}, top=[];
+  for(const id in S.nodes){ const p=S.nodes[id].parentId; if(p && S.nodes[p]) (kids[p]=kids[p]||[]).push(id); else top.push(id); }
+  const weight={};
+  const wfn=(id)=>{ const n=S.nodes[id]; if(n.collapsed||!kids[id]||!kids[id].length){ weight[id]=1; return 1; } let s=0; for(const c of kids[id]) s+=wfn(c); weight[id]=s; return s; };
+  let totalW=0; for(const id of top) totalW+=wfn(id);
+  const step=Math.max(74,(Math.min(cw,ch)/2-90)/2);
+  const depthR=(d)=> 110 + (d-1)*step;
+  const place=(id,a0,a1,depth)=>{ const n=S.nodes[id]; const mid=(a0+a1)/2; const rad=depthR(depth); n._tx=cx+Math.cos(mid)*rad; n._ty=cy+Math.sin(mid)*rad; if(n.collapsed||!kids[id]) return; let a=a0; for(const c of kids[id]){ const span=(a1-a0)*(weight[c]/weight[id]); place(c,a,a+span,depth+1); a+=span; } };
+  let a=-Math.PI/2; for(const id of top){ const span=(totalW>0?2*Math.PI*(weight[id]/totalW):0); place(id,a,a+span,1); a+=span; }
 }
 function _cstStartPhysics(){
   cancelAnimationFrame(_cstRAF); _cstRAF=null; _cstLayout();
@@ -3173,7 +3178,7 @@ function _cstUp(e){
     const t=(e.changedTouches&&e.changedTouches[0])||e;
     const tgt=document.elementFromPoint(t.clientX,t.clientY);
     const nodeEl=tgt&&tgt.closest&&tgt.closest('.cst-node');
-    if(nodeEl&&nodeEl.dataset.id&&nodeEl.dataset.id!==_cstLinkFrom) _cstMakeLink(_cstLinkFrom,nodeEl.dataset.id);
+    if(nodeEl&&nodeEl.dataset.id&&nodeEl.dataset.id!==_cstLinkFrom) _cstReparent(_cstLinkFrom,nodeEl.dataset.id);
     _cstLinkFrom=null;
   }
 }
@@ -3210,6 +3215,8 @@ function _cstHoverSet(S){ if(!_cstHover) return null; const s=new Set([_cstHover
 function _cstSetHover(id){ _cstHover=id; const st=document.getElementById("cst-stage"); if(!st) return; const S=_cstState(); const nb=_cstHoverSet(S); if(id) st.classList.add("cst-dimming"); else st.classList.remove("cst-dimming"); st.querySelectorAll(".cst-node").forEach(el=>el.classList.toggle("cst-hl", !!(nb&&nb.has(el.dataset.id)))); _cstDrawLinks(); }
 function _cstWheel(e){ e.preventDefault(); const ca=document.getElementById("cst-canvas"); const r=ca.getBoundingClientRect(); const mx=e.clientX-r.left, my=e.clientY-r.top; const old=_cstView.k; const k=Math.max(0.35,Math.min(3,old*(e.deltaY<0?1.12:0.89))); _cstView.tx=mx-(mx-_cstView.tx)*(k/old); _cstView.ty=my-(my-_cstView.ty)*(k/old); _cstView.k=k; _cstApplyView(); }
 function _cstPanStart(e){ if(e.target.closest && e.target.closest(".cst-node")) return; const t=(e.touches&&e.touches[0])||e; _cstPan={sx:t.clientX, sy:t.clientY, tx:_cstView.tx, ty:_cstView.ty}; if(_cstSel){ _cstSel=null; _cstUpdateSel(); } }
+function _cstVisible(id){ const S=_cstState(); let p=S.nodes[id]&&S.nodes[id].parentId, g=0; while(p&&g++<60){ const pn=S.nodes[p]; if(!pn) break; if(pn.collapsed) return false; p=pn.parentId; } return true; }
+function _cstReparent(childId,parentId){ const S=_cstState(); if(!S.nodes[childId]||!S.nodes[parentId]||childId===parentId) return; let p=parentId,g=0; while(p&&g++<60){ if(p===childId) return; p=S.nodes[p]&&S.nodes[p].parentId; } S.nodes[childId].parentId=parentId; if(!S.links.some(l=>(l.a===parentId&&l.b===childId)||(l.a===childId&&l.b===parentId))) S.links.push({a:parentId,b:childId,free:false}); _cstSel=childId; _cstRender(); _cstStartPhysics(); _cstPersist(); }
 function _cstUpdateSel(){ document.querySelectorAll(".cst-node").forEach(el=>el.classList.toggle("cst-sel", el.dataset.id===_cstSel)); }
 function _cstSelect(id){ _cstSel=id; _cstUpdateSel(); }
 function _cstNewNode(parentId){
