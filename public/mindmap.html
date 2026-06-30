@@ -278,6 +278,12 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 .node-wrap.collapsed .node-toggle{opacity:.8;background:rgba(212,175,55,.5)}
 /* Touch devices have no hover — surface the collapse handle by default (skill ux Touch HIGH) */
 @media (pointer:coarse){.node-toggle{opacity:.7}}
+.node-div.node-constellation{border-radius:50% !important;background:radial-gradient(circle at 38% 32%,#ffe7a8,#ffb877 72%) !important;border:2px solid #ffcf86 !important;color:#7a4a12 !important;font-weight:700 !important;box-shadow:0 0 28px rgba(255,176,90,.6),0 4px 14px rgba(0,0,0,.25) !important;cursor:pointer;text-align:center;position:relative;overflow:visible}
+.node-eye{position:absolute;top:-10px;right:-10px;width:20px;height:20px;border-radius:50%;background:#6366f1;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;z-index:7;box-shadow:0 1px 5px rgba(0,0,0,.3);opacity:.85;user-select:none}
+.node-eye:hover{opacity:1;transform:scale(1.12)}
+.mm-link{color:#7c3aed;cursor:pointer;font-weight:600}
+.mm-link:hover{text-decoration:underline}
+.mm-link-unresolved{color:#9ca3af;opacity:.75}
 /* Quick "branch out": one-tap + button to add a child sub-topic. Sits opposite the
    collapse toggle; shows on hover/selection, and is always visible on touch. */
 .node-add{position:absolute;left:-13px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.65);background:#2e9e5b;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;z-index:6;opacity:0;transition:opacity .15s,transform .1s;user-select:none;line-height:1;box-shadow:0 1px 5px rgba(0,0,0,.3)}
@@ -816,7 +822,7 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <button class="tb-ribbon-tab" id="rtab-templates" onclick="toggleRibbon('templates')" title="תבניות סטטיסטיות" aria-label="תבניות סטטיסטיות"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="tb-chev">▾</span><span class="tb-label">תבניות</span></button>
     <button class="tb-ribbon-tab" id="rtab-files"     onclick="toggleRibbon('files')"     title="ייצוא, ייבוא, ניקוי" aria-label="ייצוא, ייבוא וניקוי"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="tb-chev">▾</span><span class="tb-label">קבצים</span></button>
     <div class="tb-div"></div>
-    <button class="tb-btn" onclick="mmOpenConstellation()" title="אסוציאציות — חלון חיבור חופשי (שמש + קרניים)" aria-label="אסוציאציות"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.4"/><circle cx="5" cy="6" r="1.5"/><circle cx="19" cy="7" r="1.5"/><circle cx="6" cy="18" r="1.5"/><circle cx="18" cy="17" r="1.5"/><line x1="12" y1="12" x2="5" y2="6"/><line x1="12" y1="12" x2="19" y2="7"/><line x1="12" y1="12" x2="6" y2="18"/><line x1="12" y1="12" x2="18" y2="17"/></svg></button>
+    <button class="tb-btn" onclick="mmAddOrOpenConstellation()" title="אסוציאציות — חלון חיבור חופשי (שמש + קרניים)" aria-label="אסוציאציות"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.4"/><circle cx="5" cy="6" r="1.5"/><circle cx="19" cy="7" r="1.5"/><circle cx="6" cy="18" r="1.5"/><circle cx="18" cy="17" r="1.5"/><line x1="12" y1="12" x2="5" y2="6"/><line x1="12" y1="12" x2="19" y2="7"/><line x1="12" y1="12" x2="6" y2="18"/><line x1="12" y1="12" x2="18" y2="17"/></svg></button>
     <button class="tb-btn" onclick="openSearch()" title="חיפוש (Ctrl+F)" aria-label="חיפוש בצמתי המפה"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg></button>
     <button class="tb-btn" onclick="mmTourStart()" title="סיור מודרך" aria-label="התחל סיור מודרך"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l10-5 10 5-10 5z"/><path d="M6 11v5c0 1 2.5 3 6 3s6-2 6-3v-5"/></svg></button>
   </div>
@@ -838,7 +844,7 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <button class="tb-btn" id="zone-create-btn" onclick="mmStartZoneCreate()" title="צור אזור — נקודות חופשיות"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="3" y="3" width="14" height="14" rx="2" stroke-dasharray="3 2"/><path d="M17 17l4 4"/><path d="M21 17v4h-4"/></svg> צור אזור</button>
     <button class="tb-btn" onclick="mmLoadReadyMap(mmCurrentReadyMapId(),'manual')" title="טען מפת מושגים מוכנה — ההערות והעריכות שלך נשמרות">🗺️ טען מפה מוכנה</button>
     <button class="tb-btn" onclick="wsGoDrawing()" title="פתח לוח ציור (Excalidraw) במסך מלא">🎨 לוח ציור</button>
-    <button class="tb-btn" onclick="mmOpenConstellation()" title="אסוציאציות — חלון חיבור חופשי (שמש + קרניים): גרור רעיונות, צייר חיבורים, ערבב">&#10024; אסוציאציות</button>
+    <button class="tb-btn" onclick="mmAddOrOpenConstellation()" title="אסוציאציות — חלון חיבור חופשי (שמש + קרניים): גרור רעיונות, צייר חיבורים, ערבב">&#10024; אסוציאציות</button>
   </div>
   <div class="ribbon-group" id="ribbon-view" style="display:none">
     <button class="tb-btn" onclick="mmMacroView()" title="מבט-על: כווץ הכול לענפים הראשיים">&#9776; מבט-על</button>
@@ -1209,6 +1215,7 @@ function mmNode(type,text,x,y,parentId,color){
   const n={id:uid(),type,text,x,y,color,parentId,childIds:[],collapsed:false,W:140,H:40};
   if(type==='equation'){n.latex='\\frac{x}{2}';}
   if(type==='canvas'){n.scene=[];n.W=220;n.H=145;} // canvas nodes are larger to show preview
+  if(type==='constellation'){n.W=108;n.H=108;} // אסוציאציות portal sphere
   MM.nodes[n.id]=n;
   if(parentId&&MM.nodes[parentId]){MM.nodes[parentId].childIds.push(n.id);}
   return n;
@@ -1913,6 +1920,40 @@ function mmFitAllNodes(){
   }
 }
 
+// ── @mention links: render @Name / @[Multi word] as clickable spans → jump to a node (or open a vault note). ──
+function _mmInObs(){ return !!(window.parent && window.parent!==window); }
+function mmResolveLink(name){
+  const t=String(name||'').trim().toLowerCase(); if(!t) return null;
+  for(const id in MM.nodes){ const n=MM.nodes[id]; if(!n) continue;
+    if(String(n.text||'').trim().toLowerCase()===t || (n.title && String(n.title).trim().toLowerCase()===t)) return {kind:'node', id}; }
+  const S=MM.constellation; if(S&&S.nodes){ for(const id in S.nodes){ const cn=S.nodes[id]; if(cn && String(cn.text||'').trim().toLowerCase()===t) return {kind:'cst', id}; } }
+  return null;
+}
+function mmLinkClick(name){
+  const r=mmResolveLink(name);
+  if(r && r.kind==='node'){ MM.sel=r.id; MM.multiSel=[]; if(document.getElementById('cst-overlay') && typeof mmCloseConstellation==='function') mmCloseConstellation(); mmRender(); if(typeof panToNode==='function' && MM.nodes[r.id]) panToNode(MM.nodes[r.id]); return; }
+  if(r && r.kind==='cst'){ if(!document.getElementById('cst-overlay') && typeof mmOpenConstellation==='function') mmOpenConstellation(); if(typeof _cstSelect==='function') _cstSelect(r.id); return; }
+  if(_mmInObs()){ try{ window.parent.postMessage({type:'mm:open-note', data:{title:String(name).trim()}}, '*'); }catch(e){} }
+}
+function mmRenderTextWithLinks(container, text){
+  if(!container) return; container.textContent='';
+  const s=String(text==null?'':text);
+  if(s.indexOf('@')===-1){ container.textContent=s; return; }
+  const re=/@\[([^\]]+)\]|@([^\s@\[\]]+)/g; let last=0, m;
+  while((m=re.exec(s))){
+    if(m.index>last) container.appendChild(document.createTextNode(s.slice(last,m.index)));
+    const name=(m[1]!==undefined)?m[1]:m[2];
+    const sp=document.createElement('span'); sp.textContent='@'+name;
+    sp.className='mm-link'+((!mmResolveLink(name)&&!_mmInObs())?' mm-link-unresolved':'');
+    sp.title='קישור: '+name;
+    sp.onmousedown=(e)=>e.stopPropagation(); sp.ontouchstart=(e)=>e.stopPropagation();
+    sp.onclick=(e)=>{ e.stopPropagation(); e.preventDefault(); mmLinkClick(name); };
+    container.appendChild(sp);
+    last=re.lastIndex;
+  }
+  if(last<s.length) container.appendChild(document.createTextNode(s.slice(last)));
+}
+
 function mmRender(){
   // §24: positions are derived. Recompute via tidy-tree unless an animation
   // is currently easing positions (window._mmAnimating is set by
@@ -2004,7 +2045,7 @@ function mmRender(){
     // Topic nodes (mapped to a course topic → 📖 תיאוריה / 📝 תרגול) get a
     // distinct GOLD liquid-glass treatment so they stand out from plain branches.
     const isTopicNode = !!n.topicId;
-    nodeDiv.className='node-div'+((sel||multiSel)?' selected':'')+(n.type==='equation'?' eq-node':'')+(n.type==='root'?' node-root':'')+(isTopicNode?' node-topic':'');
+    nodeDiv.className='node-div'+((sel||multiSel)?' selected':'')+(n.type==='equation'?' eq-node':'')+(n.type==='root'?' node-root':'')+(isTopicNode?' node-topic':'')+(n.type==='constellation'?' node-constellation':'');
     nodeDiv.id='nd_'+id;
     // Topic nodes: let the .node-topic CSS gradient own the background.
     if(!isTopicNode) nodeDiv.style.background=n.color||'#60a5fa';
@@ -2023,7 +2064,7 @@ function mmRender(){
       img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:10px;display:block;pointer-events:none';
       nodeDiv.appendChild(img);
     }
-    else{nodeDiv.textContent=n.text;}
+    else{mmRenderTextWithLinks(nodeDiv, n.text);}
     nodeDiv.oncontextmenu=e=>{e.preventDefault();showNodeActions(e,n.id);};
     nodeDiv.onclick=(e)=>{
       if(e && (e.ctrlKey||e.metaKey||e.shiftKey)){
@@ -2055,10 +2096,20 @@ function mmRender(){
         if(typeof mmFitVisibleSubtree === 'function') mmFitVisibleSubtree(id);
       }
     };
+    if(n.type==='constellation'){
+      nodeDiv.onclick=e=>{ e.stopPropagation(); mmOpenConstellation(); };
+      nodeDiv.ondblclick=e=>{ e.stopPropagation(); };
+      nodeDiv.title='אסוציאציות — לחץ לפתיחת מרחב החיבור החופשי';
+      if(MM.constellationPreview!==false){ const _has=MM.constellation&&MM.constellation.nodes&&Object.keys(MM.constellation.nodes).length; nodeDiv.innerHTML = _has ? _cstMiniSvg(Math.min(n.W||108,n.H||108)-16) : '<span style="font-size:13px;font-weight:700;color:#7a4a12">✨</span>'; }
+      const _eye=document.createElement('div'); _eye.className='node-eye'; _eye.textContent='👁'; _eye.title='הצג/הסתר תצוגה מקדימה';
+      _eye.onmousedown=e=>e.stopPropagation(); _eye.ontouchstart=e=>e.stopPropagation();
+      _eye.onclick=e=>{ e.stopPropagation(); MM.constellationPreview=(MM.constellationPreview===false); mmRender(); };
+      nodeDiv.appendChild(_eye);
+    }
     if(n.type==='equation'){
       nodeDiv.title='Double-click to edit';
       nodeDiv.ondblclick=e=>{e.stopPropagation();openEquationModal(id,'edit');};
-    } else if(n.type !== 'summary' && n.type !== 'canvas') {
+    } else if(n.type !== 'summary' && n.type !== 'canvas' && n.type !== 'constellation') {
       // Plain text branch / root: double-click opens the inline text editor.
       // (Was missing — only equations had this. Made the mindmap feel broken.)
       nodeDiv.title = 'לחץ פעמיים לעריכה';
@@ -2520,12 +2571,12 @@ function mmRender(){
 
       nodeEl.addEventListener('mousedown', ev => {
         if(ev.button !== 0) return;
-        if(ev.target.closest('.node-toggle,.node-add,button,input,.node-note-badge')) return;
+        if(ev.target.closest('.node-toggle,.node-add,.node-eye,button,input,.node-note-badge')) return;
         ev.stopPropagation();
         startDrag(ev.clientX, ev.clientY, false);
       });
       nodeEl.addEventListener('touchstart', ev => {
-        if(ev.target.closest('.node-toggle,.node-add,button,input,.node-note-badge')) return;
+        if(ev.target.closest('.node-toggle,.node-add,.node-eye,button,input,.node-note-badge')) return;
         if(ev.touches.length !== 1) return;
         ev.stopPropagation();
         startDrag(ev.touches[0].clientX, ev.touches[0].clientY, true);
@@ -3042,6 +3093,31 @@ function _cstInjectCSS(){
 @media(pointer:coarse){.cst-dot{width:16px;height:16px;}.cst-pin,.cst-handle{opacity:0.9;}.cst-lbl{max-width:100px;}}`;
   document.head.appendChild(s);
 }
+// Tiny SVG thumbnail of the אסוציאציות space (sun + node dots + links) shown inside the sphere.
+function _cstMiniSvg(sz){
+  sz=Math.max(40,sz||80);
+  const S=(MM.constellation&&MM.constellation.nodes)?MM.constellation:{sun:null,nodes:{},links:[]};
+  const pts=Object.values(S.nodes||{}).filter(n=>typeof n.x==='number'&&typeof n.y==='number');
+  if(!pts.length) return '<span style="font-size:13px;font-weight:700;color:#7a4a12">✨</span>';
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  for(const n of pts){ minX=Math.min(minX,n.x);maxX=Math.max(maxX,n.x);minY=Math.min(minY,n.y);maxY=Math.max(maxY,n.y); }
+  const w=(maxX-minX)||1,h=(maxY-minY)||1,pad=8,s=Math.min((sz-pad*2)/w,(sz-pad*2)/h);
+  const tx=x=>pad+(x-minX)*s, ty=y=>pad+(y-minY)*s;
+  let svg='<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 '+sz+' '+sz+'" style="display:block;pointer-events:none">';
+  for(const l of (S.links||[])){ const a=S.nodes[l.a],b=S.nodes[l.b]; if(!a||!b)continue; svg+='<line x1="'+tx(a.x).toFixed(1)+'" y1="'+ty(a.y).toFixed(1)+'" x2="'+tx(b.x).toFixed(1)+'" y2="'+ty(b.y).toFixed(1)+'" stroke="'+(l.free?'#7c3aed':'#c9a24a')+'" stroke-width="1" opacity="0.7"/>'; }
+  svg+='<circle cx="'+(sz/2)+'" cy="'+(sz/2)+'" r="5" fill="#ff9e3d"/>';
+  for(const n of pts){ svg+='<circle cx="'+tx(n.x).toFixed(1)+'" cy="'+ty(n.y).toFixed(1)+'" r="2.6" fill="#5a3da0"/>'; }
+  return svg+'</svg>';
+}
+function mmAddOrOpenConstellation(){
+  const ex = Object.values(MM.nodes).find(n=>n && n.type==='constellation');
+  if(ex){ MM.sel=ex.id; mmOpenConstellation(); return; }
+  const parent = MM.nodes[MM.root] || Object.values(MM.nodes)[0];
+  if(!parent){ mmOpenConstellation(); return; }
+  const by = (typeof mmNextChildY==='function') ? mmNextChildY(parent) : (parent.y+140);
+  const n = mmNode('constellation','✨ אסוציאציות', parent.x + (typeof MM_XSTEP!=='undefined'?MM_XSTEP:230), by, parent.id, '#ffb877');
+  if(typeof mmFinishAdd==='function') mmFinishAdd(n,false); else { mmPushHistory(); mmRender(); }
+}
 function mmOpenConstellation(){
   _cstInjectCSS();
   const S=_cstState();
@@ -3095,7 +3171,7 @@ function _cstRender(){
     const el=document.createElement('div'); el.className='cst-node'+(nd.pinned?' pinned':'')+(id===_cstSel?' cst-sel':''); el.dataset.id=id;
     el.style.left=nd.x+'px'; el.style.top=nd.y+'px';
     el.innerHTML='<span class="cst-dot"></span><span class="cst-pin" title="נעץ/שחרר">📌</span><span class="cst-lbl"></span><span class="cst-handle" title="גרור לחיבור">◦</span>'; var _cdeg=S.links.reduce(function(a,l){return a+((l.a===id||l.b===id)?1:0)},0)+(S.sun?1:0); var _csz=Math.max(10,Math.min(28,10+_cdeg*3.2)); var _cd=el.querySelector(".cst-dot"); _cd.style.background=nd.color||"#a78bfa"; _cd.style.width=_csz+"px"; _cd.style.height=_csz+"px";
-    el.querySelector('.cst-lbl').textContent=nd.text; if(_kids[id]&&_kids[id].length){ el.classList.add('cst-haskids'); if(nd.collapsed) el.classList.add('cst-collapsed'); const _cb=document.createElement('span'); _cb.className='cst-collapse'; _cb.textContent=nd.collapsed?'+':'\u2212'; _cb.title=nd.collapsed?'הרחב':'כווץ'; _cb.onclick=(ev)=>{ ev.stopPropagation(); nd.collapsed=!nd.collapsed; _cstRender(); _cstStartPhysics(); _cstPersist(); }; el.appendChild(_cb); }
+    mmRenderTextWithLinks(el.querySelector('.cst-lbl'), nd.text); if(_kids[id]&&_kids[id].length){ el.classList.add('cst-haskids'); if(nd.collapsed) el.classList.add('cst-collapsed'); const _cb=document.createElement('span'); _cb.className='cst-collapse'; _cb.textContent=nd.collapsed?'+':'\u2212'; _cb.title=nd.collapsed?'הרחב':'כווץ'; _cb.onclick=(ev)=>{ ev.stopPropagation(); nd.collapsed=!nd.collapsed; _cstRender(); _cstStartPhysics(); _cstPersist(); }; el.appendChild(_cb); }
     stage.appendChild(el); _cstWireNode(el,id);
   }
   _cstDrawLinks();
