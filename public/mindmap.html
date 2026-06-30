@@ -3008,7 +3008,37 @@ function _cstInjectCSS(){
 .cst-list-it:hover{background:#f3eefc;}
 .cst-toast{position:absolute;bottom:54px;left:50%;transform:translateX(-50%);background:#4c2c80;color:#fff;padding:8px 14px;border-radius:999px;font-size:12px;z-index:30;transition:opacity .4s;}
 .cst-node.cst-sel{box-shadow:0 0 0 2px #7c3aed,0 4px 16px rgba(60,30,100,0.28);border-color:#5b21b6;}.cst-node-input{border:none;outline:none;background:transparent;font-size:12px;color:#33264d;font-family:inherit;min-width:46px;max-width:160px;padding:0;}
-@media(pointer:coarse){.cst-node{padding:8px 12px;gap:10px;font-size:13px;}.cst-pin,.cst-handle{font-size:19px;opacity:1;padding:2px;}.cst-lbl{max-width:130px;}.cst-tb{padding:8px 12px;font-size:13px;}}`;
+@media(pointer:coarse){.cst-node{padding:8px 12px;gap:10px;font-size:13px;}.cst-pin,.cst-handle{font-size:19px;opacity:1;padding:2px;}.cst-lbl{max-width:130px;}.cst-tb{padding:8px 12px;font-size:13px;}}
+/* ── Obsidian-style dark local-graph look ── */
+.cst-overlay{background:rgba(8,8,12,0.66);backdrop-filter:blur(5px);}
+.cst-win{background:#17151d;border:1px solid #2b2833;box-shadow:0 26px 80px rgba(0,0,0,0.6);}
+.cst-titlebar{background:#1e1c25;border-bottom:1px solid #2b2833;}
+.cst-title{color:#e7e2f2;}
+.cst-sun-label{color:#d9a96c;}
+.cst-tb{background:#262430;border:1px solid #38343f;color:#cdc6dd;}
+.cst-tb:hover{background:#322e3c;}
+.cst-tb.cst-primary{background:#7c3aed;border-color:#7c3aed;color:#fff;}
+.cst-canvas{background:radial-gradient(circle at 50% 46%,#242030 0%,#16141d 64%,#0d0c12 100%);}
+.cst-hint{background:#1e1c25;border-top:1px solid #2b2833;color:#8b8399;}
+.cst-hint b{color:#cdc6dd;}
+.cst-sun{width:60px;height:60px;background:radial-gradient(circle,#ffe1a0,#e89a39);border:1.5px solid rgba(255,200,120,0.45);box-shadow:0 0 48px rgba(255,160,70,0.4);color:#5a3410;font-size:10px;}
+.cst-sun-t{max-width:50px;}
+.cst-node{background:transparent;border:none;box-shadow:none;padding:0;flex-direction:column;gap:4px;white-space:normal;}
+.cst-dot{width:13px;height:13px;border-radius:50%;background:#a78bfa;box-shadow:0 0 7px rgba(167,139,250,0.45);transition:transform .12s,box-shadow .12s;}
+.cst-node:hover .cst-dot{transform:scale(1.3);}
+.cst-node.cst-sel{box-shadow:none;}
+.cst-node.cst-sel .cst-dot{box-shadow:0 0 0 3px rgba(167,139,250,0.75),0 0 13px rgba(124,58,237,0.7);}
+.cst-node.pinned{box-shadow:none;}
+.cst-node.pinned .cst-dot{box-shadow:0 0 0 2px #ffb877,0 0 10px rgba(255,170,80,0.5);}
+.cst-lbl{color:#bdb6cf;font-size:11px;max-width:118px;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,0.7);}
+.cst-lbl:hover{text-decoration:none;color:#fff;}
+.cst-node:hover .cst-lbl{color:#fff;}
+.cst-pin{position:absolute;top:-7px;right:-7px;font-size:10px;opacity:0;}
+.cst-node:hover .cst-pin,.cst-node.pinned .cst-pin{opacity:0.95;}
+.cst-handle{position:absolute;bottom:-6px;left:-6px;font-size:13px;color:#a78bfa;opacity:0;}
+.cst-node:hover .cst-handle{opacity:0.9;}
+.cst-node-input{color:#f0ecff;text-align:center;}
+@media(pointer:coarse){.cst-dot{width:16px;height:16px;}.cst-pin,.cst-handle{opacity:0.9;}.cst-lbl{max-width:100px;}}`;
   document.head.appendChild(s);
 }
 function mmOpenConstellation(){
@@ -3060,8 +3090,8 @@ function _cstRender(){
   for(const id in S.nodes){
     const nd=S.nodes[id];
     const el=document.createElement('div'); el.className='cst-node'+(nd.pinned?' pinned':'')+(id===_cstSel?' cst-sel':''); el.dataset.id=id;
-    el.style.left=nd.x+'px'; el.style.top=nd.y+'px'; el.style.borderColor=nd.color||'#7c3aed';
-    el.innerHTML='<span class="cst-pin" title="נעץ/שחרר">📌</span><span class="cst-lbl"></span><span class="cst-handle" title="גרור לחיבור">◦</span>';
+    el.style.left=nd.x+'px'; el.style.top=nd.y+'px';
+    el.innerHTML='<span class="cst-dot"></span><span class="cst-pin" title="נעץ/שחרר">📌</span><span class="cst-lbl"></span><span class="cst-handle" title="גרור לחיבור">◦</span>'; el.querySelector(".cst-dot").style.background=nd.color||"#a78bfa";
     el.querySelector('.cst-lbl').textContent=nd.text;
     ca.appendChild(el); _cstWireNode(el,id);
   }
@@ -3071,8 +3101,8 @@ function _cstDrawLinks(){
   const S=_cstState(); const svg=document.getElementById('cst-links'); const ca=document.getElementById('cst-canvas'); if(!svg||!ca) return;
   const cw=ca.clientWidth||640, ch=ca.clientHeight||420; svg.setAttribute('width',cw); svg.setAttribute('height',ch);
   let h='';
-  if(S.sun){ for(const id in S.nodes){ const n=S.nodes[id]; h+='<line x1="'+(cw/2)+'" y1="'+(ch/2)+'" x2="'+n.x+'" y2="'+n.y+'" stroke="#ffb877" stroke-opacity="0.5" stroke-width="1"/>'; } }
-  for(const l of S.links){ const a=S.nodes[l.a], b=S.nodes[l.b]; if(!a||!b) continue; const col=l.free?'#7c3aed':'#b9add6'; const dash=l.free?'6 5':''; h+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="'+(l.free?2:1.5)+'" stroke-dasharray="'+dash+'"/>'; }
+  if(S.sun){ for(const id in S.nodes){ const n=S.nodes[id]; h+='<line x1="'+(cw/2)+'" y1="'+(ch/2)+'" x2="'+n.x+'" y2="'+n.y+'" stroke="rgba(255,180,120,0.26)" stroke-width="1"/>'; } }
+  for(const l of S.links){ const a=S.nodes[l.a], b=S.nodes[l.b]; if(!a||!b) continue; const col=l.free?'rgba(167,139,250,0.6)':'rgba(255,255,255,0.16)'; const dash=''; h+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="1.2" stroke-dasharray="'+dash+'"/>'; }
   svg.innerHTML=h;
 }
 function _cstStartPhysics(){
