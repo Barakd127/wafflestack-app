@@ -3107,28 +3107,28 @@ function _cstDrawLinks(){
   for(const l of S.links){ const a=S.nodes[l.a], b=S.nodes[l.b]; if(!a||!b) continue; const _inc=_cstHover?(l.a===_cstHover||l.b===_cstHover):true; const col=l.free?('rgba(124,58,237,'+(_inc?0.75:0.07)+')'):('rgba(150,130,195,'+(_inc?0.6:0.12)+')'); h+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="'+(_inc&&_cstHover?1.8:1.2)+'"/>'; }
   svg.innerHTML=h;
 }
+// Even radial placement: golden-angle / phyllotaxis (sunflower) around the sun,
+// so nodes distribute evenly in space and never pile up. Stable by insertion
+// order, so adding a node appends to the spiral without shuffling the rest.
+function _cstLayout(){
+  const S=_cstState(); const ca=document.getElementById("cst-canvas"); if(!ca) return;
+  const cw=ca.clientWidth||640, ch=ca.clientHeight||420, cx=cw/2, cy=ch/2;
+  const ids=Object.keys(S.nodes); const N=ids.length;
+  const fit=Math.min(cw,ch)/2 - 64;
+  const C = N>1 ? fit/Math.sqrt(N-0.5) : 0;
+  const GA=2.399963229544; const r0=S.sun?60:0;
+  ids.forEach((id,i)=>{ const n=S.nodes[id]; const ang=i*GA; const rad=r0+C*Math.sqrt(i+0.5); n._tx=cx+Math.cos(ang)*rad; n._ty=cy+Math.sin(ang)*rad; });
+}
 function _cstStartPhysics(){
-  cancelAnimationFrame(_cstRAF); _cstRAF=null;
-  let _alpha=1;
+  cancelAnimationFrame(_cstRAF); _cstRAF=null; _cstLayout();
   const step=()=>{
     const S=_cstState(); const ca=document.getElementById("cst-canvas"); if(!ca){ _cstRAF=null; return; }
-    const cw=ca.clientWidth||640, ch=ca.clientHeight||420; const ids=Object.keys(S.nodes);
-    if(!ids.length){ _cstRAF=null; return; }
-    const rad={}, fx={}, fy={};
-    for(const id of ids){ const tl=(S.nodes[id].text||"").length; rad[id]=28+Math.min(64,tl*3.2); fx[id]=0; fy[id]=0; const n=S.nodes[id]; if(n.vx===undefined){n.vx=0;n.vy=0;} }
-    for(let i=0;i<ids.length;i++){ const id=ids[i]; const n=S.nodes[id];
-      const dxc=cw/2-n.x, dyc=ch/2-n.y; const dc=Math.hypot(dxc,dyc)||1; const target=S.sun?150:40; fx[id]+=(dxc/dc)*(dc-target)*0.0015; fy[id]+=(dyc/dc)*(dc-target)*0.0015;
-      for(let j=i+1;j<ids.length;j++){ const oid=ids[j]; const o=S.nodes[oid]; let dx=n.x-o.x, dy=n.y-o.y; let d2=dx*dx+dy*dy; if(d2<1)d2=1; const d=Math.sqrt(d2); const ux=dx/d, uy=dy/d;
-        const f=1500/d2; fx[id]+=ux*f; fy[id]+=uy*f; fx[oid]-=ux*f; fy[oid]-=uy*f;
-        const minD=rad[id]+rad[oid]; if(d<minD){ const push=(minD-d)*0.06; fx[id]+=ux*push; fy[id]+=uy*push; fx[oid]-=ux*push; fy[oid]-=uy*push; } } }
-    for(const l of S.links){ const a=S.nodes[l.a], b=S.nodes[l.b]; if(!a||!b) continue; let dx=b.x-a.x, dy=b.y-a.y; const d=Math.hypot(dx,dy)||1; const rest=rad[l.a]+rad[l.b]+24; const f=(d-rest)*0.01; const ux=dx/d, uy=dy/d; fx[l.a]+=ux*f; fy[l.a]+=uy*f; fx[l.b]-=ux*f; fy[l.b]-=uy*f; }
-    _alpha*=0.985;
-    let energy=0;
-    for(const id of ids){ const n=S.nodes[id]; if(n.pinned||(_cstDrag&&_cstDrag.id===id)){ n.vx=0; n.vy=0; continue; }
-      n.vx=(n.vx+fx[id]*_alpha)*0.8; n.vy=(n.vy+fy[id]*_alpha)*0.8; n.x+=n.vx; n.y+=n.vy;
-      n.x=Math.max(36,Math.min(cw-36,n.x)); n.y=Math.max(30,Math.min(ch-24,n.y)); energy+=n.vx*n.vx+n.vy*n.vy; }
+    const ids=Object.keys(S.nodes); let moving=false;
+    for(const id of ids){ const n=S.nodes[id]; if(n.pinned||(_cstDrag&&_cstDrag.id===id)||n._tx===undefined) continue;
+      n.x+=(n._tx-n.x)*0.16; n.y+=(n._ty-n.y)*0.16;
+      if(Math.abs(n._tx-n.x)>0.4||Math.abs(n._ty-n.y)>0.4) moving=true; }
     _cstUpdatePositions();
-    if(_alpha>0.03 && energy>1){ _cstRAF=requestAnimationFrame(step); } else { _cstRAF=null; }
+    if(moving){ _cstRAF=requestAnimationFrame(step); } else { _cstRAF=null; }
   };
   _cstRAF=requestAnimationFrame(step);
 }
