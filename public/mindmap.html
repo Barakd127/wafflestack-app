@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Mind Map v18</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playpen+Sans+Hebrew:wght@400;500;600;700&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playpen+Sans+Hebrew:wght@400;500;600;700&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
 /* Casual handwritten node text (Barak 2026-06-26): Playpen Sans Hebrew —
    one font covering BOTH Hebrew and Latin in a friendly hand-drawn style;
@@ -12,11 +12,11 @@
 .node-div{ font-family:var(--mm-hand) !important; font-size:14px !important; font-weight:600 !important; letter-spacing:.2px; white-space:normal !important; overflow-wrap:normal !important; word-break:keep-all !important; text-align:center !important; }
 .node-div.node-root{ font-size:17px !important; font-weight:700 !important; }
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+<script defer crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 <!-- MathLive is lazy-loaded on demand from openMathEditor(); CSS preloaded so the keyboard appears instantly. -->
-<link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css">
+<link rel="stylesheet" href="https://unpkg.com/mathlive@0.110.0/dist/mathlive-static.css" crossorigin="anonymous">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1a1a}
@@ -7612,12 +7612,12 @@ async function nbEnsureMathLive(){
   if(NB_MATH_LOADED) return;
   // Try ESM first; fall back to script tag if the import fails (older browsers / CSP).
   try {
-    await import('https://unpkg.com/mathlive?module');
+    await import('https://unpkg.com/mathlive@0.110.0?module');
     NB_MATH_LOADED = true;
   } catch(e){
     await new Promise((resolve, reject) => {
       const s = document.createElement('script');
-      s.src = 'https://unpkg.com/mathlive';
+      s.crossOrigin = 'anonymous'; s.src = 'https://unpkg.com/mathlive@0.110.0';
       s.onload = () => { NB_MATH_LOADED = true; resolve(); };
       s.onerror = reject;
       document.head.appendChild(s);
