@@ -372,6 +372,9 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
   #topbar{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding:6px 12px;row-gap:0}
   #topbar::-webkit-scrollbar{display:none}
   #topbar .tb-center{flex-wrap:nowrap}
+  /* Phones: smaller toolbar buttons so more fit on one row and fewer get clipped by the scroll. */
+  #topbar .tb-btn, #topbar .tb-ribbon-tab{height:30px;min-width:30px;padding:0 6px;font-size:12px;gap:1px}
+  #topbar .tb-btn svg, #topbar .tb-ribbon-tab svg{width:16px !important;height:16px !important}
   /* The minimap (bottom-right) overlapped the centered מחשבות sheet bar + zoom
      controls and is of little use on a phone — hide it on small screens. */
   #minimap-container{display:none !important}

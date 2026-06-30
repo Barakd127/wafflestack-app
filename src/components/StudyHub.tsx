@@ -876,6 +876,10 @@ interface TopicSelectorProps {
   userProgress: UserProgress
   onSelectTopic: (topicId: string, mode: 'lesson' | 'quiz') => void
   onBack: () => void
+  darkMode?: boolean
+  onToggleDark?: () => void
+  /** Reports whether the embedded mindmap ("מפה") view is active, so the shell can hide its title bar. */
+  onMapModeChange?: (on: boolean) => void
 }
 
 /**
@@ -1020,7 +1024,7 @@ function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
   )
 }
 
-function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorProps) {
+function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggleDark, onMapModeChange }: TopicSelectorProps) {
   // Re-order topics according to the user's personal plan when one exists.
   // Topics not in the plan trail at the end in their natural order.
   const personalPlan = useLearningStore(s => s.personalPlan)
@@ -1042,6 +1046,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
     personalPlan?.sequence.filter(s => s.hint).map(s => [s.topicId, s.hint as string]) ?? []
   )
   const [viewMode, setViewMode] = useState<'list' | 'mindmap'>('list')
+  useEffect(() => { if (onMapModeChange) onMapModeChange(viewMode === 'mindmap') }, [viewMode])
 
   // The מפה tab embeds the real interactive mindmap (mindmap.html). When a topic
   // node's 📖/📝 chip is clicked it posts {type:'ws-open-topic', topicId, mode}
@@ -1208,9 +1213,14 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
       {viewMode === 'mindmap' ? (
         /* Map view — compact ONE-LINE header (back + toggle), minimal height so the map fills the screen. */
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 5, flexShrink: 0 }}>
-          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-            → חזרה
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+              → חזרה
+            </button>
+            {onToggleDark && (
+              <button onClick={onToggleDark} title={darkMode ? 'מצב בהיר' : 'מצב כהה'} aria-label={darkMode ? 'מצב בהיר' : 'מצב כהה'} style={{ background: 'rgba(127,155,217,0.12)', border: 'none', borderRadius: 8, width: 30, height: 30, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{darkMode ? '☀️' : '🌙'}</button>
+            )}
+          </div>
           <div style={{ display: 'flex', gap: 4, background: 'rgba(127,155,217,0.12)', padding: 3, borderRadius: 999 }}>
             {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => {
               const locked = m === 'mindmap' && !mapUnlocked
@@ -4187,6 +4197,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   // Distraction-free fullscreen for the practice/learning view. When true,
   // sidebar + topbar are hidden so only the quiz + companion tool remain.
   const [learningFullscreen, setLearningFullscreen] = useState(false)
+  const [mapActive, setMapActive] = useState(false) // embedded "מפה" mindmap active → hide the shell title bar on mobile
   // Mobile (<=768px): sidebar collapses entirely and is opened as a hamburger overlay.
   const [isMobile, setIsMobile] = useState<boolean>(() =>
     typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false
@@ -4422,7 +4433,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
 
       {/* Main */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {!(learningFullscreen && internalView === 'learning') && (
+        {!(learningFullscreen && internalView === 'learning') && !(internalView === 'topics' && mapActive && isMobile) && (
           <header ref={topbarTutRef}><TopBar title={title} onLogout={handleLogout} darkMode={darkMode} onToggleDark={onToggleDarkMode} /></header>
         )}
         {internalView === 'home' && (
@@ -4444,6 +4455,9 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
             userProgress={userProgress}
             onSelectTopic={handleSelectTopic}
             onBack={() => setInternalView('courses')}
+            darkMode={darkMode}
+            onToggleDark={isMobile ? onToggleDarkMode : undefined}
+            onMapModeChange={setMapActive}
           />
         )}
         {internalView === 'lesson' && selectedTopic && (
