@@ -1204,7 +1204,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
   }
 
   return (
-    <div className="ws-screen-pad" style={viewMode === 'mindmap' ? { flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '5px 10px 8px' } : { flex: 1, overflow: 'auto', padding: '32px 40px' }}>
+    <div className="ws-screen-pad" style={viewMode === 'mindmap' ? { flex: 1, overflow: 'auto', padding: '5px 8px 6px' } : { flex: 1, overflow: 'auto', padding: '32px 40px' }}>
       {viewMode === 'mindmap' ? (
         /* Map view — compact ONE-LINE header (back + toggle), minimal height so the map fills the screen. */
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 5, flexShrink: 0 }}>
@@ -1273,7 +1273,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack }: TopicSelectorPro
         <iframe
           src={`${import.meta.env.BASE_URL}mindmap.html?v=mm17-20260630&scene=topics&admin=${_adminMode ? '1' : '0'}`}
           title="מפת הנושאים"
-          style={{ width: '100%', flex: 1, minHeight: 0, border: 'none', borderRadius: 16, boxShadow: CARD_SHADOW, display: 'block' }}
+          style={{ width: '100%', height: 'calc(100dvh - 104px)', border: 'none', borderRadius: 14, boxShadow: CARD_SHADOW, display: 'block' }}
           allow="clipboard-read; clipboard-write"
         />
       )}
