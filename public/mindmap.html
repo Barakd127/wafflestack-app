@@ -2956,7 +2956,7 @@ function mmAddCanvas(){
 // nodes → offer to Blend, click a node → jump to it on the map.
 // State persists in MM.constellation (via mmSerializeForSave).
 // ═══════════════════════════════════════════════════════════
-let _cstRAF=null, _cstDrag=null, _cstLinkFrom=null, _cstSeq=0;
+let _cstRAF=null, _cstDrag=null, _cstLinkFrom=null, _cstSeq=0, _cstSel=null, _cstEditing=null;
 function _cstState(){
   if(!MM.constellation || typeof MM.constellation!=='object') MM.constellation={sun:null,nodes:{},links:[]};
   if(!MM.constellation.nodes) MM.constellation.nodes={};
@@ -3007,6 +3007,7 @@ function _cstInjectCSS(){
 .cst-list-it{padding:7px 10px;font-size:12px;cursor:pointer;border-bottom:1px solid #f3f0fa;}
 .cst-list-it:hover{background:#f3eefc;}
 .cst-toast{position:absolute;bottom:54px;left:50%;transform:translateX(-50%);background:#4c2c80;color:#fff;padding:8px 14px;border-radius:999px;font-size:12px;z-index:30;transition:opacity .4s;}
+.cst-node.cst-sel{box-shadow:0 0 0 2px #7c3aed,0 4px 16px rgba(60,30,100,0.28);border-color:#5b21b6;}.cst-node-input{border:none;outline:none;background:transparent;font-size:12px;color:#33264d;font-family:inherit;min-width:46px;max-width:160px;padding:0;}
 @media(pointer:coarse){.cst-node{padding:8px 12px;gap:10px;font-size:13px;}.cst-pin,.cst-handle{font-size:19px;opacity:1;padding:2px;}.cst-lbl{max-width:130px;}.cst-tb{padding:8px 12px;font-size:13px;}}`;
   document.head.appendChild(s);
 }
@@ -3027,7 +3028,7 @@ function mmOpenConstellation(){
       <button class="cst-tb" id="cst-close">&#10005;</button>
     </div>
     <div class="cst-canvas" id="cst-canvas"><svg class="cst-links" id="cst-links"></svg></div>
-    <div class="cst-hint">גרור צומת &middot; &#128204; לנעוץ &middot; גרור מ-&#9702; אל צומת אחר = חיבור (מציע בלנדר) &middot; קליק על שם &rarr; קפיצה למפה</div>
+    <div class="cst-hint">גרור צומת &middot; &#128204; לנעוץ &middot; גרור מ-&#9702; אל צומת אחר = חיבור (מציע בלנדר) &middot; קליק על שם &rarr; קפיצה למפה &middot; <b>Tab</b>=צומת מקושר &middot; <b>Enter</b>=צומת באותה רמה &middot; <b>F2</b>=שם &middot; <b>Del</b>=מחק</div>
   </div>`;
   document.body.appendChild(ov);
   document.getElementById('cst-close').onclick=mmCloseConstellation;
@@ -3042,7 +3043,7 @@ function mmOpenConstellation(){
   document.addEventListener('touchcancel',_cstUp); // OS-cancelled touch (call/notification/palm) — clear stuck drag/link
   _cstRender(); _cstStartPhysics();
 }
-function mmCloseConstellation(){
+function mmCloseConstellation(){ _cstSel=null; _cstEditing=null;
   cancelAnimationFrame(_cstRAF); _cstRAF=null;
   document.removeEventListener('mousemove',_cstMove); document.removeEventListener('mouseup',_cstUp);
   document.removeEventListener('touchmove',_cstMove); document.removeEventListener('touchend',_cstUp);
@@ -3058,7 +3059,7 @@ function _cstRender(){
   if(S.sun){ const sun=document.createElement('div'); sun.className='cst-sun'; sun.style.left=(cw/2)+'px'; sun.style.top=(ch/2)+'px'; sun.innerHTML='<span>☀</span><span class="cst-sun-t"></span>'; sun.querySelector('.cst-sun-t').textContent=S.sun; ca.appendChild(sun); }
   for(const id in S.nodes){
     const nd=S.nodes[id];
-    const el=document.createElement('div'); el.className='cst-node'+(nd.pinned?' pinned':''); el.dataset.id=id;
+    const el=document.createElement('div'); el.className='cst-node'+(nd.pinned?' pinned':'')+(id===_cstSel?' cst-sel':''); el.dataset.id=id;
     el.style.left=nd.x+'px'; el.style.top=nd.y+'px'; el.style.borderColor=nd.color||'#7c3aed';
     el.innerHTML='<span class="cst-pin" title="נעץ/שחרר">📌</span><span class="cst-lbl"></span><span class="cst-handle" title="גרור לחיבור">◦</span>';
     el.querySelector('.cst-lbl').textContent=nd.text;
@@ -3100,10 +3101,11 @@ function _cstWireNode(el,id){
   const S=_cstState();
   const pin=el.querySelector('.cst-pin'), handle=el.querySelector('.cst-handle'), lbl=el.querySelector('.cst-lbl');
   pin.onclick=(e)=>{ e.stopPropagation(); const n=S.nodes[id]; if(!n) return; n.pinned=!n.pinned; el.classList.toggle('pinned'); _cstPersist(); };
-  lbl.onclick=(e)=>{ e.stopPropagation(); _cstJump(id); };
-  const dragStart=(e)=>{ if(e.target===handle||e.target===pin) return; e.preventDefault(); e.stopPropagation(); const p=_cstXY(e); const n=S.nodes[id]; if(!n) return; _cstDrag={id, dx:p.x-n.x, dy:p.y-n.y}; };
+  lbl.onclick=(e)=>{ e.stopPropagation(); const n=S.nodes[id]; if(n&&n.mapId) _cstJump(id); else _cstSelect(id); };
+  const dragStart=(e)=>{ if(e.target===handle||e.target===pin) return; e.preventDefault(); e.stopPropagation(); _cstSelect(id); const p=_cstXY(e); const n=S.nodes[id]; if(!n) return; _cstDrag={id, dx:p.x-n.x, dy:p.y-n.y}; };
   el.addEventListener('mousedown',dragStart);
   el.addEventListener('touchstart',dragStart,{passive:false});
+  el.addEventListener('dblclick',(e)=>{ e.stopPropagation(); _cstEditNode(id,false); });
   const linkStart=(e)=>{ e.preventDefault(); e.stopPropagation(); _cstLinkFrom=id; };
   handle.addEventListener('mousedown',linkStart);
   handle.addEventListener('touchstart',linkStart,{passive:false});
@@ -3148,6 +3150,55 @@ function _cstJump(cstId){
 function _cstAddNew(){
   _cstPrompt('שם הצומת החדש:', '', (txt)=>{ if(!txt) return; const S=_cstState(); const id=_cstUid(); const p=_cstNextPos(); S.nodes[id]={id, mapId:null, text:txt, x:p.x, y:p.y, pinned:false, color:'#7c3aed'}; _cstRender(); _cstPersist(); });
 }
+// ── Associations keyboard flow: select + Tab(child)/Enter(sibling)/F2(rename)/Del ──
+function _cstUpdateSel(){ document.querySelectorAll(".cst-node").forEach(el=>el.classList.toggle("cst-sel", el.dataset.id===_cstSel)); }
+function _cstSelect(id){ _cstSel=id; _cstUpdateSel(); }
+function _cstNewNode(parentId){
+  const S=_cstState(); const ca=document.getElementById("cst-canvas"); if(!ca) return null;
+  const from = parentId && S.nodes[parentId];
+  const id=_cstUid();
+  const bx = from ? Math.max(60,Math.min(ca.clientWidth-60, from.x+(Math.random()*70+50))) : (ca.clientWidth/2+(Math.random()*140-70));
+  const by = from ? Math.max(46,Math.min(ca.clientHeight-40, from.y+(Math.random()*90-45))) : (ca.clientHeight/2+(Math.random()*140-70));
+  S.nodes[id]={id, mapId:null, text:"", x:bx, y:by, pinned:false, color:"#7c3aed", parentId: parentId||null};
+  if(from) S.links.push({a:parentId, b:id, free:true});
+  _cstSel=id; _cstRender(); _cstEditNode(id,true); return id;
+}
+function _cstEditNode(id,isNew){
+  const S=_cstState(); const n=S.nodes[id]; if(!n) return;
+  const el=document.querySelector('.cst-node[data-id="'+id+'"]'); if(!el) return;
+  const lbl=el.querySelector(".cst-lbl"); if(!lbl) return;
+  _cstEditing=id; _cstSel=id; _cstUpdateSel();
+  const inp=document.createElement("input"); inp.className="cst-node-input"; inp.value=n.text||"";
+  lbl.replaceWith(inp); setTimeout(()=>{ inp.focus(); inp.select(); },10);
+  let done=false;
+  const finish=(next)=>{
+    if(done) return; done=true; _cstEditing=null;
+    const v=inp.value.trim();
+    if(!v && isNew){ delete S.nodes[id]; S.links=S.links.filter(l=>l.a!==id&&l.b!==id); _cstSel=null; _cstRender(); _cstPersist(); return; }
+    if(v) n.text=v;
+    _cstRender(); _cstPersist();
+    if(next==="child" && S.nodes[id]) _cstNewNode(id);
+    else if(next==="sibling" && S.nodes[id]) _cstNewNode(n.parentId||null);
+  };
+  inp.onkeydown=(e)=>{
+    e.stopPropagation();
+    if(e.key==="Enter"){ e.preventDefault(); finish("sibling"); }
+    else if(e.key==="Tab"){ e.preventDefault(); finish("child"); }
+    else if(e.key==="Escape"){ e.preventDefault(); done=true; _cstEditing=null; if(isNew){ delete S.nodes[id]; S.links=S.links.filter(l=>l.a!==id&&l.b!==id); _cstSel=null; } _cstRender(); }
+  };
+  inp.onblur=()=>finish(null);
+}
+document.addEventListener("keydown", function(e){
+  if(!document.getElementById("cst-overlay")) return;
+  if(_cstEditing) return;
+  const tag=document.activeElement&&document.activeElement.tagName;
+  if(tag==="INPUT"||tag==="TEXTAREA") return;
+  if(e.key==="Tab"){ e.preventDefault(); e.stopPropagation(); _cstNewNode(_cstSel); }
+  else if(e.key==="Enter"){ e.preventDefault(); e.stopPropagation(); const n=_cstSel&&_cstState().nodes[_cstSel]; _cstNewNode(n?(n.parentId||null):null); }
+  else if(e.key==="F2"){ if(_cstSel){ e.preventDefault(); e.stopPropagation(); _cstEditNode(_cstSel,false); } }
+  else if(e.key==="Delete"||e.key==="Backspace"){ if(_cstSel){ e.preventDefault(); e.stopPropagation(); const S=_cstState(); delete S.nodes[_cstSel]; S.links=S.links.filter(l=>l.a!==_cstSel&&l.b!==_cstSel); _cstSel=null; _cstRender(); _cstPersist(); } }
+  else if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); if(_cstSel){ _cstSel=null; _cstUpdateSel(); } else { mmCloseConstellation(); } }
+}, true);
 function _cstPickSun(){
   _cstPrompt('שם השמש (הנושא המרכזי):', _cstState().sun||'', (txt)=>{ _cstState().sun=txt||null; _cstRender(); _cstPersist(); });
 }
@@ -6218,6 +6269,7 @@ document.addEventListener('keydown', e => {
   if(document.getElementById('wb-overlay').classList.contains('open')) return;
   const tag = document.activeElement && document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'||document.activeElement.isContentEditable) return;
+  if(document.getElementById('cst-overlay')) return;
 
   if(e.altKey && (e.key==='c'||e.key==='C')){ e.preventDefault(); mmCopyBranch(); return; }
   if(e.altKey && (e.key==='v'||e.key==='V')){ e.preventDefault(); mmPasteOutline(); return; }
