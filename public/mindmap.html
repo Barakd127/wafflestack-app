@@ -3198,10 +3198,24 @@ function _cstLayout(){
   const weight={};
   const wfn=(id)=>{ const n=S.nodes[id]; if(n.collapsed||!kids[id]||!kids[id].length){ weight[id]=1; return 1; } let s=0; for(const c of kids[id]) s+=wfn(c); weight[id]=s; return s; };
   let totalW=0; for(const id of top) totalW+=wfn(id);
-  const step=Math.max(74,(Math.min(cw,ch)/2-90)/2);
-  const depthR=(d)=> 110 + (d-1)*step;
-  const place=(id,a0,a1,depth)=>{ const n=S.nodes[id]; const mid=(a0+a1)/2; const rad=depthR(depth); n._tx=cx+Math.cos(mid)*rad; n._ty=cy+Math.sin(mid)*rad; if(n.collapsed||!kids[id]) return; let a=a0; for(const c of kids[id]){ const span=(a1-a0)*(weight[c]/weight[id]); place(c,a,a+span,depth+1); a+=span; } };
-  let a=-Math.PI/2; for(const id of top){ const span=(totalW>0?2*Math.PI*(weight[id]/totalW):0); place(id,a,a+span,1); a+=span; }
+  // Sunflower (golden-angle) spiral of all VISIBLE, non-pinned nodes around the sun — fills the
+  // disk evenly for ANY count (no cramped single ring); relax removes residual overlap. Like Obsidian.
+  const vis=Object.keys(S.nodes).filter(id=>S.nodes[id] && !S.nodes[id].pinned && (typeof _cstVisible!=='function' || _cstVisible(id)));
+  const SP=Math.max(54, Math.sqrt((cw*ch)/Math.max(1,vis.length))*0.5);
+  vis.forEach((id,i)=>{ const n=S.nodes[id]; const ang=i*2.399963; const r=SP*Math.sqrt(i+0.5); n._tx=cx+Math.cos(ang)*r; n._ty=cy+Math.sin(ang)*r; });
+  _cstRelaxTargets(80);
+}
+function _cstRelaxTargets(iters){
+  const S=_cstState(); const ca=document.getElementById("cst-canvas"); const cw=(ca&&ca.clientWidth)||640, ch=(ca&&ca.clientHeight)||420;
+  const ids=Object.keys(S.nodes).filter(id=>S.nodes[id] && S.nodes[id]._tx!==undefined && !S.nodes[id].pinned);
+  const MIN=62;
+  for(let it=0; it<(iters||60); it++){
+    for(let a=0;a<ids.length;a++)for(let b=a+1;b<ids.length;b++){
+      const na=S.nodes[ids[a]], nb=S.nodes[ids[b]]; let dx=nb._tx-na._tx, dy=nb._ty-na._ty; let d=Math.hypot(dx,dy); if(d<0.01){dx=Math.cos(a);dy=Math.sin(a);d=0.01;}
+      if(d<MIN){ const push=(MIN-d)/2, ux=dx/d, uy=dy/d; na._tx-=ux*push; na._ty-=uy*push; nb._tx+=ux*push; nb._ty+=uy*push; }
+    }
+    for(const id of ids){ const n=S.nodes[id]; n._tx=Math.max(40,Math.min(cw-40,n._tx)); n._ty=Math.max(34,Math.min(ch-30,n._ty)); }
+  }
 }
 function _cstStartPhysics(){
   cancelAnimationFrame(_cstRAF); _cstRAF=null; _cstLayout();
