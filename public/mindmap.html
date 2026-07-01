@@ -281,9 +281,9 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 .node-div.node-constellation{border-radius:50% !important;background:radial-gradient(circle at 38% 32%,#ffe7a8,#ffb877 72%) !important;border:2px solid #ffcf86 !important;color:#7a4a12 !important;font-weight:700 !important;box-shadow:0 0 28px rgba(255,176,90,.6),0 4px 14px rgba(0,0,0,.25) !important;cursor:pointer;text-align:center;position:relative;overflow:visible}
 .node-eye{position:absolute;top:-10px;right:-10px;width:20px;height:20px;border-radius:50%;background:#6366f1;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;z-index:7;box-shadow:0 1px 5px rgba(0,0,0,.3);opacity:.85;user-select:none}
 .node-eye:hover{opacity:1;transform:scale(1.12)}
-.mm-link{color:#7c3aed;cursor:pointer;font-weight:600}
-.mm-link:hover{text-decoration:underline}
-.mm-link-unresolved{color:#9ca3af;opacity:.75}
+.mm-link{color:inherit;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px;cursor:pointer;font-weight:inherit}
+.mm-link:hover{text-decoration-thickness:2.5px}
+.mm-link-unresolved{opacity:.6}
 /* Quick "branch out": one-tap + button to add a child sub-topic. Sits opposite the
    collapse toggle; shows on hover/selection, and is always visible on touch. */
 .node-add{position:absolute;left:-13px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.65);background:#2e9e5b;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;z-index:6;opacity:0;transition:opacity .15s,transform .1s;user-select:none;line-height:1;box-shadow:0 1px 5px rgba(0,0,0,.3)}
@@ -722,6 +722,11 @@ body.light .nb-empty{color:rgba(0,0,0,.45)}
   opacity:1; background:#fef3c7; border-color:#f59e0b;
 }
 body.light .node-note-badge{background:rgba(255,255,255,.95)}
+/* Launch-to-Blender badge (🧉): bottom-left, appears on hover; solid violet when already launched. */
+.node-blaunch-badge{position:absolute; bottom:-8px; left:-8px; width:19px; height:19px; border-radius:50%; background:#7c3aed; color:#fff; border:1px solid rgba(255,255,255,.55); display:flex; align-items:center; justify-content:center; font-size:11px; line-height:1; cursor:pointer; opacity:0; transition:opacity .15s, transform .12s; z-index:6; user-select:none; box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.node-wrap:hover .node-blaunch-badge{opacity:.92}
+.node-blaunch-badge.launched{opacity:1; background:#5a3da0}
+.node-blaunch-badge:hover{transform:scale(1.18); box-shadow:0 2px 8px rgba(124,58,237,.6)}
 
 /* ═══ Topic links (📖 תיאוריה / 📝 תרגול) on topic-mapped nodes ═══ */
 .node-topic-links{
@@ -848,6 +853,7 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <button class="tb-btn" onclick="mmLoadReadyMap(mmCurrentReadyMapId(),'manual')" title="טען מפת מושגים מוכנה — ההערות והעריכות שלך נשמרות">🗺️ טען מפה מוכנה</button>
     <button class="tb-btn" onclick="wsGoDrawing()" title="פתח לוח ציור (Excalidraw) במסך מלא">🎨 לוח ציור</button>
     <button class="tb-btn" onclick="mmAddOrOpenConstellation()" title="אסוציאציות — חלון חיבור חופשי (שמש + קרניים): גרור רעיונות, צייר חיבורים, ערבב">&#10024; אסוציאציות</button>
+    <button class="tb-btn" onclick="mmOpenBlender()" title="קנבס בלנדר — לוח עבודה אינסופי בסגנון n8n: שגר צמתים, חבר קלט/פלט, הרץ AI">&#129479; קנבס בלנדר</button>
   </div>
   <div class="ribbon-group" id="ribbon-view" style="display:none">
     <button class="tb-btn" onclick="mmMacroView()" title="מבט-על: כווץ הכול לענפים הראשיים">&#9776; מבט-על</button>
@@ -1862,6 +1868,7 @@ function mmSerializeForSave(){
       zones: Array.isArray(MM.zones) ? MM.zones : [],
       ink: Array.isArray(MM.ink) ? MM.ink : [],
       constellation: (MM.constellation && typeof MM.constellation === 'object') ? MM.constellation : null,
+      blender: (MM.blender && typeof MM.blender === 'object') ? MM.blender : null,
       nodes: {}
     };
     for(const id in MM.nodes){
@@ -2189,6 +2196,18 @@ function mmRender(){
       noteBtn.textContent = hasNote ? '📝' : '＋';
       noteBtn.onclick = (e)=>{ e.stopPropagation(); openNoteEditor(n.id); if(typeof mmTourCompleteIfStep==='function') mmTourCompleteIfStep('add-note'); };
       div.appendChild(noteBtn);
+    }
+
+    // ── Launch-to-Blender badge (🧉): send this node to the Blender workflow canvas as a
+    //    live-linked node. If already launched, reopens the canvas on it. ──
+    if(n.type!=='summary' && n.type!=='constellation' && n.type!=='blender'){
+      const blB=document.createElement('div');
+      blB.className='node-blaunch-badge'+(n.blenderId?' launched':'');
+      blB.title=n.blenderId?'פתח בקנבס בלנדר ↗':'שגר לקנבס בלנדר 🧉';
+      blB.textContent='🧉';
+      blB.onmousedown=(e)=>e.stopPropagation();
+      blB.onclick=(e)=>{ e.stopPropagation(); if(typeof mmLaunchToBlender==='function') mmLaunchToBlender(n.id); };
+      div.appendChild(blB);
     }
 
     // ── Manual resize handle (bottom-right). Drag = set W/H + mark userSized so
@@ -3057,6 +3076,12 @@ function _cstInjectCSS(){
 .cst-modal-lbl{font-size:13px;color:#4c2c80;margin-bottom:8px;}
 .cst-input{width:100%;box-sizing:border-box;border:1px solid #d9cef0;border-radius:8px;padding:8px;font-size:13px;}
 .cst-modal-row{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;}
+.cst-str-row{justify-content:center;}
+.cst-str{flex:1;max-width:96px;}
+.cst-str-on{background:#7c3aed !important;color:#fff !important;border-color:#7c3aed !important;}
+.cst-card-body-view{min-height:120px;max-height:240px;overflow:auto;border:1px solid #e3dcf5;border-radius:8px;padding:8px;font-size:13px;line-height:1.5;color:#33264d;white-space:pre-wrap;overflow-wrap:break-word;cursor:text;}
+.cst-card-body-view.empty{color:#a79fc0;font-style:italic;}
+.cst-card-body-view:hover{border-color:#c9b8ec;}
 .cst-list{max-height:240px;overflow:auto;margin-top:8px;border:1px solid #eee;border-radius:8px;}
 .cst-list-it{padding:7px 10px;font-size:12px;cursor:pointer;border-bottom:1px solid #f3f0fa;}
 .cst-list-it:hover{background:#f3eefc;}
@@ -3196,8 +3221,10 @@ function _cstDrawLinks(){
   const cw=ca.clientWidth||640, ch=ca.clientHeight||420; svg.setAttribute('width',cw); svg.setAttribute('height',ch);
   let h='';
   const _hn=_cstHoverSet(S); if(S.sun){ for(const id in S.nodes){ const n=S.nodes[id]; if((n.parentId&&S.nodes[n.parentId])||!_cstVisible(id)) continue; const _o=_hn?(_hn.has(id)?0.45:0.04):0.26; h+='<line x1="'+(cw/2)+'" y1="'+(ch/2)+'" x2="'+n.x+'" y2="'+n.y+'" stroke="rgba(255,180,120,'+_o+')" stroke-width="1"/>'; } }
-  for(const l of S.links){ const a=S.nodes[l.a], b=S.nodes[l.b]; if(!a||!b||!_cstVisible(l.a)||!_cstVisible(l.b)) continue; const _inc=_cstHover?(l.a===_cstHover||l.b===_cstHover):true; const col=l.free?('rgba(124,58,237,'+(_inc?0.75:0.07)+')'):('rgba(150,130,195,'+(_inc?0.6:0.12)+')'); h+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="'+(_inc&&_cstHover?1.8:1.2)+'"/>'; }
+  const _CST_WMAP={1:1.5, 2:2.75, 3:4}; // free-link thickness by strength w (רופף/בינוני/חזק)
+  S.links.forEach((l,li)=>{ const a=S.nodes[l.a], b=S.nodes[l.b]; if(!a||!b||!_cstVisible(l.a)||!_cstVisible(l.b)) return; const _inc=_cstHover?(l.a===_cstHover||l.b===_cstHover):true; const col=l.free?('rgba(124,58,237,'+(_inc?0.85:0.12)+')'):('rgba(150,130,195,'+(_inc?0.6:0.12)+')'); const base=l.free?(_CST_WMAP[l.w||2]||2.75):1.2; const sw=base*((_inc&&_cstHover)?1.25:1); h+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="'+sw+'"/>'; if(l.free) h+='<line class="cst-link-hit" data-li="'+li+'" x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="transparent" stroke-width="14" style="pointer-events:stroke;cursor:pointer"/>'; });
   svg.innerHTML=h;
+  svg.querySelectorAll('.cst-link-hit').forEach(hit=>{ hit.onclick=(e)=>{ e.stopPropagation(); const l=S.links[+hit.dataset.li]; if(!l) return; const ta=(S.nodes[l.a]&&S.nodes[l.a].text)||'', tb=(S.nodes[l.b]&&S.nodes[l.b].text)||''; _cstConnectMenu(l,ta,tb); }; });
 }
 // Even radial placement: golden-angle / phyllotaxis (sunflower) around the sun,
 // so nodes distribute evenly in space and never pile up. Stable by insertion
@@ -3289,10 +3316,26 @@ function _cstUp(e){
 }
 function _cstMakeLink(a,b){
   const S=_cstState();
-  if(!S.links.some(l=>(l.a===a&&l.b===b)||(l.a===b&&l.b===a))) S.links.push({a,b,free:true});
+  let l=S.links.find(x=>(x.a===a&&x.b===b)||(x.a===b&&x.b===a));
+  if(!l){ l={a,b,free:true,w:2}; S.links.push(l); } else { l.free=true; if(l.w==null) l.w=2; }
   _cstDrawLinks(); _cstPersist();
   const ta=(S.nodes[a]&&S.nodes[a].text)||'', tb=(S.nodes[b]&&S.nodes[b].text)||'';
-  _cstConfirm('לערבב לשילוב חדש?\n'+ta+'  ×  '+tb, ()=>_cstBlend(ta,tb));
+  _cstConnectMenu(l, ta, tb);
+}
+function _cstSetStrength(l,w){ l.free=true; l.w=w; _cstDrawLinks(); _cstPersist(); }
+// Strength picker — opened on connect AND by clicking a link line. 3 levels + keep the 🧉 blend option.
+function _cstConnectMenu(l, ta, tb){
+  const m=_cstModal('<div class="cst-modal-lbl" style="white-space:pre-line">עוצמת הקשר:\n'+ta+'  ×  '+tb+'</div>'
+    +'<div class="cst-modal-row cst-str-row">'
+    +'<button class="cst-tb cst-str" data-w="1">רופף</button>'
+    +'<button class="cst-tb cst-str" data-w="2">בינוני</button>'
+    +'<button class="cst-tb cst-str" data-w="3">חזק</button></div>'
+    +'<div class="cst-modal-row"><button class="cst-tb" id="cst-cmdone">סגור</button><button class="cst-tb cst-primary" id="cst-cmblend">🧉 בלנדר</button></div>'); if(!m) return;
+  const mark=()=>m.querySelectorAll('.cst-str').forEach(b=>b.classList.toggle('cst-str-on', (+b.dataset.w)===(l.w||2)));
+  mark();
+  m.querySelectorAll('.cst-str').forEach(b=>{ b.onclick=()=>{ _cstSetStrength(l, +b.dataset.w); mark(); }; });
+  m.querySelector('#cst-cmdone').onclick=()=>m.remove();
+  m.querySelector('#cst-cmblend').onclick=()=>{ m.remove(); _cstBlend(ta,tb); };
 }
 function _cstBlend(aText,bText){
   try{
@@ -3417,21 +3460,320 @@ function _cstOpenCard(id){
   const card=document.createElement('div'); card.className='cst-card'; card.id='cst-card'; card.setAttribute('dir','rtl');
   card.innerHTML =
     '<div class="cst-card-hd"><input class="cst-card-title" placeholder="כותרת"><button class="cst-card-x" title="סגור">&#10005;</button></div>'+
-    '<textarea class="cst-card-body" placeholder="הערות / תוכן הכרטיס…"></textarea>'+
+    '<div class="cst-card-body-view" title="לחץ לעריכה"></div>'+
+    '<textarea class="cst-card-body" style="display:none" placeholder="הערות / תוכן הכרטיס…"></textarea>'+
     '<div class="cst-card-actions">'+(linked?'<button class="cst-card-btn cst-card-open">&#8599; פתח קישור</button>':'')+'<span style="flex:1"></span><button class="cst-card-btn cst-card-del">&#128465; מחק</button></div>';
   ov.appendChild(card);
   const ti=card.querySelector('.cst-card-title'); ti.value=nd.text||'';
   const bd=card.querySelector('.cst-card-body'); bd.value=nd.note||'';
+  const bv=card.querySelector('.cst-card-body-view');
+  // Card body renders @mention links (clickable); click the view to edit (swaps to the textarea).
+  const renderView=()=>{ if(nd.note && String(nd.note).trim()){ bv.classList.remove('empty'); mmRenderTextWithLinks(bv, nd.note); } else { bv.classList.add('empty'); bv.textContent='הערות / תוכן הכרטיס…'; } };
+  const toEdit=()=>{ bv.style.display='none'; bd.style.display=''; bd.focus(); };
+  const toView=()=>{ bd.style.display='none'; bv.style.display=''; renderView(); };
+  renderView();
+  bv.onclick=(e)=>{ if(e.target.closest('.mm-link')) return; toEdit(); };
   const save=()=>{ nd.text=(ti.value.trim()||nd.text); nd.note=bd.value; _cstRender(); _cstPersist(); };
   ti.oninput=()=>{ nd.text=ti.value; }; ti.onblur=save;
-  bd.oninput=()=>{ nd.note=bd.value; }; bd.onblur=save;
-  ti.onkeydown=(e)=>{ e.stopPropagation(); if(e.key==='Enter'){ e.preventDefault(); bd.focus(); } else if(e.key==='Escape'){ save(); _cstCloseCard(); } };
-  bd.onkeydown=(e)=>{ e.stopPropagation(); if(e.key==='Escape'){ save(); _cstCloseCard(); } };
+  bd.oninput=()=>{ nd.note=bd.value; }; bd.onblur=()=>{ save(); toView(); };
+  ti.onkeydown=(e)=>{ e.stopPropagation(); if(e.key==='Enter'){ e.preventDefault(); toEdit(); } else if(e.key==='Escape'){ save(); _cstCloseCard(); } };
+  bd.onkeydown=(e)=>{ e.stopPropagation(); if(e.key==='Escape'){ e.preventDefault(); save(); toView(); } };
   card.querySelector('.cst-card-x').onclick=()=>{ save(); _cstCloseCard(); };
   card.querySelector('.cst-card-del').onclick=()=>{ delete S.nodes[id]; S.links=S.links.filter(l=>l.a!==id&&l.b!==id); _cstSel=null; _cstCloseCard(); _cstRender(); if(typeof _cstStartPhysics==='function')_cstStartPhysics(); _cstPersist(); };
   const op=card.querySelector('.cst-card-open'); if(op) op.onclick=()=>{ _cstCloseCard(); _cstJump(id); };
   setTimeout(()=>{ ti.focus(); ti.select(); },20);
 }
+
+// ═══════════════════════════════════════════════════════════
+// BLENDER — n8n/ImagineArt-style infinite workflow canvas.
+// Cloned from the CONSTELLATION overlay, but with rectangular cards that have
+// input/output PORTS, directed port→port EDGES (drag out-port → in-port), its
+// own pan/zoom world, "launch to blender" from any map node (live-linked, click
+// to jump back), and an AI RUN that reuses the existing #blend → blend.mjs
+// (Gemini) pipeline — feeding a node's WIRED INPUTS instead of tree children.
+// State persists in MM.blender. Web: AI run disabled (visual + wiring only).
+// ═══════════════════════════════════════════════════════════
+let _blDrag=null, _blWire=null, _blPan=null, _blSeq=0, _blSel=null, _blKey=null;
+function _blState(){
+  if(!MM.blender || typeof MM.blender!=='object') MM.blender={panX:0,panY:0,zoom:1,nodes:{},edges:[]};
+  if(!MM.blender.nodes) MM.blender.nodes={};
+  if(!Array.isArray(MM.blender.edges)) MM.blender.edges=[];
+  if(typeof MM.blender.panX!=='number') MM.blender.panX=0;
+  if(typeof MM.blender.panY!=='number') MM.blender.panY=0;
+  if(typeof MM.blender.zoom!=='number' || !MM.blender.zoom) MM.blender.zoom=1;
+  return MM.blender;
+}
+function _blUid(){ const S=_blState(); let id; do{ id='bl'+(++_blSeq)+'_'+Math.floor(performance.now()); }while(S.nodes[id]); return id; }
+function _blInFrame(){ return !!(window.parent && window.parent!==window); } // iframed by a host (Obsidian OR the web app) → save via postMessage
+function _blIsObsidian(){ try{ return /obsidian/i.test(navigator.userAgent||''); }catch(e){ return false; } } // AI run works only in real Obsidian (Gemini CLI); web app is iframed too, so parent!==window can't tell them apart
+function _blPersist(){
+  window._mmHostLoaded=true;
+  try{
+    if(_blInFrame()) window.parent.postMessage({type:'mm:save', data: mmSerializeForSave()}, '*');
+    else if(typeof _mmCurrentSaveKey!=='undefined') localStorage.setItem(_mmCurrentSaveKey, mmSerializeForSave());
+  }catch(e){}
+}
+function _blInjectCSS(){
+  if(document.getElementById('bl-css')) return;
+  const s=document.createElement('style'); s.id='bl-css';
+  s.textContent=`
+.bl-overlay{position:fixed;inset:0;z-index:9000;background:rgba(16,14,26,0.6);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;}
+.bl-win{width:min(96vw,1100px);height:min(92vh,720px);background:linear-gradient(160deg,#faf7ff,#eef0fb);border:1px solid #ddd7f0;border-radius:18px;box-shadow:0 20px 60px rgba(30,20,70,0.45);display:flex;flex-direction:column;overflow:hidden;}
+.bl-titlebar{display:flex;align-items:center;gap:7px;padding:9px 13px;border-bottom:1px solid #e7e2f5;background:rgba(255,255,255,0.7);flex-wrap:wrap;}
+.bl-title{font-weight:600;color:#4c2c80;font-size:14px;}
+.bl-tb{border:1px solid #d6cef0;background:#fff;color:#5a3da0;border-radius:999px;padding:5px 10px;font-size:12px;cursor:pointer;}
+.bl-tb:hover{background:#f1ebfb;}
+.bl-tb.bl-primary{background:#7c3aed;color:#fff;border-color:#7c3aed;}
+.bl-canvas{position:relative;flex:1;overflow:hidden;background:radial-gradient(circle at 50% 40%,#fdfcff 0%,#eef0fb 65%,#e4e2f6 100%);touch-action:none;cursor:grab;}
+.bl-world{position:absolute;left:0;top:0;transform-origin:0 0;}
+.bl-wires{position:absolute;left:0;top:0;width:10px;height:10px;overflow:visible;pointer-events:none;}
+.bl-node{position:absolute;transform:translate(-50%,-50%);min-width:150px;max-width:230px;background:#fff;border:1.5px solid #7c3aed;border-radius:12px;box-shadow:0 4px 14px rgba(60,30,110,0.16);font-size:12px;color:#2a2140;}
+.bl-node.bl-selected{box-shadow:0 0 0 2px #7c3aed,0 6px 18px rgba(124,58,237,.4);}
+.bl-node-hd{display:flex;align-items:center;gap:6px;padding:6px 9px;cursor:grab;border-bottom:1px solid #efeafb;}
+.bl-node-ttl{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bl-node-jump{cursor:pointer;color:#2e9e5b;font-weight:700;opacity:.75;}
+.bl-node-jump:hover{opacity:1;}
+.bl-node-body{padding:6px 9px;font-size:11px;color:#5a5470;max-height:96px;overflow:auto;white-space:pre-wrap;}
+.bl-node-body.empty{color:#a79fc0;font-style:italic;}
+.bl-node-foot{display:flex;align-items:center;gap:6px;padding:5px 9px 8px;justify-content:flex-end;}
+.bl-run{height:20px;padding:0 10px;border-radius:10px;border:1px solid rgba(124,58,237,.5);background:#7c3aed;color:#fff;font-size:10px;cursor:pointer;}
+.bl-run:disabled{background:#c9c1e4;border-color:#c9c1e4;cursor:not-allowed;}
+.bl-del{height:20px;min-width:22px;border-radius:10px;border:1px solid #eadfe0;background:#fff;color:#c0392b;font-size:11px;cursor:pointer;}
+.bl-port{position:absolute;width:13px;height:13px;border-radius:50%;background:#fff;border:2px solid #7c3aed;cursor:crosshair;z-index:3;}
+.bl-port:hover{background:#7c3aed;}
+.bl-port.bl-in{left:-8px;}
+.bl-port.bl-out{right:-8px;}
+.bl-status{font-size:10px;padding:0 6px;border-radius:8px;line-height:16px;}
+.bl-status.running,.bl-status.queued{background:#fde68a;color:#92400e;}
+.bl-status.done{background:#bbf7d0;color:#166534;}
+.bl-status.error{background:#fecaca;color:#991b1b;}
+.bl-hint{padding:7px 13px;border-top:1px solid #e7e2f5;color:#7c6aa0;font-size:11px;background:rgba(255,255,255,0.6);}
+.bl-empty{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#8a7fb0;font-size:13px;text-align:center;pointer-events:none;line-height:1.7;}
+.bl-modal{position:absolute;inset:0;background:rgba(30,20,50,0.28);display:flex;align-items:center;justify-content:center;z-index:20;}
+.bl-modal-box{background:#fff;border:1px solid #e3dcf5;border-radius:14px;padding:16px;width:min(82%,380px);box-shadow:0 12px 40px rgba(40,20,80,0.3);}
+.bl-toast{position:absolute;bottom:54px;left:50%;transform:translateX(-50%);background:#4c2c80;color:#fff;padding:8px 14px;border-radius:999px;font-size:12px;z-index:30;transition:opacity .4s;}
+`;
+  document.head.appendChild(s);
+}
+function _blApplyTransform(){ const w=document.getElementById('bl-world'); const S=_blState(); if(w) w.style.transform='translate('+S.panX+'px,'+S.panY+'px) scale('+S.zoom+')'; }
+function _blXY(e){ const ca=document.getElementById('bl-canvas'); const S=_blState(); const r=ca?ca.getBoundingClientRect():{left:0,top:0}; const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e; return { x:(t.clientX-r.left-S.panX)/S.zoom, y:(t.clientY-r.top-S.panY)/S.zoom }; }
+function _blSpawnPos(){
+  const ca=document.getElementById('bl-canvas'); const S=_blState();
+  const cw=(ca&&ca.clientWidth)||800, ch=(ca&&ca.clientHeight)||520;
+  const bx=(cw/2-S.panX)/S.zoom, by=(ch/2-S.panY)/S.zoom;
+  const occ=(px,py)=>Object.values(S.nodes).some(n=>Math.hypot((n.x||0)-px,(n.y||0)-py)<70);
+  let x=bx, y=by, i=0;
+  while(occ(x,y) && i<48){ const ang=i*2.399963, r=50+i*12; x=bx+Math.cos(ang)*r; y=by+Math.sin(ang)*r; i++; }
+  return {x,y};
+}
+function _blStatusLabel(s){ return s==='running'?'רץ…':s==='queued'?'בתור':s==='done'?'✓':s==='error'?'שגיאה':s; }
+function _blCleanTitle(t){ return String(t||'').replace(/\s*#blend\??/ig,'').replace(/^\s*✅\s*/,'').trim(); }
+function _blRender(){
+  const S=_blState(); const world=document.getElementById('bl-world'); if(!world) return;
+  world.querySelectorAll('.bl-node').forEach(e=>e.remove());
+  const em=document.getElementById('bl-empty'); if(em) em.style.display=Object.keys(S.nodes).length?'none':'block';
+  const obs=_blIsObsidian();
+  for(const id in S.nodes){
+    const nd=S.nodes[id]; if(typeof nd.x!=='number'||typeof nd.y!=='number'){ const p=_blSpawnPos(); nd.x=p.x; nd.y=p.y; }
+    const el=document.createElement('div'); el.className='bl-node'+(_blSel===id?' bl-selected':''); el.dataset.id=id;
+    el.style.left=nd.x+'px'; el.style.top=nd.y+'px'; el.style.borderColor=nd.color||'#7c3aed';
+    const jump=nd.mapId?'<span class="bl-node-jump" title="קפוץ לצומת במפה">↗</span>':'';
+    const st=(nd.status&&nd.status!=='idle')?'<span class="bl-status '+nd.status+'">'+_blStatusLabel(nd.status)+'</span>':'';
+    const runDis=obs?'':' disabled title="הרצת AI זמינה ב-Obsidian בלבד"';
+    el.innerHTML='<div class="bl-node-hd"><span class="bl-node-ttl"></span>'+jump+'</div>'
+      +'<div class="bl-node-body'+((nd.output&&nd.output.trim())?'':' empty')+'"></div>'
+      +'<div class="bl-node-foot">'+st+'<button class="bl-run"'+runDis+'>&#9658; הרץ</button><button class="bl-del" title="מחק">&#128465;</button></div>';
+    el.querySelector('.bl-node-ttl').textContent=_blCleanTitle(nd.text)||'(ללא שם)';
+    el.querySelector('.bl-node-body').textContent=(nd.output&&nd.output.trim())?nd.output:'— אין פלט עדיין —';
+    (nd.inPorts||[{pid:'in1'}]).forEach((p,i,arr)=>{ const pt=document.createElement('div'); pt.className='bl-port bl-in'; pt.dataset.node=id; pt.dataset.port=p.pid; pt.style.top=(100*(i+1)/(arr.length+1))+'%'; pt.style.transform='translateY(-50%)'; pt.title='קלט'; el.appendChild(pt); });
+    (nd.outPorts||[{pid:'out1'}]).forEach((p,i,arr)=>{ const pt=document.createElement('div'); pt.className='bl-port bl-out'; pt.dataset.node=id; pt.dataset.port=p.pid; pt.style.top=(100*(i+1)/(arr.length+1))+'%'; pt.style.transform='translateY(-50%)'; pt.title='פלט'; el.appendChild(pt); });
+    world.appendChild(el);
+    _blWireNode(el,id);
+  }
+  _blDrawWires();
+}
+function _blWireNode(el,id){
+  const S=_blState();
+  const hd=el.querySelector('.bl-node-hd'), ttl=el.querySelector('.bl-node-ttl');
+  const jump=el.querySelector('.bl-node-jump'), run=el.querySelector('.bl-run'), del=el.querySelector('.bl-del');
+  if(jump) jump.onclick=(e)=>{ e.stopPropagation(); _blJump(id); };
+  if(run){ run.onmousedown=(e)=>e.stopPropagation(); run.onclick=(e)=>{ e.stopPropagation(); _blRun(id, e.shiftKey); }; }
+  if(del){ del.onmousedown=(e)=>e.stopPropagation(); del.onclick=(e)=>{ e.stopPropagation(); _blDeleteNode(id); }; }
+  if(ttl) ttl.ondblclick=(e)=>{ e.stopPropagation(); _blEditNode(id); };
+  el.addEventListener('mousedown',(e)=>{ if(!e.target.closest('.bl-port,.bl-run,.bl-del,.bl-node-jump')) _blSelect(id); });
+  const dragStart=(e)=>{ if(e.target.closest('.bl-port,.bl-run,.bl-del,.bl-node-jump')) return; _blSelect(id); e.preventDefault(); e.stopPropagation(); const p=_blXY(e); const n=S.nodes[id]; if(!n) return; _blDrag={id, dx:p.x-n.x, dy:p.y-n.y}; };
+  hd.addEventListener('mousedown',dragStart);
+  hd.addEventListener('touchstart',dragStart,{passive:false});
+  el.querySelectorAll('.bl-port.bl-out').forEach(pt=>{
+    const start=(e)=>{ e.preventDefault(); e.stopPropagation(); const p=_blXY(e); _blWire={fromNode:id, fromPort:pt.dataset.port, mx:p.x, my:p.y}; };
+    pt.addEventListener('mousedown',start);
+    pt.addEventListener('touchstart',start,{passive:false});
+  });
+}
+function _blMove(e){
+  const S=_blState();
+  if(_blDrag){ const n=S.nodes[_blDrag.id]; if(!n){ _blDrag=null; return; } const p=_blXY(e); n.x=p.x-_blDrag.dx; n.y=p.y-_blDrag.dy; _blUpdatePositions(); if(e.cancelable) e.preventDefault(); return; }
+  if(_blWire){ const p=_blXY(e); _blWire.mx=p.x; _blWire.my=p.y; _blDrawWires(); if(e.cancelable) e.preventDefault(); return; }
+  if(_blPan){ const t=(e.touches&&e.touches[0])||e; S.panX=_blPan.px+(t.clientX-_blPan.x); S.panY=_blPan.py+(t.clientY-_blPan.y); _blApplyTransform(); if(e.cancelable) e.preventDefault(); return; }
+}
+function _blUp(e){
+  if(_blDrag){ _blDrag=null; _blPersist(); }
+  if(_blWire){
+    const t=(e.changedTouches&&e.changedTouches[0])||e;
+    const tgt=document.elementFromPoint(t.clientX,t.clientY);
+    const port=tgt&&tgt.closest&&tgt.closest('.bl-port.bl-in');
+    if(port&&port.dataset.node&&port.dataset.node!==_blWire.fromNode) _blMakeEdge(_blWire.fromNode,_blWire.fromPort,port.dataset.node,port.dataset.port);
+    _blWire=null; _blDrawWires();
+  }
+  if(_blPan){ _blPan=null; _blPersist(); }
+}
+function _blUpdatePositions(){ const S=_blState(); const world=document.getElementById('bl-world'); if(!world) return; world.querySelectorAll('.bl-node').forEach(el=>{ const n=S.nodes[el.dataset.id]; if(n){ el.style.left=n.x+'px'; el.style.top=n.y+'px'; } }); _blDrawWires(); }
+function _blPortXY(nodeId, portId, kind){
+  const S=_blState(); const n=S.nodes[nodeId]; if(!n) return null;
+  const el=document.querySelector('.bl-node[data-id="'+nodeId+'"]');
+  if(el){ const pt=el.querySelector('.bl-port.'+(kind==='in'?'bl-in':'bl-out')+'[data-port="'+portId+'"]');
+    if(pt){ const W=el.offsetWidth, H=el.offsetHeight; return { x:(n.x-W/2)+pt.offsetLeft+pt.offsetWidth/2, y:(n.y-H/2)+pt.offsetTop }; } }
+  return { x:n.x+(kind==='in'?-75:75), y:n.y };
+}
+function _blWirePath(a,b,col,w,dash){
+  const dx=Math.abs(b.x-a.x)*0.5+22; const c1x=a.x+dx, c2x=b.x-dx;
+  return '<path d="M'+a.x+','+a.y+' C'+c1x+','+a.y+' '+c2x+','+b.y+' '+b.x+','+b.y+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-dasharray="'+dash+'" marker-end="url(#bl-arrow)"/>';
+}
+function _blDrawWires(){
+  const S=_blState(); const svg=document.getElementById('bl-wires'); if(!svg) return;
+  let h='<defs><marker id="bl-arrow" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7c3aed"/></marker></defs>';
+  for(const ed of S.edges){ const a=_blPortXY(ed.from,ed.fromPort,'out'), b=_blPortXY(ed.to,ed.toPort,'in'); if(!a||!b) continue; h+=_blWirePath(a,b,'#7c3aed',2,''); }
+  if(_blWire){ const a=_blPortXY(_blWire.fromNode,_blWire.fromPort,'out'); if(a) h+=_blWirePath(a,{x:_blWire.mx,y:_blWire.my},'#a78bfa',2,'6 5'); }
+  svg.innerHTML=h;
+}
+function _blMakeEdge(from,fromPort,to,toPort){
+  const S=_blState(); if(from===to) return;
+  if(S.edges.some(e=>e.from===from&&e.fromPort===fromPort&&e.to===to&&e.toPort===toPort)) return;
+  const reaches=(src,dst)=>{ const seen=new Set(); const stack=[src]; while(stack.length){ const c=stack.pop(); if(c===dst) return true; if(seen.has(c)) continue; seen.add(c); S.edges.forEach(e=>{ if(e.from===c) stack.push(e.to); }); } return false; };
+  if(reaches(to,from)){ _blToast('לא ניתן — ייצור לולאה'); return; }
+  S.edges.push({id:_blUid(), from, fromPort, to, toPort});
+  _blDrawWires(); _blPersist();
+}
+function _blSelect(id){ _blSel=id; document.querySelectorAll('.bl-node').forEach(el=>el.classList.toggle('bl-selected', el.dataset.id===id)); }
+function _blEditNode(id){
+  const S=_blState(); const nd=S.nodes[id]; if(!nd) return;
+  const el=document.querySelector('.bl-node[data-id="'+id+'"]'); if(!el) return;
+  const ttl=el.querySelector('.bl-node-ttl'); if(!ttl) return;
+  const inp=document.createElement('input'); inp.className='cst-node-edit'; inp.value=_blCleanTitle(nd.text); inp.style.width='130px';
+  ttl.replaceWith(inp); inp.focus(); inp.select();
+  let done=false; const commit=()=>{ if(done) return; done=true; nd.text=(inp.value.trim()||nd.text); _blRender(); _blPersist(); };
+  inp.onmousedown=(e)=>e.stopPropagation();
+  inp.onkeydown=(e)=>{ e.stopPropagation(); if(e.key==='Enter'){ e.preventDefault(); commit(); } else if(e.key==='Escape'){ e.preventDefault(); done=true; _blRender(); } };
+  inp.onblur=()=>commit();
+}
+function _blDeleteNode(id){
+  const S=_blState(); const nd=S.nodes[id]; if(!nd) return;
+  if(nd.mapId && MM.nodes[nd.mapId] && MM.nodes[nd.mapId].blenderId===id){ delete MM.nodes[nd.mapId].blenderId; if(typeof mmRender==='function') mmRender(); }
+  delete S.nodes[id]; S.edges=S.edges.filter(e=>e.from!==id && e.to!==id);
+  _blSel=null; _blRender(); _blPersist();
+}
+function _blJump(id){
+  const nd=_blState().nodes[id];
+  if(nd&&nd.mapId&&MM.nodes[nd.mapId]){ MM.sel=nd.mapId; mmCloseBlender(); mmRender(); if(typeof panToNode==='function') panToNode(MM.nodes[nd.mapId]); }
+  else _blToast('צומת חופשי — לא מקושר למפה');
+}
+function _blToast(msg){ const ov=document.getElementById('bl-overlay')||document.body; const t=document.createElement('div'); t.className='bl-toast'; t.textContent=msg; ov.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),400); },2200); }
+function _blRun(id, isAsk){
+  if(!_blIsObsidian()){ _blToast('הרצת AI זמינה ב-Obsidian בלבד'); return; }
+  const S=_blState(); const nd=S.nodes[id]; if(!nd) return;
+  if(!S.edges.some(e=>e.to===id)){ _blToast('חבר קלטים לצומת קודם (גרור פלט→קלט)'); return; }
+  nd.status='queued';
+  nd.text=_blCleanTitle(nd.text)+(isAsk?' #blend?':' #blend');
+  _blRender(); if(typeof mmPushHistory==='function') mmPushHistory(); _blPersist();
+  _blToast('🧉 נשלח לבלנדר — הפלט יופיע כאן');
+}
+function _blCenterOn(id){ const S=_blState(); const nd=S.nodes[id]; const ca=document.getElementById('bl-canvas'); if(!nd||!ca) return; const cw=ca.clientWidth||800, ch=ca.clientHeight||520; if(!S.zoom) S.zoom=1; S.panX=cw/2-nd.x*S.zoom; S.panY=ch/2-nd.y*S.zoom; _blApplyTransform(); _blSelect(id); }
+function _blFit(){
+  const S=_blState(); const ids=Object.keys(S.nodes); const ca=document.getElementById('bl-canvas'); if(!ca) return;
+  const cw=ca.clientWidth||800, ch=ca.clientHeight||520;
+  if(!ids.length){ S.panX=0; S.panY=0; S.zoom=1; _blApplyTransform(); return; }
+  let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+  ids.forEach(id=>{ const n=S.nodes[id]; minx=Math.min(minx,n.x-115); maxx=Math.max(maxx,n.x+115); miny=Math.min(miny,n.y-55); maxy=Math.max(maxy,n.y+55); });
+  const w=maxx-minx, h=maxy-miny;
+  const z=Math.max(0.3,Math.min(1.3, Math.min(cw/(w+80), ch/(h+80))));
+  S.zoom=z; S.panX=cw/2-((minx+maxx)/2)*z; S.panY=ch/2-((miny+maxy)/2)*z; _blApplyTransform();
+}
+function _blAddNew(){
+  const S=_blState(); const id=_blUid(); const p=_blSpawnPos();
+  S.nodes[id]={id, mapId:null, text:'צומת חדש', x:p.x, y:p.y, color:'#7c3aed', inPorts:[{pid:'in1'}], outPorts:[{pid:'out1'}], output:'', status:'idle'};
+  _blRender(); _blPersist(); _blSelect(id); _blEditNode(id);
+}
+function _blPickFromMap(){
+  const ov=document.getElementById('bl-overlay'); if(!ov) return;
+  const m=document.createElement('div'); m.className='bl-modal';
+  m.innerHTML='<div class="bl-modal-box" dir="rtl"><div style="font-size:13px;color:#4c2c80;margin-bottom:8px">שגר צומת מהמפה:</div><input id="bl-search" style="width:100%;box-sizing:border-box;border:1px solid #d9cef0;border-radius:8px;padding:8px;font-size:13px" placeholder="חיפוש..."><div id="bl-list" style="max-height:240px;overflow:auto;margin-top:8px;border:1px solid #eee;border-radius:8px"></div><div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="bl-tb" id="bl-pclose">סגור</button></div></div>';
+  ov.appendChild(m);
+  const list=m.querySelector('#bl-list'), search=m.querySelector('#bl-search');
+  const draw=(q)=>{ list.innerHTML=''; const ql=(q||'').toLowerCase(); let c=0;
+    for(const id in MM.nodes){ const n=MM.nodes[id]; if(!n||!n.text) continue; const t=String(n.text); if(/^\s*✅|^🔹|^💬/.test(t)) continue; if(n.type==='constellation') continue; if(ql&&t.toLowerCase().indexOf(ql)===-1) continue; const it=document.createElement('div'); it.style.cssText='padding:7px 10px;font-size:12px;cursor:pointer;border-bottom:1px solid #f3f0fa'; it.textContent=t.slice(0,64); it.onclick=()=>{ m.remove(); mmLaunchToBlender(id); }; list.appendChild(it); if(++c>=100) break; } };
+  draw(''); setTimeout(()=>search.focus(),30); search.oninput=()=>draw(search.value);
+  m.querySelector('#bl-pclose').onclick=()=>m.remove();
+}
+function mmLaunchToBlender(mapId){
+  const S=_blState(); const mn=MM.nodes[mapId]; if(!mn) return;
+  for(const id in S.nodes){ if(S.nodes[id].mapId===mapId){ mn.blenderId=id; mmOpenBlender(id); return; } }
+  const id=_blUid(); const p=_blSpawnPos();
+  S.nodes[id]={id, mapId, text:mn.text, x:p.x, y:p.y, color:mn.color||'#7c3aed', inPorts:[{pid:'in1'}], outPorts:[{pid:'out1'}], output:'', status:'idle'};
+  mn.blenderId=id;
+  if(typeof mmPushHistory==='function') mmPushHistory();
+  mmOpenBlender(id);
+}
+function mmOpenBlender(focusId){
+  _blInjectCSS();
+  const S=_blState();
+  let ov=document.getElementById('bl-overlay'); if(ov) ov.remove();
+  ov=document.createElement('div'); ov.id='bl-overlay'; ov.className='bl-overlay'; ov.setAttribute('dir','rtl');
+  ov.innerHTML=`<div class="bl-win">
+    <div class="bl-titlebar">
+      <span class="bl-title">&#129479; קנבס בלנדר</span>
+      <span style="flex:1"></span>
+      <button class="bl-tb" id="bl-btn-add">&#43; צומת</button>
+      <button class="bl-tb" id="bl-btn-map">&#43; מהמפה</button>
+      <button class="bl-tb" id="bl-btn-fit">&#9635; מרכז</button>
+      <button class="bl-tb" id="bl-close">&#10005;</button>
+    </div>
+    <div class="bl-canvas" id="bl-canvas"><div class="bl-world" id="bl-world"><svg class="bl-wires" id="bl-wires"></svg></div><div class="bl-empty" id="bl-empty">קנבס ריק — שגר צומת מהמפה (&#129479; על צומת) או "&#43; מהמפה".<br>גרור פורט ימני (פלט) &#8592; לפורט שמאלי (קלט) כדי לחבר.</div></div>
+    <div class="bl-hint">גרור כותרת=הזזה &middot; גרור פורט&#8594;פורט=חיבור &middot; דאבל-קליק=שם &middot; &#9658;=הרץ AI &middot; &#8599;=קפוץ למפה &middot; גלגלת=זום</div>
+  </div>`;
+  document.body.appendChild(ov);
+  const ca=document.getElementById('bl-canvas');
+  document.getElementById('bl-close').onclick=mmCloseBlender;
+  document.getElementById('bl-btn-add').onclick=()=>_blAddNew();
+  document.getElementById('bl-btn-map').onclick=()=>_blPickFromMap();
+  document.getElementById('bl-btn-fit').onclick=()=>_blFit();
+  ca.addEventListener('mousedown',(e)=>{ if(e.target.closest('.bl-node')||e.target.closest('.bl-modal')) return; _blSelect(null); _blPan={x:e.clientX,y:e.clientY,px:_blState().panX,py:_blState().panY}; });
+  ca.addEventListener('touchstart',(e)=>{ if(e.target.closest('.bl-node')||e.target.closest('.bl-modal')) return; const t=e.touches[0]; if(!t) return; _blPan={x:t.clientX,y:t.clientY,px:_blState().panX,py:_blState().panY}; },{passive:false});
+  ca.addEventListener('wheel',(e)=>{ e.preventDefault(); const st=_blState(); const r=ca.getBoundingClientRect(); const mx=e.clientX-r.left,my=e.clientY-r.top; const old=st.zoom||1; let z=old*(e.deltaY<0?1.1:0.9); z=Math.max(0.3,Math.min(2.5,z)); st.panX=mx-(mx-st.panX)*(z/old); st.panY=my-(my-st.panY)*(z/old); st.zoom=z; _blApplyTransform(); },{passive:false});
+  document.addEventListener('mousemove',_blMove); document.addEventListener('mouseup',_blUp);
+  document.addEventListener('touchmove',_blMove,{passive:false}); document.addEventListener('touchend',_blUp);
+  document.addEventListener('touchcancel',_blUp);
+  _blKey=_blKeyHandler; document.addEventListener('keydown',_blKey,true);
+  _blApplyTransform(); _blRender();
+  if(focusId && S.nodes[focusId]) _blCenterOn(focusId);
+}
+function mmCloseBlender(){
+  document.removeEventListener('mousemove',_blMove); document.removeEventListener('mouseup',_blUp);
+  document.removeEventListener('touchmove',_blMove); document.removeEventListener('touchend',_blUp);
+  document.removeEventListener('touchcancel',_blUp);
+  if(_blKey){ document.removeEventListener('keydown',_blKey,true); _blKey=null; }
+  _blDrag=null; _blWire=null; _blPan=null; _blSel=null;
+  const ov=document.getElementById('bl-overlay'); if(ov) ov.remove();
+  _blPersist();
+}
+function _blKeyHandler(e){
+  if(!document.getElementById('bl-overlay')) return;
+  const tag=document.activeElement && document.activeElement.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA') return;
+  if(e.key==='Escape'){ e.preventDefault(); mmCloseBlender(); }
+  else if((e.key==='Delete'||e.key==='Backspace') && _blSel){ e.preventDefault(); _blDeleteNode(_blSel); }
+  else if(e.key==='F2' && _blSel){ e.preventDefault(); _blEditNode(_blSel); }
+}
+
 
 function mmCollapseAll(collapse=true){
   Object.values(MM.nodes).forEach(n=>{if(n.type==='branch'||n.type==='equation'||n.type==='canvas')n.collapsed=collapse;});
@@ -6467,6 +6809,7 @@ document.addEventListener('keydown', e => {
   const tag = document.activeElement && document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'||document.activeElement.isContentEditable) return;
   if(document.getElementById('cst-overlay')) return;
+  if(document.getElementById('bl-overlay')){ if(e.key==='Escape'){ e.preventDefault(); mmCloseBlender(); } return; } // Blender canvas open → lock main-map shortcuts
 
   if(e.altKey && (e.key==='c'||e.key==='C')){ e.preventDefault(); mmCopyBranch(); return; }
   if(e.altKey && (e.key==='v'||e.key==='V')){ e.preventDefault(); mmPasteOutline(); return; }
