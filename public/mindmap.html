@@ -853,7 +853,7 @@ body:not(.light) .summary-label{color:#fff;background:linear-gradient(135deg,#63
     <button class="tb-btn" onclick="mmLoadReadyMap(mmCurrentReadyMapId(),'manual')" title="טען מפת מושגים מוכנה — ההערות והעריכות שלך נשמרות">🗺️ טען מפה מוכנה</button>
     <button class="tb-btn" onclick="wsGoDrawing()" title="פתח לוח ציור (Excalidraw) במסך מלא">🎨 לוח ציור</button>
     <button class="tb-btn" onclick="mmAddOrOpenConstellation()" title="אסוציאציות — חלון חיבור חופשי (שמש + קרניים): גרור רעיונות, צייר חיבורים, ערבב">&#10024; אסוציאציות</button>
-    <button class="tb-btn" onclick="mmOpenBlender()" title="קנבס בלנדר — לוח עבודה אינסופי בסגנון n8n: שגר צמתים, חבר קלט/פלט, הרץ AI">&#129479; קנבס בלנדר</button>
+    <button class="tb-btn" onclick="mmOpenBlenderZone()" title="בלנדר — אזור על המפה: שגר רעיונות (🧉 על צומת), הם מתקבצים באזור אחד. ערבוב AI זמין ב-Obsidian">&#129479; בלנדר (אזור)</button>
   </div>
   <div class="ribbon-group" id="ribbon-view" style="display:none">
     <button class="tb-btn" onclick="mmMacroView()" title="מבט-על: כווץ הכול לענפים הראשיים">&#9776; מבט-על</button>
@@ -3714,14 +3714,61 @@ function _blPickFromMap(){
   draw(''); setTimeout(()=>search.focus(),30); search.oninput=()=>draw(search.value);
   m.querySelector('#bl-pclose').onclick=()=>m.remove();
 }
+// ── Blender = an auto-ZONE on the map (NOT a pop-up). Launching a node drops an idea
+//    card into the "🧉 בלנדר" zone next to one mixer node. Reuses MM.zones + the tree
+//    blender node — no ports, no wiring, no overlay. (Web has no Gemini → the mixer's
+//    Blend is inert here; the zone grouping is the value on web.) ──
+function mmEnsureBlenderZone(){
+  mmZonesEnsureArray();
+  let z = MM.zones.find(z=>z && z.blender);
+  if(!z){
+    const root = MM.nodes[MM.root] || {x:0,y:0};
+    z = { id:'zone_bl_'+Math.floor(performance.now()).toString(36), x:(root.x||0)+380, y:(root.y||0)+60, w:600, h:400, label:'🧉 בלנדר', blender:true };
+    MM.zones.push(z);
+  }
+  let bn = Object.values(MM.nodes).find(n=>n && n.blenderMixer);
+  if(!bn){ bn = mmNode('blender', '🧉 בלנדר — ערבב רעיונות', z.x + z.w/2 - 110, z.y + 26, MM.root, '#7c3aed'); bn.blenderMixer = true; }
+  bn.zoneId = z.id;
+  return { zone:z, node:bn };
+}
+function _blenderZoneLayout(){
+  const z = (MM.zones||[]).find(z=>z && z.blender); if(!z) return;
+  const mixer = Object.values(MM.nodes).find(n=>n && n.blenderMixer && n.zoneId===z.id);
+  if(mixer){
+    const stack=[...(mixer.childIds||[])], seen={};
+    while(stack.length){ const cid=stack.pop(); if(seen[cid]) continue; seen[cid]=1; const c=MM.nodes[cid]; if(!c) continue; c.zoneId=z.id; (c.childIds||[]).forEach(x=>stack.push(x)); }
+  }
+  const members = Object.values(MM.nodes).filter(n=>n && n.zoneId===z.id);
+  const others = members.filter(n=>!n.blenderMixer);
+  const pad=26, colW=196, rowH=58;
+  const cols = Math.max(2, Math.floor((Math.max(z.w,440)-pad*2)/colW));
+  const headH = mixer ? ((mixer.H||50)+30) : 0;
+  if(mixer){ mixer.x = z.x + z.w/2 - (mixer.W||170)/2; mixer.y = z.y + pad; }
+  others.forEach((n,i)=>{ const c=i%cols, r=Math.floor(i/cols); n.x = z.x+pad + c*colW; n.y = z.y + pad + headH + r*rowH; });
+  const rows = Math.max(1, Math.ceil(others.length/cols));
+  z.h = Math.max(z.h, pad + headH + rows*rowH + pad);
+  z.w = Math.max(z.w, pad*2 + cols*colW);
+}
 function mmLaunchToBlender(mapId){
-  const S=_blState(); const mn=MM.nodes[mapId]; if(!mn) return;
-  for(const id in S.nodes){ if(S.nodes[id].mapId===mapId){ mn.blenderId=id; mmOpenBlender(id); return; } }
-  const id=_blUid(); const p=_blSpawnPos();
-  S.nodes[id]={id, mapId, text:mn.text, x:p.x, y:p.y, color:mn.color||'#7c3aed', inPorts:[{pid:'in1'}], outPorts:[{pid:'out1'}], output:'', status:'idle'};
-  mn.blenderId=id;
+  const mn = MM.nodes[mapId]; if(!mn) return;
+  const { zone, node:bn } = mmEnsureBlenderZone();
+  let idea = Object.values(MM.nodes).find(n=>n && n.blenderSrc===mapId);
+  if(!idea){
+    idea = mmNode('branch', mn.text, zone.x+26, zone.y+120, bn.id, mn.color||'#7c3aed');
+    idea.zoneId = zone.id; idea.blenderSrc = mapId;
+    mn.blenderId = idea.id;
+  }
+  _blenderZoneLayout();
   if(typeof mmPushHistory==='function') mmPushHistory();
-  mmOpenBlender(id);
+  mmRender();
+  if(typeof panToNode==='function') panToNode(bn);
+}
+function mmOpenBlenderZone(){
+  const { node:bn } = mmEnsureBlenderZone();
+  _blenderZoneLayout();
+  if(typeof mmPushHistory==='function') mmPushHistory();
+  mmRender();
+  if(typeof panToNode==='function') panToNode(bn);
 }
 function mmOpenBlender(focusId){
   _blInjectCSS();
