@@ -3597,10 +3597,43 @@ function mmEnsureBlenderZone(){
   let z = MM.zones.find(z=>z && z.blender);
   if(!z){
     const root = MM.nodes[MM.root] || {x:0,y:0};
-    z = { id:'zone_bl_'+Math.floor(performance.now()).toString(36), x:(root.x||0)+380, y:(root.y||0)+60, w:640, h:420, label:'🧉 בלנדר', blender:true };
+    z = { id:'zone_bl_'+Math.floor(performance.now()).toString(36), x:(root.x||0)+380, y:(root.y||0)+60, w:780, h:520, label:'🧉 בלנדר', blender:true };
     MM.zones.push(z);
   }
   return { zone:z };
+}
+// AUTO-GROUP: n8n-style flow layout — sources in the left column, each consumer one
+// column right of its deepest input; rows stack inside a column; the zone resizes to
+// fit exactly. Runs on every STRUCTURAL change (launch/add/wire/delete + load); a
+// manual card drag survives until the next structural change re-flows the zone.
+function wfAutoLayout(){
+  const { zone:z } = mmEnsureBlenderZone();
+  const cards = wfCards().filter(n=>n.zoneId===z.id);
+  if(!cards.length){ z.w=Math.max(z.w,520); z.h=Math.max(z.h,340); return; }
+  const S=wfState();
+  const depth={};
+  const dfs=(id,seen)=>{
+    if(depth[id]!==undefined) return depth[id];
+    if(seen.has(id)) return 0;
+    seen.add(id);
+    const ins=S.edges.filter(e=>e.to===id && MM.nodes[e.from] && MM.nodes[e.from].type==='wf');
+    const d=ins.length ? Math.max(...ins.map(e=>dfs(e.from,seen)))+1 : 0;
+    depth[id]=d; return d;
+  };
+  cards.forEach(c=>dfs(c.id,new Set()));
+  const cols={};
+  cards.forEach(c=>{ (cols[depth[c.id]]=cols[depth[c.id]]||[]).push(c); });
+  const PAD=36, GAPX=96, GAPY=28, CW=230;
+  let maxBottom=z.y+PAD;
+  Object.keys(cols).map(Number).sort((a,b)=>a-b).forEach(d=>{
+    let y=z.y+PAD+14;
+    cols[d].sort((a,b)=>(a.y||0)-(b.y||0)); // keep the user's vertical order inside a column
+    cols[d].forEach(c=>{ c.x=z.x+PAD+d*(CW+GAPX); c.y=y; y+=(c.H||130)+GAPY; });
+    maxBottom=Math.max(maxBottom,y);
+  });
+  const maxDepth=Math.max(...cards.map(c=>depth[c.id]||0));
+  z.w=Math.max(520, PAD*2+(maxDepth+1)*(CW+GAPX)-GAPX);
+  z.h=Math.max(340, (maxBottom-z.y)+PAD-GAPY+PAD);
 }
 function wfCards(){ return Object.values(MM.nodes).filter(n=>n && n.type==='wf'); }
 function wfGrowZone(z){
@@ -3615,20 +3648,25 @@ function wfGrowZone(z){
     if(n.y+H+pad > z.y+z.h) z.h = n.y+H+pad - z.y;
   }
 }
-// Legacy v1.5 grid (mixer flow) preserved for old zone members; wf cards keep their own x/y.
+// Zone layout: wf cards auto-group first (n8n columns, zone fitted); legacy v1.5
+// mixer items (old maps) grid BELOW the workflow rows so the two never collide.
 function _blenderZoneLayout(){
   const z=(MM.zones||[]).find(z=>z&&z.blender); if(!z) return;
+  if(typeof wfAutoLayout==='function') wfAutoLayout(); else wfGrowZone(z);
   const mixer=Object.values(MM.nodes).find(n=>n&&n.blenderMixer&&n.zoneId===z.id);
   if(mixer){
     const stack=[...(mixer.childIds||[])], seen={};
     while(stack.length){ const cid=stack.pop(); if(seen[cid]) continue; seen[cid]=1; const c=MM.nodes[cid]; if(!c||c.type==='wf') continue; c.zoneId=z.id; (c.childIds||[]).forEach(x=>stack.push(x)); }
     const legacy=Object.values(MM.nodes).filter(n=>n&&n.zoneId===z.id&&n.type!=='wf'&&!n.blenderMixer);
     const pad=26, colW=196, rowH=58;
+    const hasWf=(typeof wfCards==='function') && wfCards().some(n=>n.zoneId===z.id);
+    const baseY=hasWf ? (z.y+z.h) : (z.y+pad); // below the fitted wf content (or top if no wf)
     const cols=Math.max(2, Math.floor((Math.max(z.w,440)-pad*2)/colW));
-    mixer.x=z.x+z.w/2-(mixer.W||170)/2; mixer.y=z.y+pad;
-    legacy.forEach((n,i)=>{ const c=i%cols, r=Math.floor(i/cols); n.x=z.x+pad+c*colW; n.y=z.y+pad+(mixer.H||50)+30+r*rowH; });
+    mixer.x=z.x+z.w/2-(mixer.W||170)/2; mixer.y=baseY+(hasWf?14:0);
+    legacy.forEach((n,i)=>{ const c=i%cols, r=Math.floor(i/cols); n.x=z.x+pad+c*colW; n.y=mixer.y+(mixer.H||50)+30+r*rowH; });
+    const rows=Math.max(1, Math.ceil(legacy.length/cols));
+    z.h=Math.max(z.h, (mixer.y+(mixer.H||50)+30+rows*rowH+pad)-z.y);
   }
-  wfGrowZone(z);
 }
 // ── cards ─────────────────────────────────────────────────────
 function wfSpawnPos(z){
@@ -3659,6 +3697,7 @@ function mmLaunchToBlender(mapId){
     mn.blenderId=card.id;
   }
   MM.sel=card.id;
+  wfAutoLayout();
   if(typeof mmPushHistory==='function') mmPushHistory();
   mmRender();
   if(typeof panToNode==='function') panToNode(card);
@@ -3726,9 +3765,9 @@ function wfMakeEdge(from,fromPort,to,toPort){
   const reaches=(src,dst)=>{ const seen=new Set(); const stack=[src]; while(stack.length){ const c=stack.pop(); if(c===dst) return true; if(seen.has(c)) continue; seen.add(c); S.edges.forEach(e=>{ if(e.from===c) stack.push(e.to); }); } return false; };
   if(reaches(to,from)){ wfToast('לא ניתן — ייצור לולאה'); return; }
   S.edges.push({id:'e'+Math.floor(performance.now()).toString(36)+Math.floor(Math.random()*999), from, fromPort, to, toPort});
-  wfSync('card', to); wfDrawWires(); wfPersist();
+  wfSync('structure'); wfPersist();
 }
-function wfDeleteEdge(eid){ const S=wfState(); const e=S.edges.find(x=>x.id===eid); S.edges=S.edges.filter(x=>x.id!==eid); if(e) wfSync('card', e.to); _wfSelEdge=null; wfDrawWires(); wfPersist(); }
+function wfDeleteEdge(eid){ const S=wfState(); S.edges=S.edges.filter(x=>x.id!==eid); _wfSelEdge=null; wfSync('structure'); wfPersist(); }
 function wfCleanupNodeEdges(id){
   const S=wfState();
   const n=MM.nodes[id];
@@ -3864,7 +3903,7 @@ const WF_PANEL_CTX={
   toWorld:(e)=>{ const ca=document.getElementById('wfp-canvas'); const r=ca?ca.getBoundingClientRect():{left:0,top:0}; const B=wfState(); const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e; return {x:(t.clientX-r.left-B.panX)/B.zoom, y:(t.clientY-r.top-B.panY)/B.zoom}; }
 };
 function wfSync(reason, id){
-  if(reason==='structure'){ mmRender(); wfpRender(); return; }
+  if(reason==='structure'){ if(typeof wfAutoLayout==='function') wfAutoLayout(); mmRender(); wfpRender(); return; }
   if(reason==='card' && id){
     const n=MM.nodes[id];
     if(n){
@@ -4580,21 +4619,30 @@ function mmRenderZones(){
     };
     wrap.appendChild(lbl);
     if(z.blender){
-      // ⛶ open the workflow in the side panel; ＋ add a card here.
+      // ⛶ open the workflow in the side panel (label chip).
       const pb = document.createElement('div');
       pb.textContent = '⛶';
       pb.title = 'פתח את הבלנדר בפאנל צד';
-      pb.style.cssText = 'position:absolute;top:-12px;inset-inline-end:34px;background:#7c3aed;color:#fff;font:600 11px Rubik,sans-serif;padding:2px 7px;border-radius:6px;cursor:pointer;user-select:none';
+      pb.style.cssText = 'position:absolute;top:-12px;inset-inline-end:10px;background:#7c3aed;color:#fff;font:600 11px Rubik,sans-serif;padding:2px 7px;border-radius:6px;cursor:pointer;user-select:none';
       pb.onmousedown = (e)=>e.stopPropagation();
       pb.onclick = (e) => { e.stopPropagation(); if(typeof wfpOpen==='function') wfpOpen(); };
       wrap.appendChild(pb);
+      // BIG, always-visible add button INSIDE the zone (bottom-center) → node picker.
       const ab = document.createElement('div');
-      ab.textContent = '＋';
-      ab.title = 'הוסף צומת לזרימה';
-      ab.style.cssText = 'position:absolute;top:-12px;inset-inline-end:10px;background:#2e9e5b;color:#fff;font:600 11px Rubik,sans-serif;padding:2px 7px;border-radius:6px;cursor:pointer;user-select:none';
+      ab.textContent = '＋ צומת חדש';
+      ab.title = 'הוסף כרטיס לזרימה — רעיון / ערבוב AI / פתק / תמונה';
+      ab.style.cssText = 'position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;font:600 13px Rubik,sans-serif;padding:6px 16px;border-radius:999px;cursor:pointer;user-select:none;box-shadow:0 3px 10px rgba(124,58,237,.4);white-space:nowrap;z-index:2';
       ab.onmousedown = (e)=>e.stopPropagation();
       ab.onclick = (e) => { e.stopPropagation(); if(typeof wfShowPicker==='function') wfShowPicker(e.clientX, e.clientY, null); };
       wrap.appendChild(ab);
+      // Empty-state hint inside the zone.
+      const hasCards = (typeof wfCards==='function') && wfCards().some(n=>n.zoneId===z.id);
+      if(!hasCards){
+        const hint = document.createElement('div');
+        hint.innerHTML = 'הבלנדר ריק 🧉<br>לחץ <b>＋ צומת חדש</b> למטה, או שגר נושא מהמפה עם תג ה-🧉 שעל כל צומת';
+        hint.style.cssText = 'position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);color:#8a7fb0;font:400 13px/1.8 Rubik,sans-serif;text-align:center;pointer-events:none;max-width:80%';
+        wrap.appendChild(hint);
+      }
     }
 
     // Resize handles (8 — 4 corners + 4 edges).
