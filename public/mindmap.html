@@ -3042,7 +3042,9 @@ function _cstState(){
   return MM.constellation;
 }
 function _cstUid(){ const S=_cstState(); let id; do{ id='c'+(++_cstSeq)+'_'+Math.floor(performance.now()); }while(S.nodes[id]); return id; }
-function _cstPersist(){
+let _cstUndo=[], _cstRedo=[], _cstLastSnap=null; // overlay-local undo: snapshots of MM.constellation
+function _cstSnap(){ try{ return JSON.stringify(_cstState()); }catch(e){ return null; } }
+function _cstSaveRaw(){
   window._mmHostLoaded=true;
   const S=MM.constellation; if(S&&S.nodes){ for(const k in S.nodes){ delete S.nodes[k].vx; delete S.nodes[k].vy; } }
   try{
@@ -3050,6 +3052,32 @@ function _cstPersist(){
     if(_inObs) window.parent.postMessage({type:'mm:save', data: mmSerializeForSave()}, '*');
     else if(typeof _mmCurrentSaveKey!=='undefined') localStorage.setItem(_mmCurrentSaveKey, mmSerializeForSave());
   }catch(e){}
+}
+function _cstPersist(){
+  // Every mutation funnels through here → diff against the last snapshot gives us
+  // one undo step per user action (add/rename/move/link/strength/delete). Ctrl+Z
+  // inside the overlay restores; Ctrl+Y / Ctrl+Shift+Z redoes.
+  const cur=_cstSnap();
+  if(cur!==null && _cstLastSnap!==null && cur!==_cstLastSnap){
+    _cstUndo.push(_cstLastSnap); if(_cstUndo.length>60) _cstUndo.shift();
+    _cstRedo=[];
+  }
+  if(cur!==null) _cstLastSnap=cur;
+  _cstSaveRaw();
+}
+function _cstUndoOp(){
+  if(!_cstUndo.length){ _cstToast('אין מה לבטל'); return; }
+  const cur=_cstSnap(); if(cur!==null) _cstRedo.push(cur);
+  MM.constellation=JSON.parse(_cstUndo.pop());
+  _cstLastSnap=_cstSnap(); _cstSel=null; _cstDrag=null; _cstLinkFrom=null; _cstEditing=null;
+  _cstRender(); if(typeof _cstStartPhysics==='function') _cstStartPhysics(); _cstSaveRaw(); _cstToast('בוטל ↩');
+}
+function _cstRedoOp(){
+  if(!_cstRedo.length){ _cstToast('אין מה לשחזר'); return; }
+  const cur=_cstSnap(); if(cur!==null) _cstUndo.push(cur);
+  MM.constellation=JSON.parse(_cstRedo.pop());
+  _cstLastSnap=_cstSnap(); _cstSel=null;
+  _cstRender(); if(typeof _cstStartPhysics==='function') _cstStartPhysics(); _cstSaveRaw(); _cstToast('שוחזר ↪');
 }
 function _cstInjectCSS(){
   if(document.getElementById('cst-css')) return;
@@ -3180,7 +3208,7 @@ function mmOpenConstellation(){
       <button class="cst-tb" id="cst-close">&#10005;</button>
     </div>
     <div class="cst-canvas" id="cst-canvas"><svg class="cst-links" id="cst-links"></svg></div>
-    <div class="cst-hint">גרור צומת &middot; &#128204; לנעוץ &middot; גרור מ-&#9702; אל צומת אחר = חיבור (מציע בלנדר) &middot; קליק על שם &rarr; קפיצה למפה &middot; <b>Tab</b>=צומת מקושר &middot; <b>Enter</b>=צומת באותה רמה &middot; <b>F2</b>=שם &middot; <b>Del</b>=מחק</div>
+    <div class="cst-hint">גרור צומת &middot; &#128204; לנעוץ &middot; גרור מ-&#9702; אל צומת אחר = חיבור &middot; <b>Tab</b>=צומת מקושר &middot; <b>Enter</b>=צומת באותה רמה &middot; <b>F2</b>=שם &middot; <b>Del</b>=מחק &middot; <b>Ctrl+Z</b>=ביטול</div>
   </div>`;
   document.body.appendChild(ov);
   document.getElementById('cst-close').onclick=mmCloseConstellation;
@@ -3194,6 +3222,7 @@ function mmOpenConstellation(){
   _cstView={tx:0,ty:0,k:1}; const _cca=document.getElementById('cst-canvas'); _cca.addEventListener('wheel',_cstWheel,{passive:false}); _cca.addEventListener('mousedown',_cstPanStart); _cca.addEventListener('touchstart',_cstPanStart,{passive:false});
   document.addEventListener('touchmove',_cstMove,{passive:false}); document.addEventListener('touchend',_cstUp);
   document.addEventListener('touchcancel',_cstUp); // OS-cancelled touch (call/notification/palm) — clear stuck drag/link
+  _cstUndo=[]; _cstRedo=[]; _cstLastSnap=_cstSnap(); // fresh undo baseline per overlay session
   _cstRender(); _cstStartPhysics();
 }
 function mmCloseConstellation(){ _cstSel=null; _cstEditing=null; _cstHover=null; _cstPan=null;
@@ -3412,6 +3441,8 @@ document.addEventListener("keydown", function(e){
   if(_cstEditing) return;
   const tag=document.activeElement&&document.activeElement.tagName;
   if(tag==="INPUT"||tag==="TEXTAREA") return;
+  if((e.ctrlKey||e.metaKey) && (e.key==='z'||e.key==='Z')){ e.preventDefault(); e.stopPropagation(); if(e.shiftKey) _cstRedoOp(); else _cstUndoOp(); return; }
+  if((e.ctrlKey||e.metaKey) && (e.key==='y'||e.key==='Y')){ e.preventDefault(); e.stopPropagation(); _cstRedoOp(); return; }
   if(e.key==="Tab"){ e.preventDefault(); e.stopPropagation(); _cstNewNode(_cstSel); }
   else if(e.key==="Enter"){ e.preventDefault(); e.stopPropagation(); const n=_cstSel&&_cstState().nodes[_cstSel]; _cstNewNode(n?(n.parentId||null):null); }
   else if(e.key==="F2"){ if(_cstSel){ e.preventDefault(); e.stopPropagation(); _cstEditNode(_cstSel,false); } }
