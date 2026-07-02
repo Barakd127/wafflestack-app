@@ -12,6 +12,8 @@
  * Statistics A course (קורס 30111 + ההוצאה הפתוחה).
  */
 
+import { LESSON_CONTENT_STAT_B } from './lesson-content-stat-b'
+
 export interface LessonSlide {
   title: string
   content: string
@@ -1922,4 +1924,8 @@ export const LESSON_CONTENT: LessonTopic[] = [
     ],
   },
 ]
+
+// Combined pool consumed by the lesson player so both courses resolve by topic id.
+// Stat-A consumers that build the Stat-A topic grid keep using LESSON_CONTENT.
+export const LESSON_CONTENT_ALL: LessonTopic[] = [...LESSON_CONTENT, ...LESSON_CONTENT_STAT_B]
 

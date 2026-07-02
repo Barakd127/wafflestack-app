@@ -44,6 +44,11 @@ const RSquaredDecompositionInteractive = lazy(() => import('./graphs/RSquaredDec
 const CombinationsVsPermutationsInteractive = lazy(() => import('./graphs/CombinationsVsPermutationsInteractive'))
 const LinearTransformationInteractive = lazy(() => import('./graphs/LinearTransformationInteractive'))
 const SkewnessKurtosisInteractive = lazy(() => import('./graphs/SkewnessKurtosisInteractive'))
+// ── Statistics B — 4 new dedicated simulators (gap topics with no exact prior sim) ──
+const ChebyshevInteractive = lazy(() => import('./graphs/ChebyshevInteractive'))
+const McNemarInteractive = lazy(() => import('./graphs/McNemarInteractive'))
+const PairedSamplesInteractive = lazy(() => import('./graphs/PairedSamplesInteractive'))
+const WilcoxonInteractive = lazy(() => import('./graphs/WilcoxonInteractive'))
 
 // Motivation AI components — Atomic Habits / Deep Work primitives.
 // Wired into the home screen so the streak + lead-measure are always visible.
@@ -67,6 +72,84 @@ type GraphEntry = {
   afterSlide?: number
 }
 const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
+  // ── Statistics B (סטטיסטיקה ב׳) — native topics; reuse existing sims + 4 new ones ──
+  'b-intro': [
+    { Component: CLTInteractive,           title: 'טעימה: משפט הגבול המרכזי' },
+  ],
+  'b-sampling-dist': [
+    { Component: SamplingDistribution,     title: 'התפלגות הדגימה — סימולטור' },
+    { Component: SamplingInteractive,      title: 'מדגם אקראי מאוכלוסייה' },
+    { Component: MeanRunningAverage,       title: 'התכנסות הממוצע' },
+  ],
+  'b-chebyshev-lln': [
+    { Component: ChebyshevInteractive,     title: 'חסם צ׳בישב' },
+    { Component: MeanRunningAverage,       title: 'חוק המספרים הגדולים' },
+  ],
+  'b-clt': [
+    { Component: CLTInteractive,           title: 'משפט הגבול המרכזי' },
+    { Component: SamplingInteractive,      title: 'ממוצע המדגם' },
+    { Component: Normal68_95_99,           title: 'כלל 68-95-99.7' },
+  ],
+  'b-point-estimation': [
+    { Component: SamplingInteractive,      title: 'אומד מתוך מדגם' },
+    { Component: MeanRunningAverage,       title: 'עקביות האומד' },
+  ],
+  'b-confidence-intervals': [
+    { Component: ConfidenceIntervalInteractive, title: 'רווחי סמך — כיסוי' },
+    { Component: ZScoreInteractive,        title: 'ערכים קריטיים z' },
+  ],
+  'b-hypothesis-testing': [
+    { Component: HypothesisTestingInteractive, title: 'H₀ מול H₁' },
+    { Component: PValueInteractive,        title: 'ערך p — אזור דחייה' },
+    { Component: TTestInteractive,         title: 'התפלגות t' },
+  ],
+  'b-errors-power': [
+    { Component: TypeIErrorInteractive,    title: 'שגיאות α · β · עוצמה' },
+    { Component: HypothesisTestingInteractive, title: 'עוצמת המבחן' },
+    { Component: EffectSizeInteractive,    title: 'גודל אפקט (Cohen d)' },
+  ],
+  'b-interpretation': [
+    { Component: PValueInteractive,        title: 'פרשנות ערך p' },
+    { Component: ConfidenceIntervalInteractive, title: 'רווח סמך כפרשנות' },
+    { Component: EffectSizeInteractive,    title: 'מובהקות מול גודל אפקט' },
+  ],
+  'b-diff-means': [
+    { Component: TTestInteractive,         title: 'מבחן t להפרש תוחלות' },
+    { Component: BoxplotComparisonInteractive, title: 'השוואת שתי קבוצות' },
+  ],
+  'b-paired-samples': [
+    { Component: PairedSamplesInteractive, title: 'לפני מול אחרי' },
+    { Component: TTestInteractive,         title: 'מבחן t מזווג' },
+  ],
+  'b-proportion': [
+    { Component: BinomialInteractive,      title: 'פרופורציה בינומית' },
+    { Component: ConfidenceIntervalInteractive, title: 'רווח סמך לפרופורציה' },
+  ],
+  'b-variance-test': [
+    { Component: ChiSquareInteractive,     title: 'מבחן χ² לשונות' },
+    { Component: ANOVAInteractive,         title: 'יחס F בין שונויות' },
+  ],
+  'b-binomial-chisquare': [
+    { Component: ChiSquareInteractive,     title: 'χ² — נצפה מול צפוי' },
+    { Component: BinomialInteractive,      title: 'מבחן בינומי' },
+  ],
+  'b-independence-mcnemar': [
+    { Component: ChiSquareInteractive,     title: 'χ² לאי-תלות' },
+    { Component: McNemarInteractive,       title: 'מבחן מקנמר (מזווג)' },
+  ],
+  'b-wilcoxon-fisher': [
+    { Component: WilcoxonInteractive,      title: 'וילקוקסון — דירוגים' },
+    { Component: HypothesisTestingInteractive, title: 'החלטה א-פרמטרית' },
+  ],
+  'b-simple-regression': [
+    { Component: RegressionInteractive,    title: 'קו רגרסיה (OLS)' },
+    { Component: ResidualPlotInteractive,  title: 'תרשים שאריות' },
+    { Component: RSquaredDecompositionInteractive, title: 'פירוק R²' },
+  ],
+  'b-multiple-regression': [
+    { Component: RegressionInteractive,    title: 'רגרסיה — מנבא' },
+    { Component: RSquaredDecompositionInteractive, title: 'R² מוסבר' },
+  ],
   // ── Hero topics — 3 aspects each ──
   power: [
     { Component: MeanInteractive,        title: 'מהו ממוצע?' },
@@ -326,6 +409,7 @@ import { loadProgressMerged } from '../lib/syncProgress'
 import quizBankData from '../data/quiz-bank.json'
 import LessonScreen from './LessonScreen'
 import { LESSON_CONTENT } from '../data/lesson-content'
+import { LESSON_CONTENT_STAT_B } from '../data/lesson-content-stat-b'
 import { HEBREW_LABELS } from '../data/topicLabels'
 import { TOPIC_ORDER } from '../lib/generatePlan'
 import { MathText } from '../lib/mathRender'
@@ -376,7 +460,7 @@ interface CourseDef {
 }
 const COURSES: CourseDef[] = [
   { id: 'stat-a',  label: "סטטיסטיקה א'",        icon: '📊', desc: 'מבוא, מדדים, התפלגויות, רגרסיה, הסתברות',  active: true,  bg: 'linear-gradient(135deg,#F5C842,#D4AF37)' },
-  { id: 'stat-b',  label: "סטטיסטיקה ב'",        icon: '📈', desc: 'הסקה סטטיסטית, מבחני השערות, מדגם, רווחי סמך', active: true,  bg: 'linear-gradient(135deg,#7CB7F8,#4A90E2)', embedUrl: 'https://stats-viz-mata.vercel.app/' },
+  { id: 'stat-b',  label: "סטטיסטיקה ב'",        icon: '📈', desc: 'דגימה, אמידה, רווחי סמך, בדיקת השערות, א-פרמטריים, רגרסיה', active: true,  bg: 'linear-gradient(135deg,#7CB7F8,#4A90E2)' },
   { id: 'methods', label: 'שיטות מחקר',          icon: '🔬', desc: 'תכנון מחקר, מדידה, מהימנות ותקפות',         active: false, bg: 'linear-gradient(135deg,#A78BFA,#7C3AED)' },
   { id: 'anova',   label: 'ניתוח שונות / רב-משתנית', icon: '📐', desc: 'ANOVA, MANOVA, רגרסיה מרובה, מודלים מורכבים', active: false, bg: 'linear-gradient(135deg,#67C29E,#229E69)' },
 ]
@@ -411,6 +495,25 @@ const QUIZ_TOPICS = (() => {
   return [...quizEntries, ...lessonOnly]
 })()
 
+// ── Statistics B topic sets ───────────────────────────────────────────────────
+// Keep the two courses' topic lists disjoint so neither course's grid ever shows
+// the other's topics (the "נוספים" catch-all in TopicSelector would otherwise leak
+// b-* topics into Stat-A). QUIZ_TOPICS_A = everything that is NOT a Stat-B id;
+// QUIZ_TOPICS_B is built straight from the Stat-B lesson list (labels from the
+// lesson hebrewName), pulling questionCount/building from quiz-bank when present.
+const STAT_B_IDS = new Set(LESSON_CONTENT_STAT_B.map(t => t.id))
+const QUIZ_TOPICS_A = QUIZ_TOPICS.filter(t => !STAT_B_IDS.has(t.id))
+const QUIZ_TOPICS_B = LESSON_CONTENT_STAT_B.map(l => {
+  const q = (quizBankData.topics as Record<string, any>)[l.id]
+  return {
+    id: l.id,
+    label: HEBREW_LABELS[l.id] || l.hebrewName,
+    building: q?.building || '',
+    concept: l.hebrewName,
+    questionCount: (q?.questions || []).length,
+  }
+})
+
 // ── Topic taxonomy — parent groups → subtopics ────────────────────────────────
 // Clusters the ~23 flat topics into 7 parent "topics" so the תיאוריה selector
 // reads as topic → subtopic (e.g. ממוצע/חציון under מדדי מרכז). Subtopic order
@@ -425,6 +528,15 @@ const TOPIC_GROUPS: TopicGroup[] = [
   { id: 'probability',  labelHe: 'הסתברות',        emoji: '🎲', topicIds: ['probability', 'combinatorics', 'discrete-rv', 'binomial'] },
   { id: 'inference',    labelHe: 'הסקה סטטיסטית',  emoji: '🔬', topicIds: ['sampling', 'hypothesis-testing', 'confidence-intervals'] },
   { id: 'association',  labelHe: 'קשר בין משתנים', emoji: '🔗', topicIds: ['correlation', 'pearson', 'spearman', 'cramer', 'regression'] },
+]
+
+// Statistics B taxonomy — 5 units matching the source curriculum order.
+const TOPIC_GROUPS_B: TopicGroup[] = [
+  { id: 'b-limits',      labelHe: 'דגימה ומשפטי גבול',        emoji: '🎲', topicIds: ['b-intro', 'b-sampling-dist', 'b-chebyshev-lln', 'b-clt'] },
+  { id: 'b-inference',   labelHe: 'אמידה ובדיקת השערות',       emoji: '🔬', topicIds: ['b-point-estimation', 'b-confidence-intervals', 'b-hypothesis-testing', 'b-errors-power', 'b-interpretation'] },
+  { id: 'b-advanced',    labelHe: 'רווחי סמך והשוואות מתקדמות', emoji: '⚖️', topicIds: ['b-diff-means', 'b-paired-samples', 'b-proportion', 'b-variance-test'] },
+  { id: 'b-nonparam',    labelHe: 'מבחנים א-פרמטריים',          emoji: '📋', topicIds: ['b-binomial-chisquare', 'b-independence-mcnemar', 'b-wilcoxon-fisher'] },
+  { id: 'b-regression',  labelHe: 'רגרסיה',                    emoji: '📈', topicIds: ['b-simple-regression', 'b-multiple-regression'] },
 ]
 
 // ── Design tokens — driven by CSS custom properties for dark/light mode ────────
@@ -674,7 +786,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
     hard: questions.filter(q => q.difficulty === 'hard').length,
   }
   const hebrewName = HEBREW_LABELS[topicId] || topicData?.concept || topicId
-  const hasLesson = LESSON_CONTENT.some(t => t.id === topicId)
+  const hasLesson = LESSON_CONTENT.some(t => t.id === topicId) || LESSON_CONTENT_STAT_B.some(t => t.id === topicId)
   const [selected, setSelected] = useState<DifficultyFilter>('all')
 
   return (
@@ -880,6 +992,8 @@ interface TopicSelectorProps {
   onToggleDark?: () => void
   /** Reports whether the embedded mindmap ("מפה") view is active, so the shell can hide its title bar. */
   onMapModeChange?: (on: boolean) => void
+  /** Which course's topic grid to show. Defaults to Stat-A. */
+  course?: 'stat-a' | 'stat-b'
 }
 
 /**
@@ -887,7 +1001,7 @@ interface TopicSelectorProps {
  * the sidebar. Active course (Stat-A) routes into the topic grid. Inactive
  * courses (Stat-B / Methods / ANOVA) open a "Coming soon" splash overlay.
  */
-function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
+function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 'stat-b') => void }) {
   const [comingSoon, setComingSoon] = useState<CourseDef | null>(null)
   const [embedded, setEmbedded] = useState<CourseDef | null>(null)
   // ESC dismisses whichever modal is open. Click-outside is already wired via
@@ -907,12 +1021,11 @@ function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
   const pickCourse = (c: CourseDef) => {
     if(!c.active) { setComingSoon(c); return }
     if(c.embedUrl) {
-      // stats-viz-mata.vercel.app + most modern apps set X-Frame-Options
-      // DENY or CSP frame-ancestors 'none' which blocks iframe embedding.
-      // Show a small launcher overlay that opens the site in a new tab.
+      // Legacy path for any future partner course that can't iframe. Stat-A and
+      // Stat-B are both NATIVE now (no embedUrl) → they route into the topic grid.
       setEmbedded(c); return
     }
-    onSelectActive()
+    onSelectActive(c.id as 'stat-a' | 'stat-b')
   }
   // Full-screen course player. Replaces the old "open external" modal: now
   // the embedded course renders inside a tab strip so we can ship our own
@@ -1024,7 +1137,11 @@ function CourseGate({ onSelectActive }: { onSelectActive: () => void }) {
   )
 }
 
-function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggleDark, onMapModeChange }: TopicSelectorProps) {
+function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggleDark, onMapModeChange, course = 'stat-a' }: TopicSelectorProps) {
+  // Course-scoped topic list + taxonomy. The two courses are kept disjoint so
+  // neither grid ever leaks the other's topics (see QUIZ_TOPICS_A/_B above).
+  const baseTopics = course === 'stat-b' ? QUIZ_TOPICS_B : QUIZ_TOPICS_A
+  const activeGroups = course === 'stat-b' ? TOPIC_GROUPS_B : TOPIC_GROUPS
   // Re-order topics according to the user's personal plan when one exists.
   // Topics not in the plan trail at the end in their natural order.
   const personalPlan = useLearningStore(s => s.personalPlan)
@@ -1034,9 +1151,10 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
   const _adminMode = useLearningStore(s => s.adminMode)
   const mapUnlocked = isFeatureUnlocked('mindmap-view', _unlockedFeatures, _adminMode)
   const sortedTopics = (() => {
-    if (!personalPlan) return QUIZ_TOPICS
+    // Personal-plan reordering is a Stat-A construct; Stat-B keeps curriculum order.
+    if (!personalPlan || course === 'stat-b') return baseTopics
     const order = new Map(personalPlan.sequence.map((s, i) => [s.topicId, i]))
-    return [...QUIZ_TOPICS].sort((a, b) => {
+    return [...baseTopics].sort((a, b) => {
       const ai = order.has(a.id) ? (order.get(a.id) as number) : 9999
       const bi = order.has(b.id) ? (order.get(b.id) as number) : 9999
       return ai - bi
@@ -1065,11 +1183,11 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
   type TopicItem = (typeof QUIZ_TOPICS)[number]
   const topicById = new Map<string, TopicItem>(sortedTopics.map(t => [t.id, t]))
   const groupedSections: Array<{ id: string; labelHe: string; emoji: string; topics: TopicItem[] }> =
-    TOPIC_GROUPS.map(g => ({
+    activeGroups.map(g => ({
       id: g.id, labelHe: g.labelHe, emoji: g.emoji,
       topics: g.topicIds.map(id => topicById.get(id)).filter((t): t is TopicItem => !!t),
     })).filter(s => s.topics.length > 0)
-  const groupedIds = new Set(TOPIC_GROUPS.flatMap(g => g.topicIds))
+  const groupedIds = new Set(activeGroups.flatMap(g => g.topicIds))
   const extraTopics = sortedTopics.filter(t => !groupedIds.has(t.id))
   if (extraTopics.length) groupedSections.push({ id: 'extra', labelHe: 'נוספים', emoji: '✨', topics: extraTopics })
 
@@ -4189,6 +4307,8 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [internalView, setInternalView] = useState<InternalView>('home')
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>()
+  // Which course the learner entered from the gate — drives the topic grid + title.
+  const [activeCourse, setActiveCourse] = useState<'stat-a' | 'stat-b'>('stat-a')
   const [quizDifficulty, setQuizDifficulty] = useState<DifficultyFilter>('all')
   const [userProgress, setUserProgress] = useState<UserProgress>(() =>
     loadProgress(initializeUser().userId)
@@ -4269,7 +4389,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   const title =
     internalView === 'home' ? 'דף הבית' :
     internalView === 'courses' ? 'הקורסים שלי' :
-    internalView === 'topics' ? "סטטיסטיקה א' — בחר נושא" :
+    internalView === 'topics' ? (activeCourse === 'stat-b' ? "סטטיסטיקה ב' — בחר נושא" : "סטטיסטיקה א' — בחר נושא") :
     'Study Zone'
 
   const handleSelectTopic = (topicId: string, mode: 'lesson' | 'quiz' = 'lesson') => {
@@ -4447,7 +4567,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
         )}
         {internalView === 'courses' && (
           <CourseGate
-            onSelectActive={() => setInternalView('topics')}
+            onSelectActive={(id) => { setActiveCourse(id); setInternalView('topics') }}
           />
         )}
         {internalView === 'topics' && (
@@ -4458,6 +4578,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
             darkMode={darkMode}
             onToggleDark={isMobile ? onToggleDarkMode : undefined}
             onMapModeChange={setMapActive}
+            course={activeCourse}
           />
         )}
         {internalView === 'lesson' && selectedTopic && (
