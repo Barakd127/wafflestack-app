@@ -1131,5 +1131,444 @@
         "courseId": "stat-a"
       }
     ]
+  },
+  {
+    "id": "b-sampling",
+    "label": "סטטיסטיקה ב׳ — דגימה ומשפטי גבול",
+    "formulas": [
+      {
+        "id": "b_se_mean",
+        "label": "שגיאת התקן של הממוצע",
+        "latex": "\\sigma_{\\bar{X}}=\\dfrac{\\sigma}{\\sqrt{n}}",
+        "desc": "סטיית התקן של ממוצע המדגם",
+        "slots": [
+          {
+            "key": "sigma",
+            "label": "σ"
+          },
+          {
+            "key": "n",
+            "label": "n"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-sampling-dist",
+          "b-clt"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_z_mean",
+        "label": "תקנון ממוצע המדגם",
+        "latex": "Z=\\dfrac{\\bar{X}-\\mu}{\\sigma/\\sqrt{n}}",
+        "desc": "תקנון הממוצע לפי CLT",
+        "slots": [
+          {
+            "key": "xbar",
+            "label": "x̄"
+          },
+          {
+            "key": "mu",
+            "label": "μ"
+          },
+          {
+            "key": "sigma",
+            "label": "σ"
+          },
+          {
+            "key": "n",
+            "label": "n"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-clt",
+          "b-sampling-dist"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_chebyshev",
+        "label": "חסם צ׳בישב",
+        "latex": "P(|X-\\mu|\\ge k\\sigma)\\le \\dfrac{1}{k^2}",
+        "desc": "חסם עליון לזנבות — כל התפלגות",
+        "slots": [
+          {
+            "key": "k",
+            "label": "k"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-chebyshev-lln"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_se_prop",
+        "label": "שגיאת התקן של פרופורציה",
+        "latex": "\\sigma_{\\hat{p}}=\\sqrt{\\dfrac{p(1-p)}{n}}",
+        "slots": [
+          {
+            "key": "p",
+            "label": "p"
+          },
+          {
+            "key": "n",
+            "label": "n"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-proportion",
+          "b-clt"
+        ],
+        "courseId": "stat-b"
+      }
+    ]
+  },
+  {
+    "id": "b-inference",
+    "label": "סטטיסטיקה ב׳ — אמידה, רווחי סמך ובדיקת השערות",
+    "formulas": [
+      {
+        "id": "b_ci_z",
+        "label": "רווח סמך לתוחלת (σ ידועה)",
+        "latex": "\\bar{X}\\pm z_{\\alpha/2}\\dfrac{\\sigma}{\\sqrt{n}}",
+        "desc": "רווח סמך כאשר סטיית התקן ידועה",
+        "slots": [
+          {
+            "key": "xbar",
+            "label": "x̄"
+          },
+          {
+            "key": "z",
+            "label": "z"
+          },
+          {
+            "key": "sigma",
+            "label": "σ"
+          },
+          {
+            "key": "n",
+            "label": "n"
+          }
+        ],
+        "hasEval": false,
+        "topics": [
+          "b-confidence-intervals"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_ci_t",
+        "label": "רווח סמך לתוחלת (σ לא ידועה)",
+        "latex": "\\bar{X}\\pm t_{\\alpha/2,\\,n-1}\\dfrac{S}{\\sqrt{n}}",
+        "desc": "רווח סמך עם אומד סטיית התקן",
+        "slots": [
+          {
+            "key": "xbar",
+            "label": "x̄"
+          },
+          {
+            "key": "t",
+            "label": "t"
+          },
+          {
+            "key": "S",
+            "label": "S"
+          },
+          {
+            "key": "n",
+            "label": "n"
+          }
+        ],
+        "hasEval": false,
+        "topics": [
+          "b-confidence-intervals"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_z_stat",
+        "label": "סטטיסטי מבחן Z",
+        "latex": "Z=\\dfrac{\\bar{X}-\\mu_0}{\\sigma/\\sqrt{n}}",
+        "slots": [
+          {
+            "key": "xbar",
+            "label": "x̄"
+          },
+          {
+            "key": "mu0",
+            "label": "μ₀"
+          },
+          {
+            "key": "sigma",
+            "label": "σ"
+          },
+          {
+            "key": "n",
+            "label": "n"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-hypothesis-testing"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_t_stat",
+        "label": "סטטיסטי מבחן t",
+        "latex": "t=\\dfrac{\\bar{X}-\\mu_0}{S/\\sqrt{n}}",
+        "slots": [
+          {
+            "key": "xbar",
+            "label": "x̄"
+          },
+          {
+            "key": "mu0",
+            "label": "μ₀"
+          },
+          {
+            "key": "S",
+            "label": "S"
+          },
+          {
+            "key": "n",
+            "label": "n"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-hypothesis-testing"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_paired_t",
+        "label": "מבחן t לדגימות מזווגות",
+        "latex": "t=\\dfrac{\\bar{d}}{S_d/\\sqrt{n}}",
+        "slots": [
+          {
+            "key": "dbar",
+            "label": "d̄"
+          },
+          {
+            "key": "Sd",
+            "label": "S_d"
+          },
+          {
+            "key": "n",
+            "label": "n"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-paired-samples"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_prop_z",
+        "label": "מבחן Z לפרופורציה",
+        "latex": "Z=\\dfrac{\\hat{p}-p_0}{\\sqrt{p_0(1-p_0)/n}}",
+        "slots": [
+          {
+            "key": "phat",
+            "label": "p̂"
+          },
+          {
+            "key": "p0",
+            "label": "p₀"
+          },
+          {
+            "key": "n",
+            "label": "n"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-proportion"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_two_means_z",
+        "label": "הפרש תוחלות (σ ידועות)",
+        "latex": "Z=\\dfrac{(\\bar{X}_1-\\bar{X}_2)}{\\sqrt{\\sigma_1^2/n_1+\\sigma_2^2/n_2}}",
+        "desc": "תחת H₀: μ₁ = μ₂",
+        "slots": [
+          {
+            "key": "x1",
+            "label": "x̄₁"
+          },
+          {
+            "key": "x2",
+            "label": "x̄₂"
+          },
+          {
+            "key": "s1",
+            "label": "σ₁"
+          },
+          {
+            "key": "s2",
+            "label": "σ₂"
+          },
+          {
+            "key": "n1",
+            "label": "n₁"
+          },
+          {
+            "key": "n2",
+            "label": "n₂"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-diff-means"
+        ],
+        "courseId": "stat-b"
+      }
+    ]
+  },
+  {
+    "id": "b-nonparam-reg",
+    "label": "סטטיסטיקה ב׳ — א-פרמטריים ורגרסיה",
+    "formulas": [
+      {
+        "id": "b_chi2",
+        "label": "סטטיסטי כי בריבוע",
+        "latex": "\\chi^2=\\sum\\dfrac{(O-E)^2}{E}",
+        "desc": "נצפה מול צפוי",
+        "slots": [
+          {
+            "key": "O",
+            "label": "O"
+          },
+          {
+            "key": "E",
+            "label": "E"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-binomial-chisquare",
+          "b-independence-mcnemar",
+          "b-variance-test"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_mcnemar",
+        "label": "מבחן מקנמר",
+        "latex": "\\chi^2=\\dfrac{(b-c)^2}{b+c}",
+        "desc": "תאים בלתי-מתאימים בטבלה מזווגת",
+        "slots": [
+          {
+            "key": "b",
+            "label": "b"
+          },
+          {
+            "key": "c",
+            "label": "c"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-independence-mcnemar"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_reg_slope",
+        "label": "שיפוע הרגרסיה",
+        "latex": "\\hat{\\beta}_1=\\dfrac{\\sum(x_i-\\bar{x})(y_i-\\bar{y})}{\\sum(x_i-\\bar{x})^2}",
+        "desc": "שיטת הריבועים הפחותים",
+        "slots": [
+          {
+            "key": "Sxy",
+            "label": "Σ(x-x̄)(y-ȳ)"
+          },
+          {
+            "key": "Sxx",
+            "label": "Σ(x-x̄)²"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-simple-regression"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_reg_intercept",
+        "label": "חותך הרגרסיה",
+        "latex": "\\hat{\\beta}_0=\\bar{y}-\\hat{\\beta}_1\\bar{x}",
+        "slots": [
+          {
+            "key": "ybar",
+            "label": "ȳ"
+          },
+          {
+            "key": "b1",
+            "label": "β̂₁"
+          },
+          {
+            "key": "xbar",
+            "label": "x̄"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-simple-regression"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_r_squared",
+        "label": "מקדם ההסבר",
+        "latex": "R^2=\\dfrac{SSR}{SST}=1-\\dfrac{SSE}{SST}",
+        "desc": "שיעור השונות המוסברת",
+        "slots": [
+          {
+            "key": "SSR",
+            "label": "SSR"
+          },
+          {
+            "key": "SST",
+            "label": "SST"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-simple-regression",
+          "b-multiple-regression"
+        ],
+        "courseId": "stat-b"
+      },
+      {
+        "id": "b_slope_t",
+        "label": "מבחן t לשיפוע",
+        "latex": "t=\\dfrac{\\hat{\\beta}_1}{SE(\\hat{\\beta}_1)}",
+        "desc": "H₀: השיפוע באוכלוסייה הוא אפס",
+        "slots": [
+          {
+            "key": "b1",
+            "label": "β̂₁"
+          },
+          {
+            "key": "seb1",
+            "label": "SE"
+          }
+        ],
+        "hasEval": true,
+        "topics": [
+          "b-simple-regression"
+        ],
+        "courseId": "stat-b"
+      }
+    ]
   }
 ]

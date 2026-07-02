@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Suspense, useMemo } from 'react'
-import { LESSON_CONTENT } from '../data/lesson-content'
+import { LESSON_CONTENT_ALL as LESSON_CONTENT } from '../data/lesson-content'
 import { TOPIC_VISUALS } from './LessonVisuals'
 import ArsenalCapture from './ArsenalCapture'
 import { quickAddToMindmap } from '../lib/mindmapWriter'
