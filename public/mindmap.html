@@ -112,11 +112,11 @@ body:not(.light) #canvas-area::after{border-color:rgba(255,255,255,.12);
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), inset 0 2px 26px rgba(0,0,0,.18)}
 /* ── Iconic dry-erase whiteboard skin: brushed-aluminium frame, grey corner
    brackets, and a marker tray with markers + eraser. All pointer-events:none. ── */
-#mm-board-frame{position:absolute;inset:5px;pointer-events:none;z-index:40;
+#mm-board-frame{position:absolute;inset:5px;pointer-events:none;z-index:60;
   border:16px solid transparent;
   border-image:linear-gradient(135deg,#f6f7f9,#cbd0d7 22%,#eef0f3 45%,#b2b7c0 68%,#e3e6eb) 16 stretch;
-  box-shadow:0 12px 30px rgba(15,23,42,.30)}
-#mm-board-deco{position:absolute;inset:5px;pointer-events:none;z-index:41}
+  box-shadow:0 12px 30px rgba(15,23,42,.30), 0 0 0 6px #FCFDFF}
+#mm-board-deco{position:absolute;inset:5px;pointer-events:none;z-index:61}
 .mm-corner{position:absolute;width:36px;height:36px;background:linear-gradient(135deg,#a4aab2,#ccd0d6 48%,#868c95);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 1px 3px rgba(0,0,0,.32)}
 .mm-corner.tl{top:0;left:0;border-radius:18px 3px 15px 3px}
@@ -6884,6 +6884,23 @@ function updateNodeEl(el, n) {
   }
 }
 
+// Stuck-menu fixes: ribbon dropdowns close on any click outside the toolbar or Escape;
+// when iframed (Obsidian), nudge the host on mousedown so its own menus dismiss too.
+function mmCloseRibbons(){
+  ['split','add','view','templates','files'].forEach(function(g){
+    var el=document.getElementById('ribbon-'+g); var t=document.getElementById('rtab-'+g);
+    if(el)el.style.display='none'; if(t)t.classList.remove('active');
+  });
+}
+let _mmPtrT=0;
+document.addEventListener('mousedown', function(e){
+  if(!(e.target.closest && e.target.closest('#ribbon-panel,.tb-ribbon-tab,.ribbon-group'))) mmCloseRibbons();
+  if(window.parent && window.parent!==window){
+    const now=Date.now();
+    if(now-_mmPtrT>=250){ _mmPtrT=now; try{ window.parent.postMessage({type:'mm:pointer'},'*'); }catch(err){} }
+  }
+}, true);
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') mmCloseRibbons(); }, true);
 function toggleRibbon(name){
   const groups=['split','add','view','templates','files'];
   const panel=document.getElementById('ribbon-panel');
