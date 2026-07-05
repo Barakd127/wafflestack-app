@@ -63,6 +63,8 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
   // Listen for progress / ready messages from the Godot iframe
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
+      // Godot iframe is same-origin; ignore messages from anywhere else.
+      if (e.origin !== window.location.origin) return
       const d = e.data as { type?: string; current?: number; total?: number }
       if (!d || typeof d.type !== 'string') return
       if (d.type === 'godot-progress' && typeof d.current === 'number' && typeof d.total === 'number') {
