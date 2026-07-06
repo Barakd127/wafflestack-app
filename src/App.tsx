@@ -79,6 +79,8 @@ function App() {
   // would overwrite).
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
+      // Only accept messages from our own iframes (mindmap/Godot are same-origin).
+      if (e.origin !== window.location.origin) return
       const d = e?.data
       if (!d || typeof d !== 'object') return
       if (d.type === 'ws-theme' && typeof d.dark === 'boolean') {

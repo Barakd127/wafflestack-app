@@ -12,11 +12,11 @@
 .node-div{ font-family:var(--mm-hand) !important; font-size:14px !important; font-weight:600 !important; letter-spacing:.2px; white-space:normal !important; overflow-wrap:normal !important; word-break:keep-all !important; text-align:center !important; }
 .node-div.node-root{ font-size:17px !important; font-weight:700 !important; }
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
-<script defer crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<script defer crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+<script defer crossorigin="anonymous" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer crossorigin="anonymous" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 <!-- MathLive is lazy-loaded on demand from openMathEditor(); CSS preloaded so the keyboard appears instantly. -->
-<link rel="stylesheet" href="https://unpkg.com/mathlive@0.110.0/dist/mathlive-static.css" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/mathlive@0.110.0/dist/mathlive-static.css" integrity="sha384-/v+rqIwsk6iyL6+WLR/iDqxu9IzCA+TRlzFFqqVFec0tuke7CD/FjlFOdy+eyP7Q" crossorigin="anonymous">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;overflow:hidden;height:100vh;background:#1a1a1a}
@@ -4011,6 +4011,7 @@ function wfInit(){
   document.addEventListener('touchend',_wfUp);
   document.addEventListener('touchcancel',_wfUp);
   window.addEventListener('message',(ev)=>{
+    if(ev.origin!==location.origin) return;
     const m=ev&&ev.data; if(!m||m.type!=='mm:resource-url'||!m.data) return;
     _wfResURL[m.data.path]=m.data.url;
     document.querySelectorAll('.wf-card').forEach(el=>{ const n=MM.nodes[el.dataset.id]; if(n&&n.wf&&n.wf.imgPath===m.data.path){ const im=el.querySelector('.wf-thumb'); if(im) im.src=m.data.url; } });
@@ -9648,12 +9649,14 @@ function nbRender(){
 // Registered at the top level (not inside the standalone-WB IIFE) so it works in mind map mode too.
 // Guided-tour demo: parent app asks the canvas to expand its ∑Formulas panel.
 window.addEventListener('message', function(e){
+  if (e.origin !== location.origin) return;
   var d = e.data;
   if (!d || typeof d !== 'object' || d.type !== 'ws-open-formula') return;
   try { if (typeof wbOpenFormulaPicker === 'function') wbOpenFormulaPicker(); } catch(_){}
 });
 
 window.addEventListener('message', function(e){
+  if (e.origin !== location.origin) return;
   var d = e.data;
   if (!d || typeof d !== 'object' || d.type !== 'ws-add-node') return;
   try {
@@ -9852,6 +9855,7 @@ setTimeout(wsUpdateTopbarHeight, 50);
 setTimeout(wsUpdateTopbarHeight, 500);
 // Listen for theme changes coming back from the parent
 window.addEventListener('message', function(e){
+  if (e.origin !== location.origin) return;
   var d = e && e.data;
   if (d && d.type === 'ws-theme' && typeof d.dark === 'boolean') wsApplyTheme(d.dark);
   // Parent CalculatorDrawer (opened from a canvas/notebook equation) sends the

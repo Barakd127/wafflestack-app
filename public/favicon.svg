@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- WaffleStack mark — three stacked waffle plates (basic → confident → mastery).
+       Brand palette: honey radial #FFE3A8→#F2A93E→#C97C18, ink #1A1A2E outlines. -->
+  <defs>
+    <radialGradient id="honey" cx="35%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#FFE3A8"/>
+      <stop offset="55%" stop-color="#F2A93E"/>
+      <stop offset="100%" stop-color="#C97C18"/>
+    </radialGradient>
+  </defs>
+  <g stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round">
+    <ellipse cx="32" cy="46" rx="24" ry="10" fill="url(#honey)"/>
+    <ellipse cx="32" cy="34" rx="20" ry="8.5" fill="url(#honey)"/>
+    <ellipse cx="32" cy="22" rx="15" ry="7" fill="url(#honey)"/>
+  </g>
+  <g stroke="#1A1A2E" stroke-width="1.5" opacity="0.55">
+    <path d="M22 20 L42 20 M25 24 L39 24 M32 16.5 L32 27.5 M26 17.5 L26 26 M38 17.5 L38 26" fill="none"/>
+  </g>
+</svg>
