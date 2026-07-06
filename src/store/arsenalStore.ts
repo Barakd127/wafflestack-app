@@ -347,6 +347,9 @@ export function useAvailablePotion(kind: ArsenalKind): number {
    and icons changed. 'equation' added 2026-05-26. */
 export const KIND_META: Record<ArsenalKind, {
   label: string;
+  /** Hard-coded plural — NEVER derive by concatenating 'ים'/'ות' (Hebrew
+   *  morphology is irregular; 'נוסחה'+'ות' once shipped as 'נוסחהות'). */
+  labelPlural: string;
   icon: string;
   color: string;
   bg: string;
@@ -359,6 +362,7 @@ export const KIND_META: Record<ArsenalKind, {
   // catching subtle ideas.
   gotcha: {
     label: 'קאצ\'',
+    labelPlural: 'קאצ\'ים',
     icon: '💡',
     color: '#b45309',
     bg: 'rgba(245,158,11,0.10)',
@@ -369,6 +373,7 @@ export const KIND_META: Record<ArsenalKind, {
   // (the lightbulb moved to gotcha so we needed something distinct).
   trick: {
     label: 'טריק',
+    labelPlural: 'טריקים',
     icon: '🪄',
     color: '#7c3aed',
     bg: 'rgba(124,58,237,0.10)',
@@ -379,6 +384,7 @@ export const KIND_META: Record<ArsenalKind, {
   // visually distinct icon now.
   tip: {
     label: 'טיפ',
+    labelPlural: 'טיפים',
     icon: '📌',
     color: '#1e40af',
     bg: 'rgba(99,102,241,0.10)',
@@ -389,6 +395,7 @@ export const KIND_META: Record<ArsenalKind, {
   // Added 2026-05-26: math-field entry so the MathLive keyboard wires correctly.
   equation: {
     label: 'נוסחה',
+    labelPlural: 'נוסחאות',
     icon: 'Σ',
     color: '#c97c18',
     bg: 'rgba(242,169,62,0.12)',
@@ -399,6 +406,7 @@ export const KIND_META: Record<ArsenalKind, {
   // Added 2026-05-30: stores cols/rows/headerBg/paramCol as JSON in `text`.
   table: {
     label: 'טבלה',
+    labelPlural: 'טבלאות',
     icon: '▦',
     color: '#1F3E6C',
     bg: 'rgba(31,62,108,0.10)',

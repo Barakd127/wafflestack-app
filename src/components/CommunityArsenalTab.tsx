@@ -133,13 +133,13 @@ export default function CommunityArsenalTab() {
       {/* Filter row */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap', alignItems: 'center' }}>
         <PillBtn label="הכל" icon="🌐" selected={kindFilter === 'all'} onClick={() => setKindFilter('all')} color="#6366f1" bg="rgba(99,102,241,0.12)" />
-        <PillBtn label={KIND_META.gotcha.label + 'ים'} icon={KIND_META.gotcha.icon}
+        <PillBtn label={KIND_META.gotcha.labelPlural} icon={KIND_META.gotcha.icon}
           selected={kindFilter === 'gotcha'} onClick={() => setKindFilter('gotcha')}
           color={KIND_META.gotcha.color} bg={KIND_META.gotcha.bg} />
-        <PillBtn label={KIND_META.trick.label + 'ים'} icon={KIND_META.trick.icon}
+        <PillBtn label={KIND_META.trick.labelPlural} icon={KIND_META.trick.icon}
           selected={kindFilter === 'trick'} onClick={() => setKindFilter('trick')}
           color={KIND_META.trick.color} bg={KIND_META.trick.bg} />
-        <PillBtn label={KIND_META.tip.label + 'ים'} icon={KIND_META.tip.icon}
+        <PillBtn label={KIND_META.tip.labelPlural} icon={KIND_META.tip.icon}
           selected={kindFilter === 'tip'} onClick={() => setKindFilter('tip')}
           color={KIND_META.tip.color} bg={KIND_META.tip.bg} />
 
