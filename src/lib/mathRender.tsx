@@ -107,6 +107,14 @@ const STRONG_MATH_RE = /[0-9A-Za-z=<>+\-*/^_·×÷√∑Σπμσ≤≥≠∪∩�
 /** Split a line into alternating Hebrew (RTL) and non-Hebrew (math/LTR) runs.
  *  Whitespace sticks to the current run so equations keep their internal
  *  spacing ("P(A) = 0.6" stays one LTR unit). */
+// Bidi-neutral punctuation sticks to the CURRENT run instead of opening a new
+// math run. Without this, Hebrew-adjacent punctuation gets glued into the LTR
+// island: "מאפשרת: 1)" segmented ":" + "1)" as one LTR unit tears the colon off
+// the Hebrew word and visually flips the paren ("מאפשרת(1 :") — the recurring
+// "numbering is off" bug. With it, "מאפשרת: " stays RTL and "1)" is its own
+// LTR-isolated unit, so numbered points render exactly as authored.
+const NEUTRAL_PUNCT_RE = /[:;,.()\[\]"'«»?!…—–]/
+
 function bidiSafeSegments(line: string): Array<{ ltr: boolean; text: string }> {
   const segs: Array<{ ltr: boolean; text: string }> = []
   let buf = ''
@@ -114,7 +122,9 @@ function bidiSafeSegments(line: string): Array<{ ltr: boolean; text: string }> {
   const flush = () => { if (buf) { segs.push({ ltr: mode === 'math', text: buf }); buf = '' } }
   for (const ch of line) {
     let m: 'heb' | 'math' = mode === 'heb' ? 'heb' : 'math'
-    if (!/\s/.test(ch)) m = HEBREW_RE.test(ch) ? 'heb' : 'math'
+    // Whitespace and neutral punctuation inherit the current run's direction;
+    // only strongly-typed characters (Hebrew vs everything else) switch modes.
+    if (!/\s/.test(ch) && !NEUTRAL_PUNCT_RE.test(ch)) m = HEBREW_RE.test(ch) ? 'heb' : 'math'
     if (mode === null) mode = m
     if (m !== mode) { flush(); mode = m }
     buf += ch
