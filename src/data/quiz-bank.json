@@ -14348,6 +14348,1878 @@
           "format": "mc"
         }
       ]
+    },
+    "sql-select": {
+      "building": "",
+      "concept": "SQL SELECT basics",
+      "questions": [
+        {
+          "id": "sql-select_001",
+          "difficulty": "easy",
+          "question": "מה עושה הפקודה SELECT name FROM students ?",
+          "options": [
+            "מוחקת את העמודה name מהטבלה",
+            "מחזירה את העמודה name מכל השורות בטבלה students",
+            "יוצרת עמודה חדשה בשם name",
+            "מעדכנת את הערכים בעמודה name"
+          ],
+          "correct_answer": "מחזירה את העמודה name מכל השורות בטבלה students",
+          "explanation": "SELECT היא פקודת שליפה בלבד: היא קוראת נתונים מהטבלה ולא משנה אותם. כאן נשלפת עמודה אחת, name, מכל שורות students.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-select_002",
+          "difficulty": "easy",
+          "question": "מה המשמעות של הכוכבית בשאילתה SELECT * FROM orders ?",
+          "options": [
+            "שליפת כל העמודות בטבלה",
+            "שליפת השורה הראשונה בלבד",
+            "הכפלת כל הערכים המספריים",
+            "שליפת עמודות מספריות בלבד"
+          ],
+          "correct_answer": "שליפת כל העמודות בטבלה",
+          "explanation": "הכוכבית היא קיצור שאומר \"כל העמודות\". השאילתה תחזיר את כל השורות ואת כל העמודות של orders.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-select_003",
+          "difficulty": "easy",
+          "question": "איזו מילת מפתח משמשת לתת שם חלופי (כינוי) לעמודה בתוצאה, למשל SELECT price AS unit_price ?",
+          "options": [
+            "RENAME",
+            "ALIAS",
+            "AS",
+            "NAME"
+          ],
+          "correct_answer": "AS",
+          "explanation": "AS מגדירה כינוי (alias) לעמודה או לטבלה בתוצאת השאילתה. השם המקורי בטבלה לא משתנה.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-select_004",
+          "difficulty": "easy",
+          "question": "מה מחזירה השאילתה SELECT DISTINCT city FROM customers ?",
+          "options": [
+            "את כל הערים כולל כפילויות",
+            "את העיר הראשונה בלבד",
+            "את מספר הערים",
+            "כל עיר פעם אחת בלבד, ללא כפילויות"
+          ],
+          "correct_answer": "כל עיר פעם אחת בלבד, ללא כפילויות",
+          "explanation": "DISTINCT מסננת שורות כפולות בתוצאה. אם עיר מופיעה אצל כמה לקוחות, היא תוחזר פעם אחת בלבד.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-select_005",
+          "difficulty": "medium",
+          "question": "מה תחזיר השאילתה SELECT name, price * 1.17 AS price_with_vat FROM products ?",
+          "options": [
+            "שגיאה, כי אסור לבצע חישוב בתוך SELECT",
+            "את השם ואת המחיר כולל מעמ מחושב לכל שורה, בלי לשנות את הטבלה",
+            "את השם בלבד, כי חישוב מוחק עמודות אחרות",
+            "עדכון קבוע של המחיר בטבלה בתוספת 17 אחוז"
+          ],
+          "correct_answer": "את השם ואת המחיר כולל מעמ מחושב לכל שורה, בלי לשנות את הטבלה",
+          "explanation": "מותר לבצע ביטויים חישוביים ב-SELECT, והתוצאה מחושבת רק בפלט. הנתונים בטבלה עצמה לא משתנים.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-select_006",
+          "difficulty": "medium",
+          "question": "מה תחזיר השאילתה SELECT DISTINCT city, country FROM customers ?",
+          "options": [
+            "כל צירוף ייחודי של עיר ומדינה יחד",
+            "ערים ייחודיות בעמודה אחת ומדינות ייחודיות בנפרד",
+            "שגיאה, כי DISTINCT עובד רק על עמודה אחת",
+            "את כל השורות כולל כפילויות"
+          ],
+          "correct_answer": "כל צירוף ייחודי של עיר ומדינה יחד",
+          "explanation": "DISTINCT פועלת על כל שורת התוצאה כיחידה אחת, כלומר על הצירוף של כל העמודות שנבחרו. שתי שורות ייחשבו כפולות רק אם גם העיר וגם המדינה זהות.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-select_007",
+          "difficulty": "medium",
+          "question": "בשאילתה SELECT name AS n FROM students WHERE n = 'דנה' מתקבלת שגיאה. מדוע?",
+          "options": [
+            "אסור להשתמש בעברית בתנאי",
+            "כינוי חייב להיות באורך שלוש אותיות לפחות",
+            "WHERE מעובד לפני SELECT, ולכן הכינוי n עוד לא קיים בשלב הסינון",
+            "חסרה מילת המפתח AS בתנאי"
+          ],
+          "correct_answer": "WHERE מעובד לפני SELECT, ולכן הכינוי n עוד לא קיים בשלב הסינון",
+          "explanation": "סדר העיבוד הלוגי הוא FROM, אחר כך WHERE, ורק אחר כך SELECT. כינויים שמוגדרים ב-SELECT אינם זמינים ב-WHERE, ולכן צריך לכתוב WHERE name = 'דנה'.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-select_008",
+          "difficulty": "medium",
+          "question": "מה ההבדל בין SELECT COUNT(*) FROM users לבין SELECT COUNT(email) FROM users ?",
+          "options": [
+            "אין הבדל, שתיהן סופרות את כל השורות תמיד",
+            "הראשונה סופרת עמודות והשנייה שורות",
+            "COUNT(email) מהירה תמיד כי היא סופרת פחות נתונים",
+            "הראשונה סופרת את כל השורות, השנייה סופרת רק שורות שבהן email אינו NULL"
+          ],
+          "correct_answer": "הראשונה סופרת את כל השורות, השנייה סופרת רק שורות שבהן email אינו NULL",
+          "explanation": "COUNT(*) סופרת שורות ללא קשר לתוכן, ואילו COUNT על עמודה מסוימת מדלגת על ערכי NULL. אם יש משתמשים ללא אימייל, התוצאות יהיו שונות.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-select_009",
+          "difficulty": "hard",
+          "question": "מהו סדר העיבוד הלוגי הנכון של חלקי שאילתה עם SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY ?",
+          "options": [
+            "SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY",
+            "FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY",
+            "FROM, SELECT, WHERE, GROUP BY, HAVING, ORDER BY",
+            "WHERE, FROM, GROUP BY, SELECT, HAVING, ORDER BY"
+          ],
+          "correct_answer": "FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY",
+          "explanation": "למרות ש-SELECT נכתב ראשון, הוא מעובד כמעט אחרון. סדר העיבוד הלוגי מסביר למה כינויי SELECT זמינים ב-ORDER BY אך לא ב-WHERE או ב-HAVING.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-select_010",
+          "difficulty": "hard",
+          "question": "בטבלת products יש 100 שורות, ובעמודה category יש 5 ערכים שונים וגם ערכי NULL בחלק מהשורות. מה תחזיר השאילתה SELECT DISTINCT category FROM products ?",
+          "options": [
+            "6 שורות: 5 הקטגוריות ועוד שורה אחת של NULL",
+            "5 שורות בלבד, כי NULL תמיד מסונן",
+            "שגיאה, כי DISTINCT לא יודע להשוות NULL",
+            "100 שורות, כי NULL שובר את הסינון"
+          ],
+          "correct_answer": "6 שורות: 5 הקטגוריות ועוד שורה אחת של NULL",
+          "explanation": "לצורך DISTINCT כל ערכי ה-NULL נחשבים לקבוצה אחת, ולכן מופיעה שורת NULL אחת בתוצאה. זה שונה מהשוואה רגילה, שבה NULL = NULL אינו אמת.",
+          "correctIndex": 0,
+          "format": "mc"
+        }
+      ]
+    },
+    "sql-where": {
+      "building": "",
+      "concept": "Filtering rows with WHERE",
+      "questions": [
+        {
+          "id": "sql-where_001",
+          "difficulty": "easy",
+          "question": "מה מחזירה השאילתה SELECT * FROM orders WHERE total > 100 ?",
+          "options": [
+            "את כל ההזמנות שסכומן גדול מ-100",
+            "את כל ההזמנות שסכומן 100 בדיוק",
+            "את 100 ההזמנות הראשונות",
+            "את כל ההזמנות שסכומן קטן מ-100"
+          ],
+          "correct_answer": "את כל ההזמנות שסכומן גדול מ-100",
+          "explanation": "WHERE מסננת שורות לפי תנאי. רק שורות שבהן התנאי total > 100 מתקיים ייכללו בתוצאה.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-where_002",
+          "difficulty": "easy",
+          "question": "איזה אופרטור בודק אם ערך נמצא בתוך רשימת ערכים, למשל בשאילתה על ערים מסוימות?",
+          "options": [
+            "BETWEEN",
+            "LIKE",
+            "IN",
+            "EXISTS"
+          ],
+          "correct_answer": "IN",
+          "explanation": "האופרטור IN בודק שייכות לרשימה, למשל WHERE city IN ('חיפה', 'תל אביב'). זה קיצור נוח לשרשרת של תנאי OR.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-where_003",
+          "difficulty": "easy",
+          "question": "מה מחזירה השאילתה SELECT * FROM customers WHERE name LIKE 'A%' ?",
+          "options": [
+            "לקוחות ששמם מסתיים באות A",
+            "לקוחות ששמם מכיל בדיוק תו אחד",
+            "לקוחות ששמם מכיל את הסימן אחוז",
+            "לקוחות ששמם מתחיל באות A"
+          ],
+          "correct_answer": "לקוחות ששמם מתחיל באות A",
+          "explanation": "ב-LIKE הסימן אחוז מייצג כל רצף תווים, כולל רצף ריק. לכן התבנית 'A%' תואמת כל מחרוזת שמתחילה ב-A.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-where_004",
+          "difficulty": "easy",
+          "question": "מה בודק התנאי WHERE price BETWEEN 10 AND 20 ?",
+          "options": [
+            "מחיר גדול מ-10 וקטן מ-20, לא כולל הקצוות",
+            "מחיר בין 10 ל-20 כולל שני הקצוות",
+            "מחיר שהוא 10 או 20 בלבד",
+            "מחיר שאינו בין 10 ל-20"
+          ],
+          "correct_answer": "מחיר בין 10 ל-20 כולל שני הקצוות",
+          "explanation": "BETWEEN הוא טווח סגור: הוא שקול ל-price >= 10 AND price <= 20, כלומר הקצוות נכללים.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-where_005",
+          "difficulty": "medium",
+          "question": "מה תחזיר השאילתה SELECT * FROM products WHERE category = 'food' OR category = 'toys' AND price < 50 ?",
+          "options": [
+            "מוצרים מקטגוריית food או toys, כולם מתחת ל-50",
+            "שגיאה, כי אסור לשלב OR ו-AND בלי סוגריים",
+            "את כל מוצרי food ללא תלות במחיר, ובנוסף מוצרי toys שמחירם מתחת ל-50",
+            "רק מוצרי toys מתחת ל-50"
+          ],
+          "correct_answer": "את כל מוצרי food ללא תלות במחיר, ובנוסף מוצרי toys שמחירם מתחת ל-50",
+          "explanation": "ל-AND יש קדימות גבוהה יותר מ-OR, ולכן התנאי מתפרש כ-food או (toys וגם מחיר מתחת ל-50). כדי לסנן את שתי הקטגוריות לפי מחיר צריך סוגריים.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-where_006",
+          "difficulty": "medium",
+          "question": "מדוע השאילתה SELECT * FROM orders WHERE created_at LIKE '2024%' עלולה להיות בעייתית בעמודת תאריך מסוג date ?",
+          "options": [
+            "LIKE מיועד למחרוזות; על תאריך עדיף להשתמש בהשוואת טווחים, וההמרה הסמויה עלולה לפגוע בשימוש באינדקס",
+            "LIKE לא חוקי בכלל ב-WHERE",
+            "אחוז אינו תו חוקי בתבנית",
+            "התנאי יחזיר תמיד את כל השורות"
+          ],
+          "correct_answer": "LIKE מיועד למחרוזות; על תאריך עדיף להשתמש בהשוואת טווחים, וההמרה הסמויה עלולה לפגוע בשימוש באינדקס",
+          "explanation": "כשמפעילים LIKE על עמודת date המנוע ממיר את התאריך למחרוזת, מה שמונע שימוש יעיל באינדקס ותלוי בפורמט ההמרה. הדרך הנכונה היא טווח, למשל created_at >= '2024-01-01' AND created_at < '2025-01-01'.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-where_007",
+          "difficulty": "medium",
+          "question": "בטבלת users יש שורות שבהן age הוא NULL. מה יקרה לשורות אלה בשאילתה SELECT * FROM users WHERE age <> 30 ?",
+          "options": [
+            "הן יוחזרו, כי NULL שונה מ-30",
+            "הן יוחזרו רק אם age גם קטן מ-30",
+            "השאילתה תיכשל בשגיאה",
+            "הן לא יוחזרו, כי השוואה עם NULL אינה מחזירה אמת"
+          ],
+          "correct_answer": "הן לא יוחזרו, כי השוואה עם NULL אינה מחזירה אמת",
+          "explanation": "כל השוואה רגילה מול NULL מחזירה UNKNOWN, ו-WHERE משאיר רק שורות שהתנאי בהן אמת. כדי לכלול אותן צריך להוסיף OR age IS NULL.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-where_008",
+          "difficulty": "medium",
+          "question": "מה ההבדל בין WHERE name LIKE 'dan_' לבין WHERE name LIKE 'dan%' ?",
+          "options": [
+            "אין הבדל, שני הסימנים זהים",
+            "קו תחתון תואם בדיוק תו אחד, ואחוז תואם כל רצף תווים כולל ריק",
+            "קו תחתון תואם רווח בלבד",
+            "אחוז תואם תו אחד וקו תחתון תואם רצף"
+          ],
+          "correct_answer": "קו תחתון תואם בדיוק תו אחד, ואחוז תואם כל רצף תווים כולל ריק",
+          "explanation": "התבנית 'dan_' תתאים למחרוזות באורך 4 בדיוק כמו dana, ואילו 'dan%' תתאים גם ל-dan, dana ו-daniel. זו ההבחנה בין תו בודד לרצף.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-where_009",
+          "difficulty": "hard",
+          "question": "בטבלת products יש 10 שורות: 4 עם category = 'food', 3 עם 'toys' ו-3 עם NULL. כמה שורות תחזיר השאילתה SELECT * FROM products WHERE category NOT IN ('food') ?",
+          "options": [
+            "6, כולל שורות ה-NULL",
+            "3 בלבד, שורות toys, כי NULL אינו עובר את התנאי",
+            "10, כי NOT IN לא מסנן NULL",
+            "0, כי NULL ברשימת הערכים בטבלה מבטל הכל"
+          ],
+          "correct_answer": "3 בלבד, שורות toys, כי NULL אינו עובר את התנאי",
+          "explanation": "עבור שורה עם category = NULL, הביטוי NOT IN מחזיר UNKNOWN ולא אמת, ולכן השורה מסוננת החוצה. רק שורות toys עומדות בתנאי בוודאות.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-where_010",
+          "difficulty": "hard",
+          "question": "מדוע התנאי WHERE lower(email) = 'dan@example.com' עלול לרוץ לאט על טבלה גדולה עם אינדקס רגיל על email ?",
+          "options": [
+            "הפונקציה lower אינה קיימת בסטנדרט",
+            "השוואת מחרוזות תמיד איטית מהשוואת מספרים",
+            "הפעלת פונקציה על העמודה מונעת שימוש באינדקס הרגיל, והמנוע סורק את כל הטבלה",
+            "אסור להשוות עמודה למחרוזת קבועה"
+          ],
+          "correct_answer": "הפעלת פונקציה על העמודה מונעת שימוש באינדקס הרגיל, והמנוע סורק את כל הטבלה",
+          "explanation": "אינדקס רגיל בנוי על ערכי העמודה המקוריים, לא על תוצאת lower. הפתרון הוא אינדקס פונקציונלי על lower(email) או שמירת הערך מנורמל מראש.",
+          "correctIndex": 2,
+          "format": "mc"
+        }
+      ]
+    },
+    "sql-order-limit": {
+      "building": "",
+      "concept": "Sorting and limiting results",
+      "questions": [
+        {
+          "id": "sql-order-limit_001",
+          "difficulty": "easy",
+          "question": "מה עושה השאילתה SELECT name FROM students ORDER BY name ?",
+          "options": [
+            "מסננת שמות כפולים",
+            "מחזירה את השמות ממוינים בסדר עולה",
+            "מחזירה את השמות בסדר אקראי",
+            "ממיינת את הטבלה עצמה לצמיתות"
+          ],
+          "correct_answer": "מחזירה את השמות ממוינים בסדר עולה",
+          "explanation": "ORDER BY ממיין את שורות התוצאה בלבד, וברירת המחדל היא סדר עולה (ASC). הטבלה עצמה לא משתנה.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-order-limit_002",
+          "difficulty": "easy",
+          "question": "איזו מילת מפתח ממיינת בסדר יורד, מהגדול לקטן?",
+          "options": [
+            "ASC",
+            "DOWN",
+            "REVERSE",
+            "DESC"
+          ],
+          "correct_answer": "DESC",
+          "explanation": "DESC (descending) ממיינת מהגדול לקטן, למשל ORDER BY price DESC. ההפך ממנה היא ASC, שהיא ברירת המחדל.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-order-limit_003",
+          "difficulty": "easy",
+          "question": "מה מחזירה השאילתה SELECT * FROM orders ORDER BY total DESC LIMIT 5 ?",
+          "options": [
+            "את 5 ההזמנות עם הסכום הגבוה ביותר",
+            "את 5 ההזמנות עם הסכום הנמוך ביותר",
+            "את כל ההזמנות מעל 5 שקלים",
+            "5 הזמנות אקראיות"
+          ],
+          "correct_answer": "את 5 ההזמנות עם הסכום הגבוה ביותר",
+          "explanation": "המיון היורד מציב את ההזמנות הגדולות ראשונות, ו-LIMIT 5 חותך את התוצאה לחמש השורות הראשונות שלה.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-order-limit_004",
+          "difficulty": "easy",
+          "question": "מה עושה OFFSET 10 בשאילתה SELECT * FROM products ORDER BY id LIMIT 10 OFFSET 10 ?",
+          "options": [
+            "מכפיל את התוצאה פי 10",
+            "מדלג על 10 השורות הראשונות ומחזיר את 10 הבאות",
+            "מחזיר רק את השורה העשירית",
+            "ממיין לפי העמודה העשירית"
+          ],
+          "correct_answer": "מדלג על 10 השורות הראשונות ומחזיר את 10 הבאות",
+          "explanation": "OFFSET מדלג על מספר שורות מתחילת התוצאה הממוינת. השילוב עם LIMIT הוא הבסיס לעימוד (pagination): כאן מתקבל העמוד השני.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-order-limit_005",
+          "difficulty": "medium",
+          "question": "מה המשמעות של ORDER BY city, name בשאילתת שליפה מטבלת customers ?",
+          "options": [
+            "מיון לפי name ואז לפי city",
+            "מיון לפי עיר, ובתוך כל עיר מיון לפי שם",
+            "מיון אקראי בין שתי העמודות",
+            "שגיאה, כי מותר למיין רק לפי עמודה אחת"
+          ],
+          "correct_answer": "מיון לפי עיר, ובתוך כל עיר מיון לפי שם",
+          "explanation": "מיון מרובה עמודות פועל בסדר הכתיבה: העמודה הראשונה קובעת את הסדר הראשי, והשנייה שוברת שוויון בתוך קבוצות זהות.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-order-limit_006",
+          "difficulty": "medium",
+          "question": "מה יקרה בשאילתה SELECT * FROM orders LIMIT 5 ללא ORDER BY ?",
+          "options": [
+            "יוחזרו 5 שורות כלשהן, בסדר שאינו מובטח",
+            "תמיד יוחזרו 5 השורות הישנות ביותר",
+            "תמיד יוחזרו 5 השורות החדשות ביותר",
+            "תתקבל שגיאה, כי LIMIT מחייב ORDER BY"
+          ],
+          "correct_answer": "יוחזרו 5 שורות כלשהן, בסדר שאינו מובטח",
+          "explanation": "ללא ORDER BY אין למסד הנתונים שום מחויבות לסדר מסוים, והתוצאה עלולה להשתנות בין הרצות. LIMIT ללא מיון הוא מתכון לתוצאות לא צפויות.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-order-limit_007",
+          "difficulty": "medium",
+          "question": "ב-PostgreSQL, היכן יופיעו ערכי NULL כברירת מחדל בשאילתה SELECT * FROM tasks ORDER BY due_date ASC ?",
+          "options": [
+            "בתחילת התוצאה",
+            "הם יושמטו מהתוצאה",
+            "בסוף התוצאה, כי במיון עולה NULL נחשב אחרון",
+            "במקום אקראי"
+          ],
+          "correct_answer": "בסוף התוצאה, כי במיון עולה NULL נחשב אחרון",
+          "explanation": "ב-PostgreSQL ברירת המחדל היא NULLS LAST במיון עולה ו-NULLS FIRST במיון יורד. אפשר לשלוט בכך במפורש עם NULLS FIRST או NULLS LAST.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-order-limit_008",
+          "difficulty": "medium",
+          "question": "האם השאילתה SELECT name, price AS p FROM products ORDER BY p תעבוד?",
+          "options": [
+            "לא, כינויים אסורים בכל מקום מחוץ ל-SELECT",
+            "כן, כי ORDER BY מעובד אחרי SELECT ולכן הכינוי כבר קיים",
+            "רק אם הכינוי זהה לשם העמודה",
+            "רק אם מוסיפים DESC"
+          ],
+          "correct_answer": "כן, כי ORDER BY מעובד אחרי SELECT ולכן הכינוי כבר קיים",
+          "explanation": "בניגוד ל-WHERE, שלב ORDER BY מעובד לוגית אחרי SELECT, ולכן כינויי עמודות זמינים בו. זה הבדל חשוב שנובע מסדר העיבוד.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-order-limit_009",
+          "difficulty": "hard",
+          "question": "אתר מציג עימוד עם LIMIT 20 OFFSET 20 ממוין לפי ORDER BY created_at, ומשתמשים מדווחים שאותה שורה מופיעה גם בעמוד 1 וגם בעמוד 2. מה ההסבר הסביר?",
+          "options": [
+            "ל-created_at יש ערכים כפולים, והמיון אינו דטרמיניסטי; יש להוסיף עמודה ייחודית כמו id למיון",
+            "OFFSET תמיד מחזיר שורות כפולות",
+            "LIMIT חייב להיות גדול מ-OFFSET",
+            "אי אפשר לעמד תוצאות ממוינות לפי תאריך"
+          ],
+          "correct_answer": "ל-created_at יש ערכים כפולים, והמיון אינו דטרמיניסטי; יש להוסיף עמודה ייחודית כמו id למיון",
+          "explanation": "כששורות רבות חולקות אותו ערך מיון, סדרן ביניהן אינו מובטח ועשוי להשתנות בין שאילתות, כך ששורה \"זזה\" בין עמודים. מיון משני לפי מפתח ייחודי, למשל ORDER BY created_at, id, הופך את הסדר ליציב.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-order-limit_010",
+          "difficulty": "hard",
+          "question": "מדוע עימוד עם OFFSET 100000 נעשה איטי מאוד בטבלאות גדולות, ומה חלופה יעילה?",
+          "options": [
+            "OFFSET שומר את כל השורות בזיכרון לנצח; החלופה היא DISTINCT",
+            "המנוע חייב לקרוא ולזרוק את כל השורות שמדלגים עליהן; חלופה יעילה היא keyset pagination עם תנאי WHERE על ערך העוגן האחרון",
+            "OFFSET גדול גורם לנעילת הטבלה; החלופה היא טרנזקציה",
+            "הבעיה קיימת רק בלי אינדקס, ואינדקס פותר אותה לחלוטין"
+          ],
+          "correct_answer": "המנוע חייב לקרוא ולזרוק את כל השורות שמדלגים עליהן; חלופה יעילה היא keyset pagination עם תנאי WHERE על ערך העוגן האחרון",
+          "explanation": "OFFSET לא \"קופץ\" ישירות לשורה, אלא סורק ומשליך את כל מה שלפניה, ולכן העלות גדלה עם עומק העמוד. עימוד לפי מפתח, למשל WHERE id > אחרון שנראה עם LIMIT, ניגש ישירות דרך האינדקס.",
+          "correctIndex": 1,
+          "format": "mc"
+        }
+      ]
+    },
+    "sql-null": {
+      "building": "",
+      "concept": "NULL semantics and three-valued logic",
+      "questions": [
+        {
+          "id": "sql-null_001",
+          "difficulty": "easy",
+          "question": "מה מייצג הערך NULL בעמודה של טבלה?",
+          "options": [
+            "את המספר אפס",
+            "מחרוזת ריקה",
+            "היעדר ערך, כלומר ערך לא ידוע או חסר",
+            "את הערך שלילי אינסוף"
+          ],
+          "correct_answer": "היעדר ערך, כלומר ערך לא ידוע או חסר",
+          "explanation": "NULL אינו אפס ואינו מחרוזת ריקה, אלא סימון שהערך חסר או לא ידוע. לכן יש לו כללי השוואה מיוחדים.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-null_002",
+          "difficulty": "easy",
+          "question": "איך בודקים נכון אם עמודת phone היא NULL בתנאי WHERE ?",
+          "options": [
+            "WHERE phone = NULL",
+            "WHERE phone IS NULL",
+            "WHERE phone == NULL",
+            "WHERE phone NULL"
+          ],
+          "correct_answer": "WHERE phone IS NULL",
+          "explanation": "השוואה עם סימן שוויון מול NULL מחזירה תמיד UNKNOWN, ולכן קיים תחביר ייעודי: IS NULL וההפך שלו IS NOT NULL.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-null_003",
+          "difficulty": "easy",
+          "question": "מה מחזירה הפונקציה COALESCE(nickname, name) עבור שורה שבה nickname הוא NULL ?",
+          "options": [
+            "את הערך של name",
+            "NULL",
+            "מחרוזת ריקה",
+            "שגיאה"
+          ],
+          "correct_answer": "את הערך של name",
+          "explanation": "COALESCE מחזירה את הארגומנט הראשון שאינו NULL. היא הכלי המרכזי להצבת ערכי ברירת מחדל במקום NULL.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-null_004",
+          "difficulty": "easy",
+          "question": "מה תוצאת הביטוי 5 + NULL בשאילתת SQL ?",
+          "options": [
+            "5",
+            "0",
+            "שגיאת חלוקה",
+            "NULL"
+          ],
+          "correct_answer": "NULL",
+          "explanation": "כמעט כל פעולה אריתמטית שמערבת NULL מחזירה NULL, כי אי אפשר לחשב עם ערך לא ידוע. זו סיבה נפוצה לתוצאות חסרות בחישובים.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-null_005",
+          "difficulty": "medium",
+          "question": "מה מחזיר התנאי NULL = NULL בלוגיקה של SQL ?",
+          "options": [
+            "TRUE, כי הערכים זהים",
+            "UNKNOWN, כי אי אפשר לדעת אם שני ערכים לא ידועים שווים",
+            "FALSE תמיד",
+            "שגיאת תחביר"
+          ],
+          "correct_answer": "UNKNOWN, כי אי אפשר לדעת אם שני ערכים לא ידועים שווים",
+          "explanation": "SQL עובד בלוגיקה תלת-ערכית: TRUE, FALSE ו-UNKNOWN. השוואת שני ערכים לא ידועים אינה יכולה להיות אמת ואינה בהכרח שקר, ולכן היא UNKNOWN.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-null_006",
+          "difficulty": "medium",
+          "question": "בטבלת employees יש 10 שורות, ב-3 מהן bonus הוא NULL. מה תחזיר השאילתה SELECT AVG(bonus) FROM employees ?",
+          "options": [
+            "את סכום הבונוסים חלקי 10",
+            "NULL",
+            "את ממוצע 7 השורות שבהן bonus אינו NULL",
+            "שגיאה בגלל ערכים חסרים"
+          ],
+          "correct_answer": "את ממוצע 7 השורות שבהן bonus אינו NULL",
+          "explanation": "פונקציות צבירה כמו AVG ו-SUM מתעלמות מערכי NULL, כך שהממוצע מחושב רק על הערכים הקיימים. אם רוצים להתייחס ל-NULL כאפס יש לעטוף ב-COALESCE(bonus, 0).",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-null_007",
+          "difficulty": "medium",
+          "question": "מה יחזיר הביטוי CONCAT בסגנון של אופרטור השרשור || ב-PostgreSQL עבור 'שלום' || NULL ?",
+          "options": [
+            "NULL",
+            "'שלום'",
+            "'שלוםNULL'",
+            "מחרוזת ריקה"
+          ],
+          "correct_answer": "NULL",
+          "explanation": "האופרטור || מחזיר NULL אם אחד הצדדים NULL, בדומה לאריתמטיקה. לעומתו הפונקציה CONCAT ב-PostgreSQL מתעלמת מ-NULL, וזה הבדל שכדאי להכיר.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-null_008",
+          "difficulty": "medium",
+          "question": "מה עושה הפונקציה NULLIF(a, b) ?",
+          "options": [
+            "מחזירה TRUE אם a הוא NULL",
+            "מחזירה NULL אם a שווה ל-b, אחרת מחזירה את a",
+            "מחליפה כל NULL ב-b",
+            "מוחקת שורות שבהן a הוא NULL"
+          ],
+          "correct_answer": "מחזירה NULL אם a שווה ל-b, אחרת מחזירה את a",
+          "explanation": "NULLIF שימושית למשל למניעת חלוקה באפס: total / NULLIF(count, 0) מחזירה NULL במקום שגיאה כאשר count הוא 0.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-null_009",
+          "difficulty": "hard",
+          "question": "בטבלת users יש 100 שורות, ב-20 מהן status הוא NULL, ב-30 status = 'active' וב-50 status = 'blocked'. כמה שורות יחזיר האיחוד של שתי השאילתות: WHERE status = 'active' ו-WHERE status <> 'active' ביחד?",
+          "options": [
+            "100, כי כל שורה עונה על אחד התנאים",
+            "80, כי שורות ה-NULL לא נכללות באף אחד מהתנאים",
+            "50 בלבד",
+            "70 בלבד"
+          ],
+          "correct_answer": "80, כי שורות ה-NULL לא נכללות באף אחד מהתנאים",
+          "explanation": "עבור status = NULL, גם ההשוואה לשוויון וגם לאי-שוויון מחזירות UNKNOWN, ולכן 20 השורות האלה נופלות בין הכיסאות. זו מלכודת קלאסית של לוגיקה תלת-ערכית: תנאי ומשלימו אינם מכסים את כל השורות.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-null_010",
+          "difficulty": "hard",
+          "question": "טבלת orders מכילה שורה שבה customer_id הוא NULL. מה יקרה לתנאי WHERE customer_id NOT IN (SELECT id FROM banned) כאשר תת-השאילתה מחזירה ערך NULL אחד לפחות?",
+          "options": [
+            "התנאי יתעלם מה-NULL ויעבוד כרגיל",
+            "רק שורות עם customer_id שלילי יוחזרו",
+            "התנאי לא יחזיר אף שורה, כי השוואה מול NULL ברשימה הופכת את כל הביטוי ל-UNKNOWN",
+            "תתקבל שגיאת ריצה"
+          ],
+          "correct_answer": "התנאי לא יחזיר אף שורה, כי השוואה מול NULL ברשימה הופכת את כל הביטוי ל-UNKNOWN",
+          "explanation": "NOT IN מתורגם לשרשרת של אי-שוויונות עם AND; אם אחד הערכים ברשימה הוא NULL, אותו איבר הוא UNKNOWN וכל הביטוי אינו יכול להיות TRUE. הפתרון הבטוח הוא NOT EXISTS או סינון NULL בתת-השאילתה.",
+          "correctIndex": 2,
+          "format": "mc"
+        }
+      ]
+    },
+    "sql-join": {
+      "building": "",
+      "concept": "Joining tables",
+      "questions": [
+        {
+          "id": "sql-join_001",
+          "difficulty": "easy",
+          "question": "מה עושה INNER JOIN בין טבלת orders לטבלת customers על פי customer_id ?",
+          "options": [
+            "מחזיר את כל השורות משתי הטבלאות ללא תנאי",
+            "מחזיר רק שורות שיש להן התאמה בשתי הטבלאות",
+            "מוחק שורות ללא התאמה מהטבלאות",
+            "מאחד את הטבלאות לטבלה אחת קבועה"
+          ],
+          "correct_answer": "מחזיר רק שורות שיש להן התאמה בשתי הטבלאות",
+          "explanation": "INNER JOIN משאיר רק זוגות שורות שמקיימים את תנאי החיבור. הזמנה בלי לקוח תואם, או לקוח בלי הזמנות, לא יופיעו בתוצאה.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-join_002",
+          "difficulty": "easy",
+          "question": "מה מחזיר LEFT JOIN של customers עם orders כשל-לקוח מסוים אין אף הזמנה?",
+          "options": [
+            "הלקוח לא יופיע בתוצאה",
+            "השורה תיכשל בשגיאה",
+            "הלקוח יופיע פעמיים",
+            "הלקוח יופיע עם ערכי NULL בעמודות ההזמנה"
+          ],
+          "correct_answer": "הלקוח יופיע עם ערכי NULL בעמודות ההזמנה",
+          "explanation": "LEFT JOIN שומר את כל שורות הטבלה השמאלית גם ללא התאמה, וממלא את עמודות הטבלה הימנית ב-NULL. כך אפשר לזהות לקוחות ללא הזמנות.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-join_003",
+          "difficulty": "easy",
+          "question": "באיזו מילת מפתח מציינים את תנאי החיבור בין הטבלאות ב-JOIN ?",
+          "options": [
+            "ON",
+            "WHERE ONLY",
+            "MATCH",
+            "BY"
+          ],
+          "correct_answer": "ON",
+          "explanation": "התחביר הוא JOIN table2 ON table1.key = table2.key. תנאי ה-ON קובע אילו שורות משתי הטבלאות מוצמדות זו לזו.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-join_004",
+          "difficulty": "easy",
+          "question": "מהי תוצאת CROSS JOIN בין טבלה עם 3 שורות לטבלה עם 4 שורות?",
+          "options": [
+            "3 שורות",
+            "4 שורות",
+            "12 שורות, כל צירוף אפשרי",
+            "7 שורות"
+          ],
+          "correct_answer": "12 שורות, כל צירוף אפשרי",
+          "explanation": "CROSS JOIN יוצר מכפלה קרטזית: כל שורה מהטבלה הראשונה מוצמדת לכל שורה מהשנייה, כלומר 3 כפול 4.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-join_005",
+          "difficulty": "medium",
+          "question": "איך מוצאים לקוחות שאין להם אף הזמנה בעזרת LEFT JOIN ?",
+          "options": [
+            "LEFT JOIN עם תנאי WHERE orders.id IS NULL אחרי החיבור",
+            "INNER JOIN עם DISTINCT",
+            "LEFT JOIN עם WHERE orders.id IS NOT NULL",
+            "CROSS JOIN עם LIMIT"
+          ],
+          "correct_answer": "LEFT JOIN עם תנאי WHERE orders.id IS NULL אחרי החיבור",
+          "explanation": "זהו דפוס anti-join: אחרי LEFT JOIN, שורות ללא התאמה מקבלות NULL בעמודות הטבלה הימנית, וסינון IS NULL משאיר בדיוק אותן.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-join_006",
+          "difficulty": "medium",
+          "question": "מה ההבדל בין הצבת תנאי ב-ON לבין הצבתו ב-WHERE כאשr משתמשים ב-LEFT JOIN ?",
+          "options": [
+            "אין שום הבדל בשום מקרה",
+            "תנאי ב-ON מסנן לפני יצירת שורות ה-NULL, ואילו תנאי WHERE על הטבלה הימנית עלול להפוך את החיבור בפועל ל-INNER JOIN",
+            "תנאי ב-WHERE תמיד מהיר יותר",
+            "ON מותר רק לעמודות מפתח"
+          ],
+          "correct_answer": "תנאי ב-ON מסנן לפני יצירת שורות ה-NULL, ואילו תנאי WHERE על הטבלה הימנית עלול להפוך את החיבור בפועל ל-INNER JOIN",
+          "explanation": "ב-LEFT JOIN, תנאי על עמודת הטבלה הימנית ב-WHERE מסנן החוצה את שורות ה-NULL שנוצרו, ובכך מבטל את מהות החיבור השמאלי. כדי לשמור על כל שורות הצד השמאלי יש לשים את התנאי ב-ON.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-join_007",
+          "difficulty": "medium",
+          "question": "מה מחזיר FULL OUTER JOIN בין שתי טבלאות?",
+          "options": [
+            "רק שורות עם התאמה בשני הצדדים",
+            "את כל השורות משני הצדדים, עם NULL בצד שאין לו התאמה",
+            "רק שורות ללא התאמה",
+            "מכפלה קרטזית מלאה"
+          ],
+          "correct_answer": "את כל השורות משני הצדדים, עם NULL בצד שאין לו התאמה",
+          "explanation": "FULL OUTER JOIN הוא שילוב של LEFT ו-RIGHT: אף שורה משום צד לא הולכת לאיבוד, ומקומות חסרים מתמלאים ב-NULL.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-join_008",
+          "difficulty": "medium",
+          "question": "מהו self join ומתי משתמשים בו?",
+          "options": [
+            "חיבור טבלה לעצמה עם כינויים שונים, למשל עובד למנהל שלו באותה טבלה",
+            "חיבור אוטומטי לפי שמות עמודות זהים",
+            "חיבור שנעשה בתוך טרנזקציה בלבד",
+            "חיבור בין שתי בסיסי נתונים שונים"
+          ],
+          "correct_answer": "חיבור טבלה לעצמה עם כינויים שונים, למשל עובד למנהל שלו באותה טבלה",
+          "explanation": "כאשר שורות באותה טבלה מפנות זו לזו, למשל עמודת manager_id בטבלת employees, מחברים את הטבלה לעצמה עם שני כינויים כדי להצמיד כל עובד למנהלו.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-join_009",
+          "difficulty": "hard",
+          "question": "טבלת customers מכילה 10 לקוחות, וללקוח אחד מהם יש 3 הזמנות בטבלת orders; לשאר אין הזמנות. כמה שורות תחזיר השאילתה SELECT * FROM customers LEFT JOIN orders ON customers.id = orders.customer_id ?",
+          "options": [
+            "10",
+            "13",
+            "3",
+            "12, כי הלקוח עם ההזמנות מופיע 3 פעמים והשאר פעם אחת"
+          ],
+          "correct_answer": "12, כי הלקוח עם ההזמנות מופיע 3 פעמים והשאר פעם אחת",
+          "explanation": "LEFT JOIN מכפיל שורה שמאלית לפי מספר ההתאמות שלה: לקוח עם 3 הזמנות תורם 3 שורות, ו-9 הלקוחות ללא הזמנות תורמים שורה אחת כל אחד עם NULL. סך הכל 3 ועוד 9, כלומר 12 — לא 10.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-join_010",
+          "difficulty": "hard",
+          "question": "מפתחים סופרים לקוחות עם SELECT COUNT(*) FROM customers LEFT JOIN orders ON customers.id = orders.customer_id ומקבלים מספר גדול ממספר הלקוחות. מה הבאג ומה התיקון?",
+          "options": [
+            "LEFT JOIN מכפיל לקוחות לפי מספר הזמנותיהם; יש לספור COUNT(DISTINCT customers.id) או לוותר על החיבור",
+            "COUNT(*) סופר גם עמודות; יש לספור עמודה אחת",
+            "צריך RIGHT JOIN במקום LEFT JOIN",
+            "התנאי ON שגוי ולכן נוצרת מכפלה קרטזית"
+          ],
+          "correct_answer": "LEFT JOIN מכפיל לקוחות לפי מספר הזמנותיהם; יש לספור COUNT(DISTINCT customers.id) או לוותר על החיבור",
+          "explanation": "כל התאמה בטבלה הימנית מייצרת שורת תוצאה נוספת, ולכן לקוח עם 5 הזמנות נספר 5 פעמים. ספירת מזהים ייחודיים, או ביצוע הצבירה לפני החיבור, מחזירים את הספירה הנכונה.",
+          "correctIndex": 0,
+          "format": "mc"
+        }
+      ]
+    },
+    "sql-aggregate": {
+      "building": "",
+      "concept": "Aggregate functions",
+      "questions": [
+        {
+          "id": "sql-aggregate_001",
+          "difficulty": "easy",
+          "question": "מה מחזירה השאילתה SELECT COUNT(*) FROM orders WHERE total > 100 ?",
+          "options": [
+            "את סכום כל ההזמנות",
+            "את מספר ההזמנות שסכומן גדול מ-100",
+            "את ההזמנה הגדולה ביותר",
+            "את כל ההזמנות מעל 100"
+          ],
+          "correct_answer": "את מספר ההזמנות שסכומן גדול מ-100",
+          "explanation": "COUNT(*) סופרת שורות, וה-WHERE מצמצם קודם את השורות הנספרות לאלה שעומדות בתנאי. התוצאה היא מספר אחד.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-aggregate_002",
+          "difficulty": "easy",
+          "question": "איזו פונקציה מחזירה את הערך הגבוה ביותר בעמודה?",
+          "options": [
+            "TOP",
+            "HIGHEST",
+            "MOST",
+            "MAX"
+          ],
+          "correct_answer": "MAX",
+          "explanation": "MAX מחזירה את הערך המקסימלי בעמודה, למשל SELECT MAX(price) FROM products. המקבילה לערך הנמוך היא MIN.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-aggregate_003",
+          "difficulty": "easy",
+          "question": "מה ההבדל בין SUM(price) לבין AVG(price) ?",
+          "options": [
+            "SUM מחזירה סכום כולל ו-AVG מחזירה ממוצע",
+            "SUM מחזירה ממוצע ו-AVG סכום",
+            "שתיהן זהות בעמודות מספריות",
+            "SUM עובדת רק על מספרים שלמים"
+          ],
+          "correct_answer": "SUM מחזירה סכום כולל ו-AVG מחזירה ממוצע",
+          "explanation": "SUM מחברת את כל הערכים ו-AVG מחלקת את הסכום במספר הערכים שאינם NULL. שתיהן פונקציות צבירה שמחזירות ערך אחד מקבוצת שורות.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-aggregate_004",
+          "difficulty": "easy",
+          "question": "כמה שורות מחזירה השאילתה SELECT MIN(price), MAX(price) FROM products על טבלה עם 500 שורות?",
+          "options": [
+            "500",
+            "2",
+            "שורה אחת עם שני ערכים",
+            "0"
+          ],
+          "correct_answer": "שורה אחת עם שני ערכים",
+          "explanation": "פונקציות צבירה ללא GROUP BY מכווצות את כל הטבלה לשורת תוצאה אחת. בשורה זו מופיעים המינימום והמקסימום זה לצד זה.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-aggregate_005",
+          "difficulty": "medium",
+          "question": "מה תחזיר השאילתה SELECT COUNT(DISTINCT city) FROM customers ?",
+          "options": [
+            "את מספר הלקוחות",
+            "את מספר הערים השונות שבהן יש לקוחות",
+            "את שם העיר הנפוצה ביותר",
+            "את מספר הלקוחות בעיר הגדולה ביותר"
+          ],
+          "correct_answer": "את מספר הערים השונות שבהן יש לקוחות",
+          "explanation": "השילוב COUNT(DISTINCT ...) סופר ערכים ייחודיים בלבד. עיר שמופיעה אצל 50 לקוחות נספרת פעם אחת.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-aggregate_006",
+          "difficulty": "medium",
+          "question": "מה תחזיר SELECT SUM(amount) FROM payments אם הטבלה ריקה לחלוטין?",
+          "options": [
+            "0",
+            "שגיאה",
+            "NULL",
+            "מחרוזת ריקה"
+          ],
+          "correct_answer": "NULL",
+          "explanation": "SUM על קבוצה ריקה מחזירה NULL ולא אפס, בניגוד ל-COUNT שמחזירה 0. אם צריך אפס, עוטפים ב-COALESCE(SUM(amount), 0).",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-aggregate_007",
+          "difficulty": "medium",
+          "question": "מדוע השאילתה SELECT name, MAX(salary) FROM employees נכשלת ב-PostgreSQL ?",
+          "options": [
+            "MAX לא עובדת על עמודת salary",
+            "העמודה name אינה בתוך פונקציית צבירה ואינה ב-GROUP BY, ולכן אין דרך חד-משמעית לבחור לה ערך",
+            "אסור לשלב עמודה ופונקציה באותו SELECT לעולם",
+            "חסר ORDER BY"
+          ],
+          "correct_answer": "העמודה name אינה בתוך פונקציית צבירה ואינה ב-GROUP BY, ולכן אין דרך חד-משמעית לבחור לה ערך",
+          "explanation": "כשיש צבירה, כל עמודה בפלט חייבת להיות מצוברת או להופיע ב-GROUP BY. כדי למצוא את בעל השכר הגבוה משתמשים ב-ORDER BY salary DESC LIMIT 1 או בתת-שאילתה.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-aggregate_008",
+          "difficulty": "medium",
+          "question": "בעמודת rating יש את הערכים 4, 5 ו-NULL. מה תחזיר SELECT AVG(rating) על שלוש השורות האלה?",
+          "options": [
+            "3, כי NULL נספר כאפס",
+            "4.5, כי NULL אינו נכלל בממוצע",
+            "NULL, כי יש ערך חסר",
+            "5, הערך הגבוה"
+          ],
+          "correct_answer": "4.5, כי NULL אינו נכלל בממוצע",
+          "explanation": "AVG מסכמת רק ערכים שאינם NULL ומחלקת במספרם: 9 חלקי 2. אילו NULL היה נספר כאפס הממוצע היה 3, וההבדל הזה קריטי בניתוח נתונים.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-aggregate_009",
+          "difficulty": "hard",
+          "question": "מדוע השאילתה SELECT COUNT(*) FROM users WHERE COUNT(id) > 5 נכשלת?",
+          "options": [
+            "COUNT דורשת סוגריים כפולים",
+            "אי אפשר להשוות ספירה למספר",
+            "WHERE מעובד לפני הצבירה, ולכן אסור להשתמש בפונקציית צבירה בתוכו; לכך נועד HAVING",
+            "חסרה מילת המפתח AS"
+          ],
+          "correct_answer": "WHERE מעובד לפני הצבירה, ולכן אסור להשתמש בפונקציית צבירה בתוכו; לכך נועד HAVING",
+          "explanation": "בשלב ה-WHERE המנוע עדיין מסתכל על שורות בודדות, ואין עדיין קבוצות שאפשר לספור. תנאים על תוצאות צבירה שייכים ל-HAVING שמעובד אחרי GROUP BY.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-aggregate_010",
+          "difficulty": "hard",
+          "question": "בטבלת sales יש 4 שורות עם amount בערכים 10, 20, NULL ו-30. מה יחזירו COUNT(*), COUNT(amount) ו-AVG(amount) בהתאמה?",
+          "options": [
+            "4, 3, 20",
+            "4, 4, 15",
+            "3, 3, 20",
+            "4, 3, 15"
+          ],
+          "correct_answer": "4, 3, 20",
+          "explanation": "COUNT(*) סופרת את כל 4 השורות, COUNT(amount) מדלגת על ה-NULL ומחזירה 3, ו-AVG מחשבת 60 חלקי 3 שזה 20. השילוב מדגים שכל הפונקציות מלבד COUNT(*) מתעלמות מ-NULL.",
+          "correctIndex": 0,
+          "format": "mc"
+        }
+      ]
+    },
+    "sql-group-by": {
+      "building": "",
+      "concept": "GROUP BY and HAVING",
+      "questions": [
+        {
+          "id": "sql-group-by_001",
+          "difficulty": "easy",
+          "question": "מה עושה השאילתה SELECT city, COUNT(*) FROM customers GROUP BY city ?",
+          "options": [
+            "ממיינת את הלקוחות לפי עיר",
+            "סופרת כמה לקוחות יש בכל עיר",
+            "מוחקת ערים כפולות",
+            "מחזירה את העיר עם הכי הרבה לקוחות בלבד"
+          ],
+          "correct_answer": "סופרת כמה לקוחות יש בכל עיר",
+          "explanation": "GROUP BY מקבץ את השורות לקבוצות לפי ערך העיר, ו-COUNT(*) פועלת בנפרד על כל קבוצה. מתקבלת שורה אחת לכל עיר.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-group-by_002",
+          "difficulty": "easy",
+          "question": "כמה שורות תחזיר שאילתת GROUP BY category על טבלת מוצרים שבה 4 קטגוריות שונות (ללא NULL)?",
+          "options": [
+            "שורה אחת",
+            "4 שורות, אחת לכל קטגוריה",
+            "כמספר המוצרים",
+            "תלוי ב-LIMIT"
+          ],
+          "correct_answer": "4 שורות, אחת לכל קטגוריה",
+          "explanation": "כל ערך ייחודי בעמודת הקיבוץ יוצר קבוצה אחת, וכל קבוצה מפיקה שורת תוצאה אחת. לכן מספר השורות שווה למספר הקטגוריות.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-group-by_003",
+          "difficulty": "easy",
+          "question": "איזו פסוקית מסננת קבוצות אחרי הקיבוץ, למשל רק ערים עם יותר מ-10 לקוחות?",
+          "options": [
+            "WHERE",
+            "FILTER BY",
+            "LIMIT",
+            "HAVING"
+          ],
+          "correct_answer": "HAVING",
+          "explanation": "HAVING מופעלת על הקבוצות אחרי GROUP BY, למשל HAVING COUNT(*) > 10. זאת לעומת WHERE שמסננת שורות בודדות לפני הקיבוץ.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-group-by_004",
+          "difficulty": "easy",
+          "question": "מה מחשבת השאילתה SELECT department, AVG(salary) FROM employees GROUP BY department ?",
+          "options": [
+            "את השכר הממוצע בכל מחלקה",
+            "את השכר הכולל בחברה",
+            "את מספר העובדים בכל מחלקה",
+            "את השכר הגבוה בכל מחלקה"
+          ],
+          "correct_answer": "את השכר הממוצע בכל מחלקה",
+          "explanation": "הקיבוץ לפי מחלקה יוצר קבוצת עובדים לכל מחלקה, ו-AVG מחושבת בנפרד בתוך כל קבוצה.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-group-by_005",
+          "difficulty": "medium",
+          "question": "מה ההבדל העקרוני בין WHERE לבין HAVING בשאילתה עם GROUP BY ?",
+          "options": [
+            "WHERE מסננת שורות לפני הקיבוץ, HAVING מסננת קבוצות אחרי הקיבוץ",
+            "HAVING מהירה יותר תמיד",
+            "WHERE עובדת רק על מספרים",
+            "אין הבדל, אלה שמות נרדפים"
+          ],
+          "correct_answer": "WHERE מסננת שורות לפני הקיבוץ, HAVING מסננת קבוצות אחרי הקיבוץ",
+          "explanation": "הסינון ב-WHERE קובע אילו שורות בכלל ייכנסו לקבוצות, ואילו HAVING בוחנת את תוצאות הצבירה של כל קבוצה. לכן רק ב-HAVING מותר להשתמש בפונקציות צבירה.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-group-by_006",
+          "difficulty": "medium",
+          "question": "מה תחזיר השאילתה SELECT category, COUNT(*) FROM products GROUP BY category HAVING COUNT(*) >= 3 ?",
+          "options": [
+            "את כל הקטגוריות עם הספירה שלהן",
+            "רק את שלוש הקטגוריות הראשונות",
+            "רק קטגוריות שיש בהן לפחות 3 מוצרים, עם הספירה",
+            "את המוצרים בקטגוריה השלישית"
+          ],
+          "correct_answer": "רק קטגוריות שיש בהן לפחות 3 מוצרים, עם הספירה",
+          "explanation": "אחרי הקיבוץ והספירה, HAVING משליכה קבוצות שאינן עומדות בתנאי. קטגוריות עם מוצר אחד או שניים לא יופיעו כלל.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-group-by_007",
+          "difficulty": "medium",
+          "question": "מדוע השאילתה SELECT department, name, AVG(salary) FROM employees GROUP BY department נכשלת?",
+          "options": [
+            "AVG לא חוקית עם GROUP BY",
+            "אי אפשר לקבץ לפי עמודת טקסט",
+            "GROUP BY חייב לכלול את כל העמודות בטבלה",
+            "העמודה name אינה ב-GROUP BY ואינה מצוברת, ובקבוצה יש הרבה שמות שונים"
+          ],
+          "correct_answer": "העמודה name אינה ב-GROUP BY ואינה מצוברת, ובקבוצה יש הרבה שמות שונים",
+          "explanation": "לכל מחלקה יש עובדים רבים, ולמנוע אין דרך לבחור איזה name להציג עבור הקבוצה. כל עמודה בפלט חייבת להיות עמודת קיבוץ או ביטוי צבירה.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-group-by_008",
+          "difficulty": "medium",
+          "question": "איך מקבצים הזמנות לפי חודש מתוך עמודת תאריך order_date ב-PostgreSQL ?",
+          "options": [
+            "GROUP BY עם date_trunc('month', order_date)",
+            "GROUP BY MONTH בלבד, בלי לציין עמודה",
+            "אי אפשר לקבץ לפי חלק מתאריך",
+            "חובה ליצור עמודת חודש קבועה בטבלה"
+          ],
+          "correct_answer": "GROUP BY עם date_trunc('month', order_date)",
+          "explanation": "מותר לקבץ לפי ביטוי, לא רק לפי עמודה גולמית. date_trunc חותכת את התאריך לתחילת החודש, כך שכל הזמנות אותו חודש נופלות לאותה קבוצה.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-group-by_009",
+          "difficulty": "hard",
+          "question": "רוצים את הערים שבהן יש יותר מ-5 לקוחות פעילים. מה ההבדל בין HAVING COUNT(*) > 5 עם WHERE active = true לבין העברת התנאי active לתוך HAVING ?",
+          "options": [
+            "שתי הצורות מחזירות תמיד אותו דבר",
+            "עם WHERE נספרים רק לקוחות פעילים בכל עיר; תנאי active בודד ב-HAVING בכלל אינו חוקי כי active אינה מצוברת ואינה עמודת קיבוץ",
+            "HAVING מהיר יותר ולכן עדיף",
+            "WHERE אינו חוקי לצד GROUP BY"
+          ],
+          "correct_answer": "עם WHERE נספרים רק לקוחות פעילים בכל עיר; תנאי active בודד ב-HAVING בכלל אינו חוקי כי active אינה מצוברת ואינה עמודת קיבוץ",
+          "explanation": "הסינון לפני הקיבוץ משנה את מה שנספר, לא רק את מה שמוצג. תנאי על עמודת שורה בודדת חייב להיות ב-WHERE; ב-HAVING מותר להתייחס רק לעמודות הקיבוץ ולביטויי צבירה.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-group-by_010",
+          "difficulty": "hard",
+          "question": "בטבלת orders יש שורות שבהן coupon_code הוא NULL. מה יקרה להן בשאילתה SELECT coupon_code, COUNT(*) FROM orders GROUP BY coupon_code ?",
+          "options": [
+            "הן יושמטו מהתוצאה לגמרי",
+            "כל שורת NULL תהפוך לקבוצה נפרדת משלה",
+            "כל שורות ה-NULL יקובצו יחד לקבוצה אחת שתופיע בתוצאה",
+            "תתקבל שגיאה כי אסור לקבץ לפי NULL"
+          ],
+          "correct_answer": "כל שורות ה-NULL יקובצו יחד לקבוצה אחת שתופיע בתוצאה",
+          "explanation": "לצורך GROUP BY כל ערכי ה-NULL נחשבים שווים ונופלים לקבוצה אחת, בניגוד להשוואה רגילה שבה NULL אינו שווה לכלום. לכן תופיע שורת תוצאה עם coupon_code ריק וספירה של כל ההזמנות ללא קופון.",
+          "correctIndex": 2,
+          "format": "mc"
+        }
+      ]
+    },
+    "sql-subquery-cte": {
+      "building": "",
+      "concept": "Subqueries and CTEs",
+      "questions": [
+        {
+          "id": "sql-subquery-cte_001",
+          "difficulty": "easy",
+          "question": "מהי תת-שאילתה (subquery) ?",
+          "options": [
+            "שאילתה שרצה על טבלה קטנה",
+            "שאילתה שנכתבת בתוך שאילתה אחרת ותוצאתה משמשת אותה",
+            "שאילתה ללא WHERE",
+            "גיבוי של שאילתה קודמת"
+          ],
+          "correct_answer": "שאילתה שנכתבת בתוך שאילתה אחרת ותוצאתה משמשת אותה",
+          "explanation": "תת-שאילתה מוקפת בסוגריים ויכולה להופיע ב-WHERE, ב-FROM או ב-SELECT. השאילתה החיצונית משתמשת בתוצאתה כערך, כרשימה או כטבלה.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-subquery-cte_002",
+          "difficulty": "easy",
+          "question": "מה מחזירה השאילתה SELECT name FROM products WHERE price > (SELECT AVG(price) FROM products) ?",
+          "options": [
+            "מוצרים שמחירם מעל המחיר הממוצע",
+            "את המוצר היקר ביותר בלבד",
+            "את המחיר הממוצע",
+            "מוצרים שמחירם מתחת לממוצע"
+          ],
+          "correct_answer": "מוצרים שמחירם מעל המחיר הממוצע",
+          "explanation": "תת-השאילתה מחשבת ערך יחיד, הממוצע, והשאילתה החיצונית משווה אליו כל מוצר. זהו שימוש קלאסי בתת-שאילתה סקלרית.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-subquery-cte_003",
+          "difficulty": "easy",
+          "question": "באיזו מילת מפתח מגדירים CTE, טבלה זמנית עם שם לצורך השאילתה?",
+          "options": [
+            "TEMP",
+            "DEFINE",
+            "WITH",
+            "LET"
+          ],
+          "correct_answer": "WITH",
+          "explanation": "התחביר הוא WITH some_name AS (שאילתה) ואחריו השאילתה הראשית שמשתמשת ב-some_name כמו בטבלה. CTE משפר קריאות ומאפשר שימוש חוזר באותה תוצאה.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-subquery-cte_004",
+          "difficulty": "easy",
+          "question": "מה בודק התנאי WHERE customer_id IN (SELECT id FROM vip_customers) ?",
+          "options": [
+            "אם ללקוח יש הזמנות",
+            "אם מזהה הלקוח מופיע בתוצאת תת-השאילתה של לקוחות VIP",
+            "אם טבלת VIP ריקה",
+            "אם המזהה גדול ממספר לקוחות ה-VIP"
+          ],
+          "correct_answer": "אם מזהה הלקוח מופיע בתוצאת תת-השאילתה של לקוחות VIP",
+          "explanation": "תת-השאילתה מחזירה רשימת מזהים, ו-IN בודק שייכות אליה. כך מסננים שורות לפי נתונים מטבלה אחרת בלי JOIN.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-subquery-cte_005",
+          "difficulty": "medium",
+          "question": "מהי תת-שאילתה מתואמת (correlated subquery) ?",
+          "options": [
+            "תת-שאילתה שרצה פעם אחת בלבד",
+            "תת-שאילתה שמחזירה תמיד שתי עמודות",
+            "תת-שאילתה שמפנה לעמודות של השאילתה החיצונית ולכן מוערכת לוגית עבור כל שורה שלה",
+            "תת-שאילתה בתוך CTE"
+          ],
+          "correct_answer": "תת-שאילתה שמפנה לעמודות של השאילתה החיצונית ולכן מוערכת לוגית עבור כל שורה שלה",
+          "explanation": "כאשר תת-השאילתה משתמשת בערך מהשורה החיצונית, למשל WHERE o.customer_id = c.id, היא תלויה בכל שורה בנפרד. זה חזק אך עלול להיות איטי ללא אינדוקס מתאים.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-subquery-cte_006",
+          "difficulty": "medium",
+          "question": "מה בודק EXISTS בשאילתה SELECT name FROM customers c WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id) ?",
+          "options": [
+            "אם קיימת לפחות הזמנה אחת ללקוח, בלי לשלוף את ההזמנות עצמן",
+            "אם המספר 1 קיים בטבלת ההזמנות",
+            "אם טבלת orders קיימת במסד",
+            "אם ללקוח בדיוק הזמנה אחת"
+          ],
+          "correct_answer": "אם קיימת לפחות הזמנה אחת ללקוח, בלי לשלוף את ההזמנות עצמן",
+          "explanation": "EXISTS מחזיר אמת ברגע שנמצאה שורה תואמת אחת, והערך שבתוך ה-SELECT הפנימי לא משנה. זו דרך יעילה לבדוק קיום קשר.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-subquery-cte_007",
+          "difficulty": "medium",
+          "question": "מה היתרון המרכזי של CTE על פני תת-שאילתה מקוננת בתוך FROM ?",
+          "options": [
+            "CTE תמיד מהיר יותר",
+            "CTE שומר את התוצאה לצמיתות בדיסק",
+            "CTE מאפשר עדכון נתונים ותת-שאילתה לא",
+            "קריאות: הלוגיקה מפורקת לשלבים בעלי שם שאפשר להשתמש בהם יותר מפעם אחת"
+          ],
+          "correct_answer": "קריאות: הלוגיקה מפורקת לשלבים בעלי שם שאפשר להשתמש בהם יותר מפעם אחת",
+          "explanation": "CTE הופך שאילתה מסובכת לרצף שלבים קריאים מלמעלה למטה, וכל שלב יכול להפנות לקודמיו. מבחינת ביצועים המתכנן בדרך כלל מתייחס אליהם דומה לתת-שאילתות.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-subquery-cte_008",
+          "difficulty": "medium",
+          "question": "מה יקרה אם תת-שאילתה סקלרית בהשוואה WHERE price = (SELECT price FROM products WHERE category = 'toys') תחזיר יותר משורה אחת?",
+          "options": [
+            "יילקח הערך הראשון",
+            "תתקבל שגיאת ריצה, כי השוואה סקלרית דורשת ערך יחיד",
+            "יילקח הערך הגבוה",
+            "כל הערכים ישמשו כמו IN"
+          ],
+          "correct_answer": "תתקבל שגיאת ריצה, כי השוואה סקלרית דורשת ערך יחיד",
+          "explanation": "השוואת שוויון מצפה לערך בודד; אם תת-השאילתה מחזירה כמה שורות המנוע זורק שגיאה. אם רוצים התאמה לכמה ערכים משתמשים ב-IN או ב-ANY.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-subquery-cte_009",
+          "difficulty": "hard",
+          "question": "מהו CTE רקורסיבי עם WITH RECURSIVE ולאיזו בעיה הוא מתאים במיוחד?",
+          "options": [
+            "CTE שמריץ את עצמו שוב עד שמסד הנתונים עוצר אותו אקראית",
+            "CTE שמורכב מאיבר בסיס ואיבר שמפנה לעצמו, ומתאים למבנים היררכיים כמו עץ עובדים-מנהלים",
+            "CTE שמותר רק בתוך טריגר",
+            "CTE שממטמן את התוצאה בין הרצות"
+          ],
+          "correct_answer": "CTE שמורכב מאיבר בסיס ואיבר שמפנה לעצמו, ומתאים למבנים היררכיים כמו עץ עובדים-מנהלים",
+          "explanation": "האיבר הבסיסי מחזיר את נקודת ההתחלה, והאיבר הרקורסיבי מצרף בכל סיבוב את הרמה הבאה עד שאין שורות חדשות. כך עוברים על עצים וגרפים בעומק לא ידוע מראש, דבר שאי אפשר לעשות ב-JOIN רגיל.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-subquery-cte_010",
+          "difficulty": "hard",
+          "question": "מדוע מומלץ להעדיף NOT EXISTS על פני NOT IN עם תת-שאילתה כשמחפשים שורות ללא התאמה?",
+          "options": [
+            "NOT EXISTS קצר יותר לכתיבה",
+            "NOT IN אינו חוקי עם תת-שאילתה",
+            "NOT EXISTS מתנהג נכון גם כשתת-השאילתה מחזירה NULL, בעוד NOT IN עם NULL מחזיר אפס שורות",
+            "NOT EXISTS עוקף את הצורך באינדקסים"
+          ],
+          "correct_answer": "NOT EXISTS מתנהג נכון גם כשתת-השאילתה מחזירה NULL, בעוד NOT IN עם NULL מחזיר אפס שורות",
+          "explanation": "ערך NULL בתוצאת תת-השאילתה הופך כל תנאי NOT IN ל-UNKNOWN ומרוקן את התוצאה בשקט. NOT EXISTS בודק קיום שורה תואמת ואינו רגיש למלכודת הזו, ולרוב גם מתוכנן יעיל יותר.",
+          "correctIndex": 2,
+          "format": "mc"
+        }
+      ]
+    },
+    "sql-dml": {
+      "building": "",
+      "concept": "INSERT, UPDATE, DELETE",
+      "questions": [
+        {
+          "id": "sql-dml_001",
+          "difficulty": "easy",
+          "question": "איזו פקודה מוסיפה שורה חדשה לטבלה?",
+          "options": [
+            "ADD ROW",
+            "INSERT INTO",
+            "CREATE ROW",
+            "APPEND"
+          ],
+          "correct_answer": "INSERT INTO",
+          "explanation": "התחביר הוא INSERT INTO table (col1, col2) VALUES (v1, v2). זו פקודת ה-DML הבסיסית להוספת נתונים.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-dml_002",
+          "difficulty": "easy",
+          "question": "מה עושה הפקודה UPDATE users SET active = false WHERE last_login < '2023-01-01' ?",
+          "options": [
+            "מוחקת משתמשים ישנים",
+            "מסמנת כלא פעילים את המשתמשים שלא התחברו מאז תחילת 2023",
+            "יוצרת עמודת active חדשה",
+            "מחזירה את המשתמשים הלא פעילים"
+          ],
+          "correct_answer": "מסמנת כלא פעילים את המשתמשים שלא התחברו מאז תחילת 2023",
+          "explanation": "UPDATE משנה ערכים בשורות קיימות; ה-SET קובע מה משתנה וה-WHERE קובע אילו שורות מושפעות. השורות עצמן נשארות בטבלה.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-dml_003",
+          "difficulty": "easy",
+          "question": "מה עושה הפקודה DELETE FROM orders WHERE id = 42 ?",
+          "options": [
+            "מוחקת את העמודה id",
+            "מרוקנת את כל הטבלה",
+            "מוחקת את ההזמנה שמזהה שלה 42",
+            "מסתירה את השורה זמנית"
+          ],
+          "correct_answer": "מוחקת את ההזמנה שמזהה שלה 42",
+          "explanation": "DELETE מסירה שורות שעונות על תנאי ה-WHERE. עם תנאי על מפתח ראשי נמחקת לכל היותר שורה אחת.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-dml_004",
+          "difficulty": "easy",
+          "question": "מה יקרה אם מריצים UPDATE products SET price = 0 בלי WHERE ?",
+          "options": [
+            "רק השורה הראשונה תתעדכן",
+            "המחיר של כל המוצרים בטבלה יתאפס",
+            "תתקבל שגיאה, כי WHERE חובה",
+            "שום דבר, הפקודה תתעלם"
+          ],
+          "correct_answer": "המחיר של כל המוצרים בטבלה יתאפס",
+          "explanation": "בלי WHERE, פקודות UPDATE ו-DELETE חלות על כל שורות הטבלה. זו אחת הטעויות המסוכנות ביותר ב-SQL, ולכן נהוג לבדוק את התנאי עם SELECT לפני ההרצה.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-dml_005",
+          "difficulty": "medium",
+          "question": "מה עושה פסוקית RETURNING ב-PostgreSQL, למשל INSERT INTO users (name) VALUES ('דנה') RETURNING id ?",
+          "options": [
+            "מחזירה את ערכי השורה שנוספה, כאן המזהה שנוצר, בלי שאילתה נוספת",
+            "מבטלת את ההוספה אם יש שגיאה",
+            "מחזירה את השורה למצב הקודם",
+            "מדפיסה את הפקודה ללוג"
+          ],
+          "correct_answer": "מחזירה את ערכי השורה שנוספה, כאן המזהה שנוצר, בלי שאילתה נוספת",
+          "explanation": "RETURNING מאפשרת לקבל בחזרה עמודות מהשורות שהושפעו על ידי INSERT, UPDATE או DELETE. זה חוסך שאילתת SELECT נפרדת לקבלת המזהה החדש.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-dml_006",
+          "difficulty": "medium",
+          "question": "מה ההבדל המעשי בין DELETE FROM logs לבין TRUNCATE TABLE logs ?",
+          "options": [
+            "TRUNCATE מוחקת רק חלק מהשורות",
+            "DELETE מוחקת שורה-שורה וניתנת לסינון עם WHERE; TRUNCATE מרוקנת את הטבלה כולה במהירות ואינה מקבלת תנאי",
+            "DELETE מוחקת גם את מבנה הטבלה",
+            "אין הבדל מלבד השם"
+          ],
+          "correct_answer": "DELETE מוחקת שורה-שורה וניתנת לסינון עם WHERE; TRUNCATE מרוקנת את הטבלה כולה במהירות ואינה מקבלת תנאי",
+          "explanation": "TRUNCATE היא פעולה מהירה שמאפסת את אחסון הטבלה בבת אחת, בעוד DELETE עוברת שורה-שורה ומפעילה טריגרים של שורות. כשצריך למחוק הכל, TRUNCATE יעילה בהרבה.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-dml_007",
+          "difficulty": "medium",
+          "question": "מה עושה ON CONFLICT DO NOTHING בפקודת INSERT ב-PostgreSQL ?",
+          "options": [
+            "מוחקת את השורה המתנגשת הקיימת",
+            "עוצרת את כל הטרנזקציה",
+            "אם ההוספה מפרה אילוץ ייחודיות, השורה פשוט לא מתווספת ואין שגיאה",
+            "מוסיפה את השורה פעמיים"
+          ],
+          "correct_answer": "אם ההוספה מפרה אילוץ ייחודיות, השורה פשוט לא מתווספת ואין שגיאה",
+          "explanation": "זהו מנגנון upsert של PostgreSQL: במקום שהפרת ייחודיות תפיל את הפקודה, אפשר לבחור להתעלם (DO NOTHING) או לעדכן את השורה הקיימת (DO UPDATE).",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-dml_008",
+          "difficulty": "medium",
+          "question": "איך מוסיפים לטבלת archive את כל השורות הישנות מטבלת orders בפקודה אחת?",
+          "options": [
+            "INSERT INTO archive SELECT * FROM orders WHERE created_at < '2023-01-01'",
+            "COPY orders TO archive",
+            "UPDATE archive FROM orders",
+            "MOVE ROWS orders TO archive"
+          ],
+          "correct_answer": "INSERT INTO archive SELECT * FROM orders WHERE created_at < '2023-01-01'",
+          "explanation": "INSERT יכולה לקבל את שורותיה משאילתת SELECT במקום מרשימת VALUES. זו הדרך הסטנדרטית להעתקת נתונים בין טבלאות.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-dml_009",
+          "difficulty": "hard",
+          "question": "מפתח הריץ בטעות DELETE FROM users בלי WHERE בתוך טרנזקציה שנפתחה עם BEGIN וטרם בוצע COMMIT. מה הדרך הנכונה להציל את הנתונים?",
+          "options": [
+            "להריץ INSERT מחדש מהזיכרון",
+            "להריץ ROLLBACK, שמבטל את כל השינויים שנעשו בטרנזקציה",
+            "לסגור את החיבור ולקוות לטוב",
+            "להריץ UNDO DELETE"
+          ],
+          "correct_answer": "להריץ ROLLBACK, שמבטל את כל השינויים שנעשו בטרנזקציה",
+          "explanation": "כל עוד הטרנזקציה פתוחה, שום שינוי אינו סופי ו-ROLLBACK מחזיר את המצב לנקודת ההתחלה. זו בדיוק הסיבה לעטוף פעולות מסוכנות בטרנזקציה מפורשת.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-dml_010",
+          "difficulty": "hard",
+          "question": "בטבלת orders יש מפתח זר customer_id שמפנה לטבלת customers עם הגדרת ON DELETE CASCADE. מה יקרה כשמריצים DELETE FROM customers WHERE id = 7 ?",
+          "options": [
+            "המחיקה תיכשל כי יש הזמנות תלויות",
+            "הלקוח יימחק וכל ההזמנות שלו בטבלת orders יימחקו אוטומטית",
+            "הלקוח יימחק וההזמנות יקבלו NULL",
+            "רק ההזמנות יימחקו והלקוח יישאר"
+          ],
+          "correct_answer": "הלקוח יימחק וכל ההזמנות שלו בטבלת orders יימחקו אוטומטית",
+          "explanation": "CASCADE מגלגל את המחיקה לשורות הבנות באופן אוטומטי. זה נוח אך מסוכן: מחיקת שורת אב אחת יכולה למחוק בשקט אלפי שורות תלויות, בניגוד ל-RESTRICT שחוסם או SET NULL שמאפס.",
+          "correctIndex": 1,
+          "format": "mc"
+        }
+      ]
+    },
+    "sql-create-constraints": {
+      "building": "",
+      "concept": "CREATE TABLE and constraints",
+      "questions": [
+        {
+          "id": "sql-create-constraints_001",
+          "difficulty": "easy",
+          "question": "איזו פקודה יוצרת טבלה חדשה במסד הנתונים?",
+          "options": [
+            "NEW TABLE",
+            "CREATE TABLE",
+            "INSERT TABLE",
+            "BUILD TABLE"
+          ],
+          "correct_answer": "CREATE TABLE",
+          "explanation": "CREATE TABLE מגדירה טבלה חדשה עם שמות עמודות, טיפוסים ואילוצים, למשל CREATE TABLE users (id serial, name text).",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-create-constraints_002",
+          "difficulty": "easy",
+          "question": "מה מבטיח אילוץ PRIMARY KEY על עמודת id ?",
+          "options": [
+            "שהערכים ייחודיים ולא NULL, ומזהים כל שורה חד-משמעית",
+            "שהעמודה תהיה תמיד מספרית",
+            "שהעמודה תהיה ראשונה בטבלה",
+            "שהערכים יהיו ממוינים"
+          ],
+          "correct_answer": "שהערכים ייחודיים ולא NULL, ומזהים כל שורה חד-משמעית",
+          "explanation": "מפתח ראשי משלב UNIQUE ו-NOT NULL: אין שתי שורות עם אותו מזהה ואין שורה בלי מזהה. כך כל שורה ניתנת לאיתור חד-ערכי.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-create-constraints_003",
+          "difficulty": "easy",
+          "question": "מה עושה אילוץ NOT NULL על עמודת email ?",
+          "options": [
+            "מוודא שהאימייל תקין תחבירית",
+            "מונע כפילויות באימיילים",
+            "מחייב שלכל שורה יהיה ערך בעמודה, ואוסר על השארתה ריקה",
+            "הופך את העמודה למפתח"
+          ],
+          "correct_answer": "מחייב שלכל שורה יהיה ערך בעמודה, ואוסר על השארתה ריקה",
+          "explanation": "NOT NULL דוחה כל ניסיון להכניס או לעדכן שורה עם NULL בעמודה. הוא אינו בודק תוכן ואינו מונע כפילויות; לכך יש CHECK ו-UNIQUE.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-create-constraints_004",
+          "difficulty": "easy",
+          "question": "מה תפקידו של FOREIGN KEY בעמודת customer_id בטבלת orders ?",
+          "options": [
+            "להצפין את מזהה הלקוח",
+            "להבטיח שכל הזמנה מפנה ללקוח שקיים בטבלת customers",
+            "להאיץ שאילתות על הזמנות",
+            "למנוע מחיקת הזמנות"
+          ],
+          "correct_answer": "להבטיח שכל הזמנה מפנה ללקוח שקיים בטבלת customers",
+          "explanation": "מפתח זר אוכף שלמות הפניות: אי אפשר להכניס הזמנה עם customer_id שלא קיים בטבלת האב. כך נמנעות שורות יתומות.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-create-constraints_005",
+          "difficulty": "medium",
+          "question": "מה עושה אילוץ CHECK (price >= 0) בהגדרת טבלת products ?",
+          "options": [
+            "ממיר מחירים שליליים לאפס",
+            "מסנן מחירים שליליים בשאילתות",
+            "יוצר אינדקס על עמודת המחיר",
+            "דוחה כל הכנסה או עדכון שמנסים לשים מחיר שלילי"
+          ],
+          "correct_answer": "דוחה כל הכנסה או עדכון שמנסים לשים מחיר שלילי",
+          "explanation": "CHECK אוכף כלל עסקי ברמת מסד הנתונים: פעולה שמפרה את התנאי נכשלת בשגיאה. האכיפה במסד מגינה גם מפני באגים בקוד האפליקציה.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-create-constraints_006",
+          "difficulty": "medium",
+          "question": "מה ההבדל בין UNIQUE לבין PRIMARY KEY ?",
+          "options": [
+            "אין הבדל כלל",
+            "UNIQUE מאפשר ערכי NULL ויכול להופיע כמה פעמים בטבלה; PRIMARY KEY אחד בלבד ואוסר NULL",
+            "PRIMARY KEY מאפשר כפילויות",
+            "UNIQUE עובד רק על מחרוזות"
+          ],
+          "correct_answer": "UNIQUE מאפשר ערכי NULL ויכול להופיע כמה פעמים בטבלה; PRIMARY KEY אחד בלבד ואוסר NULL",
+          "explanation": "לטבלה יכול להיות מפתח ראשי אחד, אך כמה אילוצי UNIQUE. בנוסף, UNIQUE אינו אוסר NULL, וב-PostgreSQL אף מותרים כמה NULL באותה עמודה ייחודית.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-create-constraints_007",
+          "difficulty": "medium",
+          "question": "מה עושה DEFAULT now() בהגדרת עמודת created_at ?",
+          "options": [
+            "מעדכן את העמודה בכל שינוי בשורה",
+            "אם לא סופק ערך בהכנסה, העמודה מקבלת אוטומטית את זמן ההכנסה",
+            "מוחק שורות ישנות",
+            "הופך את העמודה לקריאה בלבד"
+          ],
+          "correct_answer": "אם לא סופק ערך בהכנסה, העמודה מקבלת אוטומטית את זמן ההכנסה",
+          "explanation": "DEFAULT קובע ערך ברירת מחדל שמופעל רק בעת INSERT כשהעמודה לא צוינה. הוא לא מתעדכן בהמשך; לעדכון אוטומטי בשינויים צריך טריגר.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-create-constraints_008",
+          "difficulty": "medium",
+          "question": "איך מוסיפים עמודת phone לטבלת users קיימת?",
+          "options": [
+            "ALTER TABLE users ADD COLUMN phone text",
+            "UPDATE users ADD phone",
+            "CREATE COLUMN phone ON users",
+            "INSERT COLUMN phone INTO users"
+          ],
+          "correct_answer": "ALTER TABLE users ADD COLUMN phone text",
+          "explanation": "ALTER TABLE היא הפקודה לשינוי מבנה של טבלה קיימת: הוספת עמודות, שינוי טיפוסים, הוספת אילוצים ועוד. UPDATE משנה נתונים, לא מבנה.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-create-constraints_009",
+          "difficulty": "hard",
+          "question": "מנסים להריץ DELETE FROM customers WHERE id = 5 כשקיימות הזמנות של הלקוח, והמפתח הזר הוגדר בברירת המחדל ללא ON DELETE. מה יקרה?",
+          "options": [
+            "הלקוח יימחק וההזמנות יישארו יתומות",
+            "המחיקה תיכשל בשגיאת הפרת מפתח זר, כי ברירת המחדל חוסמת מחיקת אב עם בנים",
+            "ההזמנות יקבלו NULL אוטומטית",
+            "ההזמנות יימחקו יחד עם הלקוח"
+          ],
+          "correct_answer": "המחיקה תיכשל בשגיאת הפרת מפתח זר, כי ברירת המחדל חוסמת מחיקת אב עם בנים",
+          "explanation": "ללא הגדרה מפורשת, התנהגות ברירת המחדל היא NO ACTION: המסד מסרב למחוק שורת אב שיש לה שורות מפנות. CASCADE או SET NULL קורים רק אם הוגדרו במפורש.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-create-constraints_010",
+          "difficulty": "hard",
+          "question": "בטבלה עם אילוץ UNIQUE על עמודת email ב-PostgreSQL הוכנסו שלוש שורות שבהן email הוא NULL. מדוע זה עבר בהצלחה?",
+          "options": [
+            "האילוץ נבדק רק פעם ביום",
+            "PostgreSQL מתעלם מאילוצי UNIQUE על עמודות טקסט",
+            "בהשוואת ייחודיות NULL אינו נחשב שווה ל-NULL אחר, ולכן כמה NULL אינם מפרים את האילוץ",
+            "זו באג מוכר במסד"
+          ],
+          "correct_answer": "בהשוואת ייחודיות NULL אינו נחשב שווה ל-NULL אחר, ולכן כמה NULL אינם מפרים את האילוץ",
+          "explanation": "אילוץ UNIQUE מבוסס על השוואת שוויון, ו-NULL = NULL אינו אמת בלוגיקת SQL. אם רוצים לאסור יותר מ-NULL אחד, ב-PostgreSQL 15 ומעלה אפשר להגדיר UNIQUE NULLS NOT DISTINCT.",
+          "correctIndex": 2,
+          "format": "mc"
+        }
+      ]
+    },
+    "sql-index": {
+      "building": "",
+      "concept": "Indexes and performance",
+      "questions": [
+        {
+          "id": "sql-index_001",
+          "difficulty": "easy",
+          "question": "מהו אינדקס במסד נתונים?",
+          "options": [
+            "עותק גיבוי של הטבלה",
+            "מבנה עזר ממוין שמאפשר איתור מהיר של שורות בלי לסרוק את כל הטבלה",
+            "מספר סידורי של כל שורה",
+            "טבלה זמנית לחישובים"
+          ],
+          "correct_answer": "מבנה עזר ממוין שמאפשר איתור מהיר של שורות בלי לסרוק את כל הטבלה",
+          "explanation": "אינדקס דומה לאינדקס בסוף ספר: במקום לדפדף בכל העמודים, קופצים ישר למקום הנכון. במסדי נתונים המימוש הנפוץ הוא עץ B-tree.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-index_002",
+          "difficulty": "easy",
+          "question": "איזו פקודה יוצרת אינדקס על עמודת email בטבלת users ?",
+          "options": [
+            "CREATE INDEX idx_users_email ON users (email)",
+            "ADD INDEX users.email",
+            "INDEX users BY email",
+            "ALTER INDEX users email"
+          ],
+          "correct_answer": "CREATE INDEX idx_users_email ON users (email)",
+          "explanation": "CREATE INDEX מציינת שם לאינדקס, את הטבלה ואת העמודות שעליהן הוא בנוי. מרגע היצירה המסד מתחזק אותו אוטומטית.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-index_003",
+          "difficulty": "easy",
+          "question": "אילו שאילתות אינדקס על עמודת email מאיץ בעיקר?",
+          "options": [
+            "שאילתות שמסננות או מחפשות לפי email",
+            "כל שאילתה על הטבלה באותה מידה",
+            "רק פקודות INSERT",
+            "רק שאילתות עם GROUP BY"
+          ],
+          "correct_answer": "שאילתות שמסננות או מחפשות לפי email",
+          "explanation": "אינדקס עוזר כשמאתרים שורות לפי העמודות שבו, למשל WHERE email = 'a@b.com', וגם במיון לפיהן. הוא אינו מועיל לשאילתות שלא מערבות את העמודה.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-index_004",
+          "difficulty": "easy",
+          "question": "האם צריך ליצור ידנית אינדקס עבור עמודת PRIMARY KEY ב-PostgreSQL ?",
+          "options": [
+            "כן, תמיד",
+            "לא, המסד יוצר אוטומטית אינדקס ייחודי עבור המפתח הראשי",
+            "רק בטבלאות גדולות",
+            "רק אם העמודה מספרית"
+          ],
+          "correct_answer": "לא, המסד יוצר אוטומטית אינדקס ייחודי עבור המפתח הראשי",
+          "explanation": "אכיפת הייחודיות של מפתח ראשי דורשת אינדקס, ולכן המסד בונה אותו בעצמו בעת יצירת הטבלה. גם אילוצי UNIQUE מקבלים אינדקס אוטומטי.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-index_005",
+          "difficulty": "medium",
+          "question": "מה המחיר של הוספת אינדקסים רבים לטבלה?",
+          "options": [
+            "אין מחיר, אינדקסים תמיד משתלמים",
+            "האטת פקודות INSERT, UPDATE ו-DELETE וצריכת שטח אחסון, כי כל אינדקס מתעדכן בכל שינוי",
+            "השאילתות נעשות איטיות יותר תמיד",
+            "הטבלה ננעלת לקריאה"
+          ],
+          "correct_answer": "האטת פקודות INSERT, UPDATE ו-DELETE וצריכת שטח אחסון, כי כל אינדקס מתעדכן בכל שינוי",
+          "explanation": "כל כתיבה לטבלה חייבת לעדכן גם את כל האינדקסים שלה, ולכן יש איזון: אינדקסים מאיצים קריאה אך מאטים כתיבה. מאנדקסים רק את מה שהשאילתות באמת צריכות.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-index_006",
+          "difficulty": "medium",
+          "question": "באיזו פקודה בודקים ב-PostgreSQL אם שאילתה משתמשת באינדקס?",
+          "options": [
+            "SHOW INDEX USAGE",
+            "DESCRIBE QUERY",
+            "EXPLAIN, ולתוצאות ריצה בפועל EXPLAIN ANALYZE",
+            "CHECK PLAN"
+          ],
+          "correct_answer": "EXPLAIN, ולתוצאות ריצה בפועל EXPLAIN ANALYZE",
+          "explanation": "EXPLAIN מציגה את תוכנית הביצוע: Index Scan מעיד על שימוש באינדקס, ו-Seq Scan על סריקת טבלה מלאה. EXPLAIN ANALYZE גם מריצה את השאילתה ומודדת זמנים אמיתיים.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-index_007",
+          "difficulty": "medium",
+          "question": "יש אינדקס על email, אבל השאילתה WHERE email LIKE '%gmail.com' לא משתמשת בו. מדוע?",
+          "options": [
+            "אינדקס B-tree ממוין מתחילת הערך, ותבנית שמתחילה באחוז לא מאפשרת לדעת היכן להתחיל בעץ",
+            "LIKE לעולם לא משתמש באינדקסים",
+            "האינדקס עובד רק על מספרים",
+            "חסר DESC באינדקס"
+          ],
+          "correct_answer": "אינדקס B-tree ממוין מתחילת הערך, ותבנית שמתחילה באחוז לא מאפשרת לדעת היכן להתחיל בעץ",
+          "explanation": "חיפוש בעץ ממוין דורש קידומת ידועה, כמו חיפוש בספר טלפונים לפי תחילת שם. תבנית 'abc%' כן יכולה להשתמש באינדקס; לחיפושי סיומת יש פתרונות כמו אינדקס טריגרמות.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-index_008",
+          "difficulty": "medium",
+          "question": "מהו אינדקס מורכב (composite index) על (customer_id, created_at) ומה חשיבות סדר העמודות בו?",
+          "options": [
+            "שני אינדקסים נפרדים שנוצרים יחד; הסדר לא משנה",
+            "אינדקס אחד על צירוף העמודות; הוא משרת ביעילות תנאים על העמודה הראשונה, עם או בלי השנייה, אך פחות תנאים על השנייה בלבד",
+            "אינדקס שמאחסן את כל הטבלה",
+            "אינדקס שעובד רק עם JOIN"
+          ],
+          "correct_answer": "אינדקס אחד על צירוף העמודות; הוא משרת ביעילות תנאים על העמודה הראשונה, עם או בלי השנייה, אך פחות תנאים על השנייה בלבד",
+          "explanation": "האינדקס ממוין קודם לפי customer_id ובתוכו לפי created_at, כמו ספר טלפונים לפי שם משפחה ואז שם פרטי. חיפוש לפי created_at בלבד אינו יכול לנצל את המיון הראשי.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-index_009",
+          "difficulty": "hard",
+          "question": "על עמודת status שיש בה רק שלושה ערכים אפשריים בטבלה של מיליון שורות נוצר אינדקס, אך המתכנן בוחר בסריקה מלאה עבור WHERE status = 'active' כש-90 אחוז מהשורות פעילות. מדוע זו החלטה נכונה?",
+          "options": [
+            "המתכנן פשוט טועה ויש לכפות אינדקס",
+            "כשהתנאי תואם חלק גדול מהטבלה, קפיצות אקראיות דרך האינדקס יקרות יותר מקריאה רציפה של כל הטבלה",
+            "אינדקסים לא עובדים על עמודות טקסט",
+            "האינדקס נמחק אוטומטית בטבלאות גדולות"
+          ],
+          "correct_answer": "כשהתנאי תואם חלק גדול מהטבלה, קפיצות אקראיות דרך האינדקס יקרות יותר מקריאה רציפה של כל הטבלה",
+          "explanation": "אינדקס משתלם כשהוא מסנן את רוב השורות (סלקטיביות גבוהה). כשמחזירים 90 אחוז מהטבלה, גישה אקראית לכל שורה דרך האינדקס יקרה מסריקה סדרתית אחת, והמתכנן משקלל זאת לפי סטטיסטיקות.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-index_010",
+          "difficulty": "hard",
+          "question": "מהו covering index ולמה הוא מאפשר Index Only Scan ?",
+          "options": [
+            "אינדקס שמכסה את כל הטבלאות במסד",
+            "אינדקס מוצפן",
+            "אינדקס שמכיל את כל העמודות שהשאילתה צריכה, כך שהמנוע עונה מהאינדקס בלי לגשת לטבלה עצמה",
+            "אינדקס שנבנה מחדש בכל שאילתה"
+          ],
+          "correct_answer": "אינדקס שמכיל את כל העמודות שהשאילתה צריכה, כך שהמנוע עונה מהאינדקס בלי לגשת לטבלה עצמה",
+          "explanation": "אם כל עמודות ה-SELECT וה-WHERE נמצאות באינדקס, אפשר לדלג על שלב הקריאה מהטבלה, שהוא היקר ביותר. ב-PostgreSQL אפשר לצרף עמודות פלט לאינדקס עם INCLUDE.",
+          "correctIndex": 2,
+          "format": "mc"
+        }
+      ]
+    },
+    "sql-window": {
+      "building": "",
+      "concept": "Window functions",
+      "questions": [
+        {
+          "id": "sql-window_001",
+          "difficulty": "easy",
+          "question": "מה ההבדל הבסיסי בין פונקציית חלון עם OVER לבין פונקציית צבירה עם GROUP BY ?",
+          "options": [
+            "פונקציית חלון שומרת את כל השורות ומוסיפה להן ערך מחושב, ואילו GROUP BY מכווץ כל קבוצה לשורה אחת",
+            "אין הבדל, שתיהן מכווצות שורות",
+            "GROUP BY מהיר יותר תמיד ולכן עדיף",
+            "פונקציות חלון עובדות רק על תאריכים"
+          ],
+          "correct_answer": "פונקציית חלון שומרת את כל השורות ומוסיפה להן ערך מחושב, ואילו GROUP BY מכווץ כל קבוצה לשורה אחת",
+          "explanation": "פונקציית חלון מחשבת ערך על פני קבוצת שורות אך מציגה אותו ליד כל שורה מקורית. כך אפשר לראות גם את הפרט וגם את ההקשר שלו באותה תוצאה.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-window_002",
+          "difficulty": "easy",
+          "question": "מה עושה הביטוי ROW_NUMBER() OVER (ORDER BY score DESC) ?",
+          "options": [
+            "סופר כמה שורות יש בטבלה",
+            "מעניק לכל שורה מספר סידורי לפי סדר הציונים מהגבוה לנמוך",
+            "מוחק שורות כפולות",
+            "ממיין את הטבלה לצמיתות"
+          ],
+          "correct_answer": "מעניק לכל שורה מספר סידורי לפי סדר הציונים מהגבוה לנמוך",
+          "explanation": "ROW_NUMBER ממספרת שורות 1, 2, 3 וכן הלאה לפי המיון שבתוך ה-OVER. בעל הציון הגבוה ביותר יקבל 1.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-window_003",
+          "difficulty": "easy",
+          "question": "מה תפקיד PARTITION BY department בביטוי RANK() OVER (PARTITION BY department ORDER BY salary DESC) ?",
+          "options": [
+            "מיזוג כל המחלקות לקבוצה אחת",
+            "מחיקת מחלקות ריקות",
+            "חלוקת השורות לקבוצות לפי מחלקה, כך שהדירוג מתחיל מחדש בכל מחלקה",
+            "מיון המחלקות לפי שם"
+          ],
+          "correct_answer": "חלוקת השורות לקבוצות לפי מחלקה, כך שהדירוג מתחיל מחדש בכל מחלקה",
+          "explanation": "PARTITION BY מגדיר את גבולות החלון: החישוב נעשה בנפרד בתוך כל מחיצה. כאן כל מחלקה מקבלת דירוג שכר עצמאי משלה.",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-window_004",
+          "difficulty": "easy",
+          "question": "מה מחזירה הפונקציה LAG(total) OVER (ORDER BY month) עבור כל שורה?",
+          "options": [
+            "את הערך של השורה הבאה",
+            "את הערך הגדול ביותר",
+            "את ממוצע כל השורות",
+            "את ערך total של השורה הקודמת לפי סדר החודשים"
+          ],
+          "correct_answer": "את ערך total של השורה הקודמת לפי סדר החודשים",
+          "explanation": "LAG מציצה שורה אחת אחורה בתוך החלון, ולכן היא מושלמת להשוואת חודש מול קודמו. המקבילה שמסתכלת קדימה היא LEAD.",
+          "correctIndex": 3,
+          "format": "mc"
+        },
+        {
+          "id": "sql-window_005",
+          "difficulty": "medium",
+          "question": "מה ההבדל בין RANK() לבין DENSE_RANK() כשיש שוויון בערכים?",
+          "options": [
+            "אין הבדל ביניהן",
+            "RANK מדלגת על מקומות אחרי שוויון, למשל 1, 1, 3, ואילו DENSE_RANK ממשיכה ברצף, למשל 1, 1, 2",
+            "DENSE_RANK מדלגת ו-RANK לא",
+            "RANK עובדת רק על מספרים שלמים"
+          ],
+          "correct_answer": "RANK מדלגת על מקומות אחרי שוויון, למשל 1, 1, 3, ואילו DENSE_RANK ממשיכה ברצף, למשל 1, 1, 2",
+          "explanation": "כששתי שורות חולקות מקום ראשון, RANK נותנת לבאה אחריהן 3 כי שני מקומות נתפסו, בעוד DENSE_RANK נותנת 2. הבחירה תלויה אם רוצים דירוג עם חורים או צפוף.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-window_006",
+          "difficulty": "medium",
+          "question": "איך מחשבים סכום מצטבר (running total) של מכירות לפי תאריך?",
+          "options": [
+            "SUM(amount) OVER (ORDER BY sale_date)",
+            "SUM(amount) GROUP BY sale_date",
+            "COUNT(amount) OVER ()",
+            "TOTAL(amount) BY sale_date"
+          ],
+          "correct_answer": "SUM(amount) OVER (ORDER BY sale_date)",
+          "explanation": "כשמוסיפים ORDER BY בתוך OVER, ברירת המחדל של המסגרת היא מתחילת החלון ועד השורה הנוכחית, ולכן כל שורה מקבלת את סכום כל מה שקדם לה כולל עצמה.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-window_007",
+          "difficulty": "medium",
+          "question": "מדוע השאילתה SELECT * FROM sales WHERE ROW_NUMBER() OVER (ORDER BY id) <= 10 נכשלת?",
+          "options": [
+            "ROW_NUMBER דורשת PARTITION BY",
+            "פונקציות חלון מעובדות אחרי WHERE, ולכן אסור להשתמש בהן בתנאי; יש לעטוף בתת-שאילתה או CTE ולסנן שם",
+            "אי אפשר להשוות פונקציית חלון למספר",
+            "חסר GROUP BY"
+          ],
+          "correct_answer": "פונקציות חלון מעובדות אחרי WHERE, ולכן אסור להשתמש בהן בתנאי; יש לעטוף בתת-שאילתה או CTE ולסנן שם",
+          "explanation": "בשלב ה-WHERE תוצאת החלון עוד לא קיימת, בדיוק כמו שכינויי SELECT לא זמינים שם. הדפוס המקובל: לחשב את ROW_NUMBER בתת-שאילתה ולסנן עליה בשאילתה החיצונית.",
+          "correctIndex": 1,
+          "format": "mc"
+        },
+        {
+          "id": "sql-window_008",
+          "difficulty": "medium",
+          "question": "מה מחזיר הביטוי AVG(salary) OVER (PARTITION BY department) ליד כל שורת עובד?",
+          "options": [
+            "את השכר הממוצע בכל החברה",
+            "שורה אחת לכל מחלקה עם הממוצע",
+            "את ממוצע השכר של המחלקה של אותו עובד, מוצג בכל שורת עובד",
+            "את שכר העובד עצמו"
+          ],
+          "correct_answer": "את ממוצע השכר של המחלקה של אותו עובד, מוצג בכל שורת עובד",
+          "explanation": "בלי ORDER BY בחלון, החישוב נעשה על כל המחיצה כולה, וכל שורה במחיצה מקבלת אותו ערך. כך קל להשוות כל עובד לממוצע המחלקתי שלו, למשל salary - AVG(salary) OVER (...).",
+          "correctIndex": 2,
+          "format": "mc"
+        },
+        {
+          "id": "sql-window_009",
+          "difficulty": "hard",
+          "question": "רוצים את העובד בעל השכר הגבוה ביותר בכל מחלקה, כולל כל פרטי השורה. למה פתרון עם GROUP BY department בלבד לא מספיק, ומה הפתרון עם פונקציית חלון?",
+          "options": [
+            "GROUP BY מחזיר את MAX(salary) אך לא את שאר עמודות העובד; הפתרון הוא ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) בתת-שאילתה וסינון לפי הערך 1",
+            "GROUP BY עובד מצוין ואין בעיה",
+            "צריך שני GROUP BY מקוננים",
+            "פונקציות חלון לא יכולות לפתור זאת"
+          ],
+          "correct_answer": "GROUP BY מחזיר את MAX(salary) אך לא את שאר עמודות העובד; הפתרון הוא ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) בתת-שאילתה וסינון לפי הערך 1",
+          "explanation": "הצבירה מכווצת את הקבוצה ומאבדת את זהות השורה שהשיאה את המקסימום. פונקציית חלון משאירה את כל השורות, מדרגת אותן בתוך כל מחלקה, וסינון על הדירוג שולף את השורה השלמה של המוביל.",
+          "correctIndex": 0,
+          "format": "mc"
+        },
+        {
+          "id": "sql-window_010",
+          "difficulty": "hard",
+          "question": "בטבלה עם עמודות month ו-revenue מחושב הביטוי revenue - LAG(revenue) OVER (ORDER BY month). מה יתקבל בשורה של החודש הראשון?",
+          "options": [
+            "0",
+            "ערך ההכנסה עצמו",
+            "NULL, כי LAG אינה מוצאת שורה קודמת ומחזירה NULL כברירת מחדל",
+            "שגיאת ריצה"
+          ],
+          "correct_answer": "NULL, כי LAG אינה מוצאת שורה קודמת ומחזירה NULL כברירת מחדל",
+          "explanation": "לשורה הראשונה אין קודמת, ולכן LAG מחזירה NULL, וכל חיסור עם NULL נותן NULL. אפשר לספק ערך ברירת מחדל שלישי, למשל LAG(revenue, 1, 0), כדי לקבל 0 במקום.",
+          "correctIndex": 2,
+          "format": "mc"
+        }
+      ]
     }
   },
   "mcSchemaVersion": 1
