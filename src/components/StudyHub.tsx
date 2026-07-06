@@ -449,7 +449,7 @@ type InternalView = 'home' | 'learning' | 'courses' | 'topics' | 'lesson' | 'qui
 // the rest show a "Coming soon" splash. The folder labels live here as the
 // single source of truth — UI + future analytics can reference COURSES[].
 interface CourseDef {
-  id: 'stat-a' | 'stat-b' | 'methods' | 'anova'
+  id: 'stat-a' | 'stat-b' | 'methods' | 'anova' | 'sql'
   label: string
   icon: string                   // emoji shown on the card
   desc: string
@@ -457,12 +457,16 @@ interface CourseDef {
   bg: string                     // tile gradient
   /** If set, course opens an external page in a fullscreen iframe. */
   embedUrl?: string
+  /** If set, course is a self-hosted static page opened in a new tab
+   *  (page owns its layout/i18n, so the RTL app shell stays out of its way). */
+  pageUrl?: string
 }
 const COURSES: CourseDef[] = [
   { id: 'stat-a',  label: "סטטיסטיקה א'",        icon: '📊', desc: 'מבוא, מדדים, התפלגויות, רגרסיה, הסתברות',  active: true,  bg: 'linear-gradient(135deg,#F5C842,#D4AF37)' },
   { id: 'stat-b',  label: "סטטיסטיקה ב'",        icon: '📈', desc: 'דגימה, אמידה, רווחי סמך, בדיקת השערות, א-פרמטריים, רגרסיה', active: true,  bg: 'linear-gradient(135deg,#7CB7F8,#4A90E2)' },
   { id: 'methods', label: 'שיטות מחקר',          icon: '🔬', desc: 'תכנון מחקר, מדידה, מהימנות ותקפות',         active: false, bg: 'linear-gradient(135deg,#A78BFA,#7C3AED)' },
   { id: 'anova',   label: 'ניתוח שונות / רב-משתנית', icon: '📐', desc: 'ANOVA, MANOVA, רגרסיה מרובה, מודלים מורכבים', active: false, bg: 'linear-gradient(135deg,#67C29E,#229E69)' },
+  { id: 'sql',     label: 'SQL — שפת מסדי נתונים',  icon: '🗄️', desc: 'קורס אינטראקטיבי באנגלית: שאילתות, JOIN, אינדקסים — עם מטאפורות ומשחקים', active: true, bg: 'linear-gradient(135deg,#F0B429,#C97C18)', pageUrl: 'sql-academy.html' },
 ]
 
 // Hebrew labels for each topic now live in ../data/topicLabels (shared with
@@ -1020,6 +1024,11 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
   }, [comingSoon, embedded])
   const pickCourse = (c: CourseDef) => {
     if(!c.active) { setComingSoon(c); return }
+    if(c.pageUrl) {
+      // Self-hosted static page (e.g. SQL academy) — same origin, opens in a
+      // new tab so the LTR/English page isn't squeezed into the RTL app shell.
+      window.open(c.pageUrl, '_blank', 'noopener,noreferrer'); return
+    }
     if(c.embedUrl) {
       // Legacy path for any future partner course that can't iframe. Stat-A and
       // Stat-B are both NATIVE now (no embedUrl) → they route into the topic grid.
