@@ -302,6 +302,13 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   const adminMode = useLearningStore(s => s.adminMode)
   const [editsVersion, setEditsVersion] = useState(0)
   const [editingSlide, setEditingSlide] = useState(false)
+  // Editor bidi controls (Word-style). Persisted so Barak sets it once.
+  const [editDir, setEditDirState] = useState<'auto' | 'rtl' | 'ltr'>(() =>
+    (localStorage.getItem('wafflestack-edit-dir') as 'auto' | 'rtl' | 'ltr') || 'auto')
+  const [editAlign, setEditAlignState] = useState<'right' | 'left'>(() =>
+    (localStorage.getItem('wafflestack-edit-align') as 'right' | 'left') || 'right')
+  const setEditDir = (d: 'auto' | 'rtl' | 'ltr') => { setEditDirState(d); localStorage.setItem('wafflestack-edit-dir', d) }
+  const setEditAlign = (a: 'right' | 'left') => { setEditAlignState(a); localStorage.setItem('wafflestack-edit-align', a) }
   const [draftTitle, setDraftTitle] = useState('')
   const [draftContent, setDraftContent] = useState('')
   void editsVersion // read so the state is "used"; bump triggers re-render → fresh getOverride
@@ -572,15 +579,59 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
         </div>
         {editingSlide ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+            {/* Word-style bidi controls for the editor. "אוטו" uses
+                unicode-bidi: plaintext so EVERY LINE follows its own first
+                strong character — mixed Hebrew/English lines each lay out
+                correctly instead of inheriting one global direction. */}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }} role="toolbar" aria-label="כיוון ויישור">
+              {([
+                { key: 'auto', label: '¶ אוטו — כל שורה לפי השפה שלה' },
+                { key: 'rtl', label: '→¶ ימין לשמאל' },
+                { key: 'ltr', label: '¶← שמאל לימין' },
+              ] as const).map(o => (
+                <button
+                  key={o.key}
+                  onClick={() => setEditDir(o.key)}
+                  aria-pressed={editDir === o.key}
+                  style={{
+                    minHeight: 44, padding: '6px 14px', borderRadius: 10,
+                    fontSize: 13, fontWeight: 600, fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+                    background: editDir === o.key ? 'rgba(212,160,23,0.20)' : 'rgba(255,255,255,0.06)',
+                    border: `1.5px solid ${editDir === o.key ? 'rgba(212,160,23,0.6)' : 'rgba(127,155,217,0.30)'}`,
+                    color: TEXT_DARK,
+                  }}
+                >{o.label}</button>
+              ))}
+              <span style={{ width: 1, alignSelf: 'stretch', background: 'rgba(127,155,217,0.30)', margin: '4px 4px' }} aria-hidden="true" />
+              {([
+                { key: 'right', label: 'יישור לימין' },
+                { key: 'left', label: 'יישור לשמאל' },
+              ] as const).map(o => (
+                <button
+                  key={o.key}
+                  onClick={() => setEditAlign(o.key)}
+                  aria-pressed={editAlign === o.key}
+                  style={{
+                    minHeight: 44, padding: '6px 14px', borderRadius: 10,
+                    fontSize: 13, fontWeight: 600, fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+                    background: editAlign === o.key ? 'rgba(212,160,23,0.20)' : 'rgba(255,255,255,0.06)',
+                    border: `1.5px solid ${editAlign === o.key ? 'rgba(212,160,23,0.6)' : 'rgba(127,155,217,0.30)'}`,
+                    color: TEXT_DARK,
+                  }}
+                >{o.label}</button>
+              ))}
+            </div>
             <textarea
               value={draftContent}
               onChange={e => setDraftContent(e.target.value)}
               onKeyDown={e => { if (e.key === 'Escape') cancelSlideEdit() }}
-              dir="rtl"
+              dir={editDir === 'auto' ? 'rtl' : editDir}
               aria-label="עריכת תוכן השקופית"
               style={{
                 fontFamily: "'Assistant', sans-serif", fontSize: 17, lineHeight: 1.8,
-                color: TEXT_DARK, textAlign: 'start',
+                color: TEXT_DARK,
+                textAlign: editAlign,
+                unicodeBidi: editDir === 'auto' ? 'plaintext' : 'isolate',
                 background: 'rgba(255,255,255,0.06)',
                 border: '1.5px solid rgba(245,200,66,0.55)',
                 borderRadius: 12, padding: '14px 16px',
