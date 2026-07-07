@@ -320,15 +320,39 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   const displayContent = contentOverride ?? originalContent
   const hasSlideOverride = titleOverride !== null || contentOverride !== null
 
+  // Sentence-split for the EDITOR: same boundary rule as the bullet renderer
+  // ([.!?] + whitespace, never inside $…$ math), so the textarea shows one
+  // bullet per line instead of one unreadable paragraph. Saved content keeps
+  // the newlines — the renderer treats a newline as a hard bullet break, which
+  // also gives Barak direct control: Enter in the editor = new bullet.
+  const splitForEdit = (s: string): string[] => {
+    const out: string[] = []
+    for (const chunk of s.split(/\n+/)) {
+      let last = 0, dollars = 0
+      for (let i = 0; i < chunk.length; i++) {
+        if (chunk[i] === '$') dollars++
+        if (dollars % 2 === 0 && /[.!?]/.test(chunk[i]) && i + 1 < chunk.length && /\s/.test(chunk[i + 1])) {
+          let j = i + 1
+          while (j < chunk.length && /\s/.test(chunk[j])) j++
+          out.push(chunk.slice(last, i + 1))
+          last = j; i = j - 1
+        }
+      }
+      if (last < chunk.length) out.push(chunk.slice(last))
+    }
+    return out.map(t => t.trim()).filter(Boolean)
+  }
   const startSlideEdit = () => {
     setDraftTitle(displayTitle)
-    setDraftContent(displayContent)
+    setDraftContent(splitForEdit(displayContent).join('\n'))
     setEditingSlide(true)
   }
   const cancelSlideEdit = () => setEditingSlide(false)
   const saveSlideEdit = () => {
     if (draftTitle !== displayTitle) recordEdit(topicId, lessonIdx, 'title', displayTitle, draftTitle)
-    if (draftContent !== displayContent) recordEdit(topicId, lessonIdx, 'content', displayContent, draftContent)
+    // Compare against the same line-split form shown in the textarea, so
+    // opening + saving without typing records nothing.
+    if (draftContent !== splitForEdit(displayContent).join('\n')) recordEdit(topicId, lessonIdx, 'content', displayContent, draftContent)
     setEditingSlide(false)
     setEditsVersion(v => v + 1)
   }
@@ -689,9 +713,11 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             if (last < s.length) out.push(s.slice(last))
             return out
           }
-          const parts = raw.length < 80
+          // A newline is a HARD bullet break (admin-edited content is stored
+          // one bullet per line); sentence-splitting applies within each line.
+          const parts = raw.length < 80 && !raw.includes('\n')
             ? [raw]
-            : splitSentences(raw).reduce((acc: string[], s) => {
+            : raw.split(/\n+/).flatMap(chunk => splitSentences(chunk)).reduce((acc: string[], s) => {
                 const t = s.trim(); if (!t) return acc
                 if (acc.length && t.length < 12) acc[acc.length - 1] += ' ' + t
                 else acc.push(t)

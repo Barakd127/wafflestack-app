@@ -113,22 +113,38 @@ const STRONG_MATH_RE = /[0-9A-Za-z=<>+\-*/^_·×÷√∑Σπμσ≤≥≠∪∩�
 // the Hebrew word and visually flips the paren ("מאפשרת(1 :") — the recurring
 // "numbering is off" bug. With it, "מאפשרת: " stays RTL and "1)" is its own
 // LTR-isolated unit, so numbered points render exactly as authored.
-const NEUTRAL_PUNCT_RE = /[:;,.()\[\]"'«»?!…—–]/
+// '-' is neutral too: in "ל-100" the hyphen must stay with the Hebrew run so
+// it renders between the ל and the number ("ל-100"), not flipped to the far
+// side of the LTR island ("ל100-"). Inside math runs ("5-3", "x-1") it still
+// sticks to the digits because it's directly attached to them.
+const NEUTRAL_PUNCT_RE = /[:;,.()\[\]"'«»?!…—–-]/
 
 function bidiSafeSegments(line: string): Array<{ ltr: boolean; text: string }> {
   const segs: Array<{ ltr: boolean; text: string }> = []
   let buf = ''
   let mode: 'heb' | 'math' | null = null
+  // Neutrals that FOLLOW whitespace belong to whatever comes next, not to the
+  // previous run: in "ל-100 (או ..." the "(" must join the Hebrew run (where
+  // RTL mirroring renders it correctly), not glue onto the LTR "100" island.
+  // Neutrals directly attached to a character keep that character's run:
+  // "מאפשרת:" stays Hebrew, "1)" and "P(A)" stay math.
+  let pending = ''
+  let prevWasSpace = true
   const flush = () => { if (buf) { segs.push({ ltr: mode === 'math', text: buf }); buf = '' } }
   for (const ch of line) {
+    const isSpace = /\s/.test(ch)
+    const isNeutral = !isSpace && NEUTRAL_PUNCT_RE.test(ch)
+    if (isNeutral && prevWasSpace) { pending += ch; continue }
+    if (isSpace && pending) { pending += ch; continue }
     let m: 'heb' | 'math' = mode === 'heb' ? 'heb' : 'math'
-    // Whitespace and neutral punctuation inherit the current run's direction;
-    // only strongly-typed characters (Hebrew vs everything else) switch modes.
-    if (!/\s/.test(ch) && !NEUTRAL_PUNCT_RE.test(ch)) m = HEBREW_RE.test(ch) ? 'heb' : 'math'
+    if (!isSpace && !isNeutral) m = HEBREW_RE.test(ch) ? 'heb' : 'math'
     if (mode === null) mode = m
     if (m !== mode) { flush(); mode = m }
+    if (pending) { buf += pending; pending = '' }
     buf += ch
+    prevWasSpace = isSpace
   }
+  if (pending) buf += pending
   flush()
   return segs
 }
