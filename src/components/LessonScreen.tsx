@@ -4,6 +4,8 @@ import { TOPIC_VISUALS } from './LessonVisuals'
 import ArsenalCapture from './ArsenalCapture'
 import { quickAddToMindmap } from '../lib/mindmapWriter'
 import { MathLineBlock } from '../lib/mathRender'
+import { useLearningStore } from '../store/learningStore'
+import { getOverride, recordEdit, revertOverride } from '../lib/contentEdits'
 
 // Design tokens — keep in sync with StudyHub.tsx
 const GLASS_CARD  = 'var(--sh-glass-card)'
@@ -293,6 +295,74 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
 
   const lessonIdx = currentRef?.kind === 'lesson' ? currentRef.lessonIdx : 0
   const slide = slides[lessonIdx] ?? slides[0]
+
+  // ── Admin in-place content editing (track changes) ────────────────────────
+  // Overrides from contentEdits resolve on top of the bundled slide text.
+  // editsVersion bumps force a re-read after record/revert.
+  const adminMode = useLearningStore(s => s.adminMode)
+  const [editsVersion, setEditsVersion] = useState(0)
+  const [editingSlide, setEditingSlide] = useState(false)
+  // Editor bidi controls (Word-style). Persisted so Barak sets it once.
+  const [editDir, setEditDirState] = useState<'auto' | 'rtl' | 'ltr'>(() =>
+    (localStorage.getItem('wafflestack-edit-dir') as 'auto' | 'rtl' | 'ltr') || 'auto')
+  const [editAlign, setEditAlignState] = useState<'right' | 'left'>(() =>
+    (localStorage.getItem('wafflestack-edit-align') as 'right' | 'left') || 'right')
+  const setEditDir = (d: 'auto' | 'rtl' | 'ltr') => { setEditDirState(d); localStorage.setItem('wafflestack-edit-dir', d) }
+  const setEditAlign = (a: 'right' | 'left') => { setEditAlignState(a); localStorage.setItem('wafflestack-edit-align', a) }
+  const [draftTitle, setDraftTitle] = useState('')
+  const [draftContent, setDraftContent] = useState('')
+  void editsVersion // read so the state is "used"; bump triggers re-render → fresh getOverride
+  const originalTitle = slide?.title ?? ''
+  const originalContent = typeof slide?.content === 'string' ? slide.content : String(slide?.content ?? '')
+  const titleOverride = slide ? getOverride(topicId, lessonIdx, 'title') : null
+  const contentOverride = slide ? getOverride(topicId, lessonIdx, 'content') : null
+  const displayTitle = titleOverride ?? originalTitle
+  const displayContent = contentOverride ?? originalContent
+  const hasSlideOverride = titleOverride !== null || contentOverride !== null
+
+  // Sentence-split for the EDITOR: same boundary rule as the bullet renderer
+  // ([.!?] + whitespace, never inside $…$ math), so the textarea shows one
+  // bullet per line instead of one unreadable paragraph. Saved content keeps
+  // the newlines — the renderer treats a newline as a hard bullet break, which
+  // also gives Barak direct control: Enter in the editor = new bullet.
+  const splitForEdit = (s: string): string[] => {
+    const out: string[] = []
+    for (const chunk of s.split(/\n+/)) {
+      let last = 0, dollars = 0
+      for (let i = 0; i < chunk.length; i++) {
+        if (chunk[i] === '$') dollars++
+        if (dollars % 2 === 0 && /[.!?]/.test(chunk[i]) && i + 1 < chunk.length && /\s/.test(chunk[i + 1])) {
+          let j = i + 1
+          while (j < chunk.length && /\s/.test(chunk[j])) j++
+          out.push(chunk.slice(last, i + 1))
+          last = j; i = j - 1
+        }
+      }
+      if (last < chunk.length) out.push(chunk.slice(last))
+    }
+    return out.map(t => t.trim()).filter(Boolean)
+  }
+  const startSlideEdit = () => {
+    setDraftTitle(displayTitle)
+    setDraftContent(splitForEdit(displayContent).join('\n'))
+    setEditingSlide(true)
+  }
+  const cancelSlideEdit = () => setEditingSlide(false)
+  const saveSlideEdit = () => {
+    if (draftTitle !== displayTitle) recordEdit(topicId, lessonIdx, 'title', displayTitle, draftTitle)
+    // Compare against the same line-split form shown in the textarea, so
+    // opening + saving without typing records nothing.
+    if (draftContent !== splitForEdit(displayContent).join('\n')) recordEdit(topicId, lessonIdx, 'content', displayContent, draftContent)
+    setEditingSlide(false)
+    setEditsVersion(v => v + 1)
+  }
+  const revertSlide = () => {
+    revertOverride(topicId, lessonIdx, 'title')
+    revertOverride(topicId, lessonIdx, 'content')
+    setEditsVersion(v => v + 1)
+  }
+  // Leaving the slide (nav) drops any in-progress edit draft
+  useEffect(() => { setEditingSlide(false) }, [currentSlide, topicId])
   // Slides may override the topic-level visual via `visualId` — used by the
   // probability lesson to attach distinct Venn variants to specific slides.
   // Per-slide Visual: only when slide explicitly sets visualId (e.g. probability
@@ -421,14 +491,71 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 14, marginBottom: 22 }}>
+          {editingSlide ? (
+            <input
+              value={draftTitle}
+              onChange={e => setDraftTitle(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Escape') cancelSlideEdit() }}
+              dir="rtl"
+              aria-label="עריכת כותרת השקופית"
+              style={{
+                fontFamily: "'Rubik', sans-serif", fontSize: 26, fontWeight: 700,
+                color: TEXT_DARK, textAlign: 'start', flex: 1,
+                background: 'rgba(255,255,255,0.06)',
+                border: '1.5px solid rgba(245,200,66,0.55)',
+                borderRadius: 10, padding: '8px 12px', minHeight: 44,
+              }}
+            />
+          ) : (
           <h3 style={{
             fontFamily: "'Rubik', sans-serif", fontSize: 30, fontWeight: 700,
             color: TEXT_DARK, marginTop: 0, marginBottom: 0, textAlign: 'right',
             lineHeight: 1.3, letterSpacing: '-0.01em', flex: 1,
           }}>
-            {slide.title}
+            {displayTitle}
+            {adminMode && hasSlideOverride && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                marginInlineStart: 10, verticalAlign: 'middle',
+                background: 'rgba(245,200,66,0.18)',
+                border: '1px solid rgba(245,200,66,0.55)',
+                color: '#b8860b', borderRadius: 8,
+                padding: '2px 8px', fontSize: 12, fontWeight: 700,
+                fontFamily: "'Rubik', sans-serif",
+              }}>
+                נערך
+                <button
+                  onClick={revertSlide}
+                  aria-label="שחזור מקור"
+                  title="שחזור הטקסט המקורי"
+                  style={{
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    color: 'inherit', fontSize: 13, padding: '4px 6px',
+                    minWidth: 24, minHeight: 24, lineHeight: 1,
+                  }}
+                >↺</button>
+              </span>
+            )}
           </h3>
+          )}
           <div style={{ display: 'flex', gap: 6, flexShrink: 0, marginTop: 6 }}>
+            {adminMode && !editingSlide && (
+              <button
+                onClick={startSlideEdit}
+                aria-label="עריכת תוכן (אדמין)"
+                title="עריכת תוכן השקופית (אדמין)"
+                style={{
+                  background: 'rgba(245,200,66,0.12)',
+                  border: '1.5px solid rgba(245,200,66,0.45)',
+                  color: '#b8860b',
+                  borderRadius: 10, padding: '6px 12px',
+                  minWidth: 44, minHeight: 44,
+                  fontSize: 16, cursor: 'pointer',
+                  fontFamily: "'Rubik', sans-serif",
+                  transition: 'all 0.2s',
+                }}
+              >✏️</button>
+            )}
             <button
               onClick={() => {
                 const ok = quickAddToMindmap({
@@ -474,14 +601,98 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             </button>
           </div>
         </div>
-        {(() => {
+        {editingSlide ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+            {/* Word-style bidi controls for the editor. "אוטו" uses
+                unicode-bidi: plaintext so EVERY LINE follows its own first
+                strong character — mixed Hebrew/English lines each lay out
+                correctly instead of inheriting one global direction. */}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }} role="toolbar" aria-label="כיוון ויישור">
+              {([
+                { key: 'auto', label: '¶ אוטו — כל שורה לפי השפה שלה' },
+                { key: 'rtl', label: '→¶ ימין לשמאל' },
+                { key: 'ltr', label: '¶← שמאל לימין' },
+              ] as const).map(o => (
+                <button
+                  key={o.key}
+                  onClick={() => setEditDir(o.key)}
+                  aria-pressed={editDir === o.key}
+                  style={{
+                    minHeight: 44, padding: '6px 14px', borderRadius: 10,
+                    fontSize: 13, fontWeight: 600, fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+                    background: editDir === o.key ? 'rgba(212,160,23,0.20)' : 'rgba(255,255,255,0.06)',
+                    border: `1.5px solid ${editDir === o.key ? 'rgba(212,160,23,0.6)' : 'rgba(127,155,217,0.30)'}`,
+                    color: TEXT_DARK,
+                  }}
+                >{o.label}</button>
+              ))}
+              <span style={{ width: 1, alignSelf: 'stretch', background: 'rgba(127,155,217,0.30)', margin: '4px 4px' }} aria-hidden="true" />
+              {([
+                { key: 'right', label: 'יישור לימין' },
+                { key: 'left', label: 'יישור לשמאל' },
+              ] as const).map(o => (
+                <button
+                  key={o.key}
+                  onClick={() => setEditAlign(o.key)}
+                  aria-pressed={editAlign === o.key}
+                  style={{
+                    minHeight: 44, padding: '6px 14px', borderRadius: 10,
+                    fontSize: 13, fontWeight: 600, fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+                    background: editAlign === o.key ? 'rgba(212,160,23,0.20)' : 'rgba(255,255,255,0.06)',
+                    border: `1.5px solid ${editAlign === o.key ? 'rgba(212,160,23,0.6)' : 'rgba(127,155,217,0.30)'}`,
+                    color: TEXT_DARK,
+                  }}
+                >{o.label}</button>
+              ))}
+            </div>
+            <textarea
+              value={draftContent}
+              onChange={e => setDraftContent(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Escape') cancelSlideEdit() }}
+              dir={editDir === 'auto' ? 'rtl' : editDir}
+              aria-label="עריכת תוכן השקופית"
+              style={{
+                fontFamily: "'Assistant', sans-serif", fontSize: 17, lineHeight: 1.8,
+                color: TEXT_DARK,
+                textAlign: editAlign,
+                unicodeBidi: editDir === 'auto' ? 'plaintext' : 'isolate',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1.5px solid rgba(245,200,66,0.55)',
+                borderRadius: 12, padding: '14px 16px',
+                minHeight: 220, resize: 'vertical', flex: 1,
+              }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'row-reverse', gap: 10 }}>
+              {/* row-reverse in RTL context: שמור (primary) lands on the LEFT */}
+              <button
+                onClick={saveSlideEdit}
+                style={{
+                  background: BUTTON_COLOR, color: '#fff', border: 'none',
+                  borderRadius: 10, padding: '10px 22px', minHeight: 44, minWidth: 44,
+                  fontSize: 14, fontWeight: 700, fontFamily: "'Rubik', sans-serif",
+                  cursor: 'pointer',
+                }}
+              >שמור</button>
+              <button
+                onClick={cancelSlideEdit}
+                style={{
+                  background: 'rgba(255,255,255,0.06)', color: TEXT_MED,
+                  border: '1.5px solid rgba(127,155,217,0.35)',
+                  borderRadius: 10, padding: '10px 22px', minHeight: 44, minWidth: 44,
+                  fontSize: 14, fontWeight: 600, fontFamily: "'Rubik', sans-serif",
+                  cursor: 'pointer',
+                }}
+              >ביטול</button>
+            </div>
+          </div>
+        ) : (() => {
           // Auto-split prose into numbered bullets so every slide reads
           // like a high-production-value card. Sentences are split on
           // periods that are followed by whitespace; sequences shorter
           // than ~12 chars (e.g. "x̄.") are merged with the previous one
           // so we don't fragment formulas. Slides that are already short
           // (< 80 chars) render as a single big bullet.
-          const raw = String(slide.content || '').trim()
+          const raw = String(displayContent || '').trim()
           // Split prose into sentence bullets, but NEVER split inside a `$…$`
           // math span — factorial "!", ellipsis "...", and "." inside LaTeX must
           // not break the pair (else the `$` go unbalanced and KaTeX can't render,
@@ -502,9 +713,11 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             if (last < s.length) out.push(s.slice(last))
             return out
           }
-          const parts = raw.length < 80
+          // A newline is a HARD bullet break (admin-edited content is stored
+          // one bullet per line); sentence-splitting applies within each line.
+          const parts = raw.length < 80 && !raw.includes('\n')
             ? [raw]
-            : splitSentences(raw).reduce((acc: string[], s) => {
+            : raw.split(/\n+/).flatMap(chunk => splitSentences(chunk)).reduce((acc: string[], s) => {
                 const t = s.trim(); if (!t) return acc
                 if (acc.length && t.length < 12) acc[acc.length - 1] += ' ' + t
                 else acc.push(t)
