@@ -4,6 +4,7 @@ import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../con
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
+import { getAllEdits } from '../lib/contentEdits'
 import { toPng } from 'html-to-image'
 
 // Lazy-load interactive graph components (per-topic visualizations).
@@ -2008,6 +2009,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
           )
         })}
         <AdminToggle collapsed={collapsed} />
+        <ContentEditsButton collapsed={collapsed} />
         {/* Pomodoro mounted in sidebar bottom; gated by feature unlock */}
         <FeatureGate id="pomodoro" mode="hide"><PomodoroTimer /></FeatureGate>
       </nav>
@@ -2054,6 +2056,51 @@ function AdminToggle({ collapsed }: { collapsed: boolean }) {
         </span>
       )}
     </button>
+  )
+}
+
+// Lazy — the changelog panel only ships when an admin actually opens it.
+const ContentEditsPanel = lazy(() => import('./admin/ContentEditsPanel'))
+
+/**
+ * ContentEditsButton — compact opener for the admin content-edits changelog.
+ * Sits directly under the AdminToggle pill; visible only in adminMode.
+ */
+function ContentEditsButton({ collapsed }: { collapsed: boolean }) {
+  const adminMode = useLearningStore(s => s.adminMode)
+  const [open, setOpen] = useState(false)
+  const [count, setCount] = useState(0)
+  useEffect(() => {
+    if (adminMode) setCount(getAllEdits().length)
+  }, [adminMode, open])
+  if (!adminMode) return null
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        aria-label={`שינויי תוכן (${count})`}
+        title="יומן שינויי תוכן (אדמין)"
+        style={{
+          alignSelf: 'stretch',
+          display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start',
+          gap: 10, padding: collapsed ? '10px 8px' : '10px 12px', minHeight: 44,
+          background: 'rgba(245,200,66,0.10)',
+          border: '1px solid rgba(245,200,66,0.40)',
+          color: '#FFD700',
+          borderRadius: 10, cursor: 'pointer',
+          fontFamily: "'Rubik', sans-serif", fontSize: 12, fontWeight: 700,
+          direction: 'rtl', transition: 'all 0.15s',
+        }}
+      >
+        <span aria-hidden="true">📋</span>
+        {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>שינויי תוכן ({count})</span>}
+      </button>
+      {open && (
+        <Suspense fallback={null}>
+          <ContentEditsPanel onClose={() => setOpen(false)} />
+        </Suspense>
+      )}
+    </>
   )
 }
 
