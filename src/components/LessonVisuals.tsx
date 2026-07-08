@@ -38,7 +38,7 @@ const BADGE = (extra?: React.CSSProperties): React.CSSProperties => ({
 })
 const ROW: React.CSSProperties = { display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center', marginBottom: 12 }
 const LABEL_STYLE: React.CSSProperties = { fontSize: 14, color: 'var(--sh-text-dark)', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 500 }
-const SLIDER = (color = GOLD): React.CSSProperties => ({ width: 110, accentColor: color, marginRight: 6 } as React.CSSProperties)
+const SLIDER = (color = GOLD): React.CSSProperties => ({ width: 110, accentColor: color, marginInlineEnd: 6 } as React.CSSProperties)
 const CAPTION: React.CSSProperties = { fontSize: 12, color: 'var(--sh-text-dark)', fontWeight: 700, marginBottom: 6, opacity: 0.85 }
 const STORY: React.CSSProperties = { fontSize: 14, color: 'var(--sh-text-dark)', lineHeight: 1.65, marginBottom: 14, padding: '10px 14px', background: 'rgba(255,255,255,0.08)', borderRight: `3px solid ${GOLD}`, borderRadius: 8 }
 
