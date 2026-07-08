@@ -26,7 +26,7 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              אם כבר סטטיסטיקה…<br />הפכו את הלמידה<br /><span className="ls-gold-gradient">לבניית כרך שלם!</span>
+              אם כבר סטטיסטיקה…<br />הפכו את הלמידה<br /><span className="ls-gold-gradient">לבניית עיר שלמה!</span>
             </motion.h1>
 
             <motion.p
