@@ -200,16 +200,15 @@
 }
 .ls-gold-text { color: var(--ls-gold); }
 .ls-gold-gradient {
-  /* Deeper, more saturated amber gold so it stays READABLE on the pale-blue
-   * hero — the old honey start (#FFD24D) washed out against the light bg.
-   * Per user 2026-06-08. */
-  background: linear-gradient(120deg, #E0930F 0%, #C4760B 45%, #A85F08 75%, #8A4C06 100%);
+  /* Warm yellow→amber, less orange than the prior deep-amber. Stops from
+   * user 2026-07-08: #FFC81E (yellow) → #FF9E20 (amber). */
+  background: linear-gradient(120deg, #FFC81E 0%, #FF9E20 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 800;
-  /* Stronger warm shadow lifts the gold off the pale background for contrast. */
-  filter: drop-shadow(0 1px 1.5px rgba(96,58,6,0.5));
+  /* Warm shadow lifts the gold off the pale background for contrast. */
+  filter: drop-shadow(0 1px 1.5px rgba(180,110,10,0.4));
 }
 
 /* === Scroll progress bar === */
