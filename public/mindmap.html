@@ -1237,7 +1237,77 @@ function mmNode(type,text,x,y,parentId,color){
 // who opens the mind map for the first time sees the whole landscape, not a
 // blank "Untitled" node. The seed only fires when no saved map exists or
 // when the existing map is essentially empty (root + 0 children).
-const COURSE_SEED = {
+// ── Course-adaptive topic scene ───────────────────────────────────────────────
+// ?course=stat-a|stat-b|sql picks which curriculum tree seeds the topic map.
+// Each course also gets its own storage slot (stat-a keeps the legacy key so
+// existing users don't lose their edited maps).
+const _MM_COURSE = (function(){
+  const c = new URLSearchParams(location.search).get('course');
+  return (c === 'stat-b' || c === 'sql') ? c : 'stat-a';
+})();
+
+const COURSE_SEED_STAT_B = {
+  text: 'סטטיסטיקה ב׳',
+  color: '#1e3a8a',
+  children: [
+    { text: 'דגימה ומשפטי גבול', color: '#2563eb', children: [
+      { text: 'מבוא לסטטיסטיקה ב׳', topicId: 'b-intro' },
+      { text: 'התפלגות הדגימה', topicId: 'b-sampling-dist' },
+      { text: 'צ׳בישב וחוק המספרים הגדולים', topicId: 'b-chebyshev-lln' },
+      { text: 'משפט הגבול המרכזי', topicId: 'b-clt' },
+    ]},
+    { text: 'אמידה ובדיקת השערות', color: '#7c3aed', children: [
+      { text: 'אמידה נקודתית', topicId: 'b-point-estimation' },
+      { text: 'רווחי סמך', topicId: 'b-confidence-intervals' },
+      { text: 'בדיקת השערות', topicId: 'b-hypothesis-testing' },
+      { text: 'שגיאות וכוח המבחן', topicId: 'b-errors-power' },
+      { text: 'פרשנות ומשמעות', topicId: 'b-interpretation' },
+    ]},
+    { text: 'רווחי סמך והשוואות מתקדמות', color: '#0ea5e9', children: [
+      { text: 'הפרש בין שתי תוחלות', topicId: 'b-diff-means' },
+      { text: 'דגימות מזווגות', topicId: 'b-paired-samples' },
+      { text: 'פרופורציה', topicId: 'b-proportion' },
+      { text: 'מבחני שונות', topicId: 'b-variance-test' },
+    ]},
+    { text: 'מבחנים א-פרמטריים', color: '#ea580c', children: [
+      { text: 'בינומי וכי בריבוע', topicId: 'b-binomial-chisquare' },
+      { text: 'אי-תלות ומקנמר', topicId: 'b-independence-mcnemar' },
+      { text: 'וילקוקסון ופישר', topicId: 'b-wilcoxon-fisher' },
+    ]},
+    { text: 'רגרסיה', color: '#10b981', children: [
+      { text: 'רגרסיה ליניארית פשוטה', topicId: 'b-simple-regression' },
+      { text: 'רגרסיה מרובה', topicId: 'b-multiple-regression' },
+    ]},
+  ],
+};
+
+// SQL — the warehouse: request-slip basics → advanced queries → design & speed.
+const COURSE_SEED_SQL = {
+  text: 'SQL',
+  color: '#78350f',
+  children: [
+    { text: 'פתקי בקשה — יסודות', color: '#d97706', children: [
+      { text: 'שאילתת SELECT ראשונה', topicId: 'sql-select' },
+      { text: 'סינון עם WHERE', topicId: 'sql-where' },
+      { text: 'ORDER BY ו-LIMIT', topicId: 'sql-order-limit' },
+      { text: 'הערך החסר: NULL', topicId: 'sql-null' },
+    ]},
+    { text: 'שאילתות מתקדמות', color: '#b45309', children: [
+      { text: 'חיבור טבלאות: JOIN', topicId: 'sql-join' },
+      { text: 'פונקציות סיכום', topicId: 'sql-aggregate' },
+      { text: 'קיבוץ עם GROUP BY', topicId: 'sql-group-by' },
+      { text: 'תת-שאילתות ו-CTE', topicId: 'sql-subquery-cte' },
+    ]},
+    { text: 'עיצוב המחסן וביצועים', color: '#92400e', children: [
+      { text: 'INSERT, UPDATE, DELETE', topicId: 'sql-dml' },
+      { text: 'בניית טבלאות ואילוצים', topicId: 'sql-create-constraints' },
+      { text: 'אינדקסים וביצועים', topicId: 'sql-index' },
+      { text: 'פונקציות חלון', topicId: 'sql-window' },
+    ]},
+  ],
+};
+
+const COURSE_SEED_STAT_A = {
   text: 'סטטיסטיקה',
   color: '#312e81',
   children: [
@@ -1292,6 +1362,11 @@ const COURSE_SEED = {
     },
   ],
 };
+
+const COURSE_SEED =
+  _MM_COURSE === 'sql'    ? COURSE_SEED_SQL :
+  _MM_COURSE === 'stat-b' ? COURSE_SEED_STAT_B :
+  COURSE_SEED_STAT_A;
 
 // Set of every text in the centralized COURSE_SEED skeleton — used to (re)stamp
 // the `skeleton` lock onto loaded maps (incl. saves made before the flag existed).
@@ -1565,7 +1640,11 @@ function initMM(){
   // 'studies' sheet. The personal 'thoughts'/custom sheets must keep their own
   // per-sheet slot even inside the topic scene, otherwise switching to מחשבות
   // wrongly shows the locked course tree (user 2026-06-11).
-  if(_MM_TOPIC_SCENE && _mmSheets.active === 'studies'){ _mmCurrentSaveKey = 'wafflestack-mm-topicmap-' + _MM_USER_ID; }
+  // Per-course storage slot; stat-a keeps the legacy (unsuffixed) key so
+  // existing users' edited topic maps survive the course-adaptive change.
+  if(_MM_TOPIC_SCENE && _mmSheets.active === 'studies'){
+    _mmCurrentSaveKey = 'wafflestack-mm-topicmap-' + (_MM_COURSE === 'stat-a' ? '' : _MM_COURSE + '-') + _MM_USER_ID;
+  }
 
   // Try to load saved mind map for this user
   try {
@@ -1630,7 +1709,7 @@ function initMM(){
   catch(e) {
     console.warn('seed failed, falling back to blank root', e);
     MM={nodes:{},root:'root',sel:null,multiSel:[],zoom:1,panX:0,panY:0,orientation:'tb',zones:[],selectedZoneId:null};
-    MM.nodes.root=mmNode('root','סטטיסטיקה',100,100,null,'#312e81');
+    MM.nodes.root=mmNode('root',COURSE_SEED.text,100,100,null,COURSE_SEED.color);
   }
   MM_HISTORY=[cloneMMForHistory()];
 }

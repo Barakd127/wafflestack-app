@@ -13,6 +13,7 @@
  */
 
 import { LESSON_CONTENT_STAT_B } from './lesson-content-stat-b'
+import { LESSON_CONTENT_SQL } from './lesson-content-sql'
 
 export interface LessonSlide {
   title: string
@@ -1925,7 +1926,7 @@ export const LESSON_CONTENT: LessonTopic[] = [
   },
 ]
 
-// Combined pool consumed by the lesson player so both courses resolve by topic id.
+// Combined pool consumed by the lesson player so all courses resolve by topic id.
 // Stat-A consumers that build the Stat-A topic grid keep using LESSON_CONTENT.
-export const LESSON_CONTENT_ALL: LessonTopic[] = [...LESSON_CONTENT, ...LESSON_CONTENT_STAT_B]
+export const LESSON_CONTENT_ALL: LessonTopic[] = [...LESSON_CONTENT, ...LESSON_CONTENT_STAT_B, ...LESSON_CONTENT_SQL]
 

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL Warehouse Academy — WaffleStack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* WaffleStack brand: cream paper, ink navy, warm gold */
+    --paper:#FBF8F1;
+    --ink:#1F3E6C;
+    --ink-soft:#4a5a7a;
+    --amber:#D4A017;      /* WaffleStack gold accent */
+    --teal:#1f7a6d;       /* semantic: good/result */
+    --card:#ffffff;
+    --line:#e3dccb;
+    --code-bg:#1F3E6C;
+    --code-fg:#e8ecf1;
+    --warn:#b33a3a;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font:16px/1.6 "Rubik","Segoe UI",system-ui,sans-serif;margin:0;padding:0 16px 80px}
+  main{max-width:880px;margin:0 auto}
+  h1,h2,h3{font-family:"Rubik","Segoe UI",sans-serif;font-weight:800;line-height:1.2;text-wrap:balance}
+  h1{font-size:clamp(2rem,5vw,3.2rem);margin:.2em 0}
+  h2{font-size:1.7rem;border-bottom:3px solid var(--amber);display:inline-block;padding-bottom:4px;margin-top:2.5em}
+  h3{font-size:1.15rem;margin-bottom:.3em}
+  .eyebrow{letter-spacing:.14em;text-transform:uppercase;font-size:.75rem;color:var(--amber);font-weight:700}
+  .hero{padding:64px 0 24px}
+  .hero p.lede{font-size:1.2rem;max-width:60ch;color:var(--ink-soft)}
+  .metaphor{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--amber);padding:14px 18px;margin:18px 0;border-radius:0 8px 8px 0}
+  .metaphor b{color:var(--amber)}
+  code,pre{font-family:Consolas,"Cascadia Code",monospace}
+  pre{background:var(--code-bg);color:var(--code-fg);padding:14px 16px;border-radius:8px;overflow-x:auto;font-size:.9rem;line-height:1.5}
+  .kw{color:#7fd1c0;font-weight:700}
+  .str{color:#f0c674}
+  .num{color:#e8a4c9}
+  table{border-collapse:collapse;width:100%;background:var(--card);font-variant-numeric:tabular-nums;font-size:.9rem}
+  th{background:var(--ink);color:#fff;text-align:left;padding:6px 10px}
+  td{border:1px solid var(--line);padding:5px 10px}
+  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin:10px 0}
+  button{background:var(--ink);color:#fff;border:0;padding:8px 16px;border-radius:6px;font-size:.95rem;cursor:pointer}
+  button:hover{background:var(--amber)}
+  button:focus-visible,select:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+  button.tab{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+  button.tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+  select{padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:.95rem}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+  .level{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;cursor:pointer}
+  .level:hover{border-color:var(--amber)}
+  .level .n{font-family:"Rubik",sans-serif;font-size:1.6rem;color:var(--amber);min-width:34px;font-weight:800}
+  .level .body{flex:1}
+  .level .detail{display:none;color:var(--ink-soft);font-size:.92rem;margin-top:6px}
+  .level.open .detail{display:block}
+  .yt{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0;text-decoration:none;color:var(--ink)}
+  .yt:hover{border-color:var(--amber)}
+  .yt .play{width:44px;height:44px;border-radius:8px;background:var(--warn);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex:none}
+  .pill{display:inline-block;background:var(--teal);color:#fff;border-radius:999px;padding:2px 12px;font-size:.75rem;letter-spacing:.05em}
+  .quiz-q{margin:16px 0}
+  .quiz-q .opts{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .quiz-q label{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+  .quiz-q label.right{border-color:var(--teal);background:#e7f3f0}
+  .quiz-q label.wrong{border-color:var(--warn);background:#f9e9e9}
+  canvas{max-width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px}
+  input[type=range]{width:min(320px,100%)}
+  .result-note{font-size:.9rem;color:var(--teal);font-weight:600}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+  .backlink{display:inline-block;margin-top:24px;color:var(--ink-soft);text-decoration:none;font-size:.9rem}
+  .backlink:hover{color:var(--amber)}
+</style>
+</head>
+<body>
+<main>
+<header class="hero">
+  <div class="eyebrow">Interactive course · updated July 2026</div>
+  <h1>SQL Warehouse Academy</h1>
+  <p class="lede">A database is a <b>giant warehouse</b>. Tables are shelves, rows are boxes, columns are labels on each box. SQL is the language you use to talk to the <b>warehouse clerk</b> — you never walk the aisles yourself; you write a precise request slip and the clerk fetches exactly what you asked for.</p>
+</header>
+
+<!-- ══════════ ROADMAP ══════════ -->
+<h2>The Roadmap — 8 Levels</h2>
+<p>Click a level to expand. This mirrors the standard 2026 roadmap (SQLBolt / Mode / LearnSQL style): basics → joins → aggregation → subqueries/CTEs → windows → data-changing → design → performance.</p>
+<div id="levels"></div>
+
+<!-- ══════════ ANATOMY ══════════ -->
+<h2>Anatomy of a Query</h2>
+<div class="metaphor">📋 <b>Metaphor:</b> a SELECT statement is a <b>request slip</b> handed to the clerk. Each clause is one line on the slip: which shelf, which boxes, how to sort them, how many to bring back.</div>
+<pre>
+<span class="kw">SELECT</span>  name, price          <span style="color:#8ba3b8">-- WHAT labels to copy off each box</span>
+<span class="kw">FROM</span>    products             <span style="color:#8ba3b8">-- WHICH shelf (table)</span>
+<span class="kw">WHERE</span>   price &gt; <span class="num">100</span>          <span style="color:#8ba3b8">-- FILTER: only boxes matching this test</span>
+<span class="kw">ORDER BY</span> price <span class="kw">DESC</span>         <span style="color:#8ba3b8">-- SORT the boxes before delivery</span>
+<span class="kw">LIMIT</span>   <span class="num">5</span>;                   <span style="color:#8ba3b8">-- bring at most 5 boxes</span>
+</pre>
+<div class="card"><b>Clerk's secret:</b> the clerk does NOT read the slip top-to-bottom. Real execution order: <code>FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT</code>. That's why you can't use a SELECT alias inside WHERE — the clerk hasn't written the label yet when filtering.</div>
+
+<!-- ══════════ PLAYGROUND ══════════ -->
+<h2>Live Playground</h2>
+<p>Real mini-warehouse below (a <code>products</code> shelf). Build a query with the dropdowns and press <b>Run</b> — the table filters live, exactly like the clerk would.</p>
+<div class="card">
+  <div class="row">
+    <code>SELECT * FROM products WHERE</code>
+    <select id="pgCol"><option>price</option><option>stock</option><option>category</option></select>
+    <select id="pgOp"><option>&gt;</option><option>&lt;</option><option>=</option></select>
+    <select id="pgVal"></select>
+    <code>ORDER BY</code>
+    <select id="pgSort"><option>price</option><option>stock</option><option>name</option></select>
+    <button id="pgRun">Run ▶</button>
+  </div>
+  <div id="pgSql" style="font-family:Consolas,monospace;font-size:.85rem;color:var(--ink-soft);margin:6px 0"></div>
+  <div class="tblwrap"><table id="pgTable"></table></div>
+  <div id="pgNote" class="result-note"></div>
+</div>
+
+<!-- ══════════ JOINS ══════════ -->
+<h2>JOINs — Two Clerks Compare Clipboards</h2>
+<div class="metaphor">🤝 <b>Metaphor:</b> a JOIN is <b>two clerks standing side by side</b>, each holding a clipboard (table), matching lines by a shared ID. The join type decides what happens to lines that have <i>no partner</i> on the other clipboard.</div>
+<div class="row" id="joinTabs">
+  <button class="tab active" data-j="inner">INNER</button>
+  <button class="tab" data-j="left">LEFT</button>
+  <button class="tab" data-j="right">RIGHT</button>
+  <button class="tab" data-j="full">FULL</button>
+</div>
+<div class="card">
+  <svg id="venn" viewBox="0 0 320 150" width="320" height="150" role="img" aria-label="Join Venn diagram">
+    <circle id="vL" cx="120" cy="75" r="60" fill="#c97b1e" opacity="0.25" stroke="#1d2b3a"/>
+    <circle id="vR" cx="200" cy="75" r="60" fill="#1f7a6d" opacity="0.25" stroke="#1d2b3a"/>
+    <text x="85" y="80" font-size="13" fill="#1d2b3a">customers</text>
+    <text x="192" y="80" font-size="13" fill="#1d2b3a">orders</text>
+  </svg>
+  <p id="joinDesc" style="max-width:65ch"></p>
+  <div class="grid2">
+    <div><h3>customers</h3><div class="tblwrap"><table id="jT1"></table></div></div>
+    <div><h3>orders</h3><div class="tblwrap"><table id="jT2"></table></div></div>
+  </div>
+  <h3>Result</h3>
+  <div class="tblwrap"><table id="jRes"></table></div>
+  <pre id="joinSql"></pre>
+</div>
+
+<!-- ══════════ GROUP BY ══════════ -->
+<h2>GROUP BY — Sorting Boxes into Bins</h2>
+<div class="metaphor">🗂️ <b>Metaphor:</b> <b>GROUP BY</b> = the clerk drags all boxes into <b>bins by label</b> (one bin per category), then reports <b>one summary line per bin</b> — count, average, total. You never see individual boxes again, only bin summaries. <b>HAVING</b> = throwing away whole bins that fail a test.</div>
+<div class="card">
+  <div class="row">
+    <code>SELECT category,</code>
+    <select id="aggFn"><option>COUNT(*)</option><option>AVG(price)</option><option>SUM(stock)</option><option>MAX(price)</option></select>
+    <code>FROM products GROUP BY category</code>
+    <button id="aggRun">Run ▶</button>
+  </div>
+  <div class="tblwrap"><table id="aggTable"></table></div>
+  <canvas id="aggChart" width="800" height="240" aria-label="aggregate bar chart"></canvas>
+</div>
+
+<!-- ══════════ INDEX ══════════ -->
+<h2>Indexes — The Card Catalog</h2>
+<div class="metaphor">🗃️ <b>Metaphor:</b> without an index, the clerk <b>walks every aisle</b> to find your box (full table scan). An index is a <b>card catalog</b>: sorted cards saying exactly which aisle each box lives in. Lookup becomes a few card flips (binary search, O(log n)) instead of a full walk (O(n)). Cost: every new box also needs a new card — writes get slightly slower.</div>
+<div class="card">
+  <div class="row">
+    <label for="idxSlider"><b>Rows in table:</b> <span id="idxN">1,000,000</span></label>
+    <input type="range" id="idxSlider" min="3" max="9" step="0.1" value="6">
+  </div>
+  <canvas id="idxChart" width="800" height="280" aria-label="scan vs index lookup comparison"></canvas>
+  <p id="idxNote" class="result-note"></p>
+</div>
+
+<!-- ══════════ MODERN SQL ══════════ -->
+<h2>Modern SQL (What's Current in 2026)</h2>
+<div class="grid2">
+  <div class="card"><h3>CTEs — <code>WITH</code></h3><p><b>Metaphor:</b> a scratch pad. The clerk prepares a temporary pile on a side desk, names it, then queries the pile. Replaces nested subqueries; makes queries readable.</p><pre><span class="kw">WITH</span> big_spenders <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> customer_id, SUM(total) t
+  <span class="kw">FROM</span> orders <span class="kw">GROUP BY</span> customer_id)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> big_spenders <span class="kw">WHERE</span> t &gt; <span class="num">1000</span>;</pre></div>
+  <div class="card"><h3>Window functions</h3><p><b>Metaphor:</b> each box gets a sticky note about its <i>neighbors</i> — rank within its bin, running total — without collapsing bins like GROUP BY does. The #1 interview topic for data roles.</p><pre><span class="kw">SELECT</span> name, price,
+  RANK() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> category
+               <span class="kw">ORDER BY</span> price <span class="kw">DESC</span>) r
+<span class="kw">FROM</span> products;</pre></div>
+  <div class="card"><h3>SQL:2023 standard</h3><p>Latest standard adds native <b>JSON type + dot notation</b> (<code>data.address.city</code>) and <b>property-graph queries</b> (<code>GRAPH_TABLE</code>) — query relationships like a graph DB, inside SQL.</p></div>
+  <div class="card"><h3>Ecosystem 2026</h3><p><b>PostgreSQL</b> = default choice (most-loved DB, Stack Overflow surveys). <b>SQLite</b> = in your pocket (every phone). <b>DuckDB</b> = hot analytics engine, runs SQL on CSV/Parquet files locally. AI writes SQL now — but you must <i>read</i> it to trust it. SQL is ~50 years old and still top-5 most-used languages.</p></div>
+</div>
+
+<!-- ══════════ YOUTUBE ══════════ -->
+<h2>YouTube Presentations</h2>
+<p>Current, high-quality, free full courses (verified July 2026):</p>
+<a class="yt" href="https://www.youtube.com/watch?v=SSKVgrwhzus" target="_blank" rel="noopener"><div class="play">▶</div><div><b>SQL Full Course for Beginners — Zero to Hero (30 hours)</b><br><span class="pill">Data With Baraa</span> deepest free course, data-analysis focused — and yes, teacher shares your name</div></a>
+<a class="yt" href="https://www.youtube.com/watch?v=kkKPD7khA54" target="_blank" rel="noopener"><div class="play">▶</div><div><b>How I Would Learn SQL FAST as a Data Analyst (2026 Roadmap)</b><br><span class="pill">roadmap</span> watch first — strategy before grind</div></a>
+<a class="yt" href="https://www.youtube.com/watch?v=7S_tz1z_5bA" target="_blank" rel="noopener"><div class="play">▶</div><div><b>SQL Course for Beginners [Full Course]</b><br><span class="pill">Programming with Mosh</span> classic, tight, MySQL-based</div></a>
+<a class="yt" href="https://www.youtube.com/watch?v=vh_Nco0ZSUg" target="_blank" rel="noopener"><div class="play">▶</div><div><b>SQL Full Course 2026 [FREE]</b><br><span class="pill">2026 edition</span> fresh full-length beginner course</div></a>
+<p>Practice sites: <a href="https://sqlbolt.com" target="_blank" rel="noopener">SQLBolt</a> (interactive basics), <a href="https://mode.com/sql-tutorial" target="_blank" rel="noopener">Mode SQL Tutorial</a>, <a href="https://sqlzoo.net" target="_blank" rel="noopener">SQLZoo</a>, <a href="https://leetcode.com/problemset/database/" target="_blank" rel="noopener">LeetCode Database</a>.</p>
+
+<!-- ══════════ QUIZ ══════════ -->
+<h2>Final Quiz — Are You the Clerk Yet?</h2>
+<div id="quiz"></div>
+<div class="row"><button id="quizCheck">Check answers</button><span id="quizScore" class="result-note"></span></div>
+<a class="backlink" href="./">&larr; Back to WaffleStack</a>
+</main>
+
+<script>
+// ── data ──────────────────────────────────────────────
+const PRODUCTS=[
+ {name:"Laptop",category:"Tech",price:1200,stock:14},
+ {name:"Headphones",category:"Tech",price:150,stock:80},
+ {name:"Coffee Beans",category:"Food",price:18,stock:200},
+ {name:"Olive Oil",category:"Food",price:25,stock:120},
+ {name:"Desk Chair",category:"Furniture",price:320,stock:35},
+ {name:"Bookshelf",category:"Furniture",price:180,stock:22},
+ {name:"Monitor",category:"Tech",price:400,stock:50},
+ {name:"Chocolate",category:"Food",price:8,stock:500},
+];
+
+// ── roadmap ───────────────────────────────────────────
+const LEVELS=[
+ ["Speak to the clerk","SELECT, FROM, WHERE, ORDER BY, LIMIT","Your first request slips. Metaphor: learn to fill the form. Practice: SQLBolt lessons 1–6. ~1 week."],
+ ["Filter like a pro","AND/OR, IN, BETWEEN, LIKE, NULL","NULL = a box with a torn-off label — it's not 0, not empty text, it's 'unknown'. NULL = NULL is never true; use IS NULL."],
+ ["Two clerks (JOINs)","INNER/LEFT/RIGHT/FULL JOIN, keys","The heart of SQL. Primary key = box serial number; foreign key = a note referencing another shelf's serial. ~2 weeks, drill hard."],
+ ["Bins & summaries","GROUP BY, COUNT/SUM/AVG, HAVING","Turn thousands of boxes into a one-page report. HAVING filters bins; WHERE filters boxes."],
+ ["Scratch pads","Subqueries, CTEs (WITH), views","Queries feeding queries. CTE = named side-desk pile. View = a saved request slip you can reuse by name."],
+ ["Sticky notes (windows)","OVER, PARTITION BY, RANK, LAG/LEAD","Ranking, running totals, comparing each row to its neighbors. The skill that separates junior from mid-level."],
+ ["Change the warehouse","INSERT, UPDATE, DELETE, transactions","⚠ UPDATE/DELETE without WHERE hits EVERY box. Transactions = do all these moves or none (BEGIN/COMMIT/ROLLBACK)."],
+ ["Design & speed","Schema design, normalization, indexes, EXPLAIN","Arrange shelves so no fact is stored twice (normalization). EXPLAIN = ask the clerk to narrate his route before walking it."]
+];
+const lv=document.getElementById("levels");
+LEVELS.forEach((l,i)=>{
+ const d=document.createElement("div");d.className="level";d.tabIndex=0;
+ d.innerHTML=`<div class="n">${i+1}</div><div class="body"><h3>${l[0]}</h3><code style="font-size:.8rem">${l[1]}</code><div class="detail">${l[2]}</div></div>`;
+ const t=()=>d.classList.toggle("open");
+ d.addEventListener("click",t);d.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();t();}});
+ lv.appendChild(d);
+});
+
+// ── playground ────────────────────────────────────────
+function renderTable(el,rows,cols){
+ if(!rows.length){el.innerHTML="<tr><td>(0 rows)</td></tr>";return;}
+ cols=cols||Object.keys(rows[0]);
+ el.innerHTML="<tr>"+cols.map(c=>`<th>${c}</th>`).join("")+"</tr>"+
+  rows.map(r=>"<tr>"+cols.map(c=>`<td>${r[c]===null?"<i>NULL</i>":r[c]}</td>`).join("")+"</tr>").join("");
+}
+const pgVals={price:[10,50,100,200,500],stock:[20,50,100,200],category:["Tech","Food","Furniture"]};
+const pgCol=document.getElementById("pgCol"),pgOp=document.getElementById("pgOp"),pgVal=document.getElementById("pgVal");
+function fillVals(){pgVal.innerHTML=pgVals[pgCol.value].map(v=>`<option>${v}</option>`).join("");
+ pgOp.disabled=false; if(pgCol.value==="category"){pgOp.value="=";pgOp.disabled=true;}}
+pgCol.addEventListener("change",fillVals);fillVals();
+function runPG(){
+ const c=pgCol.value,o=pgOp.value,vRaw=pgVal.value,v=isNaN(+vRaw)?vRaw:+vRaw,s=document.getElementById("pgSort").value;
+ let rows=PRODUCTS.filter(r=>o===">"?r[c]>v:o==="<"?r[c]<v:r[c]===v);
+ rows=[...rows].sort((a,b)=>a[s]>b[s]?1:-1);
+ document.getElementById("pgSql").textContent=`SELECT * FROM products WHERE ${c} ${o} ${typeof v==="string"?`'${v}'`:v} ORDER BY ${s};`;
+ renderTable(document.getElementById("pgTable"),rows);
+ document.getElementById("pgNote").textContent=`→ clerk returned ${rows.length} of ${PRODUCTS.length} boxes`;
+}
+document.getElementById("pgRun").addEventListener("click",runPG);runPG();
+
+// ── joins ─────────────────────────────────────────────
+const CUST=[{id:1,customer:"Avi"},{id:2,customer:"Dana"},{id:3,customer:"Noa"}];
+const ORD=[{id:2,order:"Laptop"},{id:2,order:"Monitor"},{id:4,order:"Chair"}];
+renderTable(document.getElementById("jT1"),CUST);
+renderTable(document.getElementById("jT2"),ORD);
+const JDESC={
+ inner:["Only lines that match on BOTH clipboards. Unmatched customers and orphan orders vanish.","INNER JOIN",1,0,0],
+ left:["ALL customers kept; missing order info filled with NULL (Avi and Noa bought nothing — still listed).","LEFT JOIN",1,1,0],
+ right:["ALL orders kept; order id 4 has no known customer → NULL customer.","RIGHT JOIN",1,0,1],
+ full:["Everything from both clipboards; NULLs wherever there was no partner.","FULL OUTER JOIN",1,1,1]};
+function runJoin(t){
+ const[desc,kw,,keepL,keepR]=JDESC[t];
+ document.getElementById("joinDesc").textContent="🤝 "+desc;
+ document.getElementById("joinSql").innerHTML=`<span class="kw">SELECT</span> c.customer, o.order\n<span class="kw">FROM</span> customers c\n<span class="kw">${kw}</span> orders o <span class="kw">ON</span> c.id = o.id;`;
+ const res=[];
+ CUST.forEach(c=>{const m=ORD.filter(o=>o.id===c.id);
+  if(m.length)m.forEach(o=>res.push({customer:c.customer,order:o.order}));
+  else if(keepL)res.push({customer:c.customer,order:null});});
+ if(keepR)ORD.filter(o=>!CUST.some(c=>c.id===o.id)).forEach(o=>res.push({customer:null,order:o.order}));
+ renderTable(document.getElementById("jRes"),res,["customer","order"]);
+ document.getElementById("vL").setAttribute("opacity",(t==="left"||t==="full")?"0.6":"0.25");
+ document.getElementById("vR").setAttribute("opacity",(t==="right"||t==="full")?"0.6":"0.25");
+ document.querySelectorAll("#joinTabs .tab").forEach(b=>b.classList.toggle("active",b.dataset.j===t));
+}
+document.querySelectorAll("#joinTabs .tab").forEach(b=>b.addEventListener("click",()=>runJoin(b.dataset.j)));
+runJoin("inner");
+
+// ── group by ──────────────────────────────────────────
+function runAgg(){
+ const fn=document.getElementById("aggFn").value;
+ const bins={};PRODUCTS.forEach(p=>{(bins[p.category]=bins[p.category]||[]).push(p);});
+ const rows=Object.entries(bins).map(([cat,ps])=>{
+  let v;
+  if(fn==="COUNT(*)")v=ps.length;
+  else if(fn==="AVG(price)")v=Math.round(ps.reduce((s,p)=>s+p.price,0)/ps.length*10)/10;
+  else if(fn==="SUM(stock)")v=ps.reduce((s,p)=>s+p.stock,0);
+  else v=Math.max(...ps.map(p=>p.price));
+  return{category:cat,[fn]:v};});
+ renderTable(document.getElementById("aggTable"),rows);
+ // bar chart
+ const cv=document.getElementById("aggChart"),ctx=cv.getContext("2d");
+ ctx.clearRect(0,0,cv.width,cv.height);
+ const max=Math.max(...rows.map(r=>r[fn]));
+ const bw=140,gap=80,x0=90,base=200;
+ ctx.font="15px Segoe UI";ctx.textAlign="center";
+ rows.forEach((r,i)=>{
+  const h=Math.max(6,r[fn]/max*150),x=x0+i*(bw+gap);
+  ctx.fillStyle=["#c97b1e","#1f7a6d","#1d2b3a"][i%3];
+  ctx.fillRect(x,base-h,bw,h);
+  ctx.fillStyle="#1d2b3a";
+  ctx.fillText(r.category,x+bw/2,base+22);
+  ctx.fillText(r[fn],x+bw/2,base-h-8);
+ });
+}
+document.getElementById("aggRun").addEventListener("click",runAgg);
+document.getElementById("aggFn").addEventListener("change",runAgg);
+runAgg();
+
+// ── index chart ───────────────────────────────────────
+function drawIdx(){
+ const exp=+document.getElementById("idxSlider").value,n=Math.round(Math.pow(10,exp));
+ document.getElementById("idxN").textContent=n.toLocaleString();
+ const cv=document.getElementById("idxChart"),ctx=cv.getContext("2d");
+ ctx.clearRect(0,0,cv.width,cv.height);
+ const scan=n,idx=Math.max(1,Math.log2(n));
+ const maxBar=560;
+ ctx.font="15px Segoe UI";ctx.textAlign="left";
+ // scan bar (log scale for display)
+ const sLen=maxBar, iLen=Math.max(8,maxBar*(Math.log10(idx+1)/Math.log10(scan+1)));
+ ctx.fillStyle="#b33a3a";ctx.fillRect(170,60,sLen,44);
+ ctx.fillStyle="#1f7a6d";ctx.fillRect(170,150,iLen,44);
+ ctx.fillStyle="#1d2b3a";
+ ctx.fillText("Full scan 🚶",30,88);
+ ctx.fillText("Index 🗃️",30,178);
+ ctx.fillText(scan.toLocaleString()+" steps (walk every aisle)",175,50);
+ ctx.fillText("~"+Math.round(idx)+" steps (card catalog flips)",175,140);
+ ctx.fillText("(bars on log scale — real gap is even bigger)",170,240);
+ document.getElementById("idxNote").textContent=
+  `→ at ${n.toLocaleString()} rows, index is ~${Math.round(scan/idx).toLocaleString()}× fewer steps`;
+}
+document.getElementById("idxSlider").addEventListener("input",drawIdx);
+drawIdx();
+
+// ── quiz ──────────────────────────────────────────────
+const QUIZ=[
+ ["Clerk executes clauses in which real order?",["SELECT → FROM → WHERE","FROM → WHERE → SELECT","WHERE → SELECT → FROM"],1],
+ ["LEFT JOIN keeps…",["only matching rows","all rows from left table, NULLs for missing right","all rows from both tables"],1],
+ ["WHERE vs HAVING?",["identical","WHERE filters rows (boxes), HAVING filters groups (bins)","HAVING is faster"],1],
+ ["NULL = NULL evaluates to…",["TRUE","FALSE / unknown — use IS NULL","error"],1],
+ ["Downside of an index?",["slower reads","slower writes + extra storage (every new box needs a card)","tables lock forever"],1]
+];
+const qEl=document.getElementById("quiz");
+QUIZ.forEach((q,qi)=>{
+ const d=document.createElement("div");d.className="quiz-q";
+ d.innerHTML=`<b>${qi+1}. ${q[0]}</b><div class="opts">`+
+  q[1].map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}"> ${o}</label>`).join("")+"</div>";
+ qEl.appendChild(d);
+});
+document.getElementById("quizCheck").addEventListener("click",()=>{
+ let score=0;
+ QUIZ.forEach((q,qi)=>{
+  document.querySelectorAll(`[name=q${qi}]`).forEach(inp=>{
+   const lab=inp.parentElement;lab.classList.remove("right","wrong");
+   if(+inp.value===q[2])lab.classList.add("right");
+   else if(inp.checked)lab.classList.add("wrong");
+  });
+  const sel=document.querySelector(`[name=q${qi}]:checked`);
+  if(sel&&+sel.value===q[2])score++;
+ });
+ document.getElementById("quizScore").textContent=
+  score===5?"5/5 — you ARE the clerk. 🏆":`${score}/5 — reread the metaphors above.`;
+});
+</script>
+
+</body>
+</html>

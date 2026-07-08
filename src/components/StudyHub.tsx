@@ -46,6 +46,12 @@ const LinearTransformationInteractive = lazy(() => import('./graphs/LinearTransf
 const SkewnessKurtosisInteractive = lazy(() => import('./graphs/SkewnessKurtosisInteractive'))
 // ── Statistics B — 4 new dedicated simulators (gap topics with no exact prior sim) ──
 const ChebyshevInteractive = lazy(() => import('./graphs/ChebyshevInteractive'))
+// ── SQL course — 5 dedicated simulators (warehouse-clerk metaphor) ──
+const SQLQueryBuilderInteractive = lazy(() => import('./graphs/SQLQueryBuilderInteractive'))
+const SQLJoinInteractive = lazy(() => import('./graphs/SQLJoinInteractive'))
+const SQLGroupByInteractive = lazy(() => import('./graphs/SQLGroupByInteractive'))
+const SQLIndexRaceInteractive = lazy(() => import('./graphs/SQLIndexRaceInteractive'))
+const SQLExecutionOrderInteractive = lazy(() => import('./graphs/SQLExecutionOrderInteractive'))
 const McNemarInteractive = lazy(() => import('./graphs/McNemarInteractive'))
 const PairedSamplesInteractive = lazy(() => import('./graphs/PairedSamplesInteractive'))
 const WilcoxonInteractive = lazy(() => import('./graphs/WilcoxonInteractive'))
@@ -72,6 +78,35 @@ type GraphEntry = {
   afterSlide?: number
 }
 const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
+  // ── SQL course — warehouse-clerk simulators ──
+  'sql-select': [
+    { Component: SQLQueryBuilderInteractive,   title: 'בונה השאילתות — פתק בקשה חי' },
+    { Component: SQLExecutionOrderInteractive, title: 'סדר הביצוע האמיתי' },
+  ],
+  'sql-where': [
+    { Component: SQLQueryBuilderInteractive,   title: 'סינון עם WHERE — נסו בעצמכם' },
+  ],
+  'sql-order-limit': [
+    { Component: SQLQueryBuilderInteractive,   title: 'ORDER BY על טבלה חיה' },
+  ],
+  'sql-join': [
+    { Component: SQLJoinInteractive,           title: 'JOIN — שני פקידים משווים לוחות' },
+  ],
+  'sql-aggregate': [
+    { Component: SQLGroupByInteractive,        title: 'פונקציות סיכום על תאים' },
+  ],
+  'sql-group-by': [
+    { Component: SQLGroupByInteractive,        title: 'GROUP BY + HAVING — קופסאות לתאים' },
+  ],
+  'sql-subquery-cte': [
+    { Component: SQLExecutionOrderInteractive, title: 'המשפך — איפה תת-שאילתה נכנסת' },
+  ],
+  'sql-index': [
+    { Component: SQLIndexRaceInteractive,      title: 'מרוץ האינדקס — קטלוג מול סריקה' },
+  ],
+  'sql-window': [
+    { Component: SQLGroupByInteractive,        title: 'להשוואה: GROUP BY שמכווץ שורות' },
+  ],
   // ── Statistics B (סטטיסטיקה ב׳) — native topics; reuse existing sims + 4 new ones ──
   'b-intro': [
     { Component: CLTInteractive,           title: 'טעימה: משפט הגבול המרכזי' },
@@ -410,6 +445,7 @@ import quizBankData from '../data/quiz-bank.json'
 import LessonScreen from './LessonScreen'
 import { LESSON_CONTENT } from '../data/lesson-content'
 import { LESSON_CONTENT_STAT_B } from '../data/lesson-content-stat-b'
+import { LESSON_CONTENT_SQL } from '../data/lesson-content-sql'
 import { HEBREW_LABELS } from '../data/topicLabels'
 import { TOPIC_ORDER } from '../lib/generatePlan'
 import { MathText } from '../lib/mathRender'
@@ -449,7 +485,7 @@ type InternalView = 'home' | 'learning' | 'courses' | 'topics' | 'lesson' | 'qui
 // the rest show a "Coming soon" splash. The folder labels live here as the
 // single source of truth — UI + future analytics can reference COURSES[].
 interface CourseDef {
-  id: 'stat-a' | 'stat-b' | 'methods' | 'anova'
+  id: 'stat-a' | 'stat-b' | 'methods' | 'anova' | 'sql'
   label: string
   icon: string                   // emoji shown on the card
   desc: string
@@ -457,12 +493,16 @@ interface CourseDef {
   bg: string                     // tile gradient
   /** If set, course opens an external page in a fullscreen iframe. */
   embedUrl?: string
+  /** If set, course is a self-hosted static page opened in a new tab
+   *  (page owns its layout/i18n, so the RTL app shell stays out of its way). */
+  pageUrl?: string
 }
 const COURSES: CourseDef[] = [
   { id: 'stat-a',  label: "סטטיסטיקה א'",        icon: '📊', desc: 'מבוא, מדדים, התפלגויות, רגרסיה, הסתברות',  active: true,  bg: 'linear-gradient(135deg,#F5C842,#D4AF37)' },
   { id: 'stat-b',  label: "סטטיסטיקה ב'",        icon: '📈', desc: 'דגימה, אמידה, רווחי סמך, בדיקת השערות, א-פרמטריים, רגרסיה', active: true,  bg: 'linear-gradient(135deg,#7CB7F8,#4A90E2)' },
   { id: 'methods', label: 'שיטות מחקר',          icon: '🔬', desc: 'תכנון מחקר, מדידה, מהימנות ותקפות',         active: false, bg: 'linear-gradient(135deg,#A78BFA,#7C3AED)' },
   { id: 'anova',   label: 'ניתוח שונות / רב-משתנית', icon: '📐', desc: 'ANOVA, MANOVA, רגרסיה מרובה, מודלים מורכבים', active: false, bg: 'linear-gradient(135deg,#67C29E,#229E69)' },
+  { id: 'sql',     label: 'SQL — שפת מסדי נתונים',  icon: '🗄️', desc: 'שאילתות, JOIN, אינדקסים ופונקציות חלון — במטאפורת מחסן, עם סימולטורים וחידונים', active: true, bg: 'linear-gradient(135deg,#F0B429,#C97C18)' },
 ]
 
 // Hebrew labels for each topic now live in ../data/topicLabels (shared with
@@ -502,8 +542,21 @@ const QUIZ_TOPICS = (() => {
 // QUIZ_TOPICS_B is built straight from the Stat-B lesson list (labels from the
 // lesson hebrewName), pulling questionCount/building from quiz-bank when present.
 const STAT_B_IDS = new Set(LESSON_CONTENT_STAT_B.map(t => t.id))
-const QUIZ_TOPICS_A = QUIZ_TOPICS.filter(t => !STAT_B_IDS.has(t.id))
+const SQL_IDS = new Set(LESSON_CONTENT_SQL.map(t => t.id))
+const QUIZ_TOPICS_A = QUIZ_TOPICS.filter(t => !STAT_B_IDS.has(t.id) && !SQL_IDS.has(t.id))
 const QUIZ_TOPICS_B = LESSON_CONTENT_STAT_B.map(l => {
+  const q = (quizBankData.topics as Record<string, any>)[l.id]
+  return {
+    id: l.id,
+    label: HEBREW_LABELS[l.id] || l.hebrewName,
+    building: q?.building || '',
+    concept: l.hebrewName,
+    questionCount: (q?.questions || []).length,
+  }
+})
+
+// SQL course topic set — built from the SQL lesson list, same pattern as Stat-B.
+const QUIZ_TOPICS_SQL = LESSON_CONTENT_SQL.map(l => {
   const q = (quizBankData.topics as Record<string, any>)[l.id]
   return {
     id: l.id,
@@ -537,6 +590,13 @@ const TOPIC_GROUPS_B: TopicGroup[] = [
   { id: 'b-advanced',    labelHe: 'רווחי סמך והשוואות מתקדמות', emoji: '⚖️', topicIds: ['b-diff-means', 'b-paired-samples', 'b-proportion', 'b-variance-test'] },
   { id: 'b-nonparam',    labelHe: 'מבחנים א-פרמטריים',          emoji: '📋', topicIds: ['b-binomial-chisquare', 'b-independence-mcnemar', 'b-wilcoxon-fisher'] },
   { id: 'b-regression',  labelHe: 'רגרסיה',                    emoji: '📈', topicIds: ['b-simple-regression', 'b-multiple-regression'] },
+]
+
+// SQL course taxonomy — 3 units: request-slip basics, advanced queries, design & speed.
+const TOPIC_GROUPS_SQL: TopicGroup[] = [
+  { id: 'sql-basics',   labelHe: 'פתקי בקשה — יסודות',       emoji: '✏️', topicIds: ['sql-select', 'sql-where', 'sql-order-limit', 'sql-null'] },
+  { id: 'sql-advanced', labelHe: 'שאילתות מתקדמות',           emoji: '🔍', topicIds: ['sql-join', 'sql-aggregate', 'sql-group-by', 'sql-subquery-cte'] },
+  { id: 'sql-design',   labelHe: 'עיצוב המחסן וביצועים',      emoji: '🗂️', topicIds: ['sql-dml', 'sql-create-constraints', 'sql-index', 'sql-window'] },
 ]
 
 // ── Design tokens — driven by CSS custom properties for dark/light mode ────────
@@ -786,7 +846,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
     hard: questions.filter(q => q.difficulty === 'hard').length,
   }
   const hebrewName = HEBREW_LABELS[topicId] || topicData?.concept || topicId
-  const hasLesson = LESSON_CONTENT.some(t => t.id === topicId) || LESSON_CONTENT_STAT_B.some(t => t.id === topicId)
+  const hasLesson = LESSON_CONTENT.some(t => t.id === topicId) || LESSON_CONTENT_STAT_B.some(t => t.id === topicId) || LESSON_CONTENT_SQL.some(t => t.id === topicId)
   const [selected, setSelected] = useState<DifficultyFilter>('all')
 
   return (
@@ -993,7 +1053,7 @@ interface TopicSelectorProps {
   /** Reports whether the embedded mindmap ("מפה") view is active, so the shell can hide its title bar. */
   onMapModeChange?: (on: boolean) => void
   /** Which course's topic grid to show. Defaults to Stat-A. */
-  course?: 'stat-a' | 'stat-b'
+  course?: 'stat-a' | 'stat-b' | 'sql'
 }
 
 /**
@@ -1001,7 +1061,7 @@ interface TopicSelectorProps {
  * the sidebar. Active course (Stat-A) routes into the topic grid. Inactive
  * courses (Stat-B / Methods / ANOVA) open a "Coming soon" splash overlay.
  */
-function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 'stat-b') => void }) {
+function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 'stat-b' | 'sql') => void }) {
   const [comingSoon, setComingSoon] = useState<CourseDef | null>(null)
   const [embedded, setEmbedded] = useState<CourseDef | null>(null)
   // ESC dismisses whichever modal is open. Click-outside is already wired via
@@ -1020,12 +1080,17 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
   }, [comingSoon, embedded])
   const pickCourse = (c: CourseDef) => {
     if(!c.active) { setComingSoon(c); return }
+    if(c.pageUrl) {
+      // Self-hosted static page (e.g. SQL academy) — same origin, opens in a
+      // new tab so the LTR/English page isn't squeezed into the RTL app shell.
+      window.open(c.pageUrl, '_blank', 'noopener,noreferrer'); return
+    }
     if(c.embedUrl) {
       // Legacy path for any future partner course that can't iframe. Stat-A and
       // Stat-B are both NATIVE now (no embedUrl) → they route into the topic grid.
       setEmbedded(c); return
     }
-    onSelectActive(c.id as 'stat-a' | 'stat-b')
+    onSelectActive(c.id as 'stat-a' | 'stat-b' | 'sql')
   }
   // Full-screen course player. Replaces the old "open external" modal: now
   // the embedded course renders inside a tab strip so we can ship our own
@@ -1140,8 +1205,8 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
 function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggleDark, onMapModeChange, course = 'stat-a' }: TopicSelectorProps) {
   // Course-scoped topic list + taxonomy. The two courses are kept disjoint so
   // neither grid ever leaks the other's topics (see QUIZ_TOPICS_A/_B above).
-  const baseTopics = course === 'stat-b' ? QUIZ_TOPICS_B : QUIZ_TOPICS_A
-  const activeGroups = course === 'stat-b' ? TOPIC_GROUPS_B : TOPIC_GROUPS
+  const baseTopics = course === 'stat-b' ? QUIZ_TOPICS_B : course === 'sql' ? QUIZ_TOPICS_SQL : QUIZ_TOPICS_A
+  const activeGroups = course === 'stat-b' ? TOPIC_GROUPS_B : course === 'sql' ? TOPIC_GROUPS_SQL : TOPIC_GROUPS
   // Re-order topics according to the user's personal plan when one exists.
   // Topics not in the plan trail at the end in their natural order.
   const personalPlan = useLearningStore(s => s.personalPlan)
@@ -1151,8 +1216,8 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
   const _adminMode = useLearningStore(s => s.adminMode)
   const mapUnlocked = isFeatureUnlocked('mindmap-view', _unlockedFeatures, _adminMode)
   const sortedTopics = (() => {
-    // Personal-plan reordering is a Stat-A construct; Stat-B keeps curriculum order.
-    if (!personalPlan || course === 'stat-b') return baseTopics
+    // Personal-plan reordering is a Stat-A construct; Stat-B and SQL keep curriculum order.
+    if (!personalPlan || course !== 'stat-a') return baseTopics
     const order = new Map(personalPlan.sequence.map((s, i) => [s.topicId, i]))
     return [...baseTopics].sort((a, b) => {
       const ai = order.has(a.id) ? (order.get(a.id) as number) : 9999
@@ -1399,7 +1464,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
         // The real interactive mindmap (same map as מפת הלמידה שלי). Topic nodes
         // carry 📖/📝 chips that open theory/practice; sub-topics can be added.
         <iframe
-          src={`${import.meta.env.BASE_URL}mindmap.html?v=mm17-20260630&scene=topics&admin=${_adminMode ? '1' : '0'}`}
+          src={`${import.meta.env.BASE_URL}mindmap.html?v=mm18-20260707&scene=topics&course=${course}&admin=${_adminMode ? '1' : '0'}`}
           title="מפת הנושאים"
           style={{ width: '100%', height: 'calc(100dvh - 104px)', border: 'none', borderRadius: 14, boxShadow: CARD_SHADOW, display: 'block' }}
           allow="clipboard-read; clipboard-write"
@@ -3450,7 +3515,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         <div data-tour="canvas-frame" style={{ position: 'fixed', inset: 0, zIndex: 400, background: '#0d1628' }}>
           <iframe
             key={`qs-wb-${q?.id || currentQ}`}
-            src={`${import.meta.env.BASE_URL}mindmap.html?v=mm17-20260630&mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
+            src={`${import.meta.env.BASE_URL}mindmap.html?v=mm18-20260707&mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
             title="קנבס לשאלה"
             style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
             allow="clipboard-read; clipboard-write"
@@ -3524,7 +3589,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             {tab === 'mindmap' && (
               <iframe
                 key="quiz-mm"
-                src={`${import.meta.env.BASE_URL}mindmap.html?v=mm17-20260630&userId=${userId || 'default'}${selectedTopic ? `&topic=${encodeURIComponent(selectedTopic)}` : ''}`}
+                src={`${import.meta.env.BASE_URL}mindmap.html?v=mm18-20260707&userId=${userId || 'default'}${selectedTopic ? `&topic=${encodeURIComponent(selectedTopic)}` : ''}`}
                 title="מפת חשיבה — תוך כדי תרגול"
                 style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
                 allow="clipboard-read; clipboard-write"
@@ -3582,7 +3647,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   // mindmap.html loads the matching wb-scene-q-<id> from
                   // localStorage. wbScene query param is read inside mindmap.html.
                   key={`quiz-wb-${q?.id || currentQ}`}
-                  src={`${import.meta.env.BASE_URL}mindmap.html?v=mm17-20260630&mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
+                  src={`${import.meta.env.BASE_URL}mindmap.html?v=mm18-20260707&mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
                   title={`קנבס לשאלה ${currentQ + 1}`}
                   style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
                   allow="clipboard-read; clipboard-write"
@@ -4308,7 +4373,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   const [internalView, setInternalView] = useState<InternalView>('home')
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>()
   // Which course the learner entered from the gate — drives the topic grid + title.
-  const [activeCourse, setActiveCourse] = useState<'stat-a' | 'stat-b'>('stat-a')
+  const [activeCourse, setActiveCourse] = useState<'stat-a' | 'stat-b' | 'sql'>('stat-a')
   const [quizDifficulty, setQuizDifficulty] = useState<DifficultyFilter>('all')
   const [userProgress, setUserProgress] = useState<UserProgress>(() =>
     loadProgress(initializeUser().userId)
@@ -4389,7 +4454,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   const title =
     internalView === 'home' ? 'דף הבית' :
     internalView === 'courses' ? 'הקורסים שלי' :
-    internalView === 'topics' ? (activeCourse === 'stat-b' ? "סטטיסטיקה ב' — בחר נושא" : "סטטיסטיקה א' — בחר נושא") :
+    internalView === 'topics' ? (activeCourse === 'stat-b' ? "סטטיסטיקה ב' — בחר נושא" : activeCourse === 'sql' ? "SQL — בחר נושא" : "סטטיסטיקה א' — בחר נושא") :
     'Study Zone'
 
   const handleSelectTopic = (topicId: string, mode: 'lesson' | 'quiz' = 'lesson') => {
