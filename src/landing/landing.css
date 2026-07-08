@@ -200,15 +200,14 @@
 }
 .ls-gold-text { color: var(--ls-gold); }
 .ls-gold-gradient {
-  /* Warm yellow→amber, less orange than the prior deep-amber. Stops from
-   * user 2026-07-08: #FFC81E (yellow) → #FF9E20 (amber). */
-  background: linear-gradient(120deg, #FFC81E 0%, #FF9E20 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  /* SOLID vivid orange — no gradient. The prior yellow→amber gradient had
+   * near-white luminance and vanished against the pale-blue hero (invisible
+   * in grayscale). #F26100 is a clean pumpkin orange (not muddy/brown) with
+   * luminance ~130 vs the ~245 background → strong contrast in colour AND
+   * grayscale. User 2026-07-08. */
+  color: #F26100;
+  -webkit-text-fill-color: #F26100;
   font-weight: 800;
-  /* Warm shadow lifts the gold off the pale background for contrast. */
-  filter: drop-shadow(0 1px 1.5px rgba(180,110,10,0.4));
 }
 
 /* === Scroll progress bar === */
