@@ -8,7 +8,7 @@
  * should be a single styled equation, not 5 fragments.
  */
 import React, { useEffect, useRef } from 'react'
-import { bidiSegments } from './bidiSegments'
+import { bidiSegments, parseLeadingEnumMarker } from './bidiSegments'
 
 declare global {
   interface Window {
@@ -119,52 +119,73 @@ const STRONG_MATH_RE = /[0-9A-Za-z=<>+\-*/^_·×÷√∑Σπμσ≤≥≠∪∩�
  *  - un-delimited lines → conservative fallback: maximal non-Hebrew runs that
  *    carry digits/Latin/operators are wrapped LTR so `≤`/`≥`/`<`/`>`/parens
  *    never mirror and runs never jump sides; Hebrew stays plain RTL. */
+// Render a leading enumeration marker ("1)", "3.") as a proper Hebrew list
+// marker: number on the RIGHT, a NON-mirrored punctuation glyph on its LEFT.
+// The line div is dir="rtl", so this span sits at the start (right) edge; its
+// two LTR-isolated children flow right-to-left → num right, punct left, and
+// each stays a literal glyph (the bare ")" no longer mirrors to "(").
+function EnumMarker({ num, punct }: { num: string; punct: string }) {
+  return (
+    <span dir="rtl" style={{ unicodeBidi: 'isolate', fontWeight: 700, marginInlineEnd: 8 }}>
+      <span dir="ltr">{num}</span>
+      <span dir="ltr">{punct}</span>
+    </span>
+  )
+}
+
+function renderLineBody(line: string): React.ReactNode {
+  // Explicit $…$ math — split keeping delimiters (same contract as MathText).
+  if (line.includes('$')) {
+    const parts = line.split(/(\$[^$]+\$)/g)
+    return parts.map((part, i) =>
+      part.length >= 2 && part.startsWith('$') && part.endsWith('$')
+        ? <KatexInline key={i} latex={part.slice(1, -1)} style={{ verticalAlign: 'middle' }} />
+        : <React.Fragment key={i}>{part}</React.Fragment>
+    )
+  }
+  // No $ but Hebrew + math mixed — bidi-safe segmentation. Each LTR run is an
+  // INLINE (not inline-block) isolated span so operators never mirror; spaces
+  // around runs stay plain text so word spacing is natural.
+  if (HEBREW_RE.test(line) && STRONG_MATH_RE.test(line)) {
+    return bidiSegments(line).map((seg, i) => {
+      if (!(seg.ltr && STRONG_MATH_RE.test(seg.text))) {
+        return <React.Fragment key={i}>{seg.text}</React.Fragment>
+      }
+      const mm = seg.text.match(/^(\s*)([\s\S]*?)(\s*)$/)
+      const lead = mm ? mm[1] : ''
+      const core = mm ? mm[2] : seg.text
+      const trail = mm ? mm[3] : ''
+      return (
+        <React.Fragment key={i}>
+          {lead}
+          <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>{core}</span>
+          {trail}
+        </React.Fragment>
+      )
+    })
+  }
+  // Plain line (pure Hebrew or pure math) — natural text.
+  return line
+}
+
+/** Render ONE line in natural RTL flow with any math kept LTR + bidi-isolated.
+ *  A leading enumeration marker ("1)", "3.") is peeled off and rendered as a
+ *  Hebrew list marker (punct left of number, non-mirrored). */
 function MathLine({ line }: { line: string }) {
   if (!line) return <div dir="rtl">{' '}</div>
 
-  // 1) Explicit $…$ math — split keeping delimiters (same contract as MathText).
-  if (line.includes('$')) {
-    const parts = line.split(/(\$[^$]+\$)/g)
-    return (
-      <div dir="rtl" style={{ unicodeBidi: 'isolate', textAlign: 'right' }}>
-        {parts.map((part, i) =>
-          part.length >= 2 && part.startsWith('$') && part.endsWith('$')
-            ? <KatexInline key={i} latex={part.slice(1, -1)} style={{ verticalAlign: 'middle' }} />
-            : <React.Fragment key={i}>{part}</React.Fragment>
-        )}
-      </div>
-    )
-  }
+  const marker = parseLeadingEnumMarker(line)
+  const body = marker ? marker.rest : line
+  // A pure-Hebrew / pure-math line with no marker can use plaintext direction;
+  // otherwise the isolate wrapper keeps mixed content from flipping.
+  const usePlaintext = !marker && !(HEBREW_RE.test(line) && STRONG_MATH_RE.test(line)) && !line.includes('$')
 
-  // 2) No $ but Hebrew + math mixed — bidi-safe fallback. Wrap each math run in
-  //    an INLINE (not inline-block, which swallows adjacent spaces) LTR-isolated
-  //    span so operators never mirror; keep the spaces AROUND each run as plain
-  //    text nodes so word spacing stays natural ("b הוא", "ערך X").
-  if (HEBREW_RE.test(line) && STRONG_MATH_RE.test(line)) {
-    return (
-      <div dir="rtl" style={{ unicodeBidi: 'isolate', textAlign: 'right' }}>
-        {bidiSegments(line).map((seg, i) => {
-          if (!(seg.ltr && STRONG_MATH_RE.test(seg.text))) {
-            return <React.Fragment key={i}>{seg.text}</React.Fragment>
-          }
-          const mm = seg.text.match(/^(\s*)([\s\S]*?)(\s*)$/)
-          const lead = mm ? mm[1] : ''
-          const core = mm ? mm[2] : seg.text
-          const trail = mm ? mm[3] : ''
-          return (
-            <React.Fragment key={i}>
-              {lead}
-              <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>{core}</span>
-              {trail}
-            </React.Fragment>
-          )
-        })}
-      </div>
-    )
-  }
-
-  // 3) Plain line (pure Hebrew or pure math) — natural direction.
-  return <div dir="rtl" style={{ unicodeBidi: 'plaintext', textAlign: 'right' }}>{line}</div>
+  return (
+    <div dir="rtl" style={{ unicodeBidi: usePlaintext ? 'plaintext' : 'isolate', textAlign: 'right' }}>
+      {marker && <EnumMarker num={marker.num} punct={marker.punct} />}
+      {renderLineBody(body)}
+    </div>
+  )
 }
 
 /** React component: render a multi-line block. Every line renders in RTL flow;

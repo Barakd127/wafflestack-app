@@ -25,6 +25,18 @@
 
 export interface BidiSeg { ltr: boolean; text: string }
 
+/** A leading enumeration marker on a bullet line, e.g. "1) …" or "3. …".
+ *  Parsed out so the renderer can display it as a proper Hebrew list marker:
+ *  number on the RIGHT, a NON-mirrored punctuation glyph on its LEFT. Left to
+ *  the plain bidi algorithm the ")" mirrors to "(" and lands on the wrong side
+ *  (user report 2026-07-08). */
+export interface LeadingMarker { num: string; punct: string; rest: string }
+export function parseLeadingEnumMarker(line: string): LeadingMarker | null {
+  const m = /^(\d{1,3})([).])\s+([\s\S]+)$/.exec(line)
+  if (!m) return null
+  return { num: m[1], punct: m[2], rest: m[3] }
+}
+
 const HEBREW_CHAR_RE = /[֐-׿]/
 // Neutral = whitespace + bidi-neutral punctuation. ASCII '-' stays STRONG-math
 // (keeps "ל-100" → LTR island "-100" working). '%' stays with digits.

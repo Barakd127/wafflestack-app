@@ -15,7 +15,7 @@ const src = readFileSync(path.join(root, 'src/lib/bidiSegments.ts'), 'utf8')
 const js = transformSync(src, { loader: 'ts' }).code
 const tmp = path.join(root, 'scripts/.bidiSegments.test-build.mjs')
 writeFileSync(tmp, js)
-const { bidiSegments } = await import(pathToFileURL(tmp).href)
+const { bidiSegments, parseLeadingEnumMarker } = await import(pathToFileURL(tmp).href)
 rmSync(tmp)
 
 const fmt = segs => segs.map(s => `${s.ltr ? 'L' : 'R'}[${s.text}]`).join(' ')
@@ -43,19 +43,33 @@ check('trailing dot after Latin word stays RTL', 'וזו בדיוק שאילתת
   return p
 })
 
-// 2. Enumeration marker renders as authored ("1)" not "(1").
-check('enumeration marker "1)" atomic LTR', 'מאפשרת: 1) זמן מהיר', segs => {
-  const p = []
-  if (!ltrTexts(segs).some(t => t.trim() === '1)')) p.push('"1)" not an atomic LTR token')
-  if (ltrTexts(segs).some(t => t.includes(':'))) p.push('colon torn off the Hebrew word')
-  return p
-})
+// 2. Leading enumeration marker is peeled off for dedicated rendering
+//    (number right, non-mirrored punct left) — user 2026-07-08.
+function checkMarker(name, line, expect) {
+  const m = parseLeadingEnumMarker(line)
+  const problems = []
+  if (!expect) { if (m) problems.push('should NOT match but did: ' + JSON.stringify(m)) }
+  else {
+    if (!m) problems.push('expected a marker, got null')
+    else {
+      if (m.num !== expect.num) problems.push(`num ${m.num} != ${expect.num}`)
+      if (m.punct !== expect.punct) problems.push(`punct ${m.punct} != ${expect.punct}`)
+      if (!m.rest.startsWith(expect.restStarts)) problems.push(`rest "${m.rest.slice(0, 12)}…" != "${expect.restStarts}…"`)
+    }
+  }
+  if (problems.length) { failures++; console.error(`✗ ${name}\n    ${problems.join('\n    ')}`) }
+  else console.log(`✓ ${name}`)
+}
+checkMarker('leading "1)" parsed', '1) זיהוי מהיר של תבניות.', { num: '1', punct: ')', restStarts: 'זיהוי' })
+checkMarker('leading "3." parsed', '3. הבנת צורת ההתפלגות.', { num: '3', punct: '.', restStarts: 'הבנת' })
+checkMarker('mid-line marker NOT a leading marker', 'מאפשרת: 1) זמן מהיר', false)
+checkMarker('decimal NOT a marker', '0.6 מההסתברות', false)
 
-// 3. Line-start enumeration (screenshot 3: "1) זמן: אומדן...").
-check('line-start "2)" enumeration', '2) עלות: דגימה זולה משחלקת אוכלוסייה.', segs => {
+// 3. Once the marker is peeled, the REST segments cleanly (no stray LTR island
+//    for the marker, punctuation resolves normally).
+check('rest after marker segments cleanly', 'זיהוי ערכי קיצון.', segs => {
   const p = []
-  if (!segs[0].ltr || segs[0].text.trim() !== '2)') p.push('leading marker not LTR-isolated')
-  if (!rtlText(segs).endsWith('.')) p.push('final dot not RTL')
+  if (segs.some(s => s.ltr)) p.push('unexpected LTR island in pure-Hebrew rest')
   return p
 })
 
