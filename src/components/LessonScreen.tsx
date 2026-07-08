@@ -502,14 +502,25 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             if (last < s.length) out.push(s.slice(last))
             return out
           }
+          // Break a sentence before any INLINE enumeration marker ("… 1) foo")
+          // so each numbered item becomes its own bullet instead of trailing on
+          // the intro sentence ("מאפשרת: 1) …"). A marker at position 0 is left
+          // alone (it's already the head of its own bullet). User 2026-07-08.
+          const splitEnumItems = (s: string): string[] =>
+            s.split(/\s+(?=\d{1,3}[).]\s)/).map(x => x.trim()).filter(Boolean)
           const parts = raw.length < 80
             ? [raw]
-            : splitSentences(raw).reduce((acc: string[], s) => {
-                const t = s.trim(); if (!t) return acc
-                if (acc.length && t.length < 12) acc[acc.length - 1] += ' ' + t
-                else acc.push(t)
-                return acc
-              }, [])
+            : splitSentences(raw)
+                .flatMap(splitEnumItems)
+                .reduce((acc: string[], s) => {
+                  const t = s.trim(); if (!t) return acc
+                  // Don't merge a short enumeration item ("3) כן.") into the
+                  // previous bullet — it must keep its own marker + row.
+                  const isEnum = /^\d{1,3}[).]\s/.test(t)
+                  if (acc.length && t.length < 12 && !isEnum) acc[acc.length - 1] += ' ' + t
+                  else acc.push(t)
+                  return acc
+                }, [])
           return (
             <div style={{
               display: 'flex', flexDirection: 'column', gap: 14,
