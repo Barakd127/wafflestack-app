@@ -296,7 +296,7 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
               letterSpacing: '-0.02em',
             }}
           >
-            {xp.toLocaleString()}
+            {xp.toLocaleString('he-IL')}
           </span>
           <span
             style={{
@@ -383,7 +383,7 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
             color: nextMilestone ? '#3351CA' : '#1F7A6E',
             fontVariantNumeric: 'tabular-nums',
           }}>
-            {nextMilestone ? `${nextMilestone.toLocaleString()} XP` : '🏆 All reached!'}
+            {nextMilestone ? `${nextMilestone.toLocaleString('he-IL')} XP` : '🏆 All reached!'}
           </span>
         </div>
         <div style={{
@@ -412,7 +412,7 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
             textAlign: 'right',
             fontVariantNumeric: 'tabular-nums',
           }}>
-            {xpToGo.toLocaleString()} XP to go
+            {xpToGo.toLocaleString('he-IL')} XP to go
           </div>
         )}
       </div>
@@ -479,7 +479,7 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
             padding: '12px 20px', borderBottom: '1px solid rgba(31,62,108,0.1)',
             background: `linear-gradient(90deg, ${weakSpots[0].color}1a 0%, rgba(255,255,255,0.0) 100%)`,
             border: 'none', borderTop: 'none', borderRight: 'none', borderLeft: 'none',
-            width: '100%', textAlign: 'left' as const, flexShrink: 0,
+            width: '100%', textAlign: 'start' as const, flexShrink: 0,
             cursor: onPracticeWeakSpots ? 'pointer' : 'default',
             transition: 'background 0.2s',
           }}
@@ -561,7 +561,7 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
             fontSize: 12, fontWeight: 700, color: weeklyTotal > 0 ? '#3351CA' : '#7F9BD9',
             fontVariantNumeric: 'tabular-nums',
           }}>
-            +{weeklyTotal.toLocaleString()} XP
+            +{weeklyTotal.toLocaleString('he-IL')} XP
           </span>
         </div>
         <div style={{
@@ -763,7 +763,7 @@ export default function ScoreBoard({ mastered, xp, sessionStart, onClose, onRese
               <div
                 style={{
                   flexShrink: 0,
-                  marginLeft: '10px',
+                  marginInlineStart: '10px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'flex-end',

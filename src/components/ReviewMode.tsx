@@ -81,7 +81,7 @@ export default function ReviewMode({ building, onClose, onReQuiz }: Props) {
         }}>
           <div style={{
             fontSize: 10, color: `${color}bb`, letterSpacing: 2,
-            marginBottom: 10, paddingLeft: 8, fontWeight: 600,
+            marginBottom: 10, paddingInlineStart: 8, fontWeight: 600,
           }}>
             ✦ ויזואליזציה
           </div>

@@ -49,7 +49,7 @@ export default function ShareCard({ xp, masteredCount, total, onClose }: Props) 
               flex: 1, padding: '16px 14px', borderRadius: 14, textAlign: 'center',
               background: 'rgba(78,205,196,0.12)', border: '1px solid rgba(78,205,196,0.25)',
             }}>
-              <div style={{ fontSize: 28, fontWeight: 900, color: '#4ECDC4', lineHeight: 1 }}>{xp.toLocaleString()}</div>
+              <div style={{ fontSize: 28, fontWeight: 900, color: '#4ECDC4', lineHeight: 1 }}>{xp.toLocaleString('he-IL')}</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>נקודות XP</div>
             </div>
             <div style={{

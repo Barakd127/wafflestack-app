@@ -806,7 +806,7 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
             color: savedFlash ? '#2F8F4A' : t.inkMuted,
             transition: 'color 200ms',
             minWidth: 110,
-            textAlign: 'left',
+            textAlign: 'end',
           }}
         >
           {savedFlash ? '✓ נשמר אוטומטית' : 'שמירה אוטומטית'}
@@ -1033,9 +1033,7 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
             suppressContentEditableWarning
             dir="rtl"
             spellCheck={false}
-            data-placeholder={
-              activePage && !activePage.body ? 'התחל לכתוב…' : ''
-            }
+            data-placeholder=""
             onInput={queueSave}
             onBlur={flushSave}
             onKeyDown={(e) => {

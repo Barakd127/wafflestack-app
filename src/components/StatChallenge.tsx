@@ -1094,7 +1094,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
             </div>
             <div style={{ fontSize: 22, fontWeight: 800, color: '#1F3E6C' }}>
               {content.conceptHe}
-              <span style={{ fontSize: 14, color: 'rgba(31,62,108,0.5)', fontWeight: 400, marginLeft: 8 }}>
+              <span style={{ fontSize: 14, color: 'rgba(31,62,108,0.5)', fontWeight: 400, marginInlineStart: 8 }}>
                 ({content.concept})
               </span>
             </div>
@@ -1190,7 +1190,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
               }}>
                 <div style={{
                   fontSize: 10, color: `${color}bb`, letterSpacing: 2,
-                  marginBottom: 10, paddingLeft: 8, fontWeight: 600,
+                  marginBottom: 10, paddingInlineStart: 8, fontWeight: 600,
                 }}>
                   ✦ ויזואליזציה אינטראקטיבית
                 </div>
@@ -1208,7 +1208,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                   fontSize: 13, color: '#1F3E6C',
                   direction: 'rtl', textAlign: 'right', lineHeight: 1.7,
                 }}>
-                  <span style={{ color: '#d97706', fontWeight: 700, marginLeft: 6 }}>💡 חשוב על זה כך:</span>
+                  <span style={{ color: '#d97706', fontWeight: 700, marginInlineStart: 6 }}>💡 חשוב על זה כך:</span>
                   {SIMPLE_ANALOGIES[building.id]}
                 </div>
               )}
@@ -1644,7 +1644,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     direction: 'rtl', textAlign: 'right',
                     lineHeight: 1.6,
                   }}>
-                    <span style={{ color: '#d97706', fontWeight: 700, marginLeft: 6 }}>💡 חשוב על זה כך:</span>
+                    <span style={{ color: '#d97706', fontWeight: 700, marginInlineStart: 6 }}>💡 חשוב על זה כך:</span>
                     {SIMPLE_ANALOGIES[building.id]}
                   </div>
                 )}

@@ -169,7 +169,7 @@ export function MeanVisual() {
         <span style={BADGE()}>Σ = {values.reduce((s, v) => s + v, 0)}</span>
         <span style={BADGE({ background: 'rgba(212,160,23,0.12)', color: 'var(--sh-text-dark)' })}>ממוצע = {mean.toFixed(2)}</span>
         <button onClick={() => values.length > 2 && setValues(v => v.slice(0, -1))}
-          style={{ marginRight: 8, background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: 'var(--sh-text-dark)', fontWeight: 600, fontSize: 12 }}>
+          style={{ marginInlineEnd: 8, background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 7, padding: '2px 10px', cursor: 'pointer', color: 'var(--sh-text-dark)', fontWeight: 600, fontSize: 12 }}>
           − הסר חבר
         </button>
         <button onClick={() => values.length < 10 && setValues(v => [...v, Math.round(mean)])}
@@ -684,7 +684,7 @@ export function NormalDistVisual() {
         <strong>גובה תלמידי כיתה י' (μ = 170 ס"מ, σ = 8 ס"מ).</strong> ציון Z אומר כמה סטיות תקן רחוקים מהממוצע. למשל Z={z.toFixed(2)} → גובה של כ-{heightCm.toFixed(0)} ס"מ. הגרף מציג את אחוז התלמידים בקצוות.
       </div>
       <div style={ROW}>
-        <label style={LABEL_STYLE}>Z = <strong>{z.toFixed(2)}</strong> (גובה ≈ {heightCm.toFixed(0)} ס"מ)<input type="range" min={-3} max={3} step={0.05} value={z} onChange={e => setZ(+e.target.value)} style={{ width: 130, accentColor: ACCENT, marginRight: 6 }} /></label>
+        <label style={LABEL_STYLE}>Z = <strong>{z.toFixed(2)}</strong> (גובה ≈ {heightCm.toFixed(0)} ס"מ)<input type="range" min={-3} max={3} step={0.05} value={z} onChange={e => setZ(+e.target.value)} style={{ width: 130, accentColor: ACCENT, marginInlineEnd: 6 }} /></label>
         <label style={{ ...LABEL_STYLE, gap: 4 }}><input type="checkbox" checked={twoTail} onChange={e => setTwoTail(e.target.checked)} />דו-צדדי</label>
       </div>
       <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
@@ -793,7 +793,7 @@ export function ConfidenceIntervalVisual() {
       </div>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 10, alignItems: 'center' }}>
         <label style={LABEL_STYLE}>ביטחון: <strong>{conf}%</strong><input type="range" min={80} max={99} step={1} value={conf} onChange={e => setConf(+e.target.value)} style={SLIDER()} /></label>
-        <label style={LABEL_STYLE}>מספר סקרים: <strong>{count}</strong><input type="range" min={5} max={40} step={5} value={count} onChange={e => setCount(+e.target.value)} style={{ width: 80, accentColor: ACCENT, marginRight: 6 }} /></label>
+        <label style={LABEL_STYLE}>מספר סקרים: <strong>{count}</strong><input type="range" min={5} max={40} step={5} value={count} onChange={e => setCount(+e.target.value)} style={{ width: 80, accentColor: ACCENT, marginInlineEnd: 6 }} /></label>
         <button onClick={generate} style={{ background: ACCENT, color: '#fff', border: 'none', borderRadius: 8, padding: '5px 14px', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>צור סקרים</button>
       </div>
       {intervals.length > 0 && (
@@ -810,7 +810,7 @@ export function ConfidenceIntervalVisual() {
           <div style={{ marginTop: 8 }}>
             <span style={BADGE()}>{hits}/{count} מכילים את μ</span>
             <span style={BADGE({ background: 'rgba(99,102,241,0.15)', color: '#3730a3' })}>{(hits / count * 100).toFixed(0)}% (צפוי: {conf}%)</span>
-            <span style={{ fontSize: 11, color: '#9ca3af', marginRight: 6 }}>z* = {zStar(conf).toFixed(2)}</span>
+            <span style={{ fontSize: 11, color: '#9ca3af', marginInlineEnd: 6 }}>z* = {zStar(conf).toFixed(2)}</span>
           </div>
         </>
       )}
@@ -1260,7 +1260,7 @@ export function PercentilesVisual() {
       <div style={{ marginTop: 4 }}>
         <span style={BADGE()}>ציון Z = {z.toFixed(2)}</span>
         <span style={BADGE({ background: 'rgba(99,102,241,0.15)', color: '#3730a3' })}>אחוזון {pct.toFixed(0)}</span>
-        <span style={{ fontSize: 11, color: '#6b7280', marginRight: 6 }}>{(100 - pct).toFixed(0)}% השיגו יותר ממך</span>
+        <span style={{ fontSize: 11, color: '#6b7280', marginInlineEnd: 6 }}>{(100 - pct).toFixed(0)}% השיגו יותר ממך</span>
       </div>
     </div>
   )
@@ -1324,7 +1324,7 @@ export function CombinatoricsVisual() {
       </div>
       <div style={{ textAlign: 'center', padding: '14px 8px', background: 'rgba(99,102,241,0.12)', borderRadius: 10 }}>
         <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 4 }}>מספר אפשרויות:</div>
-        <div style={{ fontSize: 28, fontWeight: 800, color: ACCENT }}>{result.toLocaleString()}</div>
+        <div style={{ fontSize: 28, fontWeight: 800, color: ACCENT }}>{result.toLocaleString('he-IL')}</div>
         <div style={{ fontSize: 11, color: '#6b7280', marginTop: 4 }}>
           {mode === 'P'
             ? `n!/(n-k)! = ${n}!/${n - k}! = ${result}`
@@ -1495,7 +1495,7 @@ export function CramerVisual() {
         <span style={BADGE()}>N = {N}</span>
         <span style={BADGE({ background: 'rgba(245,158,11,0.12)', color: '#92400e' })}>χ² = {chi2.toFixed(2)}</span>
         <span style={BADGE({ background: 'rgba(16,185,129,0.12)', color: '#065f46' })}>V = {V.toFixed(3)}</span>
-        <span style={{ fontSize: 11, color: '#6b7280', marginRight: 6 }}>
+        <span style={{ fontSize: 11, color: '#6b7280', marginInlineEnd: 6 }}>
           {V < 0.1 ? '(קשר זניח)' : V < 0.3 ? '(קשר חלש)' : V < 0.5 ? '(קשר בינוני)' : '(קשר חזק)'}
         </span>
       </div>

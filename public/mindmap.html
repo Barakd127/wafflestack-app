@@ -520,7 +520,7 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 /* ═══ v14: NODE QUICK ACTIONS ═══ */
 #node-actions{position:fixed;display:none;background:#1e1e2e;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:4px;z-index:500;gap:3px;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,.5)}
 #node-actions.open{display:flex}
-.na-btn{height:28px;padding:0 10px;background:rgba(255,255,255,.07);border:none;color:rgba(255,255,255,.85);border-radius:5px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;text-align:left;transition:background .12s;white-space:nowrap}
+.na-btn{height:28px;padding:0 10px;background:rgba(255,255,255,.07);border:none;color:rgba(255,255,255,.85);border-radius:5px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;text-align:start;transition:background .12s;white-space:nowrap}
 .na-btn:hover{background:rgba(212,175,55,.3)}
 
 /* ═══ v14: SCROLLBARS ═══ */
@@ -588,7 +588,7 @@ body.light .nb-breadcrumb{color:rgba(0,0,0,.55)}
   color:#1F2640;
   font-size:16px;line-height:28px;
   font-family:'Assistant','Rubik',sans-serif;
-  outline:none;direction:rtl;text-align:right;
+  outline:none;direction:rtl;text-align:start;
   caret-color:#D4AF37;cursor:text;white-space:pre-wrap;word-wrap:break-word;
   transition:border-color .2s,box-shadow .2s}
 body.light .nb-body{background-color:#FBF8F1;border-color:rgba(31,38,64,0.12);color:#1F2640}
@@ -1816,7 +1816,7 @@ function mmRenderSheetBar(){
       ].forEach(function(item){
         const btn = document.createElement('button');
         btn.textContent = item.label;
-        btn.style.cssText = 'display:block;width:100%;padding:8px 14px;background:none;border:none;color:'+(item.danger?'#f87171':'white')+';cursor:pointer;text-align:right;font-family:inherit;font-size:13px;border-radius:5px;';
+        btn.style.cssText = 'display:block;width:100%;padding:8px 14px;background:none;border:none;color:'+(item.danger?'#f87171':'white')+';cursor:pointer;text-align:start;font-family:inherit;font-size:13px;border-radius:5px;';
         btn.onmouseenter = function(){ btn.style.background='rgba(255,255,255,.1)'; };
         btn.onmouseleave = function(){ btn.style.background='none'; };
         btn.onclick = function(){ menu.remove(); item.fn(); };
