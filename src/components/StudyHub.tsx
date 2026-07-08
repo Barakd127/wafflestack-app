@@ -1464,7 +1464,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
         // The real interactive mindmap (same map as מפת הלמידה שלי). Topic nodes
         // carry 📖/📝 chips that open theory/practice; sub-topics can be added.
         <iframe
-          src={`${import.meta.env.BASE_URL}mindmap.html?v=mm18-20260707&scene=topics&course=${course}&admin=${_adminMode ? '1' : '0'}`}
+          src={`${import.meta.env.BASE_URL}mindmap.html?v=mm19-20260708&scene=topics&course=${course}&admin=${_adminMode ? '1' : '0'}`}
           title="מפת הנושאים"
           style={{ width: '100%', height: 'calc(100dvh - 104px)', border: 'none', borderRadius: 14, boxShadow: CARD_SHADOW, display: 'block' }}
           allow="clipboard-read; clipboard-write"
@@ -1723,7 +1723,7 @@ function ActivityChart() {
           fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600,
           color: total > 0 ? '#D4AF37' : TEXT_LIGHT, fontVariantNumeric: 'tabular-nums',
         }}>
-          {total > 0 ? `+${total.toLocaleString()} XP` : 'אין פעילות עדיין'}
+          {total > 0 ? `+${total.toLocaleString('he-IL')} XP` : 'אין פעילות עדיין'}
         </span>
       </div>
       <svg
@@ -1732,10 +1732,10 @@ function ActivityChart() {
         width="100%"
         role="img"
         aria-label={total > 0
-          ? `תרשים פעילות השבוע — סה"כ ${total.toLocaleString()} XP על פני 7 ימים`
+          ? `תרשים פעילות השבוע — סה"כ ${total.toLocaleString('he-IL')} XP על פני 7 ימים`
           : 'תרשים פעילות השבוע — אין פעילות עדיין'}
         style={{ maxWidth: W, display: 'block', height: 'auto', overflow: 'visible' }}>
-        <title>{total > 0 ? `+${total.toLocaleString()} XP בשבוע האחרון` : 'אין פעילות בשבוע האחרון'}</title>
+        <title>{total > 0 ? `+${total.toLocaleString('he-IL')} XP בשבוע האחרון` : 'אין פעילות בשבוע האחרון'}</title>
         <defs>
           <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="rgba(212,175,55,0.45)" />
@@ -3515,7 +3515,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         <div data-tour="canvas-frame" style={{ position: 'fixed', inset: 0, zIndex: 400, background: '#0d1628' }}>
           <iframe
             key={`qs-wb-${q?.id || currentQ}`}
-            src={`${import.meta.env.BASE_URL}mindmap.html?v=mm18-20260707&mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
+            src={`${import.meta.env.BASE_URL}mindmap.html?v=mm19-20260708&mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
             title="קנבס לשאלה"
             style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
             allow="clipboard-read; clipboard-write"
@@ -3589,7 +3589,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             {tab === 'mindmap' && (
               <iframe
                 key="quiz-mm"
-                src={`${import.meta.env.BASE_URL}mindmap.html?v=mm18-20260707&userId=${userId || 'default'}${selectedTopic ? `&topic=${encodeURIComponent(selectedTopic)}` : ''}`}
+                src={`${import.meta.env.BASE_URL}mindmap.html?v=mm19-20260708&userId=${userId || 'default'}${selectedTopic ? `&topic=${encodeURIComponent(selectedTopic)}` : ''}`}
                 title="מפת חשיבה — תוך כדי תרגול"
                 style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
                 allow="clipboard-read; clipboard-write"
@@ -3647,7 +3647,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   // mindmap.html loads the matching wb-scene-q-<id> from
                   // localStorage. wbScene query param is read inside mindmap.html.
                   key={`quiz-wb-${q?.id || currentQ}`}
-                  src={`${import.meta.env.BASE_URL}mindmap.html?v=mm18-20260707&mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
+                  src={`${import.meta.env.BASE_URL}mindmap.html?v=mm19-20260708&mode=wb&userId=${userId || 'default'}&wbScene=q-${encodeURIComponent(q?.id ?? `idx${currentQ}`)}`}
                   title={`קנבס לשאלה ${currentQ + 1}`}
                   style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
                   allow="clipboard-read; clipboard-write"

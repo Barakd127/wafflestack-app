@@ -281,7 +281,7 @@ export default function SamplingDistribution() {
         {[1, 5, 1000, 10000].map(k => (
           <button key={k} onClick={() => runK(k)} disabled={animating}
             style={{ ...primaryBtn, background: `linear-gradient(135deg,#3b6db8,${C_POP})` }}>
-            + {k.toLocaleString()} מדגמים
+            + {k.toLocaleString('he-IL')} מדגמים
           </button>
         ))}
         <div style={{ flex: 1 }} />
@@ -331,7 +331,7 @@ export default function SamplingDistribution() {
         // visualised on the chart itself; SE_x̄ = σ/√n is the headline.
         sub={
           dist.length
-            ? `σ_x̄ = σ/√n = ${theorySE.toFixed(2)}  ·  ${dist.length.toLocaleString()} מדגמים`
+            ? `σ_x̄ = σ/√n = ${theorySE.toFixed(2)}  ·  ${dist.length.toLocaleString('he-IL')} מדגמים`
             : 'התפלגות הדגימה ריקה — דגמו כדי לראות את עקומת CLT מתפתחת'
         }
         accent={C_DIST_DEEP}

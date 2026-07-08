@@ -754,7 +754,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       <div className="ws-lesson-mindmap-pane" style={{ width: `${splitPct}%`, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         <iframe
           ref={mindmapRef}
-          src={`${import.meta.env.BASE_URL}mindmap.html?v=mm18-20260707&mode=mm&userId=${encodeURIComponent(userId)}&topic=${encodeURIComponent(topicId)}`}
+          src={`${import.meta.env.BASE_URL}mindmap.html?v=mm19-20260708&mode=mm&userId=${encodeURIComponent(userId)}&topic=${encodeURIComponent(topicId)}`}
           title="Mind Map"
           style={{ width: '100%', height: '100%', border: 'none', display: 'block', background: '#fafbff' }}
         />

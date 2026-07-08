@@ -157,7 +157,7 @@ export default function ExamMode({ onClose }: Props) {
                       </span>
                     )}
                   </div>
-                  <span style={{ fontSize: 16, marginLeft: 10, flexShrink: 0, color: correct ? '#1F7A6E' : '#9B2020' }}>
+                  <span style={{ fontSize: 16, marginInlineStart: 10, flexShrink: 0, color: correct ? '#1F7A6E' : '#9B2020' }}>
                     {correct ? '✓' : '✗'}
                   </span>
                 </div>

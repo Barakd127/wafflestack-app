@@ -202,6 +202,7 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
           <button
             onClick={onBack}
             aria-label="חזרה ללימוד"
+            /* viewport-anchored back button — physical prop on purpose */
             className="ws-godot-back-btn absolute left-4 z-50"
             style={{
               bottom: 20,

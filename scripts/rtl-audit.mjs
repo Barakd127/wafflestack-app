@@ -36,9 +36,35 @@ const RULES = [
     re: /text-align:\s*right\s*[;!]/g,
     ext: /\.css$/,
   },
+  {
+    id: 'hebrew-placeholder',
+    desc: 'Hebrew placeholder text — notebook uses caret-only empty state (no placeholder copy)',
+    re: /(?:data-placeholder|placeholder)=[^\n]*[֐-׿]/g,
+    ext: /[\\/]notebook[\\/][^\\/]+\.tsx?$/,
+  },
 ]
 
+// mindmap.html — physical text-align in CSS/cssText (start|center|end are fine)
+const MINDMAP = join(ROOT, 'public', 'mindmap.html')
+const MINDMAP_RULE = {
+  id: 'text-align-physical-mindmap',
+  desc: "physical 'text-align:right|left' in mindmap.html — use start/end (center ok)",
+  re: /text-align\s*:\s*(?:right|left)\b/g,
+}
+
 let violations = 0
+{
+  const text = readFileSync(MINDMAP, 'utf8')
+  text.split('\n').forEach((line, i) => {
+    if (line.includes('direction:ltr')) return // LTR-isolated math/code — physical left is intentional
+    MINDMAP_RULE.re.lastIndex = 0
+    if (MINDMAP_RULE.re.test(line)) {
+      violations++
+      console.error(`public/mindmap.html:${i + 1} [${MINDMAP_RULE.id}] ${MINDMAP_RULE.desc}`)
+      console.error(`  ${line.trim().slice(0, 120)}`)
+    }
+  })
+}
 for (const f of files) {
   const text = readFileSync(f, 'utf8')
   const lines = text.split('\n')

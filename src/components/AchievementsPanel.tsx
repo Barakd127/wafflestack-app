@@ -87,7 +87,7 @@ function buildAchievements(xp: number, masteredCount: number): Achievement[] {
     unlocked: m.current >= m.threshold,
     progress: clamp01(m.current / m.threshold),
     progressLabel: m.threshold > 1 && m.current < m.threshold
-      ? `${Math.min(m.current, m.threshold).toLocaleString()} / ${m.threshold.toLocaleString()}`
+      ? `${Math.min(m.current, m.threshold).toLocaleString('he-IL')} / ${m.threshold.toLocaleString('he-IL')}`
       : '',
   }))
 }
