@@ -52,6 +52,10 @@ const SQLJoinInteractive = lazy(() => import('./graphs/SQLJoinInteractive'))
 const SQLGroupByInteractive = lazy(() => import('./graphs/SQLGroupByInteractive'))
 const SQLIndexRaceInteractive = lazy(() => import('./graphs/SQLIndexRaceInteractive'))
 const SQLExecutionOrderInteractive = lazy(() => import('./graphs/SQLExecutionOrderInteractive'))
+const DummyRegressionInteractive = lazy(() => import('./graphs/DummyRegressionInteractive'))
+const InteractionSlopeInteractive = lazy(() => import('./graphs/InteractionSlopeInteractive'))
+const LSDHomogeneousInteractive = lazy(() => import('./graphs/LSDHomogeneousInteractive'))
+const BlocksAnovaInteractive = lazy(() => import('./graphs/BlocksAnovaInteractive'))
 const McNemarInteractive = lazy(() => import('./graphs/McNemarInteractive'))
 const PairedSamplesInteractive = lazy(() => import('./graphs/PairedSamplesInteractive'))
 const WilcoxonInteractive = lazy(() => import('./graphs/WilcoxonInteractive'))
@@ -78,6 +82,14 @@ type GraphEntry = {
   afterSlide?: number
 }
 const INTERACTIVE_GRAPHS_BY_TOPIC: Record<string, GraphEntry[]> = {
+  'anova-multiple-regression': [{ Component: RegressionInteractive, title: 'רגרסיה — קו החיזוי' }],
+  'anova-dummy-2': [{ Component: DummyRegressionInteractive, title: 'משתנה דמי — הזזת חותך' }],
+  'anova-dummy-multi': [{ Component: DummyRegressionInteractive, title: 'משתני דמי מרובים' }],
+  'anova-interaction': [{ Component: InteractionSlopeInteractive, title: 'אינטראקציה — שינוי שיפוע' }],
+  'anova-oneway-model': [{ Component: ANOVAInteractive, title: 'ניתוח שונות חד-כיווני' }],
+  'anova-oneway-ftest': [{ Component: ANOVAInteractive, title: 'פירוק שונות ומבחן F' }],
+  'anova-posthoc': [{ Component: LSDHomogeneousInteractive, title: 'קבוצות הומוגניות — LSD' }],
+  'anova-blocks': [{ Component: BlocksAnovaInteractive, title: 'ניתוח שונות עם בלוקים' }],
   // ── SQL course — warehouse-clerk simulators ──
   'sql-select': [
     { Component: SQLQueryBuilderInteractive,   title: 'בונה השאילתות — פתק בקשה חי' },
@@ -446,6 +458,7 @@ import LessonScreen from './LessonScreen'
 import { LESSON_CONTENT } from '../data/lesson-content'
 import { LESSON_CONTENT_STAT_B } from '../data/lesson-content-stat-b'
 import { LESSON_CONTENT_SQL } from '../data/lesson-content-sql'
+import { LESSON_CONTENT_ANOVA } from '../data/lesson-content-anova'
 import { HEBREW_LABELS } from '../data/topicLabels'
 import { TOPIC_ORDER } from '../lib/generatePlan'
 import { MathText } from '../lib/mathRender'
@@ -501,7 +514,7 @@ const COURSES: CourseDef[] = [
   { id: 'stat-a',  label: "סטטיסטיקה א'",        icon: '📊', desc: 'מבוא, מדדים, התפלגויות, רגרסיה, הסתברות',  active: true,  bg: 'linear-gradient(135deg,#F5C842,#D4AF37)' },
   { id: 'stat-b',  label: "סטטיסטיקה ב'",        icon: '📈', desc: 'דגימה, אמידה, רווחי סמך, בדיקת השערות, א-פרמטריים, רגרסיה', active: true,  bg: 'linear-gradient(135deg,#7CB7F8,#4A90E2)' },
   { id: 'methods', label: 'שיטות מחקר',          icon: '🔬', desc: 'תכנון מחקר, מדידה, מהימנות ותקפות',         active: false, bg: 'linear-gradient(135deg,#A78BFA,#7C3AED)' },
-  { id: 'anova',   label: 'ניתוח שונות / רב-משתנית', icon: '📐', desc: 'ANOVA, MANOVA, רגרסיה מרובה, מודלים מורכבים', active: false, bg: 'linear-gradient(135deg,#67C29E,#229E69)' },
+  { id: 'anova',   label: 'ניתוח שונות ורגרסיה', icon: '📐', desc: 'רגרסיה מרובה, משתני דמי, ANOVA חד-כיווני, השוואות מרובות ובלוקים', active: true, bg: 'linear-gradient(135deg,#67C29E,#229E69)' },
   { id: 'sql',     label: 'SQL — שפת מסדי נתונים',  icon: '🗄️', desc: 'שאילתות, JOIN, אינדקסים ופונקציות חלון — במטאפורת מחסן, עם סימולטורים וחידונים', active: true, bg: 'linear-gradient(135deg,#F0B429,#C97C18)' },
 ]
 
@@ -543,7 +556,8 @@ const QUIZ_TOPICS = (() => {
 // lesson hebrewName), pulling questionCount/building from quiz-bank when present.
 const STAT_B_IDS = new Set(LESSON_CONTENT_STAT_B.map(t => t.id))
 const SQL_IDS = new Set(LESSON_CONTENT_SQL.map(t => t.id))
-const QUIZ_TOPICS_A = QUIZ_TOPICS.filter(t => !STAT_B_IDS.has(t.id) && !SQL_IDS.has(t.id))
+const ANOVA_IDS = new Set(LESSON_CONTENT_ANOVA.map(t => t.id))
+const QUIZ_TOPICS_A = QUIZ_TOPICS.filter(t => !STAT_B_IDS.has(t.id) && !SQL_IDS.has(t.id) && !ANOVA_IDS.has(t.id))
 const QUIZ_TOPICS_B = LESSON_CONTENT_STAT_B.map(l => {
   const q = (quizBankData.topics as Record<string, any>)[l.id]
   return {
@@ -557,6 +571,18 @@ const QUIZ_TOPICS_B = LESSON_CONTENT_STAT_B.map(l => {
 
 // SQL course topic set — built from the SQL lesson list, same pattern as Stat-B.
 const QUIZ_TOPICS_SQL = LESSON_CONTENT_SQL.map(l => {
+  const q = (quizBankData.topics as Record<string, any>)[l.id]
+  return {
+    id: l.id,
+    label: HEBREW_LABELS[l.id] || l.hebrewName,
+    building: q?.building || '',
+    concept: l.hebrewName,
+    questionCount: (q?.questions || []).length,
+  }
+})
+
+// ANOVA course topic set — built from the ANOVA lesson list, same pattern as SQL.
+const QUIZ_TOPICS_ANOVA = LESSON_CONTENT_ANOVA.map(l => {
   const q = (quizBankData.topics as Record<string, any>)[l.id]
   return {
     id: l.id,
@@ -597,6 +623,12 @@ const TOPIC_GROUPS_SQL: TopicGroup[] = [
   { id: 'sql-basics',   labelHe: 'פתקי בקשה — יסודות',       emoji: '✏️', topicIds: ['sql-select', 'sql-where', 'sql-order-limit', 'sql-null'] },
   { id: 'sql-advanced', labelHe: 'שאילתות מתקדמות',           emoji: '🔍', topicIds: ['sql-join', 'sql-aggregate', 'sql-group-by', 'sql-subquery-cte'] },
   { id: 'sql-design',   labelHe: 'עיצוב המחסן וביצועים',      emoji: '🗂️', topicIds: ['sql-dml', 'sql-create-constraints', 'sql-index', 'sql-window'] },
+]
+
+const TOPIC_GROUPS_ANOVA: TopicGroup[] = [
+  { id: 'anova-regression',   labelHe: 'רגרסיה מרובה ומשתני דמי', emoji: '📈', topicIds: ['anova-multiple-regression', 'anova-dummy-2', 'anova-dummy-multi', 'anova-interaction'] },
+  { id: 'anova-oneway',       labelHe: 'ניתוח שונות חד-כיווני',   emoji: '📊', topicIds: ['anova-oneway-model', 'anova-oneway-ftest', 'anova-posthoc'] },
+  { id: 'anova-blocks-unit',  labelHe: 'מודלים עם בלוקים',        emoji: '🧱', topicIds: ['anova-blocks'] },
 ]
 
 // ── Design tokens — driven by CSS custom properties for dark/light mode ────────
@@ -846,7 +878,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
     hard: questions.filter(q => q.difficulty === 'hard').length,
   }
   const hebrewName = HEBREW_LABELS[topicId] || topicData?.concept || topicId
-  const hasLesson = LESSON_CONTENT.some(t => t.id === topicId) || LESSON_CONTENT_STAT_B.some(t => t.id === topicId) || LESSON_CONTENT_SQL.some(t => t.id === topicId)
+  const hasLesson = LESSON_CONTENT.some(t => t.id === topicId) || LESSON_CONTENT_STAT_B.some(t => t.id === topicId) || LESSON_CONTENT_SQL.some(t => t.id === topicId) || LESSON_CONTENT_ANOVA.some(t => t.id === topicId)
   const [selected, setSelected] = useState<DifficultyFilter>('all')
 
   return (
@@ -1053,7 +1085,7 @@ interface TopicSelectorProps {
   /** Reports whether the embedded mindmap ("מפה") view is active, so the shell can hide its title bar. */
   onMapModeChange?: (on: boolean) => void
   /** Which course's topic grid to show. Defaults to Stat-A. */
-  course?: 'stat-a' | 'stat-b' | 'sql'
+  course?: 'stat-a' | 'stat-b' | 'sql' | 'anova'
 }
 
 /**
@@ -1061,7 +1093,7 @@ interface TopicSelectorProps {
  * the sidebar. Active course (Stat-A) routes into the topic grid. Inactive
  * courses (Stat-B / Methods / ANOVA) open a "Coming soon" splash overlay.
  */
-function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 'stat-b' | 'sql') => void }) {
+function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 'stat-b' | 'sql' | 'anova') => void }) {
   const [comingSoon, setComingSoon] = useState<CourseDef | null>(null)
   const [embedded, setEmbedded] = useState<CourseDef | null>(null)
   // ESC dismisses whichever modal is open. Click-outside is already wired via
@@ -1090,7 +1122,7 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
       // Stat-B are both NATIVE now (no embedUrl) → they route into the topic grid.
       setEmbedded(c); return
     }
-    onSelectActive(c.id as 'stat-a' | 'stat-b' | 'sql')
+    onSelectActive(c.id as 'stat-a' | 'stat-b' | 'sql' | 'anova')
   }
   // Full-screen course player. Replaces the old "open external" modal: now
   // the embedded course renders inside a tab strip so we can ship our own
@@ -1205,8 +1237,8 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
 function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggleDark, onMapModeChange, course = 'stat-a' }: TopicSelectorProps) {
   // Course-scoped topic list + taxonomy. The two courses are kept disjoint so
   // neither grid ever leaks the other's topics (see QUIZ_TOPICS_A/_B above).
-  const baseTopics = course === 'stat-b' ? QUIZ_TOPICS_B : course === 'sql' ? QUIZ_TOPICS_SQL : QUIZ_TOPICS_A
-  const activeGroups = course === 'stat-b' ? TOPIC_GROUPS_B : course === 'sql' ? TOPIC_GROUPS_SQL : TOPIC_GROUPS
+  const baseTopics = course === 'stat-b' ? QUIZ_TOPICS_B : course === 'sql' ? QUIZ_TOPICS_SQL : course === 'anova' ? QUIZ_TOPICS_ANOVA : QUIZ_TOPICS_A
+  const activeGroups = course === 'stat-b' ? TOPIC_GROUPS_B : course === 'sql' ? TOPIC_GROUPS_SQL : course === 'anova' ? TOPIC_GROUPS_ANOVA : TOPIC_GROUPS
   // Re-order topics according to the user's personal plan when one exists.
   // Topics not in the plan trail at the end in their natural order.
   const personalPlan = useLearningStore(s => s.personalPlan)
@@ -4373,7 +4405,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   const [internalView, setInternalView] = useState<InternalView>('home')
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>()
   // Which course the learner entered from the gate — drives the topic grid + title.
-  const [activeCourse, setActiveCourse] = useState<'stat-a' | 'stat-b' | 'sql'>('stat-a')
+  const [activeCourse, setActiveCourse] = useState<'stat-a' | 'stat-b' | 'sql' | 'anova'>('stat-a')
   const [quizDifficulty, setQuizDifficulty] = useState<DifficultyFilter>('all')
   const [userProgress, setUserProgress] = useState<UserProgress>(() =>
     loadProgress(initializeUser().userId)
@@ -4454,7 +4486,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   const title =
     internalView === 'home' ? 'דף הבית' :
     internalView === 'courses' ? 'הקורסים שלי' :
-    internalView === 'topics' ? (activeCourse === 'stat-b' ? "סטטיסטיקה ב' — בחר נושא" : activeCourse === 'sql' ? "SQL — בחר נושא" : "סטטיסטיקה א' — בחר נושא") :
+    internalView === 'topics' ? (activeCourse === 'stat-b' ? "סטטיסטיקה ב' — בחר נושא" : activeCourse === 'sql' ? "SQL — בחר נושא" : activeCourse === 'anova' ? "ניתוח שונות — בחר נושא" : "סטטיסטיקה א' — בחר נושא") :
     'Study Zone'
 
   const handleSelectTopic = (topicId: string, mode: 'lesson' | 'quiz' = 'lesson') => {
