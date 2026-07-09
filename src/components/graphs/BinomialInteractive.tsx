@@ -3,6 +3,7 @@
  * the binomial distribution and converges visually toward normal as n grows.
  */
 import { useState, useEffect } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 320, PAD = 50
 const X0 = PAD, X1 = W - PAD, Y0 = PAD, Y1 = H - 70
@@ -35,22 +36,22 @@ export default function BinomialInteractive() {
   }, [n, p, mean, std])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>התפלגות בינומית — B(n, p)</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>n ניסויים בלתי תלויים, הסתברות הצלחה p. ככל ש-n גדל, הצורה מתקרבת לנורמלית.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>התפלגות בינומית — B(n, p)</h3>
+      <p style={graphSubtitleStyle}>n ניסויים בלתי תלויים, הסתברות הצלחה p. ככל ש-n גדל, הצורה מתקרבת לנורמלית.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
         {probs.map((pr, k) => {
           const h = (pr / maxP) * (Y1 - Y0)
-          return <rect key={k} x={X0 + k * barW + 2} y={Y1 - h} width={barW - 4} height={h} fill="#2D5BA8" stroke="#1F3E6C" strokeWidth={1} />
+          return <rect key={k} x={X0 + k * barW + 2} y={Y1 - h} width={barW - 4} height={h} fill={GC.blue} stroke={GC.ink} strokeWidth={1} />
         })}
-        <line x1={X0 + mean * barW + barW / 2} y1={Y0} x2={X0 + mean * barW + barW / 2} y2={Y1} stroke="#D4A017" strokeWidth={2} strokeDasharray="4 4" />
-        <text x={X0 + mean * barW + barW / 2} y={Y0 - 4} fill="#D4A017" fontSize={12} textAnchor="middle">μ = {mean.toFixed(1)}</text>
+        <line x1={X0 + mean * barW + barW / 2} y1={Y0} x2={X0 + mean * barW + barW / 2} y2={Y1} stroke={GC.gold} strokeWidth={2} strokeDasharray="4 4" />
+        <text x={X0 + mean * barW + barW / 2} y={Y0 - 4} fill={GC.gold} fontSize={12} textAnchor="middle">μ = {mean.toFixed(1)}</text>
       </svg>
       <div id="bin-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 8 }}>
-        <label style={{ fontSize: 13 }}>n: {n}<input type="range" min={1} max={50} value={n} onChange={e => setN(+e.target.value)} style={{ width: '100%' }} /></label>
-        <label style={{ fontSize: 13 }}>p: {p.toFixed(2)}<input type="range" min={0.05} max={0.95} step={0.01} value={p} onChange={e => setP(+e.target.value)} style={{ width: '100%' }} /></label>
+        <label style={{ fontFamily: GRAPH_FONT, fontSize: 13 }}>n: {n}<input type="range" min={1} max={50} value={n} onChange={e => setN(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
+        <label style={{ fontFamily: GRAPH_FONT, fontSize: 13 }}>p: {p.toFixed(2)}<input type="range" min={0.05} max={0.95} step={0.01} value={p} onChange={e => setP(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
       </div>
     </div>
   )

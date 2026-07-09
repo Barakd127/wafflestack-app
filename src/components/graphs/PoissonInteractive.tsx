@@ -3,6 +3,7 @@
  * Shows mean=λ, variance=λ. Toggle "overlay normal approx" once λ≥10.
  */
 import { useEffect, useState, useMemo } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640
 const H = 320
@@ -70,27 +71,27 @@ export default function PoissonInteractive() {
   const xTicks = [0, 5, 10, 15, 20, 25, 30]
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>התפלגות פואסון — קירוב לבינומית</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>התפלגות פואסון — קירוב לבינומית</h3>
+      <p style={graphSubtitleStyle}>
         פואסון מתארת מספר אירועים נדירים בפרק זמן קבוע. הזז את λ — ככל שהוא גדל, ההתפלגות מתקרבת לנורמלית עם μ = σ² = λ.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" />
-        <line x1={PAD_X} y1={PAD_Y} x2={PAD_X} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" />
+        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke={GC.axis} />
+        <line x1={PAD_X} y1={PAD_Y} x2={PAD_X} y2={AXIS_Y} stroke={GC.axis} />
 
         {/* X ticks */}
         {xTicks.map(t => (
           <g key={t}>
-            <line x1={toX(t)} y1={AXIS_Y - 3} x2={toX(t)} y2={AXIS_Y + 3} stroke="rgba(31,62,108,0.4)" />
-            <text x={toX(t)} y={AXIS_Y + 16} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{t}</text>
+            <line x1={toX(t)} y1={AXIS_Y - 3} x2={toX(t)} y2={AXIS_Y + 3} stroke={GC.axis} />
+            <text x={toX(t)} y={AXIS_Y + 16} fill={GC.axisText} fontSize={11} textAnchor="middle">{t}</text>
           </g>
         ))}
 
         {/* Y ticks */}
         {[0.25, 0.5, 0.75, 1].map(f => (
-          <text key={f} x={PAD_X - 6} y={toY(yMax * f) + 4} fill="rgba(31,62,108,0.6)" fontSize={10} textAnchor="end">
+          <text key={f} x={PAD_X - 6} y={toY(yMax * f) + 4} fill={GC.axisText} fontSize={10} textAnchor="end">
             {(yMax * f).toFixed(2)}
           </text>
         ))}
@@ -103,20 +104,20 @@ export default function PoissonInteractive() {
             y={toY(p)}
             width={barW}
             height={AXIS_Y - toY(p)}
-            fill={k === Math.round(lambda) ? '#FFD700' : '#60a5fa'}
+            fill={k === Math.round(lambda) ? GC.gold : GC.blue}
             opacity={0.85}
           />
         ))}
 
         {/* Mean line */}
-        <line x1={toX(lambda)} y1={PAD_Y} x2={toX(lambda)} y2={AXIS_Y} stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="4 3" />
-        <text x={toX(lambda)} y={PAD_Y - 4} fill="#f59e0b" fontSize={12} textAnchor="middle" fontWeight={700}>
+        <line x1={toX(lambda)} y1={PAD_Y} x2={toX(lambda)} y2={AXIS_Y} stroke={GC.gold} strokeWidth={1.5} strokeDasharray="4 3" />
+        <text x={toX(lambda)} y={PAD_Y - 4} fill={GC.goldText} fontSize={12} textAnchor="middle" fontWeight={700}>
           μ = λ
         </text>
 
         {/* Normal overlay */}
         {showNormal && normalAvailable && (
-          <path d={normPath} stroke="#FFD700" strokeWidth={2.5} fill="none" opacity={0.85} />
+          <path d={normPath} stroke={GC.gold} strokeWidth={2.5} fill="none" opacity={0.85} />
         )}
       </svg>
 
@@ -131,7 +132,7 @@ export default function PoissonInteractive() {
           step={0.1}
           value={lambda}
           onChange={e => setLambda(parseFloat(e.target.value))}
-          style={{ flex: 1 }}
+          style={{ flex: 1, accentColor: GC.blue }}
         />
       </div>
 
@@ -140,8 +141,8 @@ export default function PoissonInteractive() {
           onClick={() => setShowNormal(!showNormal)}
           disabled={!normalAvailable}
           style={{
-            background: showNormal && normalAvailable ? '#FFD700' : 'rgba(31,62,108,0.1)',
-            color: showNormal && normalAvailable ? '#0B1B3E' : '#fff',
+            background: showNormal && normalAvailable ? GC.gold : 'rgba(31,62,108,0.1)',
+            color: GC.ink,
             border: '1px solid rgba(31,62,108,0.2)',
             borderRadius: 8,
             padding: '8px 16px',

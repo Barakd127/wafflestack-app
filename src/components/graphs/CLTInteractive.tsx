@@ -22,6 +22,7 @@
  *       The two charts share the same x-axis [0,10] for easy visual compare.
  */
 import { useMemo, useRef, useState } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 // ── Layout constants ────────────────────────────────────────────────────────
 const W = 640
@@ -191,18 +192,12 @@ export default function CLTInteractive() {
   return (
     <div
       dir="rtl"
-      style={{
-        background: 'rgba(255,255,255,0.06)',
-        borderRadius: 16,
-        padding: 20,
-        color: '#1F3E6C',
-        fontFamily: 'system-ui, sans-serif',
-      }}
+      style={{ ...graphCardStyle }}
     >
-      <h3 style={{ margin: 0, marginBottom: 8, fontSize: 20 }}>
+      <h3 style={{ ...graphTitleStyle }}>
         משפט הגבול המרכזי — תצפית בזמן אמת
       </h3>
-      <p style={{ margin: 0, marginBottom: 12, opacity: 0.7, fontSize: 14 }}>
+      <p style={{ ...graphSubtitleStyle }}>
         בחר התפלגות אב. ככל ש-n גדל, התפלגות ממוצעי המדגם מתקרבת לעקומה נורמלית — לא משנה איך נראית האם.
       </p>
 
@@ -219,13 +214,13 @@ export default function CLTInteractive() {
             key={opt.k}
             onClick={() => changeParent(opt.k)}
             style={{
-              background: parent === opt.k ? '#1ABC9C' : 'transparent',
-              color: '#1F3E6C',
-              border: '1px solid #1ABC9C',
+              background: parent === opt.k ? GC.blue : 'transparent',
+              color: parent === opt.k ? '#fff' : GC.ink,
+              border: `1px solid ${GC.blue}`,
               borderRadius: 8,
               padding: '6px 14px',
               cursor: 'pointer',
-              fontFamily: 'inherit',
+              fontFamily: GRAPH_FONT,
               fontSize: 14,
               fontWeight: 600,
             }}
@@ -239,7 +234,7 @@ export default function CLTInteractive() {
       <div style={{ fontSize: 13, opacity: 0.75, marginBottom: 4 }}>
         התפלגות האב (מתוכה דוגמים)
       </div>
-      <svg viewBox={`0 0 ${W} ${H_PARENT}`} width="100%" style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 6 }}>
+      <svg viewBox={`0 0 ${W} ${H_PARENT}`} width="100%" style={{ background: 'rgba(31,62,108,0.06)', borderRadius: 6 }}>
         {parentHist.map((c, i) => {
           const h = (c / parentMax) * (H_PARENT - 10)
           return (
@@ -249,7 +244,7 @@ export default function CLTInteractive() {
               y={H_PARENT - h}
               width={Math.max(1, binWidth - 1)}
               height={h}
-              fill="#4A90D9"
+              fill={GC.blue}
               opacity={0.85}
             />
           )
@@ -259,7 +254,7 @@ export default function CLTInteractive() {
           y1={H_PARENT - 0.5}
           x2={W - PAD_X}
           y2={H_PARENT - 0.5}
-          stroke="rgba(31,62,108,0.4)"
+          stroke={GC.axis}
           strokeWidth={1}
         />
         {/* PDF overlay just to hint at shape; visual aid only */}
@@ -297,7 +292,7 @@ export default function CLTInteractive() {
       <svg
         viewBox={`0 0 ${W} ${H_SAMPLE}`}
         width="100%"
-        style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 6 }}
+        style={{ background: 'rgba(31,62,108,0.06)', borderRadius: 6 }}
       >
         {sampleHist.map((c, i) => {
           const h = (c / sampleMax) * (H_SAMPLE - 20)
@@ -308,7 +303,7 @@ export default function CLTInteractive() {
               y={H_SAMPLE - h}
               width={Math.max(1, binWidth - 1)}
               height={h}
-              fill="#D4A017"
+              fill={GC.gold}
               opacity={0.85}
             />
           )
@@ -317,7 +312,7 @@ export default function CLTInteractive() {
         {normalPath && (
           <path
             d={normalPath}
-            stroke="#1F3E6C"
+            stroke={GC.ink}
             strokeWidth={2}
             fill="none"
             strokeDasharray="6 4"
@@ -329,7 +324,7 @@ export default function CLTInteractive() {
           y1={H_SAMPLE - 0.5}
           x2={W - PAD_X}
           y2={H_SAMPLE - 0.5}
-          stroke="rgba(31,62,108,0.4)"
+          stroke={GC.axis}
           strokeWidth={1}
         />
         {/* x-axis ticks */}
@@ -338,7 +333,7 @@ export default function CLTInteractive() {
             key={t}
             x={xToPx(t)}
             y={H_SAMPLE - 4}
-            fill="rgba(31,62,108,0.6)"
+            fill={GC.axisText}
             fontSize={11}
             textAnchor="middle"
           >
@@ -360,13 +355,13 @@ export default function CLTInteractive() {
           }}
         >
           <span>
-            ממוצע ממוצעי המדגם: <b style={{ color: '#D4A017' }}>{sampleStats.mean.toFixed(3)}</b>
+            ממוצע ממוצעי המדגם: <b style={{ color: GC.goldText }}>{sampleStats.mean.toFixed(3)}</b>
           </span>
           <span>
-            סטיית תקן בפועל: <b style={{ color: '#D4A017' }}>{sampleStats.sd.toFixed(3)}</b>
+            סטיית תקן בפועל: <b style={{ color: GC.goldText }}>{sampleStats.sd.toFixed(3)}</b>
           </span>
           <span>
-            תיאוריה σ/√n: <b style={{ color: '#27AE60' }}>{(parentSd / Math.sqrt(n)).toFixed(3)}</b>
+            תיאוריה σ/√n: <b style={{ color: GC.good }}>{(parentSd / Math.sqrt(n)).toFixed(3)}</b>
           </span>
         </div>
       )}
@@ -374,8 +369,8 @@ export default function CLTInteractive() {
       {/* Sliders */}
       <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontSize: 14, opacity: 0.85 }}>
-            גודל מדגם n: <b style={{ color: '#1ABC9C' }}>{n}</b>
+          <label style={{ display: 'block', marginBottom: 4, fontSize: 14, opacity: 0.85, fontFamily: GRAPH_FONT }}>
+            גודל מדגם n: <b style={{ color: GC.blue }}>{n}</b>
           </label>
           <input
             type="range"
@@ -384,12 +379,12 @@ export default function CLTInteractive() {
             step={1}
             value={n}
             onChange={e => setN(parseInt(e.target.value))}
-            style={{ width: '100%', direction: 'ltr' }}
+            style={{ width: '100%', direction: 'ltr', accentColor: GC.blue }}
           />
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 4, fontSize: 14, opacity: 0.85 }}>
-            מספר מדגמים בלחיצה: <b style={{ color: '#1ABC9C' }}>{numSamples}</b>
+          <label style={{ display: 'block', marginBottom: 4, fontSize: 14, opacity: 0.85, fontFamily: GRAPH_FONT }}>
+            מספר מדגמים בלחיצה: <b style={{ color: GC.blue }}>{numSamples}</b>
           </label>
           <input
             type="range"
@@ -398,7 +393,7 @@ export default function CLTInteractive() {
             step={10}
             value={numSamples}
             onChange={e => setNumSamples(parseInt(e.target.value))}
-            style={{ width: '100%', direction: 'ltr' }}
+            style={{ width: '100%', direction: 'ltr', accentColor: GC.blue }}
           />
         </div>
       </div>
@@ -407,15 +402,15 @@ export default function CLTInteractive() {
         <button
           onClick={draw}
           style={{
-            background: '#1ABC9C',
-            color: '#1F3E6C',
+            background: GC.blue,
+            color: '#fff',
             border: 'none',
             borderRadius: 8,
             padding: '10px 18px',
             fontSize: 15,
             fontWeight: 700,
             cursor: 'pointer',
-            fontFamily: 'inherit',
+            fontFamily: GRAPH_FONT,
           }}
         >
           דגום! ({numSamples}×)
@@ -424,13 +419,13 @@ export default function CLTInteractive() {
           onClick={reset}
           style={{
             background: 'transparent',
-            color: '#1F3E6C',
+            color: GC.ink,
             border: '1px solid rgba(31,62,108,0.3)',
             borderRadius: 8,
             padding: '10px 18px',
             fontSize: 15,
             cursor: 'pointer',
-            fontFamily: 'inherit',
+            fontFamily: GRAPH_FONT,
           }}
         >
           איפוס

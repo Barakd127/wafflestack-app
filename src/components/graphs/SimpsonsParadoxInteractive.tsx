@@ -4,6 +4,7 @@
  * with OPPOSITE slope than the overall line. Demonstrates Simpson's paradox.
  */
 import { useEffect, useMemo, useState } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640
 const H = 380
@@ -84,26 +85,26 @@ export default function SimpsonsParadoxInteractive() {
   const yTicks = [0, 2, 4, 6, 8, 10, 12]
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>פרדוקס סימפסון — קורלציה מוסתרת</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>פרדוקס סימפסון — קורלציה מוסתרת</h3>
+      <p style={graphSubtitleStyle}>
         בסקירה הכוללת — הקשר חיובי (ככל ש-x גדל, y גדל). אך בתוך כל תת-קבוצה — הקשר הפוך! הסר את ההסתרה כדי לחשוף את האמת.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         {/* Axes */}
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
-        <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke="rgba(31,62,108,0.4)" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
+        <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke={GC.axis} />
         {xTicks.map(t => (
           <g key={`x${t}`}>
-            <line x1={toX(t)} y1={Y1 - 3} x2={toX(t)} y2={Y1 + 3} stroke="rgba(31,62,108,0.4)" />
-            <text x={toX(t)} y={Y1 + 16} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{t}</text>
+            <line x1={toX(t)} y1={Y1 - 3} x2={toX(t)} y2={Y1 + 3} stroke={GC.axis} />
+            <text x={toX(t)} y={Y1 + 16} fill={GC.axisText} fontSize={11} textAnchor="middle">{t}</text>
           </g>
         ))}
         {yTicks.map(t => (
           <g key={`y${t}`}>
-            <line x1={X0 - 3} y1={toY(t)} x2={X0 + 3} y2={toY(t)} stroke="rgba(31,62,108,0.4)" />
-            <text x={X0 - 8} y={toY(t) + 4} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="end">{t}</text>
+            <line x1={X0 - 3} y1={toY(t)} x2={X0 + 3} y2={toY(t)} stroke={GC.axis} />
+            <text x={X0 - 8} y={toY(t) + 4} fill={GC.axisText} fontSize={11} textAnchor="end">{t}</text>
           </g>
         ))}
 
@@ -111,7 +112,7 @@ export default function SimpsonsParadoxInteractive() {
         <line
           x1={toX(xMin)} y1={toY(overall.intercept + overall.slope * xMin)}
           x2={toX(xMax)} y2={toY(overall.intercept + overall.slope * xMax)}
-          stroke="#FFD700"
+          stroke={GC.gold}
           strokeWidth={2.5}
           opacity={showGroups ? 0.4 : 1}
           strokeDasharray={showGroups ? '6 4' : 'none'}
@@ -123,12 +124,12 @@ export default function SimpsonsParadoxInteractive() {
             <line
               x1={toX(0.5)} y1={toY(g0.intercept + g0.slope * 0.5)}
               x2={toX(5.8)} y2={toY(g0.intercept + g0.slope * 5.8)}
-              stroke="#60a5fa" strokeWidth={2.5}
+              stroke={GC.blue} strokeWidth={2.5}
             />
             <line
               x1={toX(6.2)} y1={toY(g1.intercept + g1.slope * 6.2)}
               x2={toX(11.5)} y2={toY(g1.intercept + g1.slope * 11.5)}
-              stroke="#f59e0b" strokeWidth={2.5}
+              stroke={GC.gold} strokeWidth={2.5}
             />
           </>
         )}
@@ -138,22 +139,22 @@ export default function SimpsonsParadoxInteractive() {
           <circle
             key={i}
             cx={toX(p.x)} cy={toY(p.y)} r={7}
-            fill={showGroups ? (p.group === 0 ? '#60a5fa' : '#f59e0b') : '#94a3b8'}
-            stroke="#1F3E6C"
+            fill={showGroups ? (p.group === 0 ? GC.blue : GC.gold) : GC.axisText}
+            stroke={GC.ink}
             strokeWidth={1.2}
           />
         ))}
 
         {/* Slope direction badges */}
-        <text x={X1 - 8} y={Y0 + 14} fill="#FFD700" fontSize={12} textAnchor="end" fontWeight={700}>
+        <text x={X1 - 8} y={Y0 + 14} fill={GC.goldText} fontSize={12} textAnchor="end" fontWeight={700}>
           שיפוע כולל: {overall.slope.toFixed(2)} {overall.slope > 0 ? '↗' : '↘'}
         </text>
         {showGroups && (
           <>
-            <text x={X1 - 8} y={Y0 + 32} fill="#60a5fa" fontSize={12} textAnchor="end" fontWeight={700}>
+            <text x={X1 - 8} y={Y0 + 32} fill={GC.blue} fontSize={12} textAnchor="end" fontWeight={700}>
               קבוצה 1: {g0.slope.toFixed(2)} {g0.slope > 0 ? '↗' : '↘'}
             </text>
-            <text x={X1 - 8} y={Y0 + 50} fill="#f59e0b" fontSize={12} textAnchor="end" fontWeight={700}>
+            <text x={X1 - 8} y={Y0 + 50} fill={GC.goldText} fontSize={12} textAnchor="end" fontWeight={700}>
               קבוצה 2: {g1.slope.toFixed(2)} {g1.slope > 0 ? '↗' : '↘'}
             </text>
           </>
@@ -166,8 +167,8 @@ export default function SimpsonsParadoxInteractive() {
         <button
           onClick={() => setShowGroups(!showGroups)}
           style={{
-            background: showGroups ? '#FFD700' : 'rgba(31,62,108,0.1)',
-            color: showGroups ? '#0B1B3E' : '#fff',
+            background: showGroups ? GC.gold : 'rgba(31,62,108,0.1)',
+            color: GC.ink,
             border: '1px solid rgba(31,62,108,0.2)',
             borderRadius: 8,
             padding: '8px 16px',
@@ -184,8 +185,8 @@ export default function SimpsonsParadoxInteractive() {
         style={{
           marginTop: 12,
           padding: 12,
-          background: showGroups ? 'rgba(245,158,11,0.15)' : 'rgba(96,165,250,0.12)',
-          border: '1px solid ' + (showGroups ? '#f59e0b' : 'rgba(96,165,250,0.4)'),
+          background: showGroups ? 'rgba(212,175,55,0.15)' : 'rgba(78,113,218,0.10)',
+          border: '1px solid ' + (showGroups ? GC.gold : 'rgba(78,113,218,0.35)'),
           borderRadius: 8,
           fontSize: 13,
         }}

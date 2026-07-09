@@ -4,6 +4,7 @@
  * heteroscedasticity when fan-shape appears.
  */
 import { useRef, useState, useEffect } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640
 const H_TOP = 240
@@ -87,9 +88,9 @@ export default function ResidualPlotInteractive() {
   }, [slope, intercept])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>תרשים שאריות — בדיקת התאמת המודל</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>תרשים שאריות — בדיקת התאמת המודל</h3>
+      <p style={graphSubtitleStyle}>
         גרור נקודות. שאריות צריכות להתפזר אקראית סביב 0. צורת מניפה ↦ heteroscedasticity.
       </p>
       <svg
@@ -103,42 +104,42 @@ export default function ResidualPlotInteractive() {
         style={{ touchAction: 'none' }}
       >
         {/* Top: scatter + regression */}
-        <text x={W / 2} y={20} fill="rgba(31,62,108,0.7)" fontSize={12} textAnchor="middle">תרשים פיזור + קו רגרסיה</text>
-        <line x1={X0} y1={Y1_TOP} x2={X1} y2={Y1_TOP} stroke="rgba(31,62,108,0.4)" />
-        <line x1={X0} y1={Y0_TOP} x2={X0} y2={Y1_TOP} stroke="rgba(31,62,108,0.4)" />
+        <text x={W / 2} y={20} fill={GC.axisText} fontSize={12} textAnchor="middle">תרשים פיזור + קו רגרסיה</text>
+        <line x1={X0} y1={Y1_TOP} x2={X1} y2={Y1_TOP} stroke={GC.axis} />
+        <line x1={X0} y1={Y0_TOP} x2={X0} y2={Y1_TOP} stroke={GC.axis} />
         <line
           x1={toX(xMin)} y1={toYTop(yhat(xMin))}
           x2={toX(xMax)} y2={toYTop(yhat(xMax))}
-          stroke="#FFD700" strokeWidth={2.5}
+          stroke={GC.gold} strokeWidth={2.5}
         />
         {pts.map((p, i) => (
           <line
             key={`r${i}`}
             x1={toX(p.x)} y1={toYTop(p.y)}
             x2={toX(p.x)} y2={toYTop(yhat(p.x))}
-            stroke="#ef4444" strokeWidth={1.2} strokeDasharray="3 3"
+            stroke={GC.warn} strokeWidth={1.2} strokeDasharray="3 3"
           />
         ))}
         {pts.map((p, i) => (
           <circle
             key={i}
             cx={toX(p.x)} cy={toYTop(p.y)} r={9}
-            fill="#60a5fa" stroke="#1F3E6C" strokeWidth={1.5}
+            fill={GC.blue} stroke={GC.ink} strokeWidth={1.5}
             onPointerDown={e => { setDrag(i); (e.target as Element).setPointerCapture(e.pointerId) }}
             style={{ cursor: 'grab' }}
           />
         ))}
 
         {/* Bottom: residual plot */}
-        <text x={W / 2} y={H_TOP + 30} fill="rgba(31,62,108,0.7)" fontSize={12} textAnchor="middle">תרשים שאריות (e = y - ŷ)</text>
-        <line x1={X0} y1={Y1_BOT} x2={X1} y2={Y1_BOT} stroke="rgba(31,62,108,0.4)" />
-        <line x1={X0} y1={Y0_BOT} x2={X0} y2={Y1_BOT} stroke="rgba(31,62,108,0.4)" />
+        <text x={W / 2} y={H_TOP + 30} fill={GC.axisText} fontSize={12} textAnchor="middle">תרשים שאריות (e = y - ŷ)</text>
+        <line x1={X0} y1={Y1_BOT} x2={X1} y2={Y1_BOT} stroke={GC.axis} />
+        <line x1={X0} y1={Y0_BOT} x2={X0} y2={Y1_BOT} stroke={GC.axis} />
         {/* Zero reference line */}
         <line
           x1={X0} y1={toYBot(0)} x2={X1} y2={toYBot(0)}
-          stroke="#FFD700" strokeWidth={1.5} strokeDasharray="5 4"
+          stroke={GC.gold} strokeWidth={1.5} strokeDasharray="5 4"
         />
-        <text x={X1 - 10} y={toYBot(0) - 4} fill="#FFD700" fontSize={11} textAnchor="end">e = 0</text>
+        <text x={X1 - 10} y={toYBot(0) - 4} fill={GC.goldText} fontSize={11} textAnchor="end">e = 0</text>
         {pts.map((p, i) => {
           const r = residuals[i]
           return (
@@ -146,19 +147,19 @@ export default function ResidualPlotInteractive() {
               <line
                 x1={toX(p.x)} y1={toYBot(0)}
                 x2={toX(p.x)} y2={toYBot(r)}
-                stroke="rgba(239,68,68,0.5)" strokeWidth={1}
+                stroke="rgba(179,58,58,0.5)" strokeWidth={1}
               />
               <circle
                 cx={toX(p.x)} cy={toYBot(r)} r={6}
-                fill={Math.abs(r) > 2 ? '#f59e0b' : '#60a5fa'}
-                stroke="#1F3E6C" strokeWidth={1}
+                fill={Math.abs(r) > 2 ? GC.gold : GC.blue}
+                stroke={GC.ink} strokeWidth={1}
               />
             </g>
           )
         })}
         {/* Y axis ticks for residual */}
         {[-4, -2, 0, 2, 4].map(t => (
-          <text key={t} x={X0 - 6} y={toYBot(t) + 4} fill="rgba(31,62,108,0.6)" fontSize={10} textAnchor="end">{t}</text>
+          <text key={t} x={X0 - 6} y={toYBot(t) + 4} fill={GC.axisText} fontSize={10} textAnchor="end">{t}</text>
         ))}
       </svg>
 
@@ -167,8 +168,8 @@ export default function ResidualPlotInteractive() {
       <div
         style={{
           padding: 10,
-          background: hetero ? 'rgba(245,158,11,0.18)' : 'rgba(96,165,250,0.12)',
-          border: '1px solid ' + (hetero ? '#f59e0b' : 'rgba(96,165,250,0.4)'),
+          background: hetero ? 'rgba(212,175,55,0.18)' : 'rgba(78,113,218,0.10)',
+          border: '1px solid ' + (hetero ? GC.gold : 'rgba(78,113,218,0.35)'),
           borderRadius: 8,
           fontSize: 13,
           marginTop: 8,
@@ -182,13 +183,13 @@ export default function ResidualPlotInteractive() {
       <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
         <button
           onClick={() => setPts(base)}
-          style={{ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
+          style={{ background: 'rgba(31,62,108,0.1)', color: GC.ink, border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
         >
           איפוס
         </button>
         <button
           onClick={() => setPts(fanShape)}
-          style={{ background: '#f59e0b', color: '#0B1B3E', border: 0, borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}
+          style={{ background: GC.gold, color: GC.ink, border: 0, borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}
         >
           טעינת מניפה (heteroscedastic)
         </button>

@@ -4,6 +4,7 @@
  * and R² = 1 - SSE/SST. Sliders for slope and intercept.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 360
 const SCAT_X0 = 30, SCAT_Y0 = 30, SCAT_X1 = 380, SCAT_Y1 = 280
@@ -61,37 +62,37 @@ export default function RSquaredDecompositionInteractive() {
   }, [sse, sst, r2])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>פירוק R² — SST = SSE + SSR</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>הזז שיפוע וחיתוך — שמ הסכימים מתחלפים. SST קבוע. R² גדל ככל ש-SSE קטן.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>פירוק R² — SST = SSE + SSR</h3>
+      <p style={graphSubtitleStyle}>הזז שיפוע וחיתוך — שמ הסכימים מתחלפים. SST קבוע. R² גדל ככל ש-SSE קטן.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         {/* scatter axes */}
-        <line x1={SCAT_X0} y1={SCAT_Y1} x2={SCAT_X1} y2={SCAT_Y1} stroke="rgba(31,62,108,0.4)" />
-        <line x1={SCAT_X0} y1={SCAT_Y0} x2={SCAT_X0} y2={SCAT_Y1} stroke="rgba(31,62,108,0.4)" />
+        <line x1={SCAT_X0} y1={SCAT_Y1} x2={SCAT_X1} y2={SCAT_Y1} stroke={GC.axis} />
+        <line x1={SCAT_X0} y1={SCAT_Y0} x2={SCAT_X0} y2={SCAT_Y1} stroke={GC.axis} />
 
         {/* y-mean line */}
-        <line x1={SCAT_X0} y1={toY(yMean)} x2={SCAT_X1} y2={toY(yMean)} stroke="#94a3b8" strokeDasharray="3 3" />
-        <text x={SCAT_X1 + 4} y={toY(yMean) + 4} fill="#94a3b8" fontSize={11}>ȳ</text>
+        <line x1={SCAT_X0} y1={toY(yMean)} x2={SCAT_X1} y2={toY(yMean)} stroke={GC.axisText} strokeDasharray="3 3" />
+        <text x={SCAT_X1 + 4} y={toY(yMean) + 4} fill={GC.axisText} fontSize={11}>ȳ</text>
 
         {/* regression line */}
-        <line x1={toX(0)} y1={toY(lineY0)} x2={toX(xMax)} y2={toY(lineY1)} stroke="#FFD700" strokeWidth={2.5} />
+        <line x1={toX(0)} y1={toY(lineY0)} x2={toX(xMax)} y2={toY(lineY1)} stroke={GC.gold} strokeWidth={2.5} />
 
         {/* residuals (vertical) */}
         {PTS.map((p, i) => {
           const yhat = intercept + slope * p.x
-          return <line key={`r${i}`} x1={toX(p.x)} y1={toY(p.y)} x2={toX(p.x)} y2={toY(yhat)} stroke="#ef4444" strokeWidth={1} opacity={0.6} />
+          return <line key={`r${i}`} x1={toX(p.x)} y1={toY(p.y)} x2={toX(p.x)} y2={toY(yhat)} stroke={GC.warn} strokeWidth={1} opacity={0.6} />
         })}
 
         {/* points */}
-        {PTS.map((p, i) => <circle key={i} cx={toX(p.x)} cy={toY(p.y)} r={4} fill="#60a5fa" />)}
+        {PTS.map((p, i) => <circle key={i} cx={toX(p.x)} cy={toY(p.y)} r={4} fill={GC.blue} />)}
 
         {/* bars */}
-        <text x={BAR_X + 60} y={BAR_Y0 - 8} fill="rgba(31,62,108,0.8)" fontSize={12} textAnchor="middle">Variance Decomposition</text>
-        <Bar x={BAR_X}      yBase={BAR_Y1} h={barH(sst)} color="#94a3b8" label="SST" value={sst} />
-        <Bar x={BAR_X + 65} yBase={BAR_Y1} h={barH(ssr)} color="#FFD700" label="SSR" value={ssr} />
-        <Bar x={BAR_X + 130} yBase={BAR_Y1} h={barH(sse)} color="#ef4444" label="SSE" value={sse} />
-        <Bar x={BAR_X + 195} yBase={BAR_Y1} h={barH(sse + ssr)} color="#60a5fa" label="SSE+SSR" value={sse + ssr} />
+        <text x={BAR_X + 60} y={BAR_Y0 - 8} fill={GC.axisText} fontSize={12} textAnchor="middle">Variance Decomposition</text>
+        <Bar x={BAR_X}      yBase={BAR_Y1} h={barH(sst)} color={GC.axisText} label="SST" value={sst} />
+        <Bar x={BAR_X + 65} yBase={BAR_Y1} h={barH(ssr)} color={GC.gold} label="SSR" value={ssr} />
+        <Bar x={BAR_X + 130} yBase={BAR_Y1} h={barH(sse)} color={GC.warn} label="SSE" value={sse} />
+        <Bar x={BAR_X + 195} yBase={BAR_Y1} h={barH(sse + ssr)} color={GC.blue} label="SSE+SSR" value={sse + ssr} />
       </svg>
 
       <div id="rsq-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
@@ -100,9 +101,9 @@ export default function RSquaredDecompositionInteractive() {
       <Slider label={`intercept = ${intercept.toFixed(2)}`} value={intercept} min={-5} max={10} step={0.1} onChange={setIntercept} />
 
       <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-around' }}>
-        <span style={{ color: '#FFD700' }}>R² = <b>{r2.toFixed(3)}</b></span>
+        <span style={{ color: GC.goldText }}>R² = <b>{r2.toFixed(3)}</b></span>
         <span>SST = {sst.toFixed(2)}</span>
-        <span style={{ color: '#ef4444' }}>SSE = {sse.toFixed(2)}</span>
+        <span style={{ color: GC.warn }}>SSE = {sse.toFixed(2)}</span>
       </div>
     </div>
   )
@@ -112,7 +113,7 @@ function Bar({ x, yBase, h, color, label, value }: { x: number; yBase: number; h
   return (
     <g>
       <rect x={x} y={yBase - h} width={50} height={h} fill={color} opacity={0.7} />
-      <text x={x + 25} y={yBase + 14} fill="#1F3E6C" fontSize={11} textAnchor="middle">{label}</text>
+      <text x={x + 25} y={yBase + 14} fill={GC.ink} fontSize={11} textAnchor="middle">{label}</text>
       <text x={x + 25} y={yBase - h - 4} fill={color} fontSize={11} textAnchor="middle" fontWeight={700}>{value.toFixed(1)}</text>
     </g>
   )
@@ -122,7 +123,7 @@ function Slider({ label, value, min, max, step, onChange }: { label: string; val
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
       <label style={{ fontSize: 13, opacity: 0.85, minWidth: 140 }}>{label}</label>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1 }} />
+      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1, accentColor: GC.blue }} />
     </div>
   )
 }

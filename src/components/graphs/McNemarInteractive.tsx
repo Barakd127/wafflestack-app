@@ -5,6 +5,7 @@
  * the χ²₁ critical value 3.841 (α=0.05).
  */
 import { useState, useEffect, useMemo } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 export default function McNemarInteractive() {
   const [b, setB] = useState(25)   // before + / after −
@@ -28,18 +29,18 @@ export default function McNemarInteractive() {
   const Cell = ({ v, hi, label }: { v: number; hi?: boolean; label: string }) => (
     <div style={{
       padding: '16px 10px', textAlign: 'center', borderRadius: 10,
-      background: hi ? 'rgba(212,160,23,0.20)' : 'rgba(31,62,108,0.06)',
-      border: hi ? '2px solid #D4A017' : '1px solid rgba(31,62,108,0.15)',
+      background: hi ? GC.goldFill : 'rgba(31,62,108,0.06)',
+      border: hi ? `2px solid ${GC.gold}` : '1px solid rgba(31,62,108,0.15)',
     }}>
-      <div style={{ fontSize: 22, fontWeight: 800, color: hi ? '#D4A017' : '#1F3E6C' }}>{v}</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: hi ? GC.goldText : GC.ink }}>{v}</div>
       <div style={{ fontSize: 11, opacity: 0.7, marginTop: 2 }}>{label}</div>
     </div>
   )
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>מבחן מקנמר — נתונים מזווגים (2×2)</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 14 }}>רק התאים הבלתי-מתאימים (b ו-c) — שינו את תשובתם — נכנסים למבחן. התאים המתאימים (a, d) לא משפיעים.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>מבחן מקנמר — נתונים מזווגים (2×2)</h3>
+      <p style={graphSubtitleStyle}>רק התאים הבלתי-מתאימים (b ו-c) — שינו את תשובתם — נכנסים למבחן. התאים המתאימים (a, d) לא משפיעים.</p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 1fr', gap: 8, alignItems: 'center', maxWidth: 440, margin: '0 auto 14px' }}>
         <div />
@@ -64,7 +65,7 @@ export default function McNemarInteractive() {
         <span>χ² = <b>{chi.toFixed(3)}</b></span>
         <span style={{ opacity: 0.85 }}>עם תיקון רציפות: {chiCorr.toFixed(3)}</span>
         <span>ערך קריטי (df=1): 3.841</span>
-        <span style={{ color: reject ? '#16a34a' : '#ef4444', fontWeight: 700 }}>{reject ? 'דוחים H₀' : 'לא דוחים H₀'}</span>
+        <span style={{ color: reject ? GC.good : GC.warn, fontWeight: 700 }}>{reject ? 'דוחים H₀' : 'לא דוחים H₀'}</span>
       </div>
     </div>
   )
@@ -75,8 +76,8 @@ function Slider({ label, value, min, max, step, onChange }: {
 }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-      <label style={{ fontSize: 13, opacity: 0.85, minWidth: 140 }}>{label}</label>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1 }} />
+      <label style={{ fontFamily: GRAPH_FONT, fontSize: 13, opacity: 0.85, minWidth: 140 }}>{label}</label>
+      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1, accentColor: GC.blue }} />
     </div>
   )
 }

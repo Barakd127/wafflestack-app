@@ -4,6 +4,7 @@
  * and explains the order-matters difference visually.
  */
 import { useState, useMemo, useEffect } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 360
 const COLORS = ['#FFD700', '#60a5fa', '#34A853', '#D4A017', '#a855f7', '#FF6B35', '#06b6d4', '#ec4899', '#84cc16', '#94a3b8']
@@ -64,18 +65,18 @@ export default function CombinationsVsPermutationsInteractive() {
 
   const chip = (idx: number, x: number, y: number) => (
     <g key={`${x}-${y}-${idx}`}>
-      <circle cx={x} cy={y} r={11} fill={COLORS[idx % COLORS.length]} stroke="#0B1B3E" strokeWidth={1} />
-      <text x={x} y={y + 4} fill="#0B1B3E" fontSize={11} fontWeight={700} textAnchor="middle">{String.fromCharCode(65 + idx)}</text>
+      <circle cx={x} cy={y} r={11} fill={COLORS[idx % COLORS.length]} stroke={GC.ink} strokeWidth={1} />
+      <text x={x} y={y + 4} fill={GC.ink} fontSize={11} fontWeight={700} textAnchor="middle">{String.fromCharCode(65 + idx)}</text>
     </g>
   )
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>צירופים מול חליפות — Combinations vs Permutations</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>אותם {r} אסימונים — כצירוף (ללא סדר) זה אחד, כחליפות (עם סדר) זה {r}! סדרים.</p>
+    <div dir="rtl" style={graphCardStyle}>
+      <h3 style={graphTitleStyle}>צירופים מול חליפות — Combinations vs Permutations</h3>
+      <p style={graphSubtitleStyle}>אותם {r} אסימונים — כצירוף (ללא סדר) זה אחד, כחליפות (עם סדר) זה {r}! סדרים.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <text x={20} y={30} fill="#FFD700" fontSize={14} fontWeight={700}>nCr — ללא סדר ({Math.min(C, 6)} מתוך {C})</text>
+        <text x={20} y={30} fill={GC.goldText} fontSize={14} fontWeight={700}>nCr — ללא סדר ({Math.min(C, 6)} מתוך {C})</text>
         {cR.map((row, ri) => (
           <g key={`c${ri}`}>
             <rect x={20} y={50 + ri * 30} width={300} height={24} rx={6} fill="rgba(255,215,0,0.08)" stroke="rgba(255,215,0,0.3)" />
@@ -83,7 +84,7 @@ export default function CombinationsVsPermutationsInteractive() {
           </g>
         ))}
 
-        <text x={340} y={30} fill="#60a5fa" fontSize={14} fontWeight={700}>nPr — עם סדר ({Math.min(P, 8)} מתוך {P})</text>
+        <text x={340} y={30} fill={GC.blue} fontSize={14} fontWeight={700}>nPr — עם סדר ({Math.min(P, 8)} מתוך {P})</text>
         {cPerm.map((row, ri) => (
           <g key={`p${ri}`}>
             <rect x={340} y={50 + ri * 30} width={280} height={24} rx={6} fill="rgba(96,165,250,0.08)" stroke="rgba(96,165,250,0.3)" />
@@ -99,8 +100,8 @@ export default function CombinationsVsPermutationsInteractive() {
       <Slider label={`r = ${r}`} value={r} min={0} max={n} step={1} onChange={v => setR(Math.round(v))} />
 
       <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-around' }}>
-        <span style={{ color: '#FFD700', fontWeight: 700 }}>nCr = {C}</span>
-        <span style={{ color: '#60a5fa', fontWeight: 700 }}>nPr = {P}</span>
+        <span style={{ color: GC.goldText, fontWeight: 700 }}>nCr = {C}</span>
+        <span style={{ color: GC.blue, fontWeight: 700 }}>nPr = {P}</span>
         <span>יחס = r! = {fact(r)}</span>
       </div>
     </div>
@@ -110,8 +111,8 @@ export default function CombinationsVsPermutationsInteractive() {
 function Slider({ label, value, min, max, step, onChange }: { label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-      <label style={{ fontSize: 13, opacity: 0.85, minWidth: 80 }}>{label}</label>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1 }} />
+      <label style={{ fontFamily: GRAPH_FONT, fontSize: 13, opacity: 0.85, minWidth: 80 }}>{label}</label>
+      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1, accentColor: GC.blue }} />
     </div>
   )
 }

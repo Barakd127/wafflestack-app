@@ -67,10 +67,22 @@ export function bidiSegments(line: string): BidiSeg[] {
 
   // Pass 1 — per-char classes, enumeration chars forced LTR-strong.
   const chars = [...line]
+  const isDigit = (c: string | undefined) => !!c && /[0-9]/.test(c)
+  const isHeb = (c: string | undefined) => !!c && HEBREW_CHAR_RE.test(c)
+  const isHyphen = (c: string) => c === '-' || c === '־' /* maqaf */
   const cls: Cls[] = []
   let pos = 0
-  for (const ch of chars) {
-    cls.push(inEnum(pos) ? 'ltr' : classify(ch))
+  for (let k = 0; k < chars.length; k++) {
+    const ch = chars[k]
+    // Maqaf/hyphen directly between a Hebrew letter and a digit ("ל-100") is a
+    // Hebrew prefix separator, NOT a minus sign: it must stay with the Hebrew
+    // letter (render to its LEFT) instead of being pulled into the LTR number
+    // island. User rule 2026-07-08: "מקף משמאל לאות שמקדימה אותו".
+    if (!inEnum(pos) && isHyphen(ch) && isHeb(chars[k - 1]) && isDigit(chars[k + 1])) {
+      cls.push('heb')
+    } else {
+      cls.push(inEnum(pos) ? 'ltr' : classify(ch))
+    }
     pos += ch.length
   }
 

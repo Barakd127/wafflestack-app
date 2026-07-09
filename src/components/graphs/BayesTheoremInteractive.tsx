@@ -4,6 +4,7 @@
  * tree and a comparison bar for prior vs posterior.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 360, PAD = 24
 
@@ -43,49 +44,49 @@ export default function BayesTheoremInteractive() {
     <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth={1.5} />
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>משפט בייס — Bayes' Theorem</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>משפט בייס — Bayes' Theorem</h3>
+      <p style={graphSubtitleStyle}>
         הזז את ההסתברות הקודמת P(H), את הסבירות P(E|H), ואת התראת השווא P(E|¬H). הפוסטריור P(H|E) מחושב חי.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         {/* Tree */}
-        {branch(rootX, rootY + 80, lvl1X, yH + 30, '#D4A017')}
-        {branch(rootX, rootY + 80, lvl1X, yNH + 30, '#1F3E6C')}
-        {branch(lvl1X + 40, yH + 30, lvl2X, yEH + 12, '#D4A017')}
-        {branch(lvl1X + 40, yH + 30, lvl2X, yNEH + 12, '#D4A017')}
-        {branch(lvl1X + 40, yNH + 30, lvl2X, yENH + 12, '#1F3E6C')}
-        {branch(lvl1X + 40, yNH + 30, lvl2X, yNENH + 12, '#1F3E6C')}
+        {branch(rootX, rootY + 80, lvl1X, yH + 30, GC.gold)}
+        {branch(rootX, rootY + 80, lvl1X, yNH + 30, GC.ink)}
+        {branch(lvl1X + 40, yH + 30, lvl2X, yEH + 12, GC.gold)}
+        {branch(lvl1X + 40, yH + 30, lvl2X, yNEH + 12, GC.gold)}
+        {branch(lvl1X + 40, yNH + 30, lvl2X, yENH + 12, GC.ink)}
+        {branch(lvl1X + 40, yNH + 30, lvl2X, yNENH + 12, GC.ink)}
 
         {/* Root */}
-        <text x={rootX} y={rootY + 78} fill="#1F3E6C" fontSize={13} fontWeight={700} textAnchor="end">התחלה</text>
+        <text x={rootX} y={rootY + 78} fill={GC.ink} fontSize={13} fontWeight={700} textAnchor="end">התחלה</text>
 
         {/* Level 1 */}
-        <rect x={lvl1X} y={yH} width={80} height={36} rx={6} fill="rgba(212,160,23,0.30)" stroke="#D4A017" />
-        <text x={lvl1X + 40} y={yH + 16} fill="#9A6B00" fontSize={12} textAnchor="middle">H</text>
-        <text x={lvl1X + 40} y={yH + 30} fill="#1F3E6C" fontSize={11} textAnchor="middle">{prior.toFixed(2)}</text>
+        <rect x={lvl1X} y={yH} width={80} height={36} rx={6} fill={GC.goldFill} stroke={GC.gold} />
+        <text x={lvl1X + 40} y={yH + 16} fill={GC.goldText} fontSize={12} textAnchor="middle">H</text>
+        <text x={lvl1X + 40} y={yH + 30} fill={GC.ink} fontSize={11} textAnchor="middle">{prior.toFixed(2)}</text>
 
-        <rect x={lvl1X} y={yNH} width={80} height={36} rx={6} fill="rgba(31,62,108,0.18)" stroke="#1F3E6C" />
-        <text x={lvl1X + 40} y={yNH + 16} fill="#1F3E6C" fontSize={12} textAnchor="middle">¬H</text>
-        <text x={lvl1X + 40} y={yNH + 30} fill="#1F3E6C" fontSize={11} textAnchor="middle">{(1 - prior).toFixed(2)}</text>
+        <rect x={lvl1X} y={yNH} width={80} height={36} rx={6} fill="rgba(31,62,108,0.18)" stroke={GC.ink} />
+        <text x={lvl1X + 40} y={yNH + 16} fill={GC.ink} fontSize={12} textAnchor="middle">¬H</text>
+        <text x={lvl1X + 40} y={yNH + 30} fill={GC.ink} fontSize={11} textAnchor="middle">{(1 - prior).toFixed(2)}</text>
 
         {/* Level 2 */}
-        <text x={lvl2X} y={yEH + 12} fill="#9A6B00" fontSize={11}>E · {pHE.toFixed(3)}</text>
-        <text x={lvl2X} y={yNEH + 12} fill="rgba(31,62,108,0.6)" fontSize={11}>¬E · {(prior * (1 - likely)).toFixed(3)}</text>
-        <text x={lvl2X} y={yENH + 12} fill="#1F3E6C" fontSize={11}>E · {pNHE.toFixed(3)}</text>
-        <text x={lvl2X} y={yNENH + 12} fill="rgba(31,62,108,0.6)" fontSize={11}>¬E · {((1 - prior) * (1 - fp)).toFixed(3)}</text>
+        <text x={lvl2X} y={yEH + 12} fill={GC.goldText} fontSize={11}>E · {pHE.toFixed(3)}</text>
+        <text x={lvl2X} y={yNEH + 12} fill={GC.axisText} fontSize={11}>¬E · {(prior * (1 - likely)).toFixed(3)}</text>
+        <text x={lvl2X} y={yENH + 12} fill={GC.ink} fontSize={11}>E · {pNHE.toFixed(3)}</text>
+        <text x={lvl2X} y={yNENH + 12} fill={GC.axisText} fontSize={11}>¬E · {((1 - prior) * (1 - fp)).toFixed(3)}</text>
 
         {/* Posterior bar */}
         <text x={PAD} y={H - 60} fill="rgba(31,62,108,0.8)" fontSize={12}>Prior P(H)</text>
-        <rect x={PAD + 90} y={H - 72} width={400 * prior} height={16} fill="#2D5BA8" />
+        <rect x={PAD + 90} y={H - 72} width={400 * prior} height={16} fill={GC.blue} />
         <rect x={PAD + 90} y={H - 72} width={400} height={16} fill="none" stroke="rgba(31,62,108,0.3)" />
-        <text x={PAD + 90 + 405} y={H - 60} fill="#1F3E6C" fontSize={12}>{prior.toFixed(3)}</text>
+        <text x={PAD + 90 + 405} y={H - 60} fill={GC.ink} fontSize={12}>{prior.toFixed(3)}</text>
 
-        <text x={PAD} y={H - 30} fill="#9A6B00" fontSize={12} fontWeight={700}>Posterior P(H|E)</text>
-        <rect x={PAD + 90} y={H - 42} width={400 * post} height={16} fill="#D4A017" />
+        <text x={PAD} y={H - 30} fill={GC.goldText} fontSize={12} fontWeight={700}>Posterior P(H|E)</text>
+        <rect x={PAD + 90} y={H - 42} width={400 * post} height={16} fill={GC.gold} />
         <rect x={PAD + 90} y={H - 42} width={400} height={16} fill="none" stroke="rgba(31,62,108,0.3)" />
-        <text x={PAD + 90 + 405} y={H - 30} fill="#9A6B00" fontSize={12} fontWeight={700}>{post.toFixed(3)}</text>
+        <text x={PAD + 90 + 405} y={H - 30} fill={GC.goldText} fontSize={12} fontWeight={700}>{post.toFixed(3)}</text>
       </svg>
 
       <div id="bayes-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
@@ -106,8 +107,8 @@ function SliderRow({ label, value, min, max, step, onChange }: {
 }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-      <label style={{ fontSize: 13, opacity: 0.85, minWidth: 200 }}>{label}</label>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1 }} />
+      <label style={{ fontFamily: GRAPH_FONT, fontSize: 13, opacity: 0.85, minWidth: 200 }}>{label}</label>
+      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1, accentColor: GC.blue }} />
     </div>
   )
 }

@@ -4,6 +4,7 @@
  * Shows when the 3 measures disagree (skewed distributions).
  */
 import { useState, useRef, useEffect } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 360, PAD = 50
 const X0 = PAD, X1 = W - PAD, Y0 = PAD, Y1 = H - 80
@@ -54,30 +55,30 @@ export default function MeanVsMedianVsMode() {
   }, [meanX, medianX, modeX])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>ממוצע מול חציון ושכיח — מתי הם נפרדים</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור עמודות מעלה ומטה. כשההתפלגות סימטרית — שלושת המדדים שווים. כשהיא מוטה — הם מתפצלים.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>ממוצע מול חציון ושכיח — מתי הם נפרדים</h3>
+      <p style={graphSubtitleStyle}>גרור עמודות מעלה ומטה. כשההתפלגות סימטרית — שלושת המדדים שווים. כשהיא מוטה — הם מתפצלים.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
         {heights.map((h, i) => (
           <rect key={i} x={X0 + i * binW + 2} y={toY(h)} width={binW - 4} height={Y1 - toY(h)}
-            fill="rgba(96,165,250,0.55)" stroke="#60a5fa" strokeWidth={1.5}
+            fill="rgba(96,165,250,0.55)" stroke={GC.blue} strokeWidth={1.5}
             onPointerDown={e => { setDrag(i); (e.target as Element).setPointerCapture(e.pointerId) }}
             style={{ cursor: 'ns-resize' }} />
         ))}
-        <line x1={toX(meanX)} y1={Y0 - 8} x2={toX(meanX)} y2={Y1 + 6} stroke="#FFD700" strokeWidth={2.5} />
-        <text x={toX(meanX)} y={Y0 - 14} fill="#FFD700" fontSize={12} textAnchor="middle" fontWeight={700}>ממוצע</text>
+        <line x1={toX(meanX)} y1={Y0 - 8} x2={toX(meanX)} y2={Y1 + 6} stroke={GC.gold} strokeWidth={2.5} />
+        <text x={toX(meanX)} y={Y0 - 14} fill={GC.goldText} fontSize={12} textAnchor="middle" fontWeight={700} fontFamily={GRAPH_FONT}>ממוצע</text>
         <line x1={toX(medianX)} y1={Y0 - 8} x2={toX(medianX)} y2={Y1 + 6} stroke="#C0C0C0" strokeWidth={2.5} strokeDasharray="5 3" />
-        <text x={toX(medianX)} y={Y0 - 28} fill="#C0C0C0" fontSize={12} textAnchor="middle" fontWeight={700}>חציון</text>
+        <text x={toX(medianX)} y={Y0 - 28} fill="#C0C0C0" fontSize={12} textAnchor="middle" fontWeight={700} fontFamily={GRAPH_FONT}>חציון</text>
         <line x1={toX(modeX)} y1={Y0 - 8} x2={toX(modeX)} y2={Y1 + 6} stroke="#A855F7" strokeWidth={2.5} strokeDasharray="2 4" />
-        <text x={toX(modeX)} y={Y0 - 42} fill="#A855F7" fontSize={12} textAnchor="middle" fontWeight={700}>שכיח</text>
+        <text x={toX(modeX)} y={Y0 - 42} fill="#A855F7" fontSize={12} textAnchor="middle" fontWeight={700} fontFamily={GRAPH_FONT}>שכיח</text>
       </svg>
       <div id="mmm-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <button onClick={() => setHeights(INITIAL_HEIGHTS)} style={{
-        background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)',
-        borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13,
+        background: 'rgba(31,62,108,0.1)', color: GC.ink, border: '1px solid rgba(31,62,108,0.2)',
+        borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontFamily: GRAPH_FONT, fontSize: 13,
       }}>איפוס לסימטריה</button>
     </div>
   )

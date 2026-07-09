@@ -3,6 +3,7 @@
  * F = MSB/MSW. Drag group means via slider. Visualize partition of variance.
  */
 import { useState, useMemo, useEffect } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 340, PAD = 50
 const X0 = PAD, X1 = W - PAD, Y0 = PAD, Y1 = H - 70
@@ -50,18 +51,18 @@ export default function ANOVAInteractive() {
   }, [F, msB, msW])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>ANOVA — שונות בין קבוצות מול בתוך קבוצות</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור את הממוצעים של 3 הקבוצות. F גדל כשההפרשים בין הקבוצות גדולים יחסית לפיזור בתוך כל קבוצה.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>ANOVA — שונות בין קבוצות מול בתוך קבוצות</h3>
+      <p style={graphSubtitleStyle}>גרור את הממוצעים של 3 הקבוצות. F גדל כשההפרשים בין הקבוצות גדולים יחסית לפיזור בתוך כל קבוצה.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
-        <line x1={X0} y1={toY(grandMean)} x2={X1} y2={toY(grandMean)} stroke="#1F3E6C" strokeWidth={1.5} strokeDasharray="6 4" />
-        <text x={X1 - 6} y={toY(grandMean) - 4} fill="#1F3E6C" fontSize={11} textAnchor="end">ממוצע כללי = {grandMean.toFixed(2)}</text>
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
+        <line x1={X0} y1={toY(grandMean)} x2={X1} y2={toY(grandMean)} stroke={GC.ink} strokeWidth={1.5} strokeDasharray="6 4" />
+        <text x={X1 - 6} y={toY(grandMean) - 4} fill={GC.ink} fontSize={11} textAnchor="end">ממוצע כללי = {grandMean.toFixed(2)}</text>
         {groups.map((g, gi) => {
           const cx = X0 + (gi + 0.5) * (X1 - X0) / 3
           return (
             <g key={gi}>
-              {g.map((v, i) => <circle key={i} cx={cx + ((i % 4) - 1.5) * 14} cy={toY(v)} r={5} fill={groupColors[gi]} stroke="#1F3E6C" strokeWidth={1} />)}
+              {g.map((v, i) => <circle key={i} cx={cx + ((i % 4) - 1.5) * 14} cy={toY(v)} r={5} fill={groupColors[gi]} stroke={GC.ink} strokeWidth={1} />)}
               <line x1={cx - 50} y1={toY(groupMeans[gi])} x2={cx + 50} y2={toY(groupMeans[gi])} stroke={groupColors[gi]} strokeWidth={3} />
               <text x={cx} y={Y1 + 22} fill={groupColors[gi]} fontSize={12} textAnchor="middle" fontWeight={700}>קבוצה {gi + 1}: {groupMeans[gi].toFixed(2)}</text>
             </g>
@@ -71,11 +72,11 @@ export default function ANOVAInteractive() {
       <div id="anova-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10, marginTop: 8 }}>
         {means.map((m, i) => (
-          <label key={i} style={{ fontSize: 12 }}>μ{i + 1}: {m.toFixed(1)}
-            <input type="range" min={1} max={11} step={0.1} value={m} onChange={e => setMeans(p => { const c = [...p] as [number, number, number]; c[i] = +e.target.value; return c })} style={{ width: '100%' }} />
+          <label key={i} style={{ fontFamily: GRAPH_FONT, fontSize: 12 }}>μ{i + 1}: {m.toFixed(1)}
+            <input type="range" min={1} max={11} step={0.1} value={m} onChange={e => setMeans(p => { const c = [...p] as [number, number, number]; c[i] = +e.target.value; return c })} style={{ width: '100%', accentColor: GC.blue }} />
           </label>
         ))}
-        <label style={{ fontSize: 12 }}>פיזור: {spread.toFixed(1)}<input type="range" min={0.2} max={3} step={0.1} value={spread} onChange={e => setSpread(+e.target.value)} style={{ width: '100%' }} /></label>
+        <label style={{ fontFamily: GRAPH_FONT, fontSize: 12 }}>פיזור: {spread.toFixed(1)}<input type="range" min={0.2} max={3} step={0.1} value={spread} onChange={e => setSpread(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
       </div>
     </div>
   )

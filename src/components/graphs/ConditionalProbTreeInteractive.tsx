@@ -4,6 +4,7 @@
  * Bayesian inverse P(A|B). Visualizes the tree with proportional branch widths.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 340
 
@@ -49,36 +50,36 @@ export default function ConditionalProbTreeInteractive() {
   const wNBN = Math.max(1.2, (1 - pBN) * 6)
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>הסתברות מותנית — עץ A → B</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
+    <div dir="rtl" style={graphCardStyle}>
+      <h3 style={graphTitleStyle}>הסתברות מותנית — עץ A → B</h3>
+      <p style={graphSubtitleStyle}>
         רוחב הענפים פרופורציוני להסתברות. שלוש המחוונים שולטים בכל ההסתברויות המותנות.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={ROOT.x} y1={ROOT.y} x2={L1A.x} y2={L1A.y} stroke="#1F3E6C" strokeWidth={widthA} opacity={0.6} />
-        <line x1={ROOT.x} y1={ROOT.y} x2={L1NA.x} y2={L1NA.y} stroke="#D4A017" strokeWidth={widthNA} opacity={0.6} />
+        <line x1={ROOT.x} y1={ROOT.y} x2={L1A.x} y2={L1A.y} stroke={GC.ink} strokeWidth={widthA} opacity={0.6} />
+        <line x1={ROOT.x} y1={ROOT.y} x2={L1NA.x} y2={L1NA.y} stroke={GC.gold} strokeWidth={widthNA} opacity={0.6} />
 
-        <line x1={L1A.x + 30} y1={L1A.y} x2={L2(L1A, -40).x} y2={L2(L1A, -40).y} stroke="#1F3E6C" strokeWidth={wBA} opacity={0.6} />
+        <line x1={L1A.x + 30} y1={L1A.y} x2={L2(L1A, -40).x} y2={L2(L1A, -40).y} stroke={GC.ink} strokeWidth={wBA} opacity={0.6} />
         <line x1={L1A.x + 30} y1={L1A.y} x2={L2(L1A, 40).x} y2={L2(L1A, 40).y} stroke="rgba(31,62,108,0.4)" strokeWidth={wNBA} opacity={0.6} />
 
-        <line x1={L1NA.x + 30} y1={L1NA.y} x2={L2(L1NA, -40).x} y2={L2(L1NA, -40).y} stroke="#D4A017" strokeWidth={wBN} opacity={0.6} />
+        <line x1={L1NA.x + 30} y1={L1NA.y} x2={L2(L1NA, -40).x} y2={L2(L1NA, -40).y} stroke={GC.gold} strokeWidth={wBN} opacity={0.6} />
         <line x1={L1NA.x + 30} y1={L1NA.y} x2={L2(L1NA, 40).x} y2={L2(L1NA, 40).y} stroke="rgba(212,160,23,0.4)" strokeWidth={wNBN} opacity={0.6} />
 
-        <circle cx={ROOT.x} cy={ROOT.y} r={6} fill="rgba(31,62,108,0.08)" stroke="#1F3E6C" />
+        <circle cx={ROOT.x} cy={ROOT.y} r={6} fill="rgba(31,62,108,0.08)" stroke={GC.ink} />
         {lab(ROOT.x - 22, ROOT.y + 4, '·', 'var(--sh-text-dark)')}
 
-        <rect x={L1A.x} y={L1A.y - 16} width={60} height={32} rx={6} fill="rgba(31,62,108,0.08)" stroke="#1F3E6C" />
-        {lab(L1A.x + 4, L1A.y - 2, `A: ${pA.toFixed(2)}`, '#1F3E6C')}
+        <rect x={L1A.x} y={L1A.y - 16} width={60} height={32} rx={6} fill="rgba(31,62,108,0.08)" stroke={GC.ink} />
+        {lab(L1A.x + 4, L1A.y - 2, `A: ${pA.toFixed(2)}`, GC.ink)}
         {lab(L1A.x + 4, L1A.y + 12, `P(B|A)=${pBA.toFixed(2)}`, 'var(--sh-text-dark)', 9)}
 
-        <rect x={L1NA.x} y={L1NA.y - 16} width={60} height={32} rx={6} fill="rgba(31,62,108,0.08)" stroke="#D4A017" />
-        {lab(L1NA.x + 4, L1NA.y - 2, `¬A: ${(1 - pA).toFixed(2)}`, '#9A6B00')}
+        <rect x={L1NA.x} y={L1NA.y - 16} width={60} height={32} rx={6} fill="rgba(31,62,108,0.08)" stroke={GC.gold} />
+        {lab(L1NA.x + 4, L1NA.y - 2, `¬A: ${(1 - pA).toFixed(2)}`, GC.goldText)}
         {lab(L1NA.x + 4, L1NA.y + 12, `P(B|¬A)=${pBN.toFixed(2)}`, 'var(--sh-text-dark)', 9)}
 
-        {lab(L2(L1A, -40).x, L2(L1A, -40).y, `A∩B: ${pAB.toFixed(3)}`, '#1F3E6C')}
+        {lab(L2(L1A, -40).x, L2(L1A, -40).y, `A∩B: ${pAB.toFixed(3)}`, GC.ink)}
         {lab(L2(L1A, 40).x, L2(L1A, 40).y, `A∩¬B: ${pANB.toFixed(3)}`, 'var(--sh-text-dark)')}
-        {lab(L2(L1NA, -40).x, L2(L1NA, -40).y, `¬A∩B: ${pNAB.toFixed(3)}`, '#9A6B00')}
+        {lab(L2(L1NA, -40).x, L2(L1NA, -40).y, `¬A∩B: ${pNAB.toFixed(3)}`, GC.goldText)}
         {lab(L2(L1NA, 40).x, L2(L1NA, 40).y, `¬A∩¬B: ${pNANB.toFixed(3)}`, 'var(--sh-text-dark)')}
       </svg>
 
@@ -91,7 +92,7 @@ export default function ConditionalProbTreeInteractive() {
       <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-between' }}>
         <span>P(B) = <b>{pB.toFixed(3)}</b></span>
         <span>P(A∩B) = <b>{pAB.toFixed(3)}</b></span>
-        <span style={{ color: '#D4A017' }}>P(A|B) = <b>{pAgB.toFixed(3)}</b></span>
+        <span style={{ color: GC.goldText }}>P(A|B) = <b>{pAgB.toFixed(3)}</b></span>
       </div>
     </div>
   )
@@ -100,8 +101,8 @@ export default function ConditionalProbTreeInteractive() {
 function SliderRow({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-      <label style={{ fontSize: 13, opacity: 0.85, minWidth: 160 }}>{label}</label>
-      <input type="range" min={0.01} max={0.99} step={0.01} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1 }} />
+      <label style={{ fontFamily: GRAPH_FONT, fontSize: 13, opacity: 0.85, minWidth: 160 }}>{label}</label>
+      <input type="range" min={0.01} max={0.99} step={0.01} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1, accentColor: GC.blue }} />
     </div>
   )
 }

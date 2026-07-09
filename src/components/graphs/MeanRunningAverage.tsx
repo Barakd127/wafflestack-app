@@ -4,6 +4,7 @@
  * Sliders: true μ, true σ. Re-sample button regenerates the sequence.
  */
 import { useState, useMemo, useEffect } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 320, PAD = 50
 const X0 = PAD, X1 = W - PAD, Y0 = PAD, Y1 = H - 70
@@ -52,29 +53,29 @@ export default function MeanRunningAverage() {
   }, [mu])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>חוק המספרים הגדולים — התכנסות הממוצע</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>ככל ש-n גדל, הממוצע המדגמי מתקרב לממוצע האוכלוסיה האמיתי μ.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>חוק המספרים הגדולים — התכנסות הממוצע</h3>
+      <p style={graphSubtitleStyle}>ככל ש-n גדל, הממוצע המדגמי מתקרב לממוצע האוכלוסיה האמיתי μ.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
-        <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke="rgba(31,62,108,0.4)" />
-        <line x1={X0} y1={toY(mu)} x2={X1} y2={toY(mu)} stroke="#60a5fa" strokeWidth={1.5} strokeDasharray="6 4" />
-        <text x={X1 - 6} y={toY(mu) - 4} fill="#60a5fa" fontSize={12} textAnchor="end">μ = {mu}</text>
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
+        <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke={GC.axis} />
+        <line x1={X0} y1={toY(mu)} x2={X1} y2={toY(mu)} stroke={GC.blue} strokeWidth={1.5} strokeDasharray="6 4" />
+        <text x={X1 - 6} y={toY(mu) - 4} fill={GC.blue} fontSize={12} textAnchor="end" fontFamily={GRAPH_FONT}>μ = {mu}</text>
         {series.samples.map((v, i) => (
           <circle key={i} cx={toX(i)} cy={toY(v)} r={3} fill="rgba(31,62,108,0.25)" />
         ))}
-        <path d={runningPath} stroke="#FFD700" strokeWidth={2.5} fill="none" />
+        <path d={runningPath} stroke={GC.gold} strokeWidth={2.5} fill="none" />
         {[0, 10, 20, 30, 40, 49].map(i => (
-          <text key={i} x={toX(i)} y={Y1 + 18} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{i + 1}</text>
+          <text key={i} x={toX(i)} y={Y1 + 18} fill={GC.axisText} fontSize={11} textAnchor="middle" fontFamily={GRAPH_FONT}>{i + 1}</text>
         ))}
-        <text x={X0 - 24} y={Y0 + 8} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle" transform={`rotate(-90 ${X0 - 24} ${Y0 + 8})`}>ערך</text>
+        <text x={X0 - 24} y={Y0 + 8} fill={GC.axisText} fontSize={11} textAnchor="middle" fontFamily={GRAPH_FONT} transform={`rotate(-90 ${X0 - 24} ${Y0 + 8})`}>ערך</text>
       </svg>
       <div id="lln-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
-        <label style={{ fontSize: 12 }}>μ אמיתי: {mu}<input type="range" min={20} max={80} value={mu} onChange={e => setMu(+e.target.value)} style={{ width: '100%' }} /></label>
-        <label style={{ fontSize: 12 }}>σ: {sigma}<input type="range" min={2} max={25} value={sigma} onChange={e => setSigma(+e.target.value)} style={{ width: '100%' }} /></label>
+        <label style={{ fontFamily: GRAPH_FONT, fontSize: 12 }}>μ אמיתי: {mu}<input type="range" min={20} max={80} value={mu} onChange={e => setMu(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
+        <label style={{ fontFamily: GRAPH_FONT, fontSize: 12 }}>σ: {sigma}<input type="range" min={2} max={25} value={sigma} onChange={e => setSigma(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
       </div>
-      <button onClick={() => setSeed(s => s + 1)} style={{ background: '#FFD700', color: '#0B1B3E', border: 'none', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: 700, marginTop: 8 }}>דגום מחדש</button>
+      <button onClick={() => setSeed(s => s + 1)} style={{ background: GC.gold, color: GC.ink, border: 'none', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontFamily: GRAPH_FONT, fontSize: 13, fontWeight: 700, marginTop: 8 }}>דגום מחדש</button>
     </div>
   )
 }

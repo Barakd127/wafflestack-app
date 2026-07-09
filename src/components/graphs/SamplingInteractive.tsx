@@ -3,6 +3,7 @@
  * Highlights sampled dots, shows sample mean vs population mean.
  */
 import { useState, useMemo, useEffect } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 320, PAD = 30
 
@@ -43,20 +44,20 @@ export default function SamplingInteractive() {
   }, [popMean, sampleMean])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>מדגם (Sampling) — אוכלוסיה ומדגם אקראי</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>200 נקודות באוכלוסיה. גרור n + לחץ "דגום מחדש" כדי לראות איך הממוצע במדגם מתקרב לממוצע האוכלוסיה כש-n גדל.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>מדגם (Sampling) — אוכלוסיה ומדגם אקראי</h3>
+      <p style={graphSubtitleStyle}>200 נקודות באוכלוסיה. גרור n + לחץ "דגום מחדש" כדי לראות איך הממוצע במדגם מתקרב לממוצע האוכלוסיה כש-n גדל.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         {pop.map((p, i) => (
           <circle key={i} cx={p.x} cy={p.y} r={sampleIdx.has(i) ? 6 : 3}
-            fill={sampleIdx.has(i) ? '#FFD700' : 'rgba(96,165,250,0.4)'}
-            stroke={sampleIdx.has(i) ? '#fff' : 'none'} strokeWidth={1.5} />
+            fill={sampleIdx.has(i) ? GC.gold : 'rgba(78,113,218,0.4)'}
+            stroke={sampleIdx.has(i) ? GC.ink : 'none'} strokeWidth={1.5} />
         ))}
       </svg>
       <div id="samp-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
-        <label style={{ flex: 1, fontSize: 13 }}>n: {n}<input type="range" min={5} max={150} value={n} onChange={e => setN(+e.target.value)} style={{ width: '100%' }} /></label>
-        <button onClick={() => setSeed(s => s + 1)} style={{ background: '#FFD700', color: '#0B1B3E', border: 'none', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>דגום מחדש</button>
+        <label style={{ flex: 1, fontSize: 13 }}>n: {n}<input type="range" min={5} max={150} value={n} onChange={e => setN(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
+        <button onClick={() => setSeed(s => s + 1)} style={{ background: GC.gold, color: GC.ink, border: 'none', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>דגום מחדש</button>
       </div>
     </div>
   )

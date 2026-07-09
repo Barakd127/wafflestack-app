@@ -7,6 +7,7 @@
  * why a SELECT alias can't be used inside WHERE.
  */
 import { useState } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const STAGES = [
   { kw: 'FROM products',            he: 'הפקיד ניגש למדף — כל 8 הקופסאות על השולחן', rows: 8 },
@@ -33,9 +34,9 @@ export default function SQLExecutionOrderInteractive() {
   const maxRows = STAGES[0].rows
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)', fontFamily: 'Rubik, sans-serif' }}>
-      <h3 style={{ fontSize: 18, margin: '0 0 4px' }}>הסוד של הפקיד — סדר הביצוע האמיתי</h3>
-      <p style={{ fontSize: 14, opacity: 0.75, margin: '0 0 12px' }}>השאילתה נכתבת מלמעלה למטה, אבל הפקיד מבצע אותה בסדר אחר. עברו שלב-שלב וראו את משפך השורות מצטמצם.</p>
+    <div dir="rtl" style={graphCardStyle}>
+      <h3 style={graphTitleStyle}>הסוד של הפקיד — סדר הביצוע האמיתי</h3>
+      <p style={graphSubtitleStyle}>השאילתה נכתבת מלמעלה למטה, אבל הפקיד מבצע אותה בסדר אחר. עברו שלב-שלב וראו את משפך השורות מצטמצם.</p>
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
         {/* written query, highlighted by execution step */}
@@ -59,8 +60,8 @@ export default function SQLExecutionOrderInteractive() {
               return (
                 <g key={i}>
                   <rect x={(240 - w) / 2} y={i * 15 + 4} width={w} height={11} rx={4}
-                    fill={i === step ? '#D4A017' : 'rgba(31,62,108,0.45)'} />
-                  <text x={232} y={i * 15 + 13} textAnchor="end" fontSize={9} fill="var(--sh-text-dark)">{s.rows}</text>
+                    fill={i === step ? GC.gold : 'rgba(31,62,108,0.45)'} />
+                  <text x={232} y={i * 15 + 13} textAnchor="end" fontSize={9} fill={GC.ink}>{s.rows}</text>
                 </g>
               )
             })}
@@ -71,14 +72,14 @@ export default function SQLExecutionOrderInteractive() {
       <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center', flexWrap: 'wrap' }}>
         <button onClick={() => setStep(s => Math.max(0, s - 1))} aria-disabled={step === 0} style={{
           padding: '7px 18px', borderRadius: 10, cursor: step === 0 ? 'default' : 'pointer', opacity: step === 0 ? 0.4 : 1,
-          background: 'rgba(255,255,255,0.08)', color: 'var(--sh-text-dark)', border: '1px solid rgba(255,255,255,0.2)', fontFamily: 'inherit', fontSize: 14,
+          background: 'rgba(31,62,108,0.06)', color: GC.ink, border: '1px solid rgba(127,155,217,0.22)', fontFamily: GRAPH_FONT, fontSize: 14,
         }}>→ אחורה</button>
         <button onClick={() => setStep(s => Math.min(STAGES.length - 1, s + 1))} aria-disabled={step === STAGES.length - 1} style={{
           padding: '7px 18px', borderRadius: 10, cursor: step === STAGES.length - 1 ? 'default' : 'pointer', opacity: step === STAGES.length - 1 ? 0.4 : 1,
-          background: '#D4A017', color: '#1F3E6C', border: '1px solid #D4A017', fontFamily: 'inherit', fontSize: 14, fontWeight: 700,
+          background: GC.gold, color: GC.ink, border: `1px solid ${GC.gold}`, fontFamily: GRAPH_FONT, fontSize: 14, fontWeight: 700,
         }}>השלב הבא ←</button>
         {step === STAGES.length - 1 && (
-          <span style={{ fontSize: 13, color: '#D4A017', fontWeight: 600 }}>💡 לכן אי-אפשר להשתמש בכינוי מ-SELECT בתוך WHERE — הוא עוד לא קיים שם.</span>
+          <span style={{ fontSize: 13, color: GC.goldText, fontWeight: 600, fontFamily: GRAPH_FONT }}>💡 לכן אי-אפשר להשתמש בכינוי מ-SELECT בתוך WHERE — הוא עוד לא קיים שם.</span>
         )}
       </div>
     </div>
