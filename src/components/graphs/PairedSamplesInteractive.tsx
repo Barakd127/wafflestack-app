@@ -41,8 +41,8 @@ export default function PairedSamplesInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>דגימות מזווגות — לפני מול אחרי</h3>
-      <p style={graphSubtitleStyle}>כל קו הוא אותו נבדק. המבחן עובד על ההפרשים dᵢ, לא על הערכים עצמם — כך מנטרלים את השונות בין הנבדקים.</p>
+      <h3 style={graphTitleStyle}>איך מודדים שינוי כשבודקים את אותם אנשים לפני ואחרי?</h3>
+      <p style={graphSubtitleStyle}>כל קו מחבר את המדידה "לפני" ל"אחרי" של אותו נבדק. הסליידר מזיז את מדידות ה"אחרי" (עוצמת הטיפול). המבחן עובד על ההפרשים dᵢ של כל נבדק — לא על הערכים עצמם — כדי לנטרל את השונות הטבעית בין אנשים. שימו לב לערך t ולשורה "דוחים / לא דוחים H₀" מתחת לגרף.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <text x={COL_B} y={PAD - 14} fill={GC.axisText} fontSize={13} textAnchor="middle" fontWeight={700}>לפני</text>

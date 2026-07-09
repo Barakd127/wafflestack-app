@@ -54,8 +54,8 @@ export default function MeanRunningAverage() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>חוק המספרים הגדולים — התכנסות הממוצע</h3>
-      <p style={graphSubtitleStyle}>ככל ש-n גדל, הממוצע המדגמי מתקרב לממוצע האוכלוסיה האמיתי μ.</p>
+      <h3 style={graphTitleStyle}>האם הממוצע מתייצב ככל שאוספים יותר נתונים? (חוק המספרים הגדולים)</h3>
+      <p style={graphSubtitleStyle}>כל נקודה אפורה היא תצפית בודדת, והקו הזהוב הוא הממוצע המצטבר עד לאותו שלב. הזיזו את μ (הממוצע האמיתי) ואת σ (הפיזור), או דגמו מחדש, וראו איך הקו הזהוב מתנודד בהתחלה ואז מתקרב לקו הכחול (μ) ככל ש-n גדל.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
         <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke={GC.axis} />
@@ -71,6 +71,9 @@ export default function MeanRunningAverage() {
         <text x={X0 - 24} y={Y0 + 8} fill={GC.axisText} fontSize={11} textAnchor="middle" fontFamily={GRAPH_FONT} transform={`rotate(-90 ${X0 - 24} ${Y0 + 8})`}>ערך</text>
       </svg>
       <div id="lln-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
+      <div style={{ textAlign: 'center', fontSize: 13, color: GC.ink }}>
+        אחרי {series.running.length} תצפיות: הממוצע המצטבר = <b style={{ color: GC.goldText }}>{series.running[series.running.length - 1].toFixed(2)}</b> — מרחק מ-μ: {Math.abs(series.running[series.running.length - 1] - mu).toFixed(2)}
+      </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
         <label style={{ fontFamily: GRAPH_FONT, fontSize: 12 }}>μ אמיתי: {mu}<input type="range" min={20} max={80} value={mu} onChange={e => setMu(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
         <label style={{ fontFamily: GRAPH_FONT, fontSize: 12 }}>σ: {sigma}<input type="range" min={2} max={25} value={sigma} onChange={e => setSigma(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>

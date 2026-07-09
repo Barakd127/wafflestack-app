@@ -61,8 +61,8 @@ export default function CorrelationInteractive() {
 
   return (
     <div dir="rtl" style={graphCardStyle}>
-      <h3 style={graphTitleStyle}>קורלציה (Correlation) — מקדם Pearson</h3>
-      <p style={graphSubtitleStyle}>גרור נקודות. r מתעדכן בזמן אמת. צבע כל נקודה לפי הרבע שלה ביחס לממוצעים.</p>
+      <h3 style={graphTitleStyle}>כשמשתנה אחד עולה — האם השני עולה איתו? (מקדם המתאם r)</h3>
+      <p style={graphSubtitleStyle}>כל נקודה היא נבדק עם שני ערכים. גררו נקודה — המספר r (מדד הקשר, נע בין 1- ל-1) מתעדכן מיד. ככל שהנקודות מסתדרות סביב קו עולה, r מתקרב ל-1; קו יורד → r שלילי; ענן מפוזר → r קרוב ל-0.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>

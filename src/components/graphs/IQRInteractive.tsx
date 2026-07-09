@@ -47,8 +47,8 @@ export default function IQRInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>טווח רבעוני (IQR) — Boxplot</h3>
-      <p style={{ ...graphSubtitleStyle, lineHeight: 1.5 }}>גרור נקודות. נקודות מחוץ ל-1.5·IQR מסומנות באדום (חריגות).</p>
+      <h3 style={graphTitleStyle}>כמה מפוזר האמצע של הנתונים? (טווח בין-רבעוני, IQR)</h3>
+      <p style={{ ...graphSubtitleStyle, lineHeight: 1.5 }}>כל נקודה היא ערך בקבוצת נתונים, והקופסה מציגה את ה-50% האמצעיים. גררו נקודה וראו איך ה-IQR (רוחב הקופסה, Q₃ פחות Q₁) משתנה. נקודה רחוקה מדי — מעבר ל-1.5 פעמים ה-IQR — נצבעת באדום כ"חריגה".</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>

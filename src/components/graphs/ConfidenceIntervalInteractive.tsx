@@ -59,8 +59,8 @@ export default function ConfidenceIntervalInteractive() {
 
   return (
     <div dir="rtl" style={graphCardStyle}>
-      <h3 style={graphTitleStyle}>רווח סמך (Confidence Interval)</h3>
-      <p style={graphSubtitleStyle}>{ROWS} מדגמים שונים, μ אמיתי = 100. רווחים מכסים את μ: {covered}/{ROWS} ({((covered / ROWS) * 100).toFixed(0)}%)</p>
+      <h3 style={graphTitleStyle}>האם רווח הסמך שלנו באמת "תופס" את הממוצע האמיתי?</h3>
+      <p style={graphSubtitleStyle}>כל קו אופקי הוא רווח סמך ממדגם אחר; ירוק תופס את μ האמיתי (הקו המקווקו) ואדום מפספס. שנו את n, את σ ואת רמת הסמך, וראו שאחוז התופסים מתקרב לרמת הסמך שבחרתם. כרגע: {covered}/{ROWS} ({((covered / ROWS) * 100).toFixed(0)}%) תפסו את μ.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H} style={{ touchAction: 'none' }}>
         <line x1={toX(trueMu)} y1={PAD - 10} x2={toX(trueMu)} y2={H - PAD} stroke={GC.gold} strokeWidth={2} strokeDasharray="6 4" />
         <text x={toX(trueMu)} y={PAD - 14} fill={GC.goldText} fontSize={12} textAnchor="middle" fontWeight={700}>μ = 100</text>

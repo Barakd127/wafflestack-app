@@ -64,8 +64,8 @@ export default function NormalDistributionInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>התפלגות נורמלית — גרור גבולות</h3>
-      <p style={graphSubtitleStyle}>גרור את הקווים הצהובים לצדדים וצפה בהסתברות {`P(z₁ ≤ X ≤ z₂)`} מתעדכנת בזמן אמת.</p>
+      <h3 style={graphTitleStyle}>איזה חלק מהתצפיות נופל בין שני גבולות בעקומת הפעמון?</h3>
+      <p style={graphSubtitleStyle}>העקומה היא התפלגות נורמלית. גררו את שני הקווים הצהובים (הגבולות) והזיזו את הסליידרים μ (מרכז ההתפלגות) ו-σ (מידת הפיזור). השטח הצבוע וההסתברות {`P(z₁ ≤ X ≤ z₂)`} שמתחת מתעדכנים ומראים איזה חלק מהנתונים נמצא בין הגבולות.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>

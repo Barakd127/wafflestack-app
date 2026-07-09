@@ -51,9 +51,9 @@ export default function ConditionalProbTreeInteractive() {
 
   return (
     <div dir="rtl" style={graphCardStyle}>
-      <h3 style={graphTitleStyle}>הסתברות מותנית — עץ A → B</h3>
+      <h3 style={graphTitleStyle}>אם קרה B — כמה סביר שקדם לו A?</h3>
       <p style={graphSubtitleStyle}>
-        רוחב הענפים פרופורציוני להסתברות. שלוש המחוונים שולטים בכל ההסתברויות המותנות.
+        העץ מפצל כל מקרה לפי הסתברות, ורוחב הענף מראה כמה הוא סביר. הזיזו את שלושת המחוונים וקראו למטה את P(A|B) — הסיכוי ש-A קרה בהינתן שכבר ראינו את B (ההיפוך הבייסיאני).
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>

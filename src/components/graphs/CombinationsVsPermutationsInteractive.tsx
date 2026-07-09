@@ -72,8 +72,8 @@ export default function CombinationsVsPermutationsInteractive() {
 
   return (
     <div dir="rtl" style={graphCardStyle}>
-      <h3 style={graphTitleStyle}>צירופים מול חליפות — Combinations vs Permutations</h3>
-      <p style={graphSubtitleStyle}>אותם {r} אסימונים — כצירוף (ללא סדר) זה אחד, כחליפות (עם סדר) זה {r}! סדרים.</p>
+      <h3 style={graphTitleStyle}>האם הסדר חשוב? כמה אפשרויות יש בכל מקרה?</h3>
+      <p style={graphSubtitleStyle}>אותם {r} אסימונים: בצירוף (ללא סדר) כל בחירה נספרת פעם אחת, ובחליפה (עם סדר) כל סידור שונה נספר בנפרד. הזיזו את n ו-r וראו למטה איך מספר החליפות תמיד גדול פי !{r} ממספר הצירופים.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <text x={20} y={30} fill={GC.goldText} fontSize={14} fontWeight={700}>nCr — ללא סדר ({Math.min(C, 6)} מתוך {C})</text>

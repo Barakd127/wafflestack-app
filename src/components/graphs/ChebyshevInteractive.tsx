@@ -54,8 +54,8 @@ export default function ChebyshevInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={{ ...graphTitleStyle, fontSize: 18 }}>אי-שוויון צ׳בישב — חסם לכל התפלגות</h3>
-      <p style={{ ...graphSubtitleStyle, fontSize: 13 }}>הרצועה מסמנת ±k·σ סביב התוחלת. צ׳בישב מבטיח לפחות 1 − 1/k² בתוכה עבור כל התפלגות; בנורמלי הכיסוי בפועל גבוה בהרבה.</p>
+      <h3 style={{ ...graphTitleStyle, fontSize: 18 }}>כמה מהנתונים חייבים ליפול קרוב לממוצע?</h3>
+      <p style={{ ...graphSubtitleStyle, fontSize: 13 }}>הרצועה הזהובה מסמנת מרחק של k סטיות תקן מהממוצע. הזיזו את k וראו למטה שני מספרים: מה צ׳בישב מבטיח לפחות (נכון לכל התפלגות), ומה קורה בפועל בהתפלגות פעמון — הרבה יותר. כך רואים שהחסם בטוח אבל "רחב".</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke={GC.axis} />

@@ -58,8 +58,8 @@ export default function HypothesisTestingInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>מבחן השערות — α, β ועוצמה</h3>
-      <p style={graphSubtitleStyle}>אזור אדום = α (טעות סוג I). אזור כתום = β (טעות סוג II). שטח ירוק = עוצמת המבחן.</p>
+      <h3 style={graphTitleStyle}>מהו הסיכוי לטעות בהחלטה שלנו? (מבחן השערות: α, β ועוצמה)</h3>
+      <p style={graphSubtitleStyle}>שתי עקומות: H₀ (אין אפקט) מול H₁ (יש אפקט). הזיזו את גודל האפקט δ ואת רמת המובהקות α וראו איך משתנים השטחים: אדום = סיכוי לטעות סוג I (α, לפסול אפקט שאינו קיים), כתום = טעות סוג II (β, לפספס אפקט אמיתי), ירוק = עוצמת המבחן (הסיכוי לזהות אפקט אמיתי).</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <path d={shade(0, zCrit, xMax)} fill="rgba(239,68,68,0.4)" />
         <path d={shade(delta, xMin, zCrit)} fill="rgba(245,158,11,0.4)" />

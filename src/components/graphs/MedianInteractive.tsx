@@ -47,8 +47,8 @@ export default function MedianInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>חציון מול ממוצע — גרור נקודה והשווה</h3>
-      <p style={graphSubtitleStyle}>גרור נקודה אחת לקצה הציר וצפה כיצד הממוצע "נמשך" אחריה בעוד החציון נשאר יציב.</p>
+      <h3 style={graphTitleStyle}>למה חריג אחד מזיז את הממוצע אבל כמעט לא את החציון?</h3>
+      <p style={graphSubtitleStyle}>על הציר מפוזרות 7 נקודות: הקו הצהוב הוא החציון (הערך האמצעי) והקו האפור הוא הממוצע. גררו נקודה אחת רחוק לקצה ושימו לב — הממוצע נגרר אחריה, בעוד החציון כמעט לא זז. השורה מתחת לגרף מציגה את שני הערכים בזמן אמת.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerUp}
         style={{ touchAction: 'none' }}>

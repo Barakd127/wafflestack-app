@@ -38,8 +38,8 @@ export default function StdDevTwoDistributions() {
 
   return (
     <div dir="rtl" style={graphCardStyle}>
-      <h3 style={graphTitleStyle}>שתי התפלגויות — אותו מרכז, פיזור שונה</h3>
-      <p style={graphSubtitleStyle}>גרור את הסטיות. ככל ש-σ גדלה, העקומה רחבה ושטוחה יותר. אותו μ — אך פיזור שונה לחלוטין.</p>
+      <h3 style={graphTitleStyle}>אם לשתי קבוצות יש בדיוק אותו ממוצע, האם הן זהות?</h3>
+      <p style={graphSubtitleStyle}>שתי עקומות פעמון עם אותו מרכז (μ=0) אך פיזור שונה. גררו את σ₁ ו-σ₂, ושימו לב: ככל שסטיית התקן גדולה יותר, העקומה רחבה ושטוחה יותר — כלומר הנתונים מפוזרים יותר, למרות אותו ממוצע.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <path d={curve(sigma1)} stroke={GC.ink} strokeWidth={2.5} fill="rgba(31,62,108,0.18)" />
         <path d={curve(sigma2)} stroke={GC.gold} strokeWidth={2.5} fill={GC.goldFill} />

@@ -84,9 +84,9 @@ export default function EffectSizeInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>גודל אפקט — Cohen's d</h3>
+      <h3 style={graphTitleStyle}>עד כמה ההבדל בין שתי הקבוצות באמת גדול? (גודל אפקט, Cohen's d)</h3>
       <p style={graphSubtitleStyle}>
-        הזז את d וצפה כיצד שתי ההתפלגויות מתרחקות. ככל ש-d גדול יותר — חפיפה קטנה יותר ↔ אפקט חזק יותר.
+        שתי עקומות פעמון: קבוצת ביקורת מול קבוצת טיפול. הזיזו את המחוון d והתבוננו כמה הן מתרחקות — ככל שהחפיפה (השטח המשותף) קטנה, ההבדל בין הקבוצות משמעותי יותר.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} style={{ touchAction: 'none' }}>

@@ -42,8 +42,8 @@ export default function VarianceInteractive() {
 
   return (
     <div dir="rtl" style={graphCardStyle}>
-      <h3 style={graphTitleStyle}>שונות (Variance) — ריבועי הסטיות</h3>
-      <p style={graphSubtitleStyle}>כל ריבוע מציג את (xᵢ − x̄)². השונות = שטח ממוצע של הריבועים.</p>
+      <h3 style={graphTitleStyle}>למה מודדים פיזור דרך ריבוע המרחק מהממוצע?</h3>
+      <p style={graphSubtitleStyle}>כל ריבוע מציג את המרחק של נקודה מהממוצע, בריבוע (xᵢ − x̄)². גררו את הנקודות על הציר וראו איך הריבועים גדלים או קטנים — השונות היא השטח הממוצע של כל הריבועים.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>

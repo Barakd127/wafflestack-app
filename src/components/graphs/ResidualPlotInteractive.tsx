@@ -89,9 +89,9 @@ export default function ResidualPlotInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>תרשים שאריות — בדיקת התאמת המודל</h3>
+      <h3 style={graphTitleStyle}>איך יודעים אם קו הרגרסיה באמת מתאים לנתונים?</h3>
       <p style={graphSubtitleStyle}>
-        גרור נקודות. שאריות צריכות להתפזר אקראית סביב 0. צורת מניפה ↦ heteroscedasticity.
+        למעלה — הפיזור עם קו הרגרסיה; למטה — תרשים השאריות (הפער e = y − ŷ בין כל נקודה לקו). גררו נקודות: אם השאריות מפוזרות אקראית סביב 0 המודל מתאים, ואם נוצרת צורת מניפה זהו סימן לשונות לא-אחידה (heteroscedasticity — הפיזור גדל עם x). התיבה למטה מודיעה מה זוהה.
       </p>
       <svg
         ref={svgRef}

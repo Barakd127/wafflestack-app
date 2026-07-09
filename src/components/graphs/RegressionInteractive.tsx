@@ -56,8 +56,8 @@ export default function RegressionInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>רגרסיה לינארית — OLS</h3>
-      <p style={graphSubtitleStyle}>גרור נקודות וצפה כיצד הקו והערכים β₀, β₁, R² משתנים. שייריות באדום.</p>
+      <h3 style={graphTitleStyle}>איזה קו ישר מתאר הכי טוב את הקשר בין הנקודות?</h3>
+      <p style={graphSubtitleStyle}>גררו נקודות ושימו לב איך הקו (המותאם בשיטת הריבועים הפחותים, OLS) והערכים β₀ (חיתוך), β₁ (שיפוע) ו-R² מתעדכנים מתחת לגרף. הקווים האדומים הם השאריות — המרחק בין כל נקודה לקו. הכפתור מוסיף תצפית חריגה כדי לראות כמה היא מושכת את הקו.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>

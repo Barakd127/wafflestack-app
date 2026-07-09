@@ -29,8 +29,8 @@ export default function ChiSquareInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={{ ...graphTitleStyle, fontSize: 18 }}>מבחן χ² (Chi-Square) — נצפה מול צפוי</h3>
-      <p style={{ ...graphSubtitleStyle, fontSize: 13 }}>זהב = נצפה (O), כחול = צפוי (E). χ² גדל כשהפער בין O ל-E גדל.</p>
+      <h3 style={{ ...graphTitleStyle, fontSize: 18 }}>כמה רחוקות התוצאות שקיבלנו ממה שציפינו?</h3>
+      <p style={{ ...graphSubtitleStyle, fontSize: 13 }}>לכל קטגוריה יש עמודה כחולה (הערך הצפוי E) ועמודה זהובה (מה שנצפה בפועל O). הזיזו את הערכים הנצפים וראו איך χ² גדל ככל שהפער בין נצפה לצפוי גדל — χ² מסכם את כל הפערים למספר אחד.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
         {CATS.map((c, i) => {
@@ -47,6 +47,7 @@ export default function ChiSquareInteractive() {
         })}
       </svg>
       <div id="chi-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
+      <div style={{ textAlign: 'center', fontSize: 13, color: GC.ink, marginBottom: 6 }}>סך הפער הנוכחי: <b style={{ color: GC.goldText }}>χ² = {chi2.toFixed(2)}</b> — ככל שהמספר גדול יותר, הנתונים רחוקים יותר ממה שציפינו.</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10, marginTop: 8 }}>
         {CATS.map((c, i) => (
           <label key={c} style={{ fontFamily: GRAPH_FONT, fontSize: 12 }}>O({c}): {observed[i]}

@@ -39,8 +39,8 @@ export default function McNemarInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>מבחן מקנמר — נתונים מזווגים (2×2)</h3>
-      <p style={graphSubtitleStyle}>רק התאים הבלתי-מתאימים (b ו-c) — שינו את תשובתם — נכנסים למבחן. התאים המתאימים (a, d) לא משפיעים.</p>
+      <h3 style={graphTitleStyle}>האם הטיפול באמת שינה את דעת הנבדקים? (מבחן מקנמר לנתונים מזווגים)</h3>
+      <p style={graphSubtitleStyle}>כל נבדק נמדד לפני ואחרי. רק מי ששינה את תשובתו נכנס למבחן: b (עבר מ"כן" ל"לא") ו-c (עבר מ"לא" ל"כן"). הזיזו את b ואת c וראו את χ² מתעדכן; אם הוא עובר את הערך הקריטי 3.841 — השינוי מובהק והמסקנה משתנה.</p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 1fr', gap: 8, alignItems: 'center', maxWidth: 440, margin: '0 auto 14px' }}>
         <div />

@@ -59,8 +59,8 @@ export default function PValueInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>ערך p (P-Value)</h3>
-      <p style={graphSubtitleStyle}>גרור את z*. p = שטח הצל מתחת לעקומה — הסתברות לראות תוצאה קיצונית כזו תחת H₀.</p>
+      <h3 style={graphTitleStyle}>מה הסיכוי לקבל תוצאה קיצונית כזו אם השערת האפס נכונה?</h3>
+      <p style={graphSubtitleStyle}>העקומה מתארת את התוצאות האפשריות אם השערת האפס (H₀) נכונה. גררו את קו הבדיקה z* ושימו לב לשטח האדום — זהו ערך ה-p, ההסתברות לתוצאה קיצונית כמו שלכם או יותר. הכפתור מחליף בין מבחן דו-זנבי (שני הצדדים) לחד-זנבי (צד אחד).</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(false)} onPointerLeave={() => setDrag(false)}
         style={{ touchAction: 'none' }}>
