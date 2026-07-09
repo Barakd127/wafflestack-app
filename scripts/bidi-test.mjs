@@ -89,10 +89,25 @@ check('equation keeps internal punct', 'ההסתברות היא P(A) = 0.6 בק�
   return p
 })
 
-// 6. "ל-100" keeps hyphen+number as LTR (hyphen is strong-math by design).
-check('hyphen-number after Hebrew prefix', 'בין 0 ל-100 בדיוק', segs => {
+// 6. Maqaf between a Hebrew letter and a number ("ל-100") attaches to the
+//    Hebrew side (renders to the LEFT of ל), NOT pulled into the number island.
+//    User rule 2026-07-08. So the "-" is in an RTL(heb) segment and the digits
+//    are their own LTR island WITHOUT a leading "-".
+check('maqaf ל-100 attaches to the letter', 'בין 0 ל-100 בדיוק', segs => {
   const p = []
-  if (!ltrTexts(segs).some(t => t.includes('-100'))) p.push('-100 not LTR')
+  const numIsland = ltrTexts(segs).find(t => t.includes('100'))
+  if (!numIsland) p.push('no 100 island')
+  else if (numIsland.trim().startsWith('-')) p.push('maqaf glued to number island: ' + JSON.stringify(numIsland))
+  if (!rtlText(segs).includes('ל-')) p.push('maqaf not kept with the Hebrew ל: ' + JSON.stringify(rtlText(segs)))
+  return p
+})
+
+// 6b. A real negative number ("‎-5 מעלות") keeps its minus (space before, not a
+//     Hebrew letter directly before the hyphen) — only letter+hyphen+digit is
+//     the prefix case.
+check('standalone negative keeps its minus', 'הטמפרטורה -5 מעלות', segs => {
+  const p = []
+  if (!ltrTexts(segs).some(t => t.includes('-5'))) p.push('-5 lost its minus')
   return p
 })
 

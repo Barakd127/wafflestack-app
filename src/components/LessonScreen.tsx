@@ -4,6 +4,7 @@ import { TOPIC_VISUALS } from './LessonVisuals'
 import ArsenalCapture from './ArsenalCapture'
 import { quickAddToMindmap } from '../lib/mindmapWriter'
 import { MathLineBlock } from '../lib/mathRender'
+import { parseLeadingEnumMarker } from '../lib/bidiSegments'
 
 // Design tokens — keep in sync with StudyHub.tsx
 const GLASS_CARD  = 'var(--sh-glass-card)'
@@ -527,16 +528,20 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               fontFamily: "'Assistant', sans-serif", textAlign: 'right',
               flex: 1,
             }}>
-              {parts.map((bullet, i) => (
+              {parts.map((bullet, i) => {
+                // A numbered bullet ("1) …") shows its number as the RIGHT-side
+                // marker (in the waffle's slot) with a DOT to the LEFT of the
+                // number (".1" — Hebrew list convention), and drops the waffle.
+                // User 2026-07-08. Non-numbered bullets keep the waffle.
+                const marker = parseLeadingEnumMarker(bullet)
+                const bodyText = marker ? marker.rest : bullet
+                return (
                 <div
                   key={i}
                   className="ws-lesson-bullet"
                   style={{
                     // Parent has dir="rtl"; flex-direction: row places the
-                    // first child (the accent chevron) on the RIGHT in Hebrew.
-                    // No more numbered-circle chips — those read as multiple-
-                    // choice quiz options. A small gold ▸ + left-border accent
-                    // makes the bullet feel like a study-guide point.
+                    // first child (the marker/waffle) on the RIGHT in Hebrew.
                     display: 'flex', flexDirection: 'row', gap: 14,
                     alignItems: 'flex-start',
                     background: 'linear-gradient(135deg, rgba(99,102,241,0.045), rgba(99,102,241,0.015))',
@@ -551,16 +556,22 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 >
                   <div style={{
                     flexShrink: 0,
-                    width: 20, height: 20,
+                    minWidth: 22, height: 22,
                     display: 'flex',
                     alignItems: 'center', justifyContent: 'center',
-                    marginTop: 5,
-                    opacity: 0.85,
+                    marginTop: 4,
+                    opacity: 0.9,
                   }} aria-hidden="true">
-                    {/* Round Belgian waffle bullet — premium honey gradient,
-                        ink outline, real cell pits. Matches v4 brand direction
-                        (concept 01 from the brand system). Replaces the prior
-                        flat 3x3-grid square rect per user feedback 2026-05-24. */}
+                    {marker ? (
+                      // Number marker: dot LEFT of number (".1"). RTL container +
+                      // two LTR-isolated children → num right, dot left, non-mirrored.
+                      <span dir="rtl" style={{ unicodeBidi: 'isolate', fontFamily: "'Rubik', sans-serif", fontWeight: 800, fontSize: 17, color: '#C97C18' }}>
+                        <span dir="ltr">{marker.num}</span>
+                        <span dir="ltr">.</span>
+                      </span>
+                    ) : (
+                    /* Round Belgian waffle bullet — premium honey gradient,
+                       ink outline, real cell pits. */
                     <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                       <defs>
                         <radialGradient id="waffle-bullet-grad" cx="0.42" cy="0.35" r="0.7">
@@ -579,13 +590,10 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                       </g>
                       <ellipse cx="7" cy="6.5" rx="3.5" ry="1.4" fill="#FFE3A8" opacity="0.55"/>
                     </svg>
+                    )}
                   </div>
-                  {/* MathLineBlock renders each line in RTL flow; inline math
-                      ($…$ or auto-detected) stays LTR + bidi-isolated so Hebrew
-                      never flips and operators never mirror. The renderer owns
-                      direction per line — no unicodeBidi override here. */}
                   <MathLineBlock
-                    text={bullet}
+                    text={bodyText}
                     style={{
                       flex: 1, minWidth: 0,
                       fontSize: 18.5, lineHeight: 1.85, color: TEXT_DARK,
@@ -594,7 +602,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                     }}
                   />
                 </div>
-              ))}
+                )
+              })}
             </div>
           )
         })()}

@@ -119,16 +119,18 @@ const STRONG_MATH_RE = /[0-9A-Za-z=<>+\-*/^_·×÷√∑Σπμσ≤≥≠∪∩�
  *  - un-delimited lines → conservative fallback: maximal non-Hebrew runs that
  *    carry digits/Latin/operators are wrapped LTR so `≤`/`≥`/`<`/`>`/parens
  *    never mirror and runs never jump sides; Hebrew stays plain RTL. */
-// Render a leading enumeration marker ("1)", "3.") as a proper Hebrew list
-// marker: number on the RIGHT, a NON-mirrored punctuation glyph on its LEFT.
-// The line div is dir="rtl", so this span sits at the start (right) edge; its
-// two LTR-isolated children flow right-to-left → num right, punct left, and
-// each stays a literal glyph (the bare ")" no longer mirrors to "(").
-function EnumMarker({ num, punct }: { num: string; punct: string }) {
+// Render a leading enumeration marker as a Hebrew list marker: number on the
+// RIGHT, a DOT on its LEFT (".1", ".2" — the Hebrew numbered-list convention).
+// Source markers may be "1)" or "1."; both display as a dot-left number. The
+// line div is dir="rtl", so this span sits at the start (right) edge; its two
+// LTR-isolated children flow right-to-left → num right, dot left, non-mirrored.
+// (Primary path renders the marker in the bullet's icon slot — LessonScreen;
+// this inline version is the fallback for any other MathLineBlock caller.)
+export function EnumMarker({ num }: { num: string }) {
   return (
     <span dir="rtl" style={{ unicodeBidi: 'isolate', fontWeight: 700, marginInlineEnd: 8 }}>
       <span dir="ltr">{num}</span>
-      <span dir="ltr">{punct}</span>
+      <span dir="ltr">.</span>
     </span>
   )
 }
@@ -182,7 +184,7 @@ function MathLine({ line }: { line: string }) {
 
   return (
     <div dir="rtl" style={{ unicodeBidi: usePlaintext ? 'plaintext' : 'isolate', textAlign: 'right' }}>
-      {marker && <EnumMarker num={marker.num} punct={marker.punct} />}
+      {marker && <EnumMarker num={marker.num} />}
       {renderLineBody(body)}
     </div>
   )
