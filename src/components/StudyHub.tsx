@@ -3,6 +3,8 @@ import { useLearningStore } from '../store/learningStore'
 import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../config/featureUnlocks'
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
+import WhiteboardShell from './WhiteboardShell'
+import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
 import { toPng } from 'html-to-image'
 
@@ -1086,6 +1088,9 @@ interface TopicSelectorProps {
   onMapModeChange?: (on: boolean) => void
   /** Which course's topic grid to show. Defaults to Stat-A. */
   course?: 'stat-a' | 'stat-b' | 'sql' | 'anova'
+  /** List/mindmap toggle state — lifted to the root so the topbar can render it as a context control. */
+  viewMode: 'list' | 'mindmap'
+  onViewModeChange: (mode: 'list' | 'mindmap') => void
 }
 
 /**
@@ -1234,7 +1239,7 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
   )
 }
 
-function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggleDark, onMapModeChange, course = 'stat-a' }: TopicSelectorProps) {
+function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggleDark, onMapModeChange, course = 'stat-a', viewMode, onViewModeChange }: TopicSelectorProps) {
   // Course-scoped topic list + taxonomy. The two courses are kept disjoint so
   // neither grid ever leaks the other's topics (see QUIZ_TOPICS_A/_B above).
   const baseTopics = course === 'stat-b' ? QUIZ_TOPICS_B : course === 'sql' ? QUIZ_TOPICS_SQL : course === 'anova' ? QUIZ_TOPICS_ANOVA : QUIZ_TOPICS_A
@@ -1242,11 +1247,10 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
   // Re-order topics according to the user's personal plan when one exists.
   // Topics not in the plan trail at the end in their natural order.
   const personalPlan = useLearningStore(s => s.personalPlan)
-  // Map view is an unlock-ladder feature (mindmap-view, 35 XP). Lock the 🗺️ מפה
-  // toggle until it unlocks; adminMode flushes the gate.
-  const _unlockedFeatures = useLearningStore(s => s.unlockedFeatures)
+  // Map view is an unlock-ladder feature (mindmap-view, 35 XP). The מפה/רשימה
+  // toggle now lives in the topbar (contextControls) and owns its own gating
+  // check; this component only needs adminMode for the mindmap iframe src below.
   const _adminMode = useLearningStore(s => s.adminMode)
-  const mapUnlocked = isFeatureUnlocked('mindmap-view', _unlockedFeatures, _adminMode)
   const sortedTopics = (() => {
     // Personal-plan reordering is a Stat-A construct; Stat-B and SQL keep curriculum order.
     if (!personalPlan || course !== 'stat-a') return baseTopics
@@ -1260,8 +1264,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
   const hintByTopic = new Map<string, string>(
     personalPlan?.sequence.filter(s => s.hint).map(s => [s.topicId, s.hint as string]) ?? []
   )
-  const [viewMode, setViewMode] = useState<'list' | 'mindmap'>('list')
-  useEffect(() => { if (onMapModeChange) onMapModeChange(viewMode === 'mindmap') }, [viewMode])
+  useEffect(() => { if (onMapModeChange) onMapModeChange(viewMode === 'mindmap') }, [viewMode, onMapModeChange])
 
   // The מפה tab embeds the real interactive mindmap (mindmap.html). When a topic
   // node's 📖/📝 chip is clicked it posts {type:'ws-open-topic', topicId, mode}
@@ -1425,51 +1428,10 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
 
   return (
     <div className="ws-screen-pad" style={viewMode === 'mindmap' ? { flex: 1, overflow: 'auto', padding: '5px 8px 6px' } : { flex: 1, overflow: 'auto', padding: '32px 40px' }}>
-      {viewMode === 'mindmap' ? (
-        /* Map view — compact ONE-LINE header (back + toggle), minimal height so the map fills the screen. */
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 5, flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
-              → חזרה
-            </button>
-            {onToggleDark && (
-              <button onClick={onToggleDark} title={darkMode ? 'מצב בהיר' : 'מצב כהה'} aria-label={darkMode ? 'מצב בהיר' : 'מצב כהה'} style={{ background: 'rgba(127,155,217,0.12)', border: 'none', borderRadius: 8, width: 30, height: 30, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{darkMode ? '☀️' : '🌙'}</button>
-            )}
-          </div>
-          <div style={{ display: 'flex', gap: 4, background: 'rgba(127,155,217,0.12)', padding: 3, borderRadius: 999 }}>
-            {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => {
-              const locked = m === 'mindmap' && !mapUnlocked
-              const tip = locked ? FEATURE_UNLOCKS_BY_ID['mindmap-view']?.descriptionHe : undefined
-              return (
-                <button key={m} onClick={() => { if (!locked) setViewMode(m) }} title={tip} aria-label={tip} aria-disabled={locked || undefined}
-                  style={{ border: 'none', borderRadius: 999, padding: '4px 12px', cursor: locked ? 'not-allowed' : 'pointer', fontFamily: "'Rubik', sans-serif", fontSize: 12, fontWeight: 700, background: viewMode === m ? BUTTON_COLOR : 'transparent', color: viewMode === m ? '#fff' : TEXT_MED, transition: 'all 0.15s', opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none' }}>
-                  {locked ? '🔒 ' : ''}{lbl}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      ) : (
-        <>
-          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Rubik', sans-serif", fontSize: 16, marginBottom: 24, padding: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-            → חזרה לדף הבית
-          </button>
-          <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
-            בחר נושא ללמוד 📚
-          </h2>
-          <div style={{ display: 'flex', gap: 6, marginBottom: 24, background: 'rgba(127,155,217,0.12)', padding: 4, borderRadius: 999, width: 'fit-content' }}>
-            {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => {
-              const locked = m === 'mindmap' && !mapUnlocked
-              const tip = locked ? FEATURE_UNLOCKS_BY_ID['mindmap-view']?.descriptionHe : undefined
-              return (
-                <button key={m} onClick={() => { if (!locked) setViewMode(m) }} title={tip} aria-label={tip} aria-disabled={locked || undefined}
-                  style={{ border: 'none', borderRadius: 999, padding: '7px 18px', cursor: locked ? 'not-allowed' : 'pointer', fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700, background: viewMode === m ? BUTTON_COLOR : 'transparent', color: viewMode === m ? '#fff' : TEXT_MED, transition: 'all 0.15s', opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none' }}>
-                  {locked ? '🔒 ' : ''}{lbl}
-                </button>
-              )
-            })}
-          </div>
-        </>
+      {viewMode === 'mindmap' ? null : (
+        <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
+          בחר נושא ללמוד 📚
+        </h2>
       )}
 
       {viewMode === 'list' ? (
@@ -2155,7 +2117,7 @@ function AdminToggle({ collapsed }: { collapsed: boolean }) {
 }
 
 // ── Top bar ────────────────────────────────────────────────────────────────────
-function TopBar({ title, onLogout, darkMode, onToggleDark }: { title: string; onLogout?: () => void; darkMode?: boolean; onToggleDark?: () => void }) {
+function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { title: string; onLogout?: () => void; darkMode?: boolean; onToggleDark?: () => void; contextControls?: React.ReactNode }) {
   const userName = localStorage.getItem('userName') || 'Student'
   const xp = useLearningStore(state => state.xp)
   return (
@@ -2170,20 +2132,30 @@ function TopBar({ title, onLogout, darkMode, onToggleDark }: { title: string; on
       padding: '0 36px',
       flexShrink: 0,
     }} dir="rtl">
-      <h1 style={{
-        fontFamily: "'Rubik', sans-serif",
-        fontWeight: 800,
-        fontSize: 28,
-        color: TEXT_DARK,
-        margin: 0,
-        letterSpacing: '-0.5px',
-        textShadow: '0 1px 4px rgba(255,255,255,0.8)',
-        // Shrink + ellipsize so the actions (logout etc.) never overlap the
-        // title on narrow widths. Per user 2026-06-02.
-        flex: '1 1 auto', minWidth: 0,
-        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        marginInlineEnd: 16,
-      }}>{title}</h1>
+      {/* Title + context controls share the START side so nav controls (e.g.
+          the topics מפה/רשימה toggle + back button) sit right next to the
+          title instead of stealing space from the board content area. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '1 1 auto', minWidth: 0 }}>
+        <h1 style={{
+          fontFamily: "'Rubik', sans-serif",
+          fontWeight: 800,
+          fontSize: 28,
+          color: TEXT_DARK,
+          margin: 0,
+          letterSpacing: '-0.5px',
+          textShadow: '0 1px 4px rgba(255,255,255,0.8)',
+          // Shrink + ellipsize so the actions (logout etc.) never overlap the
+          // title on narrow widths. Per user 2026-06-02.
+          flex: '1 1 auto', minWidth: 0,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          marginInlineEnd: 16,
+        }}>{title}</h1>
+        {contextControls && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+            {contextControls}
+          </div>
+        )}
+      </div>
       <div className="ws-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }} dir="ltr">
         {/* Dark-mode toggle, integrated into topbar per user 2026-05-24
             (was a floating fixed button at top-right obscuring sidebar icons). */}
@@ -3757,7 +3729,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             isMobile && tab !== 'none' && !isDone
               ? {
                   width: '100%',
-                  background: 'var(--sh-q-card-bg, rgba(255,255,255,0.97))',
+                  // Own box background removed — the question content now sits
+                  // inside a WhiteboardShell (its own #FCFDFF paper surface), so
+                  // this outer card is just a transparent positioning/elevation
+                  // shell (header strip supplies the only opaque chrome).
+                  background: 'transparent',
                   borderRadius: '20px 20px 0 0',
                   boxShadow: '0 -4px 32px rgba(31,62,108,0.18)',
                   border: '1px solid rgba(127,155,217,0.3)',
@@ -3769,7 +3745,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               : !isMobile && tab !== 'none' && !isDone
               ? {
                   width: '100%',
-                  background: 'var(--sh-q-card-bg, #ffffff)',
+                  background: 'transparent',
                   borderRadius: 0,
                   borderBottom: '1px solid rgba(127,155,217,0.22)',
                   overflow: 'hidden',         // card is a flex column; its body is the sole scroller
@@ -3785,7 +3761,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               : tab === 'none' || isDone
               ? {
                   width: 'min(720px, 100%)',
-                  background: 'var(--sh-q-card-bg, #ffffff)',
+                  background: 'transparent',
                   borderRadius: 18,
                   boxShadow: 'var(--sh-card-shadow)',
                   border: '1px solid rgba(127,155,217,0.3)',
@@ -3793,7 +3769,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 }
               : {
                   width: '100%',
-                  background: 'var(--sh-q-card-bg, rgba(255,255,255,0.97))',
+                  background: 'transparent',
                   borderRadius: 16,
                   boxShadow: '0 16px 48px rgba(0,0,0,0.32)',
                   border: '1px solid rgba(127,155,217,0.45)',
@@ -3920,6 +3896,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               minHeight: 0,
             }}>
 
+          {/* Question content is drawn directly on a whiteboard surface — the
+              hierarchy breadcrumb is pinned in the board's top-right corner.
+              (Same pattern as LessonScreen's theory slides.) */}
+          <WhiteboardShell topRightSlot={<HierarchyBreadcrumb topicId={selectedTopic || ''} />}>
           {isDone ? (
             /* ── Completion panel ── */
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 0', gap: 18 }}>
@@ -4318,6 +4298,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               )}
             </>
           )}
+          </WhiteboardShell>
 
             </div>
           </div>
@@ -4415,6 +4396,13 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   // sidebar + topbar are hidden so only the quiz + companion tool remain.
   const [learningFullscreen, setLearningFullscreen] = useState(false)
   const [mapActive, setMapActive] = useState(false) // embedded "מפה" mindmap active → hide the shell title bar on mobile
+  // Topics-screen list/mindmap toggle — lifted here (was local state inside
+  // TopicSelector) so the topbar's contextControls can render + drive it.
+  const [viewMode, setViewMode] = useState<'list' | 'mindmap'>('list')
+  // Map view is an unlock-ladder feature (mindmap-view, 35 XP); adminMode flushes the gate.
+  const _topicsUnlockedFeatures = useLearningStore(s => s.unlockedFeatures)
+  const _topicsAdminMode = useLearningStore(s => s.adminMode)
+  const mapUnlocked = isFeatureUnlocked('mindmap-view', _topicsUnlockedFeatures, _topicsAdminMode)
   // Mobile (<=768px): sidebar collapses entirely and is opened as a hamburger overlay.
   const [isMobile, setIsMobile] = useState<boolean>(() =>
     typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false
@@ -4488,6 +4476,42 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
     internalView === 'courses' ? 'הקורסים שלי' :
     internalView === 'topics' ? (activeCourse === 'stat-b' ? "סטטיסטיקה ב' — בחר נושא" : activeCourse === 'sql' ? "SQL — בחר נושא" : activeCourse === 'anova' ? "ניתוח שונות — בחר נושא" : "סטטיסטיקה א' — בחר נושא") :
     'Study Zone'
+
+  // ── Topbar context controls ─────────────────────────────────────────────
+  // Nav controls that used to live INSIDE the content area (topics' מפה/רשימה
+  // toggle + back button; lesson/quiz's back button) now render in the topbar
+  // itself, next to the title, so the board/content pane below gets the full
+  // remaining height. See TopBar's contextControls prop.
+  const topBarContextControls: React.ReactNode =
+    internalView === 'topics' ? (
+      <>
+        <button
+          onClick={() => setInternalView('courses')}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
+        >
+          → חזרה
+        </button>
+        <div style={{ display: 'flex', gap: 4, background: 'rgba(127,155,217,0.12)', padding: 3, borderRadius: 999, flexShrink: 0 }}>
+          {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => {
+            const locked = m === 'mindmap' && !mapUnlocked
+            const tip = locked ? FEATURE_UNLOCKS_BY_ID['mindmap-view']?.descriptionHe : undefined
+            return (
+              <button key={m} onClick={() => { if (!locked) setViewMode(m) }} title={tip} aria-label={tip} aria-disabled={locked || undefined}
+                style={{ border: 'none', borderRadius: 999, padding: '4px 12px', cursor: locked ? 'not-allowed' : 'pointer', fontFamily: "'Rubik', sans-serif", fontSize: 12, fontWeight: 700, background: viewMode === m ? BUTTON_COLOR : 'transparent', color: viewMode === m ? '#fff' : TEXT_MED, transition: 'all 0.15s', opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none', whiteSpace: 'nowrap' }}>
+                {locked ? '🔒 ' : ''}{lbl}
+              </button>
+            )
+          })}
+        </div>
+      </>
+    ) : (internalView === 'lesson' || internalView === 'quiz-intro' || internalView === 'learning') ? (
+      <button
+        onClick={() => setInternalView('topics')}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
+      >
+        → חזרה
+      </button>
+    ) : undefined
 
   const handleSelectTopic = (topicId: string, mode: 'lesson' | 'quiz' = 'lesson') => {
     setSelectedTopic(topicId)
@@ -4651,7 +4675,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
       {/* Main */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {!(learningFullscreen && internalView === 'learning') && !(internalView === 'topics' && mapActive && isMobile) && (
-          <header ref={topbarTutRef}><TopBar title={title} onLogout={handleLogout} darkMode={darkMode} onToggleDark={onToggleDarkMode} /></header>
+          <header ref={topbarTutRef}><TopBar title={title} onLogout={handleLogout} darkMode={darkMode} onToggleDark={onToggleDarkMode} contextControls={topBarContextControls} /></header>
         )}
         {internalView === 'home' && (
           <HomeScreen
@@ -4676,6 +4700,8 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
             onToggleDark={isMobile ? onToggleDarkMode : undefined}
             onMapModeChange={setMapActive}
             course={activeCourse}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
           />
         )}
         {internalView === 'lesson' && selectedTopic && (
