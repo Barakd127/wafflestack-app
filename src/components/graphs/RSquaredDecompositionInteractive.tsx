@@ -63,8 +63,8 @@ export default function RSquaredDecompositionInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>פירוק R² — SST = SSE + SSR</h3>
-      <p style={graphSubtitleStyle}>הזז שיפוע וחיתוך — שמ הסכימים מתחלפים. SST קבוע. R² גדל ככל ש-SSE קטן.</p>
+      <h3 style={graphTitleStyle}>כמה מהשונות ב-y הקו שלנו באמת מסביר?</h3>
+      <p style={graphSubtitleStyle}>הפיזור משמאל והעמודות מימין קשורים: השונות הכוללת (SST) מתחלקת לחלק שהקו מסביר (SSR) ולחלק שנשאר כטעות (SSE). הזיזו את השיפוע והחיתוך — SST נשאר קבוע, וככל שהטעות (SSE) קטנה, ערך ה-R² גדל ומתקרב ל-1. הערכים מתעדכנים בשורה מתחת לגרף.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         {/* scatter axes */}

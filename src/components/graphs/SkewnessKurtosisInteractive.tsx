@@ -95,8 +95,8 @@ export default function SkewnessKurtosisInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>צורת התפלגות — Skewness & Kurtosis</h3>
-      <p style={graphSubtitleStyle}>מחוון אחד שולט באסימטריה (זנב שמאל/ימין). השני שולט בחדות הפסגה.</p>
+      <h3 style={graphTitleStyle}>איך משתנה צורת הפעמון כשהיא נוטה לצד או מתחדדת?</h3>
+      <p style={graphSubtitleStyle}>מחוון אחד מטה את העקומה לצד (אסימטריה — כמה ההתפלגות נוטה שמאלה או ימינה), והשני משנה את חדות הפסגה (kurtosis — חד או שטוח). הזיזו אותם וראו איך הצורה, המספרים והתוויות למטה משתנים.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke={GC.axis} />

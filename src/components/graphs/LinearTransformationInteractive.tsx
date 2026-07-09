@@ -69,8 +69,8 @@ export default function LinearTransformationInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>טרנספורמציה ליניארית — Y = aX + b</h3>
-      <p style={graphSubtitleStyle}>שינוי קנה־מידה a ←→ מעבר b. צורת ההתפלגות נשמרת — רק מיקום ופיזור משתנים.</p>
+      <h3 style={graphTitleStyle}>מה קורה כשמכפילים ומוסיפים לכל הנתונים? (טרנספורמציה ליניארית Y=aX+b)</h3>
+      <p style={graphSubtitleStyle}>למעלה הנתונים המקוריים, למטה אחרי השינוי. הזיזו את a (מתיחה או כיווץ) ואת b (הזזה) וראו: הצורה נשמרת, הממוצע הופך ל-aμ+b, והפיזור (σ) גדל או קטן פי |a| בלבד — הוספת b לא משנה את הפיזור.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <text x={PAD} y={20} fill={GC.blue} fontSize={12} fontWeight={700} fontFamily={GRAPH_FONT}>X (original)  μ={sOrig.mu.toFixed(2)}  σ={sOrig.sd.toFixed(2)}</text>

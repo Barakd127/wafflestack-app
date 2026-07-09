@@ -37,8 +37,8 @@ export default function BinomialInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>התפלגות בינומית — B(n, p)</h3>
-      <p style={graphSubtitleStyle}>n ניסויים בלתי תלויים, הסתברות הצלחה p. ככל ש-n גדל, הצורה מתקרבת לנורמלית.</p>
+      <h3 style={graphTitleStyle}>מתוך n ניסיונות, כמה הצלחות סביר שנקבל?</h3>
+      <p style={graphSubtitleStyle}>כל עמודה היא ההסתברות לקבל בדיוק מספר מסוים של הצלחות ב-n ניסיונות עצמאיים (למשל n הטלות מטבע). הזיזו את n ואת p (סיכוי ההצלחה בכל ניסיון) וראו איך צורת ההתפלגות זזה ומתקרבת לפעמון.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
         {probs.map((pr, k) => {
@@ -49,6 +49,7 @@ export default function BinomialInteractive() {
         <text x={X0 + mean * barW + barW / 2} y={Y0 - 4} fill={GC.gold} fontSize={12} textAnchor="middle">μ = {mean.toFixed(1)}</text>
       </svg>
       <div id="bin-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
+      <div style={{ textAlign: 'center', fontSize: 13, color: GC.ink, marginBottom: 6 }}>בממוצע נצפה בערך <b style={{ color: GC.goldText }}>{mean.toFixed(1)}</b> הצלחות מתוך {n} (בפיזור טיפוסי של ±{std.toFixed(1)}).</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 8 }}>
         <label style={{ fontFamily: GRAPH_FONT, fontSize: 13 }}>n: {n}<input type="range" min={1} max={50} value={n} onChange={e => setN(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
         <label style={{ fontFamily: GRAPH_FONT, fontSize: 13 }}>p: {p.toFixed(2)}<input type="range" min={0.05} max={0.95} step={0.01} value={p} onChange={e => setP(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>

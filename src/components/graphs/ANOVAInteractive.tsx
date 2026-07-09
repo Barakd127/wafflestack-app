@@ -52,8 +52,8 @@ export default function ANOVAInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>ANOVA — שונות בין קבוצות מול בתוך קבוצות</h3>
-      <p style={graphSubtitleStyle}>גרור את הממוצעים של 3 הקבוצות. F גדל כשההפרשים בין הקבוצות גדולים יחסית לפיזור בתוך כל קבוצה.</p>
+      <h3 style={graphTitleStyle}>האם ההבדל בין הקבוצות אמיתי או רק רעש?</h3>
+      <p style={graphSubtitleStyle}>לכל קבוצה יש נקודות שמתפזרות סביב הממוצע שלה (הקו הצבעוני). גררו את הממוצעים והזיזו את הפיזור, וראו איך המספר F משתנה: F גדול אומר שהקבוצות באמת שונות זו מזו, F קרוב ל-1 אומר שההבדל יכול להיות מקרי.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
         <line x1={X0} y1={toY(grandMean)} x2={X1} y2={toY(grandMean)} stroke={GC.ink} strokeWidth={1.5} strokeDasharray="6 4" />

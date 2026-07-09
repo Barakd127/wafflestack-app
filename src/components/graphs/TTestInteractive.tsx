@@ -58,8 +58,8 @@ export default function TTestInteractive() {
 
   return (
     <div dir="rtl" style={graphCardStyle}>
-      <h3 style={graphTitleStyle}>מבחן t (T-Test) — התפלגות t</h3>
-      <p style={graphSubtitleStyle}>זהב = t-distribution, כחול = נורמלית. גרור את df וצפה בהתכנסות.</p>
+      <h3 style={graphTitleStyle}>מתי התפלגות t הופכת כמעט לזהה לעקומה הנורמלית?</h3>
+      <p style={graphSubtitleStyle}>הקו הזהב הוא התפלגות t והקו הכחול המקווקו הוא ההתפלגות הנורמלית. גררו את df (דרגות חופש — גדל עם גודל המדגם) וראו איך ככל ש-df גדל שתי העקומות כמעט מתלכדות.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <path d={pathN} stroke={GC.blue} strokeWidth={2} fill="none" strokeDasharray="6 4" />
         <path d={pathT} stroke={GC.gold} strokeWidth={2.5} fill="none" />

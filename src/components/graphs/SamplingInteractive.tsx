@@ -45,8 +45,8 @@ export default function SamplingInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>מדגם (Sampling) — אוכלוסיה ומדגם אקראי</h3>
-      <p style={graphSubtitleStyle}>200 נקודות באוכלוסיה. גרור n + לחץ "דגום מחדש" כדי לראות איך הממוצע במדגם מתקרב לממוצע האוכלוסיה כש-n גדל.</p>
+      <h3 style={graphTitleStyle}>למה מספיק לבדוק מדגם קטן במקום כל האוכלוסייה?</h3>
+      <p style={graphSubtitleStyle}>כל 200 הנקודות הן האוכלוסייה כולה, והנקודות המודגשות בזהב הן המדגם שנבחר באקראי. גררו את n (גודל המדגם) ולחצו "דגום מחדש", ושימו לב איך ממוצע המדגם מתקרב לממוצע האוכלוסייה ככל ש-n גדל.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         {pop.map((p, i) => (
           <circle key={i} cx={p.x} cy={p.y} r={sampleIdx.has(i) ? 6 : 3}
@@ -55,6 +55,9 @@ export default function SamplingInteractive() {
         ))}
       </svg>
       <div id="samp-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
+      <p style={{ textAlign: 'center', fontSize: 13, color: GC.ink, margin: '4px 0' }}>
+        הפער בין ממוצע המדגם לממוצע האוכלוסייה: {Math.abs(sampleMean - popMean).toFixed(2)} — מתכווץ ככל ש-n גדל
+      </p>
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
         <label style={{ flex: 1, fontSize: 13 }}>n: {n}<input type="range" min={5} max={150} value={n} onChange={e => setN(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
         <button onClick={() => setSeed(s => s + 1)} style={{ background: GC.gold, color: GC.ink, border: 'none', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>דגום מחדש</button>

@@ -45,9 +45,9 @@ export default function BayesTheoremInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>משפט בייס — Bayes' Theorem</h3>
+      <h3 style={graphTitleStyle}>אחרי שקיבלנו רמז חדש — כמה סביר שההשערה נכונה?</h3>
       <p style={graphSubtitleStyle}>
-        הזז את ההסתברות הקודמת P(H), את הסבירות P(E|H), ואת התראת השווא P(E|¬H). הפוסטריור P(H|E) מחושב חי.
+        מתחילים מהסיכוי הראשוני שההשערה נכונה P(H), ומוסיפים ראיה. הזיזו את שלושת המחוונים וראו איך הסיכוי המעודכן P(H|E) (הפוסטריור — הבר הזהוב למטה) קופץ, לפעמים להרבה פחות ממה שמנחשים.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>

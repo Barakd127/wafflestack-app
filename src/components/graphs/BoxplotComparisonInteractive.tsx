@@ -82,9 +82,9 @@ export default function BoxplotComparisonInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={{ ...graphTitleStyle }}>השוואת Boxplots — בין קבוצות</h3>
+      <h3 style={{ ...graphTitleStyle }}>איזו קבוצה גבוהה יותר ואיזו יותר מפוזרת?</h3>
       <p style={{ ...graphSubtitleStyle, fontSize: 15, lineHeight: 1.5 }}>
-        גרור את הידיות הצהובות (Q₁, חציון, Q₃) ואת הקצוות (min, max) של כל קבוצה. השוו חציונים, IQR וטווחים.
+        כל תיבה מסכמת קבוצה: הקו הזהוב הוא החציון (הערך האמצעי), גובה התיבה הוא ה-50% האמצעיים (IQR — טווח בין-רבעוני), והקווים למעלה ולמטה הם הטווח המלא. גררו את הידיות והשוו בין הקבוצות בכרטיסים שמתעדכנים למטה.
       </p>
 
       <svg

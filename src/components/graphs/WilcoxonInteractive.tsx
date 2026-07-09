@@ -49,8 +49,8 @@ export default function WilcoxonInteractive() {
 
   return (
     <div dir="rtl" style={graphCardStyle}>
-      <h3 style={graphTitleStyle}>מבחן וילקוקסון — דירוג ההפרשים</h3>
-      <p style={graphSubtitleStyle}>מדרגים לפי הערך המוחלט של ההפרש (אפסים יורדים), מחזירים את הסימן, ומסכמים ל-W⁺ ו-W⁻. מבחן א-פרמטרי — אין הנחת נורמליות.</p>
+      <h3 style={graphTitleStyle}>איך אפשר להכריע בין שתי מדידות בלי להניח התפלגות נורמלית?</h3>
+      <p style={graphSubtitleStyle}>כל פס הוא הפרש בין זוג מדידות, מדורג לפי גודלו (הערך המוחלט; אפסים יורדים). ירוק מימין = הפרש חיובי, אדום משמאל = שלילי. הזיזו את המחוון כדי להסיט את כל ההפרשים, וראו איך הסכומים W⁺/W⁻ וההחלטה בתחתית משתנים — מבחן א-פרמטרי שאינו מניח נורמליות.</p>
 
       <svg viewBox={`0 0 ${W} ${svgH}`} width="100%" height={Math.min(svgH, 320)}>
         <line x1={W / 2} y1={PAD_TOP} x2={W / 2} y2={svgH - PAD_TOP} stroke={GC.axis} />

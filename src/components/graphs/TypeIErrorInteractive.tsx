@@ -82,8 +82,8 @@ export default function TypeIErrorInteractive() {
 
   return (
     <div dir="rtl" style={graphCardStyle}>
-      <h3 style={graphTitleStyle}>שגיאה מסוג I ו-II — α · β · עוצמה</h3>
-      <p style={graphSubtitleStyle}>אדום = α (Type I), כחול = β (Type II). העלאת n מקטינה את σ → β קטן → עוצמה עולה.</p>
+      <h3 style={graphTitleStyle}>איך הגדלת המדגם מקטינה את הסיכוי לפספס אפקט אמיתי?</h3>
+      <p style={graphSubtitleStyle}>שתי העקומות הן שתי השערות (H₀ ללא אפקט, H₁ עם אפקט). השטח האדום הוא אזעקת שווא (α, שגיאה מסוג I), והשטח הכחול הוא פספוס (β, שגיאה מסוג II). הזיזו את גודל האפקט, את α ואת n, וראו איך הגדלת n מגדילה את העוצמה — הסיכוי לזהות אפקט אמיתי.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke={GC.axis} />

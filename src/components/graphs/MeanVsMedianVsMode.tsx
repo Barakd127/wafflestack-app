@@ -56,8 +56,8 @@ export default function MeanVsMedianVsMode() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>ממוצע מול חציון ושכיח — מתי הם נפרדים</h3>
-      <p style={graphSubtitleStyle}>גרור עמודות מעלה ומטה. כשההתפלגות סימטרית — שלושת המדדים שווים. כשהיא מוטה — הם מתפצלים.</p>
+      <h3 style={graphTitleStyle}>מתי הממוצע, החציון והשכיח נותנים תשובות שונות? (התפלגות מוטה)</h3>
+      <p style={graphSubtitleStyle}>כל עמודה מציגה כמה ערכים נופלים בתחום מסוים. גררו עמודות מעלה ומטה כדי לשנות את צורת ההתפלגות: כשהיא סימטרית שלושת הקווים מתלכדים, וכשהיא מוטה (זנב לצד אחד) הם נפרדים — הממוצע (זהב) נמשך לכיוון הזנב יותר מהחציון (כסף) והשכיח (סגול).</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>

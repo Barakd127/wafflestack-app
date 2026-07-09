@@ -86,9 +86,9 @@ export default function SimpsonsParadoxInteractive() {
 
   return (
     <div dir="rtl" style={{ ...graphCardStyle }}>
-      <h3 style={graphTitleStyle}>פרדוקס סימפסון — קורלציה מוסתרת</h3>
+      <h3 style={graphTitleStyle}>איך אותם נתונים יכולים להראות קשר חיובי וגם שלילי בו-זמנית?</h3>
       <p style={graphSubtitleStyle}>
-        בסקירה הכוללת — הקשר חיובי (ככל ש-x גדל, y גדל). אך בתוך כל תת-קבוצה — הקשר הפוך! הסר את ההסתרה כדי לחשוף את האמת.
+        כל נקודה היא תצפית. הקו הכולל עולה (ככל ש-x גדל, y גדל) — אבל הנתונים מסתירים שתי תת-קבוצות. לחצו "חשוף תת-קבוצות" וראו שבתוך כל קבוצה הקשר בעצם יורד.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
