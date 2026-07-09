@@ -5,6 +5,8 @@ import ArsenalCapture from './ArsenalCapture'
 import { quickAddToMindmap } from '../lib/mindmapWriter'
 import { MathLineBlock } from '../lib/mathRender'
 import { parseLeadingEnumMarker } from '../lib/bidiSegments'
+import WhiteboardShell from './WhiteboardShell'
+import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 
 // Design tokens — keep in sync with StudyHub.tsx
 const GLASS_CARD  = 'var(--sh-glass-card)'
@@ -405,6 +407,9 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
         </button>
       </div>
 
+      {/* Lesson content is drawn directly on a whiteboard surface — the
+          hierarchy breadcrumb is pinned in the board's top-right corner. */}
+      <WhiteboardShell topRightSlot={<HierarchyBreadcrumb topicId={topicId} />}>
       {!isGraphSlide && (
       <>{/* Slide card — theory is the heart of the lesson, give it presence */}
       <div
@@ -412,8 +417,9 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
         data-arsenal-topic={topicId}
         className="ws-lesson-card"
         style={{
-          ...glassCardStyle,
-          padding: '40px 48px',
+          // Drawn ON the board — no glass-card chrome (no background/
+          // border/shadow); content sits directly on the whiteboard surface.
+          padding: '8px 6px',
           marginBottom: 22,
           minHeight: 260,
           display: 'flex',
@@ -542,17 +548,15 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                   style={{
                     // Parent has dir="rtl"; flex-direction: row places the
                     // first child (the marker/waffle) on the RIGHT in Hebrew.
+                    // Drawn ON the board — no box background/border/shadow;
+                    // just the marker + text sitting directly on the whiteboard.
                     display: 'flex', flexDirection: 'row', gap: 14,
                     alignItems: 'flex-start',
-                    background: 'linear-gradient(135deg, rgba(99,102,241,0.045), rgba(99,102,241,0.015))',
-                    borderInlineStart: '3px solid #FFD700',
-                    border: '1px solid rgba(127,155,217,0.20)',
-                    borderRadius: 14, padding: '14px 18px',
-                    boxShadow: '0 2px 8px rgba(31,62,108,0.04)',
-                    transition: 'transform 0.15s, box-shadow 0.15s',
+                    padding: '6px 4px',
+                    transition: 'transform 0.15s',
                   }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 14px rgba(31,62,108,0.08)' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 8px rgba(31,62,108,0.04)' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)' }}
                 >
                   <div style={{
                     flexShrink: 0,
@@ -599,6 +603,9 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                       fontSize: 18.5, lineHeight: 1.85, color: TEXT_DARK,
                       whiteSpace: 'pre-wrap',
                       textAlign: 'right',
+                      // Handwritten, whiteboard-marker feel — readable Hebrew
+                      // handwriting font first, falls back to Assistant.
+                      fontFamily: "'Playpen Sans Hebrew','Assistant',sans-serif",
                     }}
                   />
                 </div>
@@ -718,6 +725,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           </div>
         </div>
       )}
+      </WhiteboardShell>
 
       {/* Footer controls — dots for ALL slides (lesson + graph) */}
       <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
