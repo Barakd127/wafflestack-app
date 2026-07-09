@@ -3,6 +3,7 @@
  * Shade two-tail or one-tail rejection region. Live p-value via Phi(z).
  */
 import { useRef, useState, useEffect } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 320, PAD = 50
 const X0 = PAD, X1 = W - PAD, Y0 = PAD, Y1 = H - 80
@@ -57,24 +58,24 @@ export default function PValueInteractive() {
   }, [p, zStat])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>ערך p (P-Value)</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור את z*. p = שטח הצל מתחת לעקומה — הסתברות לראות תוצאה קיצונית כזו תחת H₀.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>ערך p (P-Value)</h3>
+      <p style={graphSubtitleStyle}>גרור את z*. p = שטח הצל מתחת לעקומה — הסתברות לראות תוצאה קיצונית כזו תחת H₀.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(false)} onPointerLeave={() => setDrag(false)}
         style={{ touchAction: 'none' }}>
-        {twoTail && <path d={shadeFor(xMin, -absZ)} fill="rgba(239,68,68,0.4)" />}
-        <path d={shadeFor(absZ, xMax)} fill="rgba(239,68,68,0.4)" />
-        <path d={path} stroke="#FFD700" strokeWidth={2.5} fill="none" />
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
-        <line x1={toPx(zStat)} y1={Y0} x2={toPx(zStat)} y2={Y1} stroke="#1F3E6C" strokeWidth={2} />
-        <rect x={toPx(zStat) - 8} y={Y1 - 12} width={16} height={24} fill="#FFD700"
+        {twoTail && <path d={shadeFor(xMin, -absZ)} fill="rgba(179,58,58,0.35)" />}
+        <path d={shadeFor(absZ, xMax)} fill="rgba(179,58,58,0.35)" />
+        <path d={path} stroke={GC.gold} strokeWidth={2.5} fill="none" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
+        <line x1={toPx(zStat)} y1={Y0} x2={toPx(zStat)} y2={Y1} stroke={GC.ink} strokeWidth={2} />
+        <rect x={toPx(zStat) - 8} y={Y1 - 12} width={16} height={24} fill={GC.gold}
           onPointerDown={e => { setDrag(true); (e.target as Element).setPointerCapture(e.pointerId) }}
           style={{ cursor: 'ew-resize' }} />
-        <text x={toPx(zStat)} y={Y1 + 30} fill="#FFD700" fontSize={13} textAnchor="middle" fontWeight={700}>z* = {zStat.toFixed(2)}</text>
+        <text x={toPx(zStat)} y={Y1 + 30} fill={GC.goldText} fontSize={13} textAnchor="middle" fontWeight={700}>z* = {zStat.toFixed(2)}</text>
       </svg>
       <div id="p-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
-      <button onClick={() => setTwoTail(!twoTail)} style={{ background: twoTail ? '#FFD700' : 'rgba(31,62,108,0.1)', color: twoTail ? '#0B1B3E' : '#fff', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: twoTail ? 700 : 400 }}>{twoTail ? 'מבחן דו-זנבי' : 'מבחן חד-זנבי'}</button>
+      <button onClick={() => setTwoTail(!twoTail)} style={{ background: twoTail ? GC.gold : 'rgba(31,62,108,0.1)', color: GC.ink, border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: twoTail ? 700 : 400 }}>{twoTail ? 'מבחן דו-זנבי' : 'מבחן חד-זנבי'}</button>
     </div>
   )
 }

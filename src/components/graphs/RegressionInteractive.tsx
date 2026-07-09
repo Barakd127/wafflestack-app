@@ -3,6 +3,7 @@
  * Residuals as vertical red segments. Toggle "add outlier" to see leverage.
  */
 import { useRef, useState, useEffect } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 380, PAD = 50
 const X0 = PAD, X1 = W - PAD, Y0 = PAD, Y1 = H - 60
@@ -54,29 +55,29 @@ export default function RegressionInteractive() {
   }, [slope, intercept, r2])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>רגרסיה לינארית — OLS</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור נקודות וצפה כיצד הקו והערכים β₀, β₁, R² משתנים. שייריות באדום.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>רגרסיה לינארית — OLS</h3>
+      <p style={graphSubtitleStyle}>גרור נקודות וצפה כיצד הקו והערכים β₀, β₁, R² משתנים. שייריות באדום.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
-        <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke="rgba(31,62,108,0.4)" />
-        <line x1={toX(xMin)} y1={toY(yhat(xMin))} x2={toX(xMax)} y2={toY(yhat(xMax))} stroke="#FFD700" strokeWidth={2.5} />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
+        <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke={GC.axis} />
+        <line x1={toX(xMin)} y1={toY(yhat(xMin))} x2={toX(xMax)} y2={toY(yhat(xMax))} stroke={GC.gold} strokeWidth={2.5} />
         {all.map((p, i) => (
-          <line key={`r${i}`} x1={toX(p.x)} y1={toY(p.y)} x2={toX(p.x)} y2={toY(yhat(p.x))} stroke="#ef4444" strokeWidth={1.5} strokeDasharray="3 3" />
+          <line key={`r${i}`} x1={toX(p.x)} y1={toY(p.y)} x2={toX(p.x)} y2={toY(yhat(p.x))} stroke={GC.warn} strokeWidth={1.5} strokeDasharray="3 3" />
         ))}
         {pts.map((p, i) => (
-          <circle key={i} cx={toX(p.x)} cy={toY(p.y)} r={9} fill="#60a5fa" stroke="#1F3E6C" strokeWidth={1.5}
+          <circle key={i} cx={toX(p.x)} cy={toY(p.y)} r={9} fill={GC.blue} stroke={GC.ink} strokeWidth={1.5}
             onPointerDown={e => { setDrag(i); (e.target as Element).setPointerCapture(e.pointerId) }}
             style={{ cursor: 'grab' }} />
         ))}
-        {outlier && <circle cx={toX(12)} cy={toY(1)} r={10} fill="#f59e0b" stroke="#1F3E6C" strokeWidth={2} />}
+        {outlier && <circle cx={toX(12)} cy={toY(1)} r={10} fill={GC.gold} stroke={GC.ink} strokeWidth={2} />}
       </svg>
       <div id="reg-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-        <button onClick={() => setPts(base)} style={{ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}>איפוס</button>
-        <button onClick={() => setOutlier(!outlier)} style={{ background: outlier ? '#f59e0b' : 'rgba(31,62,108,0.1)', color: outlier ? '#0B1B3E' : '#fff', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: outlier ? 700 : 400 }}>{outlier ? 'הסר חריגה' : 'הוסף חריגה'}</button>
+        <button onClick={() => setPts(base)} style={{ background: 'rgba(31,62,108,0.1)', color: GC.ink, border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}>איפוס</button>
+        <button onClick={() => setOutlier(!outlier)} style={{ background: outlier ? GC.gold : 'rgba(31,62,108,0.1)', color: GC.ink, border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: outlier ? 700 : 400 }}>{outlier ? 'הסר חריגה' : 'הוסף חריגה'}</button>
       </div>
     </div>
   )

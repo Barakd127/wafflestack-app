@@ -5,6 +5,7 @@
  * numeric readouts for sample skewness and excess kurtosis.
  */
 import { useState, useMemo, useEffect } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 320, PAD_X = 30, PAD_Y = 30, AXIS_Y = H - 50
 
@@ -93,16 +94,16 @@ export default function SkewnessKurtosisInteractive() {
   const kurtLabel = excessKurt < -0.3 ? 'Platykurtic (שטוח)' : excessKurt > 0.3 ? 'Leptokurtic (חד)' : 'Mesokurtic (נורמלי)'
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>צורת התפלגות — Skewness & Kurtosis</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>מחוון אחד שולט באסימטריה (זנב שמאל/ימין). השני שולט בחדות הפסגה.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>צורת התפלגות — Skewness & Kurtosis</h3>
+      <p style={graphSubtitleStyle}>מחוון אחד שולט באסימטריה (זנב שמאל/ימין). השני שולט בחדות הפסגה.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" />
-        <path d={closed} fill="rgba(255,215,0,0.18)" />
-        <path d={path} stroke="#FFD700" strokeWidth={2.5} fill="none" />
+        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke={GC.axis} />
+        <path d={closed} fill="rgba(212,175,55,0.18)" />
+        <path d={path} stroke={GC.gold} strokeWidth={2.5} fill="none" />
         {[-4, -2, 0, 2, 4].map(t => (
-          <text key={t} x={toX(t)} y={AXIS_Y + 14} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{t}</text>
+          <text key={t} x={toX(t)} y={AXIS_Y + 14} fill={GC.axisText} fontSize={11} textAnchor="middle">{t}</text>
         ))}
       </svg>
 
@@ -112,8 +113,8 @@ export default function SkewnessKurtosisInteractive() {
       <Slider label={`Kurtosis = ${kurt.toFixed(2)}`} value={kurt} min={-1} max={1} step={0.05} onChange={setKurt} />
 
       <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-around' }}>
-        <span style={{ color: '#FFD700' }}>{skewLabel}</span>
-        <span style={{ color: '#60a5fa' }}>{kurtLabel}</span>
+        <span style={{ color: GC.goldText }}>{skewLabel}</span>
+        <span style={{ color: GC.blue }}>{kurtLabel}</span>
       </div>
     </div>
   )
@@ -123,7 +124,7 @@ function Slider({ label, value, min, max, step, onChange }: { label: string; val
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
       <label style={{ fontSize: 13, opacity: 0.85, minWidth: 130 }}>{label}</label>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1 }} />
+      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1, accentColor: GC.blue }} />
     </div>
   )
 }

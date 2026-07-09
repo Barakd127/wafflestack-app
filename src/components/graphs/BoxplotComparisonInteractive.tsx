@@ -3,6 +3,7 @@
  * Drag handles on each Q1/Q3/median. Compare medians visually. Range + IQR per group.
  */
 import { useRef, useState, useEffect } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640
 const H = 360
@@ -15,7 +16,7 @@ const Y_BOT = H - 50
 // Single source of truth for the themed navy stroke/text used across the
 // boxplot SVG. Mirrors --sh-text-dark from index.css. Kept as a JS literal
 // because SVG stroke/fill attrs cannot resolve CSS custom properties.
-const NAVY = '#1F3E6C'
+const NAVY = GC.ink
 
 const yMin = 0
 const yMax = 100
@@ -80,9 +81,9 @@ export default function BoxplotComparisonInteractive() {
   const yTicks = [0, 20, 40, 60, 80, 100]
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 20, marginBottom: 6, fontWeight: 700 }}>השוואת Boxplots — בין קבוצות</h3>
-      <p style={{ fontSize: 15, opacity: 0.85, marginBottom: 14, lineHeight: 1.5 }}>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={{ ...graphTitleStyle }}>השוואת Boxplots — בין קבוצות</h3>
+      <p style={{ ...graphSubtitleStyle, fontSize: 15, lineHeight: 1.5 }}>
         גרור את הידיות הצהובות (Q₁, חציון, Q₃) ואת הקצוות (min, max) של כל קבוצה. השוו חציונים, IQR וטווחים.
       </p>
 
@@ -97,12 +98,12 @@ export default function BoxplotComparisonInteractive() {
         style={{ touchAction: 'none', userSelect: 'none' }}
       >
         {/* Y axis */}
-        <line x1={AXIS_X} y1={Y_TOP} x2={AXIS_X} y2={Y_BOT} stroke="rgba(31,62,108,0.4)" />
+        <line x1={AXIS_X} y1={Y_TOP} x2={AXIS_X} y2={Y_BOT} stroke={GC.axis} />
         {yTicks.map(t => (
           <g key={t}>
-            <line x1={AXIS_X - 4} y1={toY(t)} x2={AXIS_X} y2={toY(t)} stroke="rgba(31,62,108,0.4)" />
+            <line x1={AXIS_X - 4} y1={toY(t)} x2={AXIS_X} y2={toY(t)} stroke={GC.axis} />
             <line x1={AXIS_X} y1={toY(t)} x2={W - PAD_X / 2} y2={toY(t)} stroke="rgba(31,62,108,0.06)" />
-            <text x={AXIS_X - 8} y={toY(t) + 4} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="end">{t}</text>
+            <text x={AXIS_X - 8} y={toY(t) + 4} fill={GC.axisText} fontSize={11} textAnchor="end">{t}</text>
           </g>
         ))}
 
@@ -137,12 +138,12 @@ export default function BoxplotComparisonInteractive() {
                 strokeWidth={2}
               />
               {/* Median line */}
-              <line x1={cx - BOX_HALF_W} y1={yMed} x2={cx + BOX_HALF_W} y2={yMed} stroke="#FFD700" strokeWidth={3} />
+              <line x1={cx - BOX_HALF_W} y1={yMed} x2={cx + BOX_HALF_W} y2={yMed} stroke={GC.gold} strokeWidth={3} />
 
               {/* Drag handles */}
               {(['min', 'q1', 'median', 'q3', 'max'] as const).map(field => {
                 const y = field === 'min' ? yMin_ : field === 'q1' ? yQ1 : field === 'median' ? yMed : field === 'q3' ? yQ3 : yMax_
-                const fill = field === 'median' ? '#FFD700' : '#fff'
+                const fill = field === 'median' ? GC.gold : '#fff'
                 return (
                   <circle
                     key={field}
@@ -150,7 +151,7 @@ export default function BoxplotComparisonInteractive() {
                     cy={y}
                     r={6}
                     fill={fill}
-                    stroke="#0B1B3E"
+                    stroke={GC.ink}
                     strokeWidth={1.5}
                     onPointerDown={e => { setDrag({ groupIdx: gi, field }); (e.target as Element).setPointerCapture(e.pointerId) }}
                     style={{ cursor: 'ns-resize' }}
@@ -183,7 +184,7 @@ export default function BoxplotComparisonInteractive() {
               }}
             >
               <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>קבוצה {b.name}</div>
-              <div>חציון: <span style={{ color: '#FFD700', fontWeight: 700 }}>{b.median.toFixed(1)}</span></div>
+              <div>חציון: <span style={{ color: GC.goldText, fontWeight: 700 }}>{b.median.toFixed(1)}</span></div>
               <div>IQR: {iqr.toFixed(1)}</div>
               <div>טווח: {range.toFixed(1)}</div>
             </div>

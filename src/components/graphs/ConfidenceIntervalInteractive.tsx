@@ -4,6 +4,7 @@
  * those that miss μ (should match (1-α)·100 ≈ confidence%).
  */
 import { useRef, useState, useEffect, useMemo } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 360, PAD = 50
 const X0 = PAD, X1 = W - PAD
@@ -57,30 +58,30 @@ export default function ConfidenceIntervalInteractive() {
   }, [conf, halfWidth])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>רווח סמך (Confidence Interval)</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 8 }}>{ROWS} מדגמים שונים, μ אמיתי = 100. רווחים מכסים את μ: {covered}/{ROWS} ({((covered / ROWS) * 100).toFixed(0)}%)</p>
+    <div dir="rtl" style={graphCardStyle}>
+      <h3 style={graphTitleStyle}>רווח סמך (Confidence Interval)</h3>
+      <p style={graphSubtitleStyle}>{ROWS} מדגמים שונים, μ אמיתי = 100. רווחים מכסים את μ: {covered}/{ROWS} ({((covered / ROWS) * 100).toFixed(0)}%)</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H} style={{ touchAction: 'none' }}>
-        <line x1={toX(trueMu)} y1={PAD - 10} x2={toX(trueMu)} y2={H - PAD} stroke="#FFD700" strokeWidth={2} strokeDasharray="6 4" />
-        <text x={toX(trueMu)} y={PAD - 14} fill="#FFD700" fontSize={12} textAnchor="middle" fontWeight={700}>μ = 100</text>
+        <line x1={toX(trueMu)} y1={PAD - 10} x2={toX(trueMu)} y2={H - PAD} stroke={GC.gold} strokeWidth={2} strokeDasharray="6 4" />
+        <text x={toX(trueMu)} y={PAD - 14} fill={GC.goldText} fontSize={12} textAnchor="middle" fontWeight={700}>μ = 100</text>
         {samples.map((s, i) => (
           <g key={i}>
-            <line x1={toX(s.lo)} y1={PAD + i * ROW_H + 6} x2={toX(s.hi)} y2={PAD + i * ROW_H + 6} stroke={s.covers ? '#10b981' : '#ef4444'} strokeWidth={2.5} />
-            <circle cx={toX(s.mean)} cy={PAD + i * ROW_H + 6} r={3} fill="#1F3E6C" />
+            <line x1={toX(s.lo)} y1={PAD + i * ROW_H + 6} x2={toX(s.hi)} y2={PAD + i * ROW_H + 6} stroke={s.covers ? GC.good : GC.warn} strokeWidth={2.5} />
+            <circle cx={toX(s.mean)} cy={PAD + i * ROW_H + 6} r={3} fill={GC.ink} />
           </g>
         ))}
       </svg>
       <div id="ci-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginTop: 8 }}>
-        <label style={{ fontSize: 12 }}>n: {n}<input type="range" min={5} max={200} value={n} onChange={e => setN(+e.target.value)} style={{ width: '100%' }} /></label>
-        <label style={{ fontSize: 12 }}>σ: {sigma}<input type="range" min={5} max={40} value={sigma} onChange={e => setSigma(+e.target.value)} style={{ width: '100%' }} /></label>
-        <label style={{ fontSize: 12 }}>סמך %: {conf}
-          <select value={conf} onChange={e => setConf(+e.target.value)} style={{ width: '100%', background: 'rgba(0,0,0,0.6)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 6, padding: 4 }}>
+        <label style={{ fontFamily: GRAPH_FONT, fontSize: 12 }}>n: {n}<input type="range" min={5} max={200} value={n} onChange={e => setN(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
+        <label style={{ fontFamily: GRAPH_FONT, fontSize: 12 }}>σ: {sigma}<input type="range" min={5} max={40} value={sigma} onChange={e => setSigma(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
+        <label style={{ fontFamily: GRAPH_FONT, fontSize: 12 }}>סמך %: {conf}
+          <select value={conf} onChange={e => setConf(+e.target.value)} style={{ width: '100%', background: 'var(--sh-q-card-bg, #FCFDFF)', color: GC.ink, border: '1px solid rgba(127,155,217,0.22)', borderRadius: 6, padding: 4 }}>
             <option value={80}>80%</option><option value={90}>90%</option><option value={95}>95%</option><option value={99}>99%</option>
           </select>
         </label>
       </div>
-      <button onClick={() => setSeed(s => s + 1)} style={{ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, marginTop: 8 }}>דגום מחדש</button>
+      <button onClick={() => setSeed(s => s + 1)} style={{ fontFamily: GRAPH_FONT, background: 'rgba(31,62,108,0.1)', color: GC.ink, border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13, marginTop: 8 }}>דגום מחדש</button>
     </div>
   )
 }

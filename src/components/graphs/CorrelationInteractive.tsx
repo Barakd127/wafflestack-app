@@ -4,6 +4,7 @@
  * relative to (mean_x, mean_y). r → ±1 as user shapes the cloud.
  */
 import { useRef, useState, useEffect } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle, GRAPH_FONT } from './graphTheme'
 
 const W = 640, H = 380, PAD = 50
 const X0 = PAD, X1 = W - PAD, Y0 = PAD, Y1 = H - 60
@@ -59,31 +60,31 @@ export default function CorrelationInteractive() {
   const lineY1 = slope * lineX1 + intercept, lineY2 = slope * lineX2 + intercept
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>קורלציה (Correlation) — מקדם Pearson</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>גרור נקודות. r מתעדכן בזמן אמת. צבע כל נקודה לפי הרבע שלה ביחס לממוצעים.</p>
+    <div dir="rtl" style={graphCardStyle}>
+      <h3 style={graphTitleStyle}>קורלציה (Correlation) — מקדם Pearson</h3>
+      <p style={graphSubtitleStyle}>גרור נקודות. r מתעדכן בזמן אמת. צבע כל נקודה לפי הרבע שלה ביחס לממוצעים.</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
-        <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke="rgba(31,62,108,0.4)" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
+        <line x1={X0} y1={Y0} x2={X0} y2={Y1} stroke={GC.axis} />
         <line x1={toX(mx)} y1={Y0} x2={toX(mx)} y2={Y1} stroke="rgba(31,62,108,0.2)" strokeDasharray="4 4" />
         <line x1={X0} y1={toY(my)} x2={X1} y2={toY(my)} stroke="rgba(31,62,108,0.2)" strokeDasharray="4 4" />
-        <line x1={toX(lineX1)} y1={toY(lineY1)} x2={toX(lineX2)} y2={toY(lineY2)} stroke="#FFD700" strokeWidth={2.5} />
+        <line x1={toX(lineX1)} y1={toY(lineY1)} x2={toX(lineX2)} y2={toY(lineY2)} stroke={GC.gold} strokeWidth={2.5} />
         {pts.map((p, i) => {
           const dx = p.x - mx, dy = p.y - my
-          const color = dx * dy >= 0 ? '#10b981' : '#ef4444'
+          const color = dx * dy >= 0 ? GC.good : GC.warn
           return (
-            <circle key={i} cx={toX(p.x)} cy={toY(p.y)} r={9} fill={color} stroke="#1F3E6C" strokeWidth={1.5}
+            <circle key={i} cx={toX(p.x)} cy={toY(p.y)} r={9} fill={color} stroke={GC.ink} strokeWidth={1.5}
               onPointerDown={e => { setDrag(i); (e.target as Element).setPointerCapture(e.pointerId) }}
               style={{ cursor: 'grab' }} />
           )
         })}
-        <text x={X1 - 6} y={Y0 + 12} fill="rgba(31,62,108,0.5)" fontSize={11} textAnchor="end">r = {r.toFixed(3)}</text>
+        <text x={X1 - 6} y={Y0 + 12} fill={GC.axisText} fontSize={11} textAnchor="end">r = {r.toFixed(3)}</text>
       </svg>
       <div id="corr-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <button onClick={() => setPts(initial)} style={{
-        background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)',
+        fontFamily: GRAPH_FONT, background: 'rgba(31,62,108,0.1)', color: GC.ink, border: '1px solid rgba(31,62,108,0.2)',
         borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13,
       }}>איפוס</button>
     </div>

@@ -4,6 +4,7 @@
  * Slider: effect size δ. Slider: α.
  */
 import { useState, useEffect } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 320, PAD = 50
 const X0 = PAD, X1 = W - PAD, Y0 = PAD, Y1 = H - 70
@@ -56,25 +57,25 @@ export default function HypothesisTestingInteractive() {
   }, [alpha, beta, power])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>מבחן השערות — α, β ועוצמה</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>אזור אדום = α (טעות סוג I). אזור כתום = β (טעות סוג II). שטח ירוק = עוצמת המבחן.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>מבחן השערות — α, β ועוצמה</h3>
+      <p style={graphSubtitleStyle}>אזור אדום = α (טעות סוג I). אזור כתום = β (טעות סוג II). שטח ירוק = עוצמת המבחן.</p>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <path d={shade(0, zCrit, xMax)} fill="rgba(239,68,68,0.4)" />
         <path d={shade(delta, xMin, zCrit)} fill="rgba(245,158,11,0.4)" />
         <path d={shade(delta, zCrit, xMax)} fill="rgba(16,185,129,0.35)" />
-        <path d={path(0)} stroke="#60a5fa" strokeWidth={2.5} fill="none" />
-        <path d={path(delta)} stroke="#FFD700" strokeWidth={2.5} fill="none" />
-        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.4)" />
-        <line x1={toPx(zCrit)} y1={Y0} x2={toPx(zCrit)} y2={Y1} stroke="#1F3E6C" strokeWidth={1.5} strokeDasharray="4 4" />
-        <text x={toPx(zCrit)} y={Y0 - 4} fill="#1F3E6C" fontSize={11} textAnchor="middle">קריטי</text>
-        <text x={toPx(0)} y={Y0 + 14} fill="#60a5fa" fontSize={11} textAnchor="middle">H₀</text>
-        <text x={toPx(delta)} y={Y0 + 14} fill="#FFD700" fontSize={11} textAnchor="middle">H₁</text>
+        <path d={path(0)} stroke={GC.blue} strokeWidth={2.5} fill="none" />
+        <path d={path(delta)} stroke={GC.gold} strokeWidth={2.5} fill="none" />
+        <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke={GC.axis} />
+        <line x1={toPx(zCrit)} y1={Y0} x2={toPx(zCrit)} y2={Y1} stroke={GC.ink} strokeWidth={1.5} strokeDasharray="4 4" />
+        <text x={toPx(zCrit)} y={Y0 - 4} fill={GC.ink} fontSize={11} textAnchor="middle" fontFamily={GRAPH_FONT}>קריטי</text>
+        <text x={toPx(0)} y={Y0 + 14} fill={GC.blue} fontSize={11} textAnchor="middle" fontFamily={GRAPH_FONT}>H₀</text>
+        <text x={toPx(delta)} y={Y0 + 14} fill={GC.goldText} fontSize={11} textAnchor="middle" fontFamily={GRAPH_FONT}>H₁</text>
       </svg>
       <div id="hyp-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 8 }}>
-        <label style={{ fontSize: 13 }}>אפקט (δ): {delta.toFixed(2)}<input type="range" min={0.1} max={4} step={0.1} value={delta} onChange={e => setDelta(+e.target.value)} style={{ width: '100%' }} /></label>
-        <label style={{ fontSize: 13 }}>α: {alpha.toFixed(3)}<input type="range" min={0.001} max={0.2} step={0.005} value={alpha} onChange={e => setAlpha(+e.target.value)} style={{ width: '100%' }} /></label>
+        <label style={{ fontFamily: GRAPH_FONT, fontSize: 13 }}>אפקט (δ): {delta.toFixed(2)}<input type="range" min={0.1} max={4} step={0.1} value={delta} onChange={e => setDelta(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
+        <label style={{ fontFamily: GRAPH_FONT, fontSize: 13 }}>α: {alpha.toFixed(3)}<input type="range" min={0.001} max={0.2} step={0.005} value={alpha} onChange={e => setAlpha(+e.target.value)} style={{ width: '100%', accentColor: GC.blue }} /></label>
       </div>
     </div>
   )

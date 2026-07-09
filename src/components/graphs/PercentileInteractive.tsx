@@ -4,6 +4,7 @@
  * Shows value at percentile + how many dots below.
  */
 import { useEffect, useMemo, useState } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640
 const H = 320
@@ -97,19 +98,19 @@ export default function PercentileInteractive() {
   for (let t = Math.ceil(xMin / tickStep) * tickStep; t <= xMax; t += tickStep) xTicks.push(t)
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>אחוזונים — מיקום בהתפלגות</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>אחוזונים — מיקום בהתפלגות</h3>
+      <p style={graphSubtitleStyle}>
         50 ערכים מסודרים בהיסטוגרמת נקודות. הזז את האחוזון וצפה היכן הוא חותך — וכמה נקודות נמצאות מתחתיו.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" />
+        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke={GC.axis} />
 
         {xTicks.map(t => (
           <g key={t}>
-            <line x1={toX(t)} y1={AXIS_Y - 3} x2={toX(t)} y2={AXIS_Y + 3} stroke="rgba(31,62,108,0.4)" />
-            <text x={toX(t)} y={AXIS_Y + 16} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{t}</text>
+            <line x1={toX(t)} y1={AXIS_Y - 3} x2={toX(t)} y2={AXIS_Y + 3} stroke={GC.axis} />
+            <text x={toX(t)} y={AXIS_Y + 16} fill={GC.axisText} fontSize={11} textAnchor="middle">{t}</text>
           </g>
         ))}
 
@@ -120,8 +121,8 @@ export default function PercentileInteractive() {
             cx={pos.cx}
             cy={pos.cy}
             r={dotR}
-            fill={pos.below ? '#60a5fa' : '#94a3b8'}
-            stroke="#1F3E6C"
+            fill={pos.below ? GC.blue : GC.axisText}
+            stroke={GC.ink}
             strokeWidth={1}
             opacity={0.95}
           />
@@ -133,11 +134,11 @@ export default function PercentileInteractive() {
           y1={PAD_Y}
           x2={toX(value)}
           y2={AXIS_Y}
-          stroke="#FFD700"
+          stroke={GC.gold}
           strokeWidth={2.5}
           strokeDasharray="6 4"
         />
-        <text x={toX(value)} y={PAD_Y - 6} fill="#FFD700" fontSize={13} textAnchor="middle" fontWeight={700}>
+        <text x={toX(value)} y={PAD_Y - 6} fill={GC.goldText} fontSize={13} textAnchor="middle" fontWeight={700}>
           P{p} = {value.toFixed(2)}
         </text>
       </svg>
@@ -153,7 +154,7 @@ export default function PercentileInteractive() {
           step={1}
           value={p}
           onChange={e => setP(parseInt(e.target.value, 10))}
-          style={{ flex: 1 }}
+          style={{ flex: 1, accentColor: GC.blue }}
         />
       </div>
 
@@ -161,7 +162,7 @@ export default function PercentileInteractive() {
         style={{
           marginTop: 10,
           padding: '10px 14px',
-          background: 'rgba(96,165,250,0.12)',
+          background: 'rgba(78,113,218,0.10)',
           borderRadius: 8,
           fontSize: 13,
           display: 'flex',
@@ -169,33 +170,33 @@ export default function PercentileInteractive() {
           flexWrap: 'wrap',
         }}
       >
-        <span><span style={{ color: '#60a5fa', fontWeight: 700 }}>{belowCount}</span> מתחת ל-P{p}</span>
-        <span><span style={{ color: '#94a3b8', fontWeight: 700 }}>{N - belowCount}</span> מעליו</span>
-        <span style={{ marginInlineStart: 'auto' }}>ערך באחוזון: <span style={{ color: '#FFD700', fontWeight: 700 }}>{value.toFixed(2)}</span></span>
+        <span><span style={{ color: GC.blue, fontWeight: 700 }}>{belowCount}</span> מתחת ל-P{p}</span>
+        <span><span style={{ color: GC.axisText, fontWeight: 700 }}>{N - belowCount}</span> מעליו</span>
+        <span style={{ marginInlineStart: 'auto' }}>ערך באחוזון: <span style={{ color: GC.goldText, fontWeight: 700 }}>{value.toFixed(2)}</span></span>
       </div>
 
       <div style={{ display: 'flex', gap: 12, marginTop: 10, flexWrap: 'wrap' }}>
         <button
           onClick={() => setSeed(seed + 1)}
-          style={{ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
+          style={{ background: 'rgba(31,62,108,0.1)', color: GC.ink, border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
         >
           הגרל נתונים חדשים
         </button>
         <button
           onClick={() => setP(25)}
-          style={{ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
+          style={{ background: 'rgba(31,62,108,0.1)', color: GC.ink, border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
         >
           P25 (רבעון תחתון)
         </button>
         <button
           onClick={() => setP(50)}
-          style={{ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
+          style={{ background: 'rgba(31,62,108,0.1)', color: GC.ink, border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
         >
           P50 (חציון)
         </button>
         <button
           onClick={() => setP(75)}
-          style={{ background: 'rgba(31,62,108,0.1)', color: '#1F3E6C', border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
+          style={{ background: 'rgba(31,62,108,0.1)', color: GC.ink, border: '1px solid rgba(31,62,108,0.2)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer', fontSize: 13 }}
         >
           P75 (רבעון עליון)
         </button>

@@ -3,15 +3,14 @@
  * (beyond 1.5·IQR) auto-highlight red. User reshapes dataset to see IQR.
  */
 import { useRef, useState, useEffect } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 280, PAD = 40
 const X0 = PAD, X1 = W - PAD
 const Y_BOX = 130, BOX_H = 60
 
-// Single source of truth for the themed navy stroke used in the boxplot SVG.
-// Mirrors --sh-text-dark from index.css. JS literal because SVG stroke/fill
-// attrs do not resolve CSS custom properties.
-const NAVY = '#1F3E6C'
+// Themed navy stroke used in the boxplot SVG (SVG attrs can't resolve CSS vars).
+const NAVY = GC.ink
 
 const quantile = (sorted: number[], q: number) => {
   const pos = (sorted.length - 1) * q
@@ -47,33 +46,33 @@ export default function IQRInteractive() {
   }, [Q1, Q2, Q3, iqr])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 20, marginBottom: 6, fontWeight: 700 }}>טווח רבעוני (IQR) — Boxplot</h3>
-      <p style={{ fontSize: 15, opacity: 0.85, marginBottom: 14, lineHeight: 1.5 }}>גרור נקודות. נקודות מחוץ ל-1.5·IQR מסומנות באדום (חריגות).</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>טווח רבעוני (IQR) — Boxplot</h3>
+      <p style={{ ...graphSubtitleStyle, lineHeight: 1.5 }}>גרור נקודות. נקודות מחוץ ל-1.5·IQR מסומנות באדום (חריגות).</p>
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(null)} onPointerLeave={() => setDrag(null)}
         style={{ touchAction: 'none' }}>
-        <line x1={toX(sorted[0])} y1={Y_BOX + BOX_H / 2} x2={toX(Q1)} y2={Y_BOX + BOX_H / 2} stroke="#FFD700" strokeWidth={2} />
-        <line x1={toX(Q3)} y1={Y_BOX + BOX_H / 2} x2={toX(sorted[sorted.length - 1])} y2={Y_BOX + BOX_H / 2} stroke="#FFD700" strokeWidth={2} />
-        <rect x={toX(Q1)} y={Y_BOX} width={toX(Q3) - toX(Q1)} height={BOX_H} fill="rgba(255,215,0,0.2)" stroke="#FFD700" strokeWidth={2} />
-        <line x1={toX(Q2)} y1={Y_BOX} x2={toX(Q2)} y2={Y_BOX + BOX_H} stroke="#FFD700" strokeWidth={3} />
+        <line x1={toX(sorted[0])} y1={Y_BOX + BOX_H / 2} x2={toX(Q1)} y2={Y_BOX + BOX_H / 2} stroke={GC.gold} strokeWidth={2} />
+        <line x1={toX(Q3)} y1={Y_BOX + BOX_H / 2} x2={toX(sorted[sorted.length - 1])} y2={Y_BOX + BOX_H / 2} stroke={GC.gold} strokeWidth={2} />
+        <rect x={toX(Q1)} y={Y_BOX} width={toX(Q3) - toX(Q1)} height={BOX_H} fill={GC.goldFill} stroke={GC.gold} strokeWidth={2} />
+        <line x1={toX(Q2)} y1={Y_BOX} x2={toX(Q2)} y2={Y_BOX + BOX_H} stroke={GC.gold} strokeWidth={3} />
         {values.map((v, i) => {
           const outlier = v < fenceLo || v > fenceHi
           return (
             <circle key={i} cx={toX(v)} cy={Y_BOX + BOX_H + 30} r={9}
-              fill={outlier ? '#ef4444' : '#60a5fa'} stroke={NAVY} strokeWidth={1.5}
+              fill={outlier ? GC.warn : GC.blue} stroke={NAVY} strokeWidth={1.5}
               onPointerDown={e => { setDrag(i); (e.target as Element).setPointerCapture(e.pointerId) }}
               style={{ cursor: 'grab' }} />
           )
         })}
-        <text x={toX(Q1)} y={Y_BOX - 6} fill="#FFD700" fontSize={11} textAnchor="middle">Q₁</text>
-        <text x={toX(Q2)} y={Y_BOX - 6} fill="#FFD700" fontSize={11} textAnchor="middle">חציון</text>
-        <text x={toX(Q3)} y={Y_BOX - 6} fill="#FFD700" fontSize={11} textAnchor="middle">Q₃</text>
+        <text x={toX(Q1)} y={Y_BOX - 6} fill={GC.goldText} fontSize={11} textAnchor="middle" fontFamily={GRAPH_FONT}>Q₁</text>
+        <text x={toX(Q2)} y={Y_BOX - 6} fill={GC.goldText} fontSize={11} textAnchor="middle" fontFamily={GRAPH_FONT}>חציון</text>
+        <text x={toX(Q3)} y={Y_BOX - 6} fill={GC.goldText} fontSize={11} textAnchor="middle" fontFamily={GRAPH_FONT}>Q₃</text>
       </svg>
       <div id="iqr-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
       <button onClick={() => setValues([2, 4, 5, 6, 7, 8, 9, 10, 11, 13])} style={{
-        background: 'rgba(31,62,108,0.10)', color: 'var(--sh-text-dark)', border: '1px solid rgba(31,62,108,0.20)',
-        borderRadius: 8, padding: '10px 18px', cursor: 'pointer', fontSize: 14, fontWeight: 600, minHeight: 44,
+        background: 'rgba(31,62,108,0.10)', color: GC.ink, border: '1px solid rgba(31,62,108,0.20)',
+        borderRadius: 8, padding: '10px 18px', cursor: 'pointer', fontFamily: GRAPH_FONT, fontSize: 14, fontWeight: 600, minHeight: 44,
       }}>איפוס</button>
     </div>
   )

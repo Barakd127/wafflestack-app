@@ -5,6 +5,7 @@
  * appear. Teaches: join type = policy for rows with no partner.
  */
 import { useState } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 type JoinType = 'inner' | 'left' | 'right' | 'full'
 const CUSTOMERS = [
@@ -28,13 +29,13 @@ function MiniTable({ title, cols, rows }: { title: string; cols: string[]; rows:
   return (
     <div style={{ flex: '1 1 180px', minWidth: 170 }}>
       <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{title}</div>
-      <div dir="ltr" style={{ overflowX: 'auto', borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)' }}>
-        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 13, fontVariantNumeric: 'tabular-nums' }}>
-          <thead><tr>{cols.map(c => <th key={c} style={{ background: 'rgba(31,62,108,0.85)', color: '#fff', textAlign: 'left', padding: '4px 8px' }}>{c}</th>)}</tr></thead>
+      <div dir="ltr" style={{ overflowX: 'auto', borderRadius: 8, border: '1px solid rgba(127,155,217,0.22)' }}>
+        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 13, fontVariantNumeric: 'tabular-nums', fontFamily: 'Consolas, monospace' }}>
+          <thead><tr>{cols.map(c => <th key={c} style={{ background: GC.ink, color: '#fff', textAlign: 'left', padding: '4px 8px' }}>{c}</th>)}</tr></thead>
           <tbody>
             {rows.map((r, i) => (
               <tr key={i}>{r.map((cell, j) => (
-                <td key={j} style={{ padding: '4px 8px', borderTop: '1px solid rgba(255,255,255,0.12)', fontStyle: cell === null ? 'italic' : 'normal', color: cell === null ? '#D4A017' : 'inherit' }}>
+                <td key={j} style={{ padding: '4px 8px', borderTop: '1px solid rgba(127,155,217,0.22)', fontStyle: cell === null ? 'italic' : 'normal', color: cell === null ? GC.goldText : 'inherit' }}>
                   {cell === null ? 'NULL' : cell}
                 </td>
               ))}</tr>
@@ -59,27 +60,27 @@ export default function SQLJoinInteractive() {
   if (m.keepR) ORDERS.filter(o => !CUSTOMERS.some(c => c.id === o.id)).forEach(o => result.push([null, o.order]))
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)', fontFamily: 'Rubik, sans-serif' }}>
-      <h3 style={{ fontSize: 18, margin: '0 0 4px' }}>JOIN — שני פקידים משווים לוחות</h3>
-      <p style={{ fontSize: 14, opacity: 0.75, margin: '0 0 12px' }}>בחרו סוג חיבור וראו אילו שורות שורדות ואיפה מופיע NULL.</p>
+    <div dir="rtl" style={graphCardStyle}>
+      <h3 style={graphTitleStyle}>JOIN — שני פקידים משווים לוחות</h3>
+      <p style={graphSubtitleStyle}>בחרו סוג חיבור וראו אילו שורות שורדות ואיפה מופיע NULL.</p>
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
         {(Object.keys(META) as JoinType[]).map(t => (
           <button key={t} onClick={() => setJt(t)} style={{
-            padding: '7px 16px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700,
-            background: jt === t ? '#D4A017' : 'rgba(255,255,255,0.08)',
-            color: jt === t ? '#1F3E6C' : 'var(--sh-text-dark)',
-            border: `1px solid ${jt === t ? '#D4A017' : 'rgba(255,255,255,0.2)'}`,
+            padding: '7px 16px', borderRadius: 10, cursor: 'pointer', fontFamily: GRAPH_FONT, fontSize: 14, fontWeight: 700,
+            background: jt === t ? GC.gold : 'rgba(31,62,108,0.06)',
+            color: GC.ink,
+            border: `1px solid ${jt === t ? GC.gold : 'rgba(127,155,217,0.22)'}`,
           }}>{META[t].kw.split(' ')[0]}</button>
         ))}
       </div>
 
       <svg viewBox="0 0 320 130" width="260" height="106" role="img" aria-label="Venn" style={{ display: 'block', margin: '0 auto 8px' }}>
-        <circle cx={125} cy={65} r={52} fill="#D4A017" opacity={m.keepL || jt === 'full' ? 0.55 : 0.22} stroke="#1F3E6C" />
-        <circle cx={195} cy={65} r={52} fill="#7CB7F8" opacity={m.keepR || jt === 'full' ? 0.55 : 0.22} stroke="#1F3E6C" />
+        <circle cx={125} cy={65} r={52} fill={GC.gold} opacity={m.keepL || jt === 'full' ? 0.55 : 0.22} stroke={GC.ink} />
+        <circle cx={195} cy={65} r={52} fill={GC.blue} opacity={m.keepR || jt === 'full' ? 0.55 : 0.22} stroke={GC.ink} />
         {/* intersection always included in every join type shown here */}
-        <text x={95} y={70} fontSize={12} fill="var(--sh-text-dark)">customers</text>
-        <text x={185} y={70} fontSize={12} fill="var(--sh-text-dark)">orders</text>
+        <text x={95} y={70} fontSize={12} fill={GC.ink} fontFamily={GRAPH_FONT}>customers</text>
+        <text x={185} y={70} fontSize={12} fill={GC.ink} fontFamily={GRAPH_FONT}>orders</text>
       </svg>
 
       <p style={{ fontSize: 14, margin: '0 0 12px' }}>🤝 {m.desc}</p>

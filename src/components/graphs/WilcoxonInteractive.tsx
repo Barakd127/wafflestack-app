@@ -6,6 +6,7 @@
  * (non-parametric) test reaches a decision without assuming normality.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const BASE = [4, -2, 6, 1, -3, 5, -1, 7, 2, -4]
 const W = 600, ROW_H = 22, PAD_TOP = 12
@@ -47,12 +48,12 @@ export default function WilcoxonInteractive() {
   const reject = Math.abs(z) > 1.96
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>מבחן וילקוקסון — דירוג ההפרשים</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>מדרגים לפי הערך המוחלט של ההפרש (אפסים יורדים), מחזירים את הסימן, ומסכמים ל-W⁺ ו-W⁻. מבחן א-פרמטרי — אין הנחת נורמליות.</p>
+    <div dir="rtl" style={graphCardStyle}>
+      <h3 style={graphTitleStyle}>מבחן וילקוקסון — דירוג ההפרשים</h3>
+      <p style={graphSubtitleStyle}>מדרגים לפי הערך המוחלט של ההפרש (אפסים יורדים), מחזירים את הסימן, ומסכמים ל-W⁺ ו-W⁻. מבחן א-פרמטרי — אין הנחת נורמליות.</p>
 
       <svg viewBox={`0 0 ${W} ${svgH}`} width="100%" height={Math.min(svgH, 320)}>
-        <line x1={W / 2} y1={PAD_TOP} x2={W / 2} y2={svgH - PAD_TOP} stroke="rgba(31,62,108,0.3)" />
+        <line x1={W / 2} y1={PAD_TOP} x2={W / 2} y2={svgH - PAD_TOP} stroke={GC.axis} />
         {rows.map((r, i) => {
           const y = PAD_TOP + i * ROW_H + ROW_H / 2
           const len = (r.rank / maxRank) * (W / 2 - 60)
@@ -61,8 +62,8 @@ export default function WilcoxonInteractive() {
           const x2 = pos ? W / 2 + len : W / 2 - len
           return (
             <g key={i}>
-              <line x1={x1} y1={y} x2={x2} y2={y} stroke={pos ? '#16a34a' : '#ef4444'} strokeWidth={5} strokeLinecap="round" />
-              <text x={pos ? x2 + 6 : x2 - 6} y={y + 4} fill={pos ? '#16a34a' : '#ef4444'} fontSize={11} textAnchor={pos ? 'start' : 'end'}>
+              <line x1={x1} y1={y} x2={x2} y2={y} stroke={pos ? GC.good : GC.warn} strokeWidth={5} strokeLinecap="round" />
+              <text x={pos ? x2 + 6 : x2 - 6} y={y + 4} fill={pos ? GC.good : GC.warn} fontSize={11} fontFamily={GRAPH_FONT} textAnchor={pos ? 'start' : 'end'}>
                 d={r.v} · דירוג {r.rank}
               </text>
             </g>
@@ -74,12 +75,12 @@ export default function WilcoxonInteractive() {
 
       <Slider label={`הזזת ההפרשים = ${shift}`} value={shift} min={-6} max={8} step={1} onChange={v => setShift(Math.round(v))} />
 
-      <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 8 }}>
-        <span style={{ color: '#16a34a', fontWeight: 700 }}>W⁺ = {wPlus.toFixed(1)}</span>
-        <span style={{ color: '#ef4444', fontWeight: 700 }}>W⁻ = {wMinus.toFixed(1)}</span>
+      <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 8, fontFamily: GRAPH_FONT }}>
+        <span style={{ color: GC.good, fontWeight: 700 }}>W⁺ = {wPlus.toFixed(1)}</span>
+        <span style={{ color: GC.warn, fontWeight: 700 }}>W⁻ = {wMinus.toFixed(1)}</span>
         <span>n = {nEff}</span>
         <span>z ≈ {z.toFixed(2)}</span>
-        <span style={{ color: reject ? '#16a34a' : '#ef4444', fontWeight: 700 }}>{reject ? 'דוחים H₀' : 'לא דוחים H₀'}</span>
+        <span style={{ color: reject ? GC.good : GC.warn, fontWeight: 700 }}>{reject ? 'דוחים H₀' : 'לא דוחים H₀'}</span>
       </div>
     </div>
   )
@@ -89,9 +90,9 @@ function Slider({ label, value, min, max, step, onChange }: {
   label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void
 }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8, fontFamily: GRAPH_FONT }}>
       <label style={{ fontSize: 13, opacity: 0.85, minWidth: 150 }}>{label}</label>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1 }} />
+      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1, accentColor: GC.blue }} />
     </div>
   )
 }

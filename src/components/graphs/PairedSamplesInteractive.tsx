@@ -5,6 +5,7 @@
  * effect); live mean difference d̄, s_d and paired t = d̄ / (s_d/√n), df=n−1.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const BEFORE = [62, 70, 55, 80, 68, 74, 59, 66]
 // deterministic per-subject variation of the effect (keeps spread fixed, no RNG)
@@ -39,20 +40,20 @@ export default function PairedSamplesInteractive() {
   }, [dbar, sd, t])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>דגימות מזווגות — לפני מול אחרי</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>כל קו הוא אותו נבדק. המבחן עובד על ההפרשים dᵢ, לא על הערכים עצמם — כך מנטרלים את השונות בין הנבדקים.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>דגימות מזווגות — לפני מול אחרי</h3>
+      <p style={graphSubtitleStyle}>כל קו הוא אותו נבדק. המבחן עובד על ההפרשים dᵢ, לא על הערכים עצמם — כך מנטרלים את השונות בין הנבדקים.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <text x={COL_B} y={PAD - 14} fill="#64748B" fontSize={13} textAnchor="middle" fontWeight={700}>לפני</text>
-        <text x={COL_A} y={PAD - 14} fill="#64748B" fontSize={13} textAnchor="middle" fontWeight={700}>אחרי</text>
+        <text x={COL_B} y={PAD - 14} fill={GC.axisText} fontSize={13} textAnchor="middle" fontWeight={700}>לפני</text>
+        <text x={COL_A} y={PAD - 14} fill={GC.axisText} fontSize={13} textAnchor="middle" fontWeight={700}>אחרי</text>
         {BEFORE.map((v, i) => {
           const up = diffs[i] >= 0
           return (
             <g key={i}>
-              <line x1={COL_B} y1={toY(v)} x2={COL_A} y2={toY(after[i])} stroke={up ? '#16a34a' : '#ef4444'} strokeWidth={1.6} opacity={0.75} />
-              <circle cx={COL_B} cy={toY(v)} r={4.5} fill="#1F3E6C" />
-              <circle cx={COL_A} cy={toY(after[i])} r={4.5} fill="#D4A017" />
+              <line x1={COL_B} y1={toY(v)} x2={COL_A} y2={toY(after[i])} stroke={up ? GC.good : GC.warn} strokeWidth={1.6} opacity={0.75} />
+              <circle cx={COL_B} cy={toY(v)} r={4.5} fill={GC.ink} />
+              <circle cx={COL_A} cy={toY(after[i])} r={4.5} fill={GC.gold} />
             </g>
           )
         })}
@@ -67,7 +68,7 @@ export default function PairedSamplesInteractive() {
         <span>s_d = {sd.toFixed(2)}</span>
         <span>t = <b>{t.toFixed(2)}</b></span>
         <span style={{ opacity: 0.85 }}>קריטי t(7) = ±{CRIT_T}</span>
-        <span style={{ color: reject ? '#16a34a' : '#ef4444', fontWeight: 700 }}>{reject ? 'דוחים H₀' : 'לא דוחים H₀'}</span>
+        <span style={{ color: reject ? GC.good : GC.warn, fontWeight: 700 }}>{reject ? 'דוחים H₀' : 'לא דוחים H₀'}</span>
       </div>
     </div>
   )
@@ -79,7 +80,7 @@ function Slider({ label, value, min, max, step, onChange }: {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
       <label style={{ fontSize: 13, opacity: 0.85, minWidth: 150 }}>{label}</label>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1 }} />
+      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1, accentColor: GC.blue }} />
     </div>
   )
 }

@@ -5,6 +5,7 @@
  * describe WHAT you want and the result set updates declaratively.
  */
 import { useMemo, useState } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 type Product = { name: string; category: string; price: number; stock: number }
 const PRODUCTS: Product[] = [
@@ -53,9 +54,9 @@ export default function SQLQueryBuilderInteractive() {
   }
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)', fontFamily: 'Rubik, sans-serif' }}>
-      <h3 style={{ fontSize: 18, margin: '0 0 4px' }}>בונה השאילתות — פתק בקשה חי</h3>
-      <p style={{ fontSize: 14, opacity: 0.75, margin: '0 0 12px' }}>שנו את התנאי בתפריטים — הטבלה מסתננת מיד, בדיוק כמו שפקיד המחסן היה מבצע את הפתק.</p>
+    <div dir="rtl" style={graphCardStyle}>
+      <h3 style={graphTitleStyle}>בונה השאילתות — פתק בקשה חי</h3>
+      <p style={graphSubtitleStyle}>שנו את התנאי בתפריטים — הטבלה מסתננת מיד, בדיוק כמו שפקיד המחסן היה מבצע את הפתק.</p>
 
       {/* the query row is LTR — SQL reads left-to-right */}
       <div dir="ltr" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10, fontFamily: 'Consolas, monospace', fontSize: 14 }}>
@@ -77,20 +78,20 @@ export default function SQLQueryBuilderInteractive() {
 
       <div dir="ltr" style={{ fontFamily: 'Consolas, monospace', fontSize: 13, background: 'rgba(31,62,108,0.9)', color: '#e8ecf1', borderRadius: 10, padding: '8px 12px', marginBottom: 12, overflowX: 'auto' }}>{sql}</div>
 
-      <div dir="ltr" style={{ overflowX: 'auto', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)' }}>
-        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 14, fontVariantNumeric: 'tabular-nums' }}>
+      <div dir="ltr" style={{ overflowX: 'auto', borderRadius: 10, border: '1px solid rgba(127,155,217,0.22)' }}>
+        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 14, fontVariantNumeric: 'tabular-nums', fontFamily: 'Consolas, monospace' }}>
           <thead>
             <tr>{['name', 'category', 'price', 'stock'].map(h => (
-              <th key={h} style={{ background: 'rgba(31,62,108,0.85)', color: '#fff', textAlign: 'left', padding: '6px 10px' }}>{h}</th>
+              <th key={h} style={{ background: GC.ink, color: '#fff', textAlign: 'left', padding: '6px 10px' }}>{h}</th>
             ))}</tr>
           </thead>
           <tbody>
             {rows.map(r => (
               <tr key={r.name}>
-                <td style={{ padding: '5px 10px', borderTop: '1px solid rgba(255,255,255,0.12)' }}>{r.name}</td>
-                <td style={{ padding: '5px 10px', borderTop: '1px solid rgba(255,255,255,0.12)' }}>{r.category}</td>
-                <td style={{ padding: '5px 10px', borderTop: '1px solid rgba(255,255,255,0.12)' }}>{r.price}</td>
-                <td style={{ padding: '5px 10px', borderTop: '1px solid rgba(255,255,255,0.12)' }}>{r.stock}</td>
+                <td style={{ padding: '5px 10px', borderTop: '1px solid rgba(127,155,217,0.22)' }}>{r.name}</td>
+                <td style={{ padding: '5px 10px', borderTop: '1px solid rgba(127,155,217,0.22)' }}>{r.category}</td>
+                <td style={{ padding: '5px 10px', borderTop: '1px solid rgba(127,155,217,0.22)' }}>{r.price}</td>
+                <td style={{ padding: '5px 10px', borderTop: '1px solid rgba(127,155,217,0.22)' }}>{r.stock}</td>
               </tr>
             ))}
             {rows.length === 0 && (
@@ -99,7 +100,7 @@ export default function SQLQueryBuilderInteractive() {
           </tbody>
         </table>
       </div>
-      <div style={{ fontSize: 14, color: '#D4A017', fontWeight: 600, marginTop: 8 }}>
+      <div style={{ fontSize: 14, color: GC.goldText, fontWeight: 600, marginTop: 8, fontFamily: GRAPH_FONT }}>
         הפקיד החזיר {rows.length} מתוך {PRODUCTS.length} קופסאות
       </div>
     </div>

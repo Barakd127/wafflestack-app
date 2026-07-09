@@ -4,6 +4,7 @@
  * and β (blue, type-II) tail regions. Live readout of power = 1 - β.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 320, PAD_X = 40, PAD_Y = 30, AXIS_Y = H - 50
 
@@ -80,20 +81,20 @@ export default function TypeIErrorInteractive() {
   }, [alpha, beta, power])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>שגיאה מסוג I ו-II — α · β · עוצמה</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>אדום = α (Type I), כחול = β (Type II). העלאת n מקטינה את σ → β קטן → עוצמה עולה.</p>
+    <div dir="rtl" style={graphCardStyle}>
+      <h3 style={graphTitleStyle}>שגיאה מסוג I ו-II — α · β · עוצמה</h3>
+      <p style={graphSubtitleStyle}>אדום = α (Type I), כחול = β (Type II). העלאת n מקטינה את σ → β קטן → עוצמה עולה.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" />
+        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke={GC.axis} />
         <path d={betaPath} fill="rgba(96,165,250,0.4)" />
         <path d={alphaPath} fill="rgba(239,68,68,0.5)" />
-        <path d={path0} stroke="#94a3b8" strokeWidth={2.5} fill="none" />
-        <path d={path1} stroke="#FFD700" strokeWidth={2.5} fill="none" />
-        <line x1={toX(zc)} y1={PAD_Y} x2={toX(zc)} y2={AXIS_Y} stroke="#ef4444" strokeDasharray="4 3" />
-        <text x={toX(zc) + 4} y={PAD_Y + 12} fill="#ef4444" fontSize={11}>critical</text>
-        <text x={toX(mu0)} y={PAD_Y - 8} fill="#94a3b8" fontSize={12} textAnchor="middle" fontWeight={700}>H₀</text>
-        <text x={toX(mu1)} y={PAD_Y - 8} fill="#FFD700" fontSize={12} textAnchor="middle" fontWeight={700}>H₁</text>
+        <path d={path0} stroke={GC.axisText} strokeWidth={2.5} fill="none" />
+        <path d={path1} stroke={GC.gold} strokeWidth={2.5} fill="none" />
+        <line x1={toX(zc)} y1={PAD_Y} x2={toX(zc)} y2={AXIS_Y} stroke={GC.warn} strokeDasharray="4 3" />
+        <text x={toX(zc) + 4} y={PAD_Y + 12} fill={GC.warn} fontSize={11} fontFamily={GRAPH_FONT}>critical</text>
+        <text x={toX(mu0)} y={PAD_Y - 8} fill={GC.axisText} fontSize={12} fontFamily={GRAPH_FONT} textAnchor="middle" fontWeight={700}>H₀</text>
+        <text x={toX(mu1)} y={PAD_Y - 8} fill={GC.gold} fontSize={12} fontFamily={GRAPH_FONT} textAnchor="middle" fontWeight={700}>H₁</text>
       </svg>
 
       <div id="t1-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
@@ -102,10 +103,10 @@ export default function TypeIErrorInteractive() {
       <Slider label={`α = ${alpha.toFixed(3)}`} value={alpha} min={0.001} max={0.2} step={0.001} onChange={setAlpha} />
       <Slider label={`n = ${n}`} value={n} min={5} max={200} step={1} onChange={v => setN(Math.round(v))} />
 
-      <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-around' }}>
-        <span style={{ color: '#ef4444' }}>α = {alpha.toFixed(3)}</span>
-        <span style={{ color: '#60a5fa' }}>β = {beta.toFixed(3)}</span>
-        <span style={{ color: '#FFD700', fontWeight: 700 }}>Power = {power.toFixed(3)}</span>
+      <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(31,62,108,0.06)', borderRadius: 8, fontSize: 13, display: 'flex', justifyContent: 'space-around', fontFamily: GRAPH_FONT }}>
+        <span style={{ color: GC.warn }}>α = {alpha.toFixed(3)}</span>
+        <span style={{ color: GC.blue }}>β = {beta.toFixed(3)}</span>
+        <span style={{ color: GC.gold, fontWeight: 700 }}>Power = {power.toFixed(3)}</span>
       </div>
     </div>
   )
@@ -115,9 +116,9 @@ function Slider({ label, value, min, max, step, onChange }: {
   label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void
 }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8, fontFamily: GRAPH_FONT }}>
       <label style={{ fontSize: 13, opacity: 0.85, minWidth: 160 }}>{label}</label>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1 }} />
+      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1, accentColor: GC.blue }} />
     </div>
   )
 }

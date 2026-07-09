@@ -4,6 +4,7 @@
  * σ → |a|σ. Negative a flips the distribution.
  */
 import { useState, useMemo, useEffect } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640, H = 360
 const PAD = 30
@@ -67,29 +68,29 @@ export default function LinearTransformationInteractive() {
   }, [a, b, sNew.mu, sNew.sd])
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>טרנספורמציה ליניארית — Y = aX + b</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>שינוי קנה־מידה a ←→ מעבר b. צורת ההתפלגות נשמרת — רק מיקום ופיזור משתנים.</p>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>טרנספורמציה ליניארית — Y = aX + b</h3>
+      <p style={graphSubtitleStyle}>שינוי קנה־מידה a ←→ מעבר b. צורת ההתפלגות נשמרת — רק מיקום ופיזור משתנים.</p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
-        <text x={PAD} y={20} fill="#60a5fa" fontSize={12} fontWeight={700}>X (original)  μ={sOrig.mu.toFixed(2)}  σ={sOrig.sd.toFixed(2)}</text>
-        <line x1={PAD} y1={baseTop} x2={W - PAD} y2={baseTop} stroke="rgba(31,62,108,0.4)" />
+        <text x={PAD} y={20} fill={GC.blue} fontSize={12} fontWeight={700} fontFamily={GRAPH_FONT}>X (original)  μ={sOrig.mu.toFixed(2)}  σ={sOrig.sd.toFixed(2)}</text>
+        <line x1={PAD} y1={baseTop} x2={W - PAD} y2={baseTop} stroke={GC.axis} />
         {hOrig.map((c, i) => {
           const h = (HALF_H * c) / maxC
-          return <rect key={i} x={PAD + i * barW + 1} y={baseTop - h} width={barW - 2} height={h} fill="#60a5fa" opacity={0.7} />
+          return <rect key={i} x={PAD + i * barW + 1} y={baseTop - h} width={barW - 2} height={h} fill={GC.blue} opacity={0.7} />
         })}
-        <line x1={toX(sOrig.mu)} y1={30} x2={toX(sOrig.mu)} y2={baseTop} stroke="#60a5fa" strokeDasharray="3 3" />
+        <line x1={toX(sOrig.mu)} y1={30} x2={toX(sOrig.mu)} y2={baseTop} stroke={GC.blue} strokeDasharray="3 3" />
 
-        <text x={PAD} y={baseTop + 20} fill="#FFD700" fontSize={12} fontWeight={700}>Y = aX + b   μ={sNew.mu.toFixed(2)}  σ={sNew.sd.toFixed(2)}</text>
-        <line x1={PAD} y1={baseBot} x2={W - PAD} y2={baseBot} stroke="rgba(31,62,108,0.4)" />
+        <text x={PAD} y={baseTop + 20} fill={GC.goldText} fontSize={12} fontWeight={700} fontFamily={GRAPH_FONT}>Y = aX + b   μ={sNew.mu.toFixed(2)}  σ={sNew.sd.toFixed(2)}</text>
+        <line x1={PAD} y1={baseBot} x2={W - PAD} y2={baseBot} stroke={GC.axis} />
         {hNew.map((c, i) => {
           const h = (HALF_H * c) / maxC
-          return <rect key={i} x={PAD + i * barW + 1} y={baseBot - h} width={barW - 2} height={h} fill="#FFD700" opacity={0.7} />
+          return <rect key={i} x={PAD + i * barW + 1} y={baseBot - h} width={barW - 2} height={h} fill={GC.gold} opacity={0.7} />
         })}
-        <line x1={toX(sNew.mu)} y1={baseTop + 30} x2={toX(sNew.mu)} y2={baseBot} stroke="#FFD700" strokeDasharray="3 3" />
+        <line x1={toX(sNew.mu)} y1={baseTop + 30} x2={toX(sNew.mu)} y2={baseBot} stroke={GC.gold} strokeDasharray="3 3" />
 
         {[0, 5, 10, 15, 20, 25, 30].filter(t => t >= xMin && t <= xMax).map(t => (
-          <text key={t} x={toX(t)} y={H - 8} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{t}</text>
+          <text key={t} x={toX(t)} y={H - 8} fill={GC.axisText} fontSize={11} textAnchor="middle" fontFamily={GRAPH_FONT}>{t}</text>
         ))}
       </svg>
 
@@ -104,8 +105,8 @@ export default function LinearTransformationInteractive() {
 function Slider({ label, value, min, max, step, onChange }: { label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-      <label style={{ fontSize: 13, opacity: 0.85, minWidth: 100 }}>{label}</label>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1 }} />
+      <label style={{ fontFamily: GRAPH_FONT, fontSize: 13, opacity: 0.85, minWidth: 100 }}>{label}</label>
+      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ flex: 1, accentColor: GC.blue }} />
     </div>
   )
 }

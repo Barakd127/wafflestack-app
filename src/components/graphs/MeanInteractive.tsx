@@ -23,6 +23,7 @@
  * Self-contained: no props are required. Default export.
  */
 import { useEffect, useRef, useState, useMemo } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 // ── KaTeX inline helper ─────────────────────────────────────────────────────
 // Mirrors the helper in LessonScreen.tsx so this component stays self-contained.
@@ -148,20 +149,12 @@ export default function MeanInteractive() {
   return (
     <div
       dir="rtl"
-      style={{
-        background: 'rgba(255,255,255,0.06)',
-        border: '1px solid rgba(31,62,108,0.15)',
-        borderRadius: 16,
-        padding: 20,
-        color: '#1F3E6C',
-        fontFamily: 'system-ui, sans-serif',
-        boxShadow: '0 2px 10px rgba(31,62,108,0.06)',
-      }}
+      style={{ ...graphCardStyle }}
     >
-      <h3 style={{ margin: 0, marginBottom: 8, fontSize: 20 }}>
+      <h3 style={graphTitleStyle}>
         ממוצע אינטראקטיבי — גרור את הנקודות
       </h3>
-      <p style={{ margin: 0, marginBottom: 16, opacity: 0.7, fontSize: 14 }}>
+      <p style={graphSubtitleStyle}>
         הממוצע הוא נקודת האיזון של הנתונים. נסה לגרור נקודה רחוק וראה איך הממוצע נמשך אליה.
       </p>
 
@@ -180,7 +173,7 @@ export default function MeanInteractive() {
           y1={AXIS_Y}
           x2={W - PAD_X}
           y2={AXIS_Y}
-          stroke="rgba(31,62,108,0.4)"
+          stroke={GC.axis}
           strokeWidth={2}
         />
         {/* Tick marks and labels */}
@@ -191,15 +184,16 @@ export default function MeanInteractive() {
               y1={AXIS_Y - 4}
               x2={xToPx(t)}
               y2={AXIS_Y + 4}
-              stroke="rgba(31,62,108,0.4)"
+              stroke={GC.axis}
               strokeWidth={1}
             />
             <text
               x={xToPx(t)}
               y={AXIS_Y + 20}
-              fill="rgba(31,62,108,0.6)"
+              fill={GC.axisText}
               fontSize={12}
               textAnchor="middle"
+              fontFamily={GRAPH_FONT}
             >
               {t}
             </text>
@@ -212,7 +206,7 @@ export default function MeanInteractive() {
           y1={30}
           x2={meanPx}
           y2={AXIS_Y}
-          stroke="#D4A017"
+          stroke={GC.gold}
           strokeWidth={2}
           strokeDasharray="4 3"
         />
@@ -220,8 +214,8 @@ export default function MeanInteractive() {
             data-point circles sitting on the axis. Was tip at AXIS_Y+8. */}
         <polygon
           points={`${meanPx - 9},${AXIS_Y + 44} ${meanPx + 9},${AXIS_Y + 44} ${meanPx},${AXIS_Y + 24}`}
-          fill="#D4A017"
-          stroke="#1F3E6C"
+          fill={GC.gold}
+          stroke={GC.ink}
           strokeWidth={1.5}
         />
         {/* Larger x̄ readout — was fontSize 14, now 22 / weight 800 per user
@@ -229,10 +223,11 @@ export default function MeanInteractive() {
         <text
           x={meanPx}
           y={22}
-          fill="#1F3E6C"
+          fill={GC.ink}
           fontSize={22}
           fontWeight={800}
           textAnchor="middle"
+          fontFamily={GRAPH_FONT}
         >
           x̄ = {mean.toFixed(2)}
         </text>
@@ -245,14 +240,14 @@ export default function MeanInteractive() {
             <g key={p.id} style={{ cursor: 'grab' }}>
               {/* Drop shadow / halo when dragging for feedback */}
               {isDragging && (
-                <circle cx={cx} cy={AXIS_Y} r={DOT_RADIUS + 6} fill="#4A90D9" opacity={0.3} />
+                <circle cx={cx} cy={AXIS_Y} r={DOT_RADIUS + 6} fill={GC.blue} opacity={0.3} />
               )}
               <circle
                 cx={cx}
                 cy={AXIS_Y}
                 r={DOT_RADIUS}
-                fill="#4A90D9"
-                stroke="#1F3E6C"
+                fill={GC.blue}
+                stroke={GC.ink}
                 strokeWidth={2}
                 onPointerDown={e => {
                   e.currentTarget.setPointerCapture(e.pointerId)
@@ -262,11 +257,12 @@ export default function MeanInteractive() {
               <text
                 x={cx}
                 y={AXIS_Y + 4}
-                fill="#1F3E6C"
+                fill={GC.ink}
                 fontSize={11}
                 fontWeight={600}
                 textAnchor="middle"
                 pointerEvents="none"
+                fontFamily={GRAPH_FONT}
               >
                 {p.x.toFixed(1)}
               </text>
@@ -299,18 +295,18 @@ export default function MeanInteractive() {
         <button
           onClick={addPoint}
           disabled={points.length >= 12}
-          style={btnStyle('#1F3E6C', '#fff')}
+          style={btnStyle(GC.ink, '#fff')}
         >
           הוסף נקודה
         </button>
         <button
           onClick={removePoint}
           disabled={points.length <= 1}
-          style={btnStyle('#1F3E6C', '#fff')}
+          style={btnStyle(GC.ink, '#fff')}
         >
           הסר אחרונה
         </button>
-        <button onClick={reset} style={btnStyle('#D4A017', '#1F3E6C')}>
+        <button onClick={reset} style={btnStyle(GC.gold, GC.ink)}>
           איפוס
         </button>
         <span style={{ alignSelf: 'center', marginInlineStart: 'auto', opacity: 0.7, fontSize: 13 }}>

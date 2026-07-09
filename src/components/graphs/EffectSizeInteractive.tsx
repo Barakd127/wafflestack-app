@@ -4,6 +4,7 @@
  * Shows standard interpretation table (small=0.2, medium=0.5, large=0.8).
  */
 import { useRef, useEffect, useState, useMemo } from 'react'
+import { GRAPH_FONT, GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 const W = 640
 const H = 320
@@ -30,10 +31,10 @@ function approxNormalCdf(z: number) {
 function interpret(d: number) {
   const ad = Math.abs(d)
   if (ad < 0.2) return { label: 'זניח', color: '#94a3b8' }
-  if (ad < 0.5) return { label: 'קטן (Small)', color: '#60a5fa' }
-  if (ad < 0.8) return { label: 'בינוני (Medium)', color: '#FFD700' }
+  if (ad < 0.5) return { label: 'קטן (Small)', color: GC.blue }
+  if (ad < 0.8) return { label: 'בינוני (Medium)', color: GC.gold }
   if (ad < 1.2) return { label: 'גדול (Large)', color: '#f59e0b' }
-  return { label: 'גדול מאוד (Very Large)', color: '#D4A017' }
+  return { label: 'גדול מאוד (Very Large)', color: GC.gold }
 }
 
 export default function EffectSizeInteractive() {
@@ -82,36 +83,36 @@ export default function EffectSizeInteractive() {
   const info = interpret(d)
 
   return (
-    <div dir="rtl" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, margin: '24px auto', maxWidth: 700, color: 'var(--sh-text-dark)' }}>
-      <h3 style={{ fontFamily: 'Rubik, sans-serif', fontSize: 18, marginBottom: 4 }}>גודל אפקט — Cohen's d</h3>
-      <p style={{ fontSize: 13, opacity: 0.7, marginBottom: 12 }}>
+    <div dir="rtl" style={{ ...graphCardStyle }}>
+      <h3 style={graphTitleStyle}>גודל אפקט — Cohen's d</h3>
+      <p style={graphSubtitleStyle}>
         הזז את d וצפה כיצד שתי ההתפלגויות מתרחקות. ככל ש-d גדול יותר — חפיפה קטנה יותר ↔ אפקט חזק יותר.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} style={{ touchAction: 'none' }}>
-        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke="rgba(31,62,108,0.4)" />
+        <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke={GC.axis} />
         {/* Tick labels */}
         {[-3, -2, -1, 0, 1, 2, 3, 4].map(t => (
           <g key={t}>
-            <line x1={toX(t)} y1={AXIS_Y - 3} x2={toX(t)} y2={AXIS_Y + 3} stroke="rgba(31,62,108,0.4)" />
-            <text x={toX(t)} y={AXIS_Y + 16} fill="rgba(31,62,108,0.6)" fontSize={11} textAnchor="middle">{t}</text>
+            <line x1={toX(t)} y1={AXIS_Y - 3} x2={toX(t)} y2={AXIS_Y + 3} stroke={GC.axis} />
+            <text x={toX(t)} y={AXIS_Y + 16} fill={GC.axisText} fontSize={11} textAnchor="middle" fontFamily={GRAPH_FONT}>{t}</text>
           </g>
         ))}
 
         {/* Overlap area */}
-        <path d={overlapPath} fill="rgba(245,158,11,0.35)" stroke="none" />
+        <path d={overlapPath} fill={GC.goldFill} stroke="none" />
 
         {/* Control curve */}
-        <path d={path1} stroke="#60a5fa" strokeWidth={2.5} fill="none" />
+        <path d={path1} stroke={GC.blue} strokeWidth={2.5} fill="none" />
         {/* Treatment curve */}
-        <path d={path2} stroke="#FFD700" strokeWidth={2.5} fill="none" />
+        <path d={path2} stroke={GC.gold} strokeWidth={2.5} fill="none" />
 
         {/* Mean lines */}
-        <line x1={toX(mu1)} y1={toY(pdf(mu1, mu1, sigma))} x2={toX(mu1)} y2={AXIS_Y} stroke="#60a5fa" strokeWidth={1.5} strokeDasharray="3 3" />
-        <line x1={toX(mu2)} y1={toY(pdf(mu2, mu2, sigma))} x2={toX(mu2)} y2={AXIS_Y} stroke="#FFD700" strokeWidth={1.5} strokeDasharray="3 3" />
+        <line x1={toX(mu1)} y1={toY(pdf(mu1, mu1, sigma))} x2={toX(mu1)} y2={AXIS_Y} stroke={GC.blue} strokeWidth={1.5} strokeDasharray="3 3" />
+        <line x1={toX(mu2)} y1={toY(pdf(mu2, mu2, sigma))} x2={toX(mu2)} y2={AXIS_Y} stroke={GC.gold} strokeWidth={1.5} strokeDasharray="3 3" />
 
-        <text x={toX(mu1)} y={PAD_Y - 8} fill="#60a5fa" fontSize={12} textAnchor="middle" fontWeight={700}>ביקורת</text>
-        <text x={toX(mu2)} y={PAD_Y - 8} fill="#FFD700" fontSize={12} textAnchor="middle" fontWeight={700}>טיפול</text>
+        <text x={toX(mu1)} y={PAD_Y - 8} fill={GC.blue} fontSize={12} textAnchor="middle" fontWeight={700} fontFamily={GRAPH_FONT}>ביקורת</text>
+        <text x={toX(mu2)} y={PAD_Y - 8} fill={GC.goldText} fontSize={12} textAnchor="middle" fontWeight={700} fontFamily={GRAPH_FONT}>טיפול</text>
       </svg>
 
       <div id="eff-formula" style={{ textAlign: 'center', margin: '8px 0', minHeight: 28 }} />
@@ -127,7 +128,7 @@ export default function EffectSizeInteractive() {
           step={0.05}
           value={d}
           onChange={e => setD(parseFloat(e.target.value))}
-          style={{ flex: 1 }}
+          style={{ flex: 1, accentColor: GC.blue }}
         />
       </div>
 

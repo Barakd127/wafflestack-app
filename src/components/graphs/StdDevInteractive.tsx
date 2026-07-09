@@ -18,6 +18,7 @@
  * Tech: Pure SVG, KaTeX via CDN, RTL Hebrew labels.
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { GC, graphCardStyle, graphTitleStyle, graphSubtitleStyle } from './graphTheme'
 
 declare global {
   interface Window {
@@ -136,26 +137,20 @@ export default function StdDevInteractive() {
 
   // Pre-compute band colors for k=1,2,3 — for legend strip
   const BANDS = [
-    { k: 1, color: '#D4A017', label: '~68%' },
+    { k: 1, color: GC.gold, label: '~68%' },
     { k: 2, color: '#E08A1E', label: '~95%' },
-    { k: 3, color: '#1F3E6C', label: '~99.7%' },
+    { k: 3, color: GC.ink, label: '~99.7%' },
   ]
 
   return (
     <div
       dir="rtl"
-      style={{
-        background: 'rgba(255,255,255,0.06)',
-        borderRadius: 16,
-        padding: 20,
-        color: 'var(--sh-text-dark)',
-        fontFamily: 'system-ui, sans-serif',
-      }}
+      style={graphCardStyle}
     >
-      <h3 style={{ margin: 0, marginBottom: 8, fontSize: 20 }}>
+      <h3 style={{ ...graphTitleStyle, marginBottom: 8 }}>
         סטיית תקן אינטראקטיבית — גרור נקודות ושנה k
       </h3>
-      <p style={{ margin: 0, marginBottom: 16, opacity: 0.7, fontSize: 14 }}>
+      <p style={{ ...graphSubtitleStyle, marginBottom: 16 }}>
         סטיית התקן (σ) מודדת כמה הנתונים מפוזרים סביב הממוצע. הזז את k וראה כמה נקודות נכנסות לטווח ±kσ.
       </p>
 
@@ -175,7 +170,7 @@ export default function StdDevInteractive() {
             y={50}
             width={Math.max(0, bandRight - bandLeft)}
             height={AXIS_Y - 50}
-            fill="rgba(212,160,23,0.28)"
+            fill={GC.goldFill}
           />
         )}
 
@@ -187,7 +182,7 @@ export default function StdDevInteractive() {
               y1={50}
               x2={bandLeft}
               y2={AXIS_Y}
-              stroke="#D4A017"
+              stroke={GC.gold}
               strokeWidth={2}
               strokeDasharray="5 3"
             />
@@ -196,7 +191,7 @@ export default function StdDevInteractive() {
               y1={50}
               x2={bandRight}
               y2={AXIS_Y}
-              stroke="#D4A017"
+              stroke={GC.gold}
               strokeWidth={2}
               strokeDasharray="5 3"
             />
@@ -209,7 +204,7 @@ export default function StdDevInteractive() {
           y1={AXIS_Y}
           x2={W - PAD_X}
           y2={AXIS_Y}
-          stroke="rgba(31,62,108,0.4)"
+          stroke={GC.axis}
           strokeWidth={2}
         />
         {ticks.map(t => (
@@ -219,13 +214,13 @@ export default function StdDevInteractive() {
               y1={AXIS_Y - 4}
               x2={xToPx(t)}
               y2={AXIS_Y + 4}
-              stroke="rgba(31,62,108,0.4)"
+              stroke={GC.axis}
               strokeWidth={1}
             />
             <text
               x={xToPx(t)}
               y={AXIS_Y + 20}
-              fill="rgba(31,62,108,0.6)"
+              fill={GC.axisText}
               fontSize={12}
               textAnchor="middle"
             >
@@ -240,13 +235,13 @@ export default function StdDevInteractive() {
           y1={30}
           x2={meanPx}
           y2={AXIS_Y}
-          stroke="#D4A017"
+          stroke={GC.gold}
           strokeWidth={2}
         />
         <text
           x={meanPx}
           y={24}
-          fill="#D4A017"
+          fill={GC.gold}
           fontSize={13}
           fontWeight={700}
           textAnchor="middle"
@@ -262,13 +257,13 @@ export default function StdDevInteractive() {
               y1={AXIS_Y + 38}
               x2={xToPx(mean + sigma)}
               y2={AXIS_Y + 38}
-              stroke="#1F3E6C"
+              stroke={GC.ink}
               strokeWidth={3}
             />
             <text
               x={(meanPx + xToPx(mean + sigma)) / 2}
               y={AXIS_Y + 54}
-              fill="#1F3E6C"
+              fill={GC.ink}
               fontSize={12}
               fontWeight={600}
               textAnchor="middle"
@@ -293,7 +288,7 @@ export default function StdDevInteractive() {
                 cy={AXIS_Y}
                 r={DOT_RADIUS}
                 fill={inside ? '#2D5BA8' : '#E08A1E'}
-                stroke="#1F3E6C"
+                stroke={GC.ink}
                 strokeWidth={2}
                 onPointerDown={e => {
                   e.currentTarget.setPointerCapture(e.pointerId)
@@ -325,9 +320,9 @@ export default function StdDevInteractive() {
           style={{ display: 'block', marginBottom: 6, fontSize: 14, opacity: 0.85 }}
         >
           מקדם k:{' '}
-          <span style={{ color: '#D4A017', fontWeight: 700 }}>{k.toFixed(1)}σ</span>
+          <span style={{ color: GC.gold, fontWeight: 700 }}>{k.toFixed(1)}σ</span>
           {' — '}
-          <span style={{ color: '#1F3E6C' }}>
+          <span style={{ color: GC.ink }}>
             {withinBand}/{points.length} נקודות בטווח
           </span>
         </label>
@@ -339,7 +334,7 @@ export default function StdDevInteractive() {
           step={0.1}
           value={k}
           onChange={e => setK(parseFloat(e.target.value))}
-          style={{ width: '100%', direction: 'ltr' }}
+          style={{ width: '100%', direction: 'ltr', accentColor: GC.blue }}
         />
       </div>
 
@@ -368,7 +363,7 @@ export default function StdDevInteractive() {
           style={{
             background: 'transparent',
             border: '1px solid rgba(31,62,108,0.3)',
-            color: '#1F3E6C',
+            color: GC.ink,
             borderRadius: 8,
             padding: '4px 10px',
             cursor: 'pointer',
