@@ -170,35 +170,28 @@ export default function WhiteboardShell({ children, style, topRightSlot }: White
         </div>
       </div>
 
-      {/* Top-right breadcrumb / slot — pinned above the content, inside the frame. */}
-      {topRightSlot && (
-        // Physical top:14/right:14 is intentionally correct here (not a logical-property
-        // mix-up): the board's decorative frame is built with physical left/right too, so
-        // this slot must stay pinned to the same physical top-right corner regardless of
-        // dir="rtl" on the root, or it would drift to the wrong corner under RTL logical flow.
-        <div
-          style={{
-            position: 'absolute',
-            top: 14,
-            right: 14,
-            zIndex: 62,
-          }}
-        >
-          {topRightSlot}
-        </div>
-      )}
-
-      {/* Scrollable content area, inset from the aluminium frame */}
+      {/* Content column, inset from the aluminium frame. The breadcrumb slot gets
+          its OWN reserved header band (in document flow) so it NEVER overlaps the
+          content below — per the ui-anti-collision convention (reserve space +
+          position from the panel, don't float absolutely over content). */}
       <div
         style={{
           position: 'absolute',
           inset: 28,
-          overflowY: 'auto',
-          overflowX: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
           zIndex: 10,
         }}
       >
-        {children}
+        {topRightSlot && (
+          // Header band: right-aligned in RTL (justify start), reserves its own row.
+          <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'flex-start', marginBottom: 10, minHeight: 22 }}>
+            {topRightSlot}
+          </div>
+        )}
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
+          {children}
+        </div>
       </div>
     </div>
   )

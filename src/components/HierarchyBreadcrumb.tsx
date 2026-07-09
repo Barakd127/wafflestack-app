@@ -1,17 +1,18 @@
 /**
- * HierarchyBreadcrumb — small hand-drawn "where am I in the material" trail.
- * Sits in WhiteboardShell's topRightSlot on a lesson/quiz board.
+ * HierarchyBreadcrumb — compact "where am I in the material" trail.
  *
- * Reads the topic's ancestry (broad → specific) from topicHierarchy and
- * renders it reversed (specific → broad), e.g. for 'mean':
- *   ממוצע ‹ מדדי מרכז ‹ מדדים סטטיסטיים תמציתיים ‹ סטטיסטיקה תיאורית
+ * Redesign 2026-07-08 (Barak): the previous text-chain version overlapped the
+ * lesson title (collision) and ate ~60% width. Per the ui-anti-collision
+ * convention it now (a) lives in WhiteboardShell's RESERVED header band (in
+ * document flow, never absolutely over content), and (b) is a small ICON trail:
+ * the current topic as a labeled gold node, a hand-drawn connector, then small
+ * ancestor DOTS that reveal their name on hover — tiny footprint, no collision.
  *
- * The current (most specific) topic is emphasized in navy; ancestors fade
- * out in size/weight/colour. A single soft, wobbly SVG polyline runs under
- * the chain for a marker-ink, hand-drawn feel — decorative only, kept light
- * so it never competes with the text for readability.
+ * Reads the topic's ancestry (broad → specific) from topicHierarchy.
+ * For 'mean': current = ממוצע; hover dots back through
+ * מדדי מרכז ‹ מדדים סטטיסטיים תמציתיים ‹ סטטיסטיקה תיאורית.
  */
-import type { CSSProperties } from 'react'
+import { useState } from 'react'
 import { ancestryOf } from '../data/topicHierarchy'
 import { GRAPH_FONT } from './graphs/graphTheme'
 
@@ -19,95 +20,84 @@ const GOLD = '#C97C18'
 const NAVY = '#1F3E6C'
 const SLATE = '#64748B'
 
-/** Deterministic (per-topic) small integer seed, so the wobble is stable
- *  across re-renders but varies gently from one topic to another. */
-function seedFromString(s: string): number {
-  let h = 0
-  for (let i = 0; i < s.length; i++) {
-    h = (h * 31 + s.charCodeAt(i)) >>> 0
-  }
-  return h
-}
-
-/** A gentle, sketchy wave across a fixed viewBox — stretched to 100% width
- *  via preserveAspectRatio="none" so it always spans the rendered chain,
- *  whatever its length or wrap. */
-function buildWobblePath(seed: number): string {
-  const segments = 6
-  const w = 240
-  const baseY = 5
-  let d = `M0,${baseY}`
-  for (let i = 1; i <= segments; i++) {
-    const x1 = ((i - 0.66) / segments) * w
-    const x2 = ((i - 0.33) / segments) * w
-    const x = (i / segments) * w
-    // deterministic pseudo-random wobble derived from seed + segment index
-    const wobA = ((seed >> (i % 5)) % 5) - 2 // -2..2
-    const wobB = ((seed >> ((i + 2) % 7)) % 5) - 2
-    const y1 = baseY + wobA
-    const y2 = baseY - wobB
-    const y = baseY + (((seed + i) % 3) - 1)
-    d += ` C${x1},${y1} ${x2},${y2} ${x},${y}`
-  }
-  return d
-}
-
-const chainWrapStyle: CSSProperties = {
-  position: 'relative',
-  display: 'inline-flex',
-  flexWrap: 'wrap',
-  alignItems: 'baseline',
-  columnGap: 6,
-  rowGap: 2,
-  maxWidth: '60%',
-  paddingBottom: 6,
-  fontFamily: GRAPH_FONT,
-  userSelect: 'none',
-  lineHeight: 1.3,
-}
-
-const currentLabelStyle: CSSProperties = {
-  fontWeight: 700,
-  fontSize: 14,
-  color: NAVY,
-}
-
-const ancestorLabelStyle: CSSProperties = {
-  fontWeight: 400,
-  fontSize: 12,
-  color: SLATE,
-}
-
-const separatorStyle: CSSProperties = {
-  fontSize: 12,
-  color: GOLD,
-  opacity: 0.8,
-}
-
 export default function HierarchyBreadcrumb({ topicId }: { topicId: string }) {
   const ancestry = ancestryOf(topicId)
+  const [hover, setHover] = useState<number | null>(null)
   if (!ancestry || ancestry.length === 0) return null
 
-  // ancestryOf is broad → specific; the breadcrumb reads specific → broad.
-  const chain = [...ancestry].reverse()
-  const wobblePath = buildWobblePath(seedFromString(topicId))
+  const chain = ancestry                     // broad → specific
+  const current = chain[chain.length - 1]
+  // ancestors ordered specific → broad (so they trail leftward from the current node)
+  const ancestors = chain.slice(0, -1).reverse()
+  const fullPath = [...chain].reverse().join(' ‹ ')
 
   return (
-    <div dir="rtl" style={chainWrapStyle} aria-label="מיקום בחומר">
-      {chain.map((label, i) => (
-        <span key={`${topicId}-${i}`} style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
-          {i > 0 && <span style={separatorStyle} aria-hidden="true">‹</span>}
-          <span style={i === 0 ? currentLabelStyle : ancestorLabelStyle}>{label}</span>
-        </span>
-      ))}
-      <svg
-        viewBox="0 0 240 10"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-        style={{ position: 'absolute', left: 0, right: 0, bottom: 0, width: '100%', height: 8, pointerEvents: 'none' }}
-      >
-        <path d={wobblePath} fill="none" stroke={GOLD} strokeOpacity={0.5} strokeWidth={1.4} strokeLinecap="round" />
-      </svg>
+    <div
+      dir="rtl"
+      title={fullPath}
+      aria-label={'מיקום בחומר: ' + fullPath}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        maxWidth: '100%',
+        fontFamily: GRAPH_FONT,
+        userSelect: 'none',
+        background: 'rgba(255,255,255,0.65)',
+        border: '1px solid rgba(31,62,108,0.10)',
+        borderRadius: 999,
+        padding: '3px 10px 3px 8px',
+        boxShadow: '0 1px 3px rgba(31,62,108,0.08)',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {/* current topic — labeled gold node (always visible: you always know where you are) */}
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+        <span style={{ width: 12, height: 12, borderRadius: '50%', background: GOLD, boxShadow: '0 0 0 3px rgba(201,124,24,0.18)', flexShrink: 0 }} />
+        <span style={{ fontWeight: 700, fontSize: 13, color: NAVY }}>{current}</span>
+      </span>
+
+      {ancestors.length > 0 && (
+        <>
+          {/* hand-drawn connector — the "small visualization" linking the trail */}
+          <svg width="24" height="12" viewBox="0 0 24 12" aria-hidden="true" style={{ flexShrink: 0 }}>
+            <path d="M1,6 C6,3 11,9 16,6 21,4 23,6 23,6" fill="none" stroke={GOLD} strokeOpacity={0.5} strokeWidth={1.4} strokeLinecap="round" />
+          </svg>
+
+          {/* ancestor dots — hover reveals the name (compact; no text taking space) */}
+          {ancestors.map((label, i) => (
+            <span
+              key={i}
+              onMouseEnter={() => setHover(i)}
+              onMouseLeave={() => setHover(null)}
+              onFocus={() => setHover(i)}
+              onBlur={() => setHover(null)}
+              tabIndex={0}
+              title={label}
+              aria-label={label}
+              style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'default', outline: 'none' }}
+            >
+              <span style={{ width: 9, height: 9, borderRadius: '50%', background: hover === i ? GOLD : SLATE, opacity: hover === i ? 1 : Math.max(0.4, 0.75 - i * 0.12), transition: 'background .12s', flexShrink: 0 }} />
+              {i < ancestors.length - 1 && <span style={{ width: 8, height: 1, background: GOLD, opacity: 0.3 }} />}
+              {hover === i && (
+                <span
+                  role="tooltip"
+                  style={{
+                    position: 'absolute', bottom: 'calc(100% + 6px)', right: '50%', transform: 'translateX(50%)',
+                    background: NAVY, color: '#fff', fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 7,
+                    boxShadow: '0 3px 8px rgba(15,23,42,0.28)', zIndex: 5,
+                  }}
+                >
+                  {label}
+                </span>
+              )}
+            </span>
+          ))}
+
+          {/* root marker */}
+          <span aria-hidden="true" style={{ fontSize: 12, opacity: 0.65, marginInlineStart: 2 }}>🏠</span>
+        </>
+      )}
     </div>
   )
 }
