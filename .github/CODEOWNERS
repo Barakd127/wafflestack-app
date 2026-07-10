@@ -1,0 +1,10 @@
+# Code owners for wafflestack-app.
+# Every pull request automatically requests a review from the owner(s) below.
+# Pairs with the branch-protection rule on `master`:
+#   Settings -> Branches -> master -> "Require review from Code Owners".
+#
+# Effect: no change reaches `master` (and therefore production: Vercel + GitHub Pages)
+# without Barak's approval. Collaborators (e.g. Shirley) work on branches and open PRs;
+# Barak reviews and merges.
+
+* @Barakd127
