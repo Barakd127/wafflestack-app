@@ -1,0 +1,3 @@
+# Keep shell scripts LF-terminated so they run correctly when checked out on
+# Windows and executed via Git Bash / sh (CRLF would cause: bad interpreter: bash^M).
+*.sh text eol=lf
