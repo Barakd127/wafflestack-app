@@ -18,6 +18,7 @@ import FeatureGate from './components/FeatureGate'
 import UnlockToast from './components/UnlockToast'
 import TierTourTrigger from './components/TierTourTrigger'
 import VirtualKeyboardCloser from './components/VirtualKeyboardCloser'
+import VersionChecker from './components/VersionChecker'
 import WaffleStackKeyboard from './components/WaffleStackKeyboard'
 import CalculatorDrawer from './components/CalculatorDrawer'
 import { setKeyboardOpen } from './lib/uiStacks'
@@ -223,6 +224,7 @@ function App() {
 
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
+      <VersionChecker />
       {showDarkToggle && (
         <button
           onClick={() => setDarkMode(d => !d)}
