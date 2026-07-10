@@ -1310,7 +1310,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
           display: 'flex',
           flexDirection: 'column',
           gap: 16,
-          textAlign: 'right',
+          textAlign: 'center',
           transition: 'all 0.3s',
           boxShadow: CARD_SHADOW,
         }}
@@ -1323,13 +1323,13 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
           ;(e.currentTarget as HTMLElement).style.boxShadow = CARD_SHADOW
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
           <div style={{ fontSize: 32 }}>{isMastered ? '⭐' : '📖'}</div>
           <div>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK, textAlign: 'center' }}>
               {topic.label}
             </div>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginTop: 4 }}>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginTop: 4, textAlign: 'center' }}>
               {topic.building}
             </div>
           </div>
