@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { Moon, Sun } from 'lucide-react'
 import StudyHub from './components/StudyHub'
 import BridgePanel from './components/bridge/BridgePanel'
+import CoinsStore from './components/bridge/CoinsStore'
 import { loadProgress } from './stores/progressStore'
 import MindMapCanvas from './components/MindMapCanvas'
 import Tooltip from './components/Tooltip'
@@ -33,7 +34,7 @@ const LandingPage = lazy(() => import('./landing/LandingPage'))
 // wired here — kept on disk for reference. Unified data source: notebook and
 // mindmap share the same MM.nodes[id].body field inside mindmap.html.
 
-type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook' | 'bridges'
+type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook' | 'bridges' | 'coins-store'
 
 function App() {
   const [activeView, setActiveView] = useState<View>(() => {
@@ -155,6 +156,7 @@ function App() {
       else if (h === '#mindmap') setActiveView('mindmap')
       else if (h === '#notebook') setActiveView('notebook')
       else if (h === '#bridges') setActiveView('bridges')
+      else if (h === '#store') setActiveView('coins-store')
       else if (h === '#split') setActiveView('split')
       else if (h === '#split-mindmap') setActiveView('split-mindmap')
       else if (h === '#split-study-mindmap') setActiveView('split-study-mindmap')
@@ -175,6 +177,7 @@ function App() {
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
     else if (activeView === 'notebook') window.location.hash = '#notebook'
     else if (activeView === 'bridges') window.location.hash = '#bridges'
+    else if (activeView === 'coins-store') window.location.hash = '#store'
   }, [activeView])
 
   // Bridge MathLive's virtual-keyboard visibility into the uiStacks signal
@@ -224,7 +227,7 @@ function App() {
   // Floating dark-mode toggle hides on views that have their own integrated
   // dark-mode control (study screen ships one inside its TopBar per user
   // feedback 2026-05-24 — was obscuring sidebar lock icons at top-right).
-  const showDarkToggle = activeView !== 'study' && activeView !== 'mindmap' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'landing' && activeView !== 'bridges'
+  const showDarkToggle = activeView !== 'study' && activeView !== 'mindmap' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'landing' && activeView !== 'bridges' && activeView !== 'coins-store'
 
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
@@ -426,8 +429,52 @@ function App() {
             >
               ← דף הבית
             </button>
+            <button
+              onClick={() => setActiveView('coins-store')}
+              style={{
+                position: 'fixed', top: 12, insetInlineStart: 12, zIndex: 220,
+                minHeight: 44, borderRadius: 12, padding: '8px 14px',
+                border: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.08)',
+                color: 'var(--sh-text-dark)', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              🪙 חנות
+            </button>
             <div style={{ maxWidth: 720, margin: '0 auto' }}>
               <BridgePanel quizSessions={loadProgress(localStorage.getItem('userName') || 'default').quizSessions} />
+            </div>
+          </div>
+        </FeatureGate>
+      )}
+
+      {activeView === 'coins-store' && (
+        <FeatureGate id="coins-store" mode="hide">
+          <div dir="rtl" style={{ position: 'fixed', inset: 0, zIndex: 100, overflowY: 'auto', background: 'var(--sh-bg, #0d1530)', padding: '24px 16px' }}>
+            <button
+              onClick={() => setActiveView('study')}
+              aria-label="חזרה לאזור הלמידה"
+              style={{
+                position: 'fixed', top: 12, insetInlineEnd: 12, zIndex: 220,
+                minHeight: 44, minWidth: 44, borderRadius: 12, padding: '8px 14px',
+                border: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.08)',
+                color: 'var(--sh-text-dark)', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              ← דף הבית
+            </button>
+            <button
+              onClick={() => setActiveView('bridges')}
+              style={{
+                position: 'fixed', top: 12, insetInlineStart: 12, zIndex: 220,
+                minHeight: 44, borderRadius: 12, padding: '8px 14px',
+                border: '1px solid rgba(255,255,255,0.18)', background: 'rgba(255,255,255,0.08)',
+                color: 'var(--sh-text-dark)', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              🌉 גשרים
+            </button>
+            <div style={{ maxWidth: 720, margin: '0 auto' }}>
+              <CoinsStore quizSessions={loadProgress(localStorage.getItem('userName') || 'default').quizSessions} />
             </div>
           </div>
         </FeatureGate>
@@ -437,7 +484,7 @@ function App() {
 
       {/* AI Study Tutor — global FAB + slide-out drawer, shown on study views only
           (hidden in wafflecity so the city back button sits cleanly at bottom-left) */}
-      {activeView !== 'landing' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'split-study-mindmap' && activeView !== 'mindmap' && activeView !== 'drawing' && activeView !== 'bridges' && (
+      {activeView !== 'landing' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'split-study-mindmap' && activeView !== 'mindmap' && activeView !== 'drawing' && activeView !== 'bridges' && activeView !== 'coins-store' && (
         <>
           <FeatureGate id="ai-tutor" mode="hide"><TutorFAB /></FeatureGate>
           <TutorDrawer />

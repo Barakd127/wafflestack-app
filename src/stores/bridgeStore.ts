@@ -32,6 +32,24 @@ const PAYOUT: Record<BridgeKind, number> = {
   similarity: 12,
 }
 
+/** Building tiers — the visible progression the city renders (single source: here). */
+export type BuildingTier = 'shack' | 'house' | 'tower' | 'landmark'
+export const TIER_PRICE: Record<BuildingTier, number> = {
+  shack: 10, house: 40, tower: 120, landmark: 200,
+}
+export const TIER_LABEL_HE: Record<BuildingTier, string> = {
+  shack: 'צריף', house: 'בית', tower: 'מגדל', landmark: 'ציון דרך',
+}
+
+/** A building the learner has bought for a gated topic (single-player sink). */
+export interface BuildingPurchase {
+  topicId: string
+  buildingId: string
+  tier: BuildingTier
+  price: number
+  boughtAt: string
+}
+
 export interface SubmitEdgeInput {
   sourceTopicId: string
   targetTopicId: string
@@ -54,8 +72,10 @@ interface BridgeState {
   sessionBridgeCount: number
   sessionDate: string
   dailyAnalogyCount: number
+  ownedBuildings: BuildingPurchase[]
   submitEdge: (input: SubmitEdgeInput) => SubmitEdgeResult
   spendCoins: (amount: number, reason: string) => boolean
+  buyBuilding: (topicId: string, buildingId: string, tier: BuildingTier) => { ok: boolean; reason?: string; purchase?: BuildingPurchase }
   resetSession: () => void
 }
 
@@ -66,6 +86,7 @@ interface PersistedShape {
   sessionBridgeCount: number
   sessionDate: string
   dailyAnalogyCount: number
+  ownedBuildings: BuildingPurchase[]
 }
 
 function today(): string {
@@ -85,6 +106,7 @@ function initialState(): PersistedShape {
     sessionBridgeCount: 0,
     sessionDate: today(),
     dailyAnalogyCount: 0,
+    ownedBuildings: [],
   }
 }
 
@@ -100,6 +122,7 @@ function loadPersisted(): PersistedShape {
       sessionBridgeCount: typeof parsed.sessionBridgeCount === 'number' ? parsed.sessionBridgeCount : 0,
       sessionDate: typeof parsed.sessionDate === 'string' ? parsed.sessionDate : today(),
       dailyAnalogyCount: typeof parsed.dailyAnalogyCount === 'number' ? parsed.dailyAnalogyCount : 0,
+      ownedBuildings: Array.isArray(parsed.ownedBuildings) ? parsed.ownedBuildings : [],
     }
   } catch {
     return initialState()
@@ -118,6 +141,7 @@ function persistedSlice(state: BridgeState): PersistedShape {
     sessionBridgeCount: state.sessionBridgeCount,
     sessionDate: state.sessionDate,
     dailyAnalogyCount: state.dailyAnalogyCount,
+    ownedBuildings: state.ownedBuildings,
   }
 }
 
@@ -225,6 +249,35 @@ export const useBridgeStore = create<BridgeState>((set, get) => ({
     set(nextState)
     savePersisted(persistedSlice(nextState))
     return true
+  },
+
+  buyBuilding: (topicId, buildingId, tier) => {
+    const state = get()
+    const price = TIER_PRICE[tier]
+    if (state.ownedBuildings.some(b => b.topicId === topicId)) {
+      return { ok: false, reason: 'כבר קיים מבנה לנושא הזה' }
+    }
+    if (state.coins < price) {
+      return { ok: false, reason: `חסרים ${price - state.coins} מטבעות` }
+    }
+    const purchase: BuildingPurchase = {
+      topicId, buildingId, tier, price, boughtAt: new Date().toISOString(),
+    }
+    const ledgerEntry: LedgerEntry = {
+      id: makeId(),
+      ts: new Date().toISOString(),
+      amount: -price,
+      verb: `building:${tier}:${topicId}`,
+    }
+    const nextState: BridgeState = {
+      ...state,
+      coins: state.coins - price,
+      ledger: [...state.ledger, ledgerEntry],
+      ownedBuildings: [...state.ownedBuildings, purchase],
+    }
+    set(nextState)
+    savePersisted(persistedSlice(nextState))
+    return { ok: true, purchase }
   },
 
   resetSession: () => {
