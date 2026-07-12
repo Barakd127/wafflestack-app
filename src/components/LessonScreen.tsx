@@ -347,19 +347,18 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           </button>
         )}
       </div>
-      {/* ── Slide navigation strip — clearly labeled prev/next at the top
-          of the card. Sticks to the top of the scroll container so it's
-          always visible without scrolling. RTL-aware: 'הקודם' on the right
+      {/* ── Slide navigation strip — compact, clearly labeled prev/next above
+          the card. Stays in normal flow (NOT sticky) so it never tracks down
+          over the whiteboard while scrolling. Navigation stays reachable via
+          the footer dots + arrow keys. RTL-aware: 'הקודם' on the right
           (where the user reads from), 'הבא' on the left. ─────────────────── */}
       <div style={{
-        position: 'sticky', top: 0, zIndex: 30,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        gap: 8, marginBottom: 14, padding: '10px 14px',
-        background: 'rgba(255,255,255,0.92)',
-        backdropFilter: 'blur(10px)',
+        gap: 6, marginBottom: 10, padding: '4px 8px',
+        background: '#fff',
         border: '1px solid rgba(127,155,217,0.30)',
-        borderRadius: 14,
-        boxShadow: '0 4px 14px rgba(31,62,108,0.10)',
+        borderRadius: 10,
+        boxShadow: '0 2px 8px rgba(31,62,108,0.08)',
       }}>
         <button
           onClick={handlePrev}
@@ -369,19 +368,19 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           style={{
             background: isFirst ? 'rgba(127,155,217,0.12)' : 'rgba(127,155,217,0.20)',
             color: isFirst ? TEXT_LIGHT : BUTTON_COLOR,
-            border: `1.5px solid ${isFirst ? 'rgba(127,155,217,0.25)' : 'rgba(127,155,217,0.45)'}`,
-            borderRadius: 10, padding: '8px 18px',
+            border: `1px solid ${isFirst ? 'rgba(127,155,217,0.25)' : 'rgba(127,155,217,0.45)'}`,
+            borderRadius: 8, padding: '4px 12px',
             cursor: isFirst ? 'not-allowed' : 'pointer',
-            fontSize: 14, fontWeight: 700,
+            fontSize: 12.5, fontWeight: 700,
             fontFamily: "'Rubik', sans-serif",
-            display: 'flex', alignItems: 'center', gap: 6,
+            display: 'flex', alignItems: 'center', gap: 5,
             opacity: isFirst ? 0.55 : 1,
             transition: 'all 0.18s',
           }}
         >
           → הקודם
         </button>
-        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600, color: TEXT_DARK }}>
+        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, fontWeight: 600, color: TEXT_DARK }}>
           {isGraphSlide && effectiveGraphs
             ? `📊 ${effectiveGraphs[graphIdx]?.title ?? 'גרף'}`
             : `שקופית ${currentSlide + 1} מתוך ${total}`}
@@ -394,12 +393,12 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             background: isLast ? '#D4AF37' : BUTTON_COLOR,
             color: '#fff',
             border: 'none',
-            borderRadius: 10, padding: '8px 20px',
+            borderRadius: 8, padding: '4px 14px',
             cursor: 'pointer',
-            fontSize: 14, fontWeight: 700,
+            fontSize: 12.5, fontWeight: 700,
             fontFamily: "'Rubik', sans-serif",
-            display: 'flex', alignItems: 'center', gap: 6,
-            boxShadow: isLast ? '0 4px 14px rgba(212,175,55,0.45)' : '0 4px 14px rgba(31,62,108,0.30)',
+            display: 'flex', alignItems: 'center', gap: 5,
+            boxShadow: isLast ? '0 2px 10px rgba(212,175,55,0.40)' : '0 2px 10px rgba(31,62,108,0.25)',
             transition: 'all 0.18s',
           }}
         >
@@ -751,9 +750,9 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       </div>
 
       {/* Floating side-arrows removed — replaced by labeled prev/next buttons
-          in the sticky strip at the top of the slide card (above). The strip
-          stays visible regardless of scroll, and 'הקודם' / 'הבא' labels make
-          the function unambiguous. */}
+          in the compact strip above the slide card, the footer dots below, and
+          arrow keys. The strip is non-sticky so it never obscures the board;
+          'הקודם' / 'הבא' labels make the function unambiguous. */}
       {/* Formula copy button. Label is ALWAYS visible (was hover-only → showed a
           bare purple ➕ that users found cryptic). Per user 2026-06-07. */}
       <style>{`
