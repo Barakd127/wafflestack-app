@@ -7,6 +7,7 @@ import { MathLineBlock } from '../lib/mathRender'
 import { parseLeadingEnumMarker } from '../lib/bidiSegments'
 import WhiteboardShell from './WhiteboardShell'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
+import PresentationOverlay, { type PresenterTool } from './PresentationOverlay'
 
 // Design tokens — keep in sync with StudyHub.tsx
 const GLASS_CARD  = 'var(--sh-glass-card)'
@@ -31,6 +32,11 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   // Theory defaults to FULL-SCREEN. User opens the side mind map explicitly
   // via the toggle when they want to take notes alongside the lesson.
   const [mindmapOpen, setMindmapOpen] = useState(false)
+  // Presentation mode: a cartoon hand presents the slide on the whiteboard
+  // (auto choreography), or follows the mouse with a chosen tool (manual).
+  const [presenting, setPresenting] = useState(false)
+  const [presAuto, setPresAuto] = useState(false)
+  const [presTool, setPresTool] = useState<PresenterTool>('point')
   const [splitPct, setSplitPct] = useState(45)  // mind map width %
   const [copied, setCopied] = useState<string | null>(null)
   // Transient toast shown after queuing/adding a node to the mind map. Gives
@@ -322,6 +328,27 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
         <button onClick={onBack} style={backLinkStyle}>→ חזרה לבחירת נושא</button>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button
+            onClick={() => {
+              setPresenting(v => {
+                const next = !v
+                setPresAuto(next) // entering starts the auto demo; exiting stops it
+                if (next) setPresTool('point')
+                return next
+              })
+            }}
+            title={presenting ? 'סיום מצב הצגה' : 'היד מציגה את השקופית על הלוח'}
+            style={{
+              background: presenting ? '#b91c1c' : BUTTON_COLOR,
+              color: '#fff', border: 'none', borderRadius: 10,
+              padding: '7px 14px', fontSize: 13, fontWeight: 700,
+              fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+              boxShadow: '0 2px 10px rgba(31,62,108,0.25)', transition: 'all 0.18s',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {presenting ? '✖ סיום הצגה' : '🎯 מצב הצגה'}
+          </button>
+          <button
             onClick={() => setMindmapOpen(v => !v)}
             title={mindmapOpen ? 'הסתר מפת מושגים' : 'הצג מפת מושגים'}
             style={mindmapToggleStyle(mindmapOpen)}
@@ -406,8 +433,56 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
         </button>
       </div>
 
+      {/* Presentation tool bar — visible only while presenting */}
+      {presenting && !isGraphSlide && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+          marginBottom: 10, padding: '8px 12px',
+          background: 'rgba(255,255,255,0.06)',
+          border: '1px solid rgba(127,155,217,0.30)',
+          borderRadius: 12,
+        }}>
+          <button
+            onClick={() => setPresAuto(v => !v)}
+            style={{
+              background: presAuto ? 'rgba(212,175,55,0.22)' : 'rgba(255,255,255,0.85)',
+              color: presAuto ? '#8a6d1a' : TEXT_DARK,
+              border: '1.5px solid rgba(127,155,217,0.45)', borderRadius: 10,
+              padding: '6px 13px', fontSize: 13, fontWeight: 700,
+              fontFamily: "'Rubik', sans-serif", cursor: 'pointer', whiteSpace: 'nowrap',
+            }}
+          >
+            {presAuto ? '⏸ עצור הדגמה' : '▶ הדגמה אוטומטית'}
+          </button>
+          <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 700, color: BUTTON_COLOR }}>כלי הצבעה:</span>
+          {([['point', '👆 הצבעה'], ['laser', '🔦 לייזר'], ['circle', '⭕ עיגול'], ['underline', '➖ קו תחתון']] as Array<[PresenterTool, string]>).map(([id, label]) => (
+            <button
+              key={id}
+              onClick={() => { setPresAuto(false); setPresTool(id) }}
+              aria-pressed={!presAuto && presTool === id}
+              style={{
+                background: !presAuto && presTool === id ? BUTTON_COLOR : 'rgba(255,255,255,0.9)',
+                color: !presAuto && presTool === id ? '#fff' : TEXT_DARK,
+                border: `1.5px solid ${!presAuto && presTool === id ? BUTTON_COLOR : 'rgba(127,155,217,0.40)'}`,
+                borderRadius: 10, padding: '6px 13px', fontSize: 13, fontWeight: 700,
+                fontFamily: "'Rubik', sans-serif", cursor: 'pointer', whiteSpace: 'nowrap',
+                transition: 'all 0.15s',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+          <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginInlineStart: 'auto' }}>
+            {presAuto ? 'ההדגמה רצה — לחצו ⏸ כדי לשלוט ביד' : 'הזיזו את העכבר על הלוח — היד עוקבת. לחיצה מפעילה את הכלי.'}
+          </span>
+        </div>
+      )}
+
       {/* Lesson content is drawn directly on a whiteboard surface — the
-          hierarchy breadcrumb is pinned in the board's top-right corner. */}
+          hierarchy breadcrumb is pinned in the board's top-right corner.
+          The relative wrapper hosts the presentation overlay (hand/laser/ink)
+          so it can sit above the slide but under the aluminium frame. */}
+      <div style={{ position: 'relative' }}>
       <WhiteboardShell topRightSlot={<HierarchyBreadcrumb topicId={topicId} />}>
       {!isGraphSlide && (
       <>{/* Slide card — theory is the heart of the lesson, give it presence */}
@@ -725,6 +800,14 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
         </div>
       )}
       </WhiteboardShell>
+      <PresentationOverlay
+        active={presenting && !isGraphSlide}
+        autoOn={presAuto}
+        tool={presTool}
+        slideKey={currentSlide}
+        onAutoDone={() => setPresAuto(false)}
+      />
+      </div>
 
       {/* Footer controls — dots for ALL slides (lesson + graph) */}
       <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
