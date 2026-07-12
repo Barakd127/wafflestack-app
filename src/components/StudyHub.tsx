@@ -1271,6 +1271,8 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
   // — route it to the lesson / practice via the same handler the cards use.
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
+      // mindmap iframe is same-origin; ignore messages from anywhere else (T4).
+      if (e.origin !== window.location.origin) return
       const d = e.data as { type?: string; topicId?: string; mode?: string }
       if (!d || d.type !== 'ws-open-topic' || !d.topicId) return
       onSelectTopic(d.topicId, d.mode === 'quiz' ? 'quiz' : 'lesson')
