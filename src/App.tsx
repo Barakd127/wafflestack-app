@@ -3,6 +3,7 @@ import { Moon, Sun } from 'lucide-react'
 import StudyHub from './components/StudyHub'
 import BridgePanel from './components/bridge/BridgePanel'
 import CoinsStore from './components/bridge/CoinsStore'
+import WhiteboardRecall from './components/WhiteboardRecall'
 import { loadProgress } from './stores/progressStore'
 import MindMapCanvas from './components/MindMapCanvas'
 import Tooltip from './components/Tooltip'
@@ -34,7 +35,7 @@ const LandingPage = lazy(() => import('./landing/LandingPage'))
 // wired here — kept on disk for reference. Unified data source: notebook and
 // mindmap share the same MM.nodes[id].body field inside mindmap.html.
 
-type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook' | 'bridges' | 'coins-store'
+type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook' | 'bridges' | 'coins-store' | 'recall-demo'
 
 function App() {
   const [activeView, setActiveView] = useState<View>(() => {
@@ -47,6 +48,9 @@ function App() {
     if (h === '#split-study-mindmap') return 'split-study-mindmap'
     if (h === '#mindmap') return 'mindmap'
     if (h === '#notebook') return 'notebook'
+    if (h === '#bridges') return 'bridges'
+    if (h === '#store') return 'coins-store'
+    if (h === '#recall') return 'recall-demo'
     // First-time / no-hash visitor → landing page. Returning users keep their
     // hash route (#study, #mindmap, etc.) so refreshing stays in-app.
     return 'landing'
@@ -157,6 +161,7 @@ function App() {
       else if (h === '#notebook') setActiveView('notebook')
       else if (h === '#bridges') setActiveView('bridges')
       else if (h === '#store') setActiveView('coins-store')
+      else if (h === '#recall') setActiveView('recall-demo')
       else if (h === '#split') setActiveView('split')
       else if (h === '#split-mindmap') setActiveView('split-mindmap')
       else if (h === '#split-study-mindmap') setActiveView('split-study-mindmap')
@@ -478,6 +483,16 @@ function App() {
             </div>
           </div>
         </FeatureGate>
+      )}
+
+      {activeView === 'recall-demo' && (
+        <WhiteboardRecall
+          topicId="mean"
+          hebrewName="ממוצע"
+          userId={localStorage.getItem('userName') || 'default'}
+          onPass={() => {}}
+          onClose={() => setActiveView('study')}
+        />
       )}
 
       {loggedIn && <TutorialOverlay />}
