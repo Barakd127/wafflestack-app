@@ -4,6 +4,7 @@ import { TOPIC_VISUALS } from './LessonVisuals'
 import ArsenalCapture from './ArsenalCapture'
 import { quickAddToMindmap } from '../lib/mindmapWriter'
 import { MathLineBlock } from '../lib/mathRender'
+import WhiteboardRecall from './WhiteboardRecall'
 import { parseLeadingEnumMarker } from '../lib/bidiSegments'
 import WhiteboardShell from './WhiteboardShell'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
@@ -144,8 +145,14 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
     onStartQuiz()
   }
 
+  // Stage 4 of the Whiteboard Learning Plan: at lesson end the board erases and
+  // asks 2–3 recall questions. Passing records a real session (→ gates the topic
+  // → unlocks bridges + store). Shown before the full practice quiz.
+  const [showRecall, setShowRecall] = useState(false)
+  const recallUserId = (typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default'
+
   const handleNext = () => {
-    if (isLast) handleStartQuiz(true)
+    if (isLast) setShowRecall(true)
     else setCurrentSlide(s => Math.min(total - 1, s + 1))
   }
   const handlePrev = () => setCurrentSlide(s => Math.max(0, s - 1))
@@ -778,6 +785,15 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0,
       background: 'transparent',
     }}>
+      {showRecall && (
+        <WhiteboardRecall
+          topicId={topicId}
+          hebrewName={lesson?.hebrewName ?? topicId}
+          userId={recallUserId}
+          onPass={(id) => { if (!completedRef.current) { completedRef.current = true; onComplete(id) } }}
+          onClose={() => { setShowRecall(false); onStartQuiz() }}
+        />
+      )}
       {/* Mind map iframe — left side (LTR-first child) */}
       <div className="ws-lesson-mindmap-pane" style={{ width: `${splitPct}%`, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
         <iframe

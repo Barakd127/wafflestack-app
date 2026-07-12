@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "tripo:generate": "node scripts/tripo/generate.mjs",
-    "tripo:regenerate": "node scripts/tripo/generate.mjs --force"
+    "tripo:regenerate": "node scripts/tripo/generate.mjs --force",
+    "check:secrets": "node scripts/check-no-secrets.mjs"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.1",

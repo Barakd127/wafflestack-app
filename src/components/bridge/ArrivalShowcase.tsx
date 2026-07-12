@@ -14,6 +14,18 @@ export interface ArrivalShowcaseProps {
   onDismiss: () => void
   /** Total time on screen before auto-dismiss, ms. Defaults per motion pref. */
   durationMs?: number
+  /**
+   * 'bridge' (default) renders the existing bridge/analogy/similarity reward
+   * copy + coin total. 'building' renders a City Coins purchase moment
+   * instead — a spend, not an award, so no coin total is shown.
+   */
+  variant?: 'bridge' | 'building'
+  /** building variant only — overrides the headline text. */
+  title?: string
+  /** building variant only — overrides the big emoji. */
+  emoji?: string
+  /** building variant only — optional secondary line under the headline. */
+  subtitle?: string
 }
 
 const KIND_EMOJI: Record<BridgeKind, string> = {
@@ -41,11 +53,21 @@ function usePrefersReducedMotion(): boolean {
   return reduced
 }
 
-export default function ArrivalShowcase({ kind, coinsAwarded, onDismiss, durationMs }: ArrivalShowcaseProps) {
+export default function ArrivalShowcase({
+  kind,
+  coinsAwarded,
+  onDismiss,
+  durationMs,
+  variant = 'bridge',
+  title: titleOverride,
+  emoji: emojiOverride,
+  subtitle,
+}: ArrivalShowcaseProps) {
   const reducedMotion = usePrefersReducedMotion()
   const effectiveDuration = durationMs ?? (reducedMotion ? 1500 : 4000)
-  const emoji = KIND_EMOJI[kind] ?? '🌉'
-  const title = KIND_TITLE[kind] ?? KIND_TITLE.bridge
+  const isBuilding = variant === 'building'
+  const emoji = isBuilding ? (emojiOverride ?? '🏛️') : (KIND_EMOJI[kind] ?? '🌉')
+  const title = isBuilding ? (titleOverride ?? '') : (KIND_TITLE[kind] ?? KIND_TITLE.bridge)
 
   useEffect(() => {
     const t = setTimeout(onDismiss, effectiveDuration)
@@ -101,8 +123,15 @@ export default function ArrivalShowcase({ kind, coinsAwarded, onDismiss, duratio
           color: 'var(--sh-cream)',
         }}
       >
-        {title} <span style={{ color: 'var(--sh-gold)' }}>+{coinLabel} 🪙</span>
+        {title}
+        {!isBuilding && <span style={{ color: 'var(--sh-gold)' }}> +{coinLabel} 🪙</span>}
       </div>
+
+      {isBuilding && subtitle && (
+        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--sh-cream)', opacity: 0.85 }}>
+          {subtitle}
+        </div>
+      )}
 
       {reducedMotion ? (
         <div
