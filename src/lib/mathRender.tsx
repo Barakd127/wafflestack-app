@@ -153,14 +153,24 @@ function renderLineBody(line: string): React.ReactNode {
       if (!(seg.ltr && STRONG_MATH_RE.test(seg.text))) {
         return <React.Fragment key={i}>{seg.text}</React.Fragment>
       }
-      const mm = seg.text.match(/^(\s*)([\s\S]*?)(\s*)$/)
+      // Separate surrounding whitespace AND any TRAILING sentence punctuation
+      // (". , ; : ! ? …") from the LTR core. If that punctuation stayed inside
+      // the isolated LTR island it would render on the RIGHT of the number
+      // ("30." glued as one L-unit), so on a Hebrew RTL line the period sits
+      // between the number and the preceding word instead of terminating the
+      // line on the LEFT. Rendered as plain RTL-flow text it resolves to the
+      // correct (left) end. Interior punctuation — decimals like "2.2",
+      // ratios "3:1", operators, parens — stays in the core.
+      const mm = seg.text.match(/^(\s*)([\s\S]*?)([.,;:!?…]*)(\s*)$/)
       const lead = mm ? mm[1] : ''
       const core = mm ? mm[2] : seg.text
-      const trail = mm ? mm[3] : ''
+      const tailPunct = mm ? mm[3] : ''
+      const trail = mm ? mm[4] : ''
       return (
         <React.Fragment key={i}>
           {lead}
           <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>{core}</span>
+          {tailPunct}
           {trail}
         </React.Fragment>
       )
