@@ -54,11 +54,12 @@ const LASER_COLOR = '#EF4444' // matches the red tray marker
 const INK_COLOR = '#1D4ED8'   // matches the blue tray marker
 
 // Fingertip / pen-tip offset within the hand element, per pose (displayed px).
+// Calibrated against the 3D renders in public/hands/ (alpha-bbox + tip scan).
 const TIPS: Record<Pose, { x: number; y: number }> = {
-  point: { x: 89, y: 3 },
-  laser: { x: 89, y: 3 },
-  marker: { x: 5, y: 48 },
-  thumbs: { x: 70, y: 44 },
+  point: { x: 91, y: 2 },
+  laser: { x: 91, y: 2 },
+  marker: { x: 2, y: 40 },
+  thumbs: { x: 75, y: 48 },
 }
 
 const HAND_PNGS: Partial<Record<Pose, string>> = {
@@ -151,8 +152,11 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
         e.vel.y = e.vel.y * 0.62 + (e.guide.y - e.pos.y) * FOLLOW_LAG
         e.pos.x += e.vel.x * dt; e.pos.y += e.vel.y * dt
       } else {
-        // well-damped spring hugs the eased arc path
-        const freq = 0.34, k = freq * freq
+        // well-damped spring hugs the eased arc path. freq is high enough
+        // that the hand tracks the arc tightly — the arc's own easing is the
+        // sole source of shape; a loose spring lagging then catching up reads
+        // as rubber-banding, not smoothness.
+        const freq = 0.5, k = freq * freq
         const drag = Math.pow(Math.max(0, 1 - 2 * DAMP_ZETA * freq), dt)
         e.vel.x = e.vel.x * drag + (e.guide.x - e.pos.x) * k * dt
         e.vel.y = e.vel.y * drag + (e.guide.y - e.pos.y) * k * dt
@@ -172,9 +176,11 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
 
       const tip = TIPS[e.pose]
       hand.style.transformOrigin = `${tip.x}px ${tip.y}px`
-      hand.style.transform = `translate(${e.pos.x - tip.x}px,${e.pos.y - tip.y + idleY}px) rotate(${e.rot + idleR}deg)`
+      // translate3d keeps the hand on its own GPU layer — no repaint jank
+      hand.style.transform = `translate3d(${e.pos.x - tip.x}px,${e.pos.y - tip.y + idleY}px,0) rotate(${e.rot + idleR}deg)`
+      // pose swap crossfades via opacity (hard display pops read as stutter)
       hand.querySelectorAll<HTMLElement>('[data-pose]').forEach(p => {
-        p.style.display = p.getAttribute('data-pose') === e.pose ? '' : 'none'
+        p.style.opacity = p.getAttribute('data-pose') === e.pose ? '1' : '0'
       })
 
       if (e.laserHeld || e.sweeping) e.trail.push({ x: e.pos.x, y: e.pos.y, t: now })
@@ -231,7 +237,7 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
     const lift = Math.min(dist * 0.28, 70) * ARC_HEIGHT
     const ctrl = { x: mx + (nx / nl) * lift, y: my + (ny / nl) * lift - lift * 0.4 }
     // Fitts-like: farther targets take longer, capped so it never drags
-    const dur = Math.min(1500, 340 + dist * 1.7) / REACH_SPEED
+    const dur = Math.min(1600, 420 + dist * 1.9) / REACH_SPEED
     e.reachActive = true
     return new Promise(res => {
       const t0 = performance.now()
@@ -321,9 +327,9 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
     const path = newInk(); if (!path) return false
     const ok = await tween(1100, t => {
       const x = x1 + (x2 - x1) * easeInOut(t)
-      const wob = Math.sin(t * 20) * 0.4
-      e.guide.x = x; e.guide.y = y + wob
-      extendInk(path, x, y + wob + 2)
+      // hand glides straight; only the INK keeps a hand-drawn waver
+      e.guide.x = x; e.guide.y = y
+      extendInk(path, x, y + Math.sin(t * 20) * 0.6 + 2)
     }, tok)
     fadeInk(path)
     return ok && sleep(500, tok)
@@ -338,10 +344,11 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
     const path = newInk(); if (!path) return false
     const ok = await tween(1600, t => {
       const a = a0 + easeInOut(t) * Math.PI * 2.15
-      const wob = Math.sin(t * 28) * 0.4
-      const x = cx + (rx + wob) * Math.cos(a), y = cy + (ry + wob) * Math.sin(a)
+      // hand sweeps a clean ellipse; ink alone carries the waver
+      const x = cx + rx * Math.cos(a), y = cy + ry * Math.sin(a)
       e.guide.x = x; e.guide.y = y
-      extendInk(path, x, y)
+      const wob = Math.sin(t * 28) * 0.6
+      extendInk(path, cx + (rx + wob) * Math.cos(a), cy + (ry + wob) * Math.sin(a))
     }, tok)
     fadeInk(path)
     return ok && sleep(600, tok)
@@ -356,7 +363,7 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
     e.sweeping = true
     const ok = await tween(1700, t => {
       const ee = easeInOut(t)
-      const c = clampPt(x1 + (x2 - x1) * ee, y + Math.sin(t * 12) * 0.7)
+      const c = clampPt(x1 + (x2 - x1) * ee, y)
       e.guide.x = c.x; e.guide.y = c.y
     }, tok)
     e.sweeping = false
@@ -452,9 +459,9 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
     const p = boardPoint(ev)
     e.guide = { x: p.x, y: p.y }
     if (e.drawPath) {
-      const wob = Math.sin(p.x * 0.12) * 1.1
-      extendInk(e.drawPath, p.x, e.drawY + wob)
-      e.guide.y = e.drawY + wob
+      // ruler-straight hand along the draw line; ink keeps a light waver
+      extendInk(e.drawPath, p.x, e.drawY + Math.sin(p.x * 0.12) * 1.1)
+      e.guide.y = e.drawY
     }
   }
   const onPU = () => {
@@ -506,10 +513,11 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
         style={{
           position: 'absolute', top: 0, left: 0, width: 200, height: 260, zIndex: 50,
           pointerEvents: 'none', willChange: 'transform',
-          filter: 'drop-shadow(-6px 12px 14px rgba(15,23,42,0.30))',
+          // modest blur radius — big drop-shadows re-rasterize every frame
+          filter: 'drop-shadow(-5px 10px 10px rgba(15,23,42,0.28))',
         }}
       >
-        <div data-pose="point" style={{ position: 'absolute', inset: 0 }}>
+        <div data-pose="point" style={{ position: 'absolute', inset: 0, opacity: 1, transition: 'opacity 0.13s ease' }}>
           {poseImg('point', (
             <svg width="130" height="156" viewBox="0 0 200 240" fill="none">
               {svgDefs}
@@ -523,7 +531,7 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
             </svg>
           ))}
         </div>
-        <div data-pose="laser" style={{ position: 'absolute', inset: 0, display: 'none' }}>
+        <div data-pose="laser" style={{ position: 'absolute', inset: 0, opacity: 0, transition: 'opacity 0.13s ease' }}>
           {poseImg('laser', (
             <svg width="130" height="156" viewBox="0 0 200 240" fill="none">
               {svgDefs}
@@ -538,7 +546,7 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
             </svg>
           ))}
         </div>
-        <div data-pose="marker" style={{ position: 'absolute', inset: 0, display: 'none' }}>
+        <div data-pose="marker" style={{ position: 'absolute', inset: 0, opacity: 0, transition: 'opacity 0.13s ease' }}>
           {poseImg('marker', (
             <svg width="130" height="156" viewBox="0 0 200 240" fill="none">
               {svgDefs}
@@ -553,7 +561,7 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
             </svg>
           ))}
         </div>
-        <div data-pose="thumbs" style={{ position: 'absolute', inset: 0, display: 'none' }}>
+        <div data-pose="thumbs" style={{ position: 'absolute', inset: 0, opacity: 0, transition: 'opacity 0.13s ease' }}>
           {poseImg('thumbs', (
             <svg width="150" height="180" viewBox="0 0 200 240" fill="none">
               {svgDefs}
