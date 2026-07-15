@@ -482,7 +482,12 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           hierarchy breadcrumb is pinned in the board's top-right corner.
           The relative wrapper hosts the presentation overlay (hand/laser/ink)
           so it can sit above the slide but under the aluminium frame. */}
-      <div style={{ position: 'relative' }}>
+      {/* WhiteboardShell is height:100% internally — without an explicit
+          height here it collapses to its content (a 2-bullet slide reads as
+          a tiny stub, not a whiteboard). Clamp gives a real board on any
+          viewport; content that overflows still scrolls inside (see the
+          flex:1 / overflowY:auto content column in WhiteboardShell). */}
+      <div style={{ position: 'relative', height: 'clamp(420px, 66vh, 640px)' }}>
       <WhiteboardShell topRightSlot={<HierarchyBreadcrumb topicId={topicId} />}>
       {!isGraphSlide && (
       <>{/* Slide card — theory is the heart of the lesson, give it presence */}
