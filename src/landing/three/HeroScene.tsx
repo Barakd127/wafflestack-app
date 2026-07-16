@@ -9,12 +9,15 @@ import { SkeletonUtils } from 'three-stdlib'
 // was the source of the recurring "insanely fast transition" complaint
 // (≈20 reports). Per user 2026-05-30: "ditch the switch per load — let each
 // load randomly assign one building and spin it slowly without switching."
+// Absolute '/kenney/...' resolves against the DOMAIN root, not the app's
+// deployed subpath (GitHub Pages serves this app under /wafflestack-app/) —
+// that mismatch 404'd every model and killed the hero's WebGL context.
 const BUILDINGS = [
-  '/kenney/building-skyscraper-a.glb',
-  '/kenney/building-skyscraper-c.glb',
-  '/kenney/building-n.glb',
-  '/kenney/building-a.glb',
-] as const
+  'kenney/building-skyscraper-a.glb',
+  'kenney/building-skyscraper-c.glb',
+  'kenney/building-n.glb',
+  'kenney/building-a.glb',
+].map(p => `${import.meta.env.BASE_URL}${p}`)
 
 // Gentle continuous rotation. The angle is an ABSOLUTE function of time that we
 // ASSIGN (not +=). Accumulation was the entire fast-spin bug: if more than one
