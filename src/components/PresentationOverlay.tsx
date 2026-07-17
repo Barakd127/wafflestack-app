@@ -128,8 +128,11 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
     return { left: r.left - b.left, top: r.top - b.top, right: r.right - b.left, bottom: r.bottom - b.top, width: r.width, height: r.height }
   }
   const clampPt = (x: number, y: number) => {
+    // Loose margins (vs. the old 20/45/20/30 inset) — the hand is unclipped
+    // now, so letting the tip approach the board edge lets its body bleed
+    // past the frame instead of stopping dead a full hand-width short of it.
     const b = boardRect()
-    return { x: Math.max(20, Math.min(b.width - 45, x)), y: Math.max(20, Math.min(b.height - 30, y)) }
+    return { x: Math.max(4, Math.min(b.width - 16, x)), y: Math.max(4, Math.min(b.height - 10, y)) }
   }
 
   // ── engine loop + gesture engine (one effect for the component's life) ──
@@ -492,7 +495,11 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
     ) : svg
 
   return (
-    <div ref={rootRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, borderRadius: 18, overflow: 'hidden', pointerEvents: 'none' }}>
+    // NOT clipped: the hand needs to bleed past the board edge, over the
+    // aluminium frame, for a 3D "reaching into the scene" feel. Ink/laser/
+    // pulses stay confined to the board via their own inner clipped layer
+    // below (they're drawing ON the surface, so they shouldn't bleed).
+    <div ref={rootRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
       <style>{`
         @keyframes wsPresPulse {
           0%   { transform: translate(-50%,-50%) scale(0.35); opacity: 0.9; }
@@ -500,18 +507,21 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
         }
       `}</style>
 
-      {/* ink strokes */}
-      <svg ref={inkRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 40, pointerEvents: 'none', overflow: 'visible' }} />
-      {/* laser trail */}
-      <canvas ref={laserRef} style={{ position: 'absolute', inset: 0, zIndex: 45, pointerEvents: 'none' }} />
-      {/* pulse rings */}
-      <div ref={pulsesRef} style={{ position: 'absolute', inset: 0, zIndex: 46, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', inset: 0, borderRadius: 18, overflow: 'hidden', pointerEvents: 'none' }}>
+        {/* ink strokes */}
+        <svg ref={inkRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 40, pointerEvents: 'none', overflow: 'visible' }} />
+        {/* laser trail */}
+        <canvas ref={laserRef} style={{ position: 'absolute', inset: 0, zIndex: 45, pointerEvents: 'none' }} />
+        {/* pulse rings */}
+        <div ref={pulsesRef} style={{ position: 'absolute', inset: 0, zIndex: 46, pointerEvents: 'none' }} />
+      </div>
 
-      {/* the hand (z 50 — slips under the aluminium frame at z 60) */}
+      {/* the hand — z 70, ABOVE the whiteboard aluminium frame (z 60/61) and
+          unclipped, so it can visibly reach past the board edge. */}
       <div
         ref={handRef}
         style={{
-          position: 'absolute', top: 0, left: 0, width: 200, height: 260, zIndex: 50,
+          position: 'absolute', top: 0, left: 0, width: 200, height: 260, zIndex: 70,
           pointerEvents: 'none', willChange: 'transform',
           // modest blur radius — big drop-shadows re-rasterize every frame
           filter: 'drop-shadow(-5px 10px 10px rgba(15,23,42,0.28))',
