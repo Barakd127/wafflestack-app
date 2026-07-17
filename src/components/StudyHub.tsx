@@ -525,8 +525,8 @@ const COURSES: CourseDef[] = [
 // Each mark is bespoke to the course content rather than a stock glyph —
 // stat-a: histogram with a normal curve rising over it; stat-b: bell curve
 // with a dashed mean and a confidence-interval bracket; methods: checklist
-// sheet under a magnifier; anova: three group clusters (3 points each) at
-// different heights on axes; sql: three-shelf data cylinder (warehouse).
+// sheet under a magnifier; anova: three groups as vertical 3-point columns
+// (one x per group, means rising) on axes; sql: data cylinder (warehouse).
 function CourseIcon({ id, size = 30 }: { id: CourseDef['id']; size?: number }) {
   const common = {
     width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
@@ -569,15 +569,15 @@ function CourseIcon({ id, size = 30 }: { id: CourseDef['id']; size?: number }) {
       return (
         <svg {...common}>
           <path d="M4 4.5V20h16" />
-          <circle cx="8" cy="14.6" r="0.9" fill="currentColor" stroke="none" />
-          <circle cx="6.8" cy="17" r="0.9" fill="currentColor" stroke="none" />
-          <circle cx="9.2" cy="17" r="0.9" fill="currentColor" stroke="none" />
-          <circle cx="12.8" cy="10.1" r="0.9" fill="currentColor" stroke="none" />
-          <circle cx="11.6" cy="12.5" r="0.9" fill="currentColor" stroke="none" />
-          <circle cx="14" cy="12.5" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="8" cy="13.8" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="8" cy="16.2" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="8" cy="18.6" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="12.8" cy="10.5" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="12.8" cy="12.9" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="12.8" cy="15.3" r="0.9" fill="currentColor" stroke="none" />
           <circle cx="17.6" cy="5.6" r="0.9" fill="currentColor" stroke="none" />
-          <circle cx="16.4" cy="8" r="0.9" fill="currentColor" stroke="none" />
-          <circle cx="18.8" cy="8" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="17.6" cy="8" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="17.6" cy="10.4" r="0.9" fill="currentColor" stroke="none" />
         </svg>
       )
     case 'sql':
