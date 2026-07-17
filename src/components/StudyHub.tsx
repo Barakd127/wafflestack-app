@@ -569,15 +569,15 @@ function CourseIcon({ id, size = 30 }: { id: CourseDef['id']; size?: number }) {
       return (
         <svg {...common}>
           <path d="M4 4.5V20h16" />
-          <circle cx="8" cy="17" r="1.1" />
-          <circle cx="7.2" cy="15.2" r="1.1" />
-          <circle cx="8.9" cy="15.9" r="1.1" />
-          <circle cx="12.7" cy="12.8" r="1.1" />
-          <circle cx="11.9" cy="11" r="1.1" />
-          <circle cx="13.6" cy="11.8" r="1.1" />
-          <circle cx="17.4" cy="8.4" r="1.1" />
-          <circle cx="16.6" cy="6.6" r="1.1" />
-          <circle cx="18.3" cy="7.4" r="1.1" />
+          <circle cx="8" cy="14.6" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="6.8" cy="17" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="9.2" cy="17" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="12.8" cy="10.1" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="11.6" cy="12.5" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="14" cy="12.5" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="17.6" cy="5.6" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="16.4" cy="8" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="18.8" cy="8" r="0.9" fill="currentColor" stroke="none" />
         </svg>
       )
     case 'sql':
@@ -1239,9 +1239,9 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
                 translucent chip + stroke-only line icon, no gradient fill. */}
             <div style={{
               width: 56, height: 56, borderRadius: 14,
-              background: 'rgba(31,62,108,0.06)',
-              border: '1px solid rgba(31,62,108,0.16)',
-              color: TEXT_DARK,
+              background: 'var(--sh-sidebar-bg)',
+              border: '1px solid rgba(255,255,255,0.25)',
+              color: '#fff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               marginBottom: 14,
             }}><CourseIcon id={c.id} size={30} /></div>
@@ -1287,9 +1287,9 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
           >
             <div style={{
               width: 80, height: 80, borderRadius: 20,
-              background: 'rgba(31,62,108,0.06)',
-              border: '1px solid rgba(31,62,108,0.16)',
-              color: '#1F3E6C',
+              background: 'var(--sh-sidebar-bg)',
+              border: '1px solid rgba(255,255,255,0.25)',
+              color: '#fff',
               margin: '0 auto 18px', display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}><CourseIcon id={comingSoon.id} size={44} /></div>
             <div style={{ fontSize: 22, fontWeight: 700, color: '#0B1B3E', marginBottom: 6 }}>{comingSoon.label}</div>
@@ -1909,9 +1909,9 @@ function CoursePlayer({ course, onClose }: {
         >→ חזרה לקורסים</button>
         <div style={{
           width: 40, height: 40, borderRadius: 10,
-          background: 'rgba(31,62,108,0.06)',
-          border: '1px solid rgba(31,62,108,0.16)',
-          color: '#1F3E6C',
+          background: 'var(--sh-sidebar-bg)',
+          border: '1px solid rgba(255,255,255,0.25)',
+          color: '#fff',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}><CourseIcon id={course.id} size={22} /></div>
         <div>
@@ -1963,8 +1963,8 @@ function ExternalLinkPanel({ course }: { course: CourseDef }) {
     }}>
       <div style={{
         width: 80, height: 80, borderRadius: 20,
-        background: 'rgba(31,62,108,0.06)', margin: '0 auto 18px',
-        border: '1px solid rgba(31,62,108,0.16)', color: '#1F3E6C',
+        background: 'var(--sh-sidebar-bg)', margin: '0 auto 18px',
+        border: '1px solid rgba(255,255,255,0.25)', color: '#fff',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}><CourseIcon id={course.id} size={44} /></div>
       <div style={{ fontSize: 20, fontWeight: 700, color: '#0B1B3E', marginBottom: 6 }}>
