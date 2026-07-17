@@ -569,9 +569,9 @@ function CourseIcon({ id, size = 30 }: { id: CourseDef['id']; size?: number }) {
       return (
         <svg {...common}>
           <path d="M4 4.5V20h16" />
+          <circle cx="8" cy="11.4" r="0.9" fill="currentColor" stroke="none" />
           <circle cx="8" cy="13.8" r="0.9" fill="currentColor" stroke="none" />
           <circle cx="8" cy="16.2" r="0.9" fill="currentColor" stroke="none" />
-          <circle cx="8" cy="18.6" r="0.9" fill="currentColor" stroke="none" />
           <circle cx="12.8" cy="10.5" r="0.9" fill="currentColor" stroke="none" />
           <circle cx="12.8" cy="12.9" r="0.9" fill="currentColor" stroke="none" />
           <circle cx="12.8" cy="15.3" r="0.9" fill="currentColor" stroke="none" />
