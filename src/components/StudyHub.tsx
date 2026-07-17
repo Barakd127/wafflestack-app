@@ -520,6 +520,73 @@ const COURSES: CourseDef[] = [
   { id: 'sql',     label: 'SQL — שפת מסדי נתונים',  icon: '🗄️', desc: 'שאילתות, JOIN, אינדקסים ופונקציות חלון — במטאפורת מחסן, עם סימולטורים וחידונים', active: true, bg: 'linear-gradient(135deg,#F0B429,#C97C18)' },
 ]
 
+// Course icons follow the sidebar icon language (see Sidebar renderIcon):
+// stroke-only line SVGs, viewBox 24, 1.8 stroke, round caps, currentColor.
+// Each mark is bespoke to the course content rather than a stock glyph —
+// stat-a: histogram with a normal curve rising over it; stat-b: bell curve
+// with a dashed mean and a confidence-interval bracket; methods: checklist
+// sheet under a magnifier; anova: scatter points split around a fitted
+// regression line; sql: three-shelf data cylinder (the warehouse metaphor).
+function CourseIcon({ id, size = 30 }: { id: CourseDef['id']; size?: number }) {
+  const common = {
+    width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
+    stroke: 'currentColor', strokeWidth: 1.8,
+    strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
+  }
+  switch (id) {
+    case 'stat-a':
+      return (
+        <svg {...common}>
+          <path d="M3 20h18" />
+          <path d="M5.5 20v-5h3.2v5" />
+          <path d="M10.4 20v-9h3.2v9" />
+          <path d="M15.3 20v-6.5h3.2v6.5" />
+          <path d="M3.5 15.5C7 14.5 8.5 4.5 12 4.5s5 10 8.5 11" />
+        </svg>
+      )
+    case 'stat-b':
+      return (
+        <svg {...common}>
+          <path d="M3 16.5c3.6 0 4.8-11 9-11s5.4 11 9 11" />
+          <path d="M12 6.5v10" strokeDasharray="0.5 3" />
+          <path d="M6.5 21h11" />
+          <path d="M6.5 19.3v3.4" />
+          <path d="M17.5 19.3v3.4" />
+        </svg>
+      )
+    case 'methods':
+      return (
+        <svg {...common}>
+          <path d="M6 3.5h9a1.5 1.5 0 0 1 1.5 1.5v4.5" />
+          <path d="M6 3.5A1.5 1.5 0 0 0 4.5 5v12A1.5 1.5 0 0 0 6 18.5h4" />
+          <path d="M7.5 8h6" />
+          <path d="M7.5 11.5h4" />
+          <circle cx="15.5" cy="15.5" r="4" />
+          <path d="M18.5 18.5l3 3" />
+        </svg>
+      )
+    case 'anova':
+      return (
+        <svg {...common}>
+          <path d="M4 4.5V20h16" />
+          <path d="M6.5 16.8L19 7.5" />
+          <circle cx="8.5" cy="13" r="1.3" />
+          <circle cx="12.5" cy="13.8" r="1.3" />
+          <circle cx="15.5" cy="8" r="1.3" />
+        </svg>
+      )
+    case 'sql':
+      return (
+        <svg {...common}>
+          <ellipse cx="12" cy="5.5" rx="7" ry="2.6" />
+          <path d="M5 5.5v13c0 1.45 3.15 2.6 7 2.6s7-1.15 7-2.6v-13" />
+          <path d="M5 10c0 1.45 3.15 2.6 7 2.6s7-1.15 7-2.6" />
+          <path d="M5 14.4c0 1.45 3.15 2.6 7 2.6s7-1.15 7-2.6" />
+        </svg>
+      )
+  }
+}
+
 // Hebrew labels for each topic now live in ../data/topicLabels (shared with
 // PersonalPlanWizard). Imported at top of file as HEBREW_LABELS.
 
@@ -1163,13 +1230,16 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
               direction: 'rtl',
             }}
           >
-            {/* Icon chip */}
+            {/* Icon chip — same visual language as the sidebar nav: flat
+                translucent chip + stroke-only line icon, no gradient fill. */}
             <div style={{
               width: 56, height: 56, borderRadius: 14,
-              background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 30, marginBottom: 14,
-              boxShadow: '0 6px 18px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.4)',
-            }}>{c.icon}</div>
+              background: 'rgba(31,62,108,0.06)',
+              border: '1px solid rgba(31,62,108,0.16)',
+              color: TEXT_DARK,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: 14,
+            }}><CourseIcon id={c.id} size={30} /></div>
             <div style={{ fontSize: 19, fontWeight: 700, color: TEXT_DARK, marginBottom: 4 }}>{c.label}</div>
             <div style={{ fontSize: 13, color: TEXT_MED, lineHeight: 1.45 }}>{c.desc}</div>
             {!c.active && (
@@ -1212,11 +1282,11 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
           >
             <div style={{
               width: 80, height: 80, borderRadius: 20,
-              background: comingSoon.bg,
+              background: 'rgba(31,62,108,0.06)',
+              border: '1px solid rgba(31,62,108,0.16)',
+              color: '#1F3E6C',
               margin: '0 auto 18px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 44,
-              boxShadow: '0 10px 28px rgba(0,0,0,0.15)',
-            }}>{comingSoon.icon}</div>
+            }}><CourseIcon id={comingSoon.id} size={44} /></div>
             <div style={{ fontSize: 22, fontWeight: 700, color: '#0B1B3E', marginBottom: 6 }}>{comingSoon.label}</div>
             <div style={{ fontSize: 14, color: TEXT_MED, marginBottom: 4 }}>{comingSoon.desc}</div>
             <div style={{
@@ -1834,9 +1904,11 @@ function CoursePlayer({ course, onClose }: {
         >→ חזרה לקורסים</button>
         <div style={{
           width: 40, height: 40, borderRadius: 10,
-          background: course.bg,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
-        }}>{course.icon}</div>
+          background: 'rgba(31,62,108,0.06)',
+          border: '1px solid rgba(31,62,108,0.16)',
+          color: '#1F3E6C',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}><CourseIcon id={course.id} size={22} /></div>
         <div>
           <div style={{ fontSize: 17, fontWeight: 700, color: '#0B1B3E' }}>{course.label}</div>
           <div style={{ fontSize: 12, color: '#64748B' }}>{course.desc}</div>
@@ -1886,10 +1958,10 @@ function ExternalLinkPanel({ course }: { course: CourseDef }) {
     }}>
       <div style={{
         width: 80, height: 80, borderRadius: 20,
-        background: course.bg, margin: '0 auto 18px',
+        background: 'rgba(31,62,108,0.06)', margin: '0 auto 18px',
+        border: '1px solid rgba(31,62,108,0.16)', color: '#1F3E6C',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 44, boxShadow: '0 10px 28px rgba(0,0,0,0.15)',
-      }}>{course.icon}</div>
+      }}><CourseIcon id={course.id} size={44} /></div>
       <div style={{ fontSize: 20, fontWeight: 700, color: '#0B1B3E', marginBottom: 6 }}>
         כלי ויזואליזציה — מתא"ם
       </div>
