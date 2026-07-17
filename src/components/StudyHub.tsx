@@ -525,8 +525,8 @@ const COURSES: CourseDef[] = [
 // Each mark is bespoke to the course content rather than a stock glyph —
 // stat-a: histogram with a normal curve rising over it; stat-b: bell curve
 // with a dashed mean and a confidence-interval bracket; methods: checklist
-// sheet under a magnifier; anova: scatter points split around a fitted
-// regression line; sql: three-shelf data cylinder (the warehouse metaphor).
+// sheet under a magnifier; anova: three group clusters (3 points each) at
+// different heights on axes; sql: three-shelf data cylinder (warehouse).
 function CourseIcon({ id, size = 30 }: { id: CourseDef['id']; size?: number }) {
   const common = {
     width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
@@ -569,10 +569,15 @@ function CourseIcon({ id, size = 30 }: { id: CourseDef['id']; size?: number }) {
       return (
         <svg {...common}>
           <path d="M4 4.5V20h16" />
-          <path d="M6.5 16.8L19 7.5" />
-          <circle cx="8.5" cy="13" r="1.3" />
-          <circle cx="12.5" cy="13.8" r="1.3" />
-          <circle cx="15.5" cy="8" r="1.3" />
+          <circle cx="8" cy="17" r="1.1" />
+          <circle cx="7.2" cy="15.2" r="1.1" />
+          <circle cx="8.9" cy="15.9" r="1.1" />
+          <circle cx="12.7" cy="12.8" r="1.1" />
+          <circle cx="11.9" cy="11" r="1.1" />
+          <circle cx="13.6" cy="11.8" r="1.1" />
+          <circle cx="17.4" cy="8.4" r="1.1" />
+          <circle cx="16.6" cy="6.6" r="1.1" />
+          <circle cx="18.3" cy="7.4" r="1.1" />
         </svg>
       )
     case 'sql':
