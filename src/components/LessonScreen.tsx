@@ -455,7 +455,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             {presAuto ? '⏸ עצור הדגמה' : '▶ הדגמה אוטומטית'}
           </button>
           <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 700, color: BUTTON_COLOR }}>כלי הצבעה:</span>
-          {([['point', '👆 הצבעה'], ['laser', '🔦 לייזר'], ['circle', '⭕ עיגול'], ['underline', '➖ קו תחתון']] as Array<[PresenterTool, string]>).map(([id, label]) => (
+          {([['point', '👆 הצבעה'], ['laser', '🔦 לייזר'], ['draw', '✏️ ציור חופשי'], ['underline', '➖ קו תחתון']] as Array<[PresenterTool, string]>).map(([id, label]) => (
             <button
               key={id}
               onClick={() => { setPresAuto(false); setPresTool(id) }}

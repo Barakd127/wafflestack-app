@@ -25,7 +25,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 
-export type PresenterTool = 'point' | 'laser' | 'circle' | 'underline'
+export type PresenterTool = 'point' | 'laser' | 'draw' | 'underline'
 
 interface PresentationOverlayProps {
   /** Overlay is mounted/visible only while presenting. */
@@ -57,14 +57,16 @@ const INK_COLOR = '#1D4ED8'   // matches the blue tray marker
 // Calibrated against the 3D renders in public/hands/ (alpha-bbox + tip scan).
 const TIPS: Record<Pose, { x: number; y: number }> = {
   point: { x: 91, y: 2 },
-  laser: { x: 91, y: 2 },
+  // laser beams from the HELD PEN's tip (marker render), not a bare finger —
+  // a finger emitting a laser dot broke the metaphor
+  laser: { x: 2, y: 40 },
   marker: { x: 2, y: 40 },
   thumbs: { x: 75, y: 48 },
 }
 
 const HAND_PNGS: Partial<Record<Pose, string>> = {
   point: 'hands/point.png',
-  laser: 'hands/point.png',
+  laser: 'hands/marker.png',
   marker: 'hands/marker.png',
   thumbs: 'hands/thumbs.png',
 }
@@ -83,12 +85,17 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
   const [pngOk, setPngOk] = useState<Partial<Record<Pose, boolean>>>({})
   useEffect(() => {
     let mounted = true
-    const seen = new Set<string>()
+    // several poses can share one file — group by file, then mark every
+    // pose that uses it when the load succeeds
+    const byFile = new Map<string, Pose[]>()
     ;(Object.entries(HAND_PNGS) as Array<[Pose, string]>).forEach(([pose, rel]) => {
-      if (seen.has(rel)) return
-      seen.add(rel)
+      byFile.set(rel, [...(byFile.get(rel) ?? []), pose])
+    })
+    byFile.forEach((poses, rel) => {
       const img = new Image()
-      img.onload = () => { if (mounted) setPngOk(p => ({ ...p, [pose]: true, ...(rel === 'hands/point.png' ? { laser: true } : {}) })) }
+      img.onload = () => {
+        if (mounted) setPngOk(p => ({ ...p, ...Object.fromEntries(poses.map(x => [x, true])) }))
+      }
       img.src = `${import.meta.env.BASE_URL}${rel}`
     })
     return () => { mounted = false }
@@ -427,7 +434,7 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
 
   // Manual pose follows the selected tool.
   useEffect(() => {
-    if (!autoOn) eng.current.pose = tool === 'laser' ? 'laser' : tool === 'point' ? 'point' : 'marker'
+    if (!autoOn) eng.current.pose = tool === 'laser' ? 'laser' : tool === 'point' ? 'point' : 'marker' // draw + underline both hold the marker
   }, [tool, autoOn])
 
   // ── manual pointer handlers ──
@@ -442,13 +449,11 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
     const p = boardPoint(ev)
     if (tool === 'point') { e.guide = p; pulse(p.x, p.y - 8) }
     else if (tool === 'laser') { e.laserHeld = true; e.guide = p }
-    else if (tool === 'circle') {
-      const fake = {
-        getBoundingClientRect: () => ({
-          left: ev.clientX - 80, right: ev.clientX + 80, top: ev.clientY - 26, bottom: ev.clientY + 26, width: 160, height: 52,
-        }),
-      } as Element
-      gCircle(fake, e.token)
+    else if (tool === 'draw') {
+      // free drawing: ink follows the cursor exactly while held
+      e.drawPath = newInk()
+      if (e.drawPath) extendInk(e.drawPath, p.x, p.y)
+      e.guide = p
     } else if (tool === 'underline') {
       e.drawPath = newInk()
       e.drawY = p.y
@@ -462,9 +467,14 @@ export default function PresentationOverlay({ active, autoOn, tool, slideKey, on
     const p = boardPoint(ev)
     e.guide = { x: p.x, y: p.y }
     if (e.drawPath) {
-      // ruler-straight hand along the draw line; ink keeps a light waver
-      extendInk(e.drawPath, p.x, e.drawY + Math.sin(p.x * 0.12) * 1.1)
-      e.guide.y = e.drawY
+      if (tool === 'draw') {
+        // free drawing: ink tracks the cursor on both axes
+        extendInk(e.drawPath, p.x, p.y)
+      } else {
+        // underline: ruler-straight hand along the draw line; ink keeps a light waver
+        extendInk(e.drawPath, p.x, e.drawY + Math.sin(p.x * 0.12) * 1.1)
+        e.guide.y = e.drawY
+      }
     }
   }
   const onPU = () => {
