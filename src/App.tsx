@@ -7,6 +7,9 @@ import Tooltip from './components/Tooltip'
 // (/godot/index.html in public/godot/) shares localStorage with the host app,
 // so progress (XP / coins / mastered) stays in sync without a postMessage bridge.
 import WaffleStackCity from './components/WaffleStackCityGodot'
+// Asset Economy (Design Doc v1.1): coin ledger HUD + Library/Bench/Observatory/
+// Skyway overlays mounted on top of the Godot city iframe.
+import { EconomyHub } from './components/economy/EconomyHub'
 import MissionControl from './components/MissionControl'
 import OnboardingFlow from './components/OnboardingFlow'
 import SplitLayout from './components/SplitLayout'
@@ -337,6 +340,10 @@ function App() {
         {activeView === 'wafflecity' && (
           <div className="w-full h-full relative">
             <WaffleStackCity onBack={() => setActiveView('study')} />
+            <EconomyHub
+              userId={(typeof window !== 'undefined' && localStorage.getItem('userName')) || 'default'}
+              onOpenLesson={() => setActiveView('study')}
+            />
             <div className="ws-godot-controls absolute bottom-6 right-6 z-50 pointer-events-auto flex flex-col gap-2 items-end">
               <button
                 onClick={() => setActiveView('split')}
