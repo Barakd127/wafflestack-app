@@ -54,14 +54,15 @@ const LASER_COLOR = '#EF4444' // matches the red tray marker
 const INK_COLOR = '#1D4ED8'   // matches the blue tray marker
 
 // Fingertip / pen-tip offset within the hand element, per pose (displayed px).
-// Calibrated against the 3D renders in public/hands/ (alpha-bbox + tip scan).
+// Calibrated against the regenerated hands in public/hands/ — chroma-keyed
+// from clean solid-bg renders (scratchpad/regen-hands.mjs + key_hands.py).
 const TIPS: Record<Pose, { x: number; y: number }> = {
-  point: { x: 91, y: 2 },
+  point: { x: 92, y: 3 },
   // laser beams from the HELD PEN's tip (marker render), not a bare finger —
   // a finger emitting a laser dot broke the metaphor
-  laser: { x: 2, y: 40 },
-  marker: { x: 2, y: 40 },
-  thumbs: { x: 75, y: 48 },
+  laser: { x: 2, y: 35 },
+  marker: { x: 2, y: 35 },
+  thumbs: { x: 75, y: 47 },
 }
 
 const HAND_PNGS: Partial<Record<Pose, string>> = {
