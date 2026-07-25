@@ -19,9 +19,13 @@
   font-weight: 400;
 
   /* Handwriting face for anything drawn ON a whiteboard surface (practice
-     questions, board labels). Mirrors --mm-hand in public/mindmap.html so the
-     app and the mind-map canvas share one hand. */
-  --ws-hand: 'Playpen Sans Hebrew', 'Assistant', sans-serif;
+     questions, board labels).
+     Gveret Levin is actual Hebrew handwriting — slanted, single-stroke, marker
+     -like. Playpen Sans Hebrew (the mind-map's --mm-hand) was tried first and
+     rejected: its Hebrew is rounded PRINT, so nothing read as written by hand.
+     Gveret Levin covers digits and Latin A–Z too, so counters and option
+     letters stay in the same hand. Single weight — bold is synthesised. */
+  --ws-hand: 'Gveret Levin', 'Playpen Sans Hebrew', 'Assistant', sans-serif;
 
   /* Bottom-left FAB slot tokens — shared between TutorFAB (fixed) and the
      sidebar's PomodoroTimer (absolute). Keep these in sync if you move one. */
