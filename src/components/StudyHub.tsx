@@ -4080,7 +4080,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               (Same pattern as LessonScreen's theory slides.) */}
           <WhiteboardShell
             topRightSlot={
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+              // paddingInline clears the board's 36px corner brackets (they sit
+              // at inset 5 and paint at z-index 61, ON TOP of content — the
+              // counter was being cut in half by the top-left one).
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', paddingInline: boardFullBleed ? 22 : 0 }}>
                 <HierarchyBreadcrumb topicId={selectedTopic || ''} />
                 {/* Question counter — lives on the board itself now that the
                     navy strip is gone, written in the board's own hand. */}
@@ -4088,10 +4091,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   <span style={{
                     marginInlineStart: 'auto',
                     fontFamily: 'var(--ws-hand)',
-                    fontSize: bigBoard ? 19 : 15,
+                    fontSize: bigBoard ? 21 : 17,
                     fontWeight: 700,
                     color: 'var(--sh-text-dark)',
-                    opacity: 0.8,
+                    opacity: 0.85,
                     whiteSpace: 'nowrap',
                   }}>
                     שאלה {currentQ + 1} / {total}
@@ -4199,7 +4202,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               {/* Handwritten stem on the board (Playpen Sans Hebrew, same hand
                   as the mind-map). KaTeX inside MathText keeps its own font —
                   math must stay math, and it stays LTR-isolated. */}
-              <div style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: bigBoard ? 24 : 19, color: 'var(--sh-q-text-color)', lineHeight: boardFullBleed ? 1.85 : 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: bigBoard ? 20 : 16, width: '100%' }}>
+              {/* Gveret Levin sits smaller on the line than a print face, so
+                  the hand sizes run ~3px larger than the sans equivalents. */}
+              <div style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: bigBoard ? 27 : (boardFullBleed ? 21 : 19), color: 'var(--sh-q-text-color)', lineHeight: boardFullBleed ? 1.75 : 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: bigBoard ? 20 : 16, width: '100%' }}>
                 <MathText text={q.text} />
               </div>
 
@@ -4259,7 +4264,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           borderRadius: bigBoard ? 14 : 10,
                           color,
                           fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif",
-                          fontSize: bigBoard ? 18 : 15,
+                          fontSize: bigBoard ? 21 : (boardFullBleed ? 18 : 15),
                           fontWeight: 500,
                           cursor: revealed ? 'default' : 'pointer',
                           textAlign: 'center',
@@ -4275,7 +4280,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                           minWidth: bigBoard ? 40 : 32, height: bigBoard ? 40 : 32, borderRadius: 20,
                           background: '#D4AF37', color: '#fff',
-                          fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Inter', sans-serif", fontWeight: 700, fontSize: bigBoard ? 18 : 15,
+                          fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Inter', sans-serif", fontWeight: 700, fontSize: bigBoard ? 21 : 15,
                           flexShrink: 0,
                         }}>
                           {letter}
@@ -4306,7 +4311,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                       <div style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Rubik', sans-serif", fontWeight: 700, fontSize: boardFullBleed ? 16 : 14, color: '#1E7E34' }}>✓ נכון! הנה למה:</div>
                       <ArsenalQuizCaptureChip explanation={(q as any).answer} topicId={selectedTopic} />
                     </div>
-                    <div style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: bigBoard ? 17 : 15, color: TEXT_DARK, lineHeight: 1.85, whiteSpace: 'pre-wrap' }}><MathText text={(q as any).answer} /></div>
+                    <div style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: bigBoard ? 19 : (boardFullBleed ? 17 : 15), color: TEXT_DARK, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}><MathText text={(q as any).answer} /></div>
                   </div>
                 ) : null}
                 </>
@@ -4554,6 +4559,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               gap: 12,
               paddingTop: 14,
+              // Same corner-bracket clearance as the header band — the bottom
+              // brackets and the marker tray paint over this row otherwise.
+              paddingInline: 22,
               // Fade so scrolled text doesn't run into the buttons.
               background: 'linear-gradient(180deg, rgba(252,253,255,0) 0%, #FCFDFF 45%)',
             }}>
@@ -4572,7 +4580,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   padding: bigBoard ? '9px 22px' : '8px 16px',
                   cursor: isFirstQ ? 'default' : 'pointer',
                   fontFamily: 'var(--ws-hand)',
-                  fontSize: bigBoard ? 17 : 15, fontWeight: 700,
+                  fontSize: bigBoard ? 19 : 17, fontWeight: 700,
                   minHeight: 44,
                 }}
               >
@@ -4592,7 +4600,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   padding: bigBoard ? '10px 30px' : '9px 22px',
                   cursor: 'pointer',
                   fontFamily: 'var(--ws-hand)',
-                  fontSize: bigBoard ? 18 : 15, fontWeight: 700,
+                  fontSize: bigBoard ? 20 : 17, fontWeight: 700,
                   minHeight: 44,
                   boxShadow: '0 2px 10px rgba(212,175,55,0.40)',
                 }}
