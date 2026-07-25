@@ -18,6 +18,11 @@
   line-height: 1.5;
   font-weight: 400;
 
+  /* Handwriting face for anything drawn ON a whiteboard surface (practice
+     questions, board labels). Mirrors --mm-hand in public/mindmap.html so the
+     app and the mind-map canvas share one hand. */
+  --ws-hand: 'Playpen Sans Hebrew', 'Assistant', sans-serif;
+
   /* Bottom-left FAB slot tokens — shared between TutorFAB (fixed) and the
      sidebar's PomodoroTimer (absolute). Keep these in sync if you move one. */
   --ws-bottom-fab-inset: 20px;          /* matches Tailwind `bottom-5 left-5` */

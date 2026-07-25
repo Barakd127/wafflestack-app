@@ -1086,21 +1086,39 @@ function ArsenalQuizCaptureChip({ explanation, topicId }: { explanation: string;
 
 // Small inline badge shown next to "שאלה X / Y" in the active quiz card —
 // communicates the current question's difficulty level and XP reward at a glance.
-function QuizDifficultyBadge({ level, xp }: { level: 'easy' | 'medium' | 'hard'; xp: number }) {
-  const cfg: Record<string, { label: string; bg: string; color: string }> = {
-    easy:   { label: 'קל',     bg: 'rgba(16,185,129,0.22)', color: '#a7f3d0' },
-    medium: { label: 'בינוני', bg: 'rgba(245,158,11,0.22)', color: '#fde68a' },
-    hard:   { label: 'מאתגר',  bg: 'rgba(239,68,68,0.22)',  color: '#fecaca' },
+/**
+ * Difficulty chip. `tone` matters: the original palette is pale-on-translucent,
+ * readable only on the dark navy strip. Since the chip also sits in the light
+ * top bar (2026-07-25), 'light' swaps to dark ink on a tinted fill.
+ * `showXp={false}` when the XP chip is already next to it.
+ */
+function QuizDifficultyBadge({ level, xp, tone = 'dark', showXp = true }: {
+  level: 'easy' | 'medium' | 'hard'
+  xp: number
+  tone?: 'dark' | 'light'
+  showXp?: boolean
+}) {
+  const onDark: Record<string, { label: string; bg: string; color: string; border: string }> = {
+    easy:   { label: 'קל',     bg: 'rgba(16,185,129,0.22)', color: '#a7f3d0', border: 'transparent' },
+    medium: { label: 'בינוני', bg: 'rgba(245,158,11,0.22)', color: '#fde68a', border: 'transparent' },
+    hard:   { label: 'מאתגר',  bg: 'rgba(239,68,68,0.22)',  color: '#fecaca', border: 'transparent' },
   }
+  const onLight: Record<string, { label: string; bg: string; color: string; border: string }> = {
+    easy:   { label: 'קל',     bg: 'rgba(16,185,129,0.14)', color: '#0F7A5A', border: 'rgba(16,185,129,0.45)' },
+    medium: { label: 'בינוני', bg: 'rgba(245,158,11,0.14)', color: '#8A5A00', border: 'rgba(245,158,11,0.45)' },
+    hard:   { label: 'מאתגר',  bg: 'rgba(239,68,68,0.12)',  color: '#A32B22', border: 'rgba(239,68,68,0.40)' },
+  }
+  const cfg = tone === 'light' ? onLight : onDark
   const c = cfg[level] ?? cfg.medium
   return (
     <span style={{
       marginInlineStart: 8,
       background: c.bg,
       color: c.color,
+      border: `1px solid ${c.border}`,
       borderRadius: 10,
       padding: '2px 8px',
-      fontSize: 11,
+      fontSize: tone === 'light' ? 12 : 11,
       fontWeight: 700,
       letterSpacing: 0.3,
       display: 'inline-flex',
@@ -1108,7 +1126,7 @@ function QuizDifficultyBadge({ level, xp }: { level: 'easy' | 'medium' | 'hard';
       gap: 6,
     }}>
       <span>{c.label}</span>
-      <span style={{ opacity: 0.7, fontSize: 10 }}>+{xp} XP</span>
+      {showXp && <span style={{ opacity: 0.7, fontSize: 10 }}>+{xp} XP</span>}
     </span>
   )
 }
@@ -3310,7 +3328,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   // scales the type/controls drawn on it so the extra room is actually used.
   // Per user 2026-07-25: "way too small … drop the outside card, extract the
   // whiteboard and increase its width and length".
-  const boardFullBleed = tab === 'none' && !isDone
+  // floatMode is excluded: there the card lives in a 420px fixed window that
+  // still needs its own draggable header strip.
+  const boardFullBleed = tab === 'none' && !isDone && !floatMode
   const bigBoard = boardFullBleed && !isMobile
 
   return (
@@ -3568,6 +3588,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         <div className="ws-quiz-topic" style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: TEXT_DARK }}>
           <span style={{ fontWeight: 700 }}>סטטיסטיקה</span>{!isDone && ` | ${q.topic}`}
         </div>
+        {/* Difficulty chip — relocated here 2026-07-25 when the navy strip
+            over the board was removed. The top bar is the single source of
+            truth for question metadata, so difficulty joins the XP chip. */}
+        {!isDone && boardFullBleed && (q as any).difficulty && (
+          <QuizDifficultyBadge level={(q as any).difficulty} xp={q.xp} tone="light" showXp={false} />
+        )}
         {/* XP-per-question chip (moved here from inside question card per
             user request — keeps card lighter, header is the single source
             of truth for question metadata) */}
@@ -3581,6 +3607,25 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             fontFamily: "'Rubik', sans-serif",
             fontSize: 12, fontWeight: 700,
           }}>+{q.xp} XP ⭐</div>
+        )}
+        {/* Float toggle — also relocated out of the removed navy strip; it
+            sits next to the fullscreen toggle since both change the frame
+            the question is shown in. */}
+        {!isDone && !isMobile && boardFullBleed && (
+          <button
+            onClick={() => setFloatMode(true)}
+            aria-label="נתק לחלון צף"
+            title="נתק לחלון צף נגרר"
+            style={{
+              background: 'rgba(127,155,217,0.10)',
+              border: '1px solid rgba(127,155,217,0.30)',
+              color: TEXT_DARK,
+              borderRadius: 8, padding: '6px 10px',
+              cursor: 'pointer', fontFamily: "'Rubik', sans-serif",
+              fontSize: 12, fontWeight: 700,
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}
+          >⤢ צף</button>
         )}
         {/* Fullscreen toggle — distraction-free practice; parent hides sidebar+topbar */}
         {onToggleFullscreen && !isMobile && (
@@ -3898,18 +3943,22 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           }>
             {/* Card header strip — labeled prev/next buttons (same UX as
                 LessonScreen) + question counter + difficulty + chip-collapse.
-                Also serves as drag handle when floatMode is on. */}
+                Also serves as drag handle when floatMode is on.
+                REMOVED on the full-bleed board (2026-07-25): a navy bar across
+                the top of a whiteboard reads as app chrome, not as a board.
+                Its parts moved out — counter to the board's own header band,
+                prev/next to the board's footer, difficulty + ⤢ צף to the top
+                bar. It still renders for the split pane, the mobile sheet and
+                the floating window, which have no other header. */}
+            {!boardFullBleed && (
             <div
               onMouseDown={onFloatHeaderMouseDown}
               style={{
                 background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
-                color: '#fff', padding: boardFullBleed ? '10px 16px' : '10px 14px',
+                color: '#fff', padding: '10px 14px',
                 display: 'flex', alignItems: 'center', gap: 8,
-                fontFamily: "'Rubik', sans-serif", fontSize: boardFullBleed ? 15 : 14, fontWeight: 600,
+                fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
                 flexShrink: 0,
-                // Calm mode: the strip is the board's own cap, so round its top
-                // corners itself (there's no card left to clip it).
-                borderRadius: boardFullBleed ? '16px 16px 0 0' : undefined,
                 cursor: (tab !== 'none' && !isMobile) ? 'move' : 'default',
                 userSelect: (tab !== 'none' && !isMobile) ? 'none' : undefined,
               }}>
@@ -4002,6 +4051,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 </button>
               )}
             </div>
+            )}
 
             {/* Card body — height/scroll scales with mode.
                 Calm mode: zero padding + no height cap; the WhiteboardShell
@@ -4029,7 +4079,26 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               hierarchy breadcrumb is pinned in the board's top-right corner.
               (Same pattern as LessonScreen's theory slides.) */}
           <WhiteboardShell
-            topRightSlot={<HierarchyBreadcrumb topicId={selectedTopic || ''} />}
+            topRightSlot={
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+                <HierarchyBreadcrumb topicId={selectedTopic || ''} />
+                {/* Question counter — lives on the board itself now that the
+                    navy strip is gone, written in the board's own hand. */}
+                {boardFullBleed && !isDone && (
+                  <span style={{
+                    marginInlineStart: 'auto',
+                    fontFamily: 'var(--ws-hand)',
+                    fontSize: bigBoard ? 19 : 15,
+                    fontWeight: 700,
+                    color: 'var(--sh-text-dark)',
+                    opacity: 0.8,
+                    whiteSpace: 'nowrap',
+                  }}>
+                    שאלה {currentQ + 1} / {total}
+                  </span>
+                )}
+              </div>
+            }
             style={boardFullBleed
               ? {
                   flex: 1,
@@ -4039,10 +4108,17 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   // so flex:1 would collapse the board to 0 — pin a viewport
                   // -relative floor there instead.
                   minHeight: isMobile ? 'calc(100dvh - 240px)' : 0,
-                  borderRadius: '0 0 18px 18px',
+                  // All four corners now that no strip caps the top.
+                  borderRadius: 18,
                 }
               : undefined}
           >
+          {/* Full-bleed board: flex column + minHeight 100% so the footer nav
+              (below) sits on the bottom edge of the board when the question is
+              short, and directly after the content when it's long. */}
+          <div style={boardFullBleed
+            ? { display: 'flex', flexDirection: 'column', minHeight: '100%' }
+            : undefined}>
           {isDone ? (
             /* ── Completion panel ── */
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 0', gap: 18 }}>
@@ -4120,7 +4196,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 </div>
               )}
 
-              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 25 : 19, color: 'var(--sh-q-text-color)', lineHeight: 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: bigBoard ? 20 : 16, width: '100%' }}>
+              {/* Handwritten stem on the board (Playpen Sans Hebrew, same hand
+                  as the mind-map). KaTeX inside MathText keeps its own font —
+                  math must stay math, and it stays LTR-isolated. */}
+              <div style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: bigBoard ? 24 : 19, color: 'var(--sh-q-text-color)', lineHeight: boardFullBleed ? 1.85 : 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: bigBoard ? 20 : 16, width: '100%' }}>
                 <MathText text={q.text} />
               </div>
 
@@ -4179,8 +4258,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           border: `2.5px solid ${border}`,
                           borderRadius: bigBoard ? 14 : 10,
                           color,
-                          fontFamily: "'Assistant', sans-serif",
-                          fontSize: bigBoard ? 19 : 15,
+                          fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif",
+                          fontSize: bigBoard ? 18 : 15,
                           fontWeight: 500,
                           cursor: revealed ? 'default' : 'pointer',
                           textAlign: 'center',
@@ -4196,7 +4275,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                           minWidth: bigBoard ? 40 : 32, height: bigBoard ? 40 : 32, borderRadius: 20,
                           background: '#D4AF37', color: '#fff',
-                          fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: bigBoard ? 18 : 15,
+                          fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Inter', sans-serif", fontWeight: 700, fontSize: bigBoard ? 18 : 15,
                           flexShrink: 0,
                         }}>
                           {letter}
@@ -4216,7 +4295,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   })}
                 </div>
                 {mcSelected === null && (
-                  <div style={{ textAlign: 'center', fontSize: 12, color: 'rgba(31,62,108,0.55)', marginBottom: 10, fontFamily: "'Assistant', sans-serif" }} dir="rtl">💡 אפשר גם במקלדת — לחצו A–D או 1–4</div>
+                  <div style={{ textAlign: 'center', fontSize: boardFullBleed ? 13 : 12, color: 'rgba(31,62,108,0.55)', marginBottom: 10, fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif" }} dir="rtl">💡 אפשר גם במקלדת — לחצו A–D או 1–4</div>
                 )}
                 {/* Reinforcement on a CORRECT answer — show the explanation.
                     Was missing: correct answers auto-skipped with zero learning,
@@ -4224,10 +4303,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 {mcSelected !== null && mcSelected === (q as any).correctIndex && (q as any).answer ? (
                   <div style={{ maxWidth: bigBoard ? 1180 : 640, margin: '0 auto 14px', background: 'linear-gradient(135deg, rgba(52,168,83,0.12), rgba(52,168,83,0.05))', border: '1.5px solid rgba(52,168,83,0.4)', borderRadius: 12, padding: bigBoard ? '16px 22px' : '12px 16px', textAlign: 'right', direction: 'rtl' }} dir="rtl">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 14, color: '#1E7E34' }}>✓ נכון! הנה למה:</div>
+                      <div style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Rubik', sans-serif", fontWeight: 700, fontSize: boardFullBleed ? 16 : 14, color: '#1E7E34' }}>✓ נכון! הנה למה:</div>
                       <ArsenalQuizCaptureChip explanation={(q as any).answer} topicId={selectedTopic} />
                     </div>
-                    <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 18 : 15, color: TEXT_DARK, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}><MathText text={(q as any).answer} /></div>
+                    <div style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: bigBoard ? 17 : 15, color: TEXT_DARK, lineHeight: 1.85, whiteSpace: 'pre-wrap' }}><MathText text={(q as any).answer} /></div>
                   </div>
                 ) : null}
                 </>
@@ -4304,7 +4383,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_LIGHT, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleSkip}>דלג</span>
+                <span style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: 16, color: TEXT_LIGHT, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleSkip}>דלג</span>
 
                 {/* Dots — clickable navigation */}
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -4355,13 +4434,17 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             <>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>+{q.xp} XP ⭐ אם נכון</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>שאלה {currentQ + 1} / {total}</div>
+                {/* Counter hidden on the full-bleed board — it's written in the
+                    board's header band instead. */}
+                {!boardFullBleed && (
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>שאלה {currentQ + 1} / {total}</div>
+                )}
               </div>
 
               {/* User's answer */}
               <div style={{ marginBottom: 16 }}>
                 <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT, marginBottom: 6, textAlign: 'right' }}>התשובה שלך:</div>
-                <div style={{ background: 'var(--sh-answer-bg)', borderRadius: 10, padding: '12px 16px', border: '1.5px solid var(--sh-answer-border)', fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK, lineHeight: 1.7, whiteSpace: 'pre-wrap', textAlign: 'right' }}>
+                <div style={{ background: 'var(--sh-answer-bg)', borderRadius: 10, padding: '12px 16px', border: '1.5px solid var(--sh-answer-border)', fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK, lineHeight: 1.8, whiteSpace: 'pre-wrap', textAlign: 'right' }}>
                   {answer}
                 </div>
               </div>
@@ -4375,7 +4458,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 <div
                   data-arsenal-source="quiz"
                   data-arsenal-topic={selectedTopic || ''}
-                  style={{ background: 'linear-gradient(135deg, rgba(52,168,83,0.08), rgba(52,168,83,0.04))', borderRadius: 10, padding: bigBoard ? '18px 22px' : '14px 18px', border: '1.5px solid rgba(52,168,83,0.3)', fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 20 : 17, color: TEXT_DARK, lineHeight: 1.9, whiteSpace: 'pre-wrap', textAlign: 'right' }}
+                  style={{ background: 'linear-gradient(135deg, rgba(52,168,83,0.08), rgba(52,168,83,0.04))', borderRadius: 10, padding: bigBoard ? '18px 22px' : '14px 18px', border: '1.5px solid rgba(52,168,83,0.3)', fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: bigBoard ? 19 : 17, color: TEXT_DARK, lineHeight: 1.9, whiteSpace: 'pre-wrap', textAlign: 'right' }}
                 >
                   {q.answer}
                 </div>
@@ -4457,6 +4540,68 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               )}
             </>
           )}
+
+          {/* ── Board footer nav — the other half of the deleted navy strip.
+               Sticks to the bottom edge of the board (marginTop:auto pushes it
+               there when the question is short; sticky keeps it in view while a
+               long stem scrolls). Chalk-ish buttons so it reads as part of the
+               board, not as app chrome. ── */}
+          {boardFullBleed && !isDone && (
+            <div style={{
+              marginTop: 'auto',
+              position: 'sticky',
+              bottom: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              gap: 12,
+              paddingTop: 14,
+              // Fade so scrolled text doesn't run into the buttons.
+              background: 'linear-gradient(180deg, rgba(252,253,255,0) 0%, #FCFDFF 45%)',
+            }}>
+              <button
+                onClick={navPrev}
+                /* aria-disabled (not HTML disabled) keeps it discoverable by
+                   keyboard/SR; navPrev already no-ops on the first question. */
+                aria-disabled={isFirstQ || undefined}
+                aria-label="שאלה קודמת"
+                title={isFirstQ ? 'זו השאלה הראשונה' : 'הקודם'}
+                style={{
+                  background: 'transparent',
+                  color: isFirstQ ? 'rgba(31,62,108,0.30)' : 'var(--sh-text-dark)',
+                  border: `2px solid ${isFirstQ ? 'rgba(31,62,108,0.15)' : 'rgba(31,62,108,0.35)'}`,
+                  borderRadius: 22,
+                  padding: bigBoard ? '9px 22px' : '8px 16px',
+                  cursor: isFirstQ ? 'default' : 'pointer',
+                  fontFamily: 'var(--ws-hand)',
+                  fontSize: bigBoard ? 17 : 15, fontWeight: 700,
+                  minHeight: 44,
+                }}
+              >
+                → הקודם
+              </button>
+
+              <button
+                data-tour="practice-btn"
+                onClick={navNext}
+                aria-label={isLastQ ? 'סיים את הסשן' : 'שאלה הבאה'}
+                title={isLastQ ? 'סיום' : 'הבא — בלי לענות ובלי להיחשב טעות'}
+                style={{
+                  background: '#D4AF37',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 22,
+                  padding: bigBoard ? '10px 30px' : '9px 22px',
+                  cursor: 'pointer',
+                  fontFamily: 'var(--ws-hand)',
+                  fontSize: bigBoard ? 18 : 15, fontWeight: 700,
+                  minHeight: 44,
+                  boxShadow: '0 2px 10px rgba(212,175,55,0.40)',
+                }}
+              >
+                {isLastQ ? 'סיום 🏆' : 'הבא ←'}
+              </button>
+            </div>
+          )}
+          </div>
           </WhiteboardShell>
 
             </div>
