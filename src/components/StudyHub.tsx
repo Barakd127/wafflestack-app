@@ -3094,10 +3094,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   }
 
   // Quiz prev/next — same UX as LessonScreen. 'הקודם' goes back if there's a
-  // previous question (always navigable since it's already been seen). 'הבא'
-  // jumps forward but only to questions the user has already reached
-  // (otherwise it would skip unread material). On the LAST answered question
-  // it falls back to handleSkip so 'הבא' always advances something.
+  // previous question (always navigable since it's already been seen).
+  // 'הבא' is PURE NAVIGATION (per user 2026-07-25): it moves on without the
+  // current question being answered, graded or penalised for you. An untouched
+  // question stays 'empty' (revisitable, never counted wrong) and the combo
+  // streak survives — only the explicit 'דלג' link breaks it. On the last
+  // question 'הבא' ends the session instead of being disabled.
   const isFirstQ = currentQ === 0
   const isLastQ = currentQ === total - 1
   const canGoNextQ =
@@ -3105,8 +3107,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     dotStates[currentQ + 1] !== 'empty' // already visited
   const navPrev = () => { if (!isFirstQ) navigateToQuestion(currentQ - 1) }
   const navNext = () => {
-    if (canGoNextQ) navigateToQuestion(currentQ + 1)
-    else if (!isLastQ) handleSkip() // unseen → mark current as skipped and advance
+    // Already-visited target → restore its saved answer / review state.
+    if (canGoNextQ) { navigateToQuestion(currentQ + 1); return }
+    // Keep any draft the user typed so coming back doesn't lose it.
+    if (answer.trim()) setUserAnswers(prev => ({ ...prev, [currentQ]: answer }))
+    const next = [...dotStates]
+    if (next[currentQ] === 'current') next[currentQ] = 'empty'
+    setDotStates(next)
+    goNext(next)   // past the last question this finishes the session
   }
 
   const handleSelfAssess = (correct: boolean) => {
@@ -3126,19 +3134,22 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       setXpBurst(xpReward)
     }
 
-    if (correct) {
-      setTimeout(() => goNext(next), 900)
-    } else {
-      // Wrong answer — open Mistake Autopsy before advancing
+    if (!correct) {
+      // Wrong answer — open Mistake Autopsy. Advancing stays the user's call.
       setAutopsyDots(next)
       setAutopsyOpen(true)
     }
+    // Correct: NO auto-advance. The review panel switches to its
+    // "already assessed" state (result chip + הקודם / הבא / סיום), so the user
+    // reads the solution and moves on when ready. Per user 2026-07-25.
   }
 
   const handleAutopsyDone = (tag: ErrorTag | null) => {
     setAutopsyOpen(false)
     if (tag && q) recordErrorTag(q.id, tag)
-    setTimeout(() => goNext(autopsyDots ?? dotStates), 500)
+    if (autopsyDots) setDotStates(autopsyDots)
+    // No auto-advance — closing the autopsy returns to the question with the
+    // right answer revealed; 'הבא ←' moves on.
   }
 
   const handleQuizComplete = () => {
@@ -3260,18 +3271,16 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
 
     if (correct && xpReward > 0) setXpBurst(xpReward)
 
-    if (correct) {
-      // Give time to READ the explanation we now reveal on correct answers
-      // (was a 900ms blink-and-skip). The "שאלה הבאה" button advances sooner.
-      const hasExplain = !!(q as any).answer
-      setTimeout(() => goNext(nextDots), hasExplain ? 4500 : 900)
-    } else {
+    if (!correct) {
       // Wrong — keep feedback visible briefly, then open Mistake Autopsy
       setTimeout(() => {
         setAutopsyDots(nextDots)
         setAutopsyOpen(true)
       }, 900)
     }
+    // Correct: the explanation stays on the board and we do NOT jump on our own
+    // (was a 4.5s auto-advance that yanked the question away mid-read).
+    // 'הבא ←' in the header is the only thing that moves the session forward.
   }
 
   // Keyboard answering for MCQ: press A–D or 1–4 to choose (matches the letter
@@ -3295,6 +3304,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   }, [q, mcSelected])
 
   const isDone = phase === 'done'
+
+  // Calm mode (no companion tool, mid-session) = the whiteboard IS the page:
+  // no outer card, board stretched to the full content area. bigBoard also
+  // scales the type/controls drawn on it so the extra room is actually used.
+  // Per user 2026-07-25: "way too small … drop the outside card, extract the
+  // whiteboard and increase its width and length".
+  const boardFullBleed = tab === 'none' && !isDone
+  const bigBoard = boardFullBleed && !isMobile
 
   return (
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }} dir="rtl">
@@ -3656,7 +3673,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           Tab none:   flex:0 0 auto + column-reverse so the container is
             only as tall as its content (tabs + quiz card touching).
           Per user 2026-05-24 (7th flag of this issue). */}
-      <div ref={contentRowRef} style={{ flex: (tab === 'none' && !isDone) ? '0 0 auto' : 1, display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end', overflow: (tab === 'none' && !isDone) ? 'visible' : 'hidden', minHeight: 0, background: 'var(--sh-page-bg)', position: 'relative' }}>
+      {/* 2026-07-25: in calm mode the container now DOES take flex:1 — the
+          whiteboard itself fills the leftover height (the old dead-band worry
+          is gone because the quiz pane, not a spacer, owns that space). */}
+      <div ref={contentRowRef} style={{ flex: 1, display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end', overflow: 'hidden', minHeight: 0, background: 'var(--sh-page-bg)', position: 'relative' }}>
 
         {/* ── Companion tool ── */}
         {!isDone && tab !== 'none' && (
@@ -3795,7 +3815,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             // were getting cropped (option D invisible). Internal scroll
             // on the inner card if needed.
             ? { flexShrink: 0, zIndex: 2, display: 'flex', flexDirection: 'column', maxHeight: 'min(56vh, 520px)', overflow: 'hidden' }
-            : tab === 'none' || isDone
+            : boardFullBleed
+            // Calm mode: the pane GROWS to fill everything under the tab chips
+            // so the whiteboard gets the whole content area (was a 6px-padded
+            // shrink-to-fit strip holding a 720px card).
+            ? { flex: 1, minHeight: 0, padding: bigBoard ? '4px 20px 10px' : '4px 8px 8px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
+            : isDone
             // Padding tightened per user 2026-05-24 — was 18px top / 12px bot
             // creating a big empty gap between the companion-tab chips above
             // and the quiz card. Now 6/6.
@@ -3835,7 +3860,23 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   maxHeight: 'min(56vh, 520px)',
                   minHeight: '180px',
                 }
-              : tab === 'none' || isDone
+              : boardFullBleed
+              ? {
+                  // The outer card is GONE in calm mode — no white box, no
+                  // border, no shadow. What's left is the nav strip + the
+                  // whiteboard, stretched to the full pane.
+                  width: '100%',
+                  maxWidth: bigBoard ? 1600 : '100%',
+                  height: '100%',
+                  minHeight: 0,
+                  background: 'transparent',
+                  border: 'none',
+                  boxShadow: 'none',
+                  borderRadius: 0,
+                  overflow: 'hidden',
+                  display: 'flex', flexDirection: 'column',
+                }
+              : isDone
               ? {
                   width: 'min(720px, 100%)',
                   background: 'transparent',
@@ -3862,10 +3903,13 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               onMouseDown={onFloatHeaderMouseDown}
               style={{
                 background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
-                color: '#fff', padding: '10px 14px',
+                color: '#fff', padding: boardFullBleed ? '10px 16px' : '10px 14px',
                 display: 'flex', alignItems: 'center', gap: 8,
-                fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
+                fontFamily: "'Rubik', sans-serif", fontSize: boardFullBleed ? 15 : 14, fontWeight: 600,
                 flexShrink: 0,
+                // Calm mode: the strip is the board's own cap, so round its top
+                // corners itself (there's no card left to clip it).
+                borderRadius: boardFullBleed ? '16px 16px 0 0' : undefined,
                 cursor: (tab !== 'none' && !isMobile) ? 'move' : 'default',
                 userSelect: (tab !== 'none' && !isMobile) ? 'none' : undefined,
               }}>
@@ -3902,21 +3946,19 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 <button
                   data-tour="practice-btn"
                   onClick={navNext}
-                  disabled={isLastQ && !canGoNextQ}
-                  aria-label="שאלה הבאה"
-                  title={canGoNextQ ? 'הבא' : 'דלג והבא'}
+                  aria-label={isLastQ ? 'סיים את הסשן' : 'שאלה הבאה'}
+                  title={isLastQ ? 'סיום' : 'הבא — בלי לענות ובלי להיחשב טעות'}
                   style={{
                     background: '#D4AF37',
                     color: '#fff',
                     border: 'none',
                     borderRadius: 8, padding: '5px 14px',
-                    cursor: (isLastQ && !canGoNextQ) ? 'not-allowed' : 'pointer',
+                    cursor: 'pointer',
                     fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
-                    opacity: (isLastQ && !canGoNextQ) ? 0.45 : 1,
                     boxShadow: '0 2px 8px rgba(212,175,55,0.35)',
                   }}
                 >
-                  הבא ←
+                  {isLastQ ? 'סיום 🏆' : 'הבא ←'}
                 </button>
               )}
               {/* ⤢ button: only show when tab=none (manual float toggle) */}
@@ -3961,8 +4003,18 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               )}
             </div>
 
-            {/* Card body — height/scroll scales with mode */}
-            <div style={{
+            {/* Card body — height/scroll scales with mode.
+                Calm mode: zero padding + no height cap; the WhiteboardShell
+                below fills it and owns the scrolling (its own inset content
+                column), so the board reaches the edges of the pane. */}
+            <div style={boardFullBleed ? {
+              padding: 0,
+              flex: 1,
+              minHeight: 0,
+              overflow: 'hidden',
+              display: 'flex',
+              paddingBottom: isMobile ? 'calc(56px + env(safe-area-inset-bottom))' : 0,
+            } : {
               padding: '20px 22px 18px',
               maxHeight: (!isMobile && !floatMode && tab !== 'none' && !isDone) ? 'none' : (floatMode || (isMobile && tab !== 'none' && !isDone)) ? 'calc(100vh - 280px)' : 'min(60vh, 520px)',
               overflowY: 'auto',
@@ -3976,7 +4028,21 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           {/* Question content is drawn directly on a whiteboard surface — the
               hierarchy breadcrumb is pinned in the board's top-right corner.
               (Same pattern as LessonScreen's theory slides.) */}
-          <WhiteboardShell topRightSlot={<HierarchyBreadcrumb topicId={selectedTopic || ''} />}>
+          <WhiteboardShell
+            topRightSlot={<HierarchyBreadcrumb topicId={selectedTopic || ''} />}
+            style={boardFullBleed
+              ? {
+                  flex: 1,
+                  height: 'auto',
+                  // Desktop: the flex chain above has a definite height, so
+                  // flex:1 alone fills it. Mobile: that chain is content-sized,
+                  // so flex:1 would collapse the board to 0 — pin a viewport
+                  // -relative floor there instead.
+                  minHeight: isMobile ? 'calc(100dvh - 240px)' : 0,
+                  borderRadius: '0 0 18px 18px',
+                }
+              : undefined}
+          >
           {isDone ? (
             /* ── Completion panel ── */
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 0', gap: 18 }}>
@@ -3989,10 +4055,19 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#34A853' }}>{correctCount}</div>
                   <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>נכון</div>
                 </div>
+                {/* "לשיפור" counts only questions you actually ANSWERED wrong.
+                    Questions you moved past unanswered are reported separately
+                    as "דילגת" — free forward nav must not look like failure. */}
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#EA4335' }}>{total - correctCount}</div>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#EA4335' }}>{answeredCount - correctCount}</div>
                   <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>לשיפור</div>
                 </div>
+                {total - answeredCount > 0 && (
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: TEXT_LIGHT }}>{total - answeredCount}</div>
+                    <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>דילגת</div>
+                  </div>
+                )}
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#D4AF37' }}>
                     {questions.filter((_: any, i: number) => dotStates[i] === 'correct').reduce((s: number, q: any) => s + q.xp, 0)}
@@ -4000,10 +4075,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>XP הרווחת</div>
                 </div>
               </div>
-              {/* Accuracy headline */}
-              {total > 0 && (
+              {/* Accuracy headline — out of the questions you answered, not out
+                  of the whole set (skipping shouldn't tank the number). */}
+              {answeredCount > 0 && (
                 <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 15, color: TEXT_LIGHT, marginTop: -4 }}>
-                  דיוק: <span style={{ fontWeight: 800, color: correctCount / total >= 0.7 ? '#34A853' : '#D4AF37' }}>{Math.round((correctCount / total) * 100)}%</span>
+                  דיוק: <span style={{ fontWeight: 800, color: correctCount / answeredCount >= 0.7 ? '#34A853' : '#D4AF37' }}>{Math.round((correctCount / answeredCount) * 100)}%</span>
+                  <span style={{ opacity: 0.75 }}> ({correctCount}/{answeredCount} שנענו)</span>
                 </div>
               )}
               <div style={{ display: 'flex', gap: 12, marginTop: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -4034,11 +4111,16 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               {/* Question title — full width, no XP chip here (moved into
                   outer ws-quiz-topbar). User asked for fewer competing chips
                   on the question card itself. */}
-              <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 18, color: TEXT_DARK, marginBottom: 10, textAlign: 'right' }}>
-                שאלה {currentQ + 1} / {total}
-              </div>
+              {/* Counter suppressed on the full-bleed board — the nav strip
+                  directly above already reads "שאלה X / Y"; two of them just
+                  ate ~44px of board height. */}
+              {!boardFullBleed && (
+                <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 18, color: TEXT_DARK, marginBottom: 10, textAlign: 'right' }}>
+                  שאלה {currentQ + 1} / {total}
+                </div>
+              )}
 
-              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 19, color: 'var(--sh-q-text-color)', lineHeight: 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: 16, width: '100%' }}>
+              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 25 : 19, color: 'var(--sh-q-text-color)', lineHeight: 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: bigBoard ? 20 : 16, width: '100%' }}>
                 <MathText text={q.text} />
               </div>
 
@@ -4048,7 +4130,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                      2026-05-24: max-width + auto margins to center the grid
                      so answers don't push right of the question text. ── */
                 <>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14, maxWidth: 640, marginInline: 'auto', placeItems: 'stretch', justifyItems: 'stretch' }} dir="rtl">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: bigBoard ? 16 : 10, marginBottom: 14, maxWidth: bigBoard ? 1180 : 640, marginInline: 'auto', placeItems: 'stretch', justifyItems: 'stretch' }} dir="rtl">
                   {((q as any).options as string[]).map((opt: string, idx: number) => {
                     const correctIdx: number = (q as any).correctIndex
                     const isChosen = mcSelected === idx
@@ -4091,14 +4173,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         disabled={revealed}
                         style={{
                           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
-                          minHeight: 44,
-                          padding: '10px 16px',
+                          minHeight: bigBoard ? 76 : 44,
+                          padding: bigBoard ? '16px 22px' : '10px 16px',
                           background: bg,
                           border: `2.5px solid ${border}`,
-                          borderRadius: 10,
+                          borderRadius: bigBoard ? 14 : 10,
                           color,
                           fontFamily: "'Assistant', sans-serif",
-                          fontSize: 15,
+                          fontSize: bigBoard ? 19 : 15,
                           fontWeight: 500,
                           cursor: revealed ? 'default' : 'pointer',
                           textAlign: 'center',
@@ -4112,9 +4194,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         {/* RTL primary corner = right side → letter pill comes FIRST in DOM */}
                         <span style={{
                           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          minWidth: 32, height: 32, borderRadius: 16,
+                          minWidth: bigBoard ? 40 : 32, height: bigBoard ? 40 : 32, borderRadius: 20,
                           background: '#D4AF37', color: '#fff',
-                          fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 15,
+                          fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: bigBoard ? 18 : 15,
                           flexShrink: 0,
                         }}>
                           {letter}
@@ -4140,12 +4222,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     Was missing: correct answers auto-skipped with zero learning,
                     despite the setup screen promising "הסבר על כל שאלה". */}
                 {mcSelected !== null && mcSelected === (q as any).correctIndex && (q as any).answer ? (
-                  <div style={{ maxWidth: 640, margin: '0 auto 14px', background: 'linear-gradient(135deg, rgba(52,168,83,0.12), rgba(52,168,83,0.05))', border: '1.5px solid rgba(52,168,83,0.4)', borderRadius: 12, padding: '12px 16px', textAlign: 'right', direction: 'rtl' }} dir="rtl">
+                  <div style={{ maxWidth: bigBoard ? 1180 : 640, margin: '0 auto 14px', background: 'linear-gradient(135deg, rgba(52,168,83,0.12), rgba(52,168,83,0.05))', border: '1.5px solid rgba(52,168,83,0.4)', borderRadius: 12, padding: bigBoard ? '16px 22px' : '12px 16px', textAlign: 'right', direction: 'rtl' }} dir="rtl">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                       <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 14, color: '#1E7E34' }}>✓ נכון! הנה למה:</div>
                       <ArsenalQuizCaptureChip explanation={(q as any).answer} topicId={selectedTopic} />
                     </div>
-                    <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_DARK, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}><MathText text={(q as any).answer} /></div>
+                    <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 18 : 15, color: TEXT_DARK, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}><MathText text={(q as any).answer} /></div>
                   </div>
                 ) : null}
                 </>
@@ -4158,10 +4240,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     placeholder="כתוב/י את פתרונך כאן..."
                     dir="rtl"
                     style={{
-                      width: '100%', minHeight: 110,
+                      width: '100%', minHeight: bigBoard ? 200 : 110,
                       border: 'none', outline: 'none',
-                      padding: '14px 18px',
-                      fontSize: 18, color: TEXT_DARK,
+                      padding: bigBoard ? '18px 22px' : '14px 18px',
+                      fontSize: bigBoard ? 20 : 18, color: TEXT_DARK,
                       background: 'transparent',
                       fontFamily: "'Assistant', sans-serif",
                       resize: 'vertical', direction: 'rtl',
@@ -4293,7 +4375,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 <div
                   data-arsenal-source="quiz"
                   data-arsenal-topic={selectedTopic || ''}
-                  style={{ background: 'linear-gradient(135deg, rgba(52,168,83,0.08), rgba(52,168,83,0.04))', borderRadius: 10, padding: '14px 18px', border: '1.5px solid rgba(52,168,83,0.3)', fontFamily: "'Assistant', sans-serif", fontSize: 17, color: TEXT_DARK, lineHeight: 1.9, whiteSpace: 'pre-wrap', textAlign: 'right' }}
+                  style={{ background: 'linear-gradient(135deg, rgba(52,168,83,0.08), rgba(52,168,83,0.04))', borderRadius: 10, padding: bigBoard ? '18px 22px' : '14px 18px', border: '1.5px solid rgba(52,168,83,0.3)', fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 20 : 17, color: TEXT_DARK, lineHeight: 1.9, whiteSpace: 'pre-wrap', textAlign: 'right' }}
                 >
                   {q.answer}
                 </div>
@@ -4382,8 +4464,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         </div>
         )}
 
-        {/* ── Spacer (only in calm mode) so the tab row sits at the bottom ── */}
-        {tab === 'none' && !isDone && <div style={{ flex: 1, minHeight: 0 }} />}
+        {/* No spacer in calm mode any more — the whiteboard pane itself is
+            flex:1, so it (not an empty div) absorbs the leftover height. */}
 
         {/* ── Tab row: tool launcher / switcher ──────────────────────────────
              DESKTOP ONLY — on mobile the quick-switch pill (above) is the single
