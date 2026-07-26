@@ -4090,8 +4090,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 {boardFullBleed && !isDone && (
                   <span style={{
                     marginInlineStart: 'auto',
-                    fontFamily: 'var(--ws-hand)',
-                    fontSize: bigBoard ? 21 : 17,
+                    fontFamily: "'Rubik', sans-serif",
+                    fontSize: bigBoard ? 16 : 14,
                     fontWeight: 700,
                     color: 'var(--sh-text-dark)',
                     opacity: 0.85,
@@ -4204,7 +4204,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   math must stay math, and it stays LTR-isolated. */}
               {/* Gveret Levin sits smaller on the line than a print face, so
                   the hand sizes run ~3px larger than the sans equivalents. */}
-              <div style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: bigBoard ? 27 : (boardFullBleed ? 21 : 19), color: 'var(--sh-q-text-color)', lineHeight: boardFullBleed ? 1.75 : 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: bigBoard ? 20 : 16, width: '100%' }}>
+              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 25 : 19, color: 'var(--sh-q-text-color)', lineHeight: 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: bigBoard ? 20 : 16, width: '100%' }}>
                 <MathText text={q.text} />
               </div>
 
@@ -4263,8 +4263,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           border: `2.5px solid ${border}`,
                           borderRadius: bigBoard ? 14 : 10,
                           color,
-                          fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif",
-                          fontSize: bigBoard ? 21 : (boardFullBleed ? 18 : 15),
+                          fontFamily: "'Assistant', sans-serif",
+                          fontSize: bigBoard ? 19 : 15,
                           fontWeight: 500,
                           cursor: revealed ? 'default' : 'pointer',
                           textAlign: 'center',
@@ -4280,7 +4280,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                           minWidth: bigBoard ? 40 : 32, height: bigBoard ? 40 : 32, borderRadius: 20,
                           background: '#D4AF37', color: '#fff',
-                          fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Inter', sans-serif", fontWeight: 700, fontSize: bigBoard ? 21 : 15,
+                          fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: bigBoard ? 18 : 15,
                           flexShrink: 0,
                         }}>
                           {letter}
@@ -4300,7 +4300,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   })}
                 </div>
                 {mcSelected === null && (
-                  <div style={{ textAlign: 'center', fontSize: boardFullBleed ? 13 : 12, color: 'rgba(31,62,108,0.55)', marginBottom: 10, fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif" }} dir="rtl">💡 אפשר גם במקלדת — לחצו A–D או 1–4</div>
+                  <div style={{ textAlign: 'center', fontSize: 12, color: 'rgba(31,62,108,0.55)', marginBottom: 10, fontFamily: "'Assistant', sans-serif" }} dir="rtl">💡 אפשר גם במקלדת — לחצו A–D או 1–4</div>
                 )}
                 {/* Reinforcement on a CORRECT answer — show the explanation.
                     Was missing: correct answers auto-skipped with zero learning,
@@ -4308,10 +4308,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 {mcSelected !== null && mcSelected === (q as any).correctIndex && (q as any).answer ? (
                   <div style={{ maxWidth: bigBoard ? 1180 : 640, margin: '0 auto 14px', background: 'linear-gradient(135deg, rgba(52,168,83,0.12), rgba(52,168,83,0.05))', border: '1.5px solid rgba(52,168,83,0.4)', borderRadius: 12, padding: bigBoard ? '16px 22px' : '12px 16px', textAlign: 'right', direction: 'rtl' }} dir="rtl">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <div style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Rubik', sans-serif", fontWeight: 700, fontSize: boardFullBleed ? 16 : 14, color: '#1E7E34' }}>✓ נכון! הנה למה:</div>
+                      <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 14, color: '#1E7E34' }}>✓ נכון! הנה למה:</div>
                       <ArsenalQuizCaptureChip explanation={(q as any).answer} topicId={selectedTopic} />
                     </div>
-                    <div style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: bigBoard ? 19 : (boardFullBleed ? 17 : 15), color: TEXT_DARK, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}><MathText text={(q as any).answer} /></div>
+                    <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 18 : 15, color: TEXT_DARK, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}><MathText text={(q as any).answer} /></div>
                   </div>
                 ) : null}
                 </>
@@ -4388,7 +4388,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: 16, color: TEXT_LIGHT, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleSkip}>דלג</span>
+                <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_LIGHT, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleSkip}>דלג</span>
 
                 {/* Dots — clickable navigation */}
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -4449,7 +4449,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               {/* User's answer */}
               <div style={{ marginBottom: 16 }}>
                 <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT, marginBottom: 6, textAlign: 'right' }}>התשובה שלך:</div>
-                <div style={{ background: 'var(--sh-answer-bg)', borderRadius: 10, padding: '12px 16px', border: '1.5px solid var(--sh-answer-border)', fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK, lineHeight: 1.8, whiteSpace: 'pre-wrap', textAlign: 'right' }}>
+                <div style={{ background: 'var(--sh-answer-bg)', borderRadius: 10, padding: '12px 16px', border: '1.5px solid var(--sh-answer-border)', fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK, lineHeight: 1.7, whiteSpace: 'pre-wrap', textAlign: 'right' }}>
                   {answer}
                 </div>
               </div>
@@ -4463,7 +4463,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 <div
                   data-arsenal-source="quiz"
                   data-arsenal-topic={selectedTopic || ''}
-                  style={{ background: 'linear-gradient(135deg, rgba(52,168,83,0.08), rgba(52,168,83,0.04))', borderRadius: 10, padding: bigBoard ? '18px 22px' : '14px 18px', border: '1.5px solid rgba(52,168,83,0.3)', fontFamily: boardFullBleed ? 'var(--ws-hand)' : "'Assistant', sans-serif", fontSize: bigBoard ? 19 : 17, color: TEXT_DARK, lineHeight: 1.9, whiteSpace: 'pre-wrap', textAlign: 'right' }}
+                  style={{ background: 'linear-gradient(135deg, rgba(52,168,83,0.08), rgba(52,168,83,0.04))', borderRadius: 10, padding: bigBoard ? '18px 22px' : '14px 18px', border: '1.5px solid rgba(52,168,83,0.3)', fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 20 : 17, color: TEXT_DARK, lineHeight: 1.9, whiteSpace: 'pre-wrap', textAlign: 'right' }}
                 >
                   {q.answer}
                 </div>
@@ -4579,8 +4579,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   borderRadius: 22,
                   padding: bigBoard ? '9px 22px' : '8px 16px',
                   cursor: isFirstQ ? 'default' : 'pointer',
-                  fontFamily: 'var(--ws-hand)',
-                  fontSize: bigBoard ? 19 : 17, fontWeight: 700,
+                  fontFamily: "'Rubik', sans-serif",
+                  fontSize: bigBoard ? 15 : 14, fontWeight: 700,
                   minHeight: 44,
                 }}
               >
@@ -4599,8 +4599,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   borderRadius: 22,
                   padding: bigBoard ? '10px 30px' : '9px 22px',
                   cursor: 'pointer',
-                  fontFamily: 'var(--ws-hand)',
-                  fontSize: bigBoard ? 20 : 17, fontWeight: 700,
+                  fontFamily: "'Rubik', sans-serif",
+                  fontSize: bigBoard ? 15 : 14, fontWeight: 700,
                   minHeight: 44,
                   boxShadow: '0 2px 10px rgba(212,175,55,0.40)',
                 }}

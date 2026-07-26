@@ -18,14 +18,13 @@
   line-height: 1.5;
   font-weight: 400;
 
-  /* Handwriting face for anything drawn ON a whiteboard surface (practice
-     questions, board labels).
-     Gveret Levin is actual Hebrew handwriting — slanted, single-stroke, marker
-     -like. Playpen Sans Hebrew (the mind-map's --mm-hand) was tried first and
-     rejected: its Hebrew is rounded PRINT, so nothing read as written by hand.
-     Gveret Levin covers digits and Latin A–Z too, so counters and option
-     letters stay in the same hand. Single weight — bold is synthesised. */
-  --ws-hand: 'Gveret Levin', 'Playpen Sans Hebrew', 'Assistant', sans-serif;
+  /* PARKED — no handwriting face is applied to the board right now.
+     Two attempts were rejected: Playpen Sans Hebrew (its Hebrew is rounded
+     PRINT, not handwriting) and Gveret Levin (real handwriting, but thin and
+     slanted — not the thick upright whiteboard-marker look that was wanted).
+     The token stays so the next attempt is a one-line change; nothing reads it
+     until a marker face is chosen. */
+  --ws-hand: 'Assistant', sans-serif;
 
   /* Bottom-left FAB slot tokens — shared between TutorFAB (fixed) and the
      sidebar's PomodoroTimer (absolute). Keep these in sync if you move one. */
