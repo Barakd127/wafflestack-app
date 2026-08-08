@@ -1,0 +1,55 @@
+<!-- @dsCard group="Colors" viewport="700x300" name="StudyHub palette" subtitle="--sh-* tokens: page/sidebar gradients, text scale, surfaces — light + dark values" -->
+<!doctype html>
+<html lang="he" dir="rtl">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; background: var(--sh-page-bg); font-family: 'Heebo', Inter, system-ui, sans-serif; padding: 14px 16px; overflow: auto; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  h2 { font-family: 'Rubik', sans-serif; font-size: 13px; font-weight: 600; color: var(--sh-text-dark); margin: 0 0 8px; }
+  .sw { border-radius: 10px; height: 44px; box-shadow: var(--sh-card-shadow); }
+  .lbl { font-size: 10px; direction: ltr; text-align: left; font-family: 'Inter', monospace; color: var(--sh-text-med); margin: 3px 0 8px; }
+  .txt-row { display: flex; align-items: baseline; gap: 10px; background: rgba(255,255,255,0.55); border-radius: 10px; padding: 6px 10px; margin-bottom: 6px; }
+  .txt-row .name { font-size: 10px; direction: ltr; font-family: 'Inter', sans-serif; color: var(--sh-text-light); min-width: 92px; }
+  .surf { border-radius: 10px; padding: 8px 10px; font-size: 12px; margin-bottom: 6px; }
+  .darksw { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .darksw .chip { width: 26px; height: 18px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.25); flex: none; }
+  .darksw .v { font-size: 9.5px; direction: ltr; text-align: left; font-family: 'Inter', monospace; color: #a5b4fc; }
+  .darkcol { background: #111128; border-radius: 14px; padding: 12px; }
+  .darkcol h2 { color: #e2e8f0; }
+  .toggle { position: fixed; bottom: 8px; left: 8px; width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--sh-answer-border); background: var(--sh-answer-bg); cursor: pointer; font-size: 13px; z-index: 9; }
+</style>
+</head>
+<body>
+<div class="grid">
+  <div>
+    <h2>מצב בהיר — Light mode</h2>
+    <div class="sw" style="background: var(--sh-page-bg);"></div>
+    <div class="lbl">--sh-page-bg · 35.22deg #FFFFFF → #D8E7FA → #3351CA</div>
+    <div class="sw" style="background: var(--sh-sidebar-bg);"></div>
+    <div class="lbl">--sh-sidebar-bg · 265.4deg #83B2F8 → #3351CA · active #254A9F</div>
+    <div class="txt-row"><span class="name">--sh-text-dark</span><span style="color: var(--sh-text-dark); font-weight: 700;">כותרת ראשית #1F3E6C</span></div>
+    <div class="txt-row"><span class="name">--sh-text-med</span><span style="color: var(--sh-text-med);">טקסט גוף #254A9F</span></div>
+    <div class="txt-row"><span class="name">--sh-text-tip</span><span style="color: var(--sh-text-tip); font-size: 12px;">טיפ קצר #465CA5</span></div>
+    <div class="txt-row"><span class="name">--sh-text-light</span><span style="color: var(--sh-text-light); font-size: 12px;">משני #7F9BD9</span></div>
+    <div class="surf" style="background: var(--sh-topbar-bg); border: 1px solid var(--sh-topbar-border); color: var(--sh-text-dark);">--sh-topbar-bg · גבול זהב rgba(212,175,55,0.40)</div>
+    <div class="surf" style="background: var(--sh-q-card-bg); color: var(--sh-q-text-color); box-shadow: var(--sh-card-shadow);">--sh-q-card-bg · כרטיס שאלה · טקסט #111</div>
+    <div class="surf" style="background: var(--sh-answer-bg); border: 1px solid var(--sh-answer-border); color: var(--sh-text-dark);">--sh-answer-bg rgba(255,255,255,0.7) · גבול rgba(51,81,202,0.2)</div>
+  </div>
+  <div class="darkcol">
+    <h2>מצב כהה — ערכי html.dark</h2>
+    <div class="darksw"><span class="chip" style="background: linear-gradient(35.22deg,#0a0a16 -9.85%,#111128 49.05%,#181840 136%);"></span><span class="v">--sh-page-bg · #0a0a16 → #111128 → #181840</span></div>
+    <div class="darksw"><span class="chip" style="background: linear-gradient(265.4deg,#1a2080 -108.21%,#0f1245 169.33%);"></span><span class="v">--sh-sidebar-bg · #1a2080 → #0f1245</span></div>
+    <div class="darksw"><span class="chip" style="background: #2a3aaa;"></span><span class="v">--sh-sidebar-active · #2a3aaa</span></div>
+    <div class="darksw"><span class="chip" style="background: #4ECDC4;"></span><span class="v">--sh-btn-color · #4ECDC4</span></div>
+    <div class="darksw"><span class="chip" style="background: #e2e8f0;"></span><span class="v">--sh-text-dark · #e2e8f0</span></div>
+    <div class="darksw"><span class="chip" style="background: #a5b4fc;"></span><span class="v">--sh-text-med · #a5b4fc</span></div>
+    <div class="darksw"><span class="chip" style="background: #94a3b8;"></span><span class="v">--sh-text-light · #94a3b8</span></div>
+    <div class="darksw"><span class="chip" style="background: #64748b;"></span><span class="v">--sh-text-tip · #64748b</span></div>
+    <div class="darksw"><span class="chip" style="background: rgba(20,20,50,0.8); border-color: rgba(78,205,196,0.25);"></span><span class="v">--sh-answer-bg rgba(20,20,50,0.8) · border rgba(78,205,196,0.25)</span></div>
+    <div class="darksw"><span class="chip" style="background: linear-gradient(178.82deg, rgba(20,20,60,0.9) 17.91%, rgba(15,20,55,0.85) 199.73%);"></span><span class="v">--sh-q-card-bg · shadow 0 15px 30px rgba(0,0,0,0.5)</span></div>
+  </div>
+</div>
+<button class="toggle" aria-label="Toggle dark mode" onclick="document.documentElement.classList.toggle('dark')">◐</button>
+</body></html>
