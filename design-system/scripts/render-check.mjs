@@ -78,12 +78,13 @@ for (const rel of pages) {
     });
     if (info.nsErrors.length) { status = 'bad'; notes.push(`bundle errors: ${JSON.stringify(info.nsErrors)}`); }
     else if (consoleErrors.length) { status = 'bad'; notes.push(`console: ${consoleErrors.slice(0, 3).join(' | ')}`); }
-    else if (info.elements < 5 || info.text === 0) {
-      // image-only cards are allowed to have no text if they have imgs/svgs
+    else {
+      // image-only cards (e.g. brand imagery) are fine with little/no text
       const media = await page.evaluate(() => document.querySelectorAll('img,svg,canvas').length);
       if (info.elements < 5 && media === 0) { status = 'bad'; notes.push(`near-empty: ${info.elements} elements`); }
       else if (info.text < 3 && media === 0) { status = 'thin'; notes.push('no text, no media'); }
-    } else if (info.text < 10 && info.elements < 15) { status = 'thin'; notes.push(`thin: ${info.text} chars / ${info.elements} elements`); }
+      else if (info.text < 10 && info.elements < 15 && media === 0) { status = 'thin'; notes.push(`thin: ${info.text} chars / ${info.elements} elements`); }
+    }
     const uniq = new Set(info.variantNodes);
     if (info.variantNodes.length > 1 && uniq.size === 1) { variantsIdentical++; notes.push('variants render identically'); }
   } catch (e) {

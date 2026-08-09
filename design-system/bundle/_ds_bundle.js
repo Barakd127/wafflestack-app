@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"WaffleStackDesignSystem_a43b54","components":[{"name":"CoinPill","sourcePath":"components/app/CoinPill.jsx"},{"name":"ConceptCard","sourcePath":"components/app/ConceptCard.jsx"},{"name":"PopIn","sourcePath":"components/app/PopIn.jsx"},{"name":"Ribbon","sourcePath":"components/app/Ribbon.jsx"},{"name":"StreakCalendar","sourcePath":"components/app/StreakCalendar.jsx"},{"name":"Tooltip","sourcePath":"components/app/Tooltip.jsx"},{"name":"TutorFAB","sourcePath":"components/app/TutorFAB.jsx"},{"name":"GraphFrame","sourcePath":"components/graphs/graphTheme.jsx"},{"name":"GraphSlider","sourcePath":"components/graphs/graphTheme.jsx"},{"name":"GraphSliderRow","sourcePath":"components/graphs/graphTheme.jsx"},{"name":"CourseIcon","sourcePath":"components/studyhub/CourseCard.jsx"},{"name":"CourseCard","sourcePath":"components/studyhub/CourseCard.jsx"},{"name":"DifficultySelectorCard","sourcePath":"components/studyhub/DifficultySelectorCard.jsx"},{"name":"QuizIntroCard","sourcePath":"components/studyhub/QuizIntroCard.jsx"},{"name":"Sidebar","sourcePath":"components/studyhub/Sidebar.jsx"},{"name":"TopBar","sourcePath":"components/studyhub/TopBar.jsx"},{"name":"TopicCard","sourcePath":"components/studyhub/TopicCard.jsx"}],"sourceHashes":{"components/studyhub/_shared.js":"a67b1318c62e","components/app/CoinPill.jsx":"a0aeccf20362","components/app/ConceptCard.jsx":"80ce776546af","components/app/PopIn.jsx":"db561c03925f","components/app/Ribbon.jsx":"034757456c3e","components/app/StreakCalendar.jsx":"1ed754345221","components/app/Tooltip.jsx":"6ab41410e2ef","components/app/TutorFAB.jsx":"c7f4238abcf6","components/graphs/graphTheme.jsx":"ed1194428885","components/studyhub/CourseCard.jsx":"75dbbf38cc3a","components/studyhub/DifficultySelectorCard.jsx":"b948155cde7d","components/studyhub/QuizIntroCard.jsx":"989bf76633c1","components/studyhub/Sidebar.jsx":"37aff418e1c4","components/studyhub/TopBar.jsx":"760720a511f4","components/studyhub/TopicCard.jsx":"0888f736bd38"},"inlinedExternals":[],"unexposedExports":["components/graphs/graphTheme.jsx:graphTitleStyle","components/graphs/graphTheme.jsx:graphSubtitleStyle"]} */
+/* @ds-bundle: {"format":4,"namespace":"WaffleStackDesignSystem_a43b54","components":[{"name":"CoinPill","sourcePath":"components/app/CoinPill.jsx"},{"name":"ConceptCard","sourcePath":"components/app/ConceptCard.jsx"},{"name":"Ribbon","sourcePath":"components/app/Ribbon.jsx"},{"name":"StreakCalendar","sourcePath":"components/app/StreakCalendar.jsx"},{"name":"Tooltip","sourcePath":"components/app/Tooltip.jsx"},{"name":"TutorFAB","sourcePath":"components/app/TutorFAB.jsx"},{"name":"GraphFrame","sourcePath":"components/graphs/graphTheme.jsx"},{"name":"GraphSlider","sourcePath":"components/graphs/graphTheme.jsx"},{"name":"GraphSliderRow","sourcePath":"components/graphs/graphTheme.jsx"},{"name":"CourseIcon","sourcePath":"components/studyhub/CourseCard.jsx"},{"name":"CourseCard","sourcePath":"components/studyhub/CourseCard.jsx"},{"name":"DifficultySelectorCard","sourcePath":"components/studyhub/DifficultySelectorCard.jsx"},{"name":"QuizIntroCard","sourcePath":"components/studyhub/QuizIntroCard.jsx"},{"name":"Sidebar","sourcePath":"components/studyhub/Sidebar.jsx"},{"name":"TopBar","sourcePath":"components/studyhub/TopBar.jsx"},{"name":"TopicCard","sourcePath":"components/studyhub/TopicCard.jsx"}],"sourceHashes":{"components/studyhub/_shared.js":"a67b1318c62e","components/app/CoinPill.jsx":"a0aeccf20362","components/app/ConceptCard.jsx":"80ce776546af","components/app/Ribbon.jsx":"034757456c3e","components/app/StreakCalendar.jsx":"1ed754345221","components/app/Tooltip.jsx":"6ab41410e2ef","components/app/TutorFAB.jsx":"c7f4238abcf6","components/graphs/graphTheme.jsx":"ed1194428885","components/studyhub/CourseCard.jsx":"75dbbf38cc3a","components/studyhub/DifficultySelectorCard.jsx":"b948155cde7d","components/studyhub/QuizIntroCard.jsx":"989bf76633c1","components/studyhub/Sidebar.jsx":"37aff418e1c4","components/studyhub/TopBar.jsx":"760720a511f4","components/studyhub/TopicCard.jsx":"0888f736bd38"},"inlinedExternals":[],"unexposedExports":["components/graphs/graphTheme.jsx:graphTitleStyle","components/graphs/graphTheme.jsx:graphSubtitleStyle"]} */
 
 (() => {
 
@@ -121,58 +121,6 @@ function ConceptCard({ concept, conceptHe, formula, realWorld, color }) {
 
 __ds_ns.ConceptCard = ConceptCard;
 })(); } catch (e) { __ds_ns.__errors.push({ path: "components/app/ConceptCard.jsx", error: String((e && e.message) || e) }); }
-
-// components/app/PopIn.jsx
-try { (() => {
-function PopIn({ children, delay = 0 }) {
-  const groupRef = React.useRef(null);
-  const twistRef = React.useRef(Math.random() * 0.2 - 0.1);
-  const [frame, setFrame] = React.useState({ scale: 0, rotY: twistRef.current });
-  React.useEffect(() => {
-    const tension = 180;
-    const friction = 12;
-    const mass = 1;
-    let raf = 0;
-    let last = 0;
-    let s = 0, sv = 0;
-    let r = twistRef.current, rv = 0;
-    const step = (now) => {
-      const dt = Math.min((now - last) / 1e3, 1 / 30);
-      last = now;
-      sv += (tension * (1 - s) - friction * sv) / mass * dt;
-      s += sv * dt;
-      rv += (tension * (0 - r) - friction * rv) / mass * dt;
-      r += rv * dt;
-      const settled = Math.abs(1 - s) < 1e-3 && Math.abs(sv) < 1e-3 && Math.abs(r) < 1e-3 && Math.abs(rv) < 1e-3;
-      if (settled) {
-        setFrame({ scale: 1, rotY: 0 });
-      } else {
-        setFrame({ scale: s, rotY: r });
-        raf = requestAnimationFrame(step);
-      }
-    };
-    const timer = setTimeout(() => {
-      last = performance.now();
-      raf = requestAnimationFrame(step);
-    }, delay);
-    return () => {
-      clearTimeout(timer);
-      cancelAnimationFrame(raf);
-    };
-  }, [delay]);
-  return /* @__PURE__ */ React.createElement(
-    "group",
-    {
-      ref: groupRef,
-      scale: [frame.scale, frame.scale, frame.scale],
-      rotation: [0, frame.rotY, 0]
-    },
-    children
-  );
-}
-
-__ds_ns.PopIn = PopIn;
-})(); } catch (e) { __ds_ns.__errors.push({ path: "components/app/PopIn.jsx", error: String((e && e.message) || e) }); }
 
 // components/app/Ribbon.jsx
 try { (() => {
@@ -451,7 +399,6 @@ __ds_ns.TutorFAB = TutorFAB;
 
 // components/graphs/graphTheme.jsx
 try { (() => {
-import React from "react";
 const GRAPH_FONT = "'Playpen Sans Hebrew', 'Assistant', sans-serif";
 const GC = {
   ink: "#1F3E6C",
@@ -653,6 +600,7 @@ __ds_ns.DifficultySelectorCard = DifficultySelectorCard;
 
 // components/studyhub/QuizIntroCard.jsx
 try { (() => {
+const { DifficultySelectorCard } = window.WaffleStackDesignSystem_a43b54;
 function QuizIntroCard({
   // [ds-extract] replaced HEBREW_LABELS[topicId] || quizBankData.topics[topicId]?.concept lookup with topicName prop — visual output unchanged
   topicName = "\u05DE\u05DE\u05D5\u05E6\u05E2",

@@ -1,0 +1,36 @@
+<!-- @dsCard group="Type" viewport="700x220" name="RTL + LTR math isolation" subtitle="Hebrew RTL flow with direction:ltr formula chips — the KaTeX isolation rule" -->
+<!doctype html>
+<html lang="he" dir="rtl">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; background: var(--sh-page-bg); font-family: 'Heebo', Inter, system-ui, sans-serif; padding: 14px 16px; overflow: auto; }
+  h2 { font-family: 'Rubik', sans-serif; font-size: 13px; font-weight: 600; color: var(--sh-text-dark); margin: 0 0 8px; }
+  .card { background: var(--sh-q-card-bg); border-radius: 16px; padding: 12px 14px; box-shadow: var(--sh-card-shadow); color: var(--sh-q-text-color); font-size: 14px; line-height: 1.8; }
+  .math { direction: ltr; unicode-bidi: isolate; display: inline-block;
+    font-family: 'Inter', 'Courier New', monospace; font-size: 13px;
+    background: var(--sh-answer-bg); border: 1px solid var(--sh-answer-border);
+    border-radius: 8px; padding: 1px 8px; color: var(--sh-text-dark); }
+  .note { margin-top: 10px; font-size: 11px; color: var(--sh-text-tip); background: rgba(255,255,255,0.5); border-radius: 10px; padding: 8px 10px; }
+  .note code { direction: ltr; unicode-bidi: isolate; font-family: 'Inter', monospace; font-size: 10.5px; color: var(--sh-text-med); }
+  .toggle { position: fixed; bottom: 8px; left: 8px; width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--sh-answer-border); background: var(--sh-answer-bg); cursor: pointer; font-size: 13px; z-index: 9; }
+</style>
+</head>
+<body>
+<h2>עברית מימין לשמאל, נוסחה משמאל לימין</h2>
+<div class="card">
+  כדי לבדוק את ההשערה מחשבים סטטיסטי מבחן <span class="math">z = (x&#772; &minus; &mu;) / (&sigma; / &radic;n)</span>
+  ומשווים אותו לערך הקריטי. אם למשל <span class="math">z = 1.96</span> והמובהקות היא
+  <span class="math">&alpha; = 0.05</span>, דוחים את השערת האפס במבחן דו-צדדי.
+</div>
+<div class="note">
+  כלל הבידוד ב-<code>app-classes.css</code>: מתמטיקה היא נייטרלית-כיוון, אבל בתוך מכולות עבריות
+  <code>dir="rtl"</code> שורשי KaTeX יורשים RTL — מה שהופך אינדקסים, מסדר מחדש אופרטורים
+  (<code>a - b</code> נראה כמו <code>b - a</code>) ושובר שברים. לכן על
+  <code>.katex, .katex-display, .katex-html, .katex-mathml</code> נאכף
+  <code>direction: ltr !important; unicode-bidi: isolate !important;</code>
+  ובמובייל <code>.katex-display</code> מקבל גלילה אופקית במקום גלישה.
+</div>
+<button class="toggle" aria-label="Toggle dark mode" onclick="document.documentElement.classList.toggle('dark')">◐</button>
+</body></html>

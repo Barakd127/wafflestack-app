@@ -1,0 +1,46 @@
+<!-- @dsCard group="Spacing" viewport="700x260" name="Layout slot tokens" subtitle="--ws-bottom-fab-* / --ws-pomodoro-left / sidebar 247px — annotated diagram" -->
+<!doctype html>
+<html lang="he" dir="rtl">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; background: var(--sh-page-bg); font-family: 'Heebo', Inter, system-ui, sans-serif; padding: 14px 16px; overflow: auto; }
+  h2 { font-family: 'Rubik', sans-serif; font-size: 13px; font-weight: 600; color: var(--sh-text-dark); margin: 0 0 8px; }
+  .stage { position: relative; direction: ltr; height: 150px; border-radius: 14px; overflow: hidden;
+    background: rgba(255,255,255,0.45); border: 1px solid var(--sh-answer-border); }
+  .sidebar { position: absolute; top: 0; bottom: 0; left: 0; width: 123px; background: var(--sh-sidebar-bg);
+    color: #fff; font-size: 10px; font-family: 'Inter', sans-serif; padding: 8px; box-sizing: border-box; }
+  .sidebar .w { position: absolute; top: 8px; left: 8px; }
+  .fab { position: absolute; left: var(--ws-bottom-fab-inset); bottom: var(--ws-bottom-fab-inset);
+    width: var(--ws-bottom-fab-size); height: var(--ws-bottom-fab-size); border-radius: 50%;
+    background: #122460; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px;
+    box-shadow: var(--sh-card-shadow); }
+  .pomodoro { position: absolute; left: var(--ws-pomodoro-left); bottom: var(--ws-bottom-fab-inset);
+    height: 28px; border-radius: 999px; background: var(--sh-sidebar-active); color: #fff;
+    font-size: 10px; font-family: 'Inter', sans-serif; display: flex; align-items: center; padding: 0 12px; }
+  .ann { position: absolute; font-size: 9px; font-family: 'Inter', monospace; color: var(--sh-text-med);
+    background: rgba(255,255,255,0.85); border-radius: 6px; padding: 1px 5px; white-space: nowrap; }
+  .legend { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px;
+    font-size: 10.5px; direction: ltr; text-align: left; font-family: 'Inter', monospace; color: var(--sh-text-med); }
+  .toggle { position: fixed; bottom: 8px; left: 8px; width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--sh-answer-border); background: var(--sh-answer-bg); cursor: pointer; font-size: 13px; z-index: 9; }
+</style>
+</head>
+<body>
+<h2>משבצות פריסה אמיתיות — FAB, פומודורו וסרגל צד</h2>
+<div class="stage">
+  <div class="sidebar"><span class="w">sidebar 247px (½ scale)</span></div>
+  <div class="fab">🤖</div>
+  <div class="pomodoro">25:00 🍅</div>
+  <div class="ann" style="left: 20px; bottom: 82px;">inset 20px · size 56px</div>
+  <div class="ann" style="left: 90px; bottom: 54px;">--ws-pomodoro-left: 90px</div>
+  <div class="ann" style="left: 78px; bottom: 6px;">gap 12px</div>
+</div>
+<div class="legend">
+  <span>--ws-bottom-fab-inset: 20px (bottom-5 left-5)</span>
+  <span>--ws-bottom-fab-size: 56px (TutorFAB 14*4)</span>
+  <span>--ws-bottom-fab-gap: 12px</span>
+  <span>--ws-pomodoro-left: 90px (20 + 56 → col ends 76, pill at 90)</span>
+</div>
+<button class="toggle" aria-label="Toggle dark mode" onclick="document.documentElement.classList.toggle('dark')">◐</button>
+</body></html>

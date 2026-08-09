@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  /* page-local layout only */
+  html, body { margin: 0; height: 100%; }
+  #root { height: 100%; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+  const { Sidebar, TopBar, CourseCard, COURSES, TutorFAB } =
+    window.WaffleStackDesignSystem_a43b54;
+
+  function StudyHubTemplate() {
+    const [dark, setDark] = React.useState(false);
+    const toggleDark = () => {
+      document.documentElement.classList.toggle('dark');
+      setDark(d => !d);
+    };
+
+    return (
+      <div dir="rtl" style={{ width: '100%', height: '100%', display: 'flex', overflow: 'hidden', direction: 'rtl', background: 'var(--sh-page-bg)', fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
+
+        {/* Sidebar — first flex child in RTL, so it sits on the RIGHT */}
+        <nav aria-label="ניווט ראשי" style={{ width: 247, flexShrink: 0, position: 'relative', display: 'flex' }}>
+          <Sidebar activeItem="home" onNavigate={() => {}} />
+        </nav>
+
+        {/* Main column */}
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <header>
+            <TopBar
+              title="דף הבית"
+              userName="ברק"
+              xp={1240}
+              darkMode={dark}
+              onToggleDark={toggleDark}
+              onLogout={() => {}}
+            />
+          </header>
+
+          {/* HomeScreen scroll pane */}
+          <div className="ws-screen-pad" dir="rtl" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }}>
+            <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+              {/* Greeting */}
+              <div>
+                <h2 style={{ fontFamily: "'Rubik', sans-serif", color: 'var(--sh-text-dark)', fontSize: 26, fontWeight: 700, margin: 0 }}>שלום, ברק 👋</h2>
+                <p style={{ color: 'var(--sh-text-med)', fontSize: 14, margin: '6px 0 0' }}>נמשיך מאיפה שעצרת — הנה מה שמחכה לך היום</p>
+              </div>
+
+              {/* Continue-learning card — mirrors the HomeScreen תרגול ws-glass-card */}
+              <div className="ws-glass-card" style={{ borderRadius: 24, padding: '28px 28px 22px', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: 'var(--sh-text-dark)', marginBottom: 6 }}>תרגול</div>
+                <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: 'var(--sh-text-tip)', lineHeight: 1.6, marginBottom: 16 }}>
+                  נשארו לך עוד 7 שאלות<br />סטיית תקן
+                </div>
+                {/* Rotating 3D hero slot (runtime HeroScene) — static placeholder */}
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 16, minHeight: 150, height: 150, borderRadius: 12, overflow: 'hidden' }}>
+                  <div style={{ fontSize: 92, lineHeight: 1 }}>🏛️</div>
+                </div>
+                <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: 'var(--sh-text-light)', marginBottom: 8, textAlign: 'right' }}>הצעה למבנה הבא בעירך</div>
+                {/* Progress bar */}
+                <div style={{ height: 7, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden', marginBottom: 16 }}>
+                  <div style={{ width: '58%', height: '100%', background: 'rgba(212,175,55,0.7)', borderRadius: 10, transition: 'width 0.4s' }} />
+                </div>
+                <button className="ws-cta-btn" style={{ background: 'var(--sh-btn-color)', color: '#fff', border: 'none', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, fontFamily: "'Rubik', sans-serif", boxShadow: '0px 2px 6px rgba(18,36,96,0.3)', cursor: 'pointer', width: '100%' }}>
+                  המשך ←
+                </button>
+              </div>
+
+              {/* Course grid header */}
+              <div style={{ marginBottom: -2 }}>
+                <h2 style={{ fontFamily: "'Rubik', sans-serif", color: 'var(--sh-text-dark)', fontSize: 26, fontWeight: 700, margin: 0 }}>הקורסים שלי</h2>
+                <p style={{ color: 'var(--sh-text-med)', fontSize: 14, margin: '6px 0 0' }}>בחר את הקורס בו ברצונך להתחיל ללמוד</p>
+              </div>
+
+              {/* Real course grid from COURSES */}
+              <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 22 }}>
+                {COURSES.map(c => (
+                  <CourseCard key={c.id} course={c} onSelect={() => {}} />
+                ))}
+              </div>
+
+            </div>
+          </div>
+        </main>
+
+        {/* AI tutor FAB — fixed bottom-left (component positions itself) */}
+        <TutorFAB onClick={() => {}} />
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<StudyHubTemplate />);
+</script>
+</body></html>

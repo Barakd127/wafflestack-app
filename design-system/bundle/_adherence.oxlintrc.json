@@ -1,0 +1,250 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "components/graphs/**",
+              "components/app/**",
+              "components/studyhub/**",
+              "ui_kits/wafflestack/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a real app token via var() (see tokens/app.css / tokens/landing.css)."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Heebo|Rubik|Assistant|Inter|Playpen Sans Hebrew))/i]",
+        "message": "Font not provided by the design system. Available: Heebo, Rubik, Assistant, Inter, Playpen Sans Hebrew."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='CoinPill'] > JSXAttribute > JSXIdentifier[name!=/^(?:surface|balance|hasPass|onClick|style|key|ref|className|children)$/]",
+        "message": "<CoinPill> doesn't accept that prop. Declared props: surface, balance, hasPass, onClick."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ConceptCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:concept|conceptHe|formula|realWorld|color|style|key|ref|className|children)$/]",
+        "message": "<ConceptCard> doesn't accept that prop. Declared props: concept, conceptHe, formula, realWorld, color."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Ribbon'] > JSXAttribute > JSXIdentifier[name!=/^(?:label|hideLabel|children|style|key|ref|className)$/]",
+        "message": "<Ribbon> doesn't accept that prop. Declared props: label, hideLabel, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='StreakCalendar'] > JSXAttribute > JSXIdentifier[name!=/^(?:streak|style|key|ref|className|children)$/]",
+        "message": "<StreakCalendar> doesn't accept that prop. Declared props: streak."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Tooltip'] > JSXAttribute > JSXIdentifier[name!=/^(?:label|description|placement|delay|children|style|key|ref|className)$/]",
+        "message": "<Tooltip> doesn't accept that prop. Declared props: label, description, placement, delay, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='TutorFAB'] > JSXAttribute > JSXIdentifier[name!=/^(?:onClick|kbOpen|bottom|left|style|key|ref|className|children)$/]",
+        "message": "<TutorFAB> doesn't accept that prop. Declared props: onClick, kbOpen, bottom, left."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='CourseCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:id|label|icon|desc|active|bg|size|course|onSelect|style|key|ref|className|children)$/]",
+        "message": "<CourseCard> doesn't accept that prop. Declared props: id, label, icon, desc, active, bg, id, size, course, onSelect."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='DifficultySelectorCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:label|count|icon|color|bg|selected|onClick|disabled|style|key|ref|className|children)$/]",
+        "message": "<DifficultySelectorCard> doesn't accept that prop. Declared props: label, count, icon, color, bg, selected, onClick, disabled."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='QuizIntroCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:all|easy|medium|hard|topicName|counts|hasLesson|onStart|onBack|onReadLesson|style|key|ref|className|children)$/]",
+        "message": "<QuizIntroCard> doesn't accept that prop. Declared props: all, easy, medium, hard, topicName, counts, hasLesson, onStart, onBack, onReadLesson."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Sidebar'] > JSXAttribute > JSXIdentifier[name!=/^(?:activeItem|onNavigate|lockedFeatures|lockTips|style|key|ref|className|children)$/]",
+        "message": "<Sidebar> doesn't accept that prop. Declared props: activeItem, onNavigate, lockedFeatures, lockTips."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='TopBar'] > JSXAttribute > JSXIdentifier[name!=/^(?:title|onLogout|darkMode|onToggleDark|contextControls|userName|xp|potionsSlot|tourLauncherSlot|style|key|ref|className|children)$/]",
+        "message": "<TopBar> doesn't accept that prop. Declared props: title, onLogout, darkMode, onToggleDark, contextControls, userName, xp, potionsSlot, tourLauncherSlot."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='TopicCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:id|label|building|questionCount|mastered|bestScore|sessionsAttempted|topic|progress|planHint|onSelectTopic|style|key|ref|className|children)$/]",
+        "message": "<TopicCard> doesn't accept that prop. Declared props: id, label, building, questionCount, mastered, bestScore, sessionsAttempted, topic, progress, planHint, onSelectTopic."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {
+      "CoinPill": {
+        "replaces": []
+      },
+      "ConceptCard": {
+        "replaces": []
+      },
+      "Ribbon": {
+        "replaces": []
+      },
+      "StreakCalendar": {
+        "replaces": []
+      },
+      "Tooltip": {
+        "replaces": []
+      },
+      "TutorFAB": {
+        "replaces": []
+      },
+      "GraphFrame": {
+        "replaces": []
+      },
+      "GraphSlider": {
+        "replaces": []
+      },
+      "GraphSliderRow": {
+        "replaces": []
+      },
+      "CourseIcon": {
+        "replaces": []
+      },
+      "CourseCard": {
+        "replaces": []
+      },
+      "DifficultySelectorCard": {
+        "replaces": []
+      },
+      "QuizIntroCard": {
+        "replaces": []
+      },
+      "Sidebar": {
+        "replaces": []
+      },
+      "TopBar": {
+        "replaces": []
+      },
+      "TopicCard": {
+        "replaces": []
+      }
+    },
+    "tokens": [
+      "--ls-blue-darker",
+      "--ls-blue-light",
+      "--ls-blue-mid",
+      "--ls-blue-pale",
+      "--ls-blue-primary",
+      "--ls-glass-bg",
+      "--ls-glass-bg-strong",
+      "--ls-glass-border",
+      "--ls-glass-border-gold",
+      "--ls-gold",
+      "--ls-gold-bright",
+      "--ls-gold-soft",
+      "--ls-text-dim",
+      "--ls-text-muted",
+      "--ls-text-primary",
+      "--mm-canvas-bg-end",
+      "--mm-canvas-bg-start",
+      "--mm-divider",
+      "--mm-glass-bg",
+      "--mm-glass-border",
+      "--mm-text-primary",
+      "--mm-text-secondary",
+      "--sh-answer-bg",
+      "--sh-answer-border",
+      "--sh-btn-color",
+      "--sh-card-shadow",
+      "--sh-glass-card",
+      "--sh-glass-card-sm",
+      "--sh-page-bg",
+      "--sh-q-card-bg",
+      "--sh-q-text-color",
+      "--sh-sidebar-active",
+      "--sh-sidebar-bg",
+      "--sh-text-dark",
+      "--sh-text-light",
+      "--sh-text-med",
+      "--sh-text-tip",
+      "--sh-topbar-bg",
+      "--sh-topbar-border",
+      "--ws-bottom-fab-gap",
+      "--ws-bottom-fab-inset",
+      "--ws-bottom-fab-size",
+      "--ws-hand",
+      "--ws-pomodoro-left"
+    ],
+    "tokenKinds": {
+      "--ws-hand": "font",
+      "--ws-bottom-fab-inset": "spacing",
+      "--ws-bottom-fab-size": "spacing",
+      "--ws-bottom-fab-gap": "spacing",
+      "--ws-pomodoro-left": "spacing",
+      "--mm-canvas-bg-start": "color",
+      "--mm-canvas-bg-end": "color",
+      "--mm-glass-bg": "color",
+      "--mm-glass-border": "color",
+      "--mm-text-primary": "color",
+      "--mm-text-secondary": "color",
+      "--mm-divider": "color",
+      "--sh-page-bg": "color",
+      "--sh-sidebar-bg": "color",
+      "--sh-sidebar-active": "color",
+      "--sh-glass-card": "color",
+      "--sh-glass-card-sm": "color",
+      "--sh-card-shadow": "shadow",
+      "--sh-btn-color": "color",
+      "--sh-text-dark": "color",
+      "--sh-text-med": "color",
+      "--sh-text-light": "color",
+      "--sh-text-tip": "color",
+      "--sh-topbar-bg": "color",
+      "--sh-topbar-border": "color",
+      "--sh-q-card-bg": "color",
+      "--sh-answer-bg": "color",
+      "--sh-answer-border": "color",
+      "--sh-q-text-color": "color",
+      "--ls-blue-primary": "color",
+      "--ls-blue-mid": "color",
+      "--ls-blue-darker": "color",
+      "--ls-blue-light": "color",
+      "--ls-blue-pale": "color",
+      "--ls-gold": "color",
+      "--ls-gold-bright": "color",
+      "--ls-gold-soft": "color",
+      "--ls-text-primary": "color",
+      "--ls-text-muted": "color",
+      "--ls-text-dim": "color",
+      "--ls-glass-bg": "color",
+      "--ls-glass-bg-strong": "color",
+      "--ls-glass-border": "color",
+      "--ls-glass-border-gold": "color"
+    },
+    "fontFamilies": [
+      "Assistant",
+      "Heebo",
+      "Inter",
+      "Playpen Sans Hebrew",
+      "Rubik"
+    ]
+  }
+}

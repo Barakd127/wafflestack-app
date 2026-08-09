@@ -68,14 +68,30 @@ for (const f of files) {
   const src = readFileSync(f.absPath, 'utf8');
   sourceHashes[f.bundlePath] = createHash('sha256').update(src).digest('hex').slice(0, 12);
 
-  // strip imports (React UMD global + shared consts hoisted to outer scope)
-  let code = src.replace(/^import\s[^;]*;\s*$/gm, '');
+  // strip imports (React UMD global + shared consts hoisted to outer scope).
+  // Semicolon-optional and multi-line tolerant; character classes match \n.
+  // Imports of sibling COMPONENT files become `const {X} = __ds_ns;` at the top
+  // of this section (the sibling ran earlier — alphabetical walk order), since
+  // inner IIFEs can't see each other's scope. `./_shared.js` names need nothing:
+  // shared files are hoisted into the outer IIFE scope.
+  const nsBridges = [];
+  let code = src.replace(/^import[^'"]*['"]([^'"]*)['"];?[ \t]*$/gm, (full, spec) => {
+    if (/^\.\/(?!_shared)/.test(spec)) {
+      const names = full.match(/\{([^}]*)\}/)?.[1].split(',').map((s) => s.trim().split(/\s+as\s+/).pop()).filter(Boolean) ?? [];
+      for (const n of names) nsBridges.push(n);
+    }
+    return '';
+  });
+  if (nsBridges.length) code = `const { ${[...new Set(nsBridges)].join(', ')} } = window.${NS};\n` + code;
   // record exported names, then strip `export ` keywords
   const names = [];
   for (const m of code.matchAll(/^export\s+(?:function|const|let|class)\s+([A-Za-z_$][\w$]*)/gm)) names.push(m[1]);
   code = code.replace(/^export\s+default\s+/gm, '').replace(/^export\s+/gm, '');
 
-  const { code: js } = esbuild.transformSync(code, { loader: 'jsx', jsx: 'transform', format: 'esm', target: 'es2020' });
+  let { code: js } = esbuild.transformSync(code, { loader: 'jsx', jsx: 'transform', format: 'esm', target: 'es2020' });
+  // belt-and-braces: no import statement may survive into the browser IIFE
+  js = js.replace(/^import[^'"]*['"][^'"]*['"];?[ \t]*$/gm, '');
+  if (/^import\s/m.test(js)) { console.error(`unstripped import in ${f.bundlePath}`); process.exit(1); }
 
   const exposed = names.filter((n) => /^[A-Z]/.test(n) || /^[A-Z_]+$/.test(n) || ['COURSES', 'GC', 'GRAPH_FONT', 'graphCardStyle'].includes(n));
   names.filter((n) => !exposed.includes(n)).forEach((n) => unexposed.push(`${f.bundlePath}:${n}`));
