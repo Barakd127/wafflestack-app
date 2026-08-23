@@ -1,0 +1,86 @@
+{
+ "width": 1400,
+ "height": 860,
+ "buildings": {
+  "power": {
+   "left": 30.8,
+   "top": 5.92,
+   "right": 50.35,
+   "bottom": 39.89,
+   "roofX": 40.57,
+   "roofY": 14.54
+  },
+  "housing": {
+   "left": 13.99,
+   "top": 33.21,
+   "right": 26.3,
+   "bottom": 54.72,
+   "roofX": 20.14,
+   "roofY": 38.64
+  },
+  "traffic": {
+   "left": 38.6,
+   "top": 12.67,
+   "right": 54.33,
+   "bottom": 44.79,
+   "roofX": 46.46,
+   "roofY": 19.61
+  },
+  "hospital": {
+   "left": 39.6,
+   "top": 6.91,
+   "right": 74.54,
+   "bottom": 60.54,
+   "roofX": 57.07,
+   "roofY": 22.32
+  },
+  "school": {
+   "left": 30.37,
+   "top": 46.84,
+   "right": 43.7,
+   "bottom": 70.75,
+   "roofX": 37.04,
+   "roofY": 52.72
+  },
+  "research": {
+   "left": 55.6,
+   "top": 25.45,
+   "right": 76.62,
+   "bottom": 63.75,
+   "roofX": 66.11,
+   "roofY": 34.72
+  },
+  "market": {
+   "left": 35.6,
+   "top": 52.21,
+   "right": 55.76,
+   "bottom": 81.39,
+   "roofX": 45.68,
+   "roofY": 61.1
+  },
+  "bank": {
+   "left": 61.65,
+   "top": 26.92,
+   "right": 87.07,
+   "bottom": 73.66,
+   "roofX": 74.36,
+   "roofY": 38.13
+  },
+  "city-hall": {
+   "left": 72.89,
+   "top": 23.42,
+   "right": 89.96,
+   "bottom": 73.44,
+   "roofX": 81.43,
+   "roofY": 30.95
+  },
+  "news": {
+   "left": 51.53,
+   "top": 61.77,
+   "right": 62.61,
+   "bottom": 86.74,
+   "roofX": 57.07,
+   "roofY": 66.65
+  }
+ }
+}

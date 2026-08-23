@@ -5,7 +5,7 @@ import ArsenalCapture from './ArsenalCapture'
 import { quickAddToMindmap } from '../lib/mindmapWriter'
 import { MathLineBlock } from '../lib/mathRender'
 import { parseLeadingEnumMarker } from '../lib/bidiSegments'
-import WhiteboardShell from './WhiteboardShell'
+import BoardShell from './BoardShell'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import PresentationOverlay, { type PresenterTool } from './PresentationOverlay'
 
@@ -488,7 +488,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           viewport; content that overflows still scrolls inside (see the
           flex:1 / overflowY:auto content column in WhiteboardShell). */}
       <div style={{ position: 'relative', height: 'clamp(420px, 66vh, 640px)' }}>
-      <WhiteboardShell topRightSlot={<HierarchyBreadcrumb topicId={topicId} />}>
+      <BoardShell topRightSlot={<HierarchyBreadcrumb topicId={topicId} />} topicId={topicId} progress={{ done: currentSlide + 1, total }}>
       {!isGraphSlide && (
       <>{/* Slide card — theory is the heart of the lesson, give it presence */}
       <div
@@ -804,7 +804,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           </div>
         </div>
       )}
-      </WhiteboardShell>
+      </BoardShell>
       <PresentationOverlay
         active={presenting && !isGraphSlide}
         autoOn={presAuto}

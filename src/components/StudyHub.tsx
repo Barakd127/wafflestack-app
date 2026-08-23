@@ -3,7 +3,8 @@ import { useLearningStore } from '../store/learningStore'
 import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../config/featureUnlocks'
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
-import WhiteboardShell from './WhiteboardShell'
+import BoardShell from './BoardShell'
+import { useGlassBoard } from '../hooks/useGlassBoard'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
 import { toPng } from 'html-to-image'
@@ -2212,6 +2213,34 @@ function AdminToggle({ collapsed }: { collapsed: boolean }) {
 }
 
 // ── Top bar ────────────────────────────────────────────────────────────────────
+/**
+ * GlassBoardAdminToggle — admin-only flag switch for the glass board (the
+ * lesson/quiz whiteboard → pane of glass in front of the knowledge city, see
+ * hooks/useGlassBoard.ts). Renders nothing for students; when adminMode is ON
+ * it sits in the topbar next to the 🎓 סיור pill with the same styling.
+ */
+function GlassBoardAdminToggle() {
+  const adminMode = useLearningStore(s => s.adminMode)
+  const [enabled, setEnabled] = useGlassBoard()
+  if (!adminMode) return null
+  return (
+    <button
+      onClick={() => setEnabled(!enabled)}
+      aria-pressed={enabled}
+      title={enabled ? 'לוח זכוכית פעיל — לחץ לחזרה ללוח המחיק' : 'לוח זכוכית כבוי — לחץ להפעלה'}
+      style={{
+        background: enabled ? 'rgba(51,81,202,0.14)' : 'rgba(99,102,241,0.10)',
+        border: '1px solid ' + (enabled ? 'rgba(51,81,202,0.55)' : 'rgba(99,102,241,0.3)'),
+        borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
+        color: enabled ? '#3351CA' : '#6366f1', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      🪟 לוח זכוכית
+    </button>
+  )
+}
+
 function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { title: string; onLogout?: () => void; darkMode?: boolean; onToggleDark?: () => void; contextControls?: React.ReactNode }) {
   const userName = localStorage.getItem('userName') || 'Student'
   const xp = useLearningStore(state => state.xp)
@@ -2301,6 +2330,7 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
         <Ribbon label="חשבון" hideLabel>
           <span className="hidden md:inline" style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_DARK }}>שלום, {userName}</span>
           <TourLauncher />
+          <GlassBoardAdminToggle />
           {onLogout && (
             <Tooltip label="יציאה" description="התנתק מהחשבון">
               <button onClick={onLogout} style={{
@@ -4078,7 +4108,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           {/* Question content is drawn directly on a whiteboard surface — the
               hierarchy breadcrumb is pinned in the board's top-right corner.
               (Same pattern as LessonScreen's theory slides.) */}
-          <WhiteboardShell
+          <BoardShell
+            topicId={selectedTopic || undefined}
+            progress={{ done: answeredCount, total }}
             topRightSlot={
               // paddingInline clears the board's 36px corner brackets (they sit
               // at inset 5 and paint at z-index 61, ON TOP of content — the
@@ -4610,7 +4642,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             </div>
           )}
           </div>
-          </WhiteboardShell>
+          </BoardShell>
 
             </div>
           </div>
