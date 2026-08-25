@@ -32,6 +32,14 @@ export interface GlassBoardShellProps extends WhiteboardShellProps {
   onMastered?: () => void
   /** 'focus' | 'demo' | 'city'; default 'focus' */
   defaultMode?: GlassMode
+  /**
+   * Quiz board only. When true the resting frost is REVEAL_REST_FROST (city
+   * hidden while a question is open); each time `progress.done` increases the
+   * glass briefly clears to REVEAL_FROST as an answer reward, then returns to
+   * rest. Manual overrides (slider / mode / hold-to-look) still win. Default
+   * false — the lesson board is unaffected.
+   */
+  revealOnProgress?: boolean
 }
 
 const MODE_FROST: Record<GlassMode, number> = { focus: 0.85, demo: 0.4, city: 0 }
@@ -47,6 +55,9 @@ const NAVY = '#122460'
 const INK = '#1F3E6C'
 const FROST_KEY = 'ws-glass-frost'
 const MASTERY_CLEAR_MS = 1600
+const REVEAL_REST_FROST = 0.92
+const REVEAL_FROST = 0.4
+const REVEAL_MS = 2600
 const TOAST_MS = 3200
 const GOLD = '#D4AF37'
 const GOLD_LIGHT = '#F5C842'
@@ -129,6 +140,7 @@ export default function GlassBoardShell({
   progress,
   onMastered,
   defaultMode = 'focus',
+  revealOnProgress = false,
 }: GlassBoardShellProps) {
   // Initial frost: the session's last value (if any) wins over the default mode.
   // If it matches a mode exactly that mode is lit; otherwise it's a manual override.
@@ -148,10 +160,21 @@ export default function GlassBoardShell({
   const [dragging, setDragging] = useState(false)
   const [masteryClear, setMasteryClear] = useState(false)
   const [toastVisible, setToastVisible] = useState(false)
+  // revealOnProgress: the temporary "answer reward" frost (null when at rest).
+  const [autoReveal, setAutoReveal] = useState<number | null>(null)
 
   const trackRef = useRef<HTMLSpanElement | null>(null)
   const masteredFiredRef = useRef(false)
   const onMasteredRef = useRef(onMastered)
+  // True only once the student explicitly clicks a mode pill in this mount —
+  // distinguishes "mode chosen as an override" from `mode` merely holding its
+  // initial default, so revealOnProgress's own resting frost isn't shadowed
+  // by a mode nobody actually picked.
+  const modePickedRef = useRef(false)
+  const revealTimerRef = useRef<number | null>(null)
+  // null until the first reveal-effect run establishes a baseline, so a board
+  // that mounts mid-progress (done already > 0) doesn't fire a spurious reveal.
+  const prevDoneRef = useRef<number | null>(null)
   onMasteredRef.current = onMastered
 
   const done = progress ? Math.max(0, progress.done) : 0
@@ -179,7 +202,45 @@ export default function GlassBoardShell({
     }
   }, [mastered, topicId])
 
-  const base = manual ?? MODE_FROST[mode ?? defaultMode]
+  // revealOnProgress (quiz board): whenever `done` increases, open the glass
+  // to REVEAL_FROST as an answer reward, then close it back to rest after
+  // REVEAL_MS. One timer, owned by revealTimerRef; the effect's own cleanup
+  // clears it both on unmount and before every re-trigger — no timers are
+  // created during render.
+  useEffect(() => {
+    if (!revealOnProgress) return
+    if (prevDoneRef.current !== null && done > prevDoneRef.current) {
+      setAutoReveal(REVEAL_FROST)
+      revealTimerRef.current = window.setTimeout(() => {
+        setAutoReveal(null)
+        revealTimerRef.current = null
+      }, REVEAL_MS)
+    }
+    prevDoneRef.current = done
+    return () => {
+      if (revealTimerRef.current !== null) {
+        window.clearTimeout(revealTimerRef.current)
+        revealTimerRef.current = null
+      }
+    }
+  }, [done, revealOnProgress])
+
+  // A manual interaction (slider / mode pick / hold-to-look) cancels any
+  // pending auto-return — the override already wins in `base` below, but
+  // this also stops the stale timer from later clearing a value nobody is
+  // showing anymore.
+  const cancelAutoReveal = useCallback(() => {
+    if (revealTimerRef.current !== null) {
+      window.clearTimeout(revealTimerRef.current)
+      revealTimerRef.current = null
+    }
+    setAutoReveal(null)
+  }, [])
+
+  const modeFrost = modePickedRef.current && mode !== null ? MODE_FROST[mode] : null
+  const restFrost = revealOnProgress ? REVEAL_REST_FROST : MODE_FROST[mode ?? defaultMode]
+  const autoFrost = revealOnProgress ? autoReveal : null
+  const base = manual ?? modeFrost ?? autoFrost ?? restFrost
   const t = peek || masteryClear ? 0 : base
 
   // Persist the resting frost (not the transient peek / mastery clear), and
@@ -213,24 +274,26 @@ export default function GlassBoardShell({
     e.preventDefault()
     // preventDefault suppresses focus; restore it so arrow keys work after a click (like a native range)
     trackRef.current?.focus()
+    cancelAutoReveal()
     frostFromEvent(e.clientX)
     setDragging(true)
   }
 
-  const nudge = (delta: number) => setManual(clamp01(Math.round((base + delta) * 100) / 100))
+  const nudge = (delta: number) => { cancelAutoReveal(); setManual(clamp01(Math.round((base + delta) * 100) / 100)) }
 
   const onTrackKey = (e: ReactKeyboardEvent<HTMLSpanElement>) => {
     // Track runs right→left, so ArrowLeft raises the frost (moves the thumb along the fill).
     if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); nudge(0.05) }
     else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nudge(-0.05) }
-    else if (e.key === 'Home') { e.preventDefault(); setManual(0) }
-    else if (e.key === 'End') { e.preventDefault(); setManual(1) }
+    else if (e.key === 'Home') { e.preventDefault(); cancelAutoReveal(); setManual(0) }
+    else if (e.key === 'End') { e.preventDefault(); cancelAutoReveal(); setManual(1) }
   }
 
   // ── Hold-to-look ──────────────────────────────────────────────────────────
   const onPeekDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
     e.preventDefault()
     try { e.currentTarget.setPointerCapture(e.pointerId) } catch { /* unsupported */ }
+    cancelAutoReveal()
     setPeek(true)
   }
   const onPeekRelease = () => setPeek(false)
@@ -238,11 +301,12 @@ export default function GlassBoardShell({
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault()
       if (e.repeat) return // one press = one toggle; holding the key must not flicker the glass
+      cancelAutoReveal()
       setPeek(p => !p)
     }
   }
 
-  const pickMode = (m: GlassMode) => () => { setMode(m); setManual(null) }
+  const pickMode = (m: GlassMode) => () => { modePickedRef.current = true; cancelAutoReveal(); setMode(m); setManual(null) }
 
   // ── Derived visuals ───────────────────────────────────────────────────────
   const pct = Math.round(t * 100)

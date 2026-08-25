@@ -4111,6 +4111,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           <BoardShell
             topicId={selectedTopic || undefined}
             progress={{ done: answeredCount, total }}
+            revealOnProgress
             topRightSlot={
               // paddingInline clears the board's 36px corner brackets (they sit
               // at inset 5 and paint at z-index 61, ON TOP of content — the

@@ -134,7 +134,11 @@ export default function CityBackdrop({ topicId, progress, frost, mastered: maste
     }
     return { points, end }
   }, [geo, pillRect, shiftNum])
-  const worldOpacity = (1 - Math.max(0, (t - 0.6) / 0.4) * 0.45).toFixed(2)
+  // Capped at ~0.55 max (even at t=0, fully "see-through") so the block never
+  // fights the ink for attention; still tapers further as frost climbs, on
+  // top of the blur/milk doing most of the hiding. Ground haze is untouched
+  // (it's a sibling of `world`, not part of this layer).
+  const worldOpacity = (0.55 * (1 - Math.max(0, (t - 0.6) / 0.4) * 0.45)).toFixed(2)
   const worldTransition = 'transform .5s cubic-bezier(.2,.7,.2,1), opacity .35s ease'
 
   const floorH = 100 / total
