@@ -507,7 +507,6 @@ body.light #minimap-collapse-btn{color:rgba(0,0,0,.55)}
 .wbo{position:absolute;box-sizing:border-box;pointer-events:all;border:2px solid #94a3b8;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;min-width:60px;min-height:36px;cursor:move;user-select:none;overflow:visible}
 .wbo:hover{box-shadow:0 2px 12px rgba(0,0,0,.15)}
 .wbo.wbo-sel{border-color:#D4AF37!important;box-shadow:0 0 0 3px rgba(212,175,55,.3)!important}
-.wbo.wbo-msel{border-color:#6366f1!important;box-shadow:0 0 0 3px rgba(99,102,241,.35)!important}
 .wbo[data-s=sticky]{background:#fef08a;border-color:#f59e0b;border-radius:4px}
 .wbo[data-s=circle]{border-radius:50%}
 .wbo[data-s=text]{background:transparent;border:2px dashed #cbd5e1;border-radius:4px;box-shadow:none}
@@ -5717,82 +5716,18 @@ function wbRedrawEquationLayer(){
     div.className='wb-eq-div';
     div.style.left=(WB.vp.x+o.x*WB.vp.s)+'px';
     div.style.top=(WB.vp.y+o.y*WB.vp.s)+'px';
-    // Use the object's stored (auto-fitted) size; fall back to a small default
-    // for objects that have not been measured yet. Measurement below will grow
-    // the box to wrap the rendered formula and persist w/h back onto `o`.
-    div.style.width=((o.w||120)*WB.vp.s)+'px';
-    div.style.height=((o.h||60)*WB.vp.s)+'px';
+    div.style.width=(120*WB.vp.s)+'px';
+    div.style.height=(60*WB.vp.s)+'px';
     div.style.pointerEvents='all';
     div.style.cursor='move';
     div.style.userSelect='none';
-    const isMSel = WB.multiSel && WB.multiSel.indexOf(o.id) !== -1;
-    if(o.id===WB.selId || isMSel){
+    if(o.id===WB.selId){
       div.style.outline='2px solid #6366f1';
       div.style.borderRadius='6px';
     }
     const content=document.createElement('div');
     renderKatex(o.latex||'\\frac{x}{2}',content);
     div.appendChild(content);
-
-    // Auto-fit: measure the rendered KaTeX and grow BOTH the stored object
-    // size and the div so the box wraps the whole formula (no clipping /
-    // overlap). Runs after the div is in the DOM so layout is measurable.
-    // The fitted w/h persist on `o` → survive reload, move and select.
-    const EQ_PAD = 14; // px of breathing room around the formula (scene units)
-    function fitEqBox(){
-      if(!content) return;
-      // Measure the CONTENT WRAPPER, not the inner .katex span: for multi-row
-      // blocks (\begin{gathered}) KaTeX's outer .katex element reports only the
-      // baseline row height via getBoundingClientRect, while the real rows
-      // overflow it — so measuring .katex undercounts the height badly. The
-      // content wrapper's box does enclose every row.
-      //
-      // The wrapper also sits in a flex box whose width/height are pinned to
-      // the (possibly too-small) current o.w/o.h, which would clamp the
-      // measurement. So briefly unconstrain the div, read the natural content
-      // size, then restore. KaTeX renders at natural (unscaled) px; the
-      // .wb-eq-div is sized as (o.w * WB.vp.s), so store o.w/o.h in scene units
-      // (natural px / scale). fitEqBox re-runs on every wbRedraw → self-corrects
-      // across zoom levels.
-      const s = WB.vp.s || 1;
-      const prevW = div.style.width, prevH = div.style.height;
-      const prevWS = content.style.whiteSpace;
-      div.style.width = 'auto'; div.style.height = 'auto';
-      content.style.whiteSpace = 'nowrap';
-      const cr = content.getBoundingClientRect();
-      const cwPx = Math.max(cr.width, content.scrollWidth, 1);
-      const chPx = Math.max(cr.height, content.scrollHeight, 1);
-      content.style.whiteSpace = prevWS;
-      const newW = Math.ceil(cwPx / s + EQ_PAD * 2);
-      const newH = Math.ceil(chPx / s + EQ_PAD * 2);
-      // restore the pinned size before the size-change branch decides final px
-      div.style.width = prevW; div.style.height = prevH;
-      if(!newW || !newH) return;
-      // Only persist + relayout when the size actually changed, to avoid an
-      // infinite redraw loop.
-      if(Math.abs((o.w||0) - newW) > 1 || Math.abs((o.h||0) - newH) > 1){
-        o.w = newW; o.h = newH;
-        div.style.width = (newW * WB.vp.s) + 'px';
-        div.style.height = (newH * WB.vp.s) + 'px';
-        // Persist the fitted size to localStorage WITHOUT a history push (a
-        // measurement is not a user edit) so it survives reload.
-        try{ if(typeof WB_SAVE_KEY!=='undefined') localStorage.setItem(WB_SAVE_KEY, JSON.stringify(WB.scene)); }catch(e){}
-      } else {
-        // Keep div in sync even when stored size is already correct.
-        div.style.width = ((o.w||newW) * WB.vp.s) + 'px';
-        div.style.height = ((o.h||newH) * WB.vp.s) + 'px';
-      }
-    }
-    // Measure on next frame (KaTeX may finish layout async) and once more after
-    // fonts settle, so multi-row \begin{gathered} blocks are sized correctly.
-    // Also schedule via setTimeout: requestAnimationFrame is paused while the
-    // tab/iframe is hidden (background), so a rAF-only fit would never run for
-    // an equation added off-screen. The timers fire regardless of visibility
-    // and fitEqBox is idempotent (no-op once the size already matches).
-    requestAnimationFrame(fitEqBox);
-    if(window.katex) requestAnimationFrame(()=>requestAnimationFrame(fitEqBox));
-    setTimeout(fitEqBox, 0);
-    setTimeout(fitEqBox, 60);
 
     // Drag
     div.addEventListener('mousedown', e => {
@@ -5989,10 +5924,6 @@ function drawPen(ctx,o){
 function objBB(o){
   if(o.type==='rect')return{x:o.x,y:o.y,w:o.w,h:o.h};
   if(o.type==='circle')return{x:o.cx-o.rx,y:o.cy-o.ry,w:o.rx*2,h:o.ry*2};
-  // Equation overlay-div objects: x,y = top-left; w,h = fitted content size
-  // (auto-fitted in wbRedrawEquationLayer). Needed so marquee select can pick
-  // equations and so the multi-select outline can be drawn around them.
-  if(o.type==='equation')return{x:o.x,y:o.y,w:o.w||120,h:o.h||60};
   if(o.type==='text')return{x:o.x,y:o.y-(o.size||14),w:100,h:o.size||14};
   if(o.type==='sticky')return{x:o.x,y:o.y,w:o.w,h:o.h};
   if(o.type==='table'){
@@ -6115,70 +6046,6 @@ function hitHandle(sx,sy,handles,tol=8){
 }
 
 const canvas=document.getElementById('wb-canvas');
-
-// ── Marquee select (Issue 3) ───────────────────────────────────────────────
-// The marquee may be released over a DOM overlay element (rect/circle/text/
-// sticky live in #wb-obj-layer, equations in #wb-eq-layer) which would swallow
-// a canvas-bound mouseup. wbStartMarqueeTracking installs document-level
-// move/up handlers so the drag updates and commits no matter what is under the
-// cursor. wbCommitMarquee performs the scene-coord hit-test and selection.
-let _wbMarqueeMove=null,_wbMarqueeUp=null;
-function wbStartMarqueeTracking(){
-  wbStopMarqueeTracking();
-  _wbMarqueeMove=function(e){
-    if(!WB.drag||WB.drag.type!=='marquee')return;
-    const P=wbEvtXY(e);
-    WB.drag.ex=P.x;WB.drag.ey=P.y;
-    wbRedraw();
-  };
-  _wbMarqueeUp=function(e){
-    if(WB.drag&&WB.drag.type==='marquee'){
-      const P=wbEvtXY(e);
-      WB.drag.ex=P.x;WB.drag.ey=P.y;
-      wbCommitMarquee();
-    }
-    wbStopMarqueeTracking();
-  };
-  document.addEventListener('mousemove',_wbMarqueeMove,true);
-  document.addEventListener('mouseup',_wbMarqueeUp,true);
-}
-function wbStopMarqueeTracking(){
-  if(_wbMarqueeMove){document.removeEventListener('mousemove',_wbMarqueeMove,true);_wbMarqueeMove=null;}
-  if(_wbMarqueeUp){document.removeEventListener('mouseup',_wbMarqueeUp,true);_wbMarqueeUp=null;}
-}
-function wbCommitMarquee(){
-  const d=WB.drag;
-  if(!d||d.type!=='marquee'){return;}
-  // Convert marquee canvas-pixel box → scene coords using current viewport transform.
-  const sceneStart=d.sceneStart;
-  const sceneEnd=sc2scene(d.ex,d.ey);
-  const x0=Math.min(sceneStart.x,sceneEnd.x),x1=Math.max(sceneStart.x,sceneEnd.x);
-  const y0=Math.min(sceneStart.y,sceneEnd.y),y1=Math.max(sceneStart.y,sceneEnd.y);
-  const moved=Math.hypot(d.ex-d.sx,d.ey-d.sy)>=4;
-  if(moved){
-    const picked=[];
-    for(const o of WB.scene){
-      if(o.type==='connector')continue;
-      // objBB now covers every overlay-div type too (rect/circle/text/sticky/
-      // table/equation), so the marquee hit-test includes them.
-      const bb=objBB(o);
-      if(!bb)continue;
-      // AABB intersection in scene coords (both box and objBB are scene-space).
-      if(bb.x+bb.w<x0||bb.x>x1||bb.y+bb.h<y0||bb.y>y1)continue;
-      picked.push(o.id);
-    }
-    WB.multiSel=picked;
-    WB.selId=picked.length===1?picked[0]:null;
-    if(picked.length===1)WB.multiSel=[];
-    // The drag may have ended over a DOM overlay element which would steal
-    // focus; refocus the canvas so the Delete/Backspace key handler (which
-    // requires document.activeElement===canvas) acts on the picked set.
-    if(picked.length){try{canvas.focus({preventScroll:true});}catch(e){try{canvas.focus();}catch(_){}}}
-  }
-  WB.drag=null;
-  wbRedraw();
-}
-
 canvas.addEventListener('keydown',e=>{
   if(e.code==='Space'){WB.spacePanning=true;document.getElementById('wb-canvas-wrap').classList.add('cur-panning');}
   if(e.key==='Escape'){ WB.selId=null; WB.multiSel=[]; WB._connDelBtn=null; if(WB.tool!=='select') wbTool('select'); else wbRedraw(); }
@@ -6346,12 +6213,6 @@ canvas.addEventListener('mousedown',e=>{
       WB.multiSel=[];
       WB.drag={type:'marquee', sx:P.x, sy:P.y, ex:P.x, ey:P.y, sceneStart:{x:sc.x,y:sc.y}};
       document.querySelectorAll('.wbo').forEach(x=>x.classList.remove('wbo-sel'));
-      // ISSUE 3: the DOM overlay layers (#wb-obj-layer / #wb-eq-layer) sit ABOVE
-      // the canvas with pointer-events:all. While dragging a marquee the cursor
-      // often passes over those elements, so canvas-bound mousemove/mouseup stop
-      // firing and the selection is never committed. Drive the marquee from the
-      // document level for the duration of the drag so release-anywhere works.
-      wbStartMarqueeTracking();
     }
     wbRedraw();
   }else if(WB.tool==='pen'){
@@ -6549,7 +6410,27 @@ canvas.addEventListener('mouseup',e=>{
   const d=WB.drag;
   if(!d)return;
   if(d.type==='marquee'){
-    wbCommitMarquee();
+    // Convert marquee canvas-pixel box → scene coords using current viewport transform.
+    const sceneStart = d.sceneStart;
+    const sceneEnd = sc2scene(d.ex, d.ey);
+    const x0 = Math.min(sceneStart.x, sceneEnd.x), x1 = Math.max(sceneStart.x, sceneEnd.x);
+    const y0 = Math.min(sceneStart.y, sceneEnd.y), y1 = Math.max(sceneStart.y, sceneEnd.y);
+    const moved = Math.hypot(d.ex-d.sx, d.ey-d.sy) >= 4;
+    if (moved) {
+      const picked = [];
+      for (const o of WB.scene) {
+        if (o.type === 'connector') continue;
+        const bb = objBB(o);
+        if (!bb) continue;
+        if (bb.x+bb.w < x0 || bb.x > x1 || bb.y+bb.h < y0 || bb.y > y1) continue;
+        picked.push(o.id);
+      }
+      WB.multiSel = picked;
+      WB.selId = picked.length === 1 ? picked[0] : null;
+      if (picked.length === 1) WB.multiSel = [];
+    }
+    WB.drag = null;
+    wbRedraw();
     return;
   }
   if(d.type==='connecting'){
@@ -6598,13 +6479,10 @@ canvas.addEventListener('mouseup',e=>{
   }else if(d.type==='draw'){
     if(d.preview.w>0&&d.preview.h>0||d.preview.type==='circle'&&(d.preview.rx>2||d.preview.ry>2)||d.preview.type==='line'||d.preview.type==='arrow'){
       WB.scene.push(d.preview);
-      // ISSUE 2: a freshly drawn shape must look NORMAL — no selection, no
-      // resize handles, no ✕ badge. Selection (and handles) appear only when
-      // the user later clicks the shape. So leave WB.selId cleared here and do
-      // NOT auto-focus the label / start text editing on create.
-      WB.selId=null;
-      WB.multiSel=[];
+      WB.selId=d.preview.id;
       wbPush();wbRedraw();
+      if(WB_DOM_TYPES.has(d.preview.type)){wboFocus(d.preview.id);}
+      else{WB.labelObj=d.preview;startTextEdit(d.preview,P.x,P.y);}
     }
   }else if(d.type==='resize'){
     wbPush();
@@ -8078,11 +7956,6 @@ function wboUpdate(el,o){
   }
   if(WB.selId===o.id)el.classList.add('wbo-sel');
   else el.classList.remove('wbo-sel');
-  // ISSUE 3: marquee multi-select highlight. The canvas-drawn multiSel outline
-  // is hidden behind these opaque DOM overlay elements, so mark the element
-  // itself when it is part of WB.multiSel.
-  if(WB.multiSel&&WB.multiSel.indexOf(o.id)!==-1)el.classList.add('wbo-msel');
-  else el.classList.remove('wbo-msel');
   const txt=el.querySelector('.wbo-txt');
   if(txt&&document.activeElement!==txt){
     if(txt.textContent!==wboGetText(o))txt.textContent=wboGetText(o);
