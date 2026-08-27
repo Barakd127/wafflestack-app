@@ -17,7 +17,7 @@ const $ = (sel) => document.querySelector(sel);
 const state = {
   coins: 20,
   rep: 0,
-  upgrades: { machine: 1, case: 0 },
+  upgrades: { machine: 0, case: 0 },
   staff: { tom: false, cat: false },
   decor: [],
   stats: { served: 0, walkouts: 0, earned: 0 },
@@ -105,20 +105,17 @@ function spawnCustomer() {
   };
   customers.push(cust);
   sfx.pop();
-  const spot = queueSpot(queueIndex());
   scene.walkTo(peep, scene.doorPos, () => {
+    // pick the spot at door time — people ahead may have left meanwhile
+    const inQ = customers.filter((c) => ['entering', 'queued', 'brewing'].includes(c.state));
+    const spot = queueSpot(Math.max(0, inQ.indexOf(cust)));
     scene.walkTo(peep, spot, () => {
       cust.state = 'queued';
       peep.faceTarget = Math.PI;   // face the counter
       speech(cust, cust.saidLine);
+      layoutQueue();               // settle onto the true free spot
     });
   });
-  cust.state = 'entering';
-  layoutQueue();
-}
-
-function queueIndex() {
-  return customers.filter((c) => ['entering', 'queued', 'brewing'].includes(c.state)).length - 1;
 }
 
 function queueSpot(i) {
@@ -209,12 +206,13 @@ function finishBrew(brew) {
   scene.brewingCount--;
   const cust = brew.cust;
   if (cust.state !== 'brewing') return;  // already stormed out
+  cust.state = 'serving';                // patience stops; can no longer storm out
   scene.flyServe(cust.item.glb, brew.station, cust.peep, () => serveDone(cust));
   sfx.serve();
 }
 
 function serveDone(cust) {
-  if (cust.gone) return;
+  if (cust.gone || cust.state !== 'serving') return;
   cust.state = 'served';
   const amb = ambience();
   const patienceFrac = Math.max(0.15, cust.patience / cust.patienceMax);
@@ -232,13 +230,14 @@ function serveDone(cust) {
   const seat = Math.random() < 0.55 ? scene.freeSeat() : null;
   if (seat) {
     seat.taken = true;
+    cust.seat = seat;               // released in removeCustomer if interrupted
     scene.walkTo(cust.peep, { x: seat.x, z: seat.z }, () => {
       cust.peep.faceTarget = Math.atan2(seat.table.x - seat.x, seat.table.z - seat.z);
       cust.cup = scene.placeCupOnTable(seat, cust.item.glb);
       setTimeout(() => {
-        seat.taken = false;
-        if (cust.cup) { scene.scene.remove(cust.cup); cust.cup = null; }
-        exitCafe(cust);
+        if (cust.seat) { cust.seat.taken = false; cust.seat = null; }
+        if (cust.cup) { scene.removeItem(cust.cup); cust.cup = null; }
+        if (!cust.gone) exitCafe(cust);
       }, 6000 + Math.random() * 8000);
     });
   } else {
@@ -271,6 +270,8 @@ function removeBubble(cust) {
 
 function removeCustomer(cust) {
   cust.gone = true;
+  if (cust.seat) { cust.seat.taken = false; cust.seat = null; }
+  if (cust.cup) { scene.removeItem(cust.cup); cust.cup = null; }
   removeBubble(cust);
   if (cust.speechEl) { cust.speechEl.remove(); cust.speechEl = null; }
   scene.removePeep(cust.peep);
@@ -320,8 +321,10 @@ function refreshHud() {
   const starsEl = $('#stars');
   const full = Math.floor(state.rep);
   const half = state.rep - full >= 0.5;
+  starsEl.setAttribute('role', 'img');
+  starsEl.setAttribute('aria-label', `מוניטין: ${state.rep.toFixed(1)} מתוך 5 כוכבים`);
   starsEl.innerHTML = Array.from({ length: 5 }, (_, i) =>
-    `<span class="star ${i < full ? 'full' : i === full && half ? 'half' : ''}">★</span>`
+    `<span class="star ${i < full ? 'full' : i === full && half ? 'half' : ''}" aria-hidden="true">★</span>`
   ).join('');
 }
 
@@ -410,7 +413,7 @@ function renderShop() {
   } else {
     for (const d of DECOR) {
       rows += buyRow({
-        icon: d.emoji, name: `${d.name} · אווירה +${d.ambience}`, desc: d.desc, cost: d.cost,
+        icon: d.emoji, name: `${d.name} · אווירה ‎+${d.ambience}`, desc: d.desc, cost: d.cost,
         owned: state.decor.includes(d.id), onBuy: `decor:${d.id}`,
       });
     }
@@ -443,7 +446,7 @@ shopEl.addEventListener('click', (e) => {
   if (!ok) { sfx.error(); return; }
   state.coins -= cost;
   sfx.buy();
-  toast('נרכש! הבית־קפה משתדרג 🎉');
+  toast('הרכישה בוצעה! בית־הקפה משתדרג 🎉');
   applyPurchaseEffects();
   renderShop();
   save();
@@ -454,21 +457,31 @@ $('#btn-shop').addEventListener('click', () => {
   const open = shopEl.classList.toggle('open');
   if (open) renderShop();
 });
+function reflectMute() {
+  const btn = $('#btn-mute');
+  btn.textContent = state.muted ? '🔇' : '🔊';
+  btn.setAttribute('aria-label', state.muted ? 'ביטול השתקה' : 'השתקה');
+}
 $('#btn-mute').addEventListener('click', () => {
   state.muted = !state.muted;
   setMuted(state.muted);
-  $('#btn-mute').textContent = state.muted ? '🔇' : '🔊';
+  reflectMute();
   save();
 });
 $('#btn-reset').addEventListener('click', () => {
   if (confirm('לפתוח בית קפה חדש? כל ההתקדמות תימחק!')) {
-    localStorage.removeItem(SAVE_KEY);
+    try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* storage blocked */ }
     location.reload();
   }
 });
 
-// close shop when tapping the world
-canvas.addEventListener('pointerdown', () => shopEl.classList.remove('open'));
+// close shop when tapping the world — and swallow that tap so it
+// doesn't also take an order through the now-closed sheet
+let tapClosedShop = false;
+canvas.addEventListener('pointerdown', () => {
+  tapClosedShop = shopEl.classList.contains('open');
+  shopEl.classList.remove('open');
+});
 
 // ---------------- input ----------------
 function customerAt(peep) {
@@ -490,7 +503,10 @@ function handleTap(x, y) {
   }
 }
 
-canvas.addEventListener('click', (e) => handleTap(e.clientX, e.clientY));
+canvas.addEventListener('click', (e) => {
+  if (tapClosedShop) { tapClosedShop = false; return; }
+  handleTap(e.clientX, e.clientY);
+});
 bubblesEl.addEventListener('click', (e) => {
   const b = e.target.closest('.bubble');
   if (!b) return;
@@ -539,7 +555,9 @@ function tick(dt) {
     if (baristaT[s.id] <= 0) {
       const waiting = customers.filter((c) => c.state === 'queued')
         .sort((a, b) => a.patience - b.patience);
-      if (waiting.length && tryTakeOrder(waiting[0], true)) {
+      // most-urgent first, but fall through if their station is full
+      const took = waiting.find((c) => tryTakeOrder(c, true));
+      if (took) {
         baristaT[s.id] = s.interval;
         if (s.id === 'cat' && Math.random() < 0.2) sfx.meow();
       } else {
@@ -573,13 +591,20 @@ function frame() {
 // ---------------- boot ----------------
 async function boot() {
   refreshHud();
-  $('#btn-mute').textContent = state.muted ? '🔇' : '🔊';
+  reflectMute();
   setMuted(state.muted);
 
   await scene.loadAssets((f) => {
     $('#load-bar i').style.width = (f * 100).toFixed(0) + '%';
   });
   applyPurchaseEffects();
+  // signs were rasterized with fallback fonts; redraw once webfonts land
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      scene.redrawText();
+      scene.updateMenuBoard(unlockedMenu(state).map((id) => MENU[id]));
+    });
+  }
   $('#loading').classList.add('done');
   $('#title').classList.remove('hidden');
   $('#btn-start').textContent = hasSave && state.stats.served > 0 ? 'המשך משמרת ☕' : 'פתחו את הדלתות! ☕';

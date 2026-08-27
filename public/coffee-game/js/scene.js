@@ -26,6 +26,35 @@ const SKINS = [PAL.skin1, PAL.skin2, PAL.skin3];
 function mat(color, opts = {}) {
   return new THREE.MeshStandardMaterial({ color, roughness: 0.9, metalness: 0.0, ...opts });
 }
+
+// Shared-resource caches: customers churn constantly, and three.js only
+// releases a geometry's GPU buffers on dispose(), so per-peep parts reuse
+// one geometry/material per shape/color instead of allocating fresh ones.
+const geoCache = new Map();
+function cachedGeo(key, make) {
+  let g = geoCache.get(key);
+  if (!g) { g = make(); g.userData.shared = true; geoCache.set(key, g); }
+  return g;
+}
+const matCache = new Map();
+function cachedMat(color) {
+  let m = matCache.get(color);
+  if (!m) { m = mat(color); m.userData.shared = true; matCache.set(color, m); }
+  return m;
+}
+// Free everything a removed node owns, skipping shared/cached resources
+// (peep parts, GLB-cloned meshes, sign textures kept for font redraws).
+function disposeNode(root) {
+  root.traverse((o) => {
+    if (o.geometry && !o.geometry.userData.shared) o.geometry.dispose();
+    const m = o.material;
+    if (m) (Array.isArray(m) ? m : [m]).forEach((mm) => {
+      if (mm.userData.shared) return;
+      if (mm.map && !(mm.map.userData && mm.map.userData.shared)) mm.map.dispose();
+      mm.dispose();
+    });
+  });
+}
 function rbox(w, h, d, color, r = 0.06, opts = {}) {
   const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 3, Math.min(r, w / 2, h / 2, d / 2)), mat(color, opts));
   m.castShadow = true; m.receiveShadow = true;
@@ -42,7 +71,9 @@ function sph(r, color, opts = {}) {
   return m;
 }
 
-// Canvas-texture helper for signs/boards (RTL text works via ctx.direction)
+// Canvas-texture helper for signs/boards (RTL text works via ctx.direction).
+// Every texture is registered so text can be redrawn once web fonts load.
+const textTextures = [];
 function canvasTexture(w, h, draw) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
@@ -52,6 +83,8 @@ function canvasTexture(w, h, draw) {
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 4;
+  t.userData.shared = true;
+  textTextures.push({ t, c, draw });
   return t;
 }
 
@@ -116,7 +149,12 @@ export class CafeScene {
             node.traverse((o) => {
               if (o.isMesh) {
                 o.castShadow = true; o.receiveShadow = true;
-                if (o.material) { o.material.roughness = 0.9; o.material.metalness = 0; }
+                // clones share these — mark them so disposeNode leaves them alone
+                o.geometry.userData.shared = true;
+                if (o.material) {
+                  o.material.roughness = 0.9; o.material.metalness = 0;
+                  o.material.userData.shared = true;
+                }
               }
             });
             this.models[key] = node;
@@ -136,7 +174,11 @@ export class CafeScene {
       node = this.models[key].clone(true);
     } else {
       node = new THREE.Group();
-      const box = rbox(0.5, 0.4, 0.5, PAL.wood, 0.1);
+      const box = new THREE.Mesh(
+        cachedGeo('fallbackBox', () => new RoundedBoxGeometry(0.5, 0.4, 0.5, 3, 0.1)),
+        cachedMat(PAL.wood)
+      );
+      box.castShadow = true;
       box.position.y = 0.2;
       node.add(box);
     }
@@ -424,8 +466,10 @@ export class CafeScene {
 
   // Espresso machine, rebuilt per level (bigger & shinier as it grows)
   setMachineLevel(level) {
-    if (this.machineNode) this.scene.remove(this.machineNode);
     const lv = Math.max(1, level);
+    if (this._machineLv === lv) return;
+    this._machineLv = lv;
+    if (this.machineNode) { this.scene.remove(this.machineNode); disposeNode(this.machineNode); }
     const g = new THREE.Group();
     const W = 0.9 + lv * 0.28;
     const bodyCol = [0xcabfae, 0xe4574f, 0x3d3a4a][Math.min(lv - 1, 2)];
@@ -478,7 +522,9 @@ export class CafeScene {
 
   // Pastry display case, rebuilt per level, filled with real Kenney pastries
   setCaseLevel(level) {
-    if (this.caseNode) this.scene.remove(this.caseNode);
+    if (this._caseLv === level) return;
+    this._caseLv = level;
+    if (this.caseNode) { this.scene.remove(this.caseNode); disposeNode(this.caseNode); }
     const g = new THREE.Group();
     if (level >= 1) {
       const base = rbox(1.7, 0.9, 1.0, PAL.wood, 0.06);
@@ -534,59 +580,71 @@ export class CafeScene {
   _peepNode({ body = 0xff9a76, hat = 'none', skin }) {
     const g = new THREE.Group();
     const s = skin ?? SKINS[Math.floor(Math.random() * SKINS.length)];
-    const bod = new THREE.Mesh(new THREE.CapsuleGeometry(0.21, 0.34, 6, 14), mat(body));
+    // every part uses cached geometry + per-color cached material
+    const part = (geoKey, makeGeo, color) => {
+      const m = new THREE.Mesh(cachedGeo(geoKey, makeGeo), cachedMat(color));
+      m.castShadow = true;
+      g.add(m);
+      return m;
+    };
+    const sphereGeo = () => new THREE.SphereGeometry(0.2, 20, 16);
+    const bod = part('peep-body', () => new THREE.CapsuleGeometry(0.21, 0.34, 6, 14), body);
     bod.position.y = 0.48;
-    bod.castShadow = true;
-    g.add(bod);
-    const head = sph(0.2, s);
+    const head = part('peep-head', sphereGeo, s);
     head.position.y = 1.02;
-    g.add(head);
     // little face
-    const eyeM = new THREE.MeshBasicMaterial({ color: 0x2b2b2b });
+    if (!this.constructor._eyeM) {
+      this.constructor._eyeM = new THREE.MeshBasicMaterial({ color: 0x2b2b2b });
+      this.constructor._eyeM.userData.shared = true;
+      this.constructor._blushM = new THREE.MeshBasicMaterial({ color: 0xff9a90, transparent: true, opacity: 0.55 });
+      this.constructor._blushM.userData.shared = true;
+      this.constructor._hitM = new THREE.MeshBasicMaterial({ visible: false });
+      this.constructor._hitM.userData.shared = true;
+    }
     [-0.075, 0.075].forEach((dx) => {
-      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.023, 8, 8), eyeM);
+      const eye = new THREE.Mesh(cachedGeo('peep-eye', () => new THREE.SphereGeometry(0.023, 8, 8)), this.constructor._eyeM);
       eye.position.set(dx, 1.06, 0.18);
       g.add(eye);
     });
-    const blushM = new THREE.MeshBasicMaterial({ color: 0xff9a90, transparent: true, opacity: 0.55 });
     [-0.13, 0.13].forEach((dx) => {
-      const b = new THREE.Mesh(new THREE.CircleGeometry(0.03, 10), blushM);
+      const b = new THREE.Mesh(cachedGeo('peep-blush', () => new THREE.CircleGeometry(0.03, 10)), this.constructor._blushM);
       b.position.set(dx, 1.0, 0.185);
       g.add(b);
     });
-    // hats & hair
+    // hats & hair (dome hats reuse the head sphere, squashed via scale)
     const hatCol = 0x4a4a55;
     if (hat === 'beanie') {
-      const h = sph(0.2, 0xc9553e); h.scale.y = 0.62; h.position.y = 1.14; g.add(h);
-      const pom = sph(0.06, PAL.cream); pom.position.y = 1.3; g.add(pom);
+      const h = part('peep-head', sphereGeo, 0xc9553e); h.scale.y = 0.62; h.position.y = 1.14;
+      const pom = part('peep-pom', () => new THREE.SphereGeometry(0.06, 10, 8), PAL.cream); pom.position.y = 1.3;
     } else if (hat === 'bun') {
-      const h = sph(0.2, 0xdedede); h.scale.y = 0.55; h.position.y = 1.14; g.add(h);
-      const bun = sph(0.09, 0xdedede); bun.position.set(0, 1.24, -0.1); g.add(bun);
+      const h = part('peep-head', sphereGeo, 0xdedede); h.scale.y = 0.55; h.position.y = 1.14;
+      const bun = part('peep-bun', () => new THREE.SphereGeometry(0.09, 10, 8), 0xdedede); bun.position.set(0, 1.24, -0.1);
     } else if (hat === 'messybun') {
-      const h = sph(0.2, 0x6f4e37); h.scale.y = 0.55; h.position.y = 1.14; g.add(h);
-      const bun = sph(0.1, 0x6f4e37); bun.position.set(0.06, 1.27, -0.06); g.add(bun);
+      const h = part('peep-head', sphereGeo, 0x6f4e37); h.scale.y = 0.55; h.position.y = 1.14;
+      const bun = part('peep-mbun', () => new THREE.SphereGeometry(0.1, 10, 8), 0x6f4e37); bun.position.set(0.06, 1.27, -0.06);
     } else if (hat === 'cap') {
-      const h = sph(0.21, PAL.pink); h.scale.y = 0.5; h.position.y = 1.15; g.add(h);
-      const brim = cyl(0.14, 0.14, 0.03, PAL.pink, 14);
-      brim.position.set(0, 1.12, 0.2); g.add(brim);
+      const h = part('peep-head', sphereGeo, PAL.pink); h.scale.set(1.05, 0.5, 1.05); h.position.y = 1.15;
+      const brim = part('peep-capbrim', () => new THREE.CylinderGeometry(0.14, 0.14, 0.03, 14), PAL.pink);
+      brim.position.set(0, 1.12, 0.2);
     } else if (hat === 'headphones') {
-      const band = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.03, 8, 20, Math.PI), mat(hatCol));
-      band.position.y = 1.05; band.rotation.z = 0; g.add(band);
+      const band = part('peep-band', () => new THREE.TorusGeometry(0.2, 0.03, 8, 20, Math.PI), hatCol);
+      band.position.y = 1.05;
       [-0.2, 0.2].forEach((dx) => {
-        const pad = cyl(0.07, 0.07, 0.05, hatCol, 10);
+        const pad = part('peep-pad', () => new THREE.CylinderGeometry(0.07, 0.07, 0.05, 10), hatCol);
         pad.rotation.z = Math.PI / 2;
-        pad.position.set(dx, 1.02, 0); g.add(pad);
+        pad.position.set(dx, 1.02, 0);
       });
     } else if (hat === 'sunhat') {
-      const h = cyl(0.16, 0.18, 0.12, 0xf2d98c, 14); h.position.y = 1.2; g.add(h);
-      const brim = cyl(0.3, 0.32, 0.03, 0xf2d98c, 18); brim.position.y = 1.14; g.add(brim);
+      const h = part('peep-sunhat', () => new THREE.CylinderGeometry(0.16, 0.18, 0.12, 14), 0xf2d98c); h.position.y = 1.2;
+      const brim = part('peep-sunbrim', () => new THREE.CylinderGeometry(0.3, 0.32, 0.03, 18), 0xf2d98c); brim.position.y = 1.14;
     } else if (hat === 'fedora') {
-      const h = cyl(0.13, 0.15, 0.14, 0x2e2b38, 14); h.position.y = 1.21; g.add(h);
-      const brim = cyl(0.26, 0.28, 0.03, 0x2e2b38, 18); brim.position.y = 1.13; g.add(brim);
+      const h = part('peep-fedora', () => new THREE.CylinderGeometry(0.13, 0.15, 0.14, 14), 0x2e2b38); h.position.y = 1.21;
+      const brim = part('peep-fedbrim', () => new THREE.CylinderGeometry(0.26, 0.28, 0.03, 18), 0x2e2b38); brim.position.y = 1.13;
     }
     // invisible pick target (fat, easy to tap)
-    const hit = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 1.5, 8), new THREE.MeshBasicMaterial({ visible: false }));
+    const hit = new THREE.Mesh(cachedGeo('peep-hit', () => new THREE.CylinderGeometry(0.42, 0.42, 1.5, 8)), this.constructor._hitM);
     hit.position.y = 0.7;
+    hit.castShadow = false;
     g.add(hit);
     g.userData.hit = hit;
     return g;
@@ -617,8 +675,26 @@ export class CafeScene {
   removePeep(peep) {
     peep.gone = true;
     this.scene.remove(peep.node);
+    disposeNode(peep.node);
     const i = this.peeps.indexOf(peep);
     if (i >= 0) this.peeps.splice(i, 1);
+  }
+
+  // remove + free a transient item (table cup, flyer, fallback prop)
+  removeItem(node) {
+    this.scene.remove(node);
+    disposeNode(node);
+  }
+
+  // re-rasterize all canvas-text signs (called once web fonts arrive)
+  redrawText() {
+    for (const e of textTextures) {
+      const ctx = e.c.getContext('2d');
+      ctx.clearRect(0, 0, e.c.width, e.c.height);
+      ctx.direction = 'rtl';
+      e.draw(ctx, e.c.width, e.c.height);
+      e.t.needsUpdate = true;
+    }
   }
 
   shake(peep) { peep.shakeT = 0.6; }
@@ -940,10 +1016,14 @@ export class CafeScene {
           d.normalize();
           p.node.position.addScaledVector(d, Math.min(p.speed * dt, dist));
           const ang = Math.atan2(d.x, d.z);
-          p.node.rotation.y += (ang - p.node.rotation.y) * Math.min(1, dt * 10);
+          let da = ang - p.node.rotation.y;
+          da = Math.atan2(Math.sin(da), Math.cos(da));  // shortest-path turn
+          p.node.rotation.y += da * Math.min(1, dt * 10);
         }
-      } else if (!p.walking && p.faceTarget) {
-        p.node.rotation.y += (p.faceTarget - p.node.rotation.y) * Math.min(1, dt * 6);
+      } else if (!p.walking && p.faceTarget !== undefined && p.faceTarget !== null) {
+        let da = p.faceTarget - p.node.rotation.y;
+        da = Math.atan2(Math.sin(da), Math.cos(da));
+        p.node.rotation.y += da * Math.min(1, dt * 6);
       }
       let y = bob;
       if (p.jumpT > 0) { p.jumpT -= dt; y += Math.sin((1 - p.jumpT / 0.5) * Math.PI) * 0.35; }
@@ -970,7 +1050,7 @@ export class CafeScene {
       s.sp.position.x += Math.sin(t * 3 + s.sway) * dt * 0.15;
       s.sp.material.opacity = Math.max(0, 0.85 * (1 - s.t / s.life));
       s.sp.scale.multiplyScalar(1 + dt * 0.8);
-      if (s.t >= s.life) { this.scene.remove(s.sp); this.steam.splice(i, 1); }
+      if (s.t >= s.life) { this.scene.remove(s.sp); s.sp.material.dispose(); this.steam.splice(i, 1); }
     }
     for (let i = this.notes.length - 1; i >= 0; i--) {
       const n = this.notes[i];
@@ -978,7 +1058,7 @@ export class CafeScene {
       n.sp.position.y += dt * 0.55;
       n.sp.position.x = n.x + Math.sin(n.t * 4) * 0.15;
       n.sp.material.opacity = Math.max(0, 1 - n.t / n.life);
-      if (n.t >= n.life) { this.scene.remove(n.sp); this.notes.splice(i, 1); }
+      if (n.t >= n.life) { this.scene.remove(n.sp); n.sp.material.dispose(); this.notes.splice(i, 1); }
     }
 
     // flying served items (little arc)
@@ -991,7 +1071,7 @@ export class CafeScene {
       f.it.position.y += Math.sin(k * Math.PI) * 0.9;
       f.it.rotation.y += dt * 6;
       if (k >= 1) {
-        this.scene.remove(f.it);
+        this.removeItem(f.it);
         this.flyers.splice(i, 1);
         f.done && f.done();
       }
