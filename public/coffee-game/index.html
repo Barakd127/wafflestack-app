@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>תפוס את הפול! ☕ טייקון בית הקפה</title>
+  <meta name="description" content="משחק ניהול בית קפה מטורלל בהשראת Seize the Bean, בנוי עם נכסי Kenney (CC0) בסגנון MakeRoom." />
+  <meta name="theme-color" content="#f7b98a" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;900&family=Playpen+Sans+Hebrew:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.min.js" } }
+  </script>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <!-- speech bubbles / orders float here, projected from 3D -->
+  <div id="bubbles"></div>
+
+  <header id="hud">
+    <div class="pill" id="coins">₪0</div>
+    <div class="pill" id="stars"></div>
+    <div class="pill" title="אווירה">🛋️ <span id="amb">0</span></div>
+    <div class="hud-spacer"></div>
+    <button class="icon-btn" id="btn-mute" title="השתקה">🔊</button>
+    <button class="icon-btn" id="btn-reset" title="משחק חדש">🔄</button>
+  </header>
+
+  <div id="toasts"></div>
+
+  <footer id="bottombar">
+    <button id="btn-shop">🛠️ החנות של הקפה</button>
+  </footer>
+  <section id="shop" aria-label="חנות שדרוגים"></section>
+
+  <div id="title" class="hidden">
+    <div class="title-card">
+      <div class="badge-row">☕ 🧇 🥐</div>
+      <h1>תפוס את הפול!</h1>
+      <p class="sub">טייקון בית־הקפה המטורלל של השכונה</p>
+      <p class="sub">הגישו לכל המשוגעים לדבר, שדרגו את המכונה,<br />ועצבו את החדר עד חמישה כוכבים ⭐</p>
+      <button id="btn-start">פתחו את הדלתות! ☕</button>
+      <p class="tiny">
+        משחק דמו · בהשראת <bdi dir="ltr">MakeRoom</bdi> ושל <bdi dir="ltr">Seize the Bean</bdi><br />
+        מודלים תלת־ממדיים: <bdi dir="ltr">Kenney.nl</bdi> (רישיון CC0) 🎨
+      </p>
+    </div>
+  </div>
+
+  <div id="loading">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+      <div class="load-cup">☕</div>
+      <div id="load-bar"><i></i></div>
+      <div style="font-weight:700;color:#6f4e37">טוחנים פולים טריים...</div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/game.js"></script>
+</body>
+</html>
