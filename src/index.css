@@ -610,3 +610,36 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
     line-height: 1.7 !important;
   }
 }
+
+/* ── Quiz tray (layout='tray', quiz board only — scoped under
+   .ws-glass-board--tray so the whiteboard and the lesson glass board are
+   never touched) ──────────────────────────────────────────────────────────
+   The app sets its own margins inline on the stem/grid/hint/ask/controls
+   row/footer (StudyHub.tsx), tuned for the old full-height whiteboard
+   column. Inside the (shorter) sheet those add up to a cramped, uneven
+   rhythm, so every block below gets a tighter, evenly-stepped gap instead.
+   All !important — beating the same inline styles the whiteboard still
+   relies on elsewhere. */
+.ws-glass-board--tray .ws-quiz-stem { margin-bottom: 12px !important; }
+.ws-glass-board--tray .ws-quiz-grid { margin-bottom: 10px !important; }
+.ws-glass-board--tray .ws-quiz-hint { margin-bottom: 8px !important; opacity: 0.85; }
+.ws-glass-board--tray .ws-quiz-ask { margin-bottom: 8px !important; }
+.ws-glass-board--tray .ws-quiz-controls-row { padding-top: 2px; }
+.ws-glass-board--tray .ws-quiz-skip { opacity: 0.75; transition: opacity 0.15s; }
+.ws-glass-board--tray .ws-quiz-skip:hover { opacity: 1; }
+/* Footer nav: the app makes it `position: sticky; bottom: 0` with
+   `margin-top: auto` so it hugs the bottom of a TALL whiteboard column even
+   on a short question. The tray's reading area is much shorter, so on a
+   full 4-option MC question that combination goes the wrong way: sticky
+   pins the footer to the bottom of the (short) visible scroll port BEFORE
+   its natural flow position, and it ends up stacked on top of the controls
+   row above it instead of after it. Pinning to the sheet isn't needed here
+   (the sheet itself is already the fixed surface) — taking sticky out of
+   the picture puts the footer back in plain document flow, so long content
+   just scrolls as one column instead of overlapping. */
+.ws-glass-board--tray .ws-quiz-footer {
+  position: static !important;
+  margin-top: 8px !important;
+  padding-top: 8px !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.65) 55%) !important;
+}

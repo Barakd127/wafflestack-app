@@ -4112,6 +4112,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             topicId={selectedTopic || undefined}
             progress={{ done: answeredCount, total }}
             revealOnProgress
+            layout="tray"
             topRightSlot={
               // paddingInline clears the board's 36px corner brackets (they sit
               // at inset 5 and paint at z-index 61, ON TOP of content — the
@@ -4237,7 +4238,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   math must stay math, and it stays LTR-isolated. */}
               {/* Gveret Levin sits smaller on the line than a print face, so
                   the hand sizes run ~3px larger than the sans equivalents. */}
-              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 25 : 19, color: 'var(--sh-q-text-color)', lineHeight: 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: bigBoard ? 20 : 16, width: '100%' }}>
+              <div className="ws-quiz-stem" style={{ fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 25 : 19, color: 'var(--sh-q-text-color)', lineHeight: 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: bigBoard ? 20 : 16, width: '100%' }}>
                 <MathText text={q.text} />
               </div>
 
@@ -4247,7 +4248,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                      2026-05-24: max-width + auto margins to center the grid
                      so answers don't push right of the question text. ── */
                 <>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: bigBoard ? 16 : 10, marginBottom: 14, maxWidth: bigBoard ? 1180 : 640, marginInline: 'auto', placeItems: 'stretch', justifyItems: 'stretch' }} dir="rtl">
+                <div className="ws-quiz-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: bigBoard ? 16 : 10, marginBottom: 14, maxWidth: bigBoard ? 1180 : 640, marginInline: 'auto', placeItems: 'stretch', justifyItems: 'stretch' }} dir="rtl">
                   {((q as any).options as string[]).map((opt: string, idx: number) => {
                     const correctIdx: number = (q as any).correctIndex
                     const isChosen = mcSelected === idx
@@ -4333,7 +4334,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   })}
                 </div>
                 {mcSelected === null && (
-                  <div style={{ textAlign: 'center', fontSize: 12, color: 'rgba(31,62,108,0.55)', marginBottom: 10, fontFamily: "'Assistant', sans-serif" }} dir="rtl">💡 אפשר גם במקלדת — לחצו A–D או 1–4</div>
+                  <div className="ws-quiz-hint" style={{ textAlign: 'center', fontSize: 12, color: 'rgba(31,62,108,0.55)', marginBottom: 10, fontFamily: "'Assistant', sans-serif" }} dir="rtl">💡 אפשר גם במקלדת — לחצו A–D או 1–4</div>
                 )}
                 {/* Reinforcement on a CORRECT answer — show the explanation.
                     Was missing: correct answers auto-skipped with zero learning,
@@ -4371,7 +4372,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               )}
 
               {/* ── 🙋 שאל בן אדם — escalate a stuck question to Barak ── */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }} dir="rtl">
+              <div className="ws-quiz-ask" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }} dir="rtl">
                 {(!helpStatus) && (
                   <button
                     type="button"
@@ -4420,11 +4421,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 )}
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_LIGHT, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleSkip}>דלג</span>
+              <div className="ws-quiz-controls-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span className="ws-quiz-skip" style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_LIGHT, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleSkip}>דלג</span>
 
                 {/* Dots — clickable navigation */}
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <div className="ws-quiz-dots" style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   {dotStates.map((state, i) => {
                     const bg = state === 'correct' ? '#34A853' : state === 'wrong' ? '#EA4335' : state === 'current' ? BUTTON_COLOR : '#D8E0F0'
                     const isClickable = state === 'correct' || state === 'wrong' || state === 'current'
@@ -4585,7 +4586,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                long stem scrolls). Chalk-ish buttons so it reads as part of the
                board, not as app chrome. ── */}
           {boardFullBleed && !isDone && (
-            <div style={{
+            <div className="ws-quiz-footer" style={{
               marginTop: 'auto',
               position: 'sticky',
               bottom: 0,

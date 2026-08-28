@@ -40,6 +40,16 @@ export interface GlassBoardShellProps extends WhiteboardShellProps {
    * false — the lesson board is unaffected.
    */
   revealOnProgress?: boolean
+  /**
+   * 'plain' (default) — today's board: the ink column floats directly on the
+   * frosted glass, full height.
+   * 'tray' — quiz-only "question tray" (approved direction A): the content
+   * column becomes its own brighter, calmer glass sheet with a fixed edge
+   * (radius, border, shadow) occupying the top ~70% of the board. The sheet
+   * has a CONSTANT look — it does not react to the frost slider/mode/peek —
+   * only the city strip below its gold hairline does. See TRAY_* constants.
+   */
+  layout?: 'plain' | 'tray'
 }
 
 const MODE_FROST: Record<GlassMode, number> = { focus: 0.85, demo: 0.4, city: 0 }
@@ -59,6 +69,16 @@ const REVEAL_REST_FROST = 0.92
 const REVEAL_FROST = 0.4
 const REVEAL_MS = 2600
 const TOAST_MS = 3200
+// Tray layout (quiz question tray, direction A) — the sheet's own fixed
+// geometry. Inset from the board edge on 3 sides; its bottom edge is raised
+// so TRAY_CITY_PCT of the board height stays a city strip below it.
+const TRAY_INSET = 16
+// Design asked for "roughly 30%" (roughly two-thirds sheet / one-third city) —
+// nudged to 27 so the sheet has enough room for a 4-option MC question's
+// stem + grid + hint + ask-human + the controls row without scrolling on a
+// typical laptop viewport. Long content still scrolls inside the sheet
+// (never past the hairline) rather than being cut off.
+const TRAY_CITY_PCT = 26
 const GOLD = '#D4AF37'
 const GOLD_LIGHT = '#F5C842'
 const DEEP_NAVY = '#0B1B3E'
@@ -141,7 +161,9 @@ export default function GlassBoardShell({
   onMastered,
   defaultMode = 'focus',
   revealOnProgress = false,
+  layout = 'plain',
 }: GlassBoardShellProps) {
+  const tray = layout === 'tray'
   // Initial frost: the session's last value (if any) wins over the default mode.
   // If it matches a mode exactly that mode is lit; otherwise it's a manual override.
   const [mode, setMode] = useState<GlassMode | null>(() => {
@@ -328,7 +350,7 @@ export default function GlassBoardShell({
   return (
     <div
       dir="rtl"
-      className="ws-glass-board"
+      className={tray ? 'ws-glass-board ws-glass-board--tray' : 'ws-glass-board'}
       style={{
         position: 'relative',
         width: '100%',
@@ -400,17 +422,79 @@ export default function GlassBoardShell({
         }}
       />
 
+      {/* Tray sheet (layout='tray' only) — the question's own reading surface,
+          brighter and calmer than the frosted pane behind it. Its look is a
+          CONSTANT: no dependency on `t` anywhere in this block — only the
+          city strip below the hairline reacts to frost. Painted after the
+          dot grid (on top of it) and before the ink column (which sits on
+          top of the sheet). */}
+      {tray && (
+        <>
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: TRAY_INSET,
+              left: TRAY_INSET,
+              right: TRAY_INSET,
+              bottom: `${TRAY_CITY_PCT}%`,
+              zIndex: 8,
+              pointerEvents: 'none',
+              borderRadius: 20,
+              background: 'linear-gradient(155deg, rgba(255,255,255,0.88), rgba(214,230,255,0.55) 55%, rgba(255,255,255,0.84))',
+              backdropFilter: 'blur(26px) saturate(160%)',
+              WebkitBackdropFilter: 'blur(26px) saturate(160%)',
+              border: '1px solid rgba(255,255,255,0.55)',
+              boxShadow: '0 16px 40px rgba(11,27,62,0.28), inset 0 1px 0 rgba(255,255,255,0.6)',
+            }}
+          />
+          {/* Sheet sheen — top-right corner highlight, matching the approved artboard */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: TRAY_INSET,
+              right: TRAY_INSET,
+              width: '52%',
+              height: '34%',
+              zIndex: 8,
+              pointerEvents: 'none',
+              borderRadius: '20px 20px 0 0',
+              background: 'linear-gradient(200deg, rgba(255,255,255,0.55), rgba(255,255,255,0) 65%)',
+            }}
+          />
+          {/* Gold hairline — where the sheet ends and the city begins */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              left: 32,
+              right: 32,
+              bottom: `calc(${TRAY_CITY_PCT}% - 1px)`,
+              zIndex: 9,
+              height: 1,
+              pointerEvents: 'none',
+              background: `linear-gradient(90deg, rgba(212,175,55,0) 0%, rgba(212,175,55,0.45) 15%, rgba(212,175,55,0.45) 85%, rgba(212,175,55,0) 100%)`,
+            }}
+          />
+        </>
+      )}
+
       {/* Ink column — same geometry as WhiteboardShell's content column, with
           room for the dock at the bottom. The legibility guard (backplate +
-          etched text) is CSS-driven via the modifier classes (index.css). */}
+          etched text) is CSS-driven via the modifier classes (index.css).
+          In 'tray' layout the column IS the sheet's reading area: it shares
+          the sheet's inset/bottom edge and gets the sheet's own inner
+          padding, instead of the plain layout's flush 28px offset. */}
       <div
         className={inkClass}
         style={{
           position: 'absolute',
-          top: 28,
-          left: 28,
-          right: 28,
-          bottom: 108,
+          top: tray ? TRAY_INSET : 28,
+          left: tray ? TRAY_INSET : 28,
+          right: tray ? TRAY_INSET : 28,
+          bottom: tray ? `${TRAY_CITY_PCT}%` : 108,
+          padding: tray ? '28px 32px' : undefined,
           display: 'flex',
           flexDirection: 'column',
           zIndex: 10,
@@ -418,8 +502,11 @@ export default function GlassBoardShell({
       >
         {topRightSlot && (
           // paddingInlineEnd clears the mode control (left:30, ~250px wide) so a
-          // slot item pushed to inline-end (the quiz's 'שאלה N / M' counter) is not drawn under it
-          <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'flex-start', marginBottom: 10, minHeight: 22, paddingInlineEnd: 260 }}>
+          // slot item pushed to inline-end (the quiz's 'שאלה N / M' counter) is
+          // not drawn under it. In 'tray' layout the mode control has moved
+          // down into the city band (it must not overlap the sheet), so the
+          // slot no longer needs the clearance.
+          <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'flex-start', marginBottom: 10, minHeight: 22, paddingInlineEnd: tray ? 0 : 260 }}>
             {topRightSlot}
           </div>
         )}
@@ -458,21 +545,21 @@ export default function GlassBoardShell({
         </div>
       )}
 
-      {/* Modes — segmented glass control, top-left (never touches the breadcrumb on the right) */}
+      {/* Modes — segmented glass control. Plain layout: top-left, floating on
+          the glass (never touches the breadcrumb on the right). Tray layout:
+          the top-left is the sheet's reading surface now, so the control
+          moves down into the city band instead — stacked directly above the
+          dock, sharing its left:96 (already clear of the tutor FAB). Bottom-
+          right in the city band is CityBackdrop's own building/floor pill
+          (fixed right:30 bottom:24, see CityBackdrop.tsx) — stacking on the
+          LEFT above the dock, rather than the right, is what keeps the two
+          from ever colliding regardless of how long the pill's text gets. */}
       <div
         role="group"
         aria-label="מצב הזכוכית"
-        style={{
-          position: 'absolute',
-          left: 30,
-          top: 24,
-          zIndex: 12,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-          padding: 4,
-          ...pillStyle,
-        }}
+        style={tray
+          ? { position: 'absolute', left: 96, bottom: 78, zIndex: 12, display: 'flex', alignItems: 'center', gap: 2, padding: 4, ...pillStyle }
+          : { position: 'absolute', left: 30, top: 24, zIndex: 12, display: 'flex', alignItems: 'center', gap: 2, padding: 4, ...pillStyle }}
       >
         {MODES.map(m => {
           const lit = active === m
