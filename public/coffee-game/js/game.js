@@ -1,32 +1,34 @@
 // ============================================================
-// game.js — state, customer lifecycle, economy, DOM UI.
+// game.js v2 — day/shift structure, prep mini-games, non-verbal
+// customers (emoji emotes + body language, zero dialogue).
 // The 3D world is CafeScene (scene.js); content is data.js.
 // ============================================================
 
 import { CafeScene } from './scene.js';
-import { sfx, setMuted, isMuted } from './audio.js';
+import { sfx, setMuted } from './audio.js';
 import {
-  MENU, PERSONAS, UPGRADES, STAFF, DECOR,
-  REVIEWS, HINTS, STAR_THRESHOLD_LINES, unlockedMenu,
+  MENU, STATIONS, PERSONAS, UPGRADES, STAFF, DECOR, HINTS,
+  DAY_LENGTH, unlockedMenu, spawnIntervalFor,
 } from './data.js';
 
-const SAVE_KEY = 'seize-habul-save-v1';
+const SAVE_KEY = 'seize-habul-save-v2';
 const $ = (sel) => document.querySelector(sel);
 
 // ---------------- state ----------------
 const state = {
   coins: 20,
   rep: 0,
+  day: 1,
   upgrades: { machine: 0, case: 0 },
   staff: { tom: false, cat: false },
   decor: [],
-  stats: { served: 0, walkouts: 0, earned: 0 },
+  stats: { served: 0, walkouts: 0, earned: 0, perfects: 0 },
   hintsSeen: 0,
   muted: false,
 };
 
 function save() {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) { /* private mode etc. */ }
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) { /* blocked */ }
 }
 function load() {
   try {
@@ -57,23 +59,21 @@ function ambience() {
 const canvas = $('#scene');
 const scene = new CafeScene(canvas);
 window.addEventListener('resize', () => scene.resize());
+const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------------- run state ----------------
+let phase = 'title';           // title | prep | rush | summary
+let dayTime = 0;
+let spawnT = 0;
+const customers = [];
+const brews = [];              // staff-prepared orders: {cust, t, total, staffId}
+let activeOrder = null;        // the player's live mini-game
+let baristaT = { tom: 4, cat: 2 };
+const dayStats = { earned: 0, served: 0, walkouts: 0, perfects: 0, repStart: 0 };
 
 // ---------------- customers ----------------
-const customers = [];      // active customer objects
-const brews = [];          // active brews: {cust, item, t, total, station}
-let spawnT = 3;            // first customer comes fast
-let baristaT = { tom: 0, cat: 0 };
-let reviewT = 40;
-let hintT = 4;
-let running = false;
-
-function spawnInterval() {
-  const k = state.rep / 5;
-  return (9 - 5.6 * k) * (0.75 + Math.random() * 0.5);
-}
-
 function pickPersona() {
-  const pool = PERSONAS.filter((p) => state.rep >= p.minRep);
+  const pool = PERSONAS.filter((p) => state.day >= p.minDay);
   const total = pool.reduce((s, p) => s + p.rarity, 0);
   let r = Math.random() * total;
   for (const p of pool) { r -= p.rarity; if (r <= 0) return p; }
@@ -87,10 +87,8 @@ function pickItem(persona) {
   return MENU[from[Math.floor(Math.random() * from.length)]];
 }
 
-function line(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
 function spawnCustomer() {
-  if (customers.filter((c) => ['entering', 'queued', 'brewing'].includes(c.state)).length >= 6) return;
+  if (customers.filter((c) => ['entering', 'queued', 'prepping'].includes(c.state)).length >= 6) return;
   const persona = pickPersona();
   const item = pickItem(persona);
   const qty = persona.doubleOrder ? 2 : 1;
@@ -101,19 +99,19 @@ function spawnCustomer() {
     state: 'entering',
     patience: patienceMax, patienceMax,
     bubble: makeBubble(persona, item, qty),
-    saidLine: line(persona.order),
+    lastPatienceEmote: 0,
   };
   customers.push(cust);
   sfx.pop();
   scene.walkTo(peep, scene.doorPos, () => {
-    // pick the spot at door time — people ahead may have left meanwhile
-    const inQ = customers.filter((c) => ['entering', 'queued', 'brewing'].includes(c.state));
+    const inQ = customers.filter((c) => ['entering', 'queued', 'prepping'].includes(c.state));
     const spot = queueSpot(Math.max(0, inQ.indexOf(cust)));
     scene.walkTo(peep, spot, () => {
       cust.state = 'queued';
-      peep.faceTarget = Math.PI;   // face the counter
-      speech(cust, cust.saidLine);
-      layoutQueue();               // settle onto the true free spot
+      peep.faceTarget = Math.PI;
+      emote(cust, cust.persona.emotes.greet);
+      showHint(0);
+      layoutQueue();
     });
   });
 }
@@ -123,9 +121,9 @@ function queueSpot(i) {
 }
 
 function layoutQueue() {
-  const inQueue = customers.filter((c) => ['entering', 'queued', 'brewing'].includes(c.state));
+  const inQueue = customers.filter((c) => ['entering', 'queued', 'prepping'].includes(c.state));
   inQueue.forEach((c, i) => {
-    if (c.state === 'entering') return;  // still walking in; spot assigned on arrive
+    if (c.state === 'entering') return;
     const spot = queueSpot(i);
     if (c.peep.node.position.distanceTo(spot) > 0.1) {
       scene.walkTo(c.peep, spot, () => { c.peep.faceTarget = Math.PI; });
@@ -133,7 +131,13 @@ function layoutQueue() {
   });
 }
 
-// bubbles -------------------------------------------------------
+let layoutT = null;
+function layoutQueueSoon() {
+  clearTimeout(layoutT);
+  layoutT = setTimeout(layoutQueue, 350);
+}
+
+// ---------------- bubbles & emotes ----------------
 const bubblesEl = $('#bubbles');
 
 function makeBubble(persona, item, qty) {
@@ -148,101 +152,196 @@ function makeBubble(persona, item, qty) {
   return el;
 }
 
-function speech(cust, text, ms = 3200) {
+// one-shot emoji that floats up from a customer's head
+function emote(cust, char, big = false) {
+  if (!char) return;
+  const p = scene.toScreen(scene.headPos(cust.peep));
   const el = document.createElement('div');
-  el.className = 'speech';
-  el.textContent = text;
+  el.className = 'emote' + (big ? ' big' : '');
+  el.textContent = char;
+  el.style.left = p.x + 'px';
+  el.style.top = (p.y - 46) + 'px';
   bubblesEl.appendChild(el);
-  cust.speechEl = el;
-  setTimeout(() => { el.classList.add('bye'); setTimeout(() => el.remove(), 400); if (cust.speechEl === el) cust.speechEl = null; }, ms);
+  setTimeout(() => el.remove(), 1400);
 }
 
 function positionBubbles() {
-  const w = window.innerWidth;
   for (const c of customers) {
+    if (!c.bubble) continue;
     const p = scene.toScreen(scene.headPos(c.peep));
-    if (c.bubble) {
-      c.bubble.style.transform = `translate(${p.x}px, ${p.y}px)`;
-      c.bubble.classList.toggle('hidden', !p.visible || c.state === 'entering');
-    }
-    if (c.speechEl) {
-      // keep speech inside the viewport (it centers on the head)
-      const sx = Math.max(115, Math.min(w - 115, p.x));
-      c.speechEl.style.transform = `translate(${sx}px, ${p.y - 58}px)`;
-    }
+    c.bubble.style.transform = `translate(${p.x}px, ${p.y}px)`;
+    c.bubble.classList.toggle('hidden', !p.visible || c.state === 'entering');
   }
 }
 
-// orders --------------------------------------------------------
-function freeSlots(station) {
-  const max = station === 'case'
-    ? (state.upgrades.case >= 1 ? 1 : 0)
-    : UPGRADES.machine.slots[state.upgrades.machine];
-  const used = brews.filter((b) => b.station === station).length;
-  return max - used;
-}
+// ---------------- the prep mini-games ----------------
+const orderCard = $('#order-card');
 
-function tryTakeOrder(cust, byBarista = false) {
-  if (!running || cust.state !== 'queued') return false;
-  const station = cust.item.station;
-  if (freeSlots(station) <= 0) {
-    if (!byBarista) { sfx.error(); toast('כל התחנות תפוסות! רגע של חסד ☕'); }
-    return false;
+function machineParMult() { return UPGRADES.machine.parMult[state.upgrades.machine]; }
+function caseZone() { return UPGRADES.case.zone[state.upgrades.case]; }
+
+function startOrder(cust) {
+  if (phase !== 'rush' || cust.state !== 'queued') return;
+  if (activeOrder) {
+    // one order at a time — nudge the card so the player sees why
+    orderCard.classList.remove('nudge');
+    void orderCard.offsetWidth;
+    orderCard.classList.add('nudge');
+    sfx.error();
+    return;
   }
-  cust.state = 'brewing';
-  const speed = station === 'machine'
-    ? UPGRADES.machine.speed[state.upgrades.machine]
-    : [1, 1, 1.35, 1.8][state.upgrades.case] || 1;
-  const total = (cust.item.prep * (cust.qty > 1 ? 1.35 : 1)) / speed;
-  brews.push({ cust, t: 0, total, station });
-  scene.brewingCount++;
+  const item = cust.item;
+  cust.state = 'prepping';
+  activeOrder = {
+    cust, item,
+    mode: item.minigame,
+    stepIdx: 0,
+    elapsed: 0,
+    needle: 0,
+    needleDir: 1,
+  };
   sfx.order();
-  if (station === 'machine') scene.puffSteam(scene.machinePos);
+  if (item.minigame === 'steps') {
+    scene.setStationGlow([item.steps[0]]);
+    showHint(1);
+  } else {
+    scene.setStationGlow(['case']);
+    showHint(2);
+  }
+  renderOrderCard();
+  orderCard.classList.add('open');
+}
+
+function renderOrderCard() {
+  if (!activeOrder) { orderCard.classList.remove('open'); return; }
+  const { item, mode, stepIdx, cust } = activeOrder;
+  if (mode === 'steps') {
+    orderCard.innerHTML = `
+      <div class="oc-title">${item.emoji} ${item.name} <small>· ${cust.persona.name}</small></div>
+      <div class="oc-steps">${item.steps.map((s, i) => `
+        <span class="oc-step ${i < stepIdx ? 'done' : i === stepIdx ? 'now' : ''}">${STATIONS[s].icon}</span>
+        ${i < item.steps.length - 1 ? '<span class="oc-arrow">←</span>' : ''}`).join('')}
+      </div>`;
+  } else {
+    orderCard.innerHTML = `
+      <div class="oc-title">${item.emoji} ${item.name} <small>· ${cust.persona.name}</small></div>
+      <div class="oc-timing"><div class="oc-zone" style="width:${caseZone() * 100}%"></div><i class="oc-needle"></i></div>`;
+  }
+}
+
+function tapStation(id) {
+  if (!activeOrder || phase !== 'rush') return false;
+  const ao = activeOrder;
+  if (ao.mode === 'steps') {
+    const wanted = ao.item.steps[ao.stepIdx];
+    if (id === wanted) {
+      sfx.click();
+      if (id === 'brew') { sfx.steam(); scene.puffSteam(scene.machinePos); }
+      ao.stepIdx++;
+      if (ao.stepIdx >= ao.item.steps.length) {
+        finishOrder(qualityFromTime(ao));
+      } else {
+        scene.setStationGlow([ao.item.steps[ao.stepIdx]]);
+        renderOrderCard();
+      }
+    } else if (['grind', 'brew', 'milk', 'ice', 'case'].includes(id)) {
+      ao.elapsed += 0.8;             // wrong tap costs time
+      sfx.error();
+      orderCard.classList.remove('nudge');
+      void orderCard.offsetWidth;
+      orderCard.classList.add('nudge');
+    }
+    return true;
+  }
+  // timing mode: any tap on the case stops the needle
+  if (id === 'case') {
+    const off = Math.abs(ao.needle - 0.5) * 2;   // 0 = bullseye, 1 = edge
+    const zone = caseZone();
+    finishOrder(off <= zone * 0.45 ? 'perfect' : off <= zone ? 'good' : 'ok');
+    return true;
+  }
+  return false;
+}
+
+function qualityFromTime(ao) {
+  const par = ao.item.par * machineParMult();
+  if (ao.elapsed <= par) return 'perfect';
+  if (ao.elapsed <= par * 1.9) return 'good';
+  return 'ok';
+}
+
+function finishOrder(quality) {
+  const ao = activeOrder;
+  activeOrder = null;
+  orderCard.classList.remove('open');
+  scene.setStationGlow([]);
+  serveCustomer(ao.cust, quality);
+}
+
+// staff prepare in the background at fixed 'good' quality
+function staffTake(cust, staffId) {
+  if (cust.state !== 'queued') return false;
+  cust.state = 'prepping';
+  const total = 4.5 * machineParMult() + 1.5;
+  brews.push({ cust, t: 0, total, staffId });
+  scene.brewingCount++;
   cust.bubble.classList.add('brewing');
   return true;
 }
 
-function finishBrew(brew) {
-  scene.brewingCount--;
-  const cust = brew.cust;
-  if (cust.state !== 'brewing') return;  // already stormed out
-  cust.state = 'serving';                // patience stops; can no longer storm out
-  scene.flyServe(cust.item.glb, brew.station, cust.peep, () => serveDone(cust));
-  sfx.serve();
-}
+// ---------------- serving & leaving ----------------
+const QUALITY = {
+  perfect: { mult: 1.6, emote: '✨', repBonus: 0.03 },
+  good:    { mult: 1.0, emote: '❤️', repBonus: 0 },
+  ok:      { mult: 0.6, emote: '🙂', repBonus: 0 },
+};
 
-function serveDone(cust) {
-  if (cust.gone || cust.state !== 'serving') return;
-  cust.state = 'served';
-  const amb = ambience();
-  const patienceFrac = Math.max(0.15, cust.patience / cust.patienceMax);
-  const base = cust.item.price * cust.qty;
-  const tip = Math.round(base * 0.5 * cust.persona.tipMult * patienceFrac * (1 + amb * 0.06));
-  earn(base + tip, cust);
-  addRep(0.06 + (cust.persona.repBonus || 0));
-  state.stats.served++;
-  scene.jump(cust.peep);
-  speech(cust, line(cust.persona.happy));
-  if (cust.persona.id === 'influencer') photoFlash();
-  removeBubble(cust);
-  layoutQueueSoon();
-  // some customers sit and enjoy for a bit, others head straight out
-  const seat = Math.random() < 0.55 ? scene.freeSeat() : null;
-  if (seat) {
-    seat.taken = true;
-    cust.seat = seat;               // released in removeCustomer if interrupted
-    scene.walkTo(cust.peep, { x: seat.x, z: seat.z }, () => {
-      cust.peep.faceTarget = Math.atan2(seat.table.x - seat.x, seat.table.z - seat.z);
-      cust.cup = scene.placeCupOnTable(seat, cust.item.glb);
-      setTimeout(() => {
-        if (cust.seat) { cust.seat.taken = false; cust.seat = null; }
-        if (cust.cup) { scene.removeItem(cust.cup); cust.cup = null; }
-        if (!cust.gone) exitCafe(cust);
-      }, 6000 + Math.random() * 8000);
-    });
-  } else {
-    exitCafe(cust);
-  }
+function serveCustomer(cust, quality) {
+  if (cust.gone || cust.state !== 'prepping') return;
+  cust.state = 'serving';
+  scene.flyServe(cust.item.glb, cust.item.station === 'case' ? 'case' : 'machine', cust.peep, () => {
+    if (cust.gone || cust.state !== 'serving') return;
+    cust.state = 'served';
+    const q = QUALITY[quality];
+    const base = cust.item.price * cust.qty;
+    const tip = Math.round(base * 0.5 * cust.persona.tipMult * q.mult * (1 + ambience() * 0.06));
+    earn(base + tip, cust);
+    addRep(0.05 + q.repBonus + (cust.persona.repBonus || 0));
+    state.stats.served++;
+    dayStats.served++;
+    if (quality === 'perfect') {
+      state.stats.perfects++;
+      dayStats.perfects++;
+      sfx.star();
+      if (!reducedMotion) scene.shakeCamera(0.14);
+      emote(cust, '✨', true);
+    } else {
+      emote(cust, q.emote, true);
+    }
+    sfx.serve();
+    scene.spin(cust.peep);
+    if (cust.persona.id === 'influencer') { photoFlash(); emote(cust, '📸', true); }
+    emote(cust, cust.persona.emotes.happy);
+    removeBubble(cust);
+    layoutQueueSoon();
+    const seat = Math.random() < 0.55 ? scene.freeSeat() : null;
+    if (seat) {
+      seat.taken = true;
+      cust.seat = seat;
+      scene.walkTo(cust.peep, { x: seat.x, z: seat.z }, () => {
+        cust.peep.faceTarget = Math.atan2(seat.table.x - seat.x, seat.table.z - seat.z);
+        cust.cup = scene.placeCupOnTable(seat, cust.item.glb);
+        setTimeout(() => {
+          if (cust.seat) { cust.seat.taken = false; cust.seat = null; }
+          if (cust.cup) { scene.removeItem(cust.cup); cust.cup = null; }
+          if (!cust.gone) exitCafe(cust);
+        }, 6000 + Math.random() * 8000);
+      });
+    } else {
+      exitCafe(cust);
+    }
+  });
+  sfx.serve();
 }
 
 function exitCafe(cust) {
@@ -252,15 +351,25 @@ function exitCafe(cust) {
 }
 
 function stormOut(cust) {
+  // cancel whatever was being prepared for them
+  if (activeOrder && activeOrder.cust === cust) {
+    activeOrder = null;
+    orderCard.classList.remove('open');
+    scene.setStationGlow([]);
+  }
+  const bi = brews.findIndex((b) => b.cust === cust);
+  if (bi >= 0) { brews.splice(bi, 1); scene.brewingCount--; }
   cust.state = 'angry';
   sfx.angry();
-  scene.shake(cust.peep);
-  speech(cust, line(cust.persona.angry), 3600);
+  scene.stomp(cust.peep);
+  emote(cust, '💢', true);
+  emote(cust, cust.persona.emotes.angry);
   addRep(-(cust.persona.repPenalty ? cust.persona.repPenalty : 0.15));
   state.stats.walkouts++;
+  dayStats.walkouts++;
   removeBubble(cust);
-  cust.peep.speed = 3.2;
-  setTimeout(() => exitCafe(cust), 700);
+  cust.peep.speed = 3.4;
+  setTimeout(() => { if (!cust.gone) exitCafe(cust); }, 700);
   layoutQueueSoon();
 }
 
@@ -273,22 +382,16 @@ function removeCustomer(cust) {
   if (cust.seat) { cust.seat.taken = false; cust.seat = null; }
   if (cust.cup) { scene.removeItem(cust.cup); cust.cup = null; }
   removeBubble(cust);
-  if (cust.speechEl) { cust.speechEl.remove(); cust.speechEl = null; }
   scene.removePeep(cust.peep);
   const i = customers.indexOf(cust);
   if (i >= 0) customers.splice(i, 1);
 }
 
-let layoutT = null;
-function layoutQueueSoon() {
-  clearTimeout(layoutT);
-  layoutT = setTimeout(layoutQueue, 350);
-}
-
-// economy -------------------------------------------------------
+// ---------------- economy / reputation ----------------
 function earn(amount, cust) {
   state.coins += amount;
   state.stats.earned += amount;
+  dayStats.earned += amount;
   sfx.coin();
   const p = cust ? scene.toScreen(scene.headPos(cust.peep)) : { x: innerWidth / 2, y: innerHeight / 2 };
   const el = document.createElement('div');
@@ -299,25 +402,24 @@ function earn(amount, cust) {
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 1200);
   refreshHud();
-  save();
 }
 
 function addRep(d) {
   const before = Math.floor(state.rep);
   state.rep = Math.max(0, Math.min(5, state.rep + d));
-  const after = Math.floor(state.rep);
-  if (after > before) {
+  if (Math.floor(state.rep) > before) {
     sfx.star();
-    toast(`⭐ ${STAR_THRESHOLD_LINES[after - 1] || 'כוכב חדש!'}`, 5200);
+    toast('⭐ כוכב חדש!');
     confetti();
   }
   refreshHud();
 }
 
-// ---------------- HUD / panels ----------------
+// ---------------- HUD / overlays ----------------
 function refreshHud() {
   $('#coins').textContent = `₪${state.coins}`;
   $('#amb').textContent = `${ambience()}`;
+  $('#day-label').textContent = `יום ${state.day}`;
   const starsEl = $('#stars');
   const full = Math.floor(state.rep);
   const half = state.rep - full >= 0.5;
@@ -328,13 +430,21 @@ function refreshHud() {
   ).join('');
 }
 
-function toast(text, ms = 3400) {
+function toast(text, ms = 3000) {
   const el = document.createElement('div');
   el.className = 'toast';
   el.textContent = text;
   $('#toasts').appendChild(el);
   requestAnimationFrame(() => el.classList.add('in'));
   setTimeout(() => { el.classList.remove('in'); setTimeout(() => el.remove(), 400); }, ms);
+}
+
+function showHint(i) {
+  if (state.day > 1) return;
+  if (state.hintsSeen & (1 << i)) return;
+  state.hintsSeen |= 1 << i;
+  toast('💡 ' + HINTS[i], 4600);
+  save();
 }
 
 function confetti() {
@@ -354,15 +464,70 @@ function photoFlash() {
   el.className = 'flash';
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 500);
-  toast('📸 שירה העלתה סטורי! המוניטין עולה!');
 }
 
-// shop panel ----------------------------------------------------
+// ---------------- day flow ----------------
+function enterPrep() {
+  phase = 'prep';
+  scene.setDayProgress(0);
+  document.body.dataset.phase = 'prep';
+  $('#btn-open-day').textContent = `☀️ פתחו את יום ${state.day}`;
+  $('#prep-bar').classList.add('show');
+  renderShop();
+  shopEl.classList.add('open');
+  refreshHud();
+  save();
+}
+
+function startDay() {
+  phase = 'rush';
+  document.body.dataset.phase = 'rush';
+  $('#prep-bar').classList.remove('show');
+  shopEl.classList.remove('open');
+  dayTime = DAY_LENGTH;
+  spawnT = 1.2;
+  Object.assign(dayStats, { earned: 0, served: 0, walkouts: 0, perfects: 0, repStart: state.rep });
+  // reveal newly arriving regulars
+  PERSONAS.filter((p) => p.minDay === state.day && state.day > 1).forEach((p) => {
+    toast(`${p.emotes.greet} לקוח חדש בשכונה: ${p.name}`, 3600);
+  });
+  sfx.buy();
+  refreshHud();
+}
+
+function endDay() {
+  phase = 'summary';
+  document.body.dataset.phase = 'summary';
+  sfx.bell();
+  if (activeOrder) { activeOrder = null; orderCard.classList.remove('open'); scene.setStationGlow([]); }
+  const dRep = state.rep - dayStats.repStart;
+  $('#summary-body').innerHTML = `
+    <h2>סוף יום ${state.day} 🌆</h2>
+    <div class="sum-grid">
+      <div class="sum-cell"><b>₪${dayStats.earned}</b><small>הכנסות</small></div>
+      <div class="sum-cell"><b>${dayStats.served}</b><small>הוגשו</small></div>
+      <div class="sum-cell"><b>${dayStats.perfects} ✨</b><small>מושלמים</small></div>
+      <div class="sum-cell"><b>${dayStats.walkouts}</b><small>עזבו בכעס</small></div>
+    </div>
+    <div class="sum-rep">${dRep >= 0 ? '‎+' : '‎−'}${Math.abs(dRep).toFixed(2)} ⭐ מוניטין</div>`;
+  $('#summary').classList.add('show');
+  state.day++;
+  save();
+}
+
+$('#btn-next-day').addEventListener('click', () => {
+  sfx.click();
+  $('#summary').classList.remove('show');
+  enterPrep();
+});
+$('#btn-open-day').addEventListener('click', () => startDay());
+
+// ---------------- shop ----------------
 const shopEl = $('#shop');
 let shopTab = 'upgrades';
 
 function applyPurchaseEffects() {
-  scene.setMachineLevel(state.upgrades.machine);
+  scene.setMachineLevel(Math.max(1, state.upgrades.machine));
   scene.setCaseLevel(state.upgrades.case);
   scene.setStaff(state.staff);
   for (const id of state.decor) scene.addDecor(id);
@@ -396,8 +561,8 @@ function renderShop() {
       const next = u.levels[lvl + 1];
       rows += buyRow({
         icon: u.emoji,
-        name: `${u.name} ${next ? `— שלב ${lvl + 1}` : ''}`,
-        desc: next ? next.desc : u.levels[lvl].desc + ' (מקסימום!)',
+        name: `${u.name}${next ? '' : ' (מקסימום)'}`,
+        desc: next ? next.desc : u.levels[lvl].desc,
         cost: next ? next.cost : 0,
         owned: !next,
         onBuy: `up:${key}`,
@@ -413,7 +578,7 @@ function renderShop() {
   } else {
     for (const d of DECOR) {
       rows += buyRow({
-        icon: d.emoji, name: `${d.name} · אווירה ‎+${d.ambience}`, desc: d.desc, cost: d.cost,
+        icon: d.emoji, name: d.name, desc: `אווירה ‎+${d.ambience}`, cost: d.cost,
         owned: state.decor.includes(d.id), onBuy: `decor:${d.id}`,
       });
     }
@@ -446,7 +611,6 @@ shopEl.addEventListener('click', (e) => {
   if (!ok) { sfx.error(); return; }
   state.coins -= cost;
   sfx.buy();
-  toast('הרכישה בוצעה! בית־הקפה משתדרג 🎉');
   applyPurchaseEffects();
   renderShop();
   save();
@@ -457,6 +621,7 @@ $('#btn-shop').addEventListener('click', () => {
   const open = shopEl.classList.toggle('open');
   if (open) renderShop();
 });
+
 function reflectMute() {
   const btn = $('#btn-mute');
   btn.textContent = state.muted ? '🔇' : '🔊';
@@ -470,39 +635,17 @@ $('#btn-mute').addEventListener('click', () => {
 });
 $('#btn-reset').addEventListener('click', () => {
   if (confirm('לפתוח בית קפה חדש? כל ההתקדמות תימחק!')) {
-    try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* storage blocked */ }
+    try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* blocked */ }
     location.reload();
   }
 });
 
-// close shop when tapping the world — and swallow that tap so it
-// doesn't also take an order through the now-closed sheet
+// ---------------- input ----------------
 let tapClosedShop = false;
 canvas.addEventListener('pointerdown', () => {
-  tapClosedShop = shopEl.classList.contains('open');
-  shopEl.classList.remove('open');
+  tapClosedShop = phase === 'rush' && shopEl.classList.contains('open');
+  if (phase === 'rush') shopEl.classList.remove('open');
 });
-
-// ---------------- input ----------------
-function customerAt(peep) {
-  return customers.find((c) => c.peep === peep);
-}
-
-function handleTap(x, y) {
-  const hit = scene.pick(x, y);
-  if (!hit) return;
-  if (hit.type === 'peep') {
-    const cust = customerAt(hit.peep);
-    if (cust) tryTakeOrder(cust);
-  } else if (hit.type === 'machine') {
-    sfx.steam();
-    scene.puffSteam(scene.machinePos);
-    toast('פסססש! המכונה מוסרת ד״ש 💨');
-  } else if (hit.type === 'waffleclock') {
-    toast('🧇 שעון הוופל מאשר: תמיד שעת קפה.');
-  }
-}
-
 canvas.addEventListener('click', (e) => {
   if (tapClosedShop) { tapClosedShop = false; return; }
   handleTap(e.clientX, e.clientY);
@@ -511,73 +654,102 @@ bubblesEl.addEventListener('click', (e) => {
   const b = e.target.closest('.bubble');
   if (!b) return;
   const cust = customers.find((c) => c.bubble === b);
-  if (cust) tryTakeOrder(cust);
+  if (cust) startOrder(cust);
 });
+
+function handleTap(x, y) {
+  const hit = scene.pick(x, y);
+  if (!hit) return;
+  if (hit.type === 'peep') {
+    const cust = customers.find((c) => c.peep === hit.peep);
+    if (cust) startOrder(cust);
+  } else if (hit.type === 'station') {
+    if (!tapStation(hit.station) && hit.station === 'brew') {
+      sfx.steam();
+      scene.puffSteam(scene.machinePos);
+    }
+  } else if (hit.type === 'waffleclock') {
+    sfx.click();
+  }
+}
 
 // ---------------- main loop ----------------
 function tick(dt) {
-  if (!running) return;
+  if (phase !== 'rush') return;
 
-  // spawn pacing
-  spawnT -= dt;
-  if (spawnT <= 0) { spawnCustomer(); spawnT = spawnInterval(); }
+  // day clock
+  dayTime -= dt;
+  scene.setDayProgress(1 - Math.max(0, dayTime) / DAY_LENGTH);
+  const timerEl = $('#day-timer i');
+  if (timerEl) timerEl.style.width = `${(Math.max(0, dayTime) / DAY_LENGTH) * 100}%`;
 
-  // patience + brews
+  // spawning while the day runs
+  if (dayTime > 0) {
+    spawnT -= dt;
+    if (spawnT <= 0) {
+      spawnCustomer();
+      spawnT = spawnIntervalFor(state.day, state.rep) * (0.8 + Math.random() * 0.4);
+    }
+  } else if (!customers.length) {
+    endDay();
+    return;
+  }
+
+  // active-order clock + timing needle
+  if (activeOrder) {
+    activeOrder.elapsed += dt;
+    if (activeOrder.mode === 'timing') {
+      activeOrder.needle += activeOrder.needleDir * dt * 0.9;
+      if (activeOrder.needle > 1) { activeOrder.needle = 1; activeOrder.needleDir = -1; }
+      if (activeOrder.needle < 0) { activeOrder.needle = 0; activeOrder.needleDir = 1; }
+      const n = orderCard.querySelector('.oc-needle');
+      if (n) n.style.right = `${activeOrder.needle * 100}%`;
+    }
+  }
+
+  // patience
   const decay = 1 / (1 + ambience() * 0.05);
   for (const c of customers) {
-    if (c.state === 'queued' || c.state === 'brewing') {
-      c.patience -= dt * decay * (c.state === 'brewing' ? 0.55 : 1);
+    if (c.state === 'queued' || c.state === 'prepping') {
+      c.patience -= dt * decay * (c.state === 'prepping' ? 0.45 : 1);
+      const f = Math.max(0, c.patience / c.patienceMax);
       const bar = c.bubble && c.bubble.querySelector('.b-patience i');
       if (bar) {
-        const f = Math.max(0, c.patience / c.patienceMax);
         bar.style.width = (f * 100).toFixed(1) + '%';
         bar.style.background = f > 0.5 ? 'var(--mint)' : f > 0.25 ? '#ffd76b' : 'var(--red)';
       }
-      if (c.patience <= 0) {
-        const bi = brews.findIndex((b) => b.cust === c);
-        if (bi >= 0) { brews.splice(bi, 1); scene.brewingCount--; }
-        stormOut(c);
+      c.peep.fidget = f < 0.4;
+      if (f < 0.25 && performance.now() - c.lastPatienceEmote > 3000) {
+        c.lastPatienceEmote = performance.now();
+        emote(c, '⏳');
       }
+      if (c.patience <= 0) stormOut(c);
     }
   }
+
+  // staff prep
   for (let i = brews.length - 1; i >= 0; i--) {
     const b = brews[i];
     b.t += dt;
     const ring = b.cust.bubble && b.cust.bubble.querySelector('.b-ring');
     if (ring) ring.style.setProperty('--p', Math.min(1, b.t / b.total));
-    if (b.t >= b.total) { brews.splice(i, 1); finishBrew(b); }
+    if (b.t >= b.total) {
+      brews.splice(i, 1);
+      scene.brewingCount--;
+      serveCustomer(b.cust, 'good');
+    }
   }
-
-  // hired staff auto-serve
   for (const s of STAFF) {
     if (!state.staff[s.id]) continue;
     baristaT[s.id] -= dt;
     if (baristaT[s.id] <= 0) {
-      const waiting = customers.filter((c) => c.state === 'queued')
+      if (brews.some((b) => b.staffId === s.id)) { baristaT[s.id] = 1; continue; }
+      const waiting = customers.filter((c) => c.state === 'queued' && (!activeOrder || activeOrder.cust !== c))
         .sort((a, b) => a.patience - b.patience);
-      // most-urgent first, but fall through if their station is full
-      const took = waiting.find((c) => tryTakeOrder(c, true));
-      if (took) {
-        baristaT[s.id] = s.interval;
-        if (s.id === 'cat' && Math.random() < 0.2) sfx.meow();
-      } else {
-        baristaT[s.id] = 1;
-      }
+      const took = waiting.find((c) => staffTake(c, s.id));
+      baristaT[s.id] = took ? s.interval : 1;
+      if (took && s.id === 'cat' && Math.random() < 0.25) sfx.meow();
     }
-  }
-
-  // ambient flavor
-  reviewT -= dt;
-  if (reviewT <= 0 && state.stats.served >= 3) {
-    toast(line(REVIEWS), 4200);
-    reviewT = 40 + Math.random() * 30;
-  }
-  hintT -= dt;
-  if (hintT <= 0 && state.hintsSeen < HINTS.length) {
-    toast('💡 ' + HINTS[state.hintsSeen], 5200);
-    state.hintsSeen++;
-    hintT = 14;
-    save();
   }
 }
 
@@ -593,12 +765,10 @@ async function boot() {
   refreshHud();
   reflectMute();
   setMuted(state.muted);
-
   await scene.loadAssets((f) => {
     $('#load-bar i').style.width = (f * 100).toFixed(0) + '%';
   });
   applyPurchaseEffects();
-  // signs were rasterized with fallback fonts; redraw once webfonts land
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => {
       scene.redrawText();
@@ -607,7 +777,7 @@ async function boot() {
   }
   $('#loading').classList.add('done');
   $('#title').classList.remove('hidden');
-  $('#btn-start').textContent = hasSave && state.stats.served > 0 ? 'המשך משמרת ☕' : 'פתחו את הדלתות! ☕';
+  $('#btn-start').textContent = hasSave && state.day > 1 ? `המשך מיום ${state.day} ☕` : 'פתחו את הדלתות! ☕';
   scene.resize();
   requestAnimationFrame(frame);
 }
@@ -615,12 +785,16 @@ async function boot() {
 $('#btn-start').addEventListener('click', () => {
   sfx.buy();
   $('#title').classList.add('hidden');
-  running = true;
-  spawnT = 1.2;
+  enterPrep();
 });
 
 boot();
 
 // debug handle for automated tests (not part of gameplay)
-window.__game = { state, customers, brews, scene, spawnCustomer, tryTakeOrder };
-
+window.__game = {
+  state, customers, brews, scene,
+  spawnCustomer, startOrder, tapStation, startDay, endDay,
+  get phase() { return phase; },
+  get activeOrder() { return activeOrder; },
+  setDayTime(t) { dayTime = t; },
+};

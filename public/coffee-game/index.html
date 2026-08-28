@@ -24,18 +24,33 @@
   <header id="hud">
     <div class="pill" id="coins">₪0</div>
     <div class="pill" id="stars"></div>
+    <div class="pill" id="day-label">יום 1</div>
     <div class="pill" title="אווירה" aria-label="אווירה">🛋️ <span id="amb">0</span></div>
     <div class="hud-spacer"></div>
     <button class="icon-btn" id="btn-mute" title="השתקה" aria-label="השתקה">🔊</button>
     <button class="icon-btn" id="btn-reset" title="משחק חדש" aria-label="משחק חדש">🔄</button>
   </header>
+  <div id="day-timer" aria-hidden="true"><i></i></div>
 
   <div id="toasts"></div>
 
-  <footer id="bottombar">
-    <button id="btn-shop">🛠️ החנות של הקפה</button>
+  <!-- rush: the live order card with the prep mini-game -->
+  <section id="order-card" aria-live="polite"></section>
+
+  <!-- prep (between days): open-day button + shop -->
+  <footer id="prep-bar">
+    <button id="btn-shop">🛠️ החנות</button>
+    <button id="btn-open-day">☀️ פתחו את יום 1</button>
   </footer>
   <section id="shop" aria-label="חנות שדרוגים"></section>
+
+  <!-- end-of-day summary -->
+  <div id="summary">
+    <div class="summary-card">
+      <div id="summary-body"></div>
+      <button id="btn-next-day">☕ להכנות ליום הבא</button>
+    </div>
+  </div>
 
   <div id="title" class="hidden">
     <div class="title-card">

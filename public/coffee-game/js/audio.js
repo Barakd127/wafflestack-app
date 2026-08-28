@@ -77,4 +77,5 @@ export const sfx = {
   star()     { [784, 988, 1175, 1568].forEach((f, i) => tone(f, { t: i * 0.09, dur: 0.2, type: 'sine', vol: 0.3 })); },
   meow()     { tone(620, { dur: 0.24, type: 'sawtooth', vol: 0.12, slide: -300 }); },
   error()    { tone(196, { dur: 0.15, type: 'square', vol: 0.2 }); },
+  bell()     { [1047, 784].forEach((f, i) => tone(f, { t: i * 0.3, dur: 0.7, type: 'sine', vol: 0.35 })); },
 };

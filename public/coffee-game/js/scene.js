@@ -119,14 +119,28 @@ export class CafeScene {
     this._furniture();
     this.setMachineLevel(1);
     this.setCaseLevel(0);
+    this._stations();
     this._barista();
     this._spots();
+    this.camShake = 0;
     this.resize();
   }
 
   // ---------- assets ----------
+  // Models load over HTTP normally; the single-file Artifact build instead
+  // provides window.__ASSETS = { models: {key: base64}, textures: {pathSuffix: dataURI} }.
   async loadAssets(onProgress) {
-    const loader = new GLTFLoader();
+    const embedded = (typeof window !== 'undefined' && window.__ASSETS) || null;
+    const manager = new THREE.LoadingManager();
+    if (embedded) {
+      manager.setURLModifier((url) => {
+        for (const suffix in embedded.textures) {
+          if (url.endsWith(suffix)) return embedded.textures[suffix];
+        }
+        return url;
+      });
+    }
+    const loader = new GLTFLoader(manager);
     const want = [
       ['cup-coffee', '../models/food/cup-coffee.glb'],
       ['cup-tea', '../models/food/cup-tea.glb'],
@@ -137,14 +151,15 @@ export class CafeScene {
       ['cake', '../models/food/cake.glb'],
       ['waffle', '../models/food/waffle.glb'],
       ['cookie', '../models/food/cookie-chocolate.glb'],
+      ['mug', '../models/food/mug.glb'],
       ['planter', '../models/kenney-suburban/planter.glb'],
       ['parasol', '../kenney/commercial/detail-parasol-a.glb'],
     ];
     let done = 0;
     await Promise.all(want.map(([key, url]) =>
       new Promise((res) => {
-        loader.load(url,
-          (gltf) => {
+        const fail = () => { done++; onProgress && onProgress(done / want.length); res(); };
+        const ok = (gltf) => {
             const node = gltf.scene;
             node.traverse((o) => {
               if (o.isMesh) {
@@ -159,10 +174,18 @@ export class CafeScene {
             });
             this.models[key] = node;
             done++; onProgress && onProgress(done / want.length); res();
-          },
-          undefined,
-          () => { done++; onProgress && onProgress(done / want.length); res(); }  // missing model → primitive fallback later
-        );
+          };
+        if (embedded && embedded.models[key]) {
+          try {
+            const b = atob(embedded.models[key]);
+            const bytes = new Uint8Array(b.length);
+            for (let i = 0; i < b.length; i++) bytes[i] = b.charCodeAt(i);
+            // keep the real directory as resourcePath so each kit finds its colormap
+            loader.parse(bytes.buffer, url.slice(0, url.lastIndexOf('/') + 1), ok, fail);
+          } catch (e) { fail(); }
+        } else {
+          loader.load(url, ok, undefined, fail);  // missing model → primitive fallback later
+        }
       })
     ));
   }
@@ -195,8 +218,10 @@ export class CafeScene {
 
   // ---------- lights & room ----------
   _lights() {
-    this.scene.add(new THREE.HemisphereLight(0xfff6e6, 0xc9a486, 0.95));
+    this.hemi = new THREE.HemisphereLight(0xfff6e6, 0xc9a486, 0.95);
+    this.scene.add(this.hemi);
     const sun = new THREE.DirectionalLight(0xfff1d6, 1.6);
+    this.sun = sun;
     sun.position.set(6, 10, 5);
     sun.castShadow = true;
     sun.shadow.mapSize.set(1536, 1536);
@@ -464,6 +489,76 @@ export class CafeScene {
     this.seatList = this.tables.flatMap((t) => t.seats);
   }
 
+  // Prep stations the player taps during the mini-game: grinder, milk
+  // pitcher and ice bucket on the counter (the machine and the display
+  // case are stations too). Each has a pulsing glow ring for guidance.
+  _stations() {
+    const y = this.counterTopY;
+    const mkRing = (x, yy, z, r) => {
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(r * 0.72, r, 28),
+        new THREE.MeshBasicMaterial({ color: 0xffd76b, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false })
+      );
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(x, yy, z);
+      this.scene.add(ring);
+      return ring;
+    };
+
+    // grinder
+    const grinder = new THREE.Group();
+    const gBody = rbox(0.3, 0.42, 0.3, 0xe4574f, 0.05); gBody.position.y = 0.21; grinder.add(gBody);
+    const hopper = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.2, 12), mat(0x8a6a4a, { transparent: true, opacity: 0.85 }));
+    hopper.rotation.x = Math.PI; hopper.position.y = 0.52; hopper.castShadow = true; grinder.add(hopper);
+    const crank = rbox(0.2, 0.05, 0.05, PAL.metalDark, 0.02); crank.position.set(0.18, 0.36, 0); grinder.add(crank);
+    grinder.position.set(-4.35, y, -2.5);
+    this.scene.add(grinder);
+
+    // milk pitcher
+    const milk = new THREE.Group();
+    const jug = cyl(0.12, 0.15, 0.26, PAL.chrome, 14, { metalness: 0.6, roughness: 0.3 });
+    jug.position.y = 0.13; milk.add(jug);
+    const lip = sph(0.05, PAL.cream); lip.position.set(0.1, 0.27, 0); milk.add(lip);
+    milk.position.set(-2.35, y, -2.25);
+    this.scene.add(milk);
+
+    // ice bucket
+    const ice = new THREE.Group();
+    const bucket = cyl(0.18, 0.14, 0.22, 0x7ec4e8, 14);
+    bucket.position.y = 0.11; ice.add(bucket);
+    for (let i = 0; i < 3; i++) {
+      const cube = rbox(0.09, 0.09, 0.09, 0xeaf7ff, 0.02);
+      cube.position.set((i - 1) * 0.08, 0.25, (i % 2) * 0.06 - 0.03);
+      cube.rotation.y = i;
+      ice.add(cube);
+    }
+    ice.position.set(-1.7, y, -2.25);
+    this.scene.add(ice);
+
+    this.stationNodes = { grind: grinder, milk, ice };
+    this.stationRings = {
+      grind: mkRing(-4.35, y + 0.02, -2.35, 0.42),
+      brew: mkRing(-3.35, y + 0.02, -2.15, 0.5),
+      milk: mkRing(-2.35, y + 0.02, -2.2, 0.38),
+      ice: mkRing(-1.7, y + 0.02, -2.2, 0.38),
+      case: mkRing(1.6, 0.03, -1.45, 0.55),
+    };
+    this.activeStations = new Set();
+  }
+
+  setStationGlow(ids) {
+    this.activeStations = new Set(ids || []);
+  }
+
+  // 0..1 across the shift: morning light → warm dusk
+  setDayProgress(t) {
+    this._dayT = THREE.MathUtils.clamp(t, 0, 1);
+  }
+
+  shakeCamera(strength = 0.12) {
+    this.camShake = Math.max(this.camShake, strength);
+  }
+
   // Espresso machine, rebuilt per level (bigger & shinier as it grows)
   setMachineLevel(level) {
     const lv = Math.max(1, level);
@@ -647,6 +742,7 @@ export class CafeScene {
     hit.castShadow = false;
     g.add(hit);
     g.userData.hit = hit;
+    g.userData.eyes = g.children.filter((c) => c.geometry === geoCache.get('peep-eye'));
     return g;
   }
 
@@ -658,7 +754,8 @@ export class CafeScene {
       node, speed: opts.speed || 2.6,
       target: null, onArrive: null,
       bobT: Math.random() * 10, walking: false,
-      shakeT: 0, jumpT: 0, gone: false,
+      shakeT: 0, jumpT: 0, spinT: 0, stompT: 0, gone: false,
+      fidget: false, blinkT: 1 + Math.random() * 3,
       userData: opts.userData || {},
     };
     this.peeps.push(peep);
@@ -699,6 +796,8 @@ export class CafeScene {
 
   shake(peep) { peep.shakeT = 0.6; }
   jump(peep) { peep.jumpT = 0.5; }
+  spin(peep) { peep.spinT = 0.6; peep.jumpT = Math.max(peep.jumpT, 0.5); }   // happy: jump + twirl
+  stomp(peep) { peep.stompT = 0.7; peep.shakeT = Math.max(peep.shakeT, 0.5); } // angry: squash-stomps
 
   headPos(peep) {
     this._pv.copy(peep.node.position);
@@ -959,7 +1058,11 @@ export class CafeScene {
       while (o) {
         const peep = this.peeps.find((p) => p.node === o);
         if (peep) return { type: 'peep', peep };
-        if (this.machineNode === o) return { type: 'machine' };
+        if (this.machineNode === o) return { type: 'station', station: 'brew' };
+        if (this.caseNode === o) return { type: 'station', station: 'case' };
+        for (const id in this.stationNodes) {
+          if (this.stationNodes[id] === o) return { type: 'station', station: id };
+        }
         if (this.decorNodes.waffleclock === o) return { type: 'waffleclock' };
         o = o.parent;
       }
@@ -987,9 +1090,11 @@ export class CafeScene {
     // pull back on narrow screens so the room still fits, and aim a
     // touch lower so portrait doesn't leave a big empty apron below
     const k = THREE.MathUtils.clamp(1.15 / Math.max(aspect, 0.01), 1, 2.05);
-    this.camera.position.set(8.6 * k, 7.4 * k, 9.8 * k);
+    this._camBase = new THREE.Vector3(8.6 * k, 7.4 * k, 9.8 * k);
+    this.camera.position.copy(this._camBase);
     const target = this.camTarget.clone();
     if (aspect < 0.8) { target.y += 1.1; target.z += 0.3; }
+    this._camLook = target;
     this.camera.lookAt(target);
     this.camera.updateProjectionMatrix();
   }
@@ -1027,13 +1132,49 @@ export class CafeScene {
       }
       let y = bob;
       if (p.jumpT > 0) { p.jumpT -= dt; y += Math.sin((1 - p.jumpT / 0.5) * Math.PI) * 0.35; }
+      if (p.fidget && !p.walking) y += Math.max(0, Math.sin(p.bobT * 3.2)) * 0.06;  // impatient hops
       p.node.position.y = y;
+      if (p.spinT > 0) { p.spinT -= dt; p.node.rotation.y += dt * (Math.PI * 2 / 0.6); }  // happy twirl
+      if (p.stompT > 0) {
+        p.stompT -= dt;
+        const sq = 1 + Math.sin(p.stompT * 26) * 0.12;
+        p.node.scale.set(2 - sq, sq, 2 - sq);
+      } else if (p.node.scale.y !== 1) {
+        p.node.scale.set(1, 1, 1);
+      }
       if (p.shakeT > 0) {
         p.shakeT -= dt;
         p.node.rotation.z = Math.sin(t * 55) * 0.09 * (p.shakeT / 0.6);
       } else {
         p.node.rotation.z = 0;
       }
+      // blink
+      p.blinkT -= dt;
+      const eyes = p.node.userData.eyes;
+      if (eyes && eyes.length) {
+        const closed = p.blinkT < 0.1 && p.blinkT > 0;
+        eyes.forEach((e) => { e.scale.y = closed ? 0.12 : 1; });
+        if (p.blinkT <= 0) p.blinkT = 1.5 + Math.random() * 3.5;
+      }
+    }
+
+    // station guidance rings pulse while active
+    if (this.stationRings) {
+      for (const id in this.stationRings) {
+        const ring = this.stationRings[id];
+        const want = this.activeStations.has(id) ? 0.5 + Math.sin(t * 6) * 0.3 : 0;
+        ring.material.opacity += (want - ring.material.opacity) * Math.min(1, dt * 10);
+        ring.scale.setScalar(this.activeStations.has(id) ? 1 + Math.sin(t * 6) * 0.08 : 1);
+      }
+    }
+
+    // shift-of-day lighting: morning → warm dusk
+    if (this._dayT !== undefined && this.sun) {
+      const d = this._dayT;
+      this.sun.position.set(6 - 11 * d, 10 - 4.5 * d, 5 + 1.5 * d);
+      this.sun.color.setHex(d < 0.6 ? 0xfff1d6 : 0xffd0a0);
+      this.sun.intensity = 1.6 - 0.35 * d;
+      this.hemi.intensity = 0.95 - 0.18 * d;
     }
 
     // machine steam while brewing
@@ -1083,6 +1224,23 @@ export class CafeScene {
     if (this.bulbs) this.bulbs.forEach((b, i) => { b.material.color.offsetHSL(0, 0, 0); b.scale.setScalar(1 + Math.sin(t * 3 + i) * 0.12); });
     if (this.catTail) this.catTail.rotation.x = 0.9 + Math.sin(t * 2.5) * 0.25;
     if (this.catNode) this.catNode.position.y = this.counterTopY + Math.abs(Math.sin(t * 1.4)) * 0.02;
+
+    // camera micro-shake (perfect serves); decays fast
+    if (this._camBase) {
+      if (this.camShake > 0.002) {
+        this.camera.position.copy(this._camBase).add(new THREE.Vector3(
+          (Math.random() - 0.5) * this.camShake,
+          (Math.random() - 0.5) * this.camShake,
+          (Math.random() - 0.5) * this.camShake
+        ));
+        this.camera.lookAt(this._camLook);
+        this.camShake *= Math.max(0, 1 - dt * 7);
+      } else if (this.camShake !== 0) {
+        this.camShake = 0;
+        this.camera.position.copy(this._camBase);
+        this.camera.lookAt(this._camLook);
+      }
+    }
 
     this.renderer.render(this.scene, this.camera);
     return dt;
