@@ -29,6 +29,17 @@ export interface CityBackdropProps {
   frost: number
   /** done >= total, computed by the shell (single owner of mastery) */
   mastered?: boolean
+  /**
+   * layout='tray' only — the shell's live tray sheet bottom inset (%, same
+   * value driving the sheet/hairline/ink column there). The building/floor
+   * pill is fixed bottom-right; when the sheet grows tall (thinking state,
+   * ~8%) a bare `bottom: 24` would sit under the sheet's edge, so the pill
+   * clamps itself inside whatever strip is actually visible. Undefined in
+   * 'plain' layout — the pill keeps its original fixed position there.
+   */
+  traySheetBottomPct?: number
+  /** matches the shell's trayTransition, so the pill glides with the sheet edge instead of jumping. */
+  traySheetTransition?: string
 }
 
 interface BuildingBox { left: number; top: number; right: number; bottom: number; roofX: number; roofY: number }
@@ -48,7 +59,7 @@ const numStyle: CSSProperties = {
   fontWeight: 600,
 }
 
-export default function CityBackdrop({ topicId, progress, frost, mastered: masteredProp }: CityBackdropProps) {
+export default function CityBackdrop({ topicId, progress, frost, mastered: masteredProp, traySheetBottomPct, traySheetTransition }: CityBackdropProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const pillRef = useRef<HTMLDivElement>(null)
   const [box, setBox] = useState({ w: 0, h: 0 })
@@ -64,6 +75,17 @@ export default function CityBackdrop({ topicId, progress, frost, mastered: maste
   const hasProgress = Boolean(progress && progress.total > 0)
   const mastered = Boolean(masteredProp)
 
+  // Pill's bottom offset — 24 by default (unchanged), but in 'tray' layout it
+  // clamps to whatever the live sheet strip (traySheetBottomPct, in board %)
+  // actually leaves visible, so the tall "thinking" sheet never covers it.
+  const PILL_H = 44
+  const PILL_MARGIN = 8
+  const pillBottom = (() => {
+    if (traySheetBottomPct === undefined || !box.h) return 24
+    const stripPx = (box.h * traySheetBottomPct) / 100
+    return Math.max(8, Math.min(24, stripPx - PILL_H - PILL_MARGIN))
+  })()
+
   // ── board size (for the leader line, which crosses image ↔ board space) ──
   useLayoutEffect(() => {
     const el = rootRef.current
@@ -76,15 +98,20 @@ export default function CityBackdrop({ topicId, progress, frost, mastered: maste
     return () => ro.disconnect()
   }, [])
 
-  // pill rect relative to the board root — re-measured whenever the board or the text changes
-  // (offset* is relative to the parallax layer, so the translate never skews the leader)
+  // pill rect relative to the board root — re-measured whenever the board or the
+  // text changes, or the tray sheet moves the pill itself (pillBottom, computed
+  // above). (offset* is relative to the parallax layer, so the translate never
+  // skews the leader.) The pill's own `bottom` is CSS-transitioned, so this
+  // still settles at the post-transition position rather than tracking every
+  // intermediate frame — acceptable here since the leader lives inside `world`
+  // and is itself under the frosted glass/tray sheet for most of that motion.
   useLayoutEffect(() => {
     const pill = pillRef.current
     if (!pill) { setPillRect(null); return }
     const left = pill.offsetLeft
     const top = pill.offsetTop
     setPillRect({ left, top, right: left + pill.offsetWidth, bottom: top + pill.offsetHeight })
-  }, [box.w, box.h, nameHe, done, total, mastered])
+  }, [box.w, box.h, nameHe, done, total, mastered, pillBottom])
 
   // ── geometry: image box inside the board (bottom-anchored, centred, 82% wide) ──
   const geo = useMemo(() => {
@@ -266,9 +293,12 @@ export default function CityBackdrop({ topicId, progress, frost, mastered: maste
           the callout is UI — it renders above the frost/veil layers (which
           are z-index:auto, painted in DOM order) and below the mode control /
           dock / toast (z-index 12/12/20), so it reads at every frost level
-          without inheriting the frost's opacity or blur. Same fixed bottom-
-          right position as before — only its stacking layer changed, so it
-          never overlaps the ink column, dock, or mode control. */}
+          without inheriting the frost's opacity or blur. Fixed bottom-right
+          in 'plain' layout (traySheetBottomPct undefined → pillBottom is a
+          constant 24, unchanged); in 'tray' layout it rides `pillBottom` so
+          the tall thinking-state sheet never covers it — its stacking layer
+          means it never overlaps the ink column, dock, or mode control either
+          way. */}
       {building && nameHe && (
         <div
           ref={pillRef}
@@ -276,7 +306,8 @@ export default function CityBackdrop({ topicId, progress, frost, mastered: maste
           style={{
             position: 'absolute',
             right: 30,
-            bottom: 24,
+            bottom: pillBottom,
+            transition: traySheetTransition,
             zIndex: 11,
             height: 44,
             display: 'flex',

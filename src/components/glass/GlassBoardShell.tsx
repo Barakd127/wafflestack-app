@@ -15,7 +15,7 @@
  * Visual recipe + interaction logic copied from the approved canvas artboards
  * (direction C "Look-through" + B's progress overlay).
  */
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 import type { WhiteboardShellProps } from '../WhiteboardShell'
 import CityBackdrop from './CityBackdrop'
@@ -45,9 +45,12 @@ export interface GlassBoardShellProps extends WhiteboardShellProps {
    * frosted glass, full height.
    * 'tray' — quiz-only "question tray" (approved direction A): the content
    * column becomes its own brighter, calmer glass sheet with a fixed edge
-   * (radius, border, shadow) occupying the top ~70% of the board. The sheet
+   * (radius, border, shadow) occupying most of the board. The sheet's FILL
    * has a CONSTANT look — it does not react to the frost slider/mode/peek —
-   * only the city strip below its gold hairline does. See TRAY_* constants.
+   * but its bottom edge (and the hairline/city strip below it) does: tall
+   * while the glass is frosted (thinking), it retracts to open the strip
+   * whenever the same effective frost the shell computes for its other
+   * layers drops into "revealed" territory. See TRAY_* constants.
    */
   layout?: 'plain' | 'tray'
 }
@@ -69,16 +72,45 @@ const REVEAL_REST_FROST = 0.92
 const REVEAL_FROST = 0.4
 const REVEAL_MS = 2600
 const TOAST_MS = 3200
-// Tray layout (quiz question tray, direction A) — the sheet's own fixed
-// geometry. Inset from the board edge on 3 sides; its bottom edge is raised
-// so TRAY_CITY_PCT of the board height stays a city strip below it.
+// Tray layout (quiz question tray, direction A) — the sheet's own geometry.
+// Inset from the board edge on 3 sides; its bottom edge is raised so a strip
+// of the board height stays a city strip below it. That inset now ANIMATES
+// between two states instead of sitting at a constant percentage:
 const TRAY_INSET = 16
-// Design asked for "roughly 30%" (roughly two-thirds sheet / one-third city) —
-// nudged to 27 so the sheet has enough room for a 4-option MC question's
-// stem + grid + hint + ask-human + the controls row without scrolling on a
-// typical laptop viewport. Long content still scrolls inside the sheet
-// (never past the hairline) rather than being cut off.
-const TRAY_CITY_PCT = 26
+// Revealed (city strip open): design asked for "roughly 30%" (roughly
+// two-thirds sheet / one-third city) — nudged to 26 so the sheet has enough
+// room for a 4-option MC question's stem + grid + hint + ask-human + the
+// controls row without scrolling on a typical laptop viewport. Long content
+// still scrolls inside the sheet (never past the hairline) rather than
+// being cut off.
+const TRAY_CITY_PCT_OPEN = 26
+// Thinking (question open, city deliberately hidden): the ~26% strip would
+// otherwise sit empty for the entire time the student reads and answers, so
+// the sheet claims that space instead — down to an 8% ledge, just enough to
+// keep the board's horizon (haze/sky) and the building/floor pill visible.
+const TRAY_CITY_PCT_THINKING = 8
+// The switch between the two is driven by the SAME effective frost `t` the
+// shell already computes for the glass/world layers below — not a separate
+// flag — so the slider, hold-to-look pill and mode buttons open the strip
+// exactly like an answer reveal does. `t` sits at REVEAL_REST_FROST (.92)
+// while thinking and drops to REVEAL_FROST (.4) on reveal (see below), with
+// mode stops at focus .85 / demo .4 / city 0 and peek/mastery forcing 0.
+// TRAY_OPEN_AT/TRAY_CLOSE_AT bracket a linear ramp that cleanly separates
+// those two clusters (.4 and below → open, .85 and above → closed) while
+// still tracking the slider continuously as it crosses the band.
+const TRAY_OPEN_AT = 0.45
+const TRAY_CLOSE_AT = 0.65
+const TRAY_TRANSITION = 'bottom 0.5s cubic-bezier(.2,.7,.2,1), padding-bottom 0.5s cubic-bezier(.2,.7,.2,1)'
+// The tray dock (frost slider + hold-to-look, bottom:24/height 44) and mode
+// control (bottom:78, height 36) are fixed-pixel UI that live BELOW the
+// sheet, in the ledge — sized for the ~26% "revealed" ledge. At the ~8%
+// "thinking" ledge there isn't room for both stacked in the ledge itself, so
+// the ink column reserves this much clearance (px, from the board's true
+// bottom edge) via extra bottom padding instead, keeping the quiz's own
+// sticky footer nav from rendering underneath that fixed dock/mode chrome.
+// (mode control's fixed top sits ~125px up from the board bottom at a
+// typical board height — 136 leaves a small buffer above that.)
+const TRAY_DOCK_CLEARANCE_PX = 136
 const GOLD = '#D4AF37'
 const GOLD_LIGHT = '#F5C842'
 const DEEP_NAVY = '#0B1B3E'
@@ -186,6 +218,12 @@ export default function GlassBoardShell({
   const [autoReveal, setAutoReveal] = useState<number | null>(null)
 
   const trackRef = useRef<HTMLSpanElement | null>(null)
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  // Board height in px (tray layout only) — lets the ink column reserve just
+  // enough bottom padding to clear the FIXED-pixel dock/mode-control, which
+  // live below the animated sheet edge rather than scaling with it. Unused
+  // (and the ResizeObserver a no-op cost) when layout='plain'.
+  const [boardH, setBoardH] = useState(0)
   const masteredFiredRef = useRef(false)
   const onMasteredRef = useRef(onMastered)
   // True only once the student explicitly clicks a mode pill in this mount —
@@ -203,6 +241,19 @@ export default function GlassBoardShell({
   const total = progress ? Math.max(0, progress.total) : 0
   const mastered = total > 0 && done >= total
   const buildingNameHe = buildingNameForTopic(topicId)
+
+  // Board height (tray layout only) — see boardH above.
+  useLayoutEffect(() => {
+    if (!tray) return
+    const el = rootRef.current
+    if (!el) return
+    const measure = () => setBoardH(el.clientHeight)
+    measure()
+    if (typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [tray])
 
   // Mastery (single owner — CityBackdrop is presentational): clear the glass
   // for 1.6s, show the toast, fire onMastered once per mount/topic.
@@ -343,12 +394,27 @@ export default function GlassBoardShell({
   const active: GlassMode | null = manual !== null ? null : mode
   const glassTransition = dragging ? 'none' : undefined
 
+  // Tray sheet's bottom inset: ramps from TRAY_CITY_PCT_OPEN down to
+  // TRAY_CITY_PCT_THINKING as `t` rises through [TRAY_OPEN_AT, TRAY_CLOSE_AT].
+  // Same `t` as every other layer, so a slider drag tracks it live (no
+  // transition while `dragging`, matching glassTransition above); a mode
+  // pick / peek / mastery / answer-reveal jump animates it over TRAY_TRANSITION.
+  const trayCloseFrac = clamp01((t - TRAY_OPEN_AT) / (TRAY_CLOSE_AT - TRAY_OPEN_AT))
+  const trayBottomPct = TRAY_CITY_PCT_OPEN - trayCloseFrac * (TRAY_CITY_PCT_OPEN - TRAY_CITY_PCT_THINKING)
+  const trayTransition = dragging ? 'none' : TRAY_TRANSITION
+  // Ink column's extra bottom padding (tray only): only kicks in once the
+  // animated sheet edge has risen inside the fixed dock/mode-control's
+  // footprint — at the ~26% resting ledge this is 0 (unchanged from before).
+  const trayBottomPx = (trayBottomPct / 100) * boardH
+  const inkPadBottom = tray && boardH ? 28 + Math.max(0, TRAY_DOCK_CLEARANCE_PX - trayBottomPx) : 28
+
   const inkClass = ['ws-glass-ink', guard ? 'ws-glass-ink--guard' : '', guardSoft ? 'ws-glass-ink--soft' : '']
     .filter(Boolean)
     .join(' ')
 
   return (
     <div
+      ref={rootRef}
       dir="rtl"
       className={tray ? 'ws-glass-board ws-glass-board--tray' : 'ws-glass-board'}
       style={{
@@ -366,7 +432,14 @@ export default function GlassBoardShell({
       {/* World — the student's block. Parallax + world fade are applied once,
           inside CityBackdrop (driven by `frost`); this wrapper is a plain box. */}
       <div aria-hidden="true" className="ws-glass-world" style={{ position: 'absolute', inset: 0 }}>
-        <CityBackdrop topicId={topicId} progress={progress} frost={t} mastered={mastered} />
+        <CityBackdrop
+          topicId={topicId}
+          progress={progress}
+          frost={t}
+          mastered={mastered}
+          traySheetBottomPct={tray ? trayBottomPct : undefined}
+          traySheetTransition={tray ? trayTransition : undefined}
+        />
       </div>
 
       {/* Glass — frost (blur + milk) driven by t */}
@@ -423,11 +496,13 @@ export default function GlassBoardShell({
       />
 
       {/* Tray sheet (layout='tray' only) — the question's own reading surface,
-          brighter and calmer than the frosted pane behind it. Its look is a
-          CONSTANT: no dependency on `t` anywhere in this block — only the
-          city strip below the hairline reacts to frost. Painted after the
-          dot grid (on top of it) and before the ink column (which sits on
-          top of the sheet). */}
+          brighter and calmer than the frosted pane behind it. Its FILL is a
+          CONSTANT: no dependency on `t` in the gradient/blur/border below —
+          but its bottom edge (and the hairline + ink column that share it)
+          animates with `t` via trayBottomPct, so the sheet claims the city
+          strip's space while thinking and gives it back on reveal. Painted
+          after the dot grid (on top of it) and before the ink column (which
+          sits on top of the sheet). */}
       {tray && (
         <>
           <div
@@ -437,7 +512,7 @@ export default function GlassBoardShell({
               top: TRAY_INSET,
               left: TRAY_INSET,
               right: TRAY_INSET,
-              bottom: `${TRAY_CITY_PCT}%`,
+              bottom: `${trayBottomPct}%`,
               zIndex: 8,
               pointerEvents: 'none',
               borderRadius: 20,
@@ -446,9 +521,12 @@ export default function GlassBoardShell({
               WebkitBackdropFilter: 'blur(26px) saturate(160%)',
               border: '1px solid rgba(255,255,255,0.55)',
               boxShadow: '0 16px 40px rgba(11,27,62,0.28), inset 0 1px 0 rgba(255,255,255,0.6)',
+              transition: trayTransition,
             }}
           />
-          {/* Sheet sheen — top-right corner highlight, matching the approved artboard */}
+          {/* Sheet sheen — top-right corner highlight, matching the approved
+              artboard. Anchored from the top (not the bottom), so it never
+              needs to move with the animated inset below. */}
           <div
             aria-hidden="true"
             style={{
@@ -470,11 +548,12 @@ export default function GlassBoardShell({
               position: 'absolute',
               left: 32,
               right: 32,
-              bottom: `calc(${TRAY_CITY_PCT}% - 1px)`,
+              bottom: `calc(${trayBottomPct}% - 1px)`,
               zIndex: 9,
               height: 1,
               pointerEvents: 'none',
               background: `linear-gradient(90deg, rgba(212,175,55,0) 0%, rgba(212,175,55,0.45) 15%, rgba(212,175,55,0.45) 85%, rgba(212,175,55,0) 100%)`,
+              transition: trayTransition,
             }}
           />
         </>
@@ -484,8 +563,13 @@ export default function GlassBoardShell({
           room for the dock at the bottom. The legibility guard (backplate +
           etched text) is CSS-driven via the modifier classes (index.css).
           In 'tray' layout the column IS the sheet's reading area: it shares
-          the sheet's inset/bottom edge and gets the sheet's own inner
-          padding, instead of the plain layout's flush 28px offset. */}
+          the sheet's inset/bottom edge (including its animated inset) and
+          gets the sheet's own inner padding, instead of the plain layout's
+          flush 28px offset — plus inkPadBottom's extra reserve (only once
+          the sheet's grown tall enough to need it) so the quiz's own sticky
+          footer nav never renders under the fixed-position dock/mode
+          control, which don't fit in an 8%-tall ledge the way they fit a
+          26%-tall one. */}
       <div
         className={inkClass}
         style={{
@@ -493,11 +577,12 @@ export default function GlassBoardShell({
           top: tray ? TRAY_INSET : 28,
           left: tray ? TRAY_INSET : 28,
           right: tray ? TRAY_INSET : 28,
-          bottom: tray ? `${TRAY_CITY_PCT}%` : 108,
-          padding: tray ? '28px 32px' : undefined,
+          bottom: tray ? `${trayBottomPct}%` : 108,
+          padding: tray ? `28px 32px ${inkPadBottom}px` : undefined,
           display: 'flex',
           flexDirection: 'column',
           zIndex: 10,
+          transition: tray ? trayTransition : undefined,
         }}
       >
         {topRightSlot && (
