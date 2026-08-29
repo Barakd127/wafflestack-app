@@ -43,9 +43,16 @@ h1, h2, .logo-font { font-family: 'Playpen Sans Hebrew', 'Heebo', sans-serif; }
 #hud {
   position: fixed; top: 0; left: 0; right: 0;
   display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
   padding: calc(10px + env(safe-area-inset-top)) 12px 8px;
   pointer-events: none;
   z-index: 20;
+}
+@media (max-width: 500px) {
+  #hud { gap: 5px; }
+  .pill { padding: 3px 9px; font-size: .9rem; }
+  #stars { font-size: .95rem; letter-spacing: 0; }
+  .icon-btn { width: 38px; height: 38px; font-size: 1.05rem; }
 }
 .pill {
   pointer-events: auto;

@@ -114,6 +114,13 @@ export class CafeScene {
     this.raycaster = new THREE.Raycaster();
     this._pv = new THREE.Vector3();
 
+    // a GPU reset would otherwise leave the 3D view blank forever while
+    // the DOM HUD keeps running — let the game react (it reloads)
+    canvas.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      this.onContextLost && this.onContextLost();
+    });
+
     this._lights();
     this._room();
     this._furniture();
@@ -227,6 +234,7 @@ export class CafeScene {
     sun.shadow.mapSize.set(1536, 1536);
     const d = 9;
     Object.assign(sun.shadow.camera, { left: -d, right: d, top: d, bottom: -d, near: 1, far: 30 });
+    sun.shadow.camera.updateProjectionMatrix();  // assign alone never rebuilds the frustum
     sun.shadow.bias = -0.0004;
     this.scene.add(sun);
     const fill = new THREE.DirectionalLight(0xcfe8ff, 0.35);
@@ -541,9 +549,25 @@ export class CafeScene {
       brew: mkRing(-3.35, y + 0.02, -2.15, 0.5),
       milk: mkRing(-2.35, y + 0.02, -2.2, 0.38),
       ice: mkRing(-1.7, y + 0.02, -2.2, 0.38),
-      case: mkRing(1.6, 0.03, -1.45, 0.55),
+      case: mkRing(1.6, 0.07, -1.45, 0.55),   // above the 0.04-high plank floor
     };
     this.activeStations = new Set();
+
+    // fat invisible tap targets — the props themselves are tiny on phones
+    this.stationHits = {};
+    const hitFor = (id, x, yy, z, r, h) => {
+      const m = new THREE.Mesh(
+        new THREE.CylinderGeometry(r, r, h, 8),
+        new THREE.MeshBasicMaterial({ visible: false })
+      );
+      m.position.set(x, yy + h / 2, z);
+      this.scene.add(m);
+      this.stationHits[id] = m;
+    };
+    hitFor('grind', -4.35, y, -2.45, 0.5, 1.1);
+    hitFor('milk', -2.35, y, -2.25, 0.42, 0.9);
+    hitFor('ice', -1.7, y, -2.25, 0.42, 0.9);
+    hitFor('case', 1.6, 0, -2.5, 1.1, 2.2);
   }
 
   setStationGlow(ids) {
@@ -1063,6 +1087,12 @@ export class CafeScene {
         for (const id in this.stationNodes) {
           if (this.stationNodes[id] === o) return { type: 'station', station: id };
         }
+        for (const id in this.stationHits || {}) {
+          if (this.stationHits[id] === o) return { type: 'station', station: id };
+        }
+        for (const id in this.stationRings || {}) {
+          if (this.stationRings[id] === o) return { type: 'station', station: id };
+        }
         if (this.decorNodes.waffleclock === o) return { type: 'waffleclock' };
         o = o.parent;
       }
@@ -1168,11 +1198,16 @@ export class CafeScene {
       }
     }
 
-    // shift-of-day lighting: morning → warm dusk
+    // shift-of-day lighting: morning → warm dusk (continuous blend)
     if (this._dayT !== undefined && this.sun) {
       const d = this._dayT;
+      if (!this._sunMorning) {
+        this._sunMorning = new THREE.Color(0xfff1d6);
+        this._sunDusk = new THREE.Color(0xffcf9e);
+      }
       this.sun.position.set(6 - 11 * d, 10 - 4.5 * d, 5 + 1.5 * d);
-      this.sun.color.setHex(d < 0.6 ? 0xfff1d6 : 0xffd0a0);
+      const warm = THREE.MathUtils.clamp((d - 0.4) / 0.6, 0, 1);
+      this.sun.color.copy(this._sunMorning).lerp(this._sunDusk, warm);
       this.sun.intensity = 1.6 - 0.35 * d;
       this.hemi.intensity = 0.95 - 0.18 * d;
     }

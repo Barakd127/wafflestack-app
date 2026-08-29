@@ -27,7 +27,13 @@ const state = {
   muted: false,
 };
 
+// During a rush we defer writes: the last durable checkpoint is the
+// morning of the current day, so a mid-rush refresh replays the day
+// instead of losing it (or double-counting a half-day of earnings).
+let saveDirty = false;
 function save() {
+  if (phase === 'rush') { saveDirty = true; return; }
+  saveDirty = false;
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) { /* blocked */ }
 }
 function load() {
@@ -59,6 +65,10 @@ function ambience() {
 const canvas = $('#scene');
 const scene = new CafeScene(canvas);
 window.addEventListener('resize', () => scene.resize());
+scene.onContextLost = () => {
+  toast('😵 תקלה גרפית — טוענים מחדש...', 2500);
+  setTimeout(() => location.reload(), 1600);
+};
 const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---------------- run state ----------------
@@ -234,6 +244,8 @@ function tapStation(id) {
   const ao = activeOrder;
   if (ao.mode === 'steps') {
     const wanted = ao.item.steps[ao.stepIdx];
+    // a re-tap on the station just completed is enthusiasm, not a mistake
+    if (ao.stepIdx > 0 && id === ao.item.steps[ao.stepIdx - 1]) return true;
     if (id === wanted) {
       sfx.click();
       if (id === 'brew') { sfx.steam(); scene.puffSteam(scene.machinePos); }
@@ -341,7 +353,6 @@ function serveCustomer(cust, quality) {
       exitCafe(cust);
     }
   });
-  sfx.serve();
 }
 
 function exitCafe(cust) {
@@ -440,7 +451,6 @@ function toast(text, ms = 3000) {
 }
 
 function showHint(i) {
-  if (state.day > 1) return;
   if (state.hintsSeen & (1 << i)) return;
   state.hintsSeen |= 1 << i;
   toast('💡 ' + HINTS[i], 4600);
@@ -480,6 +490,7 @@ function enterPrep() {
 }
 
 function startDay() {
+  save();                       // morning checkpoint before the rush
   phase = 'rush';
   document.body.dataset.phase = 'rush';
   $('#prep-bar').classList.remove('show');
@@ -527,7 +538,8 @@ const shopEl = $('#shop');
 let shopTab = 'upgrades';
 
 function applyPurchaseEffects() {
-  scene.setMachineLevel(Math.max(1, state.upgrades.machine));
+  // +1 so every paid machine tier changes the model on the counter
+  scene.setMachineLevel(state.upgrades.machine + 1);
   scene.setCaseLevel(state.upgrades.case);
   scene.setStaff(state.staff);
   for (const id of state.decor) scene.addDecor(id);
@@ -633,22 +645,49 @@ $('#btn-mute').addEventListener('click', () => {
   reflectMute();
   save();
 });
+// two-tap confirm (window.confirm is silently ignored in sandboxed iframes)
+let resetArmT = null;
 $('#btn-reset').addEventListener('click', () => {
-  if (confirm('לפתוח בית קפה חדש? כל ההתקדמות תימחק!')) {
-    try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* blocked */ }
-    location.reload();
+  const btn = $('#btn-reset');
+  if (!btn.dataset.armed) {
+    btn.dataset.armed = '1';
+    btn.textContent = '🗑️';
+    btn.setAttribute('aria-label', 'לחצו שוב לאישור מחיקה');
+    toast('בטוחים? לחיצה נוספת תמחק את ההתקדמות', 3000);
+    resetArmT = setTimeout(() => {
+      delete btn.dataset.armed;
+      btn.textContent = '🔄';
+      btn.setAttribute('aria-label', 'משחק חדש');
+    }, 3000);
+    return;
   }
+  clearTimeout(resetArmT);
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* blocked */ }
+  location.reload();
 });
 
 // ---------------- input ----------------
 let tapClosedShop = false;
+let tapStoppedNeedle = false;
 canvas.addEventListener('pointerdown', () => {
   tapClosedShop = phase === 'rush' && shopEl.classList.contains('open');
   if (phase === 'rush') shopEl.classList.remove('open');
+  // the timing needle stops on pointerDOWN (click fires ~100ms later,
+  // which eats the perfect window on touch) — and anywhere counts:
+  // the challenge is when, not where
+  if (!tapClosedShop && activeOrder && activeOrder.mode === 'timing') {
+    tapStation('case');
+    tapStoppedNeedle = true;
+  }
 });
 canvas.addEventListener('click', (e) => {
   if (tapClosedShop) { tapClosedShop = false; return; }
+  if (tapStoppedNeedle) { tapStoppedNeedle = false; return; }
   handleTap(e.clientX, e.clientY);
+});
+// the order card itself is a control: stop the needle from it too
+orderCard.addEventListener('pointerdown', () => {
+  if (activeOrder && activeOrder.mode === 'timing') tapStation('case');
 });
 bubblesEl.addEventListener('click', (e) => {
   const b = e.target.closest('.bubble');
@@ -683,14 +722,15 @@ function tick(dt) {
   const timerEl = $('#day-timer i');
   if (timerEl) timerEl.style.width = `${(Math.max(0, dayTime) / DAY_LENGTH) * 100}%`;
 
-  // spawning while the day runs
-  if (dayTime > 0) {
+  // spawning while the day runs — last arrivals stop ~15s before closing
+  // so the shift doesn't overrun its own timer
+  if (dayTime > 15) {
     spawnT -= dt;
     if (spawnT <= 0) {
       spawnCustomer();
       spawnT = spawnIntervalFor(state.day, state.rep) * (0.8 + Math.random() * 0.4);
     }
-  } else if (!customers.length) {
+  } else if (dayTime <= 0 && !customers.length) {
     endDay();
     return;
   }
