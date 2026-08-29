@@ -49,10 +49,10 @@ h1, h2, .logo-font { font-family: 'Playpen Sans Hebrew', 'Heebo', sans-serif; }
   z-index: 20;
 }
 @media (max-width: 500px) {
-  #hud { gap: 5px; }
-  .pill { padding: 3px 9px; font-size: .9rem; }
-  #stars { font-size: .95rem; letter-spacing: 0; }
-  .icon-btn { width: 38px; height: 38px; font-size: 1.05rem; }
+  #hud { gap: 4px; padding-inline: 8px; }
+  .pill { padding: 2px 7px; font-size: .84rem; border-width: 2px; }
+  #stars { font-size: .9rem; letter-spacing: 0; }
+  .icon-btn { width: 34px; height: 34px; font-size: .95rem; border-width: 2px; }
 }
 .pill {
   pointer-events: auto;
@@ -76,6 +76,13 @@ h1, h2, .logo-font { font-family: 'Playpen Sans Hebrew', 'Heebo', sans-serif; }
   -webkit-text-fill-color: transparent;
 }
 .hud-spacer { flex: 1; }
+#corner-btns {
+  position: fixed;
+  left: 10px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 8px;
+  z-index: 26;
+}
 .icon-btn {
   pointer-events: auto;
   width: 44px; height: 44px;
