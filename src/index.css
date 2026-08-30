@@ -18,13 +18,21 @@
   line-height: 1.5;
   font-weight: 400;
 
-  /* PARKED — no handwriting face is applied to the board right now.
-     Two attempts were rejected: Playpen Sans Hebrew (its Hebrew is rounded
-     PRINT, not handwriting) and Gveret Levin (real handwriting, but thin and
-     slanted — not the thick upright whiteboard-marker look that was wanted).
-     The token stays so the next attempt is a one-line change; nothing reads it
-     until a marker face is chosen. */
-  --ws-hand: 'Assistant', sans-serif;
+  /* --ws-hand history. Originally PARKED for the aluminium WHITEBOARD: two
+     faces were tried there and rejected — Playpen Sans Hebrew (its Hebrew is
+     rounded PRINT, not handwriting) and Gveret Levin (real handwriting, but
+     thin and slanted — not the thick upright whiteboard-marker look that
+     board wanted). The whiteboard still sets its lesson-ink font inline
+     (LessonScreen.tsx) rather than reading this token, so that verdict
+     stands unaffected by the change below.
+     2026-08-23: Gveret Levin is adopted here for the GLASS board, where
+     flowing ink — not a marker look — is the point, so the thin/slanted
+     quality that got it rejected above is exactly what's wanted now. This
+     token is scoped to the glass board only, via the rule in the "Glass
+     board" block at the end of this file
+     (`.ws-glass-board .ws-lesson-bullet > div`); it does not reach the
+     whiteboard. */
+  --ws-hand: 'Gveret Levin', 'Playpen Sans Hebrew', 'Assistant', sans-serif;
 
   /* Bottom-left FAB slot tokens — shared between TutorFAB (fixed) and the
      sidebar's PomodoroTimer (absolute). Keep these in sync if you move one. */
@@ -522,4 +530,122 @@ html.dark .ws-glass-card:hover {
     transition: none !important;
   }
   .ws-glass-card::before { display: none; }
+}
+
+/* ── Glass board ─────────────────────────────────────────────────────────── */
+/* Legibility guard for the ink column when the glass is nearly clear:
+   a radial white backplate behind the column + an etched white outline on
+   the text. --guard: frost < .3 (full); --soft: .3 ≤ frost < .5 (lighter). */
+.ws-glass-ink--guard,
+.ws-glass-ink--soft { isolation: isolate; }
+.ws-glass-ink--guard::before,
+.ws-glass-ink--soft::before {
+  content: '';
+  position: absolute;
+  inset: -28px -28px 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 70% 30%, rgba(255,255,255,0.72), rgba(255,255,255,0) 70%);
+}
+.ws-glass-ink--soft::before {
+  background: radial-gradient(ellipse at 70% 30%, rgba(255,255,255,0.35), rgba(255,255,255,0) 70%);
+}
+.ws-glass-ink--guard { text-shadow: 0 0 1px #fff, 0 0 14px rgba(255,255,255,0.9); }
+.ws-glass-ink--guard h1, .ws-glass-ink--guard h2, .ws-glass-ink--guard h3 {
+  text-shadow: 0 0 1px #fff, 0 0 14px rgba(255,255,255,0.95), 0 0 28px rgba(255,255,255,0.8);
+}
+.ws-glass-ink--soft { text-shadow: 0 0 10px rgba(255,255,255,0.75), 0 0 18px rgba(255,255,255,0.5); }
+
+/* Mode segments: gold underline on the segment nearest the live frost while
+   the slider / hold-to-look overrides the lit mode. */
+.ws-glass-seg[data-near="true"]::after {
+  content: '';
+  position: absolute;
+  left: 14px; right: 14px; bottom: 4px;
+  height: 2px;
+  border-radius: 2px;
+  background: #D4AF37;
+}
+.ws-glass-seg:hover { background: rgba(18,36,96,0.08) !important; }
+.ws-glass-seg[aria-pressed="true"]:hover { background: #122460 !important; }
+.ws-glass-seg:focus-visible,
+.ws-glass-track:focus-visible,
+.ws-glass-board button:focus-visible { outline: 2px solid #3351CA; outline-offset: 2px; }
+
+/* Dark mode: the glass whites stay, the dot grid quiets down. */
+html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-glass-board, .ws-glass-board * { transition: none !important; animation: none !important; }
+}
+
+/* Lesson ink handwriting face — GLASS BOARD ONLY. LessonScreen.tsx sets the
+   bullet text's font-family, font-size and line-height all inline (18.5px /
+   'Playpen Sans Hebrew','Assistant',... / 1.85), so every property below
+   needs !important to beat that inline style, not just font-family. `>`
+   (direct child, not descendant) targets only the MathLineBlock wrapper div
+   that carries those inline styles — deliberately NOT its nested per-line
+   divs, so the font-size bump applies once, not compounded on each em
+   level. Gveret Levin renders ~12% narrower/lighter than Playpen at the
+   same px, so size is bumped ~9% here to keep the ink as readable as
+   before: 18.5px * 1.09 ≈ 20.17px. That's a fixed px, not `1.09em` — `em`
+   resolves against this div's PARENT (.ws-lesson-bullet, which inherits the
+   16px page root, not the 18.5px this div's own inline style used), so an
+   em here would have shrunk the ink instead of growing it. Line-height is
+   re-pinned to the same 1.85 the inline style already used, just so it
+   stays correct if that inline value ever changes. Scoped to
+   .ws-glass-board so the old whiteboard's Playpen bullets are untouched. */
+.ws-glass-board .ws-lesson-bullet > div {
+  font-family: var(--ws-hand) !important;
+  font-size: 20.17px !important;
+  line-height: 1.85 !important;
+}
+
+/* Mobile keeps the phone sizing from the @media block above (16px/1.7); this
+   rule comes later in the file, so without re-stating it here the glass board
+   would drag the desktop 20.17px onto phones. Only the FACE carries over. */
+@media (max-width: 768px) {
+  .ws-glass-board .ws-lesson-bullet > div {
+    font-size: 17.5px !important;   /* 16px + the same ~9% hand compensation */
+    line-height: 1.7 !important;
+  }
+}
+
+/* ── Quiz tray (layout='tray', quiz board only — scoped under
+   .ws-glass-board--tray so the whiteboard and the lesson glass board are
+   never touched) ──────────────────────────────────────────────────────────
+   The app sets its own margins inline on the stem/grid/hint/ask/controls
+   row/footer (StudyHub.tsx), tuned for the old full-height whiteboard
+   column. Inside the (shorter) sheet those add up to a cramped, uneven
+   rhythm, so every block below gets a tighter, evenly-stepped gap instead.
+   All !important — beating the same inline styles the whiteboard still
+   relies on elsewhere. */
+.ws-glass-board--tray .ws-quiz-stem { margin-bottom: 12px !important; }
+.ws-glass-board--tray .ws-quiz-grid { margin-bottom: 10px !important; }
+.ws-glass-board--tray .ws-quiz-hint { margin-bottom: 8px !important; opacity: 0.85; }
+.ws-glass-board--tray .ws-quiz-ask { margin-bottom: 8px !important; }
+.ws-glass-board--tray .ws-quiz-controls-row { padding-top: 2px; }
+.ws-glass-board--tray .ws-quiz-skip { opacity: 0.75; transition: opacity 0.15s; }
+.ws-glass-board--tray .ws-quiz-skip:hover { opacity: 1; }
+/* Footer nav: the app makes it `position: sticky; bottom: 0` with
+   `margin-top: auto` so it hugs the bottom of a TALL whiteboard column even
+   on a short question. The tray's reading area is much shorter, so on a
+   full 4-option MC question that combination goes the wrong way: sticky
+   pins the footer to the bottom of the (short) visible scroll port BEFORE
+   its natural flow position, and it ends up stacked on top of the controls
+   row above it instead of after it. Pinning to the sheet isn't needed here
+   (the sheet itself is already the fixed surface) — taking sticky out of
+   the picture puts the footer back in plain document flow, so long content
+   just scrolls as one column instead of overlapping. */
+.ws-glass-board--tray .ws-quiz-footer {
+  /* Pinned to the bottom of the sheet's scroll area. Measured: after an answer
+     the app appends its feedback block AND the sheet retracts to open the city
+     strip, so a statically-placed footer drops ~150px below the fold — exactly
+     when the student wants "הבא ←". Sticky keeps the primary action in place at
+     every sheet height and content length. Per user 2026-08-26. */
+  position: sticky !important;
+  bottom: 0 !important;
+  margin-top: auto !important;
+  padding-top: 10px !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.82) 45%, rgba(255,255,255,0.92) 100%) !important;
 }
