@@ -876,6 +876,35 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
               }}>
               {loading ? '...' : mode === 'login' ? 'כניסה →' : 'צור חשבון →'}
             </button>
+
+            {/* Guest entry — no account, no cloud. Progress lives in this
+                browser's localStorage under the fixed 'guest' id, so anyone
+                testing the app (or a student trying it before signing up) can
+                get straight in. Per user 2026-08-26. */}
+            <button
+              type="button"
+              onClick={() => onLogin({
+                userId: 'guest',
+                username: 'guest',
+                displayName: 'אורח',
+                role: 'student',
+                createdAt: new Date().toISOString(),
+                lastActiveAt: new Date().toISOString(),
+              })}
+              style={{
+                marginTop: 10, padding: '11px 0', width: '100%',
+                background: 'rgba(31,62,108,0.06)',
+                border: '1px solid rgba(31,62,108,0.22)',
+                borderRadius: 14, color: '#254A9F',
+                fontSize: 14, fontWeight: 600, fontFamily: "'Rubik', sans-serif",
+                cursor: 'pointer',
+              }}
+            >
+              כניסה כאורח — בלי חשבון
+            </button>
+            <div style={{ marginTop: 6, fontSize: 11.5, color: '#7F9BD9', textAlign: 'center', fontFamily: "'Assistant', sans-serif" }}>
+              ההתקדמות נשמרת בדפדפן הזה בלבד
+            </div>
           </form>
         </div>
 

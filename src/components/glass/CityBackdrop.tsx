@@ -80,10 +80,21 @@ export default function CityBackdrop({ topicId, progress, frost, mastered: maste
   // actually leaves visible, so the tall "thinking" sheet never covers it.
   const PILL_H = 44
   const PILL_MARGIN = 8
+  // Measured on the real board: the dock (hold-to-look + frost slider) runs
+  // from left:96 to ~538, and this pill is right:30 with a ~191px box — so
+  // below ~770px of board width the two collide (at 697px the pill starts at
+  // 503, inside the dock). Narrower than that, the pill rides ABOVE the dock
+  // instead of beside it. Per user 2026-08-26.
+  const DOCK_ROW_H = 52
+  const PILL_LIFT_BELOW_W = 780
+  const liftOverDock = !!box.w && box.w < PILL_LIFT_BELOW_W
   const pillBottom = (() => {
-    if (traySheetBottomPct === undefined || !box.h) return 24
-    const stripPx = (box.h * traySheetBottomPct) / 100
-    return Math.max(8, Math.min(24, stripPx - PILL_H - PILL_MARGIN))
+    const base = (() => {
+      if (traySheetBottomPct === undefined || !box.h) return 24
+      const stripPx = (box.h * traySheetBottomPct) / 100
+      return Math.max(8, Math.min(24, stripPx - PILL_H - PILL_MARGIN))
+    })()
+    return liftOverDock ? base + DOCK_ROW_H : base
   })()
 
   // ── board size (for the leader line, which crosses image ↔ board space) ──
