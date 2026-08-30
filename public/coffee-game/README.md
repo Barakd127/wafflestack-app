@@ -42,6 +42,24 @@ cd public && python3 -m http.server 8123
 - Everything else (room, furniture, machine, characters) is hand-built
   three.js primitives in a flat Kenney-ish palette; UI is plain DOM/CSS.
 
+## Characters (Tripo AI, optional)
+
+The customers render as built-in chibi peeps (three.js primitives). To
+replace them with AI-generated 3D characters, run **on a machine with a
+`TRIPO_API_KEY` in `.env.local`** (the remote/CI environment can't reach
+the Tripo API):
+
+```bash
+npm run tripo:characters
+```
+
+This uses the repo's existing Tripo pipeline (`scripts/tripo/generate.mjs`)
+with `scripts/tripo/characters.json` prompts and writes
+`public/models/characters/<personaId>.glb`. The game auto-loads any file
+that exists (per-persona), and `tools/build-artifact.mjs` embeds them in
+the single-file build; missing files silently fall back to the chibi peeps.
+Regenerate one: `npm run tripo:characters -- hipster --force`.
+
 ## Credits
 
 - 3D models: [Kenney](https://kenney.nl) — Creative Commons Zero (CC0).

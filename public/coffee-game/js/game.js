@@ -102,7 +102,7 @@ function spawnCustomer() {
   const persona = pickPersona();
   const item = pickItem(persona);
   const qty = persona.doubleOrder ? 2 : 1;
-  const peep = scene.createPeep({ body: persona.body, hat: persona.hat, at: scene.spawnPos });
+  const peep = scene.createPeep({ body: persona.body, hat: persona.hat, charKey: `char-${persona.id}`, at: scene.spawnPos });
   const patienceMax = persona.patience * (1 + ambience() * 0.05);
   const cust = {
     persona, item, qty, peep,
@@ -182,6 +182,18 @@ function positionBubbles() {
     c.bubble.style.transform = `translate(${p.x}px, ${p.y}px)`;
     c.bubble.classList.toggle('hidden', !p.visible || c.state === 'entering');
   }
+  // until the very first serve, a bouncing finger shows what to tap
+  const pointer = $('#tap-pointer');
+  const guideTarget = state.stats.served === 0 && phase === 'rush' && !activeOrder
+    ? customers.find((c) => c.state === 'queued')
+    : null;
+  if (guideTarget) {
+    const p = scene.toScreen(scene.headPos(guideTarget.peep));
+    pointer.style.transform = `translate(${p.x}px, ${p.y - 92}px)`;
+    pointer.hidden = false;
+  } else {
+    pointer.hidden = true;
+  }
 }
 
 // ---------------- the prep mini-games ----------------
@@ -231,11 +243,13 @@ function renderOrderCard() {
       <div class="oc-steps">${item.steps.map((s, i) => `
         <span class="oc-step ${i < stepIdx ? 'done' : i === stepIdx ? 'now' : ''}">${STATIONS[s].icon}</span>
         ${i < item.steps.length - 1 ? '<span class="oc-arrow">←</span>' : ''}`).join('')}
-      </div>`;
+      </div>
+      <div class="oc-help">לחצו על התחנה עם החץ הזהוב ⬇️</div>`;
   } else {
     orderCard.innerHTML = `
       <div class="oc-title">${item.emoji} ${item.name} <small>· ${cust.persona.name}</small></div>
-      <div class="oc-timing"><div class="oc-zone" style="width:${caseZone() * 100}%"></div><i class="oc-needle"></i></div>`;
+      <div class="oc-timing"><div class="oc-zone" style="width:${caseZone() * 100}%"></div><i class="oc-needle"></i></div>
+      <div class="oc-help">לחצו בכל מקום ברגע שהמחוג בירוק! 🎯</div>`;
   }
 }
 
@@ -807,7 +821,8 @@ async function boot() {
   setMuted(state.muted);
   await scene.loadAssets((f) => {
     $('#load-bar i').style.width = (f * 100).toFixed(0) + '%';
-  });
+  }, PERSONAS.map((p) => p.id).concat(['barista', 'tom']));
+  scene.refreshBarista();
   applyPurchaseEffects();
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => {

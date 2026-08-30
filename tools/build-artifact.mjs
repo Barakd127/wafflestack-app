@@ -43,6 +43,15 @@ const MODELS = {
   'planter': 'models/kenney-suburban/planter.glb',
   'parasol': 'kenney/commercial/detail-parasol-a.glb',
 };
+// Tripo-generated characters are optional — embed whatever exists
+import { readdirSync, existsSync } from 'node:fs';
+const charDir = path.join(root, 'public', 'models', 'characters');
+if (existsSync(charDir)) {
+  for (const f of readdirSync(charDir)) {
+    if (f.endsWith('.glb')) MODELS[`char-${f.replace(/\.glb$/, '')}`] = `models/characters/${f}`;
+  }
+}
+
 const assets = {
   models: Object.fromEntries(Object.entries(MODELS).map(([k, p]) => [k, b64(p)])),
   textures: {

@@ -136,7 +136,7 @@ export class CafeScene {
   // ---------- assets ----------
   // Models load over HTTP normally; the single-file Artifact build instead
   // provides window.__ASSETS = { models: {key: base64}, textures: {pathSuffix: dataURI} }.
-  async loadAssets(onProgress) {
+  async loadAssets(onProgress, characterIds = []) {
     const embedded = (typeof window !== 'undefined' && window.__ASSETS) || null;
     const manager = new THREE.LoadingManager();
     if (embedded) {
@@ -148,7 +148,11 @@ export class CafeScene {
       });
     }
     const loader = new GLTFLoader(manager);
+    // optional Tripo-generated characters (npm run tripo:characters);
+    // a 404 just means the built-in chibi is used instead
+    const chars = characterIds.map((id) => [`char-${id}`, `../models/characters/${id}.glb`]);
     const want = [
+      ...chars,
       ['cup-coffee', '../models/food/cup-coffee.glb'],
       ['cup-tea', '../models/food/cup-tea.glb'],
       ['frappe', '../models/food/frappe.glb'],
@@ -554,6 +558,22 @@ export class CafeScene {
     this.activeStations = new Set();
 
     // fat invisible tap targets — the props themselves are tiny on phones
+    // bouncing guide arrow above whichever station the player should tap
+    this.stationArrow = new THREE.Mesh(
+      new THREE.ConeGeometry(0.24, 0.46, 10),
+      new THREE.MeshBasicMaterial({ color: 0xffb020 })
+    );
+    this.stationArrow.rotation.x = Math.PI;
+    this.stationArrow.visible = false;
+    this.scene.add(this.stationArrow);
+    this.arrowAnchors = {
+      grind: new THREE.Vector3(-4.35, 2.2, -2.45),
+      brew: new THREE.Vector3(-3.35, 2.35, -2.5),
+      milk: new THREE.Vector3(-2.35, 2.0, -2.25),
+      ice: new THREE.Vector3(-1.7, 2.0, -2.25),
+      case: new THREE.Vector3(1.6, 2.6, -2.5),
+    };
+
     this.stationHits = {};
     const hitFor = (id, x, yy, z, r, h) => {
       const m = new THREE.Mesh(
@@ -572,6 +592,14 @@ export class CafeScene {
 
   setStationGlow(ids) {
     this.activeStations = new Set(ids || []);
+    const first = ids && ids[0];
+    if (first && this.arrowAnchors[first]) {
+      this.stationArrow.visible = true;
+      this._arrowBase = this.arrowAnchors[first];
+    } else {
+      this.stationArrow.visible = false;
+      this._arrowBase = null;
+    }
   }
 
   // 0..1 across the shift: morning light → warm dusk
@@ -696,22 +724,11 @@ export class CafeScene {
   }
 
   // ---------- characters ----------
-  _peepNode({ body = 0xff9a76, hat = 'none', skin }) {
+  // Chibi humanoid: boxy-round head, torso, swinging arms & legs.
+  // A Tripo-generated GLB (models/characters/<id>.glb) replaces the body
+  // when present; the built-in build is the fallback.
+  _peepNode({ body = 0xff9a76, hat = 'none', skin, charKey }) {
     const g = new THREE.Group();
-    const s = skin ?? SKINS[Math.floor(Math.random() * SKINS.length)];
-    // every part uses cached geometry + per-color cached material
-    const part = (geoKey, makeGeo, color) => {
-      const m = new THREE.Mesh(cachedGeo(geoKey, makeGeo), cachedMat(color));
-      m.castShadow = true;
-      g.add(m);
-      return m;
-    };
-    const sphereGeo = () => new THREE.SphereGeometry(0.2, 20, 16);
-    const bod = part('peep-body', () => new THREE.CapsuleGeometry(0.21, 0.34, 6, 14), body);
-    bod.position.y = 0.48;
-    const head = part('peep-head', sphereGeo, s);
-    head.position.y = 1.02;
-    // little face
     if (!this.constructor._eyeM) {
       this.constructor._eyeM = new THREE.MeshBasicMaterial({ color: 0x2b2b2b });
       this.constructor._eyeM.userData.shared = true;
@@ -720,53 +737,84 @@ export class CafeScene {
       this.constructor._hitM = new THREE.MeshBasicMaterial({ visible: false });
       this.constructor._hitM.userData.shared = true;
     }
-    [-0.075, 0.075].forEach((dx) => {
-      const eye = new THREE.Mesh(cachedGeo('peep-eye', () => new THREE.SphereGeometry(0.023, 8, 8)), this.constructor._eyeM);
-      eye.position.set(dx, 1.06, 0.18);
-      g.add(eye);
-    });
-    [-0.13, 0.13].forEach((dx) => {
-      const b = new THREE.Mesh(cachedGeo('peep-blush', () => new THREE.CircleGeometry(0.03, 10)), this.constructor._blushM);
-      b.position.set(dx, 1.0, 0.185);
-      g.add(b);
-    });
-    // hats & hair (dome hats reuse the head sphere, squashed via scale)
-    const hatCol = 0x4a4a55;
-    if (hat === 'beanie') {
-      const h = part('peep-head', sphereGeo, 0xc9553e); h.scale.y = 0.62; h.position.y = 1.14;
-      const pom = part('peep-pom', () => new THREE.SphereGeometry(0.06, 10, 8), PAL.cream); pom.position.y = 1.3;
-    } else if (hat === 'bun') {
-      const h = part('peep-head', sphereGeo, 0xdedede); h.scale.y = 0.55; h.position.y = 1.14;
-      const bun = part('peep-bun', () => new THREE.SphereGeometry(0.09, 10, 8), 0xdedede); bun.position.set(0, 1.24, -0.1);
-    } else if (hat === 'messybun') {
-      const h = part('peep-head', sphereGeo, 0x6f4e37); h.scale.y = 0.55; h.position.y = 1.14;
-      const bun = part('peep-mbun', () => new THREE.SphereGeometry(0.1, 10, 8), 0x6f4e37); bun.position.set(0.06, 1.27, -0.06);
-    } else if (hat === 'cap') {
-      const h = part('peep-head', sphereGeo, PAL.pink); h.scale.set(1.05, 0.5, 1.05); h.position.y = 1.15;
-      const brim = part('peep-capbrim', () => new THREE.CylinderGeometry(0.14, 0.14, 0.03, 14), PAL.pink);
-      brim.position.set(0, 1.12, 0.2);
-    } else if (hat === 'headphones') {
-      const band = part('peep-band', () => new THREE.TorusGeometry(0.2, 0.03, 8, 20, Math.PI), hatCol);
-      band.position.y = 1.05;
-      [-0.2, 0.2].forEach((dx) => {
-        const pad = part('peep-pad', () => new THREE.CylinderGeometry(0.07, 0.07, 0.05, 10), hatCol);
-        pad.rotation.z = Math.PI / 2;
-        pad.position.set(dx, 1.02, 0);
+
+    if (charKey && this.models[charKey]) {
+      // generated character: normalize to chibi height, feet on the floor
+      const node = this.itemNode(charKey, 1.05);
+      g.add(node);
+      g.userData.eyes = [];
+      g.userData.limbs = null;
+    } else {
+      const s = skin ?? SKINS[Math.floor(Math.random() * SKINS.length)];
+      const part = (geoKey, makeGeo, color) => {
+        const m = new THREE.Mesh(cachedGeo(geoKey, makeGeo), cachedMat(color));
+        m.castShadow = true;
+        g.add(m);
+        return m;
+      };
+      // legs & arms pivot at hip/shoulder (offset baked into the geometry)
+      const legGeo = () => { const geo = new RoundedBoxGeometry(0.11, 0.24, 0.13, 2, 0.03); geo.translate(0, -0.12, 0); return geo; };
+      const armGeo = () => { const geo = new RoundedBoxGeometry(0.09, 0.3, 0.1, 2, 0.035); geo.translate(0, -0.15, 0); return geo; };
+      const legL = part('peep-leg', legGeo, 0x574b40); legL.position.set(-0.08, 0.24, 0);
+      const legR = part('peep-leg', legGeo, 0x574b40); legR.position.set(0.08, 0.24, 0);
+      const torso = part('peep-torso', () => new RoundedBoxGeometry(0.38, 0.4, 0.26, 2, 0.1), body);
+      torso.position.y = 0.42;
+      const armL = part('peep-arm', armGeo, body); armL.position.set(-0.24, 0.58, 0); armL.rotation.z = 0.14;
+      const armR = part('peep-arm', armGeo, body); armR.position.set(0.24, 0.58, 0); armR.rotation.z = -0.14;
+      const head = part('peep-head', () => new RoundedBoxGeometry(0.36, 0.32, 0.32, 2, 0.12), s);
+      head.position.y = 0.8;
+      g.userData.limbs = { armL, armR, legL, legR };
+
+      [-0.07, 0.07].forEach((dx) => {
+        const eye = new THREE.Mesh(cachedGeo('peep-eye', () => new THREE.SphereGeometry(0.023, 8, 8)), this.constructor._eyeM);
+        eye.position.set(dx, 0.83, 0.165);
+        g.add(eye);
       });
-    } else if (hat === 'sunhat') {
-      const h = part('peep-sunhat', () => new THREE.CylinderGeometry(0.16, 0.18, 0.12, 14), 0xf2d98c); h.position.y = 1.2;
-      const brim = part('peep-sunbrim', () => new THREE.CylinderGeometry(0.3, 0.32, 0.03, 18), 0xf2d98c); brim.position.y = 1.14;
-    } else if (hat === 'fedora') {
-      const h = part('peep-fedora', () => new THREE.CylinderGeometry(0.13, 0.15, 0.14, 14), 0x2e2b38); h.position.y = 1.21;
-      const brim = part('peep-fedbrim', () => new THREE.CylinderGeometry(0.26, 0.28, 0.03, 18), 0x2e2b38); brim.position.y = 1.13;
+      [-0.125, 0.125].forEach((dx) => {
+        const b = new THREE.Mesh(cachedGeo('peep-blush', () => new THREE.CircleGeometry(0.03, 10)), this.constructor._blushM);
+        b.position.set(dx, 0.77, 0.162);
+        g.add(b);
+      });
+      // hats & hair sit on the head top (~0.95)
+      const hatCol = 0x4a4a55;
+      const domeGeo = () => new THREE.SphereGeometry(0.2, 18, 12);
+      if (hat === 'beanie') {
+        const h = part('peep-dome', domeGeo, 0xc9553e); h.scale.set(1, 0.6, 1); h.position.y = 0.93;
+        const pom = part('peep-pom', () => new THREE.SphereGeometry(0.06, 10, 8), PAL.cream); pom.position.y = 1.08;
+      } else if (hat === 'bun') {
+        const h = part('peep-dome', domeGeo, 0xdedede); h.scale.set(1, 0.52, 1); h.position.y = 0.93;
+        const bun = part('peep-bun', () => new THREE.SphereGeometry(0.09, 10, 8), 0xdedede); bun.position.set(0, 1.0, -0.15);
+      } else if (hat === 'messybun') {
+        const h = part('peep-dome', domeGeo, 0x6f4e37); h.scale.set(1, 0.52, 1); h.position.y = 0.93;
+        const bun = part('peep-mbun', () => new THREE.SphereGeometry(0.1, 10, 8), 0x6f4e37); bun.position.set(0.06, 1.04, -0.1);
+      } else if (hat === 'cap') {
+        const h = part('peep-dome', domeGeo, PAL.pink); h.scale.set(1.06, 0.5, 1.06); h.position.y = 0.94;
+        const brim = part('peep-capbrim', () => new THREE.CylinderGeometry(0.14, 0.14, 0.03, 14), PAL.pink);
+        brim.position.set(0, 0.9, 0.22);
+      } else if (hat === 'headphones') {
+        const band = part('peep-band', () => new THREE.TorusGeometry(0.2, 0.03, 8, 20, Math.PI), hatCol);
+        band.position.y = 0.84;
+        [-0.19, 0.19].forEach((dx) => {
+          const pad = part('peep-pad', () => new THREE.CylinderGeometry(0.07, 0.07, 0.05, 10), hatCol);
+          pad.rotation.z = Math.PI / 2;
+          pad.position.set(dx, 0.8, 0);
+        });
+      } else if (hat === 'sunhat') {
+        const h = part('peep-sunhat', () => new THREE.CylinderGeometry(0.16, 0.18, 0.12, 14), 0xf2d98c); h.position.y = 1.0;
+        const brim = part('peep-sunbrim', () => new THREE.CylinderGeometry(0.3, 0.32, 0.03, 18), 0xf2d98c); brim.position.y = 0.93;
+      } else if (hat === 'fedora') {
+        const h = part('peep-fedora', () => new THREE.CylinderGeometry(0.13, 0.15, 0.14, 14), 0x2e2b38); h.position.y = 1.0;
+        const brim = part('peep-fedbrim', () => new THREE.CylinderGeometry(0.26, 0.28, 0.03, 18), 0x2e2b38); brim.position.y = 0.92;
+      }
+      g.userData.eyes = g.children.filter((c) => c.geometry === geoCache.get('peep-eye'));
     }
+
     // invisible pick target (fat, easy to tap)
-    const hit = new THREE.Mesh(cachedGeo('peep-hit', () => new THREE.CylinderGeometry(0.42, 0.42, 1.5, 8)), this.constructor._hitM);
-    hit.position.y = 0.7;
+    const hit = new THREE.Mesh(cachedGeo('peep-hit', () => new THREE.CylinderGeometry(0.42, 0.42, 1.4, 8)), this.constructor._hitM);
+    hit.position.y = 0.65;
     hit.castShadow = false;
     g.add(hit);
     g.userData.hit = hit;
-    g.userData.eyes = g.children.filter((c) => c.geometry === geoCache.get('peep-eye'));
     return g;
   }
 
@@ -825,25 +873,36 @@ export class CafeScene {
 
   headPos(peep) {
     this._pv.copy(peep.node.position);
-    this._pv.y += 1.55;
+    this._pv.y += 1.32;
     return this._pv;
   }
 
   // barista behind the counter (+ optional hired staff)
   _barista() {
-    this.barista = this.createPeep({ body: 0x6f4e37, hat: 'none', skin: PAL.skin1, at: new THREE.Vector3(-1.2, 0, -3.3) });
-    const apron = rbox(0.34, 0.4, 0.06, PAL.cream, 0.03);
-    apron.position.set(0, 0.5, 0.2);
+    this.barista = this.createPeep({ body: 0x6f4e37, hat: 'none', skin: PAL.skin1, charKey: 'char-barista', at: new THREE.Vector3(-1.2, 0, -3.3) });
+    if (!this.barista.node.userData.limbs) return;  // generated model has its own apron
+    const apron = rbox(0.3, 0.32, 0.05, PAL.cream, 0.03);
+    apron.position.set(0, 0.4, 0.15);
     this.barista.node.add(apron);
-    this.barista.node.rotation.y = 0;  // faces +z (the room)
+  }
+
+  // swap the built-in barista for the generated one once assets exist
+  refreshBarista() {
+    if (this.models['char-barista'] && this.barista && this.barista.node.userData.limbs) {
+      const at = this.barista.node.position.clone();
+      this.removePeep(this.barista);
+      this.barista = this.createPeep({ charKey: 'char-barista', at });
+    }
   }
 
   setStaff({ tom = false, cat = false } = {}) {
     if (tom && !this.tomNode) {
-      const p = this.createPeep({ body: 0x54c6a9, hat: 'beanie', at: new THREE.Vector3(-3.0, 0, -3.3) });
-      const apron = rbox(0.34, 0.4, 0.06, 0x3d3a4a, 0.03);
-      apron.position.set(0, 0.5, 0.2);
-      p.node.add(apron);
+      const p = this.createPeep({ body: 0x54c6a9, hat: 'beanie', charKey: 'char-tom', at: new THREE.Vector3(-3.0, 0, -3.3) });
+      if (p.node.userData.limbs) {
+        const apron = rbox(0.3, 0.32, 0.05, 0x3d3a4a, 0.03);
+        apron.position.set(0, 0.4, 0.15);
+        p.node.add(apron);
+      }
       this.tomNode = p;
     }
     if (cat && !this.catNode) {
@@ -1164,6 +1223,15 @@ export class CafeScene {
       if (p.jumpT > 0) { p.jumpT -= dt; y += Math.sin((1 - p.jumpT / 0.5) * Math.PI) * 0.35; }
       if (p.fidget && !p.walking) y += Math.max(0, Math.sin(p.bobT * 3.2)) * 0.06;  // impatient hops
       p.node.position.y = y;
+      // arms and legs swing while walking, settle when standing
+      const limbs = p.node.userData.limbs;
+      if (limbs) {
+        const swing = p.walking ? Math.sin(p.bobT) * 0.55 : 0;
+        limbs.armL.rotation.x += (swing - limbs.armL.rotation.x) * Math.min(1, dt * 12);
+        limbs.armR.rotation.x += (-swing - limbs.armR.rotation.x) * Math.min(1, dt * 12);
+        limbs.legL.rotation.x += (-swing - limbs.legL.rotation.x) * Math.min(1, dt * 12);
+        limbs.legR.rotation.x += (swing - limbs.legR.rotation.x) * Math.min(1, dt * 12);
+      }
       if (p.spinT > 0) { p.spinT -= dt; p.node.rotation.y += dt * (Math.PI * 2 / 0.6); }  // happy twirl
       if (p.stompT > 0) {
         p.stompT -= dt;
@@ -1186,6 +1254,13 @@ export class CafeScene {
         eyes.forEach((e) => { e.scale.y = closed ? 0.12 : 1; });
         if (p.blinkT <= 0) p.blinkT = 1.5 + Math.random() * 3.5;
       }
+    }
+
+    // guide arrow bobs over the active station
+    if (this.stationArrow && this.stationArrow.visible && this._arrowBase) {
+      this.stationArrow.position.copy(this._arrowBase);
+      this.stationArrow.position.y += Math.sin(t * 5) * 0.1;
+      this.stationArrow.rotation.y = t * 1.5;
     }
 
     // station guidance rings pulse while active

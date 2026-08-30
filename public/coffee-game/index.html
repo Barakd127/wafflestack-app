@@ -20,6 +20,7 @@
 
   <!-- speech bubbles / orders float here, projected from 3D -->
   <div id="bubbles"></div>
+  <div id="tap-pointer" hidden aria-hidden="true">👇</div>
 
   <header id="hud">
     <div class="pill" id="coins">₪0</div>
@@ -58,7 +59,13 @@
       <div class="badge-row">☕ 🧇 🥐</div>
       <h1>תפוס את הפול!</h1>
       <p class="sub">טייקון בית־הקפה המטורלל של השכונה</p>
-      <p class="sub">הגישו לכל המשוגעים לדבר, שדרגו את המכונה,<br />ועצבו את החדר עד חמישה כוכבים ⭐</p>
+      <div class="howto" aria-label="איך משחקים">
+        <div class="ht-step"><span>👆</span><small>בוחרים לקוח</small></div>
+        <span class="ht-arrow">←</span>
+        <div class="ht-step"><span>⚙️☕</span><small>מכינים לפי הסדר</small></div>
+        <span class="ht-arrow">←</span>
+        <div class="ht-step"><span>💰</span><small>מרוויחים</small></div>
+      </div>
       <button id="btn-start">פתחו את הדלתות! ☕</button>
       <p class="tiny">
         משחק דמו · בהשראת <bdi dir="ltr">MakeRoom</bdi> ו־<bdi dir="ltr">Seize the Bean</bdi><br />

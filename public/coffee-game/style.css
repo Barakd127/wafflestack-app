@@ -345,6 +345,42 @@ body[data-phase="rush"] #day-timer { display: block; }
   margin-right: -2px;
 }
 
+/* ---------- onboarding pointers & how-to ---------- */
+#tap-pointer {
+  position: fixed; top: 0; left: 0;
+  translate: -50% -50%;
+  font-size: 2.3rem;
+  pointer-events: none;
+  z-index: 16;
+  animation: point-bounce .7s ease-in-out infinite;
+  filter: drop-shadow(0 3px 3px rgba(80, 50, 20, .4));
+}
+@keyframes point-bounce {
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: -14px; }
+}
+.oc-help {
+  margin-top: 8px;
+  font-size: .8rem;
+  font-weight: 700;
+  color: #8a6a4a;
+}
+.howto {
+  display: flex; align-items: stretch; justify-content: center; gap: 6px;
+  margin: 4px 0 2px;
+}
+.ht-step {
+  background: var(--cream);
+  border: 3px solid rgba(111, 78, 55, .3);
+  border-radius: 14px;
+  padding: 6px 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-width: 74px;
+}
+.ht-step span { font-size: 1.3rem; }
+.ht-step small { font-size: .68rem; font-weight: 700; color: #7a6a58; }
+.ht-arrow { align-self: center; color: #b9a68e; font-weight: 900; }
+
 /* ---------- emotes ---------- */
 .emote {
   position: fixed;

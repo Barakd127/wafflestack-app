@@ -1,0 +1,56 @@
+{
+  "_comment": "Customer characters for the coffee game (public/coffee-game/). Generate with: npm run tripo:characters — outputs to public/models/characters/<id>.glb, which the game auto-loads (falling back to the built-in chibi peeps when a file is missing). Keep each model a single standing full-body character; the game scales it to ~1 unit tall and animates the whole body (bob/spin/stomp), so no rig is needed.",
+  "_styleSuffix": "stylized low-poly chibi game character, oversized head, small rounded body, standing idle pose with arms relaxed, flat pastel colors, soft warm palette, cozy friendly game art, single full-body character, feet together on the ground, no base, no background, no text",
+  "items": [
+    {
+      "id": "hipster",
+      "concept": "ניר ההיפסטר",
+      "prompt": "A young hipster man with a trimmed beard, mustard-yellow shirt, rolled jeans, and a red knit beanie with a cream pompom"
+    },
+    {
+      "id": "grandma",
+      "concept": "סבתא פנינה",
+      "prompt": "A sweet elderly grandmother with a gray hair bun, round glasses, lavender cardigan over a floral dress, and a tiny handbag"
+    },
+    {
+      "id": "student",
+      "concept": "דניאל הסטודנט",
+      "prompt": "A tired university student wearing a sky-blue hoodie and big dark headphones around the head, holding a small notebook"
+    },
+    {
+      "id": "influencer",
+      "concept": "שירה האינפלואנסרית",
+      "prompt": "A trendy young woman influencer with a pink baseball cap, long ponytail, pink crop jacket, holding a smartphone up as if filming"
+    },
+    {
+      "id": "tourist",
+      "concept": "יורגן התייר",
+      "prompt": "A cheerful middle-aged tourist man with a straw sun hat, teal t-shirt, khaki shorts, sandals with socks, and a camera on a neck strap"
+    },
+    {
+      "id": "twinmom",
+      "concept": "רוני אמא של התאומים",
+      "prompt": "An exhausted but determined young mother with a messy brown hair bun, coral t-shirt, holding a coffee thermos, slightly frazzled expression"
+    },
+    {
+      "id": "hitech",
+      "concept": "עופר מההייטק",
+      "prompt": "A tech-worker man in a plain gray polo shirt with an employee badge lanyard, dark jeans, smartwatch, neat short hair"
+    },
+    {
+      "id": "critic",
+      "concept": "המבקר המסתורי",
+      "prompt": "A mysterious food critic in a long dark trench coat and black fedora pulled low, holding a tiny notepad, face mostly in shadow"
+    },
+    {
+      "id": "barista",
+      "concept": "הבריסטה הראשי",
+      "prompt": "A friendly barista with short brown hair, cream apron over a coffee-brown shirt, holding a milk pitcher"
+    },
+    {
+      "id": "tom",
+      "concept": "תום הבריסטה השכיר",
+      "prompt": "A relaxed young barista with a teal shirt, dark charcoal apron, and a small red beanie, gentle smile"
+    }
+  ]
+}
