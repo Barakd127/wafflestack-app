@@ -101,16 +101,15 @@ const TRAY_CITY_PCT_THINKING = 8
 const TRAY_OPEN_AT = 0.45
 const TRAY_CLOSE_AT = 0.65
 const TRAY_TRANSITION = 'bottom 0.5s cubic-bezier(.2,.7,.2,1), padding-bottom 0.5s cubic-bezier(.2,.7,.2,1)'
-// The tray dock (frost slider + hold-to-look, bottom:24/height 44) and mode
-// control (bottom:78, height 36) are fixed-pixel UI that live BELOW the
-// sheet, in the ledge — sized for the ~26% "revealed" ledge. At the ~8%
-// "thinking" ledge there isn't room for both stacked in the ledge itself, so
-// the ink column reserves this much clearance (px, from the board's true
-// bottom edge) via extra bottom padding instead, keeping the quiz's own
-// sticky footer nav from rendering underneath that fixed dock/mode chrome.
-// (mode control's fixed top sits ~125px up from the board bottom at a
-// typical board height — 136 leaves a small buffer above that.)
-const TRAY_DOCK_CLEARANCE_PX = 136
+// Tray chrome lives in the LEDGE, never over the sheet: one 44px dock row
+// (frost slider + hold-to-look) sitting at bottom:6, which fits the ~8%
+// "thinking" ledge (≈57px on a 711px board) as well as the ~26% revealed one.
+// The mode control (מיקוד/הדגמה/עיר) is NOT rendered in tray layout: on the
+// quiz the glass opens by itself when the student answers, so the modes are
+// redundant there — and stacking them above the dock is what pushed the
+// quiz's own footer nav (הבא / הקודם) out of the sheet. The slider and the
+// hold-to-look pill remain as the manual override. Per user 2026-08-26.
+const TRAY_DOCK_BOTTOM = 6
 const GOLD = '#D4AF37'
 const GOLD_LIGHT = '#F5C842'
 const DEEP_NAVY = '#0B1B3E'
@@ -402,11 +401,10 @@ export default function GlassBoardShell({
   const trayCloseFrac = clamp01((t - TRAY_OPEN_AT) / (TRAY_CLOSE_AT - TRAY_OPEN_AT))
   const trayBottomPct = TRAY_CITY_PCT_OPEN - trayCloseFrac * (TRAY_CITY_PCT_OPEN - TRAY_CITY_PCT_THINKING)
   const trayTransition = dragging ? 'none' : TRAY_TRANSITION
-  // Ink column's extra bottom padding (tray only): only kicks in once the
-  // animated sheet edge has risen inside the fixed dock/mode-control's
-  // footprint — at the ~26% resting ledge this is 0 (unchanged from before).
-  const trayBottomPx = (trayBottomPct / 100) * boardH
-  const inkPadBottom = tray && boardH ? 28 + Math.max(0, TRAY_DOCK_CLEARANCE_PX - trayBottomPx) : 28
+  // The tray chrome now sits entirely in the ledge (see TRAY_DOCK_BOTTOM), so
+  // the sheet no longer reserves room for it and the quiz's own footer nav
+  // stays visible at every sheet height.
+  const inkPadBottom = 28
 
   const inkClass = ['ws-glass-ink', guard ? 'ws-glass-ink--guard' : '', guardSoft ? 'ws-glass-ink--soft' : '']
     .filter(Boolean)
@@ -630,21 +628,16 @@ export default function GlassBoardShell({
         </div>
       )}
 
-      {/* Modes — segmented glass control. Plain layout: top-left, floating on
-          the glass (never touches the breadcrumb on the right). Tray layout:
-          the top-left is the sheet's reading surface now, so the control
-          moves down into the city band instead — stacked directly above the
-          dock, sharing its left:96 (already clear of the tutor FAB). Bottom-
-          right in the city band is CityBackdrop's own building/floor pill
-          (fixed right:30 bottom:24, see CityBackdrop.tsx) — stacking on the
-          LEFT above the dock, rather than the right, is what keeps the two
-          from ever colliding regardless of how long the pill's text gets. */}
+      {/* Modes — segmented glass control, plain layout only: top-left, floating
+          on the glass (never touches the breadcrumb on the right). The tray
+          (quiz) layout does not render it — see TRAY_DOCK_BOTTOM: there the
+          glass opens on its own when the student answers, and the ledge holds
+          only the dock, so the quiz's own footer nav keeps its room. */}
+      {!tray && (
       <div
         role="group"
         aria-label="מצב הזכוכית"
-        style={tray
-          ? { position: 'absolute', left: 96, bottom: 78, zIndex: 12, display: 'flex', alignItems: 'center', gap: 2, padding: 4, ...pillStyle }
-          : { position: 'absolute', left: 30, top: 24, zIndex: 12, display: 'flex', alignItems: 'center', gap: 2, padding: 4, ...pillStyle }}
+        style={{ position: 'absolute', left: 30, top: 24, zIndex: 12, display: 'flex', alignItems: 'center', gap: 2, padding: 4, ...pillStyle }}
       >
         {MODES.map(m => {
           const lit = active === m
@@ -680,14 +673,16 @@ export default function GlassBoardShell({
           )
         })}
       </div>
+      )}
 
-      {/* Dock — bottom-left, clear of the tutor FAB: frost slider + hold-to-look */}
+      {/* Dock — in the ledge below the sheet (tray) / bottom-left over the glass
+          (plain); left:96 clears the tutor FAB. Frost slider + hold-to-look. */}
       <div
         dir="rtl"
         style={{
           position: 'absolute',
           left: 96,
-          bottom: 24,
+          bottom: tray ? TRAY_DOCK_BOTTOM : 24,
           zIndex: 12,
           display: 'flex',
           alignItems: 'center',

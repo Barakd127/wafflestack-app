@@ -638,8 +638,14 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
    the picture puts the footer back in plain document flow, so long content
    just scrolls as one column instead of overlapping. */
 .ws-glass-board--tray .ws-quiz-footer {
-  position: static !important;
-  margin-top: 8px !important;
-  padding-top: 8px !important;
-  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.65) 55%) !important;
+  /* Pinned to the bottom of the sheet's scroll area. Measured: after an answer
+     the app appends its feedback block AND the sheet retracts to open the city
+     strip, so a statically-placed footer drops ~150px below the fold — exactly
+     when the student wants "הבא ←". Sticky keeps the primary action in place at
+     every sheet height and content length. Per user 2026-08-26. */
+  position: sticky !important;
+  bottom: 0 !important;
+  margin-top: auto !important;
+  padding-top: 10px !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.82) 45%, rgba(255,255,255,0.92) 100%) !important;
 }
