@@ -1,0 +1,26 @@
+<!-- @dsCard group="Brand" viewport="700x230" name="Voice & tone" subtitle="Warm, encouraging, second-person Hebrew — anxiety → play" -->
+<!doctype html>
+<html lang="he" dir="rtl">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;padding:22px;background:var(--sh-page-bg);font-family:'Heebo',system-ui,sans-serif}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .card{background:rgba(255,255,255,0.82);border:1px solid rgba(51,81,202,0.18);border-radius:16px;padding:16px}
+  .tag{font-family:'Inter',system-ui,sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px}
+  .yes{color:#229E69}
+  .no{color:#EA4335}
+  .q{font-size:16px;color:var(--sh-text-dark);line-height:1.6;margin:0}
+  .sub{font-size:12px;color:var(--sh-text-tip);margin:6px 0 0}
+  .dm{position:fixed;bottom:8px;left:8px;width:28px;height:28px;border-radius:8px;border:1px solid rgba(51,81,202,0.18);background:rgba(255,255,255,0.82);cursor:pointer;font-size:14px;line-height:1;padding:0}
+</style>
+</head>
+<body>
+  <div class="grid">
+    <div class="card"><p class="tag yes">✓ כן</p><p class="q">"כל הכבוד! פתחת נושא חדש 🎉"</p><p class="sub">חם, מעודד, פונה אליך בגוף שני. חוגג התקדמות.</p></div>
+    <div class="card"><p class="tag yes">✓ כן</p><p class="q">"בחר/י רמת קושי. מקל למאתגר."</p><p class="sub">כולל מגדרית (בחר/י), קצר וברור, מזמין.</p></div>
+    <div class="card"><p class="tag no">✗ לא</p><p class="q">"המשתמש נכשל במבחן."</p><p class="sub">לא מאשים, לא מרוחק, לא בגוף שלישי.</p></div>
+    <div class="card"><p class="tag no">✗ לא</p><p class="q">"Error: submission invalid."</p><p class="sub">עברית ראשית תמיד; אנגלית רק למונחים.</p></div>
+  </div>
+  <button class="dm" aria-label="Toggle dark mode" onclick="document.documentElement.classList.toggle('dark')">◐</button>
+</body></html>

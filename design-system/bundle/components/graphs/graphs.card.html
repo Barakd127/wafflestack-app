@@ -1,0 +1,119 @@
+<!-- @dsCard group="Components" viewport="700x420" name="Graph theme" subtitle="GraphFrame, sliders and the GC palette" -->
+<!doctype html>
+<html lang="he" dir="rtl">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body {
+    margin: 0;
+    background: var(--sh-page-bg);
+    min-height: 100vh;
+  }
+  #root { padding: 4px 12px; }
+  .gc-swatch-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 14px;
+  }
+  .gc-swatch {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font: 600 11px 'Inter', 'Heebo', sans-serif;
+    color: var(--sh-text-med);
+    direction: ltr;
+  }
+  .gc-swatch i {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1px solid rgba(31,62,108,0.18);
+    display: inline-block;
+  }
+  .dm-toggle {
+    position: fixed;
+    bottom: 8px;
+    left: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(127,155,217,0.4);
+    background: var(--sh-q-card-bg, #FCFDFF);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<button class="dm-toggle" aria-label="Toggle dark mode" onclick="document.documentElement.classList.toggle('dark')">🌓</button>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+  const { GraphFrame, GraphSlider, GraphSliderRow, GC } = window.WaffleStackDesignSystem_a43b54;
+
+  const PALETTE = [
+    ['ink', GC.ink],
+    ['gold', GC.gold],
+    ['blue', GC.blue],
+    ['goldText', GC.goldText],
+    ['good', GC.good],
+    ['warn', GC.warn],
+  ];
+
+  function Demo() {
+    const [mu, setMu] = React.useState(100);
+    const [sigma, setSigma] = React.useState(15);
+    return (
+      <div>
+        <GraphFrame
+          title="התפלגות נורמלית"
+          subtitle="הזיזו את הסליידרים וראו איך העקומה משתנה"
+          style={{ margin: '12px auto', padding: 16 }}
+        >
+          <svg viewBox="0 0 640 200" style={{ width: '100%', display: 'block' }} aria-hidden="true">
+            {/* axis */}
+            <line x1="20" y1="172" x2="620" y2="172" stroke={GC.axis} strokeWidth="1.5" />
+            {/* bell curve */}
+            <path
+              d="M40,170 C180,168 230,24 320,24 C410,24 460,168 600,170 L600,172 L40,172 Z"
+              fill={GC.goldFill}
+            />
+            <path
+              d="M40,170 C180,168 230,24 320,24 C410,24 460,168 600,170"
+              fill="none" stroke={GC.gold} strokeWidth="3" strokeLinecap="round"
+            />
+            {/* mean guide */}
+            <line x1="320" y1="24" x2="320" y2="172" stroke={GC.blue} strokeWidth="1.5" strokeDasharray="5 4" />
+            <circle cx="320" cy="24" r="5" fill={GC.ink} />
+            <text x="320" y="192" textAnchor="middle" fontSize="14" fill={GC.axisText}
+              fontFamily="'Playpen Sans Hebrew', 'Assistant', sans-serif">μ</text>
+            <text x="452" y="192" textAnchor="middle" fontSize="13" fill={GC.axisText}
+              fontFamily="'Playpen Sans Hebrew', 'Assistant', sans-serif">μ+σ</text>
+          </svg>
+          <GraphSliderRow>
+            <GraphSlider label="ממוצע (μ)" value={mu} min={60} max={140} onChange={setMu} />
+            <GraphSlider label="סטיית תקן (σ)" value={sigma} min={5} max={30} onChange={setSigma} />
+          </GraphSliderRow>
+          <div className="gc-swatch-row">
+            {PALETTE.map(([name, hex]) => (
+              <span className="gc-swatch" key={name}>
+                <i style={{ background: hex }} />
+                {name} {hex}
+              </span>
+            ))}
+          </div>
+        </GraphFrame>
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+</script>
+</body></html>

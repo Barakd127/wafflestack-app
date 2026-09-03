@@ -1,0 +1,11 @@
+/* WaffleStack Design System — global entry.
+   Import order mirrors the real app's cascade: Tailwind base → utilities →
+   token blocks → app class components → landing scope. In src/index.css the
+   @tailwind directives sit ABOVE the custom rules, so utilities must load
+   before app-classes here too (custom rules win ties, exactly like the app). */
+@import url('tokens/fonts.css');
+@import url('tokens/preflight.css');
+@import url('tokens/tailwind-utilities.css');
+@import url('tokens/app.css');
+@import url('app-classes.css');
+@import url('tokens/landing.css');

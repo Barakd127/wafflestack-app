@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="WaffleStack Study Hub" description="RTL study-hub shell — real sidebar (247px), warm top bar, continue-learning glass card, real course grid" -->
+<helmet>
+<script src="./ds-base.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700&family=Rubik:wght@300;400;600;700&family=Assistant:wght@300;400;600;700&family=Inter:wght@400;500;600;700;800&family=Playpen+Sans+Hebrew:wght@400;500;600;700&display=swap" rel="stylesheet">
+</helmet>
+<div dir="rtl" style="width:100%;height:100%;display:flex;overflow:hidden;direction:rtl;background:var(--sh-page-bg);font-family:'Rubik','Assistant',sans-serif;">
+
+  <!-- Sidebar — first flex child in RTL, so it sits on the RIGHT (StudyHub.tsx root <nav>) -->
+  <nav aria-label="ניווט ראשי" style="width:247px;flex-shrink:0;position:relative;display:flex;">
+    <x-import component-from-global-scope="WaffleStackDesignSystem_a43b54.Sidebar" active-item="home" hint-size="247px,100%"></x-import>
+  </nav>
+
+  <!-- Main column -->
+  <main style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+    <header>
+      <x-import component-from-global-scope="WaffleStackDesignSystem_a43b54.TopBar" title="דף הבית" user-name="ברק" xp="{{ 1240 }}" hint-size="100%,70px"></x-import>
+    </header>
+
+    <!-- HomeScreen scroll pane (ws-screen-pad, padding 32px 40px, column maxWidth 900) -->
+    <div class="ws-screen-pad" dir="rtl" style="flex:1;overflow:auto;padding:32px 40px;">
+      <div style="max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:24px;">
+
+        <!-- Greeting (CourseGate header markup language: Rubik h2 26/700 + sub) -->
+        <div>
+          <h2 style="font-family:'Rubik',sans-serif;color:var(--sh-text-dark);font-size:26px;font-weight:700;margin:0;">שלום, ברק 👋</h2>
+          <p style="color:var(--sh-text-med);font-size:14px;margin:6px 0 0;">נמשיך מאיפה שעצרת — הנה מה שמחכה לך היום</p>
+        </div>
+
+        <!-- Continue-learning card — mirrors the HomeScreen תרגול ws-glass-card (StudyHub.tsx ~L2526) -->
+        <div class="ws-glass-card" style="border-radius:24px;padding:28px 28px 22px;display:flex;flex-direction:column;">
+          <div style="font-family:'Rubik',sans-serif;font-weight:700;font-size:22px;color:var(--sh-text-dark);margin-bottom:6px;">תרגול</div>
+          <div style="font-family:'Assistant',sans-serif;font-size:16px;color:var(--sh-text-tip);line-height:1.6;margin-bottom:16px;">נשארו לך עוד 7 שאלות<br>סטיית תקן</div>
+          <!-- Rotating 3D hero slot (runtime HeroScene) — static placeholder in the template -->
+          <div style="flex:1;display:flex;justify-content:center;align-items:center;margin-bottom:16px;min-height:150px;height:150px;border-radius:12px;overflow:hidden;">
+            <div style="font-size:92px;line-height:1;">🏛️</div>
+          </div>
+          <div style="font-family:'Assistant',sans-serif;font-size:12px;color:var(--sh-text-light);margin-bottom:8px;text-align:right;">הצעה למבנה הבא בעירך</div>
+          <!-- Progress bar — answered share of the current topic -->
+          <div style="height:7px;background:#E4E4E4;border-radius:10px;overflow:hidden;margin-bottom:16px;">
+            <div style="width:58%;height:100%;background:rgba(212,175,55,0.7);border-radius:10px;transition:width 0.4s;"></div>
+          </div>
+          <button class="ws-cta-btn" style="background:var(--sh-btn-color);color:#fff;border:none;border-radius:24px;padding:11px 0;font-weight:600;font-size:16px;font-family:'Rubik',sans-serif;box-shadow:0px 2px 6px rgba(18,36,96,0.3);cursor:pointer;width:100%;">המשך ←</button>
+        </div>
+
+        <!-- Course grid header (CourseGate ~L1232) -->
+        <div style="margin-bottom:-2px;">
+          <h2 style="font-family:'Rubik',sans-serif;color:var(--sh-text-dark);font-size:26px;font-weight:700;margin:0;">הקורסים שלי</h2>
+          <p style="color:var(--sh-text-med);font-size:14px;margin:6px 0 0;">בחר את הקורס בו ברצונך להתחיל ללמוד</p>
+        </div>
+
+        <!-- Real course grid from COURSES (CourseGate grid: auto-fit minmax(260px,1fr), gap 22) -->
+        <div class="ws-home-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px;">
+          <x-import component-from-global-scope="WaffleStackDesignSystem_a43b54.CourseCard" course="{{ courses[0] }}" hint-size="260px,190px"></x-import>
+          <x-import component-from-global-scope="WaffleStackDesignSystem_a43b54.CourseCard" course="{{ courses[1] }}" hint-size="260px,190px"></x-import>
+          <x-import component-from-global-scope="WaffleStackDesignSystem_a43b54.CourseCard" course="{{ courses[2] }}" hint-size="260px,190px"></x-import>
+          <x-import component-from-global-scope="WaffleStackDesignSystem_a43b54.CourseCard" course="{{ courses[3] }}" hint-size="260px,190px"></x-import>
+          <x-import component-from-global-scope="WaffleStackDesignSystem_a43b54.CourseCard" course="{{ courses[4] }}" hint-size="260px,190px"></x-import>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- AI tutor FAB — fixed bottom-left (component positions itself) -->
+  <x-import component-from-global-scope="WaffleStackDesignSystem_a43b54.TutorFAB" hint-size="56px,56px"></x-import>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"courses":{"default":[{"id":"stat-a","label":"סטטיסטיקה א&#39;","icon":"📊","desc":"מבוא, מדדים, התפלגויות, רגרסיה, הסתברות","active":true,"bg":"linear-gradient(135deg,#F5C842,#D4AF37)"},{"id":"stat-b","label":"סטטיסטיקה ב&#39;","icon":"📈","desc":"דגימה, אמידה, רווחי סמך, בדיקת השערות, א-פרמטריים, רגרסיה","active":true,"bg":"linear-gradient(135deg,#7CB7F8,#4A90E2)"},{"id":"methods","label":"שיטות מחקר","icon":"🔬","desc":"תכנון מחקר, מדידה, מהימנות ותקפות","active":false,"bg":"linear-gradient(135deg,#A78BFA,#7C3AED)"},{"id":"anova","label":"ניתוח שונות ורגרסיה","icon":"📐","desc":"רגרסיה מרובה, משתני דמי, ANOVA חד-כיווני, השוואות מרובות ובלוקים","active":true,"bg":"linear-gradient(135deg,#67C29E,#229E69)"},{"id":"sql","label":"SQL — שפת מסדי נתונים","icon":"🗄️","desc":"שאילתות, JOIN, אינדקסים ופונקציות חלון — במטאפורת מחסן, עם סימולטורים וחידונים","active":true,"bg":"linear-gradient(135deg,#F0B429,#C97C18)"}]}}'></script>
+</body>
+</html>

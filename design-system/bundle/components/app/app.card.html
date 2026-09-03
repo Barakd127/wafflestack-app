@@ -1,0 +1,158 @@
+<!-- @dsCard group="Components" viewport="700x520" name="App atoms" subtitle="Tooltip, Ribbon, ConceptCard, TutorFAB, CoinPill, StreakCalendar" -->
+<!doctype html>
+<html lang="he" dir="rtl">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  /* card-local layout only */
+  body {
+    margin: 0;
+    background: var(--sh-page-bg);
+    min-height: 100vh;
+    font-family: 'Heebo', sans-serif;
+  }
+  /* --sh-gold is referenced by CoinPill's glyph in app source (src/components/economy/CoinPill.tsx);
+     value matches the app's gold #D4AF37 (StreakCalendar GOLD). Local fallback only. */
+  :root { --sh-gold: #D4AF37; }
+  #root { padding: 14px 16px 10px; }
+  .lbl {
+    font: 700 11px 'Inter', sans-serif;
+    letter-spacing: 0.4px;
+    text-transform: lowercase;
+    color: var(--sh-text-light);
+    margin: 0 0 6px;
+    direction: ltr;
+    text-align: right;
+  }
+  .atoms-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 18px;
+    align-items: start;
+  }
+  .cell { min-width: 0; }
+  .demo-box {
+    background: var(--sh-glass-card);
+    box-shadow: var(--sh-card-shadow);
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 16px;
+    padding: 14px;
+  }
+  .dark-panel {
+    background: rgba(15,18,32,0.96);
+    border: 1px solid rgba(127,155,217,0.35);
+    border-radius: 16px;
+    padding: 14px 14px 4px;
+  }
+  .dm-toggle {
+    position: fixed;
+    bottom: 88px;
+    left: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(127,155,217,0.4);
+    background: var(--sh-q-card-bg, #FCFDFF);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    z-index: 240;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<button class="dm-toggle" aria-label="Toggle dark mode" onclick="document.documentElement.classList.toggle('dark')">🌓</button>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+  const {
+    Tooltip, Ribbon, ConceptCard, TutorFAB, CoinPill, StreakCalendar,
+  } = window.WaffleStackDesignSystem_a43b54;
+
+  function Demo() {
+    return (
+      <div>
+        <div className="atoms-grid">
+
+          {/* Ribbon + CoinPill */}
+          <div className="cell">
+            <p className="lbl">ribbon · coin-pill</p>
+            <div className="demo-box" style={{ display: 'flex', gap: 12, alignItems: 'stretch', justifyContent: 'center' }}>
+              <Ribbon label="מטבעות">
+                <CoinPill surface="economy" balance={145} hasPass={true} />
+              </Ribbon>
+              <div className="ws-ribbon-divider" />
+              <Ribbon label="מצב למידה">
+                <CoinPill surface="learning" />
+                <span style={{ fontSize: 13, color: 'var(--sh-text-med)', alignSelf: 'center' }}>
+                  ללא מספר — רק נוכחות שקטה
+                </span>
+              </Ribbon>
+            </div>
+          </div>
+
+          {/* Tooltip — pinned statically inside a relative box (.ws-tooltip is position:fixed in the app) */}
+          <div className="cell">
+            <p className="lbl">tooltip</p>
+            <div className="demo-box" style={{ position: 'relative', height: 108, overflow: 'hidden' }}>
+              <Tooltip label="שמירה אוטומטית" description="הפתרון שלך נשמר כל 30 שניות" placement="bottom">
+                <button type="button" style={{
+                  background: 'rgba(255,255,255,0.7)',
+                  color: 'var(--sh-text-dark)',
+                  border: '1px solid rgba(127,155,217,0.4)',
+                  borderRadius: 12, padding: '8px 16px',
+                  font: "600 13px 'Rubik', sans-serif", cursor: 'pointer',
+                }}>
+                  💾 שמירה
+                </button>
+              </Tooltip>
+              <div className="ws-tooltip" style={{ position: 'absolute', top: 48, right: 14, transform: 'none' }}>
+                שמירה אוטומטית
+                <div className="ws-tooltip-desc">הפתרון שלך נשמר כל 30 שניות</div>
+              </div>
+            </div>
+          </div>
+
+          {/* ConceptCard — StatChallenge sidebar card, lives on a dark panel */}
+          <div className="cell">
+            <p className="lbl">concept-card</p>
+            <div className="dark-panel">
+              <ConceptCard
+                concept="Standard Deviation"
+                conceptHe="סטיית תקן"
+                formula="σ = √( Σ(xᵢ − μ)² / N )"
+                realWorld="בכיתה עם ממוצע 80: סטיית תקן קטנה אומרת שרוב הציונים צמודים ל-80"
+                color="#F5C842"
+              />
+              <ConceptCard
+                concept="Mean"
+                conceptHe="ממוצע"
+                formula="μ = Σxᵢ / N"
+                realWorld="סכום כל הציונים חלקי מספר התלמידים"
+                color="#7F9BD9"
+              />
+            </div>
+          </div>
+
+          {/* StreakCalendar */}
+          <div className="cell">
+            <p className="lbl">streak-calendar</p>
+            <div style={{ maxWidth: 250 }}>
+              <StreakCalendar streak={12} />
+            </div>
+          </div>
+
+        </div>
+
+        {/* TutorFAB — real fixed placement, bottom-left; overlays the card corner by design */}
+        <TutorFAB />
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+</script>
+</body></html>
