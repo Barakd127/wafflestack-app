@@ -4257,7 +4257,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   directly above already reads "שאלה X / Y"; two of them just
                   ate ~44px of board height. */}
               {!boardFullBleed && (
-                <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 18, color: TEXT_DARK, marginBottom: 10, textAlign: 'right' }}>
+                <div style={{ fontFamily: "'Inter', 'Rubik', sans-serif", fontWeight: 700, fontSize: 18, color: TEXT_DARK, marginBottom: 10, textAlign: 'right' }}>
                   שאלה {currentQ + 1} / {total}
                 </div>
               )}
@@ -4505,7 +4505,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 {/* Counter hidden on the full-bleed board — it's written in the
                     board's header band instead. */}
                 {!boardFullBleed && (
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>שאלה {currentQ + 1} / {total}</div>
+                  <div style={{ fontFamily: "'Inter', 'Rubik', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>שאלה {currentQ + 1} / {total}</div>
                 )}
               </div>
 
