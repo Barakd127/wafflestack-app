@@ -655,21 +655,21 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
    outrank any class selector, so a rest appearance set inline silently wins
    over :hover and :active and the states never fire.
 
-     rest   ink, raised       #0F2A31 → #1E4C57, 3px shadow
-     hover  turns indigo      #27187E → #5031CE, 6px shadow, -3px
-     press  deeper indigo     #1B1060 → #3B22A4, inset shadow, +1px
+   Depth carries the three states; colour follows.
 
-   The ink leans teal (hue 192°) rather than navy (224°). Navy ink sat in the
-   same family as the page's blues and read as a darker version of them; teal
-   steps sideways out of the palette, so the button separates from the shell
-   without adding a loud colour. The indigo still arrives only on contact.
+     rest   raised            #4438A0 → #6354C6, 3px shadow
+     hover  rises further     #27187E → #5031CE, 6px shadow, -3px
+     press  sinks BELOW       #1B1060 → #3B22A4, inset shadow, +1px
 
-   A dark rest only reads as "already pressed" when it is also FLAT; the 3px
-   shadow is what keeps this one raised. That distinction is the whole reason
-   the earlier saturated-and-shadowless version failed.
+   Rest is the LIGHTER end of the indigo ramp on purpose. A pressed button is
+   dark and flat, so a saturated flat fill reads as already-pressed and leaves
+   nowhere to travel; starting light gives the hover somewhere to go. The inset
+   on press is what makes it read as "it went in" rather than "the same button,
+   slightly darker".
 
-   White label throughout: 15.0 / 9.4 at rest, 13.8 / 7.9 on hover,
-   16.3 / 10.8 on press. The arrow is currentColor. Per Shirli 2026-09-04. */
+   Tried and rejected along the way: navy ink (sat in the same family as the
+   page blues), teal ink (stepped too far out), and #B0B8F9 with a dark label
+   (too quiet for a primary action). Per Shirli 2026-09-04. */
 .ws-cta {
   display: inline-flex;
   align-items: center;
@@ -683,8 +683,8 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  background: linear-gradient(270deg, #0F2A31 0%, #1E4C57 100%);
-  box-shadow: 0 3px 8px rgba(8,38,45,0.36);
+  background: linear-gradient(270deg, #4438A0 0%, #6354C6 100%);
+  box-shadow: 0 3px 8px rgba(39,24,126,0.32);
   transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
               background 0.18s ease;
 }
