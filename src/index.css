@@ -650,19 +650,37 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.82) 45%, rgba(255,255,255,0.92) 100%) !important;
 }
 
-/* ── Home CTA states ───────────────────────────────────────────────────────
+/* ── Home CTA ──────────────────────────────────────────────────────────────
+   The whole button lives here, not in an inline style object. Inline styles
+   outrank any class selector, so a rest appearance set inline silently wins
+   over :hover and :active and the states never fire — which is exactly what
+   happened the first time round.
+
    Depth carries the three states; colour only follows.
 
      rest   raised            3px shadow, lighter end of the ramp
      hover  rises further     9px shadow, saturated ramp, -3px
      press  sinks BELOW       inset shadow, darkest ramp, +1px
 
-   The inset on press is the piece that was missing: darkening and shrinking
-   alone read as "the same button, slightly different", while an inner shadow
-   reads as "it went in". And rest cannot be the dark end — dark and flat IS
-   what pressed looks like, which is why the saturated version looked pressed
-   before anyone touched it. Per Shirli 2026-09-04. */
+   The inset on press is the piece that matters: darkening and shrinking alone
+   read as "the same button, slightly different", while an inner shadow reads
+   as "it went in". And rest cannot be the dark end — dark and flat IS what
+   pressed looks like. Per Shirli 2026-09-04. */
 .ws-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  align-self: flex-start;
+  padding: 11px 26px;
+  border: none;
+  border-radius: 24px;
+  font-family: 'Rubik', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  background: linear-gradient(270deg, #4438A0 0%, #6354C6 100%);
+  box-shadow: 0 3px 8px rgba(39,24,126,0.32);
   transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
               background 0.18s ease;
 }

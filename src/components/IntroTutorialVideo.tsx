@@ -3,7 +3,7 @@
 // Video lives at public/videos/intro-tutorial.mp4 (720p, ~3MB, faststart).
 // Per user 2026-06-01.
 import { useState } from 'react'
-import CardIcon, { cardTitle, cardHead, CTA_BTN, CtaArrow } from './CardIcon'
+import CardIcon, { cardTitle, cardHead, CtaArrow } from './CardIcon'
 
 const SRC = `${import.meta.env.BASE_URL}videos/intro-tutorial.mp4`
 
@@ -33,9 +33,10 @@ export default function IntroTutorialVideo() {
         <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: '#5b6f93', marginTop: 6, lineHeight: 1.5 }}>
           סיור קצר בפלטפורמה · פחות מ-3 דקות
         </div>
-        {/* Flexible spacer with a floor — see CardIcon.CTA_BTN. */}
+        {/* Flexible spacer with a floor — margin-top:auto alone collapses to zero
+            once the copy fills the card, which puts the button on the text. */}
         <div style={{ flex: 1, minHeight: 20 }} />
-        <button onClick={() => setOpen(true)} className="ws-cta" style={CTA_BTN}>הדרכה מהירה<CtaArrow /></button>
+        <button onClick={() => setOpen(true)} className="ws-cta">הדרכה מהירה<CtaArrow /></button>
       </div>
 
       {/* Modal player */}

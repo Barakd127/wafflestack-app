@@ -117,37 +117,18 @@ export const cardHead: CSSProperties = {
 }
 
 /**
- * Every call-to-action on the home screen.
+ * The call-to-action buttons live entirely in `.ws-cta` (src/index.css), not
+ * in a style object here.
  *
- * Sized to its label rather than stretched across the card, and pinned to the
- * RIGHT edge (flex-start under dir="rtl") so the eye runs icon → title → copy →
- * action down one side instead of crossing the card.
+ * That is deliberate. Inline styles outrank every class selector, so any rest
+ * appearance set in JS silently beats :hover and :active and the states never
+ * fire. Keeping the whole button in CSS is what lets it actually react.
  *
- * Depth leads, colour follows. A pressed button is dark and flat — which is
- * exactly what a saturated, shadowless fill looks like, so the earlier version
- * read as already-pressed and had nowhere left to go. Rest is therefore the
- * LIGHTER end of the ramp and clearly raised; `.ws-cta` in index.css takes it
- * up on hover and sinks it below the surface on press.
+ *   <button className="ws-cta" onClick={…}>מתחילים ללמוד<CtaArrow /></button>
  *
  * Copy is gender-neutral throughout: Hebrew imperatives inflect, so "בוא"
  * addresses a man. First-person plural ("מתחילים") invites without picking one.
  */
-export const CTA_BTN: CSSProperties = {
-  background: 'linear-gradient(270deg, #4438A0 0%, #6354C6 100%)',
-  boxShadow: '0 3px 8px rgba(39,24,126,0.32)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 24,
-  padding: '11px 26px',
-  fontWeight: 600,
-  fontSize: 16,
-  fontFamily: "'Rubik', sans-serif",
-  cursor: 'pointer',
-  alignSelf: 'flex-start',
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 9,
-}
 
 /**
  * The arrow that closes every CTA. Compact, stroked, no disc behind it, and

@@ -4,7 +4,7 @@ import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../con
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import BoardShell from './BoardShell'
-import CardIcon, { cardTitle, cardHead, CTA_BTN, CtaArrow } from './CardIcon'
+import CardIcon, { cardTitle, cardHead, CtaArrow } from './CardIcon'
 import { useGlassBoard } from '../hooks/useGlassBoard'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
@@ -2543,7 +2543,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 zero once the copy fills the card, which put the button on the
                 text. This keeps 20px whatever the copy length. */}
             <div style={{ flex: 1, minHeight: 20 }} />
-            <button onClick={() => setPlanWizardOpen(true)} className="ws-cta" style={CTA_BTN}>להתאמה<CtaArrow /></button>
+            <button onClick={() => setPlanWizardOpen(true)} className="ws-cta">להתאמה<CtaArrow /></button>
           </div>
         ) : (
           <div style={{
@@ -2640,7 +2640,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 practice quiz, bypassing the difficulty picker. Returning users
                 keep the existing picker flow so they can pick difficulty / resume. */}
             <button onClick={() => (completedLessons.length > 0 ? onSelectTopic(currentTopicId) : onStartPractice(currentTopicId))}
-                            className="ws-cta" style={CTA_BTN}>
+                            className="ws-cta">
               {completedLessons.length > 0 ? 'ממשיכים בתרגול' : 'מתחילים לתרגל'}<CtaArrow />
             </button>
           </div>
@@ -2687,11 +2687,11 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 נמפה את הנושאים בקורס שלך
               </div>
             </div>
-            {/* CTA button — shares CTA_BTN + .ws-cta with every other action.
+            {/* CTA button — .ws-cta, shared with every other action on the screen.
                 Map starts collapsed, so the label names the destination, not a gendered
                 imperative. */}
             <button onClick={onGoMindmap}
-                            className="ws-cta" style={{ ...CTA_BTN, marginTop: 20 }}>
+                            className="ws-cta" style={{ marginTop: 20 }}>
               מתחילים ללמוד<CtaArrow />
             </button>
           </div>
@@ -2845,7 +2845,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             </div>
 
             <div style={{ flex: 1 }} />
-            <button onClick={onGoWorld} className="ws-cta" style={CTA_BTN}>
+            <button onClick={onGoWorld} className="ws-cta">
               כניסה לעולם<CtaArrow />
             </button>
           </div>
