@@ -1,3 +1,4 @@
+import CardIcon, { cardTitle, cardHead } from './CardIcon'
 import { useState, useMemo } from 'react'
 import { useLearningStore } from '../store/learningStore'
 import { computeTopicRisks, type TopicRisk } from '../utils/riskScore'
@@ -543,14 +544,9 @@ export function RiskBoard({ onSelectTopic }: RiskBoardProps) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
         <div>
-          <div style={{
-            fontFamily: "'Rubik', sans-serif",
-            fontWeight: 700,
-            fontSize: 16,
-            color: 'var(--sh-text-dark)',
-            lineHeight: 1.3,
-          }}>
-            🎯 לוח סיכונים
+          <div style={{ ...cardHead, marginBottom: 6 }}>
+            <CardIcon name="risk" />
+            <div style={cardTitle}>לוח סיכונים</div>
           </div>
           <div style={{
             fontSize: 15,

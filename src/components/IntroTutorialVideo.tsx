@@ -3,6 +3,7 @@
 // Video lives at public/videos/intro-tutorial.mp4 (720p, ~3MB, faststart).
 // Per user 2026-06-01.
 import { useState } from 'react'
+import CardIcon, { cardTitle, cardHead } from './CardIcon'
 
 const SRC = `${import.meta.env.BASE_URL}videos/intro-tutorial.mp4`
 
@@ -30,13 +31,8 @@ export default function IntroTutorialVideo() {
           fontFamily: "'Rubik', sans-serif",
         }}
       >
-        <div style={{
-          width: 46, height: 46, borderRadius: 12, flexShrink: 0,
-          background: 'rgba(31,62,108,0.10)', color: '#1F3E6C',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 23,
-        }}>▶</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#1F3E6C' }}>סרטון הדרכה — איך מתחילים</div>
+                <div style={{ flex: 1 }}>
+          <div style={{ ...cardHead, marginBottom: 6 }}><CardIcon name="video" /><div style={cardTitle}>סרטון הדרכה — איך מתחילים</div></div>
           <div style={{ fontSize: 15, color: '#5b6f93', marginTop: 2 }}>סיור קצר בפלטפורמה · פחות מ-3 דקות</div>
         </div>
       </button>

@@ -4,6 +4,7 @@ import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../con
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import BoardShell from './BoardShell'
+import CardIcon, { cardTitle, cardHead } from './CardIcon'
 import { useGlassBoard } from '../hooks/useGlassBoard'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
@@ -1828,14 +1829,13 @@ function ActivityChart() {
   return (
     <div>
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
         padding: '0 4px 10px', direction: 'rtl' as const,
       }}>
-        <span style={{
-          fontFamily: "'Rubik', sans-serif", fontSize: 16, fontWeight: 700, color: TEXT_DARK,
-        }}>
-          📈 פעילות השבוע
-        </span>
+        <div style={cardHead}>
+          <CardIcon name="chart" />
+          <div style={cardTitle}>פעילות השבוע</div>
+        </div>
         <span style={{
           fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600,
           color: total > 0 ? '#D4AF37' : TEXT_LIGHT, fontVariantNumeric: 'tabular-nums',
@@ -2536,9 +2536,8 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
               fontFamily: "'Rubik', sans-serif",
             }}
           >
-            <div style={{ fontSize: 36 }}>🎯</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 18, fontWeight: 700, color: TEXT_DARK }}>התאם תכנית אישית</div>
+              <div style={{ ...cardHead, marginBottom: 6 }}><CardIcon name="plan" /><div style={cardTitle}>התאם תכנית אישית</div></div>
               <div style={{ fontSize: 15, color: TEXT_MED, marginTop: 3 }}>
                 שאלון של פחות מדקה — נסדר את הנושאים בדיוק לפי המטרה והזמן שלך
               </div>
@@ -2619,20 +2618,20 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             order: 2,
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 23, color: TEXT_DARK, marginBottom: 6 }}>תרגול</div>
+            <div style={{ ...cardHead, marginBottom: 6 }}><CardIcon name="practice" /><div style={cardTitle}>תרגול</div></div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
               {completedLessons.length === 0 ? (
-                <>בואו נתחיל בהתחלה<br />{currentTopicName}</>
+                <>בואו נתחיל בהתחלה · {currentTopicName}</>
               ) : answeredInTopic > 0 && remainingInTopic > 0 ? (
-                <>נשארו לך עוד {remainingInTopic} שאלות<br />{currentTopicName}</>
+                <>נשארו לך עוד {remainingInTopic} שאלות · {currentTopicName}</>
               ) : (
-                <>נמשיך מאיפה שעצרת<br />{currentTopicName}</>
+                <>נמשיך מאיפה שעצרת · {currentTopicName}</>
               )}
             </div>
             {/* Rotating 3D hero — same Kenney-building cycler as the landing
                 page, scaled to ~150px tall to fit the home card. Replaces the
                 old static temple PNG with the live cycling preview. */}
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 16, minHeight: 150, height: 150, borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', marginBottom: 16, minHeight: 104, height: 104, overflow: 'hidden' }}>
               <Suspense fallback={<div style={{ color: 'rgba(31,41,55,0.4)', fontSize: 15 }}>טוען…</div>}>
                 <HeroScene />
               </Suspense>
@@ -2661,7 +2660,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             order: 1,
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 23, color: TEXT_MED, marginBottom: 16, textAlign: 'right' }}>לימוד חומר</div>
+            <div style={{ ...cardHead, marginBottom: 16 }}><CardIcon name="study" /><div style={cardTitle}>לימוד חומר</div></div>
             {/* Whiteboard area with glassmorphism */}
             <div style={{
               flex: 1,
@@ -2697,7 +2696,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             {/* CTA button — liquid-glass to match the תרגול card's ws-cta-btn.
                 Map starts collapsed, so the label is "בוא נלמד" (let's learn). */}
             <button onClick={onGoMindmap} className="ws-cta-btn"
-              style={{ marginTop: 12, background: BUTTON_COLOR, color: '#fff', border:'none', borderRadius:24, padding:'11px 0', fontWeight:600, fontSize:16, cursor:'pointer', fontFamily:"'Rubik',sans-serif", width:'100%', boxShadow:'0px 2px 6px rgba(18,36,96,0.3)' }}>
+              style={{ marginTop: 20, background: BUTTON_COLOR, color: '#fff', border:'none', borderRadius:24, padding:'11px 0', fontWeight:600, fontSize:16, cursor:'pointer', fontFamily:"'Rubik',sans-serif", width:'100%', boxShadow:'0px 2px 6px rgba(18,36,96,0.3)' }}>
               📖 בוא נלמד ←
             </button>
           </div>
@@ -2821,7 +2820,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             display: 'flex', flexDirection: 'column', gap: 12,
             border: '1px solid rgba(255,255,255,0.5)',
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 23, color: TEXT_DARK, textAlign: 'right' }}>העולם שלי</div>
+            <div style={{ ...cardHead, marginBottom: 12 }}><CardIcon name="world" /><div style={cardTitle}>העולם שלי</div></div>
 
             {/* Stats row */}
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
