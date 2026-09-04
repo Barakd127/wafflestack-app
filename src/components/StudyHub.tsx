@@ -2504,6 +2504,15 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
           full width. Per Shirli 2026-09-03. */}
       <div style={{ maxWidth: 1200, display: 'flex', flexDirection: 'column', gap: 24 }}>
 
+        {/* ── BANNER ROW ─────────────────────────────────
+            The plan CTA and the tutorial-video card used to stack. Side by
+            side they read as one bento row, and grid stretch gives them a
+            shared height whatever the copy length. 1.25fr / 1fr is the single
+            asymmetric ratio used by every two-column row on this screen, so
+            they all break at the same vertical seam. ws-home-grid keeps the
+            mobile override (one column under 768px). Per Shirli 2026-09-04. */}
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch' }}>
+
         {/* Personal study plan CTA / banner — opens 3-step intake wizard. */}
         {!personalPlan ? (
           <button
@@ -2579,11 +2588,17 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             accessible via the TwoMinChallengeCard preserved in motivation/,
             ready to be wired into a dedicated motivation tab in the future. */}
 
-        {/* Onboarding tutorial video — replay card + first-visit auto-modal. */}
+        {/* Onboarding tutorial video — replay card + first-visit auto-modal.
+            Its modal is position:fixed, so only the replay card lands in the
+            grid cell. */}
         <IntroTutorialVideo />
+        </div>{/* end banner row */}
 
-        {/* ── ROW 1 ──────────────────────────────────── */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'stretch' }}>
+        {/* ── ROW 1 — study (wide, right) + practice (narrow, left) ──
+            לימוד חומר carries order:1, so it takes the wide 1.25fr track,
+            which is the RIGHT column in RTL. It is the point of the app and
+            now reads that way. */}
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch' }}>
 
           {/* Card: כמעט שם! (תרגול) — order:2 so it sits on the LEFT in RTL,
               after the study card. User asked to swap study↔practice. */}
@@ -2643,7 +2658,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
               background: 'linear-gradient(180deg, rgba(255,255,255,0.51) 54.33%, rgba(255,255,255,0.17) 100%)',
               backdropFilter: 'blur(20px)',
               boxShadow: CARD_SHADOW,
-              borderRadius: CARD_RADIUS,
+              borderRadius: 16, // inner panel: outer 24 minus the padding step — 24 inside 24 read as a mis-drawn corner
               padding: '20px 24px',
               position: 'relative',
               overflow: 'hidden',
@@ -2678,26 +2693,35 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
           </div>
         </div>
 
-        {/* ── LEARNING INSIGHTS — accuracy + what to strengthen ── */}
+        {/* ── INSIGHTS ROW — insights (wide, right) + path strip (left) ──
+            Same 1.25fr / 1fr seam as every other row. The path strip used to
+            be a GLASS_CARD_SM surface with its own border and shadow; beside
+            the insights card that difference in material read as a mistake,
+            so it now uses the same ws-glass-card. Padding levelled 40 → 28 to
+            match, and the strip's rail re-anchored to the narrower box. */}
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch' }}>
+
+        {/* LEARNING INSIGHTS — accuracy + what to strengthen */}
         <LearningInsights />
 
         {/* ── LEARNING PATH STRIP ─────────────────────── */}
-        <div style={{
-          background: GLASS_CARD_SM,
-          backdropFilter: 'blur(20px)',
-          boxShadow: CARD_SHADOW,
+        <div className="ws-glass-card" style={{
           borderRadius: CARD_RADIUS,
-          padding: '22px 40px',
-          border: '1px solid rgba(255,255,255,0.4)',
+          padding: '22px 28px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
         }}>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
-            {/* Connector line */}
-            <div style={{ position: 'absolute', left: '10%', right: '10%', top: 28, height: 1, border: '1px solid #F4C52E', zIndex: 0 }} />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+            {/* Connector line — pulled in from 10% to 16% now that the strip
+                sits in the narrow column, so it starts and ends under the
+                nodes rather than running past them. */}
+            <div style={{ position: 'absolute', left: '16%', right: '16%', top: 28, height: 1, borderTop: '1px solid #F4C52E', zIndex: 0 }} />
 
             {/* Stages — progress-driven slice centered on the current topic.
                 done = green check · current = gold gem · upcoming = small node. */}
             {timelineSlice.map(stage => (
-              <div key={stage.topicId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 1 }}>
+              <div key={stage.topicId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 1, flex: 1, minWidth: 0 }}>
                 {stage.state === 'done' ? (
                   <div style={{
                     width: 38, height: 38,
@@ -2752,12 +2776,16 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             ))}
           </div>
         </div>
+        </div>{/* end insights row */}
 
-        {/* ── RISK BOARD ─────────────────────────────── */}
+        {/* ── RISK BOARD — full width ─────────────────── */}
         <RiskBoard onSelectTopic={onSelectTopic} />
 
-        {/* ── ROW 2 ──────────────────────────────────── */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        {/* ── ROW 2 — week activity (wide, right) + my world (left) ──
+            The chart needs the horizontal room for seven days; "העולם שלי" is
+            three chips, a bar and a button, so it was holding width it did not
+            use. Same 1.25fr / 1fr seam as every other row. */}
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch' }}>
 
           {/* Card: Activity chart */}
           <div className="ws-card-pad" style={{

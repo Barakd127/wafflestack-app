@@ -21,8 +21,10 @@ export default function IntroTutorialVideo() {
         style={{
           display: 'flex', alignItems: 'center', gap: 14, width: '100%',
           background: 'linear-gradient(135deg, rgba(245,200,66,0.16), rgba(212,175,55,0.08))',
-          border: '1.5px solid rgba(212,175,55,0.5)', borderRadius: 18,
-          padding: '16px 22px', cursor: 'pointer', textAlign: 'right',
+          // 24 to match every other container on the home screen — at 18 it
+          // was the odd corner in the bento row. Per Shirli 2026-09-04.
+          border: '1.5px solid rgba(212,175,55,0.5)', borderRadius: 24,
+          padding: '18px 24px', cursor: 'pointer', textAlign: 'right',
           fontFamily: "'Rubik', sans-serif",
         }}
       >
