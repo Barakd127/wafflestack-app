@@ -655,19 +655,20 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
    outrank any class selector, so a rest appearance set inline silently wins
    over :hover and :active and the states never fire.
 
-     rest   ink, raised       #16213E → #2C3A5E, 3px shadow
+     rest   ink, raised       #0F2A31 → #1E4C57, 3px shadow
      hover  turns indigo      #27187E → #5031CE, 6px shadow, -3px
      press  deeper indigo     #1B1060 → #3B22A4, inset shadow, +1px
 
-   Ink at rest is neutral, so it leaves every colour on the page free to carry
-   meaning, and the indigo arrives only on contact — colour becomes the reward
-   for reaching the button rather than its resting decoration.
+   The ink leans teal (hue 192°) rather than navy (224°). Navy ink sat in the
+   same family as the page's blues and read as a darker version of them; teal
+   steps sideways out of the palette, so the button separates from the shell
+   without adding a loud colour. The indigo still arrives only on contact.
 
    A dark rest only reads as "already pressed" when it is also FLAT; the 3px
    shadow is what keeps this one raised. That distinction is the whole reason
    the earlier saturated-and-shadowless version failed.
 
-   White label throughout: 15.9 / 11.2 at rest, 13.8 / 7.9 on hover,
+   White label throughout: 15.0 / 9.4 at rest, 13.8 / 7.9 on hover,
    16.3 / 10.8 on press. The arrow is currentColor. Per Shirli 2026-09-04. */
 .ws-cta {
   display: inline-flex;
@@ -682,8 +683,8 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  background: linear-gradient(270deg, #16213E 0%, #2C3A5E 100%);
-  box-shadow: 0 3px 8px rgba(11,27,62,0.34);
+  background: linear-gradient(270deg, #0F2A31 0%, #1E4C57 100%);
+  box-shadow: 0 3px 8px rgba(8,38,45,0.36);
   transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
               background 0.18s ease;
 }
