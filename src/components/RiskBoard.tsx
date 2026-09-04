@@ -535,6 +535,7 @@ export function RiskBoard({ onSelectTopic }: RiskBoardProps) {
         WebkitBackdropFilter: 'blur(20px)',
         boxShadow: 'var(--sh-card-shadow, 0 8px 32px rgba(31,62,108,0.10))',
         borderRadius: 24, // was 20 — every home container is 24 (Shirli 2026-09-04)
+        minHeight: 315,
         padding: '20px 22px 16px',
         border: '1px solid rgba(255,255,255,0.50)',
       }}

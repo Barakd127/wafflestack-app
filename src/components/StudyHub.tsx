@@ -2490,7 +2490,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
   }))
 
   return (
-    <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
+    <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '59px 40px 32px' }} dir="rtl">
       <PersonalPlanWizard
         open={planWizardOpen}
         onClose={() => { setPlanWizardOpen(false); finishFunnel() }}
@@ -2518,20 +2518,22 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             asymmetric ratio used by every two-column row on this screen, so
             they all break at the same vertical seam. ws-home-grid keeps the
             mobile override (one column under 768px). Per Shirli 2026-09-04. */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', minHeight: 165 }}>
 
         {/* Personal study plan CTA / banner — opens 3-step intake wizard. */}
         {!personalPlan ? (
           <button
             onClick={() => setPlanWizardOpen(true)}
+            /* Neutral glass, not gold. Once the practice card carries the
+               palette orange, a gold-tinted pair at the top of the page fights
+               it for attention; on the same white surface as every other
+               container they sit back and let the orange lead. */
+            className="ws-glass-card"
             style={{
-              background: 'linear-gradient(135deg, rgba(245,200,66,0.18), rgba(212,175,55,0.10))',
-              border: '1.5px solid rgba(212,175,55,0.55)',
               borderRadius: CARD_RADIUS,
               padding: '18px 24px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: 16, textAlign: 'right',
               fontFamily: "'Rubik', sans-serif",
-              boxShadow: '0 4px 16px rgba(212,175,55,0.18)',
             }}
           >
             <div style={{ fontSize: 36 }}>🎯</div>
@@ -2542,8 +2544,9 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
               </div>
             </div>
             <div style={{
-              background: 'linear-gradient(135deg,#F5C842,#D4AF37)', color: '#0B1B3E',
+              background: BUTTON_COLOR, color: '#fff',
               padding: '8px 16px', borderRadius: 24, fontSize: 13, fontWeight: 700,
+              flexShrink: 0,
             }}>
               התחל ←
             </div>
@@ -2605,7 +2608,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             לימוד חומר carries order:1, so it takes the wide 1.25fr track,
             which is the RIGHT column in RTL. It is the point of the app and
             now reads that way. */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', minHeight: 680 }}>
 
           {/* Card: כמעט שם! (תרגול) — order:2 so it sits on the LEFT in RTL,
               after the study card. User asked to swap study↔practice. */}
@@ -2706,7 +2709,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             the insights card that difference in material read as a mistake,
             so it now uses the same ws-glass-card. Padding levelled 40 → 28 to
             match, and the strip's rail re-anchored to the narrower box. */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', minHeight: 220 }}>
 
         {/* LEARNING INSIGHTS — accuracy + what to strengthen */}
         <LearningInsights />
@@ -2792,9 +2795,10 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             The chart needs the horizontal room for seven days; "העולם שלי" is
             three chips, a bar and a button, so it was holding width it did not
             use. Same 1.25fr / 1fr seam as every other row. */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', minHeight: 400 }}>
 
-          {/* Card: Activity chart */}
+          {/* Card: Activity chart — centred, so the row's height floor reads as
+              breathing room rather than a gap under the chart. */}
           <div className="ws-card-pad" style={{
             background: GLASS_CARD,
             backdropFilter: 'blur(20px)',
@@ -2802,6 +2806,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             borderRadius: CARD_RADIUS,
             padding: '24px 20px 16px',
             border: '1px solid rgba(255,255,255,0.5)',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center',
           }}>
             <ActivityChart />
           </div>

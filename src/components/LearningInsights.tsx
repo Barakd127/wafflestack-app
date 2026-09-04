@@ -88,7 +88,7 @@ export default function LearningInsights() {
   )
 }
 
-const card: React.CSSProperties = { borderRadius: 24, padding: '24px 26px' }
+const card: React.CSSProperties = { borderRadius: 24, padding: "24px 26px", display: "flex", flexDirection: "column", justifyContent: "center" }
 const title: React.CSSProperties = { fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 19, color: 'var(--sh-text-dark)', marginBottom: 16, textAlign: 'right' }
 const statBox: React.CSSProperties = { flex: '1 1 100px', minWidth: 100, background: 'rgba(127,155,217,0.10)', borderRadius: 14, padding: '12px 14px', textAlign: 'center' }
 const statCaption: React.CSSProperties = { fontFamily: "'Assistant', sans-serif", fontSize: 11.5, color: 'var(--sh-text-med)', marginTop: 5 }

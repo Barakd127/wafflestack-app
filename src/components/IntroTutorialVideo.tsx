@@ -18,19 +18,21 @@ export default function IntroTutorialVideo() {
       <button
         onClick={() => setOpen(true)}
         dir="rtl"
+        // Neutral glass, radius 24 — same surface and corner as every other
+        // container in the home bento. It used to be a gold-tinted card at
+        // radius 18, which made it the odd one out twice over, and the gold
+        // now competes with the orange practice card. Per Shirli 2026-09-04.
+        className="ws-glass-card"
         style={{
           display: 'flex', alignItems: 'center', gap: 14, width: '100%',
-          background: 'linear-gradient(135deg, rgba(245,200,66,0.16), rgba(212,175,55,0.08))',
-          // 24 to match every other container on the home screen — at 18 it
-          // was the odd corner in the bento row. Per Shirli 2026-09-04.
-          border: '1.5px solid rgba(212,175,55,0.5)', borderRadius: 24,
+          borderRadius: 24,
           padding: '18px 24px', cursor: 'pointer', textAlign: 'right',
           fontFamily: "'Rubik', sans-serif",
         }}
       >
         <div style={{
           width: 46, height: 46, borderRadius: 12, flexShrink: 0,
-          background: 'linear-gradient(135deg,#F5C842,#D4AF37)', color: '#1F3E6C',
+          background: 'rgba(31,62,108,0.10)', color: '#1F3E6C',
           display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
         }}>▶</div>
         <div style={{ flex: 1 }}>
