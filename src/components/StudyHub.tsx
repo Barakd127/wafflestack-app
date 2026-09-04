@@ -2497,7 +2497,12 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
         onSelectTopic={onSelectTopic}
       />
       <style>{'@keyframes ws-card-pulse{0%,100%{box-shadow:0 0 0 0 rgba(51,81,202,0)}50%{box-shadow:0 0 0 6px rgba(51,81,202,0.28)}}'}</style>
-      <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* Same content grid as the learning area (CourseGate / TopicSelector):
+          maxWidth 1200 with NO auto margins, so in RTL the column starts at the
+          right edge under the page's 40px pad instead of floating centred at
+          900. Keeps every screen on one grid and lets the home cards use the
+          full width. Per Shirli 2026-09-03. */}
+      <div style={{ maxWidth: 1200, display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* Personal study plan CTA / banner — opens 3-step intake wizard. */}
         {!personalPlan ? (
