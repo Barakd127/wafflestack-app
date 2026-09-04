@@ -2502,7 +2502,14 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
           right edge under the page's 40px pad instead of floating centred at
           900. Keeps every screen on one grid and lets the home cards use the
           full width. Per Shirli 2026-09-03. */}
-      <div style={{ maxWidth: 1200, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* The content column stops on a real landmark instead of an arbitrary
+          ceiling: the top bar's first divider, the one between the dark-mode
+          toggle and the XP ribbon. That divider sits 90px from the left edge
+          of the main area (36 top-bar padding + 40 toggle + 14 gap), and
+          ws-screen-pad already insets 40, so 50 more lands the column's left
+          edge exactly on it. The old 1200 cap left 393px of dead space on the
+          left at a 1920 window. Per Shirli 2026-09-04. */}
+      <div style={{ maxWidth: 'calc(100% - 50px)', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* ── BANNER ROW ─────────────────────────────────
             The plan CTA and the tutorial-video card used to stack. Side by
