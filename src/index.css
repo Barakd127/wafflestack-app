@@ -655,19 +655,20 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
    outrank any class selector, so a rest appearance set inline silently wins
    over :hover and :active and the states never fire.
 
-   Depth carries the three states; colour follows.
+     rest   ink, raised       #16213E → #2C3A5E, 3px shadow
+     hover  turns indigo      #27187E → #5031CE, 6px shadow, -3px
+     press  deeper indigo     #1B1060 → #3B22A4, inset shadow, +1px
 
-     rest   raised, LIGHT     #B0B8F9 → #C4CAFB, indigo label, 3px shadow
-     hover  rises, INVERTS    #27187E → #5031CE, white label, 6px shadow, -3px
-     press  sinks below       #1B1060 → #3B22A4, white label, inset shadow, +1px
+   Ink at rest is neutral, so it leaves every colour on the page free to carry
+   meaning, and the indigo arrives only on contact — colour becomes the reward
+   for reaching the button rather than its resting decoration.
 
-   Rest cannot be the dark end: dark and flat IS what pressed looks like, so a
-   saturated fill reads as already-pressed and leaves nowhere to travel. The
-   light rest also lets hover invert the whole button — fill and label at once —
-   which is a far bigger step between states than a shade change.
+   A dark rest only reads as "already pressed" when it is also FLAT; the 3px
+   shadow is what keeps this one raised. That distinction is the whole reason
+   the earlier saturated-and-shadowless version failed.
 
-   White on #B0B8F9 measures 1.9:1, so the resting label is indigo, not white.
-   The arrow is currentColor and flips with it. Per Shirli 2026-09-04. */
+   White label throughout: 15.9 / 11.2 at rest, 13.8 / 7.9 on hover,
+   16.3 / 10.8 on press. The arrow is currentColor. Per Shirli 2026-09-04. */
 .ws-cta {
   display: inline-flex;
   align-items: center;
@@ -679,22 +680,20 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   font-family: 'Rubik', sans-serif;
   font-size: 16px;
   font-weight: 600;
-  color: #27187E;
+  color: #fff;
   cursor: pointer;
-  background: linear-gradient(270deg, #B0B8F9 0%, #C4CAFB 100%);
-  box-shadow: 0 3px 8px rgba(39,24,126,0.20);
+  background: linear-gradient(270deg, #16213E 0%, #2C3A5E 100%);
+  box-shadow: 0 3px 8px rgba(11,27,62,0.34);
   transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
-              background 0.18s ease, color 0.18s ease;
+              background 0.18s ease;
 }
 .ws-cta:hover {
   background: linear-gradient(270deg, #27187E 0%, #5031CE 100%);
-  color: #fff;
   box-shadow: 0 6px 13px rgba(39,24,126,0.38);
   transform: translateY(-3px);
 }
 .ws-cta:active {
   background: linear-gradient(270deg, #1B1060 0%, #3B22A4 100%);
-  color: #fff;
   box-shadow: inset 0 2px 5px rgba(11,6,48,0.55);
   transform: translateY(1px);
 }
@@ -706,6 +705,6 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   box-shadow: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .ws-cta { transition: background 0.18s ease, color 0.18s ease; }
+  .ws-cta { transition: background 0.18s ease; }
   .ws-cta:hover, .ws-cta:active { transform: none; }
 }
