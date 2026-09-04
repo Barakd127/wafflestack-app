@@ -26,7 +26,7 @@ export default function LearningInsights() {
       <div className="ws-glass-card" style={card}>
         <div style={title}><CardIcon name="insights" /><div style={cardTitle}>תובנות למידה</div></div>
         <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: 'var(--sh-text-med)', lineHeight: 1.6 }}>
-          ענה על עוד כמה שאלות ונתחיל לזהות בדיוק מה חזק אצלך ומה כדאי לחזק.
+          עוד כמה שאלות ונתחיל לזהות בדיוק מה חזק אצלך ומה כדאי לחזק.
         </div>
       </div>
     )

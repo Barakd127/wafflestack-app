@@ -3,7 +3,7 @@
 // Video lives at public/videos/intro-tutorial.mp4 (720p, ~3MB, faststart).
 // Per user 2026-06-01.
 import { useState } from 'react'
-import CardIcon, { cardTitle, cardHead } from './CardIcon'
+import CardIcon, { cardTitle, cardHead, CTA_BTN } from './CardIcon'
 
 const SRC = `${import.meta.env.BASE_URL}videos/intro-tutorial.mp4`
 
@@ -15,27 +15,28 @@ export default function IntroTutorialVideo() {
 
   return (
     <>
-      {/* Replay card on the home page */}
-      <button
-        onClick={() => setOpen(true)}
+      {/* Replay card on the home page — a card like every other container:
+          icon, title, copy, then the CTA at the bottom-right. It used to be one
+          wide button with the text stretched across it and no call to action of
+          its own. Per Shirli 2026-09-04. */}
+      <div
         dir="rtl"
-        // Neutral glass, radius 24 — same surface and corner as every other
-        // container in the home bento. It used to be a gold-tinted card at
-        // radius 18, which made it the odd one out twice over, and the gold
-        // now competes with the orange practice card. Per Shirli 2026-09-04.
         className="ws-glass-card"
         style={{
-          display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+          display: 'flex', flexDirection: 'column',
           borderRadius: 24,
-          padding: '18px 24px', cursor: 'pointer', textAlign: 'right',
+          padding: '22px 26px', textAlign: 'right',
           fontFamily: "'Rubik', sans-serif",
         }}
       >
-                <div style={{ flex: 1 }}>
-          <div style={{ ...cardHead, marginBottom: 6 }}><CardIcon name="video" /><div style={cardTitle}>סרטון הדרכה — איך מתחילים</div></div>
-          <div style={{ fontSize: 15, color: '#5b6f93', marginTop: 2 }}>סיור קצר בפלטפורמה · פחות מ-3 דקות</div>
+        <div style={cardHead}><CardIcon name="video" /><div style={cardTitle}>סרטון הדרכה</div></div>
+        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: '#5b6f93', marginTop: 6, lineHeight: 1.5 }}>
+          סיור קצר בפלטפורמה · פחות מ-3 דקות
         </div>
-      </button>
+        {/* Flexible spacer with a floor — see CardIcon.CTA_BTN. */}
+        <div style={{ flex: 1, minHeight: 20 }} />
+        <button onClick={() => setOpen(true)} className="ws-cta" style={CTA_BTN}>הדרכה מהירה</button>
+      </div>
 
       {/* Modal player */}
       {open && (

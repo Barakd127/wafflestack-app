@@ -214,7 +214,7 @@ function PlanTargetCard({ row, onSelect, onExtend }: {
         <div
           role="button"
           tabIndex={0}
-          aria-label={`${row.hebrewTitle}, יעד ${formatTargetDate(row.targetDate)}, נשארו ${row.daysLeft} ימים. לחץ לתרגול`}
+          aria-label={`${row.hebrewTitle}, יעד ${formatTargetDate(row.targetDate)}, נשארו ${row.daysLeft} ימים. למעבר לתרגול`}
           onClick={() => onSelect(row.topicId)}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onSelect(row.topicId) }}
           style={{
@@ -326,7 +326,7 @@ function RiskCard({ risk, rank, onSelect }: {
     <div
       role="button"
       tabIndex={0}
-      aria-label={`${risk.hebrewTitle}, רמת סיכון ${risk.riskScore}. לחץ להתחיל תרגול`}
+      aria-label={`${risk.hebrewTitle}, רמת סיכון ${risk.riskScore}. למעבר לתרגול`}
       onClick={() => onSelect(risk.topicId)}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onSelect(risk.topicId) }}
       onMouseEnter={() => setHovered(true)}
@@ -468,7 +468,7 @@ function ExamDateControl({ examDate, setExamDate }: {
         whiteSpace: 'nowrap',
       }}
     >
-      {examDate ? 'שנה תאריך בחינה' : '+ הגדר תאריך בחינה'}
+      {examDate ? 'שנה תאריך בחינה' : '+ תאריך בחינה'}
     </button>
   )
 }
@@ -536,7 +536,7 @@ export function RiskBoard({ onSelectTopic }: RiskBoardProps) {
         WebkitBackdropFilter: 'blur(20px)',
         boxShadow: 'var(--sh-card-shadow, 0 8px 32px rgba(31,62,108,0.10))',
         borderRadius: 24, // was 20 — every home container is 24 (Shirli 2026-09-04)
-        aspectRatio: '5.568',
+        aspectRatio: '4.832',
         padding: '20px 22px 16px',
         border: '1px solid rgba(255,255,255,0.50)',
       }}

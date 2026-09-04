@@ -649,3 +649,29 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   padding-top: 10px !important;
   background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.82) 45%, rgba(255,255,255,0.92) 100%) !important;
 }
+
+/* ── Home CTA states ───────────────────────────────────────────────────────
+   Hover brightens and lifts: the control comes toward you. Press darkens and
+   sinks: it goes away. Darkening on hover would read as "disabled" on an
+   already-dark button — which is why the sidebar's rule (light → dark =
+   selected) must not be reused here. There, dark is a state you are in; here
+   it would be the off switch.
+
+   brightness() shifts both gradient stops together, so CTA_BTN in
+   components/CardIcon.tsx stays the single source of the ramp.
+   Per Shirli 2026-09-04. */
+.ws-cta {
+  transition: transform 0.15s cubic-bezier(.22,1,.36,1), filter 0.15s ease;
+}
+.ws-cta:hover  { filter: brightness(1.10); transform: translateY(-1px); }
+.ws-cta:active { filter: brightness(0.92); transform: translateY(0) scale(0.98); }
+.ws-cta[disabled] {
+  opacity: 0.45;
+  filter: grayscale(0.3);
+  cursor: not-allowed;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ws-cta { transition: none; }
+  .ws-cta:hover, .ws-cta:active { transform: none; }
+}

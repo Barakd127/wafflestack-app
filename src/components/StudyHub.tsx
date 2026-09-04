@@ -4,7 +4,7 @@ import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../con
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import BoardShell from './BoardShell'
-import CardIcon, { cardTitle, cardHead } from './CardIcon'
+import CardIcon, { cardTitle, cardHead, CTA_BTN } from './CardIcon'
 import { useGlassBoard } from '../hooks/useGlassBoard'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
@@ -864,8 +864,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
             )}
             {error && <div style={{ background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.3)', borderRadius: 10, padding: '10px 14px', color: '#d32f2f', fontSize: 13, textAlign: 'center' }}>{error}</div>}
             <button type="submit" disabled={loading || (mode === 'register' && !agreedIP)}
-              className="ws-cta-btn"
-              style={{
+                            style={{
                 marginTop: 6, padding: '14px 0',
                 background: 'linear-gradient(135deg,#1F3E6C,#254A9F)',
                 color: '#fff', borderRadius: 14, fontSize: 16, fontWeight: 700,
@@ -2102,7 +2101,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
       overflow: 'hidden',
     }}>
       {/* Logo / avatar area */}
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '28px 0 20px', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '28px 32px 20px', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
         <div style={{
           width: 64, height: 64,
           background: 'linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.15))',
@@ -2518,38 +2517,34 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             asymmetric ratio used by every two-column row on this screen, so
             they all break at the same vertical seam. ws-home-grid keeps the
             mobile override (one column under 768px). Per Shirli 2026-09-04. */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '10.625' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '4.921' }}>
 
         {/* Personal study plan CTA / banner — opens 3-step intake wizard. */}
         {!personalPlan ? (
-          <button
-            onClick={() => setPlanWizardOpen(true)}
-            /* Neutral glass, not gold. Once the practice card carries the
-               palette orange, a gold-tinted pair at the top of the page fights
-               it for attention; on the same white surface as every other
-               container they sit back and let the orange lead. */
+          /* A card like every other container: icon, title, copy, then the CTA
+             at the bottom-right. It used to be one big <button> with a chip
+             floating at its left edge, which is why the chip never sat where
+             the other buttons do. The real <button> is now inside, so the
+             label describes the action for screen readers too. */
+          <div
             className="ws-glass-card"
             style={{
               borderRadius: CARD_RADIUS,
-              padding: '18px 24px', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: 16, textAlign: 'right',
+              padding: '22px 26px',
+              display: 'flex', flexDirection: 'column', textAlign: 'right',
               fontFamily: "'Rubik', sans-serif",
             }}
           >
-            <div style={{ flex: 1 }}>
-              <div style={{ ...cardHead, marginBottom: 6 }}><CardIcon name="plan" /><div style={cardTitle}>התאם תכנית אישית</div></div>
-              <div style={{ fontSize: 15, color: TEXT_MED, marginTop: 3 }}>
-                שאלון של פחות מדקה — נסדר את הנושאים בדיוק לפי המטרה והזמן שלך
-              </div>
+            <div style={{ ...cardHead }}><CardIcon name="plan" /><div style={cardTitle}>התאמת תכנית אישית</div></div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_MED, marginTop: 6, lineHeight: 1.5 }}>
+              שאלון של פחות מדקה — נסדר את הנושאים בדיוק לפי המטרה והזמן שלך
             </div>
-            <div style={{
-              background: BUTTON_COLOR, color: '#fff',
-              padding: '8px 16px', borderRadius: 24, fontSize: 15, fontWeight: 700,
-              flexShrink: 0,
-            }}>
-              התחל ←
-            </div>
-          </button>
+            {/* Flexible spacer with a floor: margin-top:auto alone collapses to
+                zero once the copy fills the card, which put the button on the
+                text. This keeps 20px whatever the copy length. */}
+            <div style={{ flex: 1, minHeight: 20 }} />
+            <button onClick={() => setPlanWizardOpen(true)} className="ws-cta" style={CTA_BTN}>להתאמה</button>
+          </div>
         ) : (
           <div style={{
             background: GLASS_CARD_SM,
@@ -2621,7 +2616,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             <div style={{ ...cardHead, marginBottom: 6 }}><CardIcon name="practice" /><div style={cardTitle}>תרגול</div></div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
               {completedLessons.length === 0 ? (
-                <>בואו נתחיל בהתחלה · {currentTopicName}</>
+                <>מתחילים מהתחלה · {currentTopicName}</>
               ) : answeredInTopic > 0 && remainingInTopic > 0 ? (
                 <>נשארו לך עוד {remainingInTopic} שאלות · {currentTopicName}</>
               ) : (
@@ -2645,9 +2640,8 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 practice quiz, bypassing the difficulty picker. Returning users
                 keep the existing picker flow so they can pick difficulty / resume. */}
             <button onClick={() => (completedLessons.length > 0 ? onSelectTopic(currentTopicId) : onStartPractice(currentTopicId))}
-              className="ws-cta-btn"
-              style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, fontFamily: "'Rubik', sans-serif", boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}>
-              {completedLessons.length > 0 ? 'המשך ←' : 'בוא נתרגל ←'}
+                            className="ws-cta" style={CTA_BTN}>
+              {completedLessons.length > 0 ? 'ממשיכים בתרגול' : 'מתחילים לתרגל'}
             </button>
           </div>
 
@@ -2690,14 +2684,15 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 </svg>
               </div>
               <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_DARK, lineHeight: 1.9, textAlign: 'right', marginTop: 40 }}>
-                בוא נמפה את הנושאים בקורס שלך
+                נמפה את הנושאים בקורס שלך
               </div>
             </div>
-            {/* CTA button — liquid-glass to match the תרגול card's ws-cta-btn.
-                Map starts collapsed, so the label is "בוא נלמד" (let's learn). */}
-            <button onClick={onGoMindmap} className="ws-cta-btn"
-              style={{ marginTop: 20, background: BUTTON_COLOR, color: '#fff', border:'none', borderRadius:24, padding:'11px 0', fontWeight:600, fontSize:16, cursor:'pointer', fontFamily:"'Rubik',sans-serif", width:'100%', boxShadow:'0px 2px 6px rgba(18,36,96,0.3)' }}>
-              📖 בוא נלמד ←
+            {/* CTA button — shares CTA_BTN + .ws-cta with every other action.
+                Map starts collapsed, so the label names the destination, not a gendered
+                imperative. */}
+            <button onClick={onGoMindmap}
+                            className="ws-cta" style={{ ...CTA_BTN, marginTop: 20 }}>
+              מתחילים ללמוד
             </button>
           </div>
         </div>
@@ -2708,7 +2703,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             the insights card that difference in material read as a mistake,
             so it now uses the same ws-glass-card. Padding levelled 40 → 28 to
             match, and the strip's rail re-anchored to the narrower box. */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '7.966' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '6.903' }}>
 
         {/* LEARNING INSIGHTS — accuracy + what to strengthen */}
         <LearningInsights />
@@ -2794,7 +2789,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             The chart needs the horizontal room for seven days; "העולם שלי" is
             three chips, a bar and a button, so it was holding width it did not
             use. Same 1.25fr / 1fr seam as every other row. */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '4.386' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '3.88' }}>
 
           {/* Card: Activity chart — centred, so the row's height floor reads as
               breathing room rather than a gap under the chart. */}
@@ -2850,8 +2845,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             </div>
 
             <div style={{ flex: 1 }} />
-            <button onClick={onGoWorld} className="ws-cta-btn"
-              style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, cursor: 'pointer', fontFamily: "'Rubik', sans-serif", boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}>
+            <button onClick={onGoWorld} className="ws-cta" style={CTA_BTN}>
               כניסה לעולם
             </button>
           </div>

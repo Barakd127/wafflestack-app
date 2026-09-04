@@ -115,3 +115,32 @@ export const cardHead: CSSProperties = {
   alignItems: 'flex-start',
   gap: 9,
 }
+
+/**
+ * Every call-to-action on the home screen.
+ *
+ * Sized to its label rather than stretched across the card, and pinned to the
+ * RIGHT edge (flex-start under dir="rtl") so the eye runs icon → title → copy →
+ * action down one side instead of crossing the card. No arrow: the label
+ * already says what happens. No specular sheen and no drop shadow — the old
+ * `ws-cta-btn` glow read as a smudge on a pale card.
+ *
+ * Copy is gender-neutral throughout: Hebrew imperatives inflect, so "בוא"
+ * addresses a man. First-person plural ("מתחילים") invites without picking one.
+ */
+export const CTA_BTN: CSSProperties = {
+  // Indigo ramp rather than the shell navy, so the actions are the one thing
+  // that steps out of the blue. Both stops are on-palette: #27187E is the
+  // chosen indigo, #5031CE is the same hue lightened. White clears 13.8:1 on
+  // the dark end and 7.9:1 on the light one.
+  background: 'linear-gradient(270deg, #27187E 0%, #5031CE 100%)',
+  color: '#fff',
+  border: 'none',
+  borderRadius: 24,
+  padding: '11px 26px',
+  fontWeight: 600,
+  fontSize: 16,
+  fontFamily: "'Rubik', sans-serif",
+  cursor: 'pointer',
+  alignSelf: 'flex-start',
+}
