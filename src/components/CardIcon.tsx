@@ -121,19 +121,20 @@ export const cardHead: CSSProperties = {
  *
  * Sized to its label rather than stretched across the card, and pinned to the
  * RIGHT edge (flex-start under dir="rtl") so the eye runs icon → title → copy →
- * action down one side instead of crossing the card. No arrow: the label
- * already says what happens. No specular sheen and no drop shadow — the old
- * `ws-cta-btn` glow read as a smudge on a pale card.
+ * action down one side instead of crossing the card.
+ *
+ * Depth leads, colour follows. A pressed button is dark and flat — which is
+ * exactly what a saturated, shadowless fill looks like, so the earlier version
+ * read as already-pressed and had nowhere left to go. Rest is therefore the
+ * LIGHTER end of the ramp and clearly raised; `.ws-cta` in index.css takes it
+ * up on hover and sinks it below the surface on press.
  *
  * Copy is gender-neutral throughout: Hebrew imperatives inflect, so "בוא"
  * addresses a man. First-person plural ("מתחילים") invites without picking one.
  */
 export const CTA_BTN: CSSProperties = {
-  // Indigo ramp rather than the shell navy, so the actions are the one thing
-  // that steps out of the blue. Both stops are on-palette: #27187E is the
-  // chosen indigo, #5031CE is the same hue lightened. White clears 13.8:1 on
-  // the dark end and 7.9:1 on the light one.
-  background: 'linear-gradient(270deg, #27187E 0%, #5031CE 100%)',
+  background: 'linear-gradient(270deg, #4438A0 0%, #6354C6 100%)',
+  boxShadow: '0 3px 8px rgba(39,24,126,0.32)',
   color: '#fff',
   border: 'none',
   borderRadius: 24,
@@ -143,4 +144,26 @@ export const CTA_BTN: CSSProperties = {
   fontFamily: "'Rubik', sans-serif",
   cursor: 'pointer',
   alignSelf: 'flex-start',
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 9,
+}
+
+/**
+ * The arrow that closes every CTA. Compact, stroked, no disc behind it, and
+ * pointing LEFT — in Hebrew, forward is leftward. `currentColor` means it
+ * follows the label through every state instead of needing its own colour.
+ */
+export function CtaArrow() {
+  return (
+    <svg
+      width={16} height={16} viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" strokeWidth={2}
+      strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true" style={{ flexShrink: 0 }}
+    >
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12,19 5,12 12,5" />
+    </svg>
+  )
 }

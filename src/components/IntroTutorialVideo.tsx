@@ -3,7 +3,7 @@
 // Video lives at public/videos/intro-tutorial.mp4 (720p, ~3MB, faststart).
 // Per user 2026-06-01.
 import { useState } from 'react'
-import CardIcon, { cardTitle, cardHead, CTA_BTN } from './CardIcon'
+import CardIcon, { cardTitle, cardHead, CTA_BTN, CtaArrow } from './CardIcon'
 
 const SRC = `${import.meta.env.BASE_URL}videos/intro-tutorial.mp4`
 
@@ -35,7 +35,7 @@ export default function IntroTutorialVideo() {
         </div>
         {/* Flexible spacer with a floor — see CardIcon.CTA_BTN. */}
         <div style={{ flex: 1, minHeight: 20 }} />
-        <button onClick={() => setOpen(true)} className="ws-cta" style={CTA_BTN}>הדרכה מהירה</button>
+        <button onClick={() => setOpen(true)} className="ws-cta" style={CTA_BTN}>הדרכה מהירה<CtaArrow /></button>
       </div>
 
       {/* Modal player */}

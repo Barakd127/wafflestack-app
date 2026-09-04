@@ -4,7 +4,7 @@ import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../con
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import BoardShell from './BoardShell'
-import CardIcon, { cardTitle, cardHead, CTA_BTN } from './CardIcon'
+import CardIcon, { cardTitle, cardHead, CTA_BTN, CtaArrow } from './CardIcon'
 import { useGlassBoard } from '../hooks/useGlassBoard'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
@@ -2543,7 +2543,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 zero once the copy fills the card, which put the button on the
                 text. This keeps 20px whatever the copy length. */}
             <div style={{ flex: 1, minHeight: 20 }} />
-            <button onClick={() => setPlanWizardOpen(true)} className="ws-cta" style={CTA_BTN}>להתאמה</button>
+            <button onClick={() => setPlanWizardOpen(true)} className="ws-cta" style={CTA_BTN}>להתאמה<CtaArrow /></button>
           </div>
         ) : (
           <div style={{
@@ -2641,7 +2641,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 keep the existing picker flow so they can pick difficulty / resume. */}
             <button onClick={() => (completedLessons.length > 0 ? onSelectTopic(currentTopicId) : onStartPractice(currentTopicId))}
                             className="ws-cta" style={CTA_BTN}>
-              {completedLessons.length > 0 ? 'ממשיכים בתרגול' : 'מתחילים לתרגל'}
+              {completedLessons.length > 0 ? 'ממשיכים בתרגול' : 'מתחילים לתרגל'}<CtaArrow />
             </button>
           </div>
 
@@ -2692,7 +2692,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 imperative. */}
             <button onClick={onGoMindmap}
                             className="ws-cta" style={{ ...CTA_BTN, marginTop: 20 }}>
-              מתחילים ללמוד
+              מתחילים ללמוד<CtaArrow />
             </button>
           </div>
         </div>
@@ -2846,7 +2846,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
 
             <div style={{ flex: 1 }} />
             <button onClick={onGoWorld} className="ws-cta" style={CTA_BTN}>
-              כניסה לעולם
+              כניסה לעולם<CtaArrow />
             </button>
           </div>
         </div>
