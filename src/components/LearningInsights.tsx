@@ -24,7 +24,7 @@ export default function LearningInsights() {
     return (
       <div className="ws-glass-card" style={card}>
         <div style={title}>📊 תובנות למידה</div>
-        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: 'var(--sh-text-med)', lineHeight: 1.6 }}>
+        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: 'var(--sh-text-med)', lineHeight: 1.6 }}>
           ענה על עוד כמה שאלות ונתחיל לזהות בדיוק מה חזק אצלך ומה כדאי לחזק.
         </div>
       </div>
@@ -64,7 +64,7 @@ export default function LearningInsights() {
       {/* What to strengthen — driven by the mistake-category counts */}
       {topTags.length > 0 && (
         <div>
-          <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 14, color: 'var(--sh-text-dark)', marginBottom: 10 }}>
+          <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 16, color: 'var(--sh-text-dark)', marginBottom: 10 }}>
             מה כדאי לחזק
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -75,7 +75,7 @@ export default function LearningInsights() {
                   <span style={{ fontSize: 20, width: 26, textAlign: 'center', flexShrink: 0 }}>{meta.icon}</span>
                   <span style={{ flex: 1, minWidth: 0 }}>
                     <span style={{ display: 'block', fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 13.5, color: 'var(--sh-text-dark)' }}>{meta.labelHe}</span>
-                    {meta.tipHe && <span style={{ display: 'block', fontFamily: "'Assistant', sans-serif", fontSize: 12, color: 'var(--sh-text-med)', marginTop: 1, lineHeight: 1.4 }}>{meta.tipHe}</span>}
+                    {meta.tipHe && <span style={{ display: 'block', fontFamily: "'Assistant', sans-serif", fontSize: 15, color: 'var(--sh-text-med)', marginTop: 1, lineHeight: 1.4 }}>{meta.tipHe}</span>}
                   </span>
                   <span style={countPill}>{n}×</span>
                 </div>
@@ -89,8 +89,8 @@ export default function LearningInsights() {
 }
 
 const card: React.CSSProperties = { borderRadius: 24, padding: "24px 26px", display: "flex", flexDirection: "column", justifyContent: "center" }
-const title: React.CSSProperties = { fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 19, color: 'var(--sh-text-dark)', marginBottom: 16, textAlign: 'right' }
+const title: React.CSSProperties = { fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 20, color: 'var(--sh-text-dark)', marginBottom: 16, textAlign: 'right' }
 const statBox: React.CSSProperties = { flex: '1 1 100px', minWidth: 100, background: 'rgba(127,155,217,0.10)', borderRadius: 14, padding: '12px 14px', textAlign: 'center' }
-const statCaption: React.CSSProperties = { fontFamily: "'Assistant', sans-serif", fontSize: 11.5, color: 'var(--sh-text-med)', marginTop: 5 }
+const statCaption: React.CSSProperties = { fontFamily: "'Assistant', sans-serif", fontSize: 13, color: 'var(--sh-text-med)', marginTop: 5 }
 const tagRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.25)', borderRadius: 12, padding: '9px 12px' }
-const countPill: React.CSSProperties = { fontFamily: "'Rubik', sans-serif", fontSize: 12, fontWeight: 800, color: '#9A7B1A', background: 'rgba(212,175,55,0.18)', borderRadius: 999, padding: '3px 9px', flexShrink: 0 }
+const countPill: React.CSSProperties = { fontFamily: "'Rubik', sans-serif", fontSize: 15, fontWeight: 800, color: '#9A7B1A', background: 'rgba(212,175,55,0.18)', borderRadius: 999, padding: '3px 9px', flexShrink: 0 }

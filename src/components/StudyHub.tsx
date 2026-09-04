@@ -2538,14 +2538,14 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
           >
             <div style={{ fontSize: 36 }}>🎯</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 17, fontWeight: 700, color: TEXT_DARK }}>התאם תכנית אישית</div>
-              <div style={{ fontSize: 13, color: TEXT_MED, marginTop: 3 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: TEXT_DARK }}>התאם תכנית אישית</div>
+              <div style={{ fontSize: 15, color: TEXT_MED, marginTop: 3 }}>
                 שאלון של פחות מדקה — נסדר את הנושאים בדיוק לפי המטרה והזמן שלך
               </div>
             </div>
             <div style={{
               background: BUTTON_COLOR, color: '#fff',
-              padding: '8px 16px', borderRadius: 24, fontSize: 13, fontWeight: 700,
+              padding: '8px 16px', borderRadius: 24, fontSize: 15, fontWeight: 700,
               flexShrink: 0,
             }}>
               התחל ←
@@ -2562,12 +2562,12 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             fontFamily: "'Rubik', sans-serif",
             boxShadow: CARD_SHADOW,
           }}>
-            <div style={{ fontSize: 28 }}>🎯</div>
+            <div style={{ fontSize: 30 }}>🎯</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_DARK }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: TEXT_DARK }}>
                 התכנית שלך · {personalPlan.sequence.length} נושאים · {personalPlan.dailyTargetMin} דק׳ ביום
               </div>
-              <div style={{ fontSize: 12, color: TEXT_MED, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 15, color: TEXT_MED, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {personalPlan.sequence.slice(0, 4).map(s => HEBREW_LABELS[s.topicId] || s.topicId).join(' → ')}
                 {personalPlan.sequence.length > 4 ? ' …' : ''}
               </div>
@@ -2577,7 +2577,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
               style={{
                 background: 'rgba(212,175,55,0.18)', color: '#8a6d1c',
                 border: '1px solid rgba(212,175,55,0.45)',
-                borderRadius: 10, padding: '6px 12px', fontSize: 12, fontWeight: 700,
+                borderRadius: 10, padding: '6px 12px', fontSize: 15, fontWeight: 700,
                 cursor: 'pointer', fontFamily: 'inherit',
               }}
             >✏️ ערוך</button>
@@ -2586,7 +2586,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
               style={{
                 background: 'transparent', color: '#9a3b3b',
                 border: '1px solid rgba(154,59,59,0.3)',
-                borderRadius: 10, padding: '6px 10px', fontSize: 12, fontWeight: 700,
+                borderRadius: 10, padding: '6px 10px', fontSize: 15, fontWeight: 700,
                 cursor: 'pointer', fontFamily: 'inherit',
               }}
             >🗑</button>
@@ -2619,7 +2619,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             order: 2,
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 6 }}>תרגול</div>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 23, color: TEXT_DARK, marginBottom: 6 }}>תרגול</div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
               {completedLessons.length === 0 ? (
                 <>בואו נתחיל בהתחלה<br />{currentTopicName}</>
@@ -2633,11 +2633,11 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 page, scaled to ~150px tall to fit the home card. Replaces the
                 old static temple PNG with the live cycling preview. */}
             <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 16, minHeight: 150, height: 150, borderRadius: 12, overflow: 'hidden' }}>
-              <Suspense fallback={<div style={{ color: 'rgba(31,41,55,0.4)', fontSize: 12 }}>טוען…</div>}>
+              <Suspense fallback={<div style={{ color: 'rgba(31,41,55,0.4)', fontSize: 15 }}>טוען…</div>}>
                 <HeroScene />
               </Suspense>
             </div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginBottom: 8, textAlign: 'right' }}>הצעה למבנה הבא בעירך</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_LIGHT, marginBottom: 8, textAlign: 'right' }}>הצעה למבנה הבא בעירך</div>
             {/* Progress bar — reflects answered share of the current topic */}
             <div style={{ height: 7, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden', marginBottom: 16 }}>
               <div style={{ width: `${topicPct}%`, height: '100%', background: 'rgba(212,175,55,0.7)', borderRadius: 10, transition: 'width 0.4s' }} />
@@ -2661,7 +2661,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             order: 1,
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_MED, marginBottom: 16, textAlign: 'right' }}>לימוד חומר</div>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 23, color: TEXT_MED, marginBottom: 16, textAlign: 'right' }}>לימוד חומר</div>
             {/* Whiteboard area with glassmorphism */}
             <div style={{
               flex: 1,
@@ -2779,7 +2779,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                   </div>
                 )}
                 <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: stage.state === 'current' ? 16 : 14, color: TEXT_DARK, textAlign: 'center', fontWeight: stage.state === 'upcoming' ? 400 : 600 }}>{stage.name}</div>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: stage.state === 'done' ? '#22833F' : TEXT_LIGHT, fontWeight: stage.state === 'done' ? 600 : 400 }}>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 15, color: stage.state === 'done' ? '#22833F' : TEXT_LIGHT, fontWeight: stage.state === 'done' ? 600 : 400 }}>
                   {stage.state === 'done' ? '✓ הושלם' : stage.state === 'current' ? '(עכשיו)' : '(בקרוב)'}
                 </div>
               </div>
@@ -2821,29 +2821,29 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             display: 'flex', flexDirection: 'column', gap: 12,
             border: '1px solid rgba(255,255,255,0.5)',
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, textAlign: 'right' }}>העולם שלי</div>
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 23, color: TEXT_DARK, textAlign: 'right' }}>העולם שלי</div>
 
             {/* Stats row */}
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <div style={{ textAlign: 'center', background: 'rgba(212,175,55,0.12)', borderRadius: 14, padding: '8px 14px', border: '1px solid rgba(212,175,55,0.3)' }}>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: '#D4AF37' }}>⭐ {xp}</div>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>XP סה"כ</div>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>XP סה"כ</div>
               </div>
               <div style={{ textAlign: 'center', background: 'rgba(52,168,83,0.10)', borderRadius: 14, padding: '8px 14px', border: '1px solid rgba(52,168,83,0.25)' }}>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: '#34A853' }}>✓ {totalCorrect}</div>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>תשובות נכונות</div>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>תשובות נכונות</div>
               </div>
               <div style={{ textAlign: 'center', background: 'rgba(51,81,202,0.10)', borderRadius: 14, padding: '8px 14px', border: '1px solid rgba(51,81,202,0.22)' }}>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_MED }}>🔥 {currentStreak}</div>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ימים ברצף</div>
+                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>ימים ברצף</div>
               </div>
             </div>
 
             {/* XP level bar */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT }}>רמה {level}</span>
-                <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT }}>{xpInLevel}/{XP_PER_LEVEL} נק׳</span>
+                <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 15, color: TEXT_LIGHT }}>רמה {level}</span>
+                <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 15, color: TEXT_LIGHT }}>{xpInLevel}/{XP_PER_LEVEL} נק׳</span>
               </div>
               <div style={{ height: 7, background: 'rgba(212,175,55,0.15)', borderRadius: 10, overflow: 'hidden' }}>
                 <div style={{ width: `${(xpInLevel / XP_PER_LEVEL) * 100}%`, height: '100%', background: 'rgba(212,175,55,0.75)', borderRadius: 10, transition: 'width 0.4s' }} />

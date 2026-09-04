@@ -33,11 +33,11 @@ export default function IntroTutorialVideo() {
         <div style={{
           width: 46, height: 46, borderRadius: 12, flexShrink: 0,
           background: 'rgba(31,62,108,0.10)', color: '#1F3E6C',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 23,
         }}>▶</div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 16, fontWeight: 700, color: '#1F3E6C' }}>סרטון הדרכה — איך מתחילים</div>
-          <div style={{ fontSize: 13, color: '#5b6f93', marginTop: 2 }}>סיור קצר בפלטפורמה · פחות מ-3 דקות</div>
+          <div style={{ fontSize: 15, color: '#5b6f93', marginTop: 2 }}>סיור קצר בפלטפורמה · פחות מ-3 דקות</div>
         </div>
       </button>
 
@@ -67,7 +67,7 @@ export default function IntroTutorialVideo() {
                 aria-label="סגור"
                 style={{
                   background: 'transparent', border: 'none', cursor: 'pointer',
-                  fontSize: 22, color: '#5b6f93', lineHeight: 1, padding: 4,
+                  fontSize: 23, color: '#5b6f93', lineHeight: 1, padding: 4,
                 }}
               >×</button>
             </div>
@@ -84,7 +84,7 @@ export default function IntroTutorialVideo() {
                 style={{
                   background: 'linear-gradient(135deg,#1F3E6C,#254A9F)', color: '#fff',
                   border: 0, borderRadius: 12, padding: '10px 28px', cursor: 'pointer',
-                  fontFamily: 'inherit', fontSize: 15, fontWeight: 700,
+                  fontFamily: 'inherit', fontSize: 16, fontWeight: 700,
                 }}
               >קדימה ללמוד ←</button>
             </div>

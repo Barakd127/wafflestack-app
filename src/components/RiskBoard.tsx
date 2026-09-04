@@ -219,7 +219,7 @@ function PlanTargetCard({ row, onSelect, onExtend }: {
           style={{
             fontFamily: "'Rubik', 'Assistant', sans-serif",
             fontWeight: 700,
-            fontSize: 14,
+            fontSize: 16,
             color: 'var(--sh-text-dark)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -230,14 +230,14 @@ function PlanTargetCard({ row, onSelect, onExtend }: {
           {row.hebrewTitle}
         </div>
 
-        <div style={{ fontSize: 11, color: 'var(--sh-text-light)', marginTop: 3, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ fontSize: 13, color: 'var(--sh-text-light)', marginTop: 3, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <span>יעד: <b style={{ color: 'var(--sh-text-med)' }}>{formatTargetDate(row.targetDate)}</b></span>
           <span>נשארו {row.daysLeft} ימים</span>
           <span style={{ color: paceColor, fontWeight: 600 }}>{paceCaption(row)}</span>
         </div>
 
         {row.cappedAtExam && (
-          <div style={{ fontSize: 10, color: 'var(--sh-text-light)', marginTop: 2, opacity: 0.85 }}>
+          <div style={{ fontSize: 13, color: 'var(--sh-text-light)', marginTop: 2, opacity: 0.85 }}>
             התאריך מוגבל למועד הבחינה
           </div>
         )}
@@ -252,7 +252,7 @@ function PlanTargetCard({ row, onSelect, onExtend }: {
           border: '1px solid rgba(212,175,55,0.40)',
           borderRadius: 8,
           padding: '5px 10px',
-          fontSize: 11,
+          fontSize: 13,
           color: 'var(--sh-gold, #D4A017)',
           cursor: 'pointer',
           fontFamily: "'Rubik', sans-serif",
@@ -352,7 +352,7 @@ function RiskCard({ risk, rank, onSelect }: {
         userSelect: 'none',
       }}
     >
-      <span style={{ width: 20, textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--sh-text-light)', flexShrink: 0 }}>
+      <span style={{ width: 20, textAlign: 'center', fontSize: 15, fontWeight: 700, color: 'var(--sh-text-light)', flexShrink: 0 }}>
         #{rank}
       </span>
       <span style={{ fontSize: 20, flexShrink: 0 }}>{risk.icon}</span>
@@ -360,7 +360,7 @@ function RiskCard({ risk, rank, onSelect }: {
         <div style={{
           fontFamily: "'Rubik', 'Assistant', sans-serif",
           fontWeight: 700,
-          fontSize: 14,
+          fontSize: 16,
           color: 'var(--sh-text-dark)',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -368,7 +368,7 @@ function RiskCard({ risk, rank, onSelect }: {
         }}>
           {risk.hebrewTitle}
         </div>
-        <div style={{ fontSize: 11, color: 'var(--sh-text-light)', marginTop: 3, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <div style={{ fontSize: 13, color: 'var(--sh-text-light)', marginTop: 3, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <span>
             משקל:{' '}
             <b style={{ color: risk.examWeightLabel === 'גבוה' ? 'var(--sh-text-med)' : 'var(--sh-text-light)' }}>
@@ -410,7 +410,7 @@ function ExamDateControl({ examDate, setExamDate }: {
             border: '1.5px solid rgba(212,175,55,0.6)',
             borderRadius: 8,
             padding: '4px 8px',
-            fontSize: 13,
+            fontSize: 15,
             color: 'var(--sh-text-dark)',
             background: 'var(--sh-answer-bg, rgba(255,255,255,0.75))',
             outline: 'none',
@@ -425,7 +425,7 @@ function ExamDateControl({ examDate, setExamDate }: {
             border: 'none',
             borderRadius: 8,
             padding: '5px 14px',
-            fontSize: 13,
+            fontSize: 15,
             cursor: 'pointer',
             fontWeight: 600,
             fontFamily: "'Rubik', sans-serif",
@@ -441,7 +441,7 @@ function ExamDateControl({ examDate, setExamDate }: {
             border: 'none',
             borderRadius: 8,
             padding: '5px 8px',
-            fontSize: 13,
+            fontSize: 15,
             cursor: 'pointer',
           }}
         >
@@ -459,7 +459,7 @@ function ExamDateControl({ examDate, setExamDate }: {
         border: '1px solid rgba(212,175,55,0.35)',
         borderRadius: 8,
         padding: '5px 12px',
-        fontSize: 12,
+        fontSize: 15,
         color: 'rgba(212,175,55,0.85)',
         cursor: 'pointer',
         fontFamily: "'Rubik', sans-serif",
@@ -553,7 +553,7 @@ export function RiskBoard({ onSelectTopic }: RiskBoardProps) {
             🎯 לוח סיכונים
           </div>
           <div style={{
-            fontSize: 12,
+            fontSize: 15,
             marginTop: 3,
             color: subtitleUrgent ? 'var(--sh-sidebar-active, #3351CA)' : 'var(--sh-text-light)',
             fontWeight: subtitleUrgent ? 600 : 400,
@@ -570,7 +570,7 @@ export function RiskBoard({ onSelectTopic }: RiskBoardProps) {
           <div style={{
             fontFamily: "'Rubik', sans-serif",
             fontWeight: 700,
-            fontSize: 12,
+            fontSize: 15,
             color: 'var(--sh-text-med)',
             marginBottom: 7,
             display: 'flex',
@@ -607,7 +607,7 @@ export function RiskBoard({ onSelectTopic }: RiskBoardProps) {
       {/* Footer */}
       <div style={{
         marginTop: 12,
-        fontSize: 10,
+        fontSize: 13,
         color: 'var(--sh-text-light)',
         textAlign: 'center',
         opacity: 0.7,
