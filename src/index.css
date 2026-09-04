@@ -264,7 +264,7 @@ html.dark :focus-visible {
   .ws-topbar-actions button { padding: 4px 8px !important; }
 
   /* Home screen grid */
-  .ws-home-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 14px !important; }
+  .ws-home-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 14px !important; aspect-ratio: auto !important; }
   .ws-home-grid > div { padding: 18px !important; }
 
   /* Topic cards */
