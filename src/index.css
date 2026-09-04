@@ -686,7 +686,7 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
 }
 .ws-cta:hover {
   background: linear-gradient(270deg, #27187E 0%, #5031CE 100%);
-  box-shadow: 0 9px 20px rgba(39,24,126,0.44);
+  box-shadow: 0 6px 13px rgba(39,24,126,0.38);
   transform: translateY(-3px);
 }
 .ws-cta:active {
