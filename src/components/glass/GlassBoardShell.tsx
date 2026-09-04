@@ -110,7 +110,7 @@ const TRAY_TRANSITION = 'bottom 0.5s cubic-bezier(.2,.7,.2,1), padding-bottom 0.
 // quiz's own footer nav (הבא / הקודם) out of the sheet. The slider and the
 // hold-to-look pill remain as the manual override. Per user 2026-08-26.
 const TRAY_DOCK_BOTTOM = 6
-const GOLD = '#D4AF37'
+const GOLD = '#F2AF13'
 const GOLD_LIGHT = '#F5C842'
 const DEEP_NAVY = '#0B1B3E'
 
@@ -550,7 +550,7 @@ export default function GlassBoardShell({
               zIndex: 9,
               height: 1,
               pointerEvents: 'none',
-              background: `linear-gradient(90deg, rgba(212,175,55,0) 0%, rgba(212,175,55,0.45) 15%, rgba(212,175,55,0.45) 85%, rgba(212,175,55,0) 100%)`,
+              background: `linear-gradient(90deg, rgba(242,175,19,0) 0%, rgba(242,175,19,0.45) 15%, rgba(242,175,19,0.45) 85%, rgba(242,175,19,0) 100%)`,
               transition: trayTransition,
             }}
           />

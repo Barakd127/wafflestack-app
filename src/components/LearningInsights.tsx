@@ -32,7 +32,7 @@ export default function LearningInsights() {
   }
 
   const accuracy = Math.round((totalCorrect / totalAnswered) * 100)
-  const accColor = accuracy >= 80 ? '#22833F' : accuracy >= 60 ? '#D4AF37' : '#d4694a'
+  const accColor = accuracy >= 80 ? '#22833F' : accuracy >= 60 ? '#F2AF13' : '#d4694a'
   const accLabel = accuracy >= 80 ? 'שליטה טובה' : accuracy >= 60 ? 'בדרך הנכונה' : 'ממשיכים להתאמן'
 
   // Top mistake categories to strengthen, most frequent first.
@@ -92,5 +92,5 @@ const card: React.CSSProperties = { borderRadius: 24, padding: '24px 26px' }
 const title: React.CSSProperties = { fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 19, color: 'var(--sh-text-dark)', marginBottom: 16, textAlign: 'right' }
 const statBox: React.CSSProperties = { flex: '1 1 100px', minWidth: 100, background: 'rgba(127,155,217,0.10)', borderRadius: 14, padding: '12px 14px', textAlign: 'center' }
 const statCaption: React.CSSProperties = { fontFamily: "'Assistant', sans-serif", fontSize: 11.5, color: 'var(--sh-text-med)', marginTop: 5 }
-const tagRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.25)', borderRadius: 12, padding: '9px 12px' }
-const countPill: React.CSSProperties = { fontFamily: "'Rubik', sans-serif", fontSize: 12, fontWeight: 800, color: '#9A7B1A', background: 'rgba(212,175,55,0.18)', borderRadius: 999, padding: '3px 9px', flexShrink: 0 }
+const tagRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(242,175,19,0.08)', border: '1px solid rgba(242,175,19,0.25)', borderRadius: 12, padding: '9px 12px' }
+const countPill: React.CSSProperties = { fontFamily: "'Rubik', sans-serif", fontSize: 12, fontWeight: 800, color: '#9A7B1A', background: 'rgba(242,175,19,0.18)', borderRadius: 999, padding: '3px 9px', flexShrink: 0 }

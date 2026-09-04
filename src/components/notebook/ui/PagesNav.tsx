@@ -90,7 +90,7 @@ export default function PagesNav({ editor }: PagesNavProps) {
         gap: 6,
         padding: '0 12px',
         background: 'rgba(11,27,62,0.6)',
-        borderBottom: '1px solid rgba(212,175,55,0.2)',
+        borderBottom: '1px solid rgba(242,175,19,0.2)',
         overflowX: 'auto',
         flexShrink: 0,
       }}

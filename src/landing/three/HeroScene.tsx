@@ -116,7 +116,7 @@ export function HeroScene() {
       <ambientLight intensity={1.2} color="#d8e7fa" />
       <directionalLight intensity={1.6} position={[5, 8, 3]} color="#ffffff" />
       <pointLight intensity={0.6} position={[-3, 4, -2]} color="#3351CA" />
-      <Sparkles count={30} scale={4} size={1.2} speed={0.25} color="#D4AF37" opacity={0.45} />
+      <Sparkles count={30} scale={4} size={1.2} speed={0.25} color="#F2AF13" opacity={0.45} />
       <Suspense fallback={null}>
         <SingleBuilding />
       </Suspense>

@@ -100,7 +100,7 @@ export default function SkewnessKurtosisInteractive() {
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
         <line x1={PAD_X} y1={AXIS_Y} x2={W - PAD_X} y2={AXIS_Y} stroke={GC.axis} />
-        <path d={closed} fill="rgba(212,175,55,0.18)" />
+        <path d={closed} fill="rgba(242,175,19,0.18)" />
         <path d={path} stroke={GC.gold} strokeWidth={2.5} fill="none" />
         {[-4, -2, 0, 2, 4].map(t => (
           <text key={t} x={toX(t)} y={AXIS_Y + 14} fill={GC.axisText} fontSize={11} textAnchor="middle">{t}</text>

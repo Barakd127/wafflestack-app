@@ -16,8 +16,8 @@ export const GRAPH_FONT = "'Playpen Sans Hebrew', 'Assistant', sans-serif"
 
 export const GC = {
   ink: '#1F3E6C',        // navy — headings, axis text, data point fill
-  gold: '#D4AF37',       // primary data mark (curve, bars, highlight)
-  goldFill: 'rgba(212,175,55,0.28)', // shaded area under a curve
+  gold: '#F2AF13',       // primary data mark (curve, bars, highlight)
+  goldFill: 'rgba(242,175,19,0.28)', // shaded area under a curve
   goldText: '#9A7B1F',   // gold-on-light readable label
   blue: '#4E71DA',       // interactive accents (guides, slider fill, hints)
   axis: 'rgba(31,62,108,0.45)',

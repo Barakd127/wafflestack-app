@@ -20,15 +20,15 @@ export default function IntroTutorialVideo() {
         dir="rtl"
         style={{
           display: 'flex', alignItems: 'center', gap: 14, width: '100%',
-          background: 'linear-gradient(135deg, rgba(245,200,66,0.16), rgba(212,175,55,0.08))',
-          border: '1.5px solid rgba(212,175,55,0.5)', borderRadius: 18,
+          background: 'linear-gradient(135deg, rgba(245,200,66,0.16), rgba(242,175,19,0.08))',
+          border: '1.5px solid rgba(242,175,19,0.5)', borderRadius: 18,
           padding: '16px 22px', cursor: 'pointer', textAlign: 'right',
           fontFamily: "'Rubik', sans-serif",
         }}
       >
         <div style={{
           width: 46, height: 46, borderRadius: 12, flexShrink: 0,
-          background: 'linear-gradient(135deg,#F5C842,#D4AF37)', color: '#1F3E6C',
+          background: 'linear-gradient(135deg,#F5C842,#F2AF13)', color: '#1F3E6C',
           display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
         }}>▶</div>
         <div style={{ flex: 1 }}>

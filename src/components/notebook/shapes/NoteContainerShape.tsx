@@ -141,7 +141,7 @@ export class NoteContainerShapeUtil extends ShapeUtil<NoteContainerShape> {
           padding: NOTE_CONTAINER_PAD + 4, // 16 → 20
           boxSizing: 'border-box',
           background: isEditing ? 'rgba(255,255,255,0.65)' : 'transparent',
-          border: `1px ${isEditing ? 'solid' : 'solid'} ${isEditing ? 'rgba(212,175,55,0.45)' : 'rgba(0,0,0,0.04)'}`,
+          border: `1px ${isEditing ? 'solid' : 'solid'} ${isEditing ? 'rgba(242,175,19,0.45)' : 'rgba(0,0,0,0.04)'}`,
           borderRadius: 6,
           color: '#1F2640', // soft gray ink, not pure black
           direction: 'rtl',
@@ -150,7 +150,7 @@ export class NoteContainerShapeUtil extends ShapeUtil<NoteContainerShape> {
           overflow: 'hidden',
           cursor: isEditing ? 'text' : 'move',
           // Focus glow — soft gold ring when editing
-          boxShadow: isEditing ? '0 0 0 3px rgba(212,175,55,0.18), 0 4px 14px rgba(0,0,0,0.06)' : 'none',
+          boxShadow: isEditing ? '0 0 0 3px rgba(242,175,19,0.18), 0 4px 14px rgba(0,0,0,0.06)' : 'none',
           transform: isEditing ? 'scale(1.005)' : 'scale(1)',
           transition: 'box-shadow 180ms ease, transform 180ms ease, background 180ms ease, border-color 180ms ease',
         }}
@@ -184,9 +184,9 @@ export class NoteContainerShapeUtil extends ShapeUtil<NoteContainerShape> {
                 onDoubleClick={() => removeTag(t)}
                 title="לחיצה כפולה להסרה"
                 style={{
-                  background: 'rgba(212,175,55,0.18)',
+                  background: 'rgba(242,175,19,0.18)',
                   color: '#7A5C00',
-                  border: '1px solid rgba(212,175,55,0.5)',
+                  border: '1px solid rgba(242,175,19,0.5)',
                   borderRadius: 10,
                   padding: '1px 8px',
                   fontSize: 11,
@@ -202,7 +202,7 @@ export class NoteContainerShapeUtil extends ShapeUtil<NoteContainerShape> {
                 onClick={addTagPrompt}
                 style={{
                   background: 'transparent',
-                  border: '1px dashed rgba(212,175,55,0.5)',
+                  border: '1px dashed rgba(242,175,19,0.5)',
                   borderRadius: 10,
                   color: '#7A5C00',
                   padding: '0 8px',

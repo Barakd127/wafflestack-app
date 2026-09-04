@@ -38,7 +38,7 @@ const INK = '#1A1A2E'            // dark text on gold buttons
 const PAPER = '#1F3E6C'          // primary text (navy ink) on light bg
 const SURFACE = 'rgba(51,81,202,0.06)'  // pale blue tint panels
 const BORDER = 'rgba(242,169,62,0.55)'
-const GOLD_GRAD = 'linear-gradient(135deg, #F5C842 0%, #D4AF37 100%)'
+const GOLD_GRAD = 'linear-gradient(135deg, #F5C842 0%, #F2AF13 100%)'
 
 /** Render a slot's text label. If the label looks like math (contains `_`,
  *  `^`, `\`, or `Σ` etc.) it renders via KaTeX so `s_y` looks like `s_y`
@@ -344,7 +344,7 @@ export default function CalculatorDrawer() {
         backdropFilter: 'blur(16px)',
         border: '2px solid ' + BORDER,
         borderRadius: 16,
-        boxShadow: '0 18px 48px rgba(31,62,108,0.28), 0 0 0 1px rgba(212,175,55,0.25)',
+        boxShadow: '0 18px 48px rgba(31,62,108,0.28), 0 0 0 1px rgba(242,175,19,0.25)',
         padding: 16,
         color: PAPER,
         fontFamily: "'Rubik', sans-serif",
@@ -542,7 +542,7 @@ export default function CalculatorDrawer() {
           minHeight: 46,
           minWidth: 130,
           background: enabled ? GOLD_GRAD : 'rgba(31,62,108,0.10)',
-          border: '1px solid ' + (enabled ? 'rgba(212,175,55,0.8)' : 'rgba(31,62,108,0.18)'),
+          border: '1px solid ' + (enabled ? 'rgba(242,175,19,0.8)' : 'rgba(31,62,108,0.18)'),
           borderRadius: 12,
           color: enabled ? INK : 'rgba(31,62,108,0.4)',
           fontFamily: "'Rubik', sans-serif",
@@ -550,7 +550,7 @@ export default function CalculatorDrawer() {
           fontWeight: 800,
           cursor: enabled ? 'pointer' : 'not-allowed',
           padding: '10px 14px',
-          boxShadow: enabled ? '0 4px 12px rgba(212,175,55,0.32)' : 'none',
+          boxShadow: enabled ? '0 4px 12px rgba(242,175,19,0.32)' : 'none',
         })
         return (
           <>

@@ -101,8 +101,8 @@ export default function SplitLayout({ onBack, darkMode, initialRight = 'study' }
           aria-label="חזרה לדף הבית"
           title="חזרה לדף הבית"
           style={{
-            background: 'linear-gradient(135deg, #D4AF37 0%, #b8941f 100%)',
-            border: '1px solid rgba(212,175,55,0.65)',
+            background: 'linear-gradient(135deg, #F2AF13 0%, #b8941f 100%)',
+            border: '1px solid rgba(242,175,19,0.65)',
             color: '#1F2640',
             borderRadius: 10,
             padding: '8px 18px',
@@ -113,7 +113,7 @@ export default function SplitLayout({ onBack, darkMode, initialRight = 'study' }
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            boxShadow: '0 2px 8px rgba(212,175,55,0.45)',
+            boxShadow: '0 2px 8px rgba(242,175,19,0.45)',
             minHeight: 44,
           }}
         >
@@ -182,16 +182,16 @@ export default function SplitLayout({ onBack, darkMode, initialRight = 'study' }
           title="גרור לשינוי גודל"
           style={{
             width: 12, height: '100%', flexShrink: 0,
-            background: 'rgba(212,175,55,0.18)',
-            borderInline: '1px solid rgba(212,175,55,0.45)',
+            background: 'rgba(242,175,19,0.18)',
+            borderInline: '1px solid rgba(242,175,19,0.45)',
             cursor: 'col-resize',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'background 0.15s',
           }}
-          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(212,175,55,0.45)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(212,175,55,0.18)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(242,175,19,0.45)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(242,175,19,0.18)' }}
         >
-          <div style={{ width: 4, height: 56, borderRadius: 4, background: 'rgba(212,175,55,0.85)', boxShadow: '0 0 0 1px rgba(0,0,0,0.15)' }} />
+          <div style={{ width: 4, height: 56, borderRadius: 4, background: 'rgba(242,175,19,0.85)', boxShadow: '0 0 0 1px rgba(0,0,0,0.15)' }} />
         </div>
 
         {/* Right panel — keeps both mounted so iframes don't reload on tab switch */}

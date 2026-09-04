@@ -112,14 +112,14 @@ export default function DrawingScreen({ userId, onBack, embed = false, sceneId }
         style={{
           position: 'absolute', bottom: 16, left: 16, zIndex: 50,
           background: 'rgba(108,99,255,0.95)',
-          color: '#fff', border: '1.5px solid rgba(212,175,55,0.65)',
+          color: '#fff', border: '1.5px solid rgba(242,175,19,0.65)',
           borderRadius: 12, padding: '10px 18px', fontSize: 14, fontWeight: 700,
           fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
           boxShadow: '0 6px 18px rgba(108,99,255,0.5)',
           pointerEvents: 'auto',
           minWidth: 44, minHeight: 44,
         }}
-        onFocus={e => { (e.currentTarget as HTMLButtonElement).style.outline = '3px solid #D4AF37'; (e.currentTarget as HTMLButtonElement).style.outlineOffset = '3px' }}
+        onFocus={e => { (e.currentTarget as HTMLButtonElement).style.outline = '3px solid #F2AF13'; (e.currentTarget as HTMLButtonElement).style.outlineOffset = '3px' }}
         onBlur={e => { (e.currentTarget as HTMLButtonElement).style.outline = 'none' }}
       >
         ← דף הבית

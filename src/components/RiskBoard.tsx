@@ -201,7 +201,7 @@ function PlanTargetCard({ row, onSelect, onExtend }: {
         backdropFilter: 'blur(12px)',
         borderRadius: 14,
         padding: '11px 14px',
-        border: `1px solid ${row.pace === 'behind' ? 'rgba(209,73,91,0.30)' : 'rgba(212,175,55,0.22)'}`,
+        border: `1px solid ${row.pace === 'behind' ? 'rgba(209,73,91,0.30)' : 'rgba(242,175,19,0.22)'}`,
         boxShadow: hovered ? '0 4px 18px rgba(31,62,108,0.12)' : '0 1px 6px rgba(0,0,0,0.04)',
         transition: 'box-shadow 0.15s ease',
         userSelect: 'none',
@@ -249,7 +249,7 @@ function PlanTargetCard({ row, onSelect, onExtend }: {
         style={{
           flexShrink: 0,
           background: 'transparent',
-          border: '1px solid rgba(212,175,55,0.40)',
+          border: '1px solid rgba(242,175,19,0.40)',
           borderRadius: 8,
           padding: '5px 10px',
           fontSize: 11,
@@ -276,12 +276,12 @@ function RiskRing({ score }: { score: number }) {
   const color = score >= 60
     ? 'var(--sh-sidebar-active, #254A9F)'
     : score >= 30
-      ? 'rgba(212,175,55,0.85)'
-      : 'rgba(212,175,55,0.35)'
+      ? 'rgba(242,175,19,0.85)'
+      : 'rgba(242,175,19,0.35)'
 
   return (
     <svg width={48} height={48} viewBox="0 0 48 48" aria-hidden="true" style={{ flexShrink: 0 }}>
-      <circle cx={24} cy={24} r={r} fill="none" stroke="rgba(212,175,55,0.20)" strokeWidth={4} />
+      <circle cx={24} cy={24} r={r} fill="none" stroke="rgba(242,175,19,0.20)" strokeWidth={4} />
       <circle
         cx={24} cy={24} r={r}
         fill="none"
@@ -340,7 +340,7 @@ function RiskCard({ risk, rank, onSelect }: {
         backdropFilter: 'blur(12px)',
         borderRadius: 14,
         padding: '11px 14px',
-        border: `1px solid ${isHigh ? 'rgba(51,81,202,0.22)' : 'rgba(212,175,55,0.18)'}`,
+        border: `1px solid ${isHigh ? 'rgba(51,81,202,0.22)' : 'rgba(242,175,19,0.18)'}`,
         cursor: 'pointer',
         boxShadow: hovered
           ? '0 4px 20px rgba(51,81,202,0.16)'
@@ -407,7 +407,7 @@ function ExamDateControl({ examDate, setExamDate }: {
           min={new Date().toISOString().slice(0, 10)}
           aria-label="תאריך בחינה"
           style={{
-            border: '1.5px solid rgba(212,175,55,0.6)',
+            border: '1.5px solid rgba(242,175,19,0.6)',
             borderRadius: 8,
             padding: '4px 8px',
             fontSize: 13,
@@ -420,7 +420,7 @@ function ExamDateControl({ examDate, setExamDate }: {
         <button
           onClick={() => { if (input) setExamDate(input); setEditing(false) }}
           style={{
-            background: 'rgba(212,175,55,0.85)',
+            background: 'rgba(242,175,19,0.85)',
             color: '#fff',
             border: 'none',
             borderRadius: 8,
@@ -456,11 +456,11 @@ function ExamDateControl({ examDate, setExamDate }: {
       onClick={() => { setInput(examDate ?? ''); setEditing(true) }}
       style={{
         background: 'transparent',
-        border: '1px solid rgba(212,175,55,0.35)',
+        border: '1px solid rgba(242,175,19,0.35)',
         borderRadius: 8,
         padding: '5px 12px',
         fontSize: 12,
-        color: 'rgba(212,175,55,0.85)',
+        color: 'rgba(242,175,19,0.85)',
         cursor: 'pointer',
         fontFamily: "'Rubik', sans-serif",
         transition: 'border-color 0.15s',

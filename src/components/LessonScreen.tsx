@@ -417,7 +417,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           aria-label={isLast ? 'התחל תרגול' : 'שקופית הבאה'}
           title={isLast ? 'התחל תרגול' : 'הבא (חץ שמאלי)'}
           style={{
-            background: isLast ? '#D4AF37' : BUTTON_COLOR,
+            background: isLast ? '#F2AF13' : BUTTON_COLOR,
             color: '#fff',
             border: 'none',
             borderRadius: 8, padding: '4px 14px',
@@ -425,7 +425,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             fontSize: 12.5, fontWeight: 700,
             fontFamily: "'Rubik', sans-serif",
             display: 'flex', alignItems: 'center', gap: 5,
-            boxShadow: isLast ? '0 2px 10px rgba(212,175,55,0.40)' : '0 2px 10px rgba(31,62,108,0.25)',
+            boxShadow: isLast ? '0 2px 10px rgba(242,175,19,0.40)' : '0 2px 10px rgba(31,62,108,0.25)',
             transition: 'all 0.18s',
           }}
         >
@@ -445,7 +445,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           <button
             onClick={() => setPresAuto(v => !v)}
             style={{
-              background: presAuto ? 'rgba(212,175,55,0.22)' : 'rgba(255,255,255,0.85)',
+              background: presAuto ? 'rgba(242,175,19,0.22)' : 'rgba(255,255,255,0.85)',
               color: presAuto ? '#8a6d1a' : TEXT_DARK,
               border: '1.5px solid rgba(127,155,217,0.45)', borderRadius: 10,
               padding: '6px 13px', fontSize: 13, fontWeight: 700,
@@ -737,7 +737,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           // Issue 5: transparent-ish wrapper so graphs blend into lesson theme
           // (navy on dark, cream on light). Keeps the gold border accent.
           background: 'rgba(11,27,62,0.06)',
-          border: '1px solid rgba(212,175,55,0.4)',
+          border: '1px solid rgba(242,175,19,0.4)',
           borderRadius: 18,
           padding: '20px 18px',
           marginTop: 12,
@@ -747,7 +747,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             gap: 12, marginBottom: 10, paddingBottom: 10,
-            borderBottom: '1px solid rgba(212,175,55,0.25)',
+            borderBottom: '1px solid rgba(242,175,19,0.25)',
           }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--sh-text-dark)', fontFamily: "'Rubik', sans-serif" }}>
               📊 {effectiveGraphs[graphIdx].title}
@@ -781,7 +781,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 aria-label="ברירת מחדל"
                 title="גודל ברירת מחדל"
                 style={{
-                  background: 'transparent', border: '1px solid rgba(212,175,55,0.45)',
+                  background: 'transparent', border: '1px solid rgba(242,175,19,0.45)',
                   color: 'var(--sh-text-dark)', borderRadius: 8, padding: '4px 10px',
                   cursor: 'pointer', fontSize: 11, fontFamily: "'Assistant', sans-serif",
                   marginInlineStart: 4,
@@ -828,8 +828,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 height: idx === currentSlide ? 14 : 10,
                 borderRadius: '50%',
                 background: idx === currentSlide
-                  ? (isGraph ? '#D4AF37' : BUTTON_COLOR)
-                  : (isGraph ? 'rgba(212,175,55,0.4)' : 'rgba(127,155,217,0.35)'),
+                  ? (isGraph ? '#F2AF13' : BUTTON_COLOR)
+                  : (isGraph ? 'rgba(242,175,19,0.4)' : 'rgba(127,155,217,0.35)'),
                 border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.2s',
               }}
             />

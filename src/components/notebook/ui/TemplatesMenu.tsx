@@ -67,7 +67,7 @@ export default function TemplatesMenu({ editor }: TemplatesMenuProps) {
             top: '110%',
             insetInlineEnd: 0,
             background: '#0B1B3E',
-            border: '1px solid rgba(212,175,55,0.4)',
+            border: '1px solid rgba(242,175,19,0.4)',
             borderRadius: 8,
             padding: 6,
             display: 'flex',

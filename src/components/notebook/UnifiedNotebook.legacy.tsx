@@ -667,7 +667,7 @@ const UnifiedNotebook: React.FC<UnifiedNotebookProps> = ({ onBack }) => {
             type="button"
             className="unified-notebook__toolbar-button"
             onClick={onBack}
-            style={{ background: 'linear-gradient(135deg,#F5C842,#D4AF37)', color: '#0B1B3E', fontWeight: 700 }}
+            style={{ background: 'linear-gradient(135deg,#F5C842,#F2AF13)', color: '#0B1B3E', fontWeight: 700 }}
           >
             ← דף הבית
           </button>

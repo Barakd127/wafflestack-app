@@ -168,7 +168,7 @@ export default function ResidualPlotInteractive() {
       <div
         style={{
           padding: 10,
-          background: hetero ? 'rgba(212,175,55,0.18)' : 'rgba(78,113,218,0.10)',
+          background: hetero ? 'rgba(242,175,19,0.18)' : 'rgba(78,113,218,0.10)',
           border: '1px solid ' + (hetero ? GC.gold : 'rgba(78,113,218,0.35)'),
           borderRadius: 8,
           fontSize: 13,

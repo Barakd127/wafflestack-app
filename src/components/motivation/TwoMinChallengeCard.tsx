@@ -7,7 +7,7 @@ interface TwoMinChallengeCardProps {
   onStart?: (topicId: string) => void;
 }
 
-const GOLD = "#D4AF37";
+const GOLD = "#F2AF13";
 const GOLD_BRIGHT = "#F5C842";
 
 export const TwoMinChallengeCard = ({ topicId, onStart }: TwoMinChallengeCardProps) => {
@@ -40,7 +40,7 @@ export const TwoMinChallengeCard = ({ topicId, onStart }: TwoMinChallengeCardPro
           fontWeight: 700,
           fontSize: 12,
           fontFamily: "'Rubik', sans-serif",
-          boxShadow: "0 2px 6px rgba(212,175,55,0.35)",
+          boxShadow: "0 2px 6px rgba(242,175,19,0.35)",
         }}
       >
         🎯 אתגר 2 דקות

@@ -79,8 +79,8 @@ export default function ZScoreInteractive() {
       <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height={H}
         onPointerMove={onMove} onPointerUp={() => setDrag(false)} onPointerLeave={() => setDrag(false)}
         style={{ touchAction: 'none' }}>
-        <path d={shadePath} fill="rgba(212,175,55,0.28)" />
-        <path d={path} stroke="#D4AF37" strokeWidth={3} fill="none" strokeLinejoin="round" />
+        <path d={shadePath} fill="rgba(242,175,19,0.28)" />
+        <path d={path} stroke="#F2AF13" strokeWidth={3} fill="none" strokeLinejoin="round" />
         <line x1={X0} y1={Y1} x2={X1} y2={Y1} stroke="rgba(31,62,108,0.45)" />
         {ticks.map(t => (
           <g key={t}>
@@ -90,7 +90,7 @@ export default function ZScoreInteractive() {
         ))}
         <line x1={toPx(mu)} y1={Y0} x2={toPx(mu)} y2={Y1} stroke="#4E71DA" strokeWidth={1.5} strokeDasharray="4 4" />
         <text x={toPx(mu)} y={Y0 - 8} fill="#4E71DA" fontSize={13} fontFamily={HAND} fontWeight={700} textAnchor="middle">μ = {mu}</text>
-        <circle cx={toPx(x)} cy={yScale(toPx(x))} r={10} fill="#1F3E6C" stroke="#D4AF37" strokeWidth={3}
+        <circle cx={toPx(x)} cy={yScale(toPx(x))} r={10} fill="#1F3E6C" stroke="#F2AF13" strokeWidth={3}
           onPointerDown={e => { setDrag(true); (e.target as Element).setPointerCapture(e.pointerId) }}
           style={{ cursor: 'grab' }} />
         <text x={toPx(x)} y={Y1 + 38} fill="#9A7B1F" fontSize={14} fontFamily={HAND} textAnchor="middle" fontWeight={700}>x = {x.toFixed(1)}</text>

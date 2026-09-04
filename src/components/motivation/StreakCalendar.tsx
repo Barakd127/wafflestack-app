@@ -5,7 +5,7 @@
 import { useMemo } from "react";
 import { useMotivationStore } from "../../store/motivationStore";
 
-const GOLD = "#D4AF37";
+const GOLD = "#F2AF13";
 const GOLD_BRIGHT = "#F5C842";
 
 const localDate = (date = new Date()): string => {
@@ -51,8 +51,8 @@ export const StreakCalendar = () => {
       <style>
         {`
           @keyframes wsPulseGold {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212,175,55,0.45); }
-            50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(212,175,55,0); }
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(242,175,19,0.45); }
+            50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(242,175,19,0); }
           }
         `}
       </style>

@@ -8,7 +8,7 @@ interface LeadMeasureCardProps {
   topics_mastered: number;
 }
 
-const GOLD = "#D4AF37";
+const GOLD = "#F2AF13";
 
 export const LeadMeasureCard = ({ topics_mastered }: LeadMeasureCardProps) => {
   const focusMinutesWeek = useMotivationStore((state) => state.focus_minutes_week);

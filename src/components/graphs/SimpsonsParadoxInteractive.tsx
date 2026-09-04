@@ -185,7 +185,7 @@ export default function SimpsonsParadoxInteractive() {
         style={{
           marginTop: 12,
           padding: 12,
-          background: showGroups ? 'rgba(212,175,55,0.15)' : 'rgba(78,113,218,0.10)',
+          background: showGroups ? 'rgba(242,175,19,0.15)' : 'rgba(78,113,218,0.10)',
           border: '1px solid ' + (showGroups ? GC.gold : 'rgba(78,113,218,0.35)'),
           borderRadius: 8,
           fontSize: 13,

@@ -166,7 +166,7 @@ export default function PersonalPlanWizard({ open, onClose, onSelectTopic }: Per
         <div style={{ textAlign: 'center', marginBottom: 18 }}>
           <div style={{
             display: 'inline-block',
-            background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+            background: 'linear-gradient(135deg,#F5C842,#F2AF13)',
             color: '#0B1B3E', borderRadius: 999,
             padding: '4px 14px', fontSize: 12, fontWeight: 700,
             marginBottom: 10, letterSpacing: 0.3,
@@ -189,7 +189,7 @@ export default function PersonalPlanWizard({ open, onClose, onSelectTopic }: Per
             {[1, 2, 3].map(s => (
               <div key={s} style={{
                 width: s === step ? 28 : 8, height: 8, borderRadius: 8,
-                background: s <= step ? 'linear-gradient(135deg,#F5C842,#D4AF37)' : 'rgba(31,62,108,0.18)',
+                background: s <= step ? 'linear-gradient(135deg,#F5C842,#F2AF13)' : 'rgba(31,62,108,0.18)',
                 transition: 'width 0.2s',
               }} />
             ))}
@@ -236,7 +236,7 @@ export default function PersonalPlanWizard({ open, onClose, onSelectTopic }: Per
         {step === 2 && (
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>
-              כמה דקות ביום? <span style={{ color: '#D4AF37', fontWeight: 800 }}>{answers.dailyMinutes}</span> דק׳
+              כמה דקות ביום? <span style={{ color: '#F2AF13', fontWeight: 800 }}>{answers.dailyMinutes}</span> דק׳
             </div>
             <input
               type="range" min={5} max={120} step={5}
@@ -318,9 +318,9 @@ export default function PersonalPlanWizard({ open, onClose, onSelectTopic }: Per
                   key={m.id} type="button"
                   onClick={() => update('motivationProfile', answers.motivationProfile === m.id ? null : m.id)}
                   style={{
-                    background: answers.motivationProfile === m.id ? 'linear-gradient(135deg,#F5C842,#D4AF37)' : 'rgba(31,62,108,0.05)',
+                    background: answers.motivationProfile === m.id ? 'linear-gradient(135deg,#F5C842,#F2AF13)' : 'rgba(31,62,108,0.05)',
                     color: answers.motivationProfile === m.id ? '#0B1B3E' : '#1F3E6C',
-                    border: `1px solid ${answers.motivationProfile === m.id ? '#D4AF37' : 'rgba(31,62,108,0.12)'}`,
+                    border: `1px solid ${answers.motivationProfile === m.id ? '#F2AF13' : 'rgba(31,62,108,0.12)'}`,
                     borderRadius: 12, padding: '10px 12px',
                     fontFamily: 'inherit', fontSize: 13, fontWeight: 600,
                     cursor: 'pointer', textAlign: 'right',
@@ -389,13 +389,13 @@ function OptionCard({ selected, onClick, emoji, label, sub }: {
     <button
       type="button" onClick={onClick}
       style={{
-        background: selected ? 'linear-gradient(135deg, rgba(245,200,66,0.18), rgba(212,175,55,0.10))' : '#fff',
-        border: `1.5px solid ${selected ? '#D4AF37' : 'rgba(31,62,108,0.12)'}`,
+        background: selected ? 'linear-gradient(135deg, rgba(245,200,66,0.18), rgba(242,175,19,0.10))' : '#fff',
+        border: `1.5px solid ${selected ? '#F2AF13' : 'rgba(31,62,108,0.12)'}`,
         borderRadius: 14, padding: '12px 16px',
         fontFamily: 'inherit', cursor: 'pointer',
         display: 'flex', alignItems: 'center', gap: 12, textAlign: 'right',
         transition: 'all 0.15s',
-        boxShadow: selected ? '0 4px 12px rgba(212,175,55,0.18)' : 'none',
+        boxShadow: selected ? '0 4px 12px rgba(242,175,19,0.18)' : 'none',
       }}
     >
       <div style={{ fontSize: 24 }}>{emoji}</div>
@@ -403,7 +403,7 @@ function OptionCard({ selected, onClick, emoji, label, sub }: {
         <div style={{ fontWeight: 700, fontSize: 14, color: '#0B1B3E' }}>{label}</div>
         <div style={{ fontSize: 12, color: '#5b6f93', marginTop: 2 }}>{sub}</div>
       </div>
-      {selected && <div style={{ fontSize: 18, color: '#D4AF37' }}>✓</div>}
+      {selected && <div style={{ fontSize: 18, color: '#F2AF13' }}>✓</div>}
     </button>
   )
 }
@@ -424,10 +424,10 @@ function SuccessPanel({ onClose, onSelectTopic }: {
     <div style={{ textAlign: 'center' }}>
       <div style={{
         width: 76, height: 76, borderRadius: 20,
-        background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+        background: 'linear-gradient(135deg,#F5C842,#F2AF13)',
         margin: '4px auto 16px',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 40, boxShadow: '0 10px 26px rgba(212,175,55,0.45)',
+        fontSize: 40, boxShadow: '0 10px 26px rgba(242,175,19,0.45)',
       }}>🎯</div>
       <div style={{ fontSize: 15, color: '#5b6f93', marginBottom: 18, lineHeight: 1.5 }}>
         בנינו עבורך מסלול של <b style={{ color: '#0B1B3E' }}>{plan.sequence.length}</b> נושאים,
@@ -460,7 +460,7 @@ function SuccessPanel({ onClose, onSelectTopic }: {
             >
               <div style={{
                 width: 24, height: 24, borderRadius: 12, flexShrink: 0,
-                background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+                background: 'linear-gradient(135deg,#F5C842,#F2AF13)',
                 color: '#0B1B3E', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 12, fontWeight: 700,
               }}>{i + 1}</div>

@@ -297,8 +297,8 @@ function injectKeyboardCSS(): void {
 .ws-formula-chip.MLK__keycap:hover,
 .ws-formula-chip.MLK__keycap:active {
   background: linear-gradient(135deg, #FFFFFF 0%, #E8F1FF 100%) !important;
-  border-color: rgba(212,175,55,0.65) !important;
-  box-shadow: 0 0 0 2px rgba(212,175,55,0.40) !important;
+  border-color: rgba(242,175,19,0.65) !important;
+  box-shadow: 0 0 0 2px rgba(242,175,19,0.40) !important;
   transform: translateY(-1px);
 }
 /* Chips show the short symbol at a readable size, in navy ink so it reads
@@ -313,7 +313,7 @@ function injectKeyboardCSS(): void {
   font-family: 'Rubik', sans-serif !important;
   font-size: 11px !important;
   letter-spacing: 0.05em !important;
-  color: #D4AF37 !important;
+  color: #F2AF13 !important;
   padding: 10px 0 4px !important;
   text-align: center !important;
   width: 100% !important;
@@ -348,7 +348,7 @@ function injectKeyboardCSS(): void {
  * old near-white text on a near-transparent bg vanished on the light-mode
  * plate (user 2026-05-28 circled the washed-out 'תיאורית' button). */
 .ws-group-btn.MLK__keycap {
-  border: 1.5px solid rgba(212,175,55,0.55) !important;
+  border: 1.5px solid rgba(242,175,19,0.55) !important;
   border-radius: 12px !important;
   font-family: 'Rubik', sans-serif !important;
   font-size: 13px !important;
@@ -365,12 +365,12 @@ function injectKeyboardCSS(): void {
 }
 @media (prefers-color-scheme: dark) {
   .ws-group-btn.MLK__keycap { background: rgba(255,255,255,0.06) !important; color: #FFF7E8 !important; }
-  .ws-group-btn.MLK__keycap:hover { background: rgba(212,175,55,0.16) !important; }
+  .ws-group-btn.MLK__keycap:hover { background: rgba(242,175,19,0.16) !important; }
 }
 .ws-group-btn.ws-group-active.MLK__keycap {
-  background: linear-gradient(135deg, #F5C842 0%, #D4AF37 100%) !important;
+  background: linear-gradient(135deg, #F5C842 0%, #F2AF13 100%) !important;
   color: #1A1A2E !important;
-  border-color: #D4AF37 !important;
+  border-color: #F2AF13 !important;
   box-shadow: 0 4px 12px rgba(242,169,62,0.40) !important;
 }
 .MLK__row:has(.ws-group-btn) {
@@ -564,7 +564,7 @@ export default function WaffleStackKeyboard() {
         position: 'fixed',
         ...pos,
         zIndex: 242,
-        background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+        background: 'linear-gradient(135deg,#F5C842,#F2AF13)',
         color: '#0B1B3E',
         border: 0,
         borderRadius: 24,

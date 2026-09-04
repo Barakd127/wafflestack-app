@@ -113,7 +113,7 @@ export default function VirtualKeyboardCloser() {
         // Previously 100000 — that was a collision band-aid; other FABs
         // now hide while the keyboard is open so 240 is sufficient.
         zIndex: 240,
-        background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+        background: 'linear-gradient(135deg,#F5C842,#F2AF13)',
         color: '#0B1B3E',
         border: 0,
         borderRadius: 24,

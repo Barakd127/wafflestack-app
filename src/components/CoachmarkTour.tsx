@@ -265,7 +265,7 @@ export default function CoachmarkTour() {
       {steps.map((s, i) => (
         <span key={s.id} style={{
           width: i === activeTour.currentIndex ? 18 : 7, height: 7, borderRadius: 999,
-          background: i === activeTour.currentIndex ? 'linear-gradient(90deg,#D4AF37,#f0c651)' : 'rgba(255,255,255,0.22)',
+          background: i === activeTour.currentIndex ? 'linear-gradient(90deg,#F2AF13,#f0c651)' : 'rgba(255,255,255,0.22)',
           transition: 'width .25s',
         }} />
       ))}
@@ -276,7 +276,7 @@ export default function CoachmarkTour() {
     <>
       <div style={{
         display: 'inline-block', fontSize: 11, fontWeight: 700, color: '#0d1320',
-        background: 'linear-gradient(90deg,#D4AF37,#f0c651)', padding: '2px 9px',
+        background: 'linear-gradient(90deg,#F2AF13,#f0c651)', padding: '2px 9px',
         borderRadius: 999, marginBottom: 8, letterSpacing: '.3px',
       }}>
         שלב {activeTour.currentIndex + 1} מתוך {steps.length}
@@ -296,7 +296,7 @@ export default function CoachmarkTour() {
     borderRadius: 16,
     padding: '16px 18px',
     color: '#f1f5ff',
-    boxShadow: '0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.18), 0 0 40px rgba(91,139,255,0.18)',
+    boxShadow: '0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(242,175,19,0.18), 0 0 40px rgba(91,139,255,0.18)',
     fontFamily: "'Rubik', sans-serif",
     backdropFilter: 'blur(10px)',
   }
@@ -369,22 +369,22 @@ export default function CoachmarkTour() {
         {/* Dimmed backdrop with the target cut out */}
         <rect x={0} y={0} width={W} height={H} fill="rgba(6,9,22,0.72)" mask="url(#tour-spotlight-mask)" />
         {/* Expanding halo around the target */}
-        <circle cx={cx} cy={cy} r={0} fill="none" stroke="rgba(212,175,55,0.9)" strokeWidth={2}
+        <circle cx={cx} cy={cy} r={0} fill="none" stroke="rgba(242,175,19,0.9)" strokeWidth={2}
           style={{ animation: 'ws-tour-halo 1.6s ease-out infinite' }} />
         {/* Pulsing spotlight ring */}
         <rect
           x={r.left - PADDING} y={r.top - PADDING}
           width={r.width + PADDING * 2} height={r.height + PADDING * 2}
           rx={12} fill="none"
-          stroke="#D4AF37" strokeWidth={3}
-          style={{ filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.7))', animation: 'ws-tour-ring 1.3s ease-in-out infinite' }}
+          stroke="#F2AF13" strokeWidth={3}
+          style={{ filter: 'drop-shadow(0 0 10px rgba(242,175,19,0.7))', animation: 'ws-tour-ring 1.3s ease-in-out infinite' }}
         />
         {/* Bouncing arrow pointing at the target */}
         <g style={{ animation: bounceAnim, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }}>
           <line x1={arrowX} y1={arrowTailY} x2={arrowX} y2={arrowHeadY}
-            stroke="#D4AF37" strokeWidth={5} strokeLinecap="round"
+            stroke="#F2AF13" strokeWidth={5} strokeLinecap="round"
             strokeDasharray="7 7" style={{ animation: 'ws-tour-dash .7s linear infinite' }} />
-          <path d={headPath} fill="#D4AF37" />
+          <path d={headPath} fill="#F2AF13" />
         </g>
       </svg>
       <div

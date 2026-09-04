@@ -200,7 +200,7 @@ function EquationView(props: {
         fontFamily: "'Rubik', 'Segoe UI', sans-serif",
         fontSize,
         background: 'rgba(255,255,255,0.92)',
-        border: `1px ${isEditing ? 'solid' : 'dashed'} ${isEditing ? '#D4AF37' : 'rgba(212,175,55,0.45)'}`,
+        border: `1px ${isEditing ? 'solid' : 'dashed'} ${isEditing ? '#F2AF13' : 'rgba(242,175,19,0.45)'}`,
         borderRadius: 6,
         padding: 8,
         boxSizing: 'border-box',

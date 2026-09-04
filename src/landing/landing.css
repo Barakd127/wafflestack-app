@@ -9,10 +9,10 @@
   --ls-blue-light:    #83B2F8;
   --ls-blue-pale:     #D8E7FA;
 
-  /* Real gold — same rgba(212,175,55) from --sh-topbar-border */
+  /* Real gold — same rgba(242,175,19) from --sh-topbar-border */
   --ls-gold:         #B8960C;   /* deep gold for small text on white */
-  --ls-gold-bright:  #D4AF37;   /* headline gradient */
-  --ls-gold-soft:    rgba(212,175,55,0.12);
+  --ls-gold-bright:  #F2AF13;   /* headline gradient */
+  --ls-gold-soft:    rgba(242,175,19,0.12);
 
   /* Text — dark on light bg */
   --ls-text-primary: #122460;
@@ -23,7 +23,7 @@
   --ls-glass-bg:          rgba(255, 255, 255, 0.60);
   --ls-glass-bg-strong:   rgba(255, 255, 255, 0.82);
   --ls-glass-border:      rgba(51, 81, 202, 0.18);
-  --ls-glass-border-gold: rgba(212, 175, 55, 0.55);
+  --ls-glass-border-gold: rgba(242, 175, 19, 0.55);
 
   direction: rtl;
   font-family: 'Heebo', 'Inter', system-ui, sans-serif;

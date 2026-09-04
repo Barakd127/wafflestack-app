@@ -209,7 +209,7 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
               padding: '10px 18px',
               borderRadius: 14,
               background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
-              border: '2px solid #D4AF37',
+              border: '2px solid #F2AF13',
               color: '#fff',
               fontSize: 14,
               fontWeight: 700,

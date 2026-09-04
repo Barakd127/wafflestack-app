@@ -49,7 +49,7 @@ const IMG_W = cityBlock.width
 const IMG_H = cityBlock.height
 const IMG_WIDTH_PCT = 0.82
 
-const GOLD = '#D4AF37'
+const GOLD = '#F2AF13'
 const GOLD_LIGHT = '#F5C842'
 const NAVY = '#0B1B3E'
 
@@ -230,8 +230,8 @@ export default function CityBackdrop({ topicId, progress, frost, mastered: maste
                   height: `${building.bottom - building.top}%`,
                   borderRadius: 6,
                   boxSizing: 'border-box',
-                  border: mastered ? '1.5px solid rgba(255,255,255,0.9)' : `1.5px dashed rgba(212,175,55,0.95)`,
-                  boxShadow: '0 0 0 2px rgba(212,175,55,.55), 0 0 28px rgba(212,175,55,.35)',
+                  border: mastered ? '1.5px solid rgba(255,255,255,0.9)' : `1.5px dashed rgba(242,175,19,0.95)`,
+                  boxShadow: '0 0 0 2px rgba(242,175,19,.55), 0 0 28px rgba(242,175,19,.35)',
                   background: mastered ? 'rgba(245,200,66,0.12)' : 'rgba(216,231,250,0.22)',
                   overflow: 'hidden',
                   transition: 'border-color .6s ease, background .6s ease',
@@ -262,7 +262,7 @@ export default function CityBackdrop({ topicId, progress, frost, mastered: maste
                       left: 0,
                       right: 0,
                       bottom: `${(doneFloors + i + 1) * floorH}%`,
-                      borderTop: '1px dashed rgba(212,175,55,0.7)',
+                      borderTop: '1px dashed rgba(242,175,19,0.7)',
                     }}
                   />
                 ))}

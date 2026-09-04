@@ -31,7 +31,7 @@ import TemplatesMenu from './ui/TemplatesMenu'
 import { useNotebookStore, type PaperStyle } from './state/notebookStore'
 import { useNoteSpawner } from './hooks/useNoteSpawner'
 
-const GOLD = '#D4AF37'
+const GOLD = '#F2AF13'
 const GOLD_BRIGHT = '#F5C842'
 
 const PERSISTENCE_KEY_V1 = 'wafflestack-notebook-v1'
@@ -363,7 +363,7 @@ const btnGoldStyle: React.CSSProperties = {
   fontFamily: "'Rubik', sans-serif",
   fontWeight: 700, fontSize: 13,
   cursor: 'pointer',
-  boxShadow: '0 4px 14px rgba(212,175,55,0.45)',
+  boxShadow: '0 4px 14px rgba(242,175,19,0.45)',
 }
 
 const btnGlassStyle: React.CSSProperties = {

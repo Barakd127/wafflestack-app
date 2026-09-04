@@ -110,12 +110,12 @@ export default function BlocksAnovaInteractive() {
               const hl = hoverRow === r || hoverCol === c
               return (
                 <g key={c}>
-                  <rect x={xCols[c]} y={yRows[r]} width={COL_W} height={ROW_H} fill={hl ? 'rgba(212,175,55,0.18)' : 'rgba(31,62,108,0.015)'} stroke="rgba(127,155,217,0.22)" />
+                  <rect x={xCols[c]} y={yRows[r]} width={COL_W} height={ROW_H} fill={hl ? 'rgba(242,175,19,0.18)' : 'rgba(31,62,108,0.015)'} stroke="rgba(127,155,217,0.22)" />
                   <text x={xCols[c] + COL_W / 2} y={yRows[r] + ROW_H / 2 + 4} textAnchor="middle" fontSize={14} fill={GC.ink} style={{ pointerEvents: 'none' }}>{v}</text>
                 </g>
               )
             })}
-            <rect x={xMean} y={yRows[r]} width={MEAN_W} height={ROW_H} fill={hoverRow === r ? 'rgba(212,175,55,0.24)' : 'rgba(31,62,108,0.04)'} stroke="rgba(127,155,217,0.22)" />
+            <rect x={xMean} y={yRows[r]} width={MEAN_W} height={ROW_H} fill={hoverRow === r ? 'rgba(242,175,19,0.24)' : 'rgba(31,62,108,0.04)'} stroke="rgba(127,155,217,0.22)" />
             <text x={xMean + MEAN_W / 2} y={yRows[r] + ROW_H / 2 + 4} textAnchor="middle" fontSize={13} fontWeight={600} fill={GC.ink} style={{ pointerEvents: 'none' }}>{fmt(rowMeans[r])}</text>
           </g>
         ))}

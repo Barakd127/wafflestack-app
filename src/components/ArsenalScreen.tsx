@@ -708,9 +708,9 @@ function ArsenalCard({
         borderRadius: 18,
         // Pinned border: 2px gold ring with shadow so it stays visible in both
         // light and dark mode (was a translucent #f59e0b80 invisible in dark).
-        border: entry.pinned ? '2px solid #D4AF37' : '1px solid rgba(255,255,255,0.5)',
+        border: entry.pinned ? '2px solid #F2AF13' : '1px solid rgba(255,255,255,0.5)',
         boxShadow: entry.pinned
-          ? '0 6px 22px rgba(31,62,108,0.15), 0 0 0 3px rgba(212,175,55,0.18)'
+          ? '0 6px 22px rgba(31,62,108,0.15), 0 0 0 3px rgba(242,175,19,0.18)'
           : 'var(--sh-card-shadow, 0 6px 22px rgba(31,62,108,0.15))',
         padding: 16,
         position: 'relative',
@@ -1018,8 +1018,8 @@ function EquationCardBody({
           style={{
             alignSelf: 'flex-start',
             display: 'inline-flex', alignItems: 'center', gap: 5,
-            border: `1px solid ${eqData.numbered ? '#D4AF37' : KIND_META.equation.border}`,
-            background: eqData.numbered ? 'rgba(212,175,55,0.16)' : 'rgba(255,255,255,0.6)',
+            border: `1px solid ${eqData.numbered ? '#F2AF13' : KIND_META.equation.border}`,
+            background: eqData.numbered ? 'rgba(242,175,19,0.16)' : 'rgba(255,255,255,0.6)',
             color: eqData.numbered ? '#92400e' : '#1F3E6C',
             borderRadius: 8, padding: '3px 9px',
             fontSize: 11, fontWeight: 700,
@@ -1241,8 +1241,8 @@ function EquationCard({ latex, onCommit }: { latex: string; onCommit?: (newLatex
         padding: '2px 6px',
         // transparent so equation inherits surrounding navy/gold theme (Issue 2)
         background: 'transparent',
-        borderInlineStart: editing ? '2px solid #6366f1' : '2px solid #D4AF37',
-        border: editing ? '1px solid rgba(99,102,241,0.45)' : '1px solid rgba(212,175,55,0.25)',
+        borderInlineStart: editing ? '2px solid #6366f1' : '2px solid #F2AF13',
+        border: editing ? '1px solid rgba(99,102,241,0.45)' : '1px solid rgba(242,175,19,0.25)',
         borderRadius: 5,
         boxShadow: 'none',
         unicodeBidi: 'isolate' as React.CSSProperties['unicodeBidi'],

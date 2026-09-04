@@ -43,7 +43,7 @@ interface NotebookStore {
 }
 
 const DEFAULT_SECTION_COLORS = [
-  '#D4AF37', // gold (default)
+  '#F2AF13', // gold (default)
   '#5B8DEF', // blue
   '#67C29E', // green
   '#E17C7C', // red

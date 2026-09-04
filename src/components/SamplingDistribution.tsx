@@ -29,7 +29,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 // user feedback 2026-05-24.
 const C_POP = '#1F3E6C'           // population panel — deep brand blue
 const C_POP_SOFT = '#7CB7F8'      // softer blue for fills
-const C_SAMPLE = '#D4AF37'        // sample panel — brand gold
+const C_SAMPLE = '#F2AF13'        // sample panel — brand gold
 const C_SAMPLE_DEEP = '#9C7A1A'   // darker gold for text on light bg
 const C_DIST = '#14B8A6'          // sampling dist — mint-teal
 const C_DIST_DEEP = '#0F766E'     // darker mint for text on light bg
@@ -219,7 +219,7 @@ export default function SamplingDistribution() {
         </p>
         <div style={{
           marginTop: 10, fontSize: 13, color: C_TEXT_MED,
-          background: 'rgba(212,175,55,0.10)', borderRight: `3px solid ${C_SAMPLE}`,
+          background: 'rgba(242,175,19,0.10)', borderRight: `3px solid ${C_SAMPLE}`,
           padding: '8px 12px', borderRadius: 8, lineHeight: 1.6,
         }}>
           💡 <strong>טיפ:</strong> צבעו אוכלוסייה משונה (לחצו "צבע אוכלוסייה" וגררו במשטח העליון),
@@ -275,7 +275,7 @@ export default function SamplingDistribution() {
         display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14, alignItems: 'center',
       }}>
         <button onClick={animateOne} disabled={animating}
-          style={{ ...primaryBtn, background: `linear-gradient(135deg,#F5C842,${C_SAMPLE})`, color: '#0B1B3E', boxShadow: '0 4px 12px rgba(212,175,55,0.40)' }}>
+          style={{ ...primaryBtn, background: `linear-gradient(135deg,#F5C842,${C_SAMPLE})`, color: '#0B1B3E', boxShadow: '0 4px 12px rgba(242,175,19,0.40)' }}>
           ▶ הנפש מדגם
         </button>
         {[1, 5, 1000, 10000].map(k => (
@@ -438,7 +438,7 @@ function SampleStrip({ values, statValue }: { values: number[]; statValue: numbe
   const yForN = (k: number) => H - 22 - k * (r * 2 + 1)
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{
-      background: 'linear-gradient(180deg, rgba(212,175,55,0.07), rgba(212,175,55,0.02))',
+      background: 'linear-gradient(180deg, rgba(242,175,19,0.07), rgba(242,175,19,0.02))',
       borderRadius: 8,
     }}>
       <line x1={20} y1={H - 22} x2={W - 20} y2={H - 22} stroke="#cbd5e1" strokeWidth={1} />

@@ -281,9 +281,9 @@ const LIGHT: ThemeTokens = {
   btnBg: '#FFFFFF',
   btnBorder: 'rgba(31,38,64,0.14)',
   btnHoverBg: '#F0EEE5',
-  accent: '#D4AF37',
-  accentBg: 'linear-gradient(180deg, #F5C842 0%, #D4AF37 100%)',
-  accentBorder: 'rgba(212,175,55,0.55)',
+  accent: '#F2AF13',
+  accentBg: 'linear-gradient(180deg, #F5C842 0%, #F2AF13 100%)',
+  accentBorder: 'rgba(242,175,19,0.55)',
   dropdownBg: '#FFFFFF',
   shadow: '0 2px 8px rgba(31,38,64,0.08)',
 }
@@ -301,8 +301,8 @@ const DARK: ThemeTokens = {
   btnBorder: 'rgba(255,255,255,0.14)',
   btnHoverBg: 'rgba(255,255,255,0.1)',
   accent: '#F5C842',
-  accentBg: 'rgba(212,175,55,0.2)',
-  accentBorder: 'rgba(212,175,55,0.5)',
+  accentBg: 'rgba(242,175,19,0.2)',
+  accentBorder: 'rgba(242,175,19,0.5)',
   dropdownBg: '#0B1B3E',
   shadow: '0 12px 30px rgba(0,0,0,0.45)',
 }
@@ -515,7 +515,7 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
     span.style.padding = '0 4px'
     span.style.margin = '0 2px'
     span.style.verticalAlign = 'middle'
-    span.style.background = 'rgba(212,175,55,0.08)'
+    span.style.background = 'rgba(242,175,19,0.08)'
     span.style.borderRadius = '4px'
     span.innerHTML = html
     editorRef.current.focus()
@@ -751,7 +751,7 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
                   key={o.id}
                   style={{
                     ...dropdownItemStyle,
-                    background: o.id === paperStyle ? 'rgba(212,175,55,0.18)' : 'transparent',
+                    background: o.id === paperStyle ? 'rgba(242,175,19,0.18)' : 'transparent',
                   }}
                   onClick={() => {
                     if (activePage) setPaperStyle(activePage.id, o.id)
@@ -949,7 +949,7 @@ export default function OneNoteSurface({ onBack }: OneNoteSurfaceProps) {
                 gap: 8,
                 padding: '8px 10px',
                 borderRadius: 6,
-                background: isActive ? 'rgba(212,175,55,0.16)' : 'transparent',
+                background: isActive ? 'rgba(242,175,19,0.16)' : 'transparent',
                 border: `1px solid ${isActive ? t.accentBorder : 'transparent'}`,
                 cursor: 'pointer',
                 userSelect: 'none',
