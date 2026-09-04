@@ -2518,7 +2518,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             asymmetric ratio used by every two-column row on this screen, so
             they all break at the same vertical seam. ws-home-grid keeps the
             mobile override (one column under 768px). Per Shirli 2026-09-04. */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '9.35' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '10.625' }}>
 
         {/* Personal study plan CTA / banner — opens 3-step intake wizard. */}
         {!personalPlan ? (
@@ -2608,7 +2608,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             לימוד חומר carries order:1, so it takes the wide 1.25fr track,
             which is the RIGHT column in RTL. It is the point of the app and
             now reads that way. */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '2.27' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '2.580' }}>
 
           {/* Card: כמעט שם! (תרגול) — order:2 so it sits on the LEFT in RTL,
               after the study card. User asked to swap study↔practice. */}
@@ -2709,7 +2709,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             the insights card that difference in material read as a mistake,
             so it now uses the same ws-glass-card. Padding levelled 40 → 28 to
             match, and the strip's rail re-anchored to the narrower box. */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '7.01' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '7.966' }}>
 
         {/* LEARNING INSIGHTS — accuracy + what to strengthen */}
         <LearningInsights />
@@ -2795,7 +2795,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             The chart needs the horizontal room for seven days; "העולם שלי" is
             three chips, a bar and a button, so it was holding width it did not
             use. Same 1.25fr / 1fr seam as every other row. */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '3.86' }}>
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '4.386' }}>
 
           {/* Card: Activity chart — centred, so the row's height floor reads as
               breathing room rather than a gap under the chart. */}
