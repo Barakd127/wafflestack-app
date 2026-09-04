@@ -3425,7 +3425,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             style={{
               position: 'fixed', top: 64, left: 16, zIndex: 300,
               width: 52, height: 52, borderRadius: '50%',
-              background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+              background: 'linear-gradient(135deg,#FFA640,#FF8600)',
               color: '#0B1B3E', border: 0,
               boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -3441,7 +3441,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 role="menu" aria-label="תפריט כלים" dir="rtl"
                 style={{
                   position: 'fixed', top: 124, left: 16, zIndex: 306,
-                  background: '#FBF8F1', border: '1px solid rgba(212,175,55,0.55)',
+                  background: '#FBF8F1', border: '1px solid rgba(255,134,0,0.55)',
                   borderRadius: 12, boxShadow: '0 10px 28px rgba(11,27,62,0.30)',
                   padding: 6, minWidth: 200, fontFamily: "'Rubik', sans-serif",
                 }}
@@ -3460,7 +3460,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   onClick={() => { onToggleFullscreen(); setSplitMenuOpen(false) }}
                   style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'start', background: 'transparent', border: '1px solid transparent', borderRadius: 8, padding: '11px 10px', color: '#1F3E6C', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 44 }}
                 >☰ הצג כלי לימוד</button>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#1F3E6C', opacity: 0.6, padding: '8px 10px 4px', borderTop: '1px solid rgba(212,175,55,0.3)', marginTop: 4 }}>פיצול מסך</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#1F3E6C', opacity: 0.6, padding: '8px 10px 4px', borderTop: '1px solid rgba(255,134,0,0.3)', marginTop: 4 }}>פיצול מסך</div>
                 {([
                   ['mindmap',    '🧠 מפת חשיבה'],
                   ['canvas',     '✏️ קנבס'],
@@ -3531,7 +3531,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 style={{
                   position: 'fixed', bottom: 202, left: 52, zIndex: 306,
                   background: '#FBF8F1',
-                  border: '1px solid rgba(212,175,55,0.55)',
+                  border: '1px solid rgba(255,134,0,0.55)',
                   borderRadius: 12,
                   boxShadow: '0 10px 28px rgba(11,27,62,0.30)',
                   padding: 6, minWidth: 188,
@@ -3567,7 +3567,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         fontSize: 13, fontWeight: 600, cursor: locked ? 'not-allowed' : 'pointer',
                         minHeight: 40, opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none',
                       }}
-                      onMouseEnter={e => { if (locked) return; e.currentTarget.style.background = 'rgba(212,175,55,0.16)'; e.currentTarget.style.borderColor = 'rgba(212,175,55,0.45)' }}
+                      onMouseEnter={e => { if (locked) return; e.currentTarget.style.background = 'rgba(255,134,0,0.16)'; e.currentTarget.style.borderColor = 'rgba(255,134,0,0.45)' }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent' }}
                     >
                       {locked ? '🔒 ' : ''}{label}
@@ -3592,7 +3592,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               // scrollbar + canvas nav pill) into the bottom-left lane, top of
               // the stack, clear of the ∑Formulas rail (left:52).
               position: 'fixed', bottom: 210, left: 52, zIndex: 300,
-              background: 'linear-gradient(135deg,#D4AF37,#b8941f)',
+              background: 'linear-gradient(135deg,#FF8600,#CC6B00)',
               color: '#1F2640',
               border: 0, borderRadius: 14,
               padding: '8px 14px',
@@ -3615,7 +3615,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               position: 'fixed', bottom: 90,
               left: 52,
               zIndex: 300,
-              background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
+              background: 'linear-gradient(135deg,#FFA640,#FF8600)',
               color: '#0B1B3E',
               border: 0, borderRadius: 14,
               padding: '8px 14px',
@@ -3638,7 +3638,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         <img src={`${import.meta.env.BASE_URL}high-tech.png`} alt="" style={{ width: 34, height: 26, objectFit: 'cover', borderRadius: 5 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
         <div style={{ flex: 1 }}>
           <div style={{ height: 6, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
-            <div style={{ width: `${isDone ? 100 : ((currentQ)/total)*100}%`, height: '100%', background: 'rgba(212,175,55,0.75)', borderRadius: 10, transition: 'width 0.4s' }} />
+            <div style={{ width: `${isDone ? 100 : ((currentQ)/total)*100}%`, height: '100%', background: 'rgba(255,134,0,0.75)', borderRadius: 10, transition: 'width 0.4s' }} />
           </div>
           <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT, marginTop: 2 }}>
             {answeredCount} / {total} · {correctCount} ✓{streak >= 2 ? <span style={{ color: '#FF7A1A', fontWeight: 800 }}> · 🔥{streak}</span> : null}
@@ -3658,9 +3658,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             of truth for question metadata) */}
         {!isDone && (
           <div style={{
-            background: 'rgba(212,175,55,0.16)',
-            border: '1px solid rgba(212,175,55,0.5)',
-            color: '#7A5C00',
+            background: 'rgba(255,134,0,0.16)',
+            border: '1px solid rgba(255,134,0,0.5)',
+            color: '#8A4300',
             borderRadius: 12,
             padding: '4px 10px',
             fontFamily: "'Rubik', sans-serif",
@@ -3693,9 +3693,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             aria-label={fullscreen ? 'יציאה ממסך מלא' : 'מסך מלא — ללא הסחות דעת'}
             title={fullscreen ? 'יציאה ממסך מלא (Esc)' : 'מסך מלא'}
             style={{
-              background: fullscreen ? 'rgba(212,175,55,0.18)' : 'rgba(127,155,217,0.10)',
-              border: '1px solid ' + (fullscreen ? 'rgba(212,175,55,0.55)' : 'rgba(127,155,217,0.30)'),
-              color: fullscreen ? '#7A5C00' : TEXT_DARK,
+              background: fullscreen ? 'rgba(255,134,0,0.18)' : 'rgba(127,155,217,0.10)',
+              border: '1px solid ' + (fullscreen ? 'rgba(255,134,0,0.55)' : 'rgba(127,155,217,0.30)'),
+              color: fullscreen ? '#8A4300' : TEXT_DARK,
               borderRadius: 8, padding: '6px 10px',
               cursor: 'pointer', fontFamily: "'Rubik', sans-serif",
               fontSize: 12, fontWeight: 700,
@@ -3747,7 +3747,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 style={{
                   border: 'none', borderRadius: 999, padding: '8px 18px', cursor: locked ? 'not-allowed' : 'pointer',
                   fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700, minHeight: 40,
-                  background: active ? 'linear-gradient(135deg,#F5C842,#D4AF37)' : 'transparent',
+                  background: active ? 'linear-gradient(135deg,#FFA640,#FF8600)' : 'transparent',
                   color: active ? '#0B1B3E' : 'rgba(255,255,255,0.85)',
                   transition: 'all 0.15s', opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none',
                 }}
@@ -3812,7 +3812,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   position: 'absolute', bottom: 8, insetInlineStart: 8, zIndex: 10,
                   display: 'flex', alignItems: 'center', gap: 6,
                   background: 'rgba(13,22,40,0.82)', backdropFilter: 'blur(6px)',
-                  border: '1px solid rgba(212,175,55,0.35)', borderRadius: 999,
+                  border: '1px solid rgba(255,134,0,0.35)', borderRadius: 999,
                   padding: '4px 10px', fontFamily: "'Rubik', sans-serif",
                   fontSize: 12, color: '#e9edf7', boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
                 }}>
@@ -3823,8 +3823,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     title="קנבס קודם"
                     style={{
                       background: 'transparent',
-                      border: '1px solid rgba(212,175,55,0.45)',
-                      color: currentQ <= 0 ? 'rgba(233,237,247,0.35)' : '#D4AF37',
+                      border: '1px solid rgba(255,134,0,0.45)',
+                      color: currentQ <= 0 ? 'rgba(233,237,247,0.35)' : '#FF8600',
                       borderRadius: 6, padding: '2px 8px',
                       cursor: currentQ <= 0 ? 'default' : 'pointer',
                       fontSize: 12, fontWeight: 700,
@@ -3838,8 +3838,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     title="קנבס הבא"
                     style={{
                       background: 'transparent',
-                      border: '1px solid rgba(212,175,55,0.45)',
-                      color: currentQ >= questions.length - 1 ? 'rgba(233,237,247,0.35)' : '#D4AF37',
+                      border: '1px solid rgba(255,134,0,0.45)',
+                      color: currentQ >= questions.length - 1 ? 'rgba(233,237,247,0.35)' : '#FF8600',
                       borderRadius: 6, padding: '2px 8px',
                       cursor: currentQ >= questions.length - 1 ? 'default' : 'pointer',
                       fontSize: 12, fontWeight: 700,
@@ -4057,13 +4057,13 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   aria-label={isLastQ ? 'סיים את הסשן' : 'שאלה הבאה'}
                   title={isLastQ ? 'סיום' : 'הבא — בלי לענות ובלי להיחשב טעות'}
                   style={{
-                    background: '#D4AF37',
+                    background: '#FF8600',
                     color: '#fff',
                     border: 'none',
                     borderRadius: 8, padding: '5px 14px',
                     cursor: 'pointer',
                     fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
-                    boxShadow: '0 2px 8px rgba(212,175,55,0.35)',
+                    boxShadow: '0 2px 8px rgba(255,134,0,0.35)',
                   }}
                 >
                   {isLastQ ? 'סיום 🏆' : 'הבא ←'}
@@ -4211,7 +4211,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   </div>
                 )}
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#D4AF37' }}>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#FF8600' }}>
                     {questions.filter((_: any, i: number) => dotStates[i] === 'correct').reduce((s: number, q: any) => s + q.xp, 0)}
                   </div>
                   <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>XP הרווחת</div>
@@ -4221,7 +4221,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   of the whole set (skipping shouldn't tank the number). */}
               {answeredCount > 0 && (
                 <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 15, color: TEXT_LIGHT, marginTop: -4 }}>
-                  דיוק: <span style={{ fontWeight: 800, color: correctCount / answeredCount >= 0.7 ? '#34A853' : '#D4AF37' }}>{Math.round((correctCount / answeredCount) * 100)}%</span>
+                  דיוק: <span style={{ fontWeight: 800, color: correctCount / answeredCount >= 0.7 ? '#34A853' : '#FF8600' }}>{Math.round((correctCount / answeredCount) * 100)}%</span>
                   <span style={{ opacity: 0.75 }}> ({correctCount}/{answeredCount} שנענו)</span>
                 </div>
               )}
@@ -4342,7 +4342,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         <span style={{
                           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                           minWidth: bigBoard ? 40 : 32, height: bigBoard ? 40 : 32, borderRadius: 20,
-                          background: '#D4AF37', color: '#fff',
+                          background: '#FF8600', color: '#fff',
                           fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: bigBoard ? 18 : 15,
                           flexShrink: 0,
                         }}>
@@ -4410,8 +4410,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     style={{
                       alignSelf: 'flex-start',
                       display: 'inline-flex', alignItems: 'center', gap: 8,
-                      background: 'rgba(212,175,55,0.12)', color: '#9A7B1A',
-                      border: '1.5px dashed rgba(212,175,55,0.6)', borderRadius: 20,
+                      background: 'rgba(255,134,0,0.12)', color: '#A34700',
+                      border: '1.5px dashed rgba(255,134,0,0.6)', borderRadius: 20,
                       padding: '8px 18px', cursor: 'pointer',
                       fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
                     }}
@@ -4560,7 +4560,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                       </button>
                     ) : (
                       <button onClick={() => setPhase('done')}
-                        style={{ background: '#D4AF37', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', minHeight: 44 }}>
+                        style={{ background: '#FF8600', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', minHeight: 44 }}>
                         סיום 🏆
                       </button>
                     )}
@@ -4656,7 +4656,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 aria-label={isLastQ ? 'סיים את הסשן' : 'שאלה הבאה'}
                 title={isLastQ ? 'סיום' : 'הבא — בלי לענות ובלי להיחשב טעות'}
                 style={{
-                  background: '#D4AF37',
+                  background: '#FF8600',
                   color: '#fff',
                   border: 'none',
                   borderRadius: 22,
@@ -4665,7 +4665,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   fontFamily: "'Rubik', sans-serif",
                   fontSize: bigBoard ? 15 : 14, fontWeight: 700,
                   minHeight: 44,
-                  boxShadow: '0 2px 10px rgba(212,175,55,0.40)',
+                  boxShadow: '0 2px 10px rgba(255,134,0,0.40)',
                 }}
               >
                 {isLastQ ? 'סיום 🏆' : 'הבא ←'}
