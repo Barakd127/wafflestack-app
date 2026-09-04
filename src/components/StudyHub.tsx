@@ -2602,15 +2602,34 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
 
           {/* Card: כמעט שם! (תרגול) — order:2 so it sits on the LEFT in RTL,
               after the study card. User asked to swap study↔practice. */}
-          <div className="ws-glass-card" style={{
+          {/* Practice card — palette gradient instead of the shared glass.
+              Orange sits in the TOP-RIGHT corner, where the Hebrew copy starts,
+              and melts through peach to a solid white circle at the BOTTOM-LEFT,
+              which is exactly where the 3D asset stands — so nothing coloured
+              ever sits behind the building. Layers are listed top-first: the
+              white circle wins over the orange, the orange over the base ramp.
+              #27187E on the hottest orange measures 5.7:1, above the 4.5:1 AA
+              bar. Per Shirli 2026-09-04. */}
+          <div style={{
             borderRadius: CARD_RADIUS,
             padding: '28px 28px 22px',
             display: 'flex', flexDirection: 'column',
             order: 2,
+            position: 'relative',
+            overflow: 'hidden',
+            border: '1px solid rgba(255,255,255,0.55)',
+            boxShadow: '0 8px 32px rgba(31,62,108,0.18), inset 0 1px 0 rgba(255,255,255,0.55)',
+            background: [
+              'radial-gradient(circle 190px at 15% 86%, #FFFFFF 0%, rgba(255,255,255,0.92) 42%, rgba(255,255,255,0) 74%)',
+              'radial-gradient(ellipse 95% 80% at 98% 0%, rgba(255,134,0,0.92) 0%, rgba(255,150,32,0.45) 38%, rgba(255,168,80,0) 70%)',
+              'linear-gradient(215deg, #FFC38A 0%, #FFE2C6 26%, #FAF3EC 58%, #FFFFFF 100%)',
+            ].join(', '),
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 6 }}>תרגול</div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
+            {/* Deep indigo on the orange corner; the sub-line goes warm brown
+                because a violet-leaning slate vibrates against orange. */}
+            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: '#27187E', marginBottom: 6, position: 'relative', zIndex: 2 }}>תרגול</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: '#4A2E10', lineHeight: 1.6, marginBottom: 16, position: 'relative', zIndex: 2 }}>
               {completedLessons.length === 0 ? (
                 <>בואו נתחיל בהתחלה<br />{currentTopicName}</>
               ) : answeredInTopic > 0 && remainingInTopic > 0 ? (
@@ -2622,22 +2641,34 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             {/* Rotating 3D hero — same Kenney-building cycler as the landing
                 page, scaled to ~150px tall to fit the home card. Replaces the
                 old static temple PNG with the live cycling preview. */}
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 16, minHeight: 150, height: 150, borderRadius: 12, overflow: 'hidden' }}>
+            {/* Asset pinned to the LEFT edge in RTL, sitting in the white
+                circle and on the same line the progress bar starts from, so
+                the two read as one column instead of two loose objects. */}
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', marginBottom: 14, minHeight: 158, height: 158, overflow: 'hidden', position: 'relative', zIndex: 2 }}>
               <Suspense fallback={<div style={{ color: 'rgba(31,41,55,0.4)', fontSize: 12 }}>טוען…</div>}>
                 <HeroScene />
               </Suspense>
             </div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginBottom: 8, textAlign: 'right' }}>הצעה למבנה הבא בעירך</div>
-            {/* Progress bar — reflects answered share of the current topic */}
-            <div style={{ height: 7, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden', marginBottom: 16 }}>
-              <div style={{ width: `${topicPct}%`, height: '100%', background: 'rgba(212,175,55,0.7)', borderRadius: 10, transition: 'width 0.4s' }} />
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 6, position: 'relative', zIndex: 2 }}>
+              <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: '#4A4C86' }}>הצעה למבנה הבא בעירך</span>
+              <span dir="ltr" style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: '#A34700', fontVariantNumeric: 'tabular-nums' }}>{topicPct}%</span>
+            </div>
+            {/* Progress bar — reflects answered share of the current topic.
+                7px of pale gold on a pale card was effectively invisible; 10px
+                of the palette orange, with the figure spelled out beside it,
+                turns it from decoration into something readable. */}
+            <div style={{ height: 10, background: 'rgba(39,24,126,0.10)', borderRadius: 10, overflow: 'hidden', marginBottom: 16, position: 'relative', zIndex: 2 }}>
+              <div style={{ width: `${topicPct}%`, height: '100%', background: 'linear-gradient(90deg,#FFA640,#FF8600)', borderRadius: 10, boxShadow: '0 1px 4px rgba(255,134,0,0.45)', transition: 'width 0.4s' }} />
             </div>
             {/* Brand-new user (zero progress) → jump straight into the intro
                 practice quiz, bypassing the difficulty picker. Returning users
                 keep the existing picker flow so they can pick difficulty / resume. */}
+            {/* Indigo rather than the shared navy, so the CTA belongs to the
+                gradient it now sits on. Still a solid fill — home CTAs never
+                go glass. */}
             <button onClick={() => (completedLessons.length > 0 ? onSelectTopic(currentTopicId) : onStartPractice(currentTopicId))}
               className="ws-cta-btn"
-              style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, fontFamily: "'Rubik', sans-serif", boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}>
+              style={{ background: '#27187E', color: '#fff', border: 'none', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, fontFamily: "'Rubik', sans-serif", boxShadow: '0px 4px 14px rgba(39,24,126,0.35)', position: 'relative', zIndex: 2 }}>
               {completedLessons.length > 0 ? 'המשך ←' : 'בוא נתרגל ←'}
             </button>
           </div>
