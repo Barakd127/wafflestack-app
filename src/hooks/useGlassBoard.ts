@@ -2,7 +2,9 @@
  * useGlassBoard — feature flag for the glass board (lesson/quiz whiteboard →
  * pane of glass in front of the knowledge city).
  *
- * Source of truth: localStorage['wafflestack-glass-board'] === '1'. A URL flag
+ * Source of truth: localStorage['wafflestack-glass-board'] — DEFAULT ON, only
+ * an explicit '0' opts out (so every lesson and practice page shows the glass
+ * board without `?glass=1`). A URL flag
  * (`?glass=1` / `#…glass=1`) wins over storage and is persisted so reloads keep
  * it. Same persistence style as the dark-mode flag in App.tsx
  * ('wafflestack-dark-mode'). Toggling dispatches a window CustomEvent so every
@@ -13,11 +15,17 @@ import { useEffect, useState } from 'react'
 const STORAGE_KEY = 'wafflestack-glass-board'
 const EVENT_NAME = 'ws-glass-board'
 
+/**
+ * Default ON. An unset key means "never chosen" → the glass board, so every
+ * lesson and practice page gets it without `?glass=1`. Only an explicit '0'
+ * (from `?glass=0` or the toggle) falls back to the old whiteboard, so anyone
+ * who opted out keeps their choice. Per Shirli 2026-09-04.
+ */
 function readStorage(): boolean {
   try {
-    return localStorage.getItem(STORAGE_KEY) === '1'
+    return localStorage.getItem(STORAGE_KEY) !== '0'
   } catch {
-    return false
+    return true
   }
 }
 
@@ -45,13 +53,13 @@ function readUrlFlag(): boolean | null {
 
 /** Pure read: URL flag wins over storage. No side effects (safe inside a useState initializer). */
 function readGlassBoardFlag(): boolean {
-  if (typeof window === 'undefined') return false
+  if (typeof window === 'undefined') return true
   return readUrlFlag() ?? readStorage()
 }
 
 /** Imperative read that also persists a URL flag so reloads keep it (spec §1). */
 export function isGlassBoardEnabled(): boolean {
-  if (typeof window === 'undefined') return false
+  if (typeof window === 'undefined') return true
   const fromUrl = readUrlFlag()
   if (fromUrl !== null) {
     writeStorage(fromUrl)
