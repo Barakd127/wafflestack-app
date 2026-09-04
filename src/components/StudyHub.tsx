@@ -1267,7 +1267,7 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
         gap: 22,
-        maxWidth: 1200,
+        maxWidth: 'calc(100% - 50px)',
       }}>
         {COURSES.map(c => (
           <button
@@ -1558,7 +1558,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
       )}
 
       {viewMode === 'list' ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 30, maxWidth: 1200 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 30, maxWidth: 'calc(100% - 50px)' }}>
           {groupedSections.map(section => {
             const masteredCount = section.topics.filter(t => userProgress.topics[t.id]?.mastered).length
             return (
