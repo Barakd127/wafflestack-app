@@ -500,14 +500,16 @@ html.dark .ws-glass-card:hover {
 /* ── Coral bloom (לימוד חומר card on the home screen) ── */
 .ws-glass-card--bloom {
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%),
-    radial-gradient(circle 470px at -2% -10%,
-      rgba(255,110,45,0.94) 0%,
-      rgba(255,133,76,0.74) 20%,
-      rgba(255,158,108,0.46) 40%,
-      rgba(255,186,146,0.21) 60%,
-      rgba(255,208,178,0.06) 79%,
-      rgba(255,216,190,0) 92%),
+    linear-gradient(180deg, rgba(255,255,255,0.18) 54.33%, rgba(255,255,255,0.06) 100%),
+    radial-gradient(circle 680px at -10% -18%,
+      rgba(240,88,28,1) 0%,
+      rgba(243,96,34,1) 16%,
+      rgba(248,118,54,0.94) 27%,
+      rgba(252,146,86,0.70) 38%,
+      rgba(254,176,124,0.44) 52%,
+      rgba(255,202,168,0.22) 68%,
+      rgba(255,222,200,0.08) 86%,
+      rgba(255,232,214,0.02) 100%),
     linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%) !important;
 }
 
