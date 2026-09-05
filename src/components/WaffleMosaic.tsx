@@ -75,9 +75,11 @@ export default function WaffleMosaic({
         gridTemplateRows: `repeat(${rows}, 1fr)`,
         gap: 1,
         pointerEvents: 'none',
-        // A hair of softening — enough to take the digital edge off each
-        // corner, not enough to close the 1px gaps.
-        filter: 'blur(0.8px)',
+        // No blur. A sub-pixel softening on a grid of small squares does not
+        // read as softness — it reads as a low-resolution image rendered by
+        // mistake. The mosaic stays crisp; the only place it goes soft is
+        // where it passes behind the inner board, and that softness is the
+        // board own backdrop-filter, which is the whole idea.
       }}
     >
       {cells.map(c => (

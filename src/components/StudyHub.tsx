@@ -1838,7 +1838,7 @@ function ActivityChart() {
         </div>
         <span style={{
           fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600,
-          color: total > 0 ? '#D4AF37' : TEXT_LIGHT, fontVariantNumeric: 'tabular-nums',
+          color: total > 0 ? '#C2410C' : TEXT_LIGHT, fontVariantNumeric: 'tabular-nums',
         }}>
           {total > 0 ? `+${total.toLocaleString('he-IL')} XP` : 'אין פעילות עדיין'}
         </span>
@@ -1855,8 +1855,8 @@ function ActivityChart() {
         <title>{total > 0 ? `+${total.toLocaleString('he-IL')} XP בשבוע האחרון` : 'אין פעילות בשבוע האחרון'}</title>
         <defs>
           <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(212,175,55,0.45)" />
-            <stop offset="100%" stopColor="rgba(212,175,55,0.03)" />
+            <stop offset="0%" stopColor="rgba(255,133,76,0.42)" />
+            <stop offset="100%" stopColor="rgba(255,133,76,0.03)" />
           </linearGradient>
         </defs>
         {ticks.map(v => (
@@ -1866,7 +1866,7 @@ function ActivityChart() {
           </g>
         ))}
         <path d={area} fill="url(#chartArea)" />
-        <path d={line} fill="none" stroke="rgba(212,175,55,0.8)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={line} fill="none" stroke="#ff854c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         {pts.map(([x, y], i) => {
           const day = week[i]
           return (
@@ -1874,7 +1874,7 @@ function ActivityChart() {
               <circle
                 cx={x} cy={y}
                 r={day.isToday ? 5 : 3.5}
-                fill={day.isToday ? '#FFC700' : '#D4AF37'}
+                fill={day.isToday ? '#FF6A2B' : '#ff854c'}
                 stroke={day.isToday ? '#fff' : 'none'}
                 strokeWidth={day.isToday ? 1.5 : 0}
               >
@@ -1889,7 +1889,7 @@ function ActivityChart() {
             x={toX(i)} y={H-4}
             textAnchor="middle"
             fontSize={9}
-            fill={day.isToday ? '#D4AF37' : '#54555A'}
+            fill={day.isToday ? '#C2410C' : '#54555A'}
             fontWeight={day.isToday ? 700 : 400}
             fontFamily="Rubik"
           >
@@ -2708,7 +2708,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             {/* Connector line — pulled in from 10% to 16% now that the strip
                 sits in the narrow column, so it starts and ends under the
                 nodes rather than running past them. */}
-            <div style={{ position: 'absolute', left: '16%', right: '16%', top: 28, height: 1, borderTop: '1px solid #F4C52E', zIndex: 0 }} />
+            <div style={{ position: 'absolute', left: '16%', right: '16%', top: 28, height: 1, borderTop: '1px solid rgba(255,133,76,0.55)', zIndex: 0 }} />
 
             {/* Stages — progress-driven slice centered on the current topic.
                 done = green check · current = gold gem · upcoming = small node. */}
@@ -2731,32 +2731,28 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 ) : stage.state === 'current' ? (
                   <div style={{
                     width: 35, height: 35,
-                    background: 'linear-gradient(115.34deg, rgba(255,194,0,0.35) -8.31%, rgba(154,106,4,0.5) 168.93%)',
-                    backdropFilter: 'blur(20px)',
+                    background: 'linear-gradient(115.34deg, #FFA073 -8.31%, #ff854c 168.93%)',
                     borderRadius: 24,
-                    boxShadow: '0px 3px 5.8px rgba(142,122,59,0.5)',
+                    boxShadow: '0px 3px 5.8px rgba(255,133,76,0.45)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    {/* Gold gem */}
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                      <polygon points="9,2 15,7 9,16 3,7" fill="rgba(212,175,55,0.8)" stroke="rgba(212,175,55,1)" strokeWidth="1" />
-                      <polygon points="9,2 15,7 9,10 3,7" fill="rgba(255,220,80,0.5)" />
+                    {/* Reached — the same check the completed stages carry */}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5.5 12.5l4.3 4.3 8.7-9.6" />
                     </svg>
                   </div>
                 ) : (
                   <div style={{
                     width: 27, height: 27,
-                    background: 'linear-gradient(34.36deg, #E6C55D -10.48%, #806E34 267.01%)',
-                    backdropFilter: 'blur(20px)',
+                    background: 'rgba(255,255,255,0.6)',
+                    border: '1.5px solid rgba(127,155,217,0.5)',
+                    boxSizing: 'border-box',
                     borderRadius: 24,
-                    boxShadow: '0px 3px 5.8px rgba(142,122,59,0.5)',
-                    transform: 'matrix(1,0,0,-1,0,0)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <rect x="4" y="2" width="6" height="8" rx="1" fill="rgba(255,255,255,0.5)" />
-                      <path d="M5 5.5h4M5 7.5h3" stroke="rgba(255,255,255,0.8)" strokeWidth="1" />
-                      <circle cx="7" cy="11" r="1.5" fill="rgba(255,255,255,0.5)" />
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sh-text-light)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="6" y="3" width="12" height="16" rx="2" />
+                      <path d="M9.5 8h5M9.5 12h3" />
                     </svg>
                   </div>
                 )}

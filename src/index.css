@@ -702,18 +702,18 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  background: linear-gradient(270deg, #4438A0 0%, #6354C6 100%);
+  background: linear-gradient(270deg, #3848A0 0%, #5463C6 100%);
   box-shadow: 0 3px 8px rgba(39,24,126,0.32);
   transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
               background 0.18s ease;
 }
 .ws-cta:hover {
-  background: linear-gradient(270deg, #27187E 0%, #5031CE 100%);
+  background: linear-gradient(270deg, #18247E 0%, #313CCE 100%);
   box-shadow: 0 6px 13px rgba(39,24,126,0.38);
   transform: translateY(-3px);
 }
 .ws-cta:active {
-  background: linear-gradient(270deg, #1B1060 0%, #3B22A4 100%);
+  background: linear-gradient(270deg, #101A60 0%, #222CA4 100%);
   box-shadow: inset 0 2px 5px rgba(11,6,48,0.55);
   transform: translateY(1px);
 }
