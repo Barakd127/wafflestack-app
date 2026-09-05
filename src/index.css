@@ -693,7 +693,7 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   align-self: flex-start;
   padding: 11px 26px;
   border: none;
-  border-radius: 24px;
+  border-radius: 16px;
   font-family: 'Rubik', sans-serif;
   font-size: 16px;
   font-weight: 600;
