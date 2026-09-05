@@ -5,7 +5,6 @@ import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import BoardShell from './BoardShell'
 import CardIcon, { cardTitle, cardHead, CtaArrow } from './CardIcon'
-import WaffleMosaic from './WaffleMosaic'
 import { useGlassBoard } from '../hooks/useGlassBoard'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
@@ -2647,7 +2646,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
           </div>
 
           {/* Card: לימוד חומר — order:1 so it sits on the RIGHT in RTL (first). */}
-          <div className="ws-glass-card ws-glass-card--bloom ws-lesson" style={{
+          <div className="ws-glass-card ws-glass-card--bloom" style={{
             borderRadius: CARD_RADIUS,
             padding: '28px 28px 24px',
             display: 'flex', flexDirection: 'column',
@@ -2655,13 +2654,12 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             order: 1,
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
-            <WaffleMosaic />
             <div style={{ ...cardHead, marginBottom: 16 }}><CardIcon name="study" /><div style={cardTitle}>לימוד חומר</div></div>
             {/* Whiteboard area with glassmorphism */}
             <div style={{
               flex: 1,
               background: 'linear-gradient(180deg, rgba(255,255,255,0.51) 54.33%, rgba(255,255,255,0.17) 100%)',
-              backdropFilter: 'blur(9px) saturate(140%)',
+              backdropFilter: 'blur(18px) saturate(140%)',
               boxShadow: CARD_SHADOW,
               borderRadius: 16, // inner panel: outer 24 minus the padding step — 24 inside 24 read as a mis-drawn corner
               padding: '20px 24px',
