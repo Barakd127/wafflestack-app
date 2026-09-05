@@ -53,7 +53,7 @@
   --mm-divider: #e5e7eb;
 
   /* StudyHub theme tokens (light mode) */
-  --sh-page-bg: linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 49.05%, #3351CA 136%);
+  --sh-page-bg: linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 78%, #3351CA 210%);
   --sh-sidebar-bg: linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%);
   --sh-sidebar-active: #254A9F;
   --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%);
@@ -64,8 +64,9 @@
   --sh-text-med: #254A9F;
   --sh-text-light: #7F9BD9;
   --sh-text-tip: #465CA5;
-  --sh-topbar-bg: linear-gradient(135deg, rgba(255,255,255,0.82) 0%, rgba(228,238,255,0.78) 60%, rgba(255,245,210,0.60) 100%);
-  --sh-topbar-border: rgba(212,175,55,0.40);
+  --sh-topbar-bg: transparent;
+  --sh-topbar-border: #FFFFFF;
+  --sh-topbar-seam: 0 1px 0 rgba(31,62,108,0.22);
   --sh-q-card-bg: linear-gradient(178.82deg, rgba(255,255,255,0.82) 17.91%, rgba(192,216,255,0.77) 199.73%);
   --sh-answer-bg: rgba(255,255,255,0.7);
   --sh-answer-border: rgba(51,81,202,0.2);
@@ -94,8 +95,9 @@ html.dark {
   --sh-text-med: #a5b4fc;
   --sh-text-light: #94a3b8;
   --sh-text-tip: #64748b;
-  --sh-topbar-bg: linear-gradient(135deg, rgba(15,22,60,0.92) 0%, rgba(20,30,80,0.90) 70%, rgba(100,80,0,0.12) 100%);
-  --sh-topbar-border: rgba(212,175,55,0.20);
+  --sh-topbar-bg: transparent;
+  --sh-topbar-border: rgba(255,255,255,0.16);
+  --sh-topbar-seam: 0 1px 0 rgba(0,0,0,0.30);
   --sh-q-card-bg: linear-gradient(178.82deg, rgba(20,20,60,0.9) 17.91%, rgba(15,20,55,0.85) 199.73%);
   --sh-answer-bg: rgba(20,20,50,0.8);
   --sh-answer-border: rgba(78,205,196,0.25);

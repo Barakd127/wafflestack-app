@@ -2101,7 +2101,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
       overflow: 'hidden',
     }}>
       {/* Logo / avatar area */}
-      <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '28px 32px 20px', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '28px 32px 21px' }}>
         <div style={{
           width: 64, height: 64,
           background: 'linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.15))',
@@ -2275,8 +2275,8 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
   return (
     <div className="ws-topbar" style={{
       background: 'var(--sh-topbar-bg)',
-      backdropFilter: 'blur(12px)',
       borderBottom: '1px solid var(--sh-topbar-border)',
+      boxShadow: 'var(--sh-topbar-seam)',
       height: 70,
       display: 'flex',
       alignItems: 'center',
