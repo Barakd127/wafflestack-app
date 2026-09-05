@@ -498,19 +498,23 @@ html.dark .ws-glass-card:hover {
 }
 
 /* ── Coral bloom (לימוד חומר card on the home screen) ── */
-.ws-glass-card--bloom {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.18) 54.33%, rgba(255,255,255,0.06) 100%),
-    radial-gradient(circle 560px at 6% -4%,
-      rgba(242,96,12,1) 0%,
-      rgba(242,96,12,1) 42%,
-      rgba(248,122,42,0.94) 52%,
-      rgba(249,172,126,0.66) 65%,
-      rgba(251,211,188,0.34) 79%,
-      rgba(253,231,216,0.10) 91%,
-      rgba(255,240,230,0) 100%),
-    linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%) !important;
+.ws-lesson-orb {
+  position: absolute;
+  top: -96px;
+  left: -84px;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: #f5741a;
+  filter: blur(52px);
+  pointer-events: none;
 }
+
+/* An absolutely-positioned sibling paints above static ones, so the card
+   content is lifted rather than the orb pushed to a negative layer. The orb
+   itself must stay out of this — it needs its own position:absolute. */
+.ws-lesson > *:not(.ws-lesson-orb) { position: relative; z-index: 1; }
+.ws-lesson > .ws-lesson-orb { z-index: 0; }
 
 /* ── Solid CTA Button with glass sheen (hybrid: solid color + specular) ── */
 /*

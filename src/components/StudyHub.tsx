@@ -2646,7 +2646,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
           </div>
 
           {/* Card: לימוד חומר — order:1 so it sits on the RIGHT in RTL (first). */}
-          <div className="ws-glass-card ws-glass-card--bloom" style={{
+          <div className="ws-glass-card ws-lesson" style={{
             borderRadius: CARD_RADIUS,
             padding: '28px 28px 24px',
             display: 'flex', flexDirection: 'column',
@@ -2654,6 +2654,8 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             order: 1,
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
+            {/* The orange orb — a real circle, blurred, behind the board. */}
+            <div className="ws-lesson-orb" aria-hidden="true" />
             <div style={{ ...cardHead, marginBottom: 16 }}><CardIcon name="study" /><div style={cardTitle}>לימוד חומר</div></div>
             {/* Whiteboard area with glassmorphism */}
             <div style={{
