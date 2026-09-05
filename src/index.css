@@ -500,14 +500,28 @@ html.dark .ws-glass-card:hover {
 /* ── Coral bloom (לימוד חומר card on the home screen) ── */
 .ws-lesson-orb {
   position: absolute;
-  top: -96px;
-  left: -84px;
-  width: 340px;
-  height: 340px;
+  top: -114px;
+  left: -102px;
+  width: 528px;
+  height: 480px;
   border-radius: 50%;
-  background: #f5741a;
-  filter: blur(52px);
+  background: #ff6a1c;
+  opacity: 0.6;
+  filter: blur(48px);
   pointer-events: none;
+}
+
+/* The lesson card's own tint. The white glass layer stays on top; the colour
+   underneath it is the one value to change. #ffffff = the same as every other
+   card; warmer values tint only this one. */
+.ws-lesson {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%),
+    radial-gradient(circle 520px at 0% 0%,
+      rgba(255,106,28,0.32) 0%,
+      rgba(255,106,28,0.15) 30%,
+      rgba(255,106,28,0.05) 48%,
+      rgba(255,106,28,0) 64%) !important;
 }
 
 /* An absolutely-positioned sibling paints above static ones, so the card
