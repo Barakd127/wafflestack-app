@@ -2140,8 +2140,12 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
               }}
               title={locked ? lockTip : (collapsed ? item.label : undefined)}
               style={{
-                background: isActive ? SIDEBAR_ACTIVE : 'transparent',
-                borderRadius: 32,
+                background: isActive ? '#fff' : 'transparent',
+                boxShadow: isActive
+                  ? 'inset 0 2px 5px rgba(31,50,120,0.16), 0 1px 2px rgba(10,20,62,0.18)'
+                  : 'none',
+                transform: isActive ? 'translateY(1px)' : 'none',
+                borderRadius: 16,
                 padding: collapsed ? '12px 0' : '12px 20px',
                 display: 'flex',
                 alignItems: 'center',
@@ -2153,8 +2157,8 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
                 width: '100%',
                 fontFamily: "'Rubik', sans-serif",
                 fontSize: 17,
-                fontWeight: isActive ? 600 : 400,
-                color: '#FFFFFF',
+                fontWeight: isActive ? 700 : 400,
+                color: isActive ? '#22378E' : '#FFFFFF',
                 opacity: locked ? 0.5 : 1,
                 filter: locked ? 'grayscale(0.7)' : 'none',
                 transition: 'background 0.15s',
@@ -2164,15 +2168,11 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
               onMouseLeave={e => { if (!isActive && !locked) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
             >
               <span
-                className={`ws-icon-chip ${isActive ? 'ws-icon-chip--active' : 'ws-icon-chip--inactive'}`}
                 style={{
                   width: 32, height: 32, flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: isActive ? '#FFD700' : 'rgba(255,255,255,0.92)',
-                  borderRadius: 10,
-                  border: '1px solid',
-                  transition: 'color 0.15s, background 0.15s, transform 0.15s',
-                  transform: isActive ? 'scale(1.06)' : 'scale(1)',
+                  color: isActive ? '#22378E' : 'rgba(255,255,255,0.92)',
+                  transition: 'color 0.15s',
                 }}>{renderIcon(item.iconKey)}</span>
               {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
               {locked && (
@@ -2646,7 +2646,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
           </div>
 
           {/* Card: לימוד חומר — order:1 so it sits on the RIGHT in RTL (first). */}
-          <div className="ws-glass-card" style={{
+          <div className="ws-glass-card ws-glass-card--bloom" style={{
             borderRadius: CARD_RADIUS,
             padding: '28px 28px 24px',
             display: 'flex', flexDirection: 'column',
