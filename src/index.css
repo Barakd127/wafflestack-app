@@ -501,14 +501,18 @@ html.dark .ws-glass-card:hover {
 .ws-glass-card--bloom {
   background:
     linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%),
-    radial-gradient(circle 320px at 4% -8%,
-      rgba(255,133,76,0.95) 0%,
-      rgba(255,133,76,0.66) 24%,
-      rgba(255,140,86,0.30) 48%,
-      rgba(255,150,100,0.08) 70%,
-      rgba(255,150,100,0) 84%),
+    radial-gradient(circle 340px at 4% -8%,
+      rgba(255,133,76,0.50) 0%,
+      rgba(255,133,76,0.26) 36%,
+      rgba(255,150,100,0) 76%),
     linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%) !important;
 }
+
+/* The mosaic is an absolutely-positioned sibling, and absolutely-positioned
+   siblings paint above static ones. Lift the card content rather than pushing
+   the mosaic to a negative layer — same result, no stacking surprises. */
+.ws-lesson > * { position: relative; z-index: 1; }
+.ws-lesson > .ws-waffle-mosaic { z-index: 0; }
 
 /* ── Solid CTA Button with glass sheen (hybrid: solid color + specular) ── */
 /*

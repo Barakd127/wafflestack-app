@@ -5,6 +5,7 @@ import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import BoardShell from './BoardShell'
 import CardIcon, { cardTitle, cardHead, CtaArrow } from './CardIcon'
+import WaffleMosaic from './WaffleMosaic'
 import { useGlassBoard } from '../hooks/useGlassBoard'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
@@ -2646,7 +2647,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
           </div>
 
           {/* Card: לימוד חומר — order:1 so it sits on the RIGHT in RTL (first). */}
-          <div className="ws-glass-card ws-glass-card--bloom" style={{
+          <div className="ws-glass-card ws-glass-card--bloom ws-lesson" style={{
             borderRadius: CARD_RADIUS,
             padding: '28px 28px 24px',
             display: 'flex', flexDirection: 'column',
@@ -2654,12 +2655,13 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             order: 1,
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
+            <WaffleMosaic />
             <div style={{ ...cardHead, marginBottom: 16 }}><CardIcon name="study" /><div style={cardTitle}>לימוד חומר</div></div>
             {/* Whiteboard area with glassmorphism */}
             <div style={{
               flex: 1,
               background: 'linear-gradient(180deg, rgba(255,255,255,0.51) 54.33%, rgba(255,255,255,0.17) 100%)',
-              backdropFilter: 'blur(20px)',
+              backdropFilter: 'blur(9px) saturate(140%)',
               boxShadow: CARD_SHADOW,
               borderRadius: 16, // inner panel: outer 24 minus the padding step — 24 inside 24 read as a mis-drawn corner
               padding: '20px 24px',
@@ -2668,21 +2670,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
               minHeight: 160,
             }}>
               {/* "טיפ" label */}
-              <div style={{ position: 'absolute', top: 16, left: 20, fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_TIP }}>טיפ</div>
-              {/* Floating 3D cube (CSS) */}
-              <div style={{ position: 'absolute', top: -10, right: -10, width: 80, height: 80, opacity: 0.7, transform: 'rotate(22deg)' }}>
-                <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <polygon points="40,5 75,22 75,58 40,75 5,58 5,22" fill="rgba(131,178,248,0.35)" stroke="rgba(131,178,248,0.6)" strokeWidth="1.5" />
-                  <polygon points="40,5 75,22 40,39 5,22" fill="rgba(131,178,248,0.5)" stroke="rgba(131,178,248,0.7)" strokeWidth="1" />
-                  <polygon points="40,39 75,22 75,58 40,75" fill="rgba(51,81,202,0.25)" />
-                </svg>
-              </div>
-              <div style={{ position: 'absolute', bottom: -15, left: -15, width: 70, height: 70, opacity: 0.5, transform: 'rotate(-89deg)' }}>
-                <svg viewBox="0 0 70 70" fill="none">
-                  <ellipse cx="35" cy="35" rx="30" ry="28" fill="rgba(51,81,202,0.2)" stroke="rgba(131,178,248,0.4)" strokeWidth="1" />
-                  <ellipse cx="35" cy="35" rx="18" ry="16" fill="rgba(51,81,202,0.3)" />
-                </svg>
-              </div>
+              <div style={{ position: 'absolute', top: 16, right: 24, fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_TIP, textAlign: 'right' }}>טיפ יומי</div>
               <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_DARK, lineHeight: 1.9, textAlign: 'right', marginTop: 40 }}>
                 נמפה את הנושאים בקורס שלך
               </div>
