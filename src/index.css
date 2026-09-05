@@ -501,15 +501,14 @@ html.dark .ws-glass-card:hover {
 .ws-glass-card--bloom {
   background:
     linear-gradient(180deg, rgba(255,255,255,0.18) 54.33%, rgba(255,255,255,0.06) 100%),
-    radial-gradient(circle 680px at -10% -18%,
-      rgba(240,88,28,1) 0%,
-      rgba(243,96,34,1) 16%,
-      rgba(248,118,54,0.94) 27%,
-      rgba(252,146,86,0.70) 38%,
-      rgba(254,176,124,0.44) 52%,
-      rgba(255,202,168,0.22) 68%,
-      rgba(255,222,200,0.08) 86%,
-      rgba(255,232,214,0.02) 100%),
+    radial-gradient(circle 560px at 6% -4%,
+      rgba(242,96,12,1) 0%,
+      rgba(242,96,12,1) 42%,
+      rgba(248,122,42,0.94) 52%,
+      rgba(249,172,126,0.66) 65%,
+      rgba(251,211,188,0.34) 79%,
+      rgba(253,231,216,0.10) 91%,
+      rgba(255,240,230,0) 100%),
     linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%) !important;
 }
 
