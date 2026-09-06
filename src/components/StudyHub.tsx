@@ -2694,8 +2694,8 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 opacity: 0.35,
               }} />
               {/* "טיפ" label */}
-              <div style={{ position: 'absolute', top: 16, right: 24, fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_TIP, textAlign: 'right' }}>טיפ יומי</div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_DARK, lineHeight: 1.9, textAlign: 'right', marginTop: 40 }}>
+              <div style={{ position: 'absolute', top: 16, right: 24, fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 500, letterSpacing: '0.2px', color: '#071A47', textAlign: 'right' }}>טיפ יומי</div>
+              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 18, fontWeight: 500, color: '#000000', lineHeight: 1.7, textAlign: 'right', textWrap: 'pretty', marginTop: 40 }}>
                 נמפה את הנושאים בקורס שלך
               </div>
             </div>
