@@ -5,7 +5,6 @@ import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import BoardShell from './BoardShell'
 import CardIcon, { cardTitle, cardHead, CtaArrow, CARD_ICON_COLOR } from './CardIcon'
-import { useGlassBoard } from '../hooks/useGlassBoard'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
 import { toPng } from 'html-to-image'
@@ -477,6 +476,7 @@ import { useTutorialStore } from '../store/tutorialStore'
 import { useTutorStore } from '../store/tutorStore'
 import { registerTourAction, tourStepIds } from './CoachmarkTour'
 import TourLauncher from './TourLauncher'
+import TopBarAccount, { TopBarBell } from './TopBarAccount'
 import Tooltip from './Tooltip'
 import Ribbon from './Ribbon'
 import { RiskBoard } from './RiskBoard'
@@ -2232,34 +2232,6 @@ function AdminToggle({ collapsed }: { collapsed: boolean }) {
 }
 
 // ── Top bar ────────────────────────────────────────────────────────────────────
-/**
- * GlassBoardAdminToggle — admin-only flag switch for the glass board (the
- * lesson/quiz whiteboard → pane of glass in front of the knowledge city, see
- * hooks/useGlassBoard.ts). Renders nothing for students; when adminMode is ON
- * it sits in the topbar next to the 🎓 סיור pill with the same styling.
- */
-function GlassBoardAdminToggle() {
-  const adminMode = useLearningStore(s => s.adminMode)
-  const [enabled, setEnabled] = useGlassBoard()
-  if (!adminMode) return null
-  return (
-    <button
-      onClick={() => setEnabled(!enabled)}
-      aria-pressed={enabled}
-      title={enabled ? 'לוח זכוכית פעיל — לחץ לחזרה ללוח המחיק' : 'לוח זכוכית כבוי — לחץ להפעלה'}
-      style={{
-        background: enabled ? 'rgba(51,81,202,0.14)' : 'rgba(99,102,241,0.10)',
-        border: '1px solid ' + (enabled ? 'rgba(51,81,202,0.55)' : 'rgba(99,102,241,0.3)'),
-        borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
-        color: enabled ? '#3351CA' : '#6366f1', fontSize: 12, fontFamily: "'Assistant', sans-serif", fontWeight: 600,
-        whiteSpace: 'nowrap',
-      }}
-    >
-      🪟 לוח זכוכית
-    </button>
-  )
-}
-
 function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { title: string; onLogout?: () => void; darkMode?: boolean; onToggleDark?: () => void; contextControls?: React.ReactNode }) {
   const userName = localStorage.getItem('userName') || 'Student'
   const xp = useLearningStore(state => state.xp)
@@ -2300,26 +2272,6 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
         )}
       </div>
       <div className="ws-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }} dir="ltr">
-        {/* Dark-mode toggle, integrated into topbar per user 2026-05-24
-            (was a floating fixed button at top-right obscuring sidebar icons). */}
-        {onToggleDark && (
-          <button
-            onClick={onToggleDark}
-            aria-label={darkMode ? 'הפעל מצב בהיר' : 'הפעל מצב כהה'}
-            title={darkMode ? 'מצב בהיר' : 'מצב כהה'}
-            style={{
-              background: 'rgba(31,62,108,0.08)',
-              border: '1px solid rgba(31,62,108,0.25)',
-              borderRadius: 10,
-              width: 40, height: 40,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'var(--sh-text-dark)',
-              cursor: 'pointer',
-            }}
-          >
-            {darkMode ? '☀' : '☾'}
-          </button>
-        )}
         <span className="ws-ribbon-divider" />
         {/* Ribbon A — Progress */}
         <Ribbon label="התקדמות">
@@ -2347,20 +2299,14 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
 
         {/* Ribbon C — Account (label hidden per user 2026-05-24) */}
         <Ribbon label="חשבון" hideLabel>
-          <span className="hidden md:inline" style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK }}>שלום, {userName}</span>
           <TourLauncher />
-          <GlassBoardAdminToggle />
-          {onLogout && (
-            <Tooltip label="יציאה" description="התנתק מהחשבון">
-              <button onClick={onLogout} style={{
-                background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.2)',
-                borderRadius: 8, padding: '5px 12px', cursor: 'pointer',
-                color: '#d32f2f', fontSize: 12, fontFamily: "'Assistant', sans-serif", fontWeight: 600,
-              }}>
-                ↩ יציאה
-              </button>
-            </Tooltip>
-          )}
+          <TopBarBell />
+          <TopBarAccount
+            userName={userName}
+            onLogout={onLogout}
+            darkMode={darkMode}
+            onToggleDark={onToggleDark}
+          />
         </Ribbon>
       </div>
     </div>

@@ -72,13 +72,18 @@ export default function TourLauncher() {
           aria-expanded={open}
           style={{
             position: 'relative',
-            background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.3)',
-            borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
-            color: '#6366f1', fontSize: 12, fontFamily: "'Assistant', sans-serif", fontWeight: 600,
-            animation: pulse ? 'ws-tourbtn-pulse 1.4s ease-out infinite' : undefined,
+            background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.25)',
+            borderRadius: 10, width: 40, height: 40, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--sh-text-dark)', fontFamily: "'Assistant', sans-serif",
           }}
         >
-          🎓 סיור
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M9.6 9.3a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.6" />
+            <circle cx="12" cy="17" r=".6" fill="currentColor" />
+          </svg>
           {pulse && (
             <span style={{
               position: 'absolute', top: -4, insetInlineEnd: -4, width: 9, height: 9,

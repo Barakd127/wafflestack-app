@@ -1,18 +1,15 @@
 /**
- * BoardShell — picks the lesson/quiz board surface.
+ * BoardShell — the lesson/quiz board surface.
  *
- * Glass flag ON  → GlassBoardShell (pane of glass in front of the knowledge city).
- * Glass flag OFF → WhiteboardShell, byte-identical to before (extra glass props
- *                  are simply not forwarded).
+ * There is one board now: the pane of glass in front of the knowledge city.
+ * The whiteboard it replaced is no longer reachable, and the flag that used to
+ * choose between them is gone with it — WhiteboardShell stays in the tree only
+ * because GlassBoardShell takes its props type, and tree-shaking drops the
+ * component itself since nothing renders it any more.
  */
-import WhiteboardShell from './WhiteboardShell'
 import GlassBoardShell from './glass/GlassBoardShell'
 import type { GlassBoardShellProps } from './glass/GlassBoardShell'
-import { useGlassBoard } from '../hooks/useGlassBoard'
 
 export default function BoardShell(props: GlassBoardShellProps) {
-  const [glass] = useGlassBoard()
-  if (glass) return <GlassBoardShell {...props} />
-  const { children, style, topRightSlot } = props
-  return <WhiteboardShell style={style} topRightSlot={topRightSlot}>{children}</WhiteboardShell>
+  return <GlassBoardShell {...props} />
 }
