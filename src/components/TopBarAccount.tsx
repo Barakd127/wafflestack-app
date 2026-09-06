@@ -17,8 +17,6 @@
 import { useEffect, useRef, useState } from 'react'
 
 const INK = 'var(--sh-text-dark)'
-const LINE = '1px solid rgba(31,62,108,0.25)'
-const CHROME_BG = 'rgba(31,62,108,0.08)'
 
 /** Closes the popover on an outside click or Escape. */
 function useDismiss(open: boolean, close: () => void) {
@@ -100,9 +98,12 @@ export function TopBarBell() {
         aria-expanded={open}
         aria-label="התראות"
         title="התראות"
+        onMouseEnter={e => { if (!open) e.currentTarget.style.background = 'rgba(31,62,108,0.07)' }}
+        onMouseLeave={e => { if (!open) e.currentTarget.style.background = 'transparent' }}
         style={{
-          background: open ? 'rgba(31,62,108,0.14)' : CHROME_BG,
-          border: LINE, borderRadius: 10,
+          background: open ? 'rgba(31,62,108,0.10)' : 'transparent',
+          border: 'none', borderRadius: 10,
+          transition: 'background .15s ease',
           width: 40, height: 40,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: INK, cursor: 'pointer',
