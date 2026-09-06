@@ -288,7 +288,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
         <button onClick={onBack} style={backLinkStyle}>→ חזרה לבחירת נושא</button>
         <div style={{ ...glassCardStyle, padding: 40, marginTop: 24, textAlign: 'center' }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>📖</div>
-          <div style={{ fontFamily: "'Assistant', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 12 }}>
+          <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 12 }}>
             תוכן לימוד עבור נושא זה עדיין בהכנה
           </div>
           <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_LIGHT, marginBottom: 24 }}>
@@ -361,7 +361,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
 
       {/* Title row with copy-to-mindmap action */}
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4, gap: 12 }}>
-        <h2 style={{ fontFamily: "'Assistant', sans-serif", fontSize: 26, fontWeight: 700, color: TEXT_DARK, margin: 0, textAlign: 'right' }}>
+        <h2 style={{ fontFamily: 'var(--ws-display)', fontSize: 26, fontWeight: 700, color: TEXT_DARK, margin: 0, textAlign: 'right' }}>
           📚 {lesson.hebrewName}
         </h2>
         {mindmapOpen && (
@@ -508,7 +508,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 14, marginBottom: 22 }}>
           <h3 style={{
-            fontFamily: "'Assistant', sans-serif", fontSize: 30, fontWeight: 700,
+            fontFamily: 'var(--ws-display)', fontSize: 30, fontWeight: 700,
             color: TEXT_DARK, marginTop: 0, marginBottom: 0, textAlign: 'right',
             lineHeight: 1.3, letterSpacing: '-0.01em', flex: 1,
           }}>

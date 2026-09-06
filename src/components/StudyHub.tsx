@@ -4,7 +4,7 @@ import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../con
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import BoardShell from './BoardShell'
-import CardIcon, { cardTitle, cardHead, CtaArrow } from './CardIcon'
+import CardIcon, { cardTitle, cardHead, CtaArrow, CARD_ICON_COLOR } from './CardIcon'
 import { useGlassBoard } from '../hooks/useGlassBoard'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
@@ -1259,10 +1259,6 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
   }
   return (
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
-      <div style={{ marginBottom: 22 }}>
-        <h2 style={{ fontFamily: 'var(--ws-display)', color: TEXT_DARK, fontSize: 26, fontWeight: 700, margin: 0 }}>הקורסים שלי</h2>
-        <p style={{ color: TEXT_MED, fontSize: 14, margin: '6px 0 0' }}>בחר את הקורס בו ברצונך להתחיל ללמוד</p>
-      </div>
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -1283,17 +1279,12 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
               direction: 'rtl',
             }}
           >
-            {/* Icon chip — same visual language as the sidebar nav: flat
-                translucent chip + stroke-only line icon, no gradient fill. */}
-            <div style={{
-              width: 56, height: 56, borderRadius: 14,
-              background: 'var(--sh-sidebar-bg)',
-              border: '1px solid rgba(255,255,255,0.25)',
-              color: '#fff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 14,
-            }}><CourseIcon id={c.id} size={30} /></div>
-            <div style={{ fontSize: 19, fontWeight: 700, color: TEXT_DARK, marginBottom: 4 }}>{c.label}</div>
+            {/* Icon — the home-screen language exactly: one stroke, one colour,
+                nothing behind it. */}
+            <div style={{ color: CARD_ICON_COLOR, marginBottom: 12, display: 'flex' }}>
+              <CourseIcon id={c.id} size={26} />
+            </div>
+            <div style={{ fontFamily: 'var(--ws-display)', fontSize: 19, fontWeight: 700, color: TEXT_DARK, marginBottom: 4 }}>{c.label}</div>
             <div style={{ fontSize: 13, color: TEXT_MED, lineHeight: 1.45 }}>{c.desc}</div>
             {!c.active && (
               // Pin moved from insetInlineStart (right edge in RTL — collided
@@ -1449,7 +1440,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
           <div style={{ fontSize: 32 }}>{isMastered ? '⭐' : '📖'}</div>
           <div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK, textAlign: 'center' }}>
+            <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 20, color: TEXT_DARK, textAlign: 'center' }}>
               {topic.label}
             </div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginTop: 4, textAlign: 'center' }}>
@@ -4210,7 +4201,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             /* ── Completion panel ── */
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 0', gap: 18 }}>
               <div style={{ fontSize: 60 }}>🏆</div>
-              <div style={{ fontFamily: "'Assistant', sans-serif", fontWeight: 700, fontSize: 28, color: TEXT_DARK, textAlign: 'center' }}>
+              <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 28, color: TEXT_DARK, textAlign: 'center' }}>
                 סיימת את הסשן!
               </div>
               <div style={{ display: 'flex', gap: 24, margin: '4px 0' }}>
