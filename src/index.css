@@ -507,11 +507,13 @@ html.dark .ws-glass-card:hover {
   border-radius: 50%;
   background: linear-gradient(
     168deg,
-    #ea6633 0%,
-    #f5a279 24%,
-    #cbd9f2 52%,
-    #7fa6e6 78%,
-    #3351ca 100%
+    #142954 0%,
+    #27418f 14%,
+    #527bb8 30%,
+    #cbd9f2 46%,
+    #f5a279 68%,
+    #ea6633 82%,
+    rgba(234, 102, 51, 0) 100%
   );
   opacity: 0.45;
   filter: blur(64px);
