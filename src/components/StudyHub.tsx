@@ -2664,10 +2664,10 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
               // invisible, and so are the white dot grid and the specular sweep that
               // are what make it read as glass at all. Same 155deg, same stops — the
               // blue is just brought forward from the middle stop to the whole panel.
-              background: 'linear-gradient(155deg, #D6E6FF, #B9CEF8 55%, #D0E0FC)',
+              background: 'linear-gradient(155deg, rgba(214,230,255,0.62), rgba(197,215,250,0.52) 55%, rgba(224,236,255,0.58))',
               // No backdrop blur: nothing sits behind it to blur, and asking the
               // compositor to blur an opaque card every frame buys nothing.
-              border: '1px solid rgba(255,255,255,0.55)',
+              border: '1px solid rgba(160,188,244,0.60)',
               boxShadow: '0 16px 40px rgba(11,27,62,0.28), inset 0 1px 0 rgba(255,255,255,0.6)',
               borderRadius: 20,
               padding: '20px 24px',
