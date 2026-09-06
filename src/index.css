@@ -1,3 +1,19 @@
+/* Tel Aviv Modernist — Fontef. Licensed to Shirli Alton, order #04350.
+   Two files, declared as one family so font-weight picks between them. */
+@font-face {
+  font-family: 'Tel Aviv Modernist';
+  src: url('./assets/fonts/telaviv-modernistregular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Tel Aviv Modernist';
+  src: url('./assets/fonts/telaviv-modernistbold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -32,6 +48,15 @@
      board" block at the end of this file
      (`.ws-glass-board .ws-lesson-bullet > div`); it does not reach the
      whiteboard. */
+  /* The headline face — Tel Aviv Modernist, Fontef 2020, Yanek Iontef and
+     Daniel Grumer. Hebrew-first and geometric: it was drawn from the signage
+     of the White City's 1930s buildings, which is the same Bauhaus geometry a
+     tech headline wants, and it means something in an app about building a
+     city. It replaces Rubik in headings ONLY — Rubik keeps everything you scan
+     rather than read: labels, buttons, nav, numbers. One face to scan, one to
+     read. Fallbacks stay Hebrew-capable. */
+  --ws-display: 'Tel Aviv Modernist', 'Rubik', 'Heebo', sans-serif;
+
   --ws-hand: 'Gveret Levin', 'Playpen Sans Hebrew', 'Assistant', sans-serif;
 
   /* Bottom-left FAB slot tokens — shared between TutorFAB (fixed) and the

@@ -1260,7 +1260,7 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
   return (
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
       <div style={{ marginBottom: 22 }}>
-        <h2 style={{ fontFamily: "'Rubik', sans-serif", color: TEXT_DARK, fontSize: 26, fontWeight: 700, margin: 0 }}>הקורסים שלי</h2>
+        <h2 style={{ fontFamily: 'var(--ws-display)', color: TEXT_DARK, fontSize: 26, fontWeight: 700, margin: 0 }}>הקורסים שלי</h2>
         <p style={{ color: TEXT_MED, fontSize: 14, margin: '6px 0 0' }}>בחר את הקורס בו ברצונך להתחיל ללמוד</p>
       </div>
       <div style={{
@@ -1552,7 +1552,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
   return (
     <div className="ws-screen-pad" style={viewMode === 'mindmap' ? { flex: 1, overflow: 'auto', padding: '5px 8px 6px' } : { flex: 1, overflow: 'auto', padding: '32px 40px' }}>
       {viewMode === 'mindmap' ? null : (
-        <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
+        <h2 style={{ fontFamily: 'var(--ws-display)', fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
           בחר נושא ללמוד 📚
         </h2>
       )}
@@ -1565,7 +1565,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
               <div key={section.id}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 24 }}>{section.emoji}</span>
-                  <h3 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 21, fontWeight: 800, color: TEXT_DARK, margin: 0 }}>{section.labelHe}</h3>
+                  <h3 style={{ fontFamily: 'var(--ws-display)', fontSize: 21, fontWeight: 800, color: TEXT_DARK, margin: 0 }}>{section.labelHe}</h3>
                   <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT, background: 'rgba(127,155,217,0.12)', borderRadius: 999, padding: '2px 10px' }}>
                     {masteredCount}/{section.topics.length} נושאים
                   </span>
@@ -2289,7 +2289,7 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
           title instead of stealing space from the board content area. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '1 1 auto', minWidth: 0 }}>
         <h1 style={{
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: 'var(--ws-display)',
           fontWeight: 800,
           fontSize: 28,
           color: TEXT_DARK,

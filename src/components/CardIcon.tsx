@@ -101,7 +101,7 @@ export default function CardIcon({ name, size = 26 }: { name: CardIconName; size
 /** Every container title on the home screen. Taken from לימוד חומר, which
  *  Shirli picked as the reference. */
 export const cardTitle: CSSProperties = {
-  fontFamily: "'Rubik', sans-serif",
+  fontFamily: 'var(--ws-display)',
   fontWeight: 700,
   fontSize: 23,
   color: 'var(--sh-text-med)',
