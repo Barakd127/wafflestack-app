@@ -10,9 +10,13 @@
  * sign-out, so they are both one click from the chevron rather than nested in
  * a submenu that would hold two items.
  *
- * TopBarBell sits beside it. There is no notification source yet, so it opens
- * an honest empty state rather than nothing at all: a control that does not
- * respond reads as broken, and one that says "nothing here" reads as finished.
+ * TopBarBell sits beside it. It takes a list and shows a red dot when the list
+ * is not empty; with an empty list it opens an honest empty state rather than
+ * nothing at all, because a control that does not respond reads as broken and
+ * one that says "nothing here" reads as finished.
+ *
+ * NOTHING PRODUCES THAT LIST YET. The shape is here so the first producer is a
+ * one-line change: the daily tip being ready, a level-up, a course unlocking.
  */
 import { useEffect, useRef, useState } from 'react'
 
@@ -87,7 +91,11 @@ function Chevron({ open }: { open: boolean }) {
   )
 }
 
-export function TopBarBell() {
+/** One notification. Nothing produces these yet — see the note on TopBarBell. */
+export type WsNotification = { id: string; text: string; when?: string }
+
+export function TopBarBell({ items = [] }: { items?: WsNotification[] }) {
+  const unread = items.length
   const [open, setOpen] = useState(false)
   const ref = useDismiss(open, () => setOpen(false))
   return (
@@ -102,7 +110,7 @@ export function TopBarBell() {
         onMouseLeave={e => { if (!open) e.currentTarget.style.background = 'transparent' }}
         style={{
           background: open ? 'rgba(31,62,108,0.10)' : 'transparent',
-          border: 'none', borderRadius: 10,
+          border: 'none', borderRadius: 10, position: 'relative',
           transition: 'background .15s ease',
           width: 40, height: 40,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -110,13 +118,34 @@ export function TopBarBell() {
         }}
       >
         <BellIcon />
+        {unread > 0 && (
+          /* The same mark the tour launcher already uses for "there is
+             something new", down to the 2px white ring that keeps it legible
+             against whatever it overlaps. One sign, one meaning. */
+          <span aria-hidden style={{
+            position: 'absolute', top: 6, insetInlineEnd: 6,
+            width: 9, height: 9, borderRadius: '50%',
+            background: '#ef4444', border: '2px solid #fff',
+          }} />
+        )}
       </button>
       {open && (
         <div style={panelStyle} role="dialog" aria-label="התראות">
           <div style={sectionStyle}>התראות</div>
-          <div style={{ padding: '10px 12px 12px', fontSize: 15, color: 'var(--sh-text-med)' }}>
-            אין התראות חדשות
-          </div>
+          {unread === 0 ? (
+            <div style={{ padding: '10px 12px 12px', fontSize: 15, color: 'var(--sh-text-med)' }}>
+              אין התראות חדשות
+            </div>
+          ) : (
+            items.map(n => (
+              <div key={n.id} style={{ padding: '9px 12px', fontSize: 15, color: INK, lineHeight: 1.45 }}>
+                {n.text}
+                {n.when && (
+                  <div style={{ fontSize: 13, color: 'var(--sh-text-light)', marginTop: 2 }}>{n.when}</div>
+                )}
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>
