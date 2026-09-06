@@ -505,9 +505,9 @@ html.dark .ws-glass-card:hover {
   width: 334px;
   height: 304px;
   border-radius: 50%;
-  background: #ff6a1c;
-  opacity: 0.6;
-  filter: blur(30px);
+  background: #ea6633;
+  opacity: 0.55;
+  filter: blur(38px);
   pointer-events: none;
 }
 
@@ -516,12 +516,51 @@ html.dark .ws-glass-card:hover {
    card; warmer values tint only this one. */
 .ws-lesson {
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%),
-    radial-gradient(circle 330px at 0% 0%,
-      rgba(255,106,28,0.32) 0%,
-      rgba(255,106,28,0.15) 30%,
-      rgba(255,106,28,0.05) 48%,
-      rgba(255,106,28,0) 64%) !important;
+    radial-gradient(circle 330px at 8% 2%,
+      rgba(234,102,51,0.95) 0%, rgba(234,102,51,0.45) 38%, rgba(234,102,51,0) 66%),
+    radial-gradient(ellipse 460px 340px at 94% -12%,
+      rgba(243,136,85,0.62) 0%, rgba(243,136,85,0.18) 44%, rgba(243,136,85,0) 70%),
+    radial-gradient(circle 520px at 100% 108%,
+      rgba(82,123,184,0.80) 0%, rgba(82,123,184,0.26) 42%, rgba(82,123,184,0) 72%),
+    linear-gradient(155deg, #1c3568 0%, #142954 56%, #101f40 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.22) !important;
+  border-right-color: rgba(0, 0, 0, 0.22) !important;
+  box-shadow:
+    0 16px 42px rgba(10, 22, 62, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Ink inverts with the surface. White on this navy is 14.2:1. */
+.ws-lesson [style*="--sh-text-med"] { color: #ffffff !important; }
+.ws-lesson svg[stroke="#4B5563"] { stroke: rgba(255, 255, 255, 0.88) !important; }
+
+/* The inner panel goes near-opaque. Translucent white over navy turns muddy
+   blue, and every reference has a clean light panel sitting ON the coloured
+   card — that contrast is the whole pattern. */
+.ws-lesson [style*="min-height: 160px"],
+.ws-lesson [style*="min-height:160px"] {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 12px 30px rgba(6, 14, 50, 0.36) !important;
+}
+
+/* Not white: white already means "selected" in the sidebar, and one sign
+   cannot teach two things on one screen. Pale blue from the same palette —
+   7.7:1 against the card and 7.7:1 for its own ink. */
+.ws-lesson .ws-cta {
+  background: #a8c0e4 !important;
+  color: #142954 !important;
+  box-shadow: 0 3px 10px rgba(8, 18, 55, 0.40) !important;
+}
+.ws-lesson .ws-cta:hover {
+  background: #bccfec !important;
+  box-shadow: 0 7px 16px rgba(8, 18, 55, 0.46) !important;
+}
+.ws-lesson .ws-cta:active {
+  background: #93aed8 !important;
+  box-shadow: inset 0 2px 5px rgba(8, 18, 55, 0.34) !important;
 }
 
 /* An absolutely-positioned sibling paints above static ones, so the card
