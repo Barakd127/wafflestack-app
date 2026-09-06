@@ -102,9 +102,8 @@ export default function CardIcon({ name, size = 26 }: { name: CardIconName; size
  *  Shirli picked as the reference. */
 export const cardTitle: CSSProperties = {
   fontFamily: "'Rubik', sans-serif",
-  fontWeight: 600,
+  fontWeight: 700,
   fontSize: 23,
-  textWrap: 'balance',
   color: 'var(--sh-text-med)',
   textAlign: 'right',
 }

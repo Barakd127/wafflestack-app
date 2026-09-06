@@ -53,17 +53,17 @@
   --mm-divider: #e5e7eb;
 
   /* StudyHub theme tokens (light mode) */
-  --sh-page-bg: linear-gradient(35.22deg, #FFFFFF -9.85%, #DFE8FB 78%, #3060CF 210%);
-  --sh-sidebar-bg: linear-gradient(265.4deg, #070C7FC5, #2956C0EB);
-  --sh-sidebar-active: #3A5188;
+  --sh-page-bg: linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 78%, #3351CA 210%);
+  --sh-sidebar-bg: linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%);
+  --sh-sidebar-active: #254A9F;
   --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%);
   --sh-glass-card-sm: linear-gradient(180deg, rgba(255,255,255,0.30) 54.33%, rgba(255,255,255,0.10) 100%);
   --sh-card-shadow: 0px 15px 30px rgba(31,41,55,0.25);
-  --sh-btn-color: #1D2434;
-  --sh-text-dark: #253865;
-  --sh-text-med: #3A5188;
-  --sh-text-light: #8EAAEB;
-  --sh-text-tip: #3A5188;
+  --sh-btn-color: #122460;
+  --sh-text-dark: #1F3E6C;
+  --sh-text-med: #254A9F;
+  --sh-text-light: #7F9BD9;
+  --sh-text-tip: #465CA5;
   --sh-topbar-bg: transparent;
   --sh-topbar-border: #FFFFFF;
   --sh-topbar-seam: 0 1px 0 rgba(31,62,108,0.22);
@@ -391,7 +391,7 @@ html.dark :focus-visible {
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   border: 1px solid rgba(158, 177, 231, 0.55) !important;
-  color: #253865 !important;
+  color: #1F3E6C !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 18px rgba(110, 140, 210, 0.28) !important;
 }
 .ws-glass-btn:hover { background: rgba(158, 177, 231, 0.44) !important; }
@@ -497,15 +497,38 @@ html.dark .ws-glass-card:hover {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.2) !important;
 }
 
-/* Every card on the home screen, including לימוד חומר. Kept at 95/86 rather
-   than solid so the page still reads underneath and they stay glass, not paper. */
-.ws-glass-card {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.86) 100%) !important;
-  border-color: rgba(255,255,255,0.9) !important;
-  border-bottom-color: rgba(31,62,108,0.06) !important;
-  border-right-color: rgba(31,62,108,0.06) !important;
+/* ── Coral bloom (לימוד חומר card on the home screen) ── */
+.ws-lesson-orb {
+  position: absolute;
+  top: -72px;
+  left: -64px;
+  width: 334px;
+  height: 304px;
+  border-radius: 50%;
+  background: #ff6a1c;
+  opacity: 0.6;
+  filter: blur(30px);
+  pointer-events: none;
 }
+
+/* The lesson card's own tint. The white glass layer stays on top; the colour
+   underneath it is the one value to change. #ffffff = the same as every other
+   card; warmer values tint only this one. */
+.ws-lesson {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%),
+    radial-gradient(circle 330px at 0% 0%,
+      rgba(255,106,28,0.32) 0%,
+      rgba(255,106,28,0.15) 30%,
+      rgba(255,106,28,0.05) 48%,
+      rgba(255,106,28,0) 64%) !important;
+}
+
+/* An absolutely-positioned sibling paints above static ones, so the card
+   content is lifted rather than the orb pushed to a negative layer. The orb
+   itself must stay out of this — it needs its own position:absolute. */
+.ws-lesson > *:not(.ws-lesson-orb) { position: relative; z-index: 1; }
+.ws-lesson > .ws-lesson-orb { z-index: 0; }
 
 /* ── Solid CTA Button with glass sheen (hybrid: solid color + specular) ── */
 /*
@@ -579,10 +602,10 @@ html.dark .ws-glass-card:hover {
   background: #D4AF37;
 }
 .ws-glass-seg:hover { background: rgba(18,36,96,0.08) !important; }
-.ws-glass-seg[aria-pressed="true"]:hover { background: #1D2434 !important; }
+.ws-glass-seg[aria-pressed="true"]:hover { background: #122460 !important; }
 .ws-glass-seg:focus-visible,
 .ws-glass-track:focus-visible,
-.ws-glass-board button:focus-visible { outline: 2px solid #3060CF; outline-offset: 2px; }
+.ws-glass-board button:focus-visible { outline: 2px solid #3351CA; outline-offset: 2px; }
 
 /* Dark mode: the glass whites stay, the dot grid quiets down. */
 html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
@@ -695,18 +718,18 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  background: linear-gradient(270deg, #3757B9EB, #172580);
+  background: linear-gradient(270deg, #3848A0 0%, #5463C6 100%);
   box-shadow: 0 3px 8px rgba(39,24,126,0.32);
   transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
               background 0.18s ease;
 }
 .ws-cta:hover {
-  background: linear-gradient(270deg, #2F4B9FEB, #14206E);
+  background: linear-gradient(270deg, #18247E 0%, #313CCE 100%);
   box-shadow: 0 6px 13px rgba(39,24,126,0.38);
   transform: translateY(-3px);
 }
 .ws-cta:active {
-  background: linear-gradient(270deg, #294089EB, #111B5F);
+  background: linear-gradient(270deg, #101A60 0%, #222CA4 100%);
   box-shadow: inset 0 2px 5px rgba(11,6,48,0.55);
   transform: translateY(1px);
 }
