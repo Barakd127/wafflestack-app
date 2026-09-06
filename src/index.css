@@ -513,7 +513,7 @@ html.dark .ws-glass-card:hover {
 }
 
 .ws-lesson {
-  background: linear-gradient(35.22deg, #FFFFFF, #FAF9F56C, #7A99FFCA) !important;
+  background: linear-gradient(-22deg, #F2F7FF, #87A0F796) !important;
   box-shadow:
     0 12px 28px rgba(20, 34, 78, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.55),
