@@ -54,7 +54,7 @@
 
   /* StudyHub theme tokens (light mode) */
   --sh-page-bg: linear-gradient(35.22deg, #FFFFFF -9.85%, #DFE8FB 78%, #3060CF 210%);
-  --sh-sidebar-bg: linear-gradient(265.4deg, #8EAAEB -108.21%, #3060CF 169.33%);
+  --sh-sidebar-bg: linear-gradient(265.4deg, #070C7FC5, #2956C0EB);
   --sh-sidebar-active: #3A5188;
   --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%);
   --sh-glass-card-sm: linear-gradient(180deg, rgba(255,255,255,0.30) 54.33%, rgba(255,255,255,0.10) 100%);
@@ -497,17 +497,23 @@ html.dark .ws-glass-card:hover {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.2) !important;
 }
 
-/* ── Coral bloom (לימוד חומר card on the home screen) ── */
+/* ── The leading card (לימוד חומר, home screen) ──
+   It leads on value alone — a deeper, more saturated rung of the same 222°
+   scale than the glass around it. Not on hue: coral already means "this moved"
+   (the weekly chart, the timeline), and a second job would make one sign carry
+   two messages. Not on depth either — the shadow is deliberately the shared
+   one, so the card sits in the same plane as its neighbours and the difference
+   between them stays purely chromatic. */
 .ws-lesson {
+  background: linear-gradient(180deg, #C6CEFFBF, #A6BEF7BF) !important;
+}
+
+/* Dark mode has no light ground for that value step to read against, so the
+   card leads by being LIGHTER than its neighbours (0.14 against their 0.07)
+   instead of deeper. Same channel, inverted. */
+html.dark .ws-lesson {
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%),
-    linear-gradient(
-      180deg,
-      #dfe8fb 0%,
-      #dfe8fb 80%,
-      rgba(255, 133, 76, 0.1) 96%,
-      rgba(255, 133, 76, 0.42) 100%
-    ) !important;
+    linear-gradient(180deg, rgba(255,255,255,0.14) 54.33%, rgba(255,255,255,0.06) 100%) !important;
 }
 
 /* ── Solid CTA Button with glass sheen (hybrid: solid color + specular) ── */
@@ -698,18 +704,18 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  background: linear-gradient(270deg, #2853B8 0%, #4570D3 100%);
+  background: linear-gradient(270deg, #060B77 0%, #2751B4 100%);
   box-shadow: 0 3px 8px rgba(39,24,126,0.32);
   transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
               background 0.18s ease;
 }
 .ws-cta:hover {
-  background: linear-gradient(270deg, #214497 0%, #2E5AC2 100%);
+  background: linear-gradient(270deg, #050966 0%, #22469B 100%);
   box-shadow: 0 6px 13px rgba(39,24,126,0.38);
   transform: translateY(-3px);
 }
 .ws-cta:active {
-  background: linear-gradient(270deg, #1A3575 0%, #25499D 100%);
+  background: linear-gradient(270deg, #040858 0%, #1D3C85 100%);
   box-shadow: inset 0 2px 5px rgba(11,6,48,0.55);
   transform: translateY(1px);
 }
