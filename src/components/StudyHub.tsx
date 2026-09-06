@@ -2140,7 +2140,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
               }}
               title={locked ? lockTip : (collapsed ? item.label : undefined)}
               style={{
-                background: isActive ? '#fff' : 'transparent',
+                background: isActive ? '#C0D0F6' : 'transparent',
                 boxShadow: isActive
                   ? 'inset 0 2px 5px rgba(31,50,120,0.16), 0 1px 2px rgba(10,20,62,0.18)'
                   : 'none',
@@ -2536,14 +2536,14 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             }}
           >
             <div style={{ ...cardHead }}><CardIcon name="plan" /><div style={cardTitle}>התאמת תכנית אישית</div></div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_MED, marginTop: 6, lineHeight: 1.5 }}>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_MED, marginTop: 6, lineHeight: 1.6, textWrap: 'pretty' }}>
               שאלון של פחות מדקה — נסדר את הנושאים בדיוק לפי המטרה והזמן שלך
             </div>
             {/* Flexible spacer with a floor: margin-top:auto alone collapses to
                 zero once the copy fills the card, which put the button on the
                 text. This keeps 20px whatever the copy length. */}
             <div style={{ flex: 1, minHeight: 20 }} />
-            <button onClick={() => setPlanWizardOpen(true)} className="ws-cta">להתאמה<CtaArrow /></button>
+            <button onClick={() => setPlanWizardOpen(true)} className="ws-cta ws-cta--quiet">להתאמה<CtaArrow /></button>
           </div>
         ) : (
           <div style={{
@@ -2614,7 +2614,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
             <div style={{ ...cardHead, marginBottom: 6 }}><CardIcon name="practice" /><div style={cardTitle}>תרגול</div></div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16, textWrap: 'pretty' }}>
               {completedLessons.length === 0 ? (
                 <>מתחילים מהתחלה · {currentTopicName}</>
               ) : answeredInTopic > 0 && remainingInTopic > 0 ? (
@@ -2631,7 +2631,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 <HeroScene />
               </Suspense>
             </div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_LIGHT, marginBottom: 8, textAlign: 'right' }}>הצעה למבנה הבא בעירך</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 500, letterSpacing: '0.2px', color: TEXT_LIGHT, marginBottom: 8, textAlign: 'right' }}>הצעה למבנה הבא בעירך</div>
             {/* Progress bar — reflects answered share of the current topic */}
             <div style={{ height: 7, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden', marginBottom: 16 }}>
               <div style={{ width: `${topicPct}%`, height: '100%', background: 'rgba(212,175,55,0.7)', borderRadius: 10, transition: 'width 0.4s' }} />
@@ -2640,7 +2640,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 practice quiz, bypassing the difficulty picker. Returning users
                 keep the existing picker flow so they can pick difficulty / resume. */}
             <button onClick={() => (completedLessons.length > 0 ? onSelectTopic(currentTopicId) : onStartPractice(currentTopicId))}
-                            className="ws-cta">
+                            className="ws-cta ws-cta--quiet">
               {completedLessons.length > 0 ? 'ממשיכים בתרגול' : 'מתחילים לתרגל'}<CtaArrow />
             </button>
           </div>
@@ -2654,19 +2654,45 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             order: 1,
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
+            {/* The sky's light sweep and ground haze — CityBackdrop.tsx:194/196,
+                dimmed to card scale. Decoration only, never in the tab order. */}
+            <div className="ws-lesson-sky" aria-hidden style={{
+              position: 'absolute', top: '-10%', right: '18%', width: '70%', height: '120%',
+              background: 'linear-gradient(112deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.22) 48%, rgba(255,255,255,0) 52%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.14) 66%, rgba(255,255,255,0) 70%)',
+              opacity: 0.46, pointerEvents: 'none',
+            }} />
             <div style={{ ...cardHead, marginBottom: 16 }}><CardIcon name="study" /><div style={cardTitle}>לימוד חומר</div></div>
             {/* Whiteboard area with glassmorphism */}
             <div style={{
               flex: 1,
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.51) 54.33%, rgba(255,255,255,0.17) 100%)',
-              backdropFilter: 'blur(18px) saturate(140%)',
-              boxShadow: CARD_SHADOW,
-              borderRadius: 16, // inner panel: outer 24 minus the padding step — 24 inside 24 read as a mis-drawn corner
+              // The board from the lesson screen, verbatim — GlassBoardShell.tsx:517.
+              // Same frost, same blur, same border, same shadow, same radius, so
+              // the card is a window onto the screen it leads to rather than a
+              // picture of one.
+              background: 'linear-gradient(155deg, rgba(255,255,255,0.88), rgba(214,230,255,0.55) 55%, rgba(255,255,255,0.84))',
+              backdropFilter: 'blur(26px) saturate(160%)',
+              WebkitBackdropFilter: 'blur(26px) saturate(160%)',
+              border: '1px solid rgba(255,255,255,0.55)',
+              boxShadow: '0 16px 40px rgba(11,27,62,0.28), inset 0 1px 0 rgba(255,255,255,0.6)',
+              borderRadius: 20,
               padding: '20px 24px',
               position: 'relative',
               overflow: 'hidden',
               minHeight: 160,
             }}>
+              {/* Dot grid (GlassBoardShell.tsx:490) and specular sweep (:478) ride
+                  on their own layers rather than as extra background stops, so the
+                  frost itself stays one editable colour. */}
+              <div aria-hidden style={{
+                position: 'absolute', inset: 0, borderRadius: 20, pointerEvents: 'none',
+                backgroundImage: 'radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1px)',
+                backgroundSize: '28px 28px',
+              }} />
+              <div aria-hidden style={{
+                position: 'absolute', inset: 0, borderRadius: 20, pointerEvents: 'none',
+                background: 'linear-gradient(215deg, rgba(255,255,255,0.5), rgba(255,255,255,0) 60%)',
+                opacity: 0.35,
+              }} />
               {/* "טיפ" label */}
               <div style={{ position: 'absolute', top: 16, right: 24, fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_TIP, textAlign: 'right' }}>טיפ יומי</div>
               <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_DARK, lineHeight: 1.9, textAlign: 'right', marginTop: 40 }}>
@@ -2827,7 +2853,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             </div>
 
             <div style={{ flex: 1 }} />
-            <button onClick={onGoWorld} className="ws-cta">
+            <button onClick={onGoWorld} className="ws-cta ws-cta--quiet">
               כניסה לעולם<CtaArrow />
             </button>
           </div>
