@@ -36,7 +36,7 @@ export default function IntroTutorialVideo() {
         {/* Flexible spacer with a floor — margin-top:auto alone collapses to zero
             once the copy fills the card, which puts the button on the text. */}
         <div style={{ flex: 1, minHeight: 20 }} />
-        <button onClick={() => setOpen(true)} className="ws-cta ws-cta--quiet">הדרכה מהירה<CtaArrow /></button>
+        <button onClick={() => setOpen(true)} className="ws-cta">הדרכה מהירה<CtaArrow /></button>
       </div>
 
       {/* Modal player */}
