@@ -802,8 +802,8 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                 }}
               />
             </div>
-            <div style={{ fontWeight: 800, fontSize: 26, color: '#1F3E6C' }}>WaffleStack</div>
-            <div style={{ fontSize: 13, color: '#7F9BD9', marginTop: 4 }}>פלטפורמת למידה לסטטיסטיקה</div>
+            <div style={{ fontWeight: 800, fontSize: 26, color: '#253865' }}>WaffleStack</div>
+            <div style={{ fontSize: 13, color: '#8EAAEB', marginTop: 4 }}>פלטפורמת למידה לסטטיסטיקה</div>
           </div>
 
           {/* Mode tabs — glass pill */}
@@ -813,9 +813,9 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                 className={mode === m ? 'ws-cta-btn' : ''}
                 style={{
                   flex: 1, padding: '10px 0', borderRadius: 10, cursor: 'pointer',
-                  background: mode === m ? 'linear-gradient(135deg,#1F3E6C,#254A9F)' : 'transparent',
+                  background: mode === m ? 'linear-gradient(135deg,#253865,#3A5188)' : 'transparent',
                   border: mode === m ? '1px solid rgba(255,255,255,0.2)' : '1px solid transparent',
-                  color: mode === m ? '#fff' : '#1F3E6C',
+                  color: mode === m ? '#fff' : '#253865',
                   fontWeight: 600, fontSize: 14,
                   boxShadow: mode === m ? '0 4px 14px rgba(31,62,108,0.3), inset 0 1px 0 rgba(255,255,255,0.25)' : 'none',
                   transition: 'all 0.2s',
@@ -829,25 +829,25 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {mode === 'register' && (
               <div>
-                <label style={{ fontSize: 12, color: '#7F9BD9', fontWeight: 600, display: 'block', marginBottom: 5 }}>שם מלא</label>
+                <label style={{ fontSize: 12, color: '#8EAAEB', fontWeight: 600, display: 'block', marginBottom: 5 }}>שם מלא</label>
                 <input value={displayName} onChange={e => setDisplayName(e.target.value)}
                   placeholder="ישראל ישראלי"
-                  style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(196,220,255,0.8)', borderRadius: 12, fontSize: 15, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', transition: 'border-color 0.15s' }} />
+                  style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(196,220,255,0.8)', borderRadius: 12, fontSize: 15, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#253865', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', transition: 'border-color 0.15s' }} />
               </div>
             )}
             <div>
-              <label style={{ fontSize: 12, color: '#7F9BD9', fontWeight: 600, display: 'block', marginBottom: 5 }}>שם משתמש</label>
+              <label style={{ fontSize: 12, color: '#8EAAEB', fontWeight: 600, display: 'block', marginBottom: 5 }}>שם משתמש</label>
               <input value={username} onChange={e => setUsername(e.target.value)} required
                 placeholder="username"
                 autoComplete="username"
-                style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(196,220,255,0.8)', borderRadius: 12, fontSize: 16, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', direction: 'ltr', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', transition: 'border-color 0.15s' }} />
+                style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(196,220,255,0.8)', borderRadius: 12, fontSize: 16, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#253865', direction: 'ltr', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', transition: 'border-color 0.15s' }} />
             </div>
             <div>
-              <label style={{ fontSize: 12, color: '#7F9BD9', fontWeight: 600, display: 'block', marginBottom: 5 }}>סיסמה</label>
+              <label style={{ fontSize: 12, color: '#8EAAEB', fontWeight: 600, display: 'block', marginBottom: 5 }}>סיסמה</label>
               <input value={password} onChange={e => setPassword(e.target.value)} required
                 type="password" placeholder="••••••"
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(196,220,255,0.8)', borderRadius: 12, fontSize: 16, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', direction: 'ltr', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', transition: 'border-color 0.15s' }} />
+                style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(196,220,255,0.8)', borderRadius: 12, fontSize: 16, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#253865', direction: 'ltr', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', transition: 'border-color 0.15s' }} />
             </div>
             {mode === 'register' && (
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: 9, cursor: 'pointer', fontSize: 12.5, color: '#5b6f93', lineHeight: 1.5, textAlign: 'right' }}>
@@ -855,10 +855,10 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                   type="checkbox"
                   checked={agreedIP}
                   onChange={e => setAgreedIP(e.target.checked)}
-                  style={{ marginTop: 2, width: 16, height: 16, accentColor: '#254A9F', flexShrink: 0, cursor: 'pointer' }}
+                  style={{ marginTop: 2, width: 16, height: 16, accentColor: '#3A5188', flexShrink: 0, cursor: 'pointer' }}
                 />
                 <span>
-                  אני מאשר/ת שאני יודע/ת שהתוכן, התרגילים והמערכת הם <b style={{ color: '#1F3E6C' }}>קניין רוחני של ברק דקר</b> — ואין להעתיק, לשכפל או להפיץ ללא אישור בכתב.
+                  אני מאשר/ת שאני יודע/ת שהתוכן, התרגילים והמערכת הם <b style={{ color: '#253865' }}>קניין רוחני של ברק דקר</b> — ואין להעתיק, לשכפל או להפיץ ללא אישור בכתב.
                 </span>
               </label>
             )}
@@ -866,7 +866,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
             <button type="submit" disabled={loading || (mode === 'register' && !agreedIP)}
                             style={{
                 marginTop: 6, padding: '14px 0',
-                background: 'linear-gradient(135deg,#1F3E6C,#254A9F)',
+                background: 'linear-gradient(135deg,#253865,#3A5188)',
                 color: '#fff', borderRadius: 14, fontSize: 16, fontWeight: 700,
                 cursor: (loading || (mode === 'register' && !agreedIP)) ? 'not-allowed' : 'pointer',
                 opacity: (loading || (mode === 'register' && !agreedIP)) ? 0.6 : 1,
@@ -895,14 +895,14 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                 marginTop: 10, padding: '11px 0', width: '100%',
                 background: 'rgba(31,62,108,0.06)',
                 border: '1px solid rgba(31,62,108,0.22)',
-                borderRadius: 14, color: '#254A9F',
+                borderRadius: 14, color: '#3A5188',
                 fontSize: 14, fontWeight: 600, fontFamily: "'Rubik', sans-serif",
                 cursor: 'pointer',
               }}
             >
               כניסה כאורח — בלי חשבון
             </button>
-            <div style={{ marginTop: 6, fontSize: 11.5, color: '#7F9BD9', textAlign: 'center', fontFamily: "'Assistant', sans-serif" }}>
+            <div style={{ marginTop: 6, fontSize: 11.5, color: '#8EAAEB', textAlign: 'center', fontFamily: "'Assistant', sans-serif" }}>
               ההתקדמות נשמרת בדפדפן הזה בלבד
             </div>
           </form>
@@ -915,7 +915,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
             borderRadius: 20, padding: '24px 20px',
             flexShrink: 0,
           }}>
-            <div style={{ fontWeight: 700, fontSize: 14, color: '#1F3E6C', marginBottom: 14, textAlign: 'right' }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: '#253865', marginBottom: 14, textAlign: 'right' }}>
               👥 כניסה מהירה
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -928,12 +928,12 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                     cursor: 'pointer', textAlign: 'right', width: '100%',
                   }}
                 >
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#254A9F,#7F9BD9)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#3A5188,#8EAAEB)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
                     {(u.displayName || u.username).slice(0, 1).toUpperCase()}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: 13, color: '#1F3E6C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.displayName || u.username}</div>
-                    <div style={{ fontSize: 10, color: '#7F9BD9' }}>{u.role === 'teacher' ? '👩‍🏫 מורה' : '🎓 תלמיד'}</div>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: '#253865', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.displayName || u.username}</div>
+                    <div style={{ fontSize: 10, color: '#8EAAEB' }}>{u.role === 'teacher' ? '👩‍🏫 מורה' : '🎓 תלמיד'}</div>
                   </div>
                 </button>
               ))}
@@ -1601,7 +1601,7 @@ function TopicMindmap({ groups, userProgress, onSelectTopic }: {
   onSelectTopic: (id: string, mode: 'lesson' | 'quiz') => void
 }) {
   // Branch colours cycle like the real mindmap (blue / red alternating spine).
-  const BRANCH_COLORS = ['#3351CA', '#C0392B', '#2563EB', '#B23B6E', '#1E7F6B', '#7C5CBF', '#C77D2E']
+  const BRANCH_COLORS = ['#3060CF', '#C0392B', '#2563EB', '#B23B6E', '#1E7F6B', '#7C5CBF', '#C77D2E']
   const COL_W = 196
   const ROOT_TOP = 16, ROOT_H = 46
   const GROUP_TOP = 132, GROUP_H = 42
@@ -1622,7 +1622,7 @@ function TopicMindmap({ groups, userProgress, onSelectTopic }: {
   return (
     <div style={{
       position: 'relative', width: '100%', overflowX: 'auto', overflowY: 'hidden',
-      background: 'linear-gradient(160deg,#1F3E6C 0%,#254A9F 100%)',
+      background: 'linear-gradient(160deg,#253865 0%,#3A5188 100%)',
       borderRadius: 18, boxShadow: CARD_SHADOW, padding: 4,
     }}>
       <div style={{ position: 'relative', width: W, height: H, margin: '0 auto' }} dir="rtl">
@@ -2158,7 +2158,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
                 fontFamily: "'Rubik', sans-serif",
                 fontSize: 17,
                 fontWeight: isActive ? 700 : 400,
-                color: isActive ? '#22378E' : '#FFFFFF',
+                color: isActive ? '#253865' : '#FFFFFF',
                 opacity: locked ? 0.5 : 1,
                 filter: locked ? 'grayscale(0.7)' : 'none',
                 transition: 'background 0.15s',
@@ -2171,7 +2171,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
                 style={{
                   width: 32, height: 32, flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: isActive ? '#22378E' : 'rgba(255,255,255,0.92)',
+                  color: isActive ? '#253865' : 'rgba(255,255,255,0.92)',
                   transition: 'color 0.15s',
                 }}>{renderIcon(item.iconKey)}</span>
               {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
@@ -2260,7 +2260,7 @@ function GlassBoardAdminToggle() {
         background: enabled ? 'rgba(51,81,202,0.14)' : 'rgba(99,102,241,0.10)',
         border: '1px solid ' + (enabled ? 'rgba(51,81,202,0.55)' : 'rgba(99,102,241,0.3)'),
         borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
-        color: enabled ? '#3351CA' : '#6366f1', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
+        color: enabled ? '#3060CF' : '#6366f1', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
         whiteSpace: 'nowrap',
       }}
     >
@@ -2654,8 +2654,6 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             order: 1,
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
-            {/* The orange orb — a real circle, blurred, behind the board. */}
-            <div className="ws-lesson-orb" aria-hidden="true" />
             <div style={{ ...cardHead, marginBottom: 16 }}><CardIcon name="study" /><div style={cardTitle}>לימוד חומר</div></div>
             {/* Whiteboard area with glassmorphism */}
             <div style={{
@@ -3475,14 +3473,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     try { window.location.hash = '#study' } catch(_){}
                     setSplitMenuOpen(false)
                   }}
-                  style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'start', background: 'transparent', border: '1px solid transparent', borderRadius: 8, padding: '11px 10px', color: '#1F3E6C', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 44 }}
+                  style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'start', background: 'transparent', border: '1px solid transparent', borderRadius: 8, padding: '11px 10px', color: '#253865', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 44 }}
                 >🏠 דף הבית</button>
                 <button
                   role="menuitem"
                   onClick={() => { onToggleFullscreen(); setSplitMenuOpen(false) }}
-                  style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'start', background: 'transparent', border: '1px solid transparent', borderRadius: 8, padding: '11px 10px', color: '#1F3E6C', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 44 }}
+                  style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'start', background: 'transparent', border: '1px solid transparent', borderRadius: 8, padding: '11px 10px', color: '#253865', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 44 }}
                 >☰ הצג כלי לימוד</button>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#1F3E6C', opacity: 0.6, padding: '8px 10px 4px', borderTop: '1px solid rgba(212,175,55,0.3)', marginTop: 4 }}>פיצול מסך</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#253865', opacity: 0.6, padding: '8px 10px 4px', borderTop: '1px solid rgba(212,175,55,0.3)', marginTop: 4 }}>פיצול מסך</div>
                 {([
                   ['mindmap',    '🧠 מפת חשיבה'],
                   ['canvas',     '✏️ קנבס'],
@@ -3498,7 +3496,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                       aria-disabled={locked || undefined}
                       title={locked ? toolLockTip(key as typeof tab) : undefined}
                       onClick={() => { if (locked) return; handleSetTab(key as typeof tab); setSplitMenuOpen(false) }}
-                      style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'start', background: 'transparent', border: '1px solid transparent', borderRadius: 8, padding: '10px 10px', color: '#1F3E6C', fontSize: 13, fontWeight: 600, cursor: locked ? 'not-allowed' : 'pointer', minHeight: 40, opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none' }}
+                      style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'start', background: 'transparent', border: '1px solid transparent', borderRadius: 8, padding: '10px 10px', color: '#253865', fontSize: 13, fontWeight: 600, cursor: locked ? 'not-allowed' : 'pointer', minHeight: 40, opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none' }}
                     >{locked ? '🔒 ' : ''}{label}</button>
                   )})}
               </div>
@@ -3560,7 +3558,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   fontFamily: "'Rubik', sans-serif",
                 }}
               >
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#1F3E6C', opacity: 0.7, padding: '4px 10px 6px' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#253865', opacity: 0.7, padding: '4px 10px 6px' }}>
                   כלי לחלונית התחתונה
                 </div>
                 {([
@@ -3585,7 +3583,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         background: 'transparent',
                         border: '1px solid transparent',
                         borderRadius: 8, padding: '9px 10px',
-                        color: '#1F3E6C', fontFamily: "'Rubik', sans-serif",
+                        color: '#253865', fontFamily: "'Rubik', sans-serif",
                         fontSize: 13, fontWeight: 600, cursor: locked ? 'not-allowed' : 'pointer',
                         minHeight: 40, opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none',
                       }}
@@ -3909,7 +3907,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               bottom: 72,
               insetInlineEnd: 12,
               zIndex: 50,
-              background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
+              background: 'linear-gradient(135deg,#253865,#2c4f8a)',
               border: '1px solid rgba(127,155,217,0.5)',
               borderRadius: 22, padding: '8px 16px',
               color: '#fff', cursor: 'pointer',
@@ -4035,7 +4033,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             <div
               onMouseDown={onFloatHeaderMouseDown}
               style={{
-                background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
+                background: 'linear-gradient(135deg,#253865,#2c4f8a)',
                 color: '#fff', padding: '10px 14px',
                 display: 'flex', alignItems: 'center', gap: 8,
                 fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
@@ -4401,7 +4399,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 ) : null}
                 </>
               ) : (
-                <div style={{ border: `2px solid ${answer.trim() ? '#3351CA' : '#C8D0E0'}`, borderRadius: 12, overflow: 'hidden', marginBottom: 18, transition: 'border-color 0.2s' }}>
+                <div style={{ border: `2px solid ${answer.trim() ? '#3060CF' : '#C8D0E0'}`, borderRadius: 12, overflow: 'hidden', marginBottom: 18, transition: 'border-color 0.2s' }}>
                   <textarea
                     ref={quizTutRef}
                     value={answer}

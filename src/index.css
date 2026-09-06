@@ -53,17 +53,17 @@
   --mm-divider: #e5e7eb;
 
   /* StudyHub theme tokens (light mode) */
-  --sh-page-bg: linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 78%, #3351CA 210%);
-  --sh-sidebar-bg: linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%);
-  --sh-sidebar-active: #254A9F;
+  --sh-page-bg: linear-gradient(35.22deg, #FFFFFF -9.85%, #DFE8FB 78%, #3060CF 210%);
+  --sh-sidebar-bg: linear-gradient(265.4deg, #8EAAEB -108.21%, #3060CF 169.33%);
+  --sh-sidebar-active: #3A5188;
   --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%);
   --sh-glass-card-sm: linear-gradient(180deg, rgba(255,255,255,0.30) 54.33%, rgba(255,255,255,0.10) 100%);
   --sh-card-shadow: 0px 15px 30px rgba(31,41,55,0.25);
-  --sh-btn-color: #122460;
-  --sh-text-dark: #1F3E6C;
-  --sh-text-med: #254A9F;
-  --sh-text-light: #7F9BD9;
-  --sh-text-tip: #465CA5;
+  --sh-btn-color: #1D2434;
+  --sh-text-dark: #253865;
+  --sh-text-med: #3A5188;
+  --sh-text-light: #8EAAEB;
+  --sh-text-tip: #3A5188;
   --sh-topbar-bg: transparent;
   --sh-topbar-border: #FFFFFF;
   --sh-topbar-seam: 0 1px 0 rgba(31,62,108,0.22);
@@ -391,7 +391,7 @@ html.dark :focus-visible {
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   border: 1px solid rgba(158, 177, 231, 0.55) !important;
-  color: #1F3E6C !important;
+  color: #253865 !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 18px rgba(110, 140, 210, 0.28) !important;
 }
 .ws-glass-btn:hover { background: rgba(158, 177, 231, 0.44) !important; }
@@ -498,36 +498,17 @@ html.dark .ws-glass-card:hover {
 }
 
 /* ── Coral bloom (לימוד חומר card on the home screen) ── */
-.ws-lesson-orb {
-  position: absolute;
-  top: -70px;
-  left: -120px;
-  width: 460px;
-  height: 620px;
-  border-radius: 50%;
-  background: linear-gradient(
-    168deg,
-    #142954 0%,
-    #27418f 14%,
-    #527bb8 30%,
-    #cbd9f2 46%,
-    #f5a279 68%,
-    #ea6633 82%,
-    rgba(234, 102, 51, 0) 100%
-  );
-  opacity: 0.45;
-  filter: blur(64px);
-  pointer-events: none;
+.ws-lesson {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%),
+    linear-gradient(
+      180deg,
+      #dfe8fb 0%,
+      #dfe8fb 80%,
+      rgba(255, 133, 76, 0.1) 96%,
+      rgba(255, 133, 76, 0.42) 100%
+    ) !important;
 }
-
-/* The lesson card's own tint. The white glass layer stays on top; the colour
-   underneath it is the one value to change. #ffffff = the same as every other
-   card; warmer values tint only this one. */
-/* The card itself is untouched — it is one of the row, and it says so by
-   using exactly the same glass every other card uses. All the colour lives in
-   the blurred shape behind it. */
-.ws-lesson > *:not(.ws-lesson-orb) { position: relative; z-index: 1; }
-.ws-lesson > .ws-lesson-orb { z-index: 0; }
 
 /* ── Solid CTA Button with glass sheen (hybrid: solid color + specular) ── */
 /*
@@ -601,10 +582,10 @@ html.dark .ws-glass-card:hover {
   background: #D4AF37;
 }
 .ws-glass-seg:hover { background: rgba(18,36,96,0.08) !important; }
-.ws-glass-seg[aria-pressed="true"]:hover { background: #122460 !important; }
+.ws-glass-seg[aria-pressed="true"]:hover { background: #1D2434 !important; }
 .ws-glass-seg:focus-visible,
 .ws-glass-track:focus-visible,
-.ws-glass-board button:focus-visible { outline: 2px solid #3351CA; outline-offset: 2px; }
+.ws-glass-board button:focus-visible { outline: 2px solid #3060CF; outline-offset: 2px; }
 
 /* Dark mode: the glass whites stay, the dot grid quiets down. */
 html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
@@ -717,18 +698,18 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  background: linear-gradient(270deg, #3848A0 0%, #5463C6 100%);
+  background: linear-gradient(270deg, #2853B8 0%, #4570D3 100%);
   box-shadow: 0 3px 8px rgba(39,24,126,0.32);
   transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
               background 0.18s ease;
 }
 .ws-cta:hover {
-  background: linear-gradient(270deg, #18247E 0%, #313CCE 100%);
+  background: linear-gradient(270deg, #214497 0%, #2E5AC2 100%);
   box-shadow: 0 6px 13px rgba(39,24,126,0.38);
   transform: translateY(-3px);
 }
 .ws-cta:active {
-  background: linear-gradient(270deg, #101A60 0%, #222CA4 100%);
+  background: linear-gradient(270deg, #1A3575 0%, #25499D 100%);
   box-shadow: inset 0 2px 5px rgba(11,6,48,0.55);
   transform: translateY(1px);
 }
