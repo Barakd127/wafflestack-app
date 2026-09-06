@@ -140,7 +140,7 @@ export default function UnlockToast() {
         border: '1px solid rgba(255,215,0,0.6)',
         boxShadow: '0 12px 32px rgba(26,35,126,0.45), 0 0 0 2px rgba(255,215,0,0.35)',
         color: '#1a237e',
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
         display: 'flex',
         alignItems: 'flex-start',
         gap: 12,

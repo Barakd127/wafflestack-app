@@ -378,7 +378,7 @@ export default function ArsenalScreen() {
   return (
     <div data-tour="arsenal-screen" dir="rtl" style={{
       flex: 1, overflow: 'auto', padding: '32px 40px',
-      fontFamily: "'Rubik', 'Assistant', sans-serif",
+      fontFamily: "'Assistant', 'Assistant', sans-serif",
       background: 'linear-gradient(135deg, rgba(245,158,11,0.05) 0%, rgba(99,102,241,0.04) 50%, rgba(168,85,247,0.05) 100%)',
     }}>
 
@@ -406,7 +406,7 @@ export default function ArsenalScreen() {
                 background: view === 'mine' ? '#6366f1' : 'transparent',
                 color: view === 'mine' ? '#fff' : TEXT_MED,
                 border: 'none', borderRadius: 18, padding: '6px 14px',
-                cursor: 'pointer', fontFamily: "'Rubik', sans-serif",
+                cursor: 'pointer', fontFamily: "'Assistant', sans-serif",
                 fontSize: 13, fontWeight: 700,
               }}
             >האוסף שלי</button>
@@ -416,7 +416,7 @@ export default function ArsenalScreen() {
                 background: view === 'community' ? '#6366f1' : 'transparent',
                 color: view === 'community' ? '#fff' : TEXT_MED,
                 border: 'none', borderRadius: 18, padding: '6px 14px',
-                cursor: 'pointer', fontFamily: "'Rubik', sans-serif",
+                cursor: 'pointer', fontFamily: "'Assistant', sans-serif",
                 fontSize: 13, fontWeight: 700,
               }}
             >הקהילה</button>
@@ -430,7 +430,7 @@ export default function ArsenalScreen() {
               background: showHints ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.5)',
               border: `1px solid ${showHints ? 'rgba(99,102,241,0.45)' : 'rgba(127,155,217,0.35)'}`,
               borderRadius: 18, padding: '7px 13px', cursor: 'pointer',
-              fontFamily: "'Rubik', sans-serif", fontSize: 12, fontWeight: 600,
+              fontFamily: "'Assistant', sans-serif", fontSize: 12, fontWeight: 600,
               color: showHints ? '#4338ca' : TEXT_LIGHT,
               display: 'flex', alignItems: 'center', gap: 4,
             }}
@@ -447,7 +447,7 @@ export default function ArsenalScreen() {
           border: '1px solid rgba(239,68,68,0.35)',
           borderRadius: 12, padding: '10px 14px',
           marginBottom: 12, fontSize: 13,
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
         }}>⚠️ {shareError}</div>
       )}
 
@@ -498,7 +498,7 @@ export default function ArsenalScreen() {
               background: 'rgba(255,255,255,0.6)',
               border: '1px solid rgba(127,155,217,0.4)',
               borderRadius: 18, padding: '8px 14px',
-              fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_DARK,
+              fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_DARK,
               cursor: 'pointer',
               textAlign: 'right',
               minHeight: 44,
@@ -599,7 +599,7 @@ function FilterPill({ label, icon, count, selected, onClick, color, bg, tip }: {
           color: selected ? '#fff' : color,
           borderRadius: 18, padding: '7px 14px',
           cursor: 'pointer', fontWeight: 600, fontSize: 13,
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           transition: 'all 0.18s ease',
           boxShadow: selected ? `0 4px 14px ${color}55` : 'none',
           transform: selected ? 'translateY(-1px)' : 'translateY(0)',
@@ -621,7 +621,7 @@ function FilterPill({ label, icon, count, selected, onClick, color, bg, tip }: {
             border: '1px solid rgba(99,102,241,0.4)',
             opacity: 0, transition: 'opacity 0.18s ease',
             pointerEvents: 'none', zIndex: 50,
-            width: 250, fontWeight: 500, fontFamily: "'Rubik', sans-serif",
+            width: 250, fontWeight: 500, fontFamily: "'Assistant', sans-serif",
           }}
         >
           {tip}
@@ -851,7 +851,7 @@ function ArsenalCard({
                       background: 'rgba(16,185,129,0.18)',
                       border: '1px solid rgba(16,185,129,0.35)',
                       color: '#065f46', borderRadius: 8, padding: '4px 8px',
-                      fontSize: 11, fontWeight: 700, fontFamily: "'Rubik', sans-serif",
+                      fontSize: 11, fontWeight: 700, fontFamily: "'Assistant', sans-serif",
                     }}
                     title="כבר משותף לקהילה"
                   >
@@ -968,7 +968,7 @@ function EquationCardBody({
       {eqData.label ? (
         <div dir="rtl" style={{
           fontSize: 12, fontWeight: 600, color: KIND_META.equation.color,
-          fontFamily: "'Rubik', sans-serif", opacity: 0.85,
+          fontFamily: "'Assistant', sans-serif", opacity: 0.85,
         }}>
           {eqData.label}
         </div>
@@ -1023,7 +1023,7 @@ function EquationCardBody({
             color: eqData.numbered ? '#92400e' : '#1F3E6C',
             borderRadius: 8, padding: '3px 9px',
             fontSize: 11, fontWeight: 700,
-            fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+            fontFamily: "'Assistant', sans-serif", cursor: 'pointer',
           }}
         >
           🔢 מספור שורות
@@ -1286,7 +1286,7 @@ function EquationCard({ latex, onCommit }: { latex: string; onCommit?: (newLatex
             cursor: 'pointer',
             fontSize: 12,
             lineHeight: 1,
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
           }}
         >
           ✏️
@@ -1401,7 +1401,7 @@ function ConfirmShareDialog({ onCancel, onConfirm, loading }: {
         background: 'rgba(15,15,35,0.55)', backdropFilter: 'blur(4px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         animation: 'wsFadeIn 0.18s ease',
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
       }}
     >
       <div
@@ -1514,7 +1514,7 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
         background: 'rgba(15,15,35,0.55)', backdropFilter: 'blur(4px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         animation: 'wsFadeIn 0.18s ease',
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
       }}
     >
       <div
@@ -1551,7 +1551,7 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
                   border: `1.5px solid ${active ? m.color : m.border}`,
                   color: active ? '#fff' : m.color,
                   borderRadius: 14, padding: '10px 6px',
-                  cursor: 'pointer', fontFamily: "'Rubik', sans-serif",
+                  cursor: 'pointer', fontFamily: "'Assistant', sans-serif",
                   fontSize: 13, fontWeight: 600,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                   transition: 'all 0.15s',
@@ -1670,7 +1670,7 @@ function AddEntryModal({ onClose, onSave, presentTopics }: {
             style={{
               width: '100%', padding: '8px 10px',
               border: '1px solid rgba(127,155,217,0.4)',
-              borderRadius: 10, fontFamily: "'Rubik', sans-serif",
+              borderRadius: 10, fontFamily: "'Assistant', sans-serif",
               background: 'rgba(255,255,255,0.6)', fontSize: 13, color: TEXT_DARK,
               boxSizing: 'border-box',
             }}
@@ -1704,7 +1704,7 @@ function EmptyState({ hasEntries }: { hasEntries: boolean }) {
     <div style={{
       display: 'flex', flexDirection: 'column', alignItems: 'center',
       padding: '60px 20px', textAlign: 'center',
-      color: TEXT_LIGHT, fontFamily: "'Rubik', sans-serif",
+      color: TEXT_LIGHT, fontFamily: "'Assistant', sans-serif",
     }}>
       <div style={{ fontSize: 64, marginBottom: 18, opacity: 0.85 }}>🎯</div>
       <div style={{ fontSize: 18, color: TEXT_DARK, fontWeight: 600, marginBottom: 8 }}>
@@ -1738,7 +1738,7 @@ function relativeTime(ts: number): string {
 const primaryBtn: React.CSSProperties = {
   background: 'var(--sh-btn-color, #6366f1)', color: '#fff', border: 'none',
   borderRadius: 22, padding: '10px 22px', cursor: 'pointer',
-  fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 700,
+  fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 700,
   boxShadow: '0 4px 14px rgba(99,102,241,0.4)',
   minHeight: 44,
   transition: 'filter 0.15s, transform 0.15s',
@@ -1748,7 +1748,7 @@ const secondaryBtn: React.CSSProperties = {
   background: 'rgba(255,255,255,0.6)', color: TEXT_DARK,
   border: '1px solid rgba(127,155,217,0.4)',
   borderRadius: 22, padding: '10px 18px', cursor: 'pointer',
-  fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
+  fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
   minHeight: 44,
 }
 
@@ -1756,7 +1756,7 @@ function iconBtn(bg: string, color: string): React.CSSProperties {
   return {
     background: bg, border: `1px solid ${color}30`, color,
     borderRadius: 8, padding: '8px 12px', cursor: 'pointer',
-    fontSize: 13, fontFamily: "'Rubik', sans-serif",
+    fontSize: 13, fontFamily: "'Assistant', sans-serif",
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4,
     transition: 'all 0.12s',
     // 44×44 touch target floor (skill ux Touch & Interaction CRITICAL).

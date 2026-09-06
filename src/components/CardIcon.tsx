@@ -29,8 +29,9 @@ export type CardIconName =
   | 'chart'     // פעילות השבוע — trend line
   | 'world'     // העולם שלי — globe
 
-/** Dark grey, per the brief — not the app navy, so the icons read as chrome. */
-export const CARD_ICON_COLOR = '#4B5563'
+/** The button’s resting ink. The icons used to sit on a grey of their own,
+ *  which was one more colour on the screen than the card needed. */
+export const CARD_ICON_COLOR = '#253865'
 
 const PATHS: Record<CardIconName, JSX.Element> = {
   plan: (

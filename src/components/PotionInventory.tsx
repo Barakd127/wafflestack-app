@@ -102,7 +102,7 @@ function PotionChip({ kind, available }: ChipProps) {
       <span style={{
         fontSize: 10,
         fontWeight: 700,
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
         color: isActive ? meta.color : available > 0 ? meta.color : '#aaa',
         letterSpacing: '-0.2px',
         minWidth: 14,

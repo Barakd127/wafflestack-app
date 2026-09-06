@@ -26,7 +26,7 @@ export default function IntroTutorialVideo() {
           display: 'flex', flexDirection: 'column',
           borderRadius: 24,
           padding: '22px 26px', textAlign: 'right',
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
         }}
       >
         <div style={cardHead}><CardIcon name="video" /><div style={cardTitle}>סרטון הדרכה</div></div>
@@ -55,7 +55,7 @@ export default function IntroTutorialVideo() {
             style={{
               background: '#fff', borderRadius: 20, padding: 16,
               width: '100%', maxWidth: 880, boxShadow: '0 24px 70px rgba(0,0,0,0.4)',
-              fontFamily: "'Rubik', sans-serif",
+              fontFamily: "'Assistant', sans-serif",
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>

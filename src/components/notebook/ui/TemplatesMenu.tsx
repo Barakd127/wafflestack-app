@@ -51,7 +51,7 @@ export default function TemplatesMenu({ editor }: TemplatesMenuProps) {
           border: '1px solid rgba(255,255,255,0.18)',
           borderRadius: 18,
           padding: '7px 16px',
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           fontWeight: 500,
           fontSize: 13,
           cursor: 'pointer',
@@ -89,7 +89,7 @@ export default function TemplatesMenu({ editor }: TemplatesMenuProps) {
                 borderRadius: 4,
                 padding: '8px 10px',
                 textAlign: 'right',
-                fontFamily: "'Rubik', sans-serif",
+                fontFamily: "'Assistant', sans-serif",
                 fontSize: 13,
                 cursor: 'pointer',
               }}

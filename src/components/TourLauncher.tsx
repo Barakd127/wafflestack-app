@@ -74,7 +74,7 @@ export default function TourLauncher() {
             position: 'relative',
             background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.3)',
             borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
-            color: '#6366f1', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
+            color: '#6366f1', fontSize: 12, fontFamily: "'Assistant', sans-serif", fontWeight: 600,
             animation: pulse ? 'ws-tourbtn-pulse 1.4s ease-out infinite' : undefined,
           }}
         >
@@ -99,7 +99,7 @@ export default function TourLauncher() {
               background: '#fff', borderRadius: 14,
               border: '1px solid rgba(99,102,241,0.25)',
               boxShadow: '0 18px 50px rgba(0,0,0,0.22)',
-              padding: 12, fontFamily: "'Rubik', sans-serif",
+              padding: 12, fontFamily: "'Assistant', sans-serif",
             }}
           >
             <div style={{ fontWeight: 800, fontSize: 15, color: '#1F2640', marginBottom: 2 }}>סיורים מודרכים</div>

@@ -124,7 +124,7 @@ export default function Coachmark({ spec }: { spec: CoachmarkSpec }) {
           padding: '14px 16px',
           color: '#f1f5ff',
           boxShadow: '0 20px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04)',
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           backdropFilter: 'blur(8px)',
         }}
       >
@@ -144,7 +144,7 @@ export default function Coachmark({ spec }: { spec: CoachmarkSpec }) {
               fontSize: 12,
               cursor: 'pointer',
               padding: '4px 6px',
-              fontFamily: "'Rubik', sans-serif",
+              fontFamily: "'Assistant', sans-serif",
             }}
           >
             דלג על הסיור
@@ -160,7 +160,7 @@ export default function Coachmark({ spec }: { spec: CoachmarkSpec }) {
               padding: '7px 16px',
               borderRadius: 999,
               cursor: 'pointer',
-              fontFamily: "'Rubik', sans-serif",
+              fontFamily: "'Assistant', sans-serif",
               boxShadow: '0 4px 14px rgba(91,139,255,0.45)',
             }}
           >

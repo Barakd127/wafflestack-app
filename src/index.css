@@ -52,10 +52,10 @@
      Daniel Grumer. Hebrew-first and geometric: it was drawn from the signage
      of the White City's 1930s buildings, which is the same Bauhaus geometry a
      tech headline wants, and it means something in an app about building a
-     city. It replaces Rubik in headings ONLY — Rubik keeps everything you scan
+     city. It is the headings face ONLY — Assistant keeps everything you scan
      rather than read: labels, buttons, nav, numbers. One face to scan, one to
      read. Fallbacks stay Hebrew-capable. */
-  --ws-display: 'Tel Aviv Modernist', 'Rubik', 'Heebo', sans-serif;
+  --ws-display: 'Tel Aviv Modernist', 'Assistant', 'Heebo', sans-serif;
 
   --ws-hand: 'Gveret Levin', 'Playpen Sans Hebrew', 'Assistant', sans-serif;
 
@@ -706,7 +706,7 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   padding: 11px 26px;
   border: none;
   border-radius: 16px;
-  font-family: 'Rubik', sans-serif;
+  font-family: 'Assistant', sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: #253865;

@@ -142,7 +142,7 @@ const pillStyle = {
   borderRadius: 999,
 } as const
 
-const labelFont = { fontFamily: "'Rubik', sans-serif", fontSize: 12.5, fontWeight: 600 } as const
+const labelFont = { fontFamily: "'Assistant', sans-serif", fontSize: 12.5, fontWeight: 600 } as const
 
 const svgProps = {
   width: 18,
@@ -614,7 +614,7 @@ export default function GlassBoardShell({
             borderRadius: 24,
             background: `linear-gradient(135deg, ${GOLD_LIGHT}, ${GOLD})`,
             color: DEEP_NAVY,
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             fontSize: 13,
             fontWeight: 700,
             whiteSpace: 'nowrap',

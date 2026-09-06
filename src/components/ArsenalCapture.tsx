@@ -99,7 +99,7 @@ export default function ArsenalCapture() {
             borderRadius: 14,
             padding: '6px 10px',
             boxShadow: '0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(99,102,241,0.5)',
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             fontSize: 13, fontWeight: 600,
             animation: 'arsenalChipIn 0.16s ease',
             backdropFilter: 'blur(12px)',
@@ -125,7 +125,7 @@ export default function ArsenalCapture() {
                       borderRadius: 10,
                       padding: '4px 9px',
                       cursor: 'pointer',
-                      fontFamily: "'Rubik', sans-serif",
+                      fontFamily: "'Assistant', sans-serif",
                       fontSize: 12, fontWeight: 700,
                       display: 'inline-flex', alignItems: 'center', gap: 4,
                       transition: 'all 0.12s',
@@ -150,7 +150,7 @@ export default function ArsenalCapture() {
               onClick={() => setExpanded(true)}
               style={{
                 background: 'transparent', color: '#fff', border: 'none',
-                cursor: 'pointer', fontFamily: "'Rubik', sans-serif",
+                cursor: 'pointer', fontFamily: "'Assistant', sans-serif",
                 fontSize: 13, fontWeight: 700,
                 display: 'inline-flex', alignItems: 'center', gap: 6,
               }}
@@ -168,7 +168,7 @@ export default function ArsenalCapture() {
             position: 'fixed', top: 28, left: '50%', transform: 'translateX(-50%)',
             background: '#10b981', color: '#fff',
             padding: '10px 20px', borderRadius: 14,
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             fontSize: 14, fontWeight: 700,
             boxShadow: '0 8px 28px rgba(16,185,129,0.45)',
             zIndex: 260,

@@ -50,7 +50,7 @@ export default function SectionsNav() {
           fontWeight: 700,
           color: '#F5C842',
           letterSpacing: 0.4,
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           borderBottom: '1px solid rgba(212,175,55,0.2)',
           display: 'flex',
           alignItems: 'center',
@@ -101,7 +101,7 @@ export default function SectionsNav() {
                 cursor: 'pointer',
                 background: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
                 border: `1px solid ${isActive ? s.color : 'transparent'}`,
-                fontFamily: "'Rubik', sans-serif",
+                fontFamily: "'Assistant', sans-serif",
                 color: '#fff',
                 fontSize: 13,
               }}

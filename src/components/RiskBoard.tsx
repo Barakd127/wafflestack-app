@@ -218,7 +218,7 @@ function PlanTargetCard({ row, onSelect, onExtend }: {
           onClick={() => onSelect(row.topicId)}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onSelect(row.topicId) }}
           style={{
-            fontFamily: "'Rubik', 'Assistant', sans-serif",
+            fontFamily: "'Assistant', 'Assistant', sans-serif",
             fontWeight: 700,
             fontSize: 16,
             color: 'var(--sh-text-dark)',
@@ -256,7 +256,7 @@ function PlanTargetCard({ row, onSelect, onExtend }: {
           fontSize: 13,
           color: 'var(--sh-gold, #D4A017)',
           cursor: 'pointer',
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           fontWeight: 600,
           whiteSpace: 'nowrap',
           transition: 'border-color 0.15s, background 0.15s',
@@ -359,7 +359,7 @@ function RiskCard({ risk, rank, onSelect }: {
       <span style={{ fontSize: 20, flexShrink: 0 }}>{risk.icon}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontFamily: "'Rubik', 'Assistant', sans-serif",
+          fontFamily: "'Assistant', 'Assistant', sans-serif",
           fontWeight: 700,
           fontSize: 16,
           color: 'var(--sh-text-dark)',
@@ -429,7 +429,7 @@ function ExamDateControl({ examDate, setExamDate }: {
             fontSize: 15,
             cursor: 'pointer',
             fontWeight: 600,
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
           }}
         >
           שמור
@@ -463,7 +463,7 @@ function ExamDateControl({ examDate, setExamDate }: {
         fontSize: 15,
         color: 'rgba(212,175,55,0.85)',
         cursor: 'pointer',
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
         transition: 'border-color 0.15s',
         whiteSpace: 'nowrap',
       }}
@@ -564,7 +564,7 @@ export function RiskBoard({ onSelectTopic }: RiskBoardProps) {
       {planTargetRows.length > 0 && (
         <div style={{ marginBottom: 14 }}>
           <div style={{
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             fontWeight: 700,
             fontSize: 15,
             color: 'var(--sh-text-med)',

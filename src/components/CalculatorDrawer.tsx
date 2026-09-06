@@ -347,7 +347,7 @@ export default function CalculatorDrawer() {
         boxShadow: '0 18px 48px rgba(31,62,108,0.28), 0 0 0 1px rgba(212,175,55,0.25)',
         padding: 16,
         color: PAPER,
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
       }}
     >
       {/* Header */}
@@ -545,7 +545,7 @@ export default function CalculatorDrawer() {
           border: '1px solid ' + (enabled ? 'rgba(212,175,55,0.8)' : 'rgba(31,62,108,0.18)'),
           borderRadius: 12,
           color: enabled ? INK : 'rgba(31,62,108,0.4)',
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           fontSize: 13,
           fontWeight: 800,
           cursor: enabled ? 'pointer' : 'not-allowed',

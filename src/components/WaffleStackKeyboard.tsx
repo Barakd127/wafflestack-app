@@ -310,7 +310,7 @@ function injectKeyboardCSS(): void {
 }
 /* Section separators — gold ribbon look (wafflestack-conventions §17). */
 .MLK__row .separator {
-  font-family: 'Rubik', sans-serif !important;
+  font-family: 'Assistant', sans-serif !important;
   font-size: 11px !important;
   letter-spacing: 0.05em !important;
   color: #D4AF37 !important;
@@ -350,7 +350,7 @@ function injectKeyboardCSS(): void {
 .ws-group-btn.MLK__keycap {
   border: 1.5px solid rgba(212,175,55,0.55) !important;
   border-radius: 12px !important;
-  font-family: 'Rubik', sans-serif !important;
+  font-family: 'Assistant', sans-serif !important;
   font-size: 13px !important;
   font-weight: 800 !important;
   letter-spacing: 0.05em !important;
@@ -569,7 +569,7 @@ export default function WaffleStackKeyboard() {
         border: 0,
         borderRadius: 24,
         padding: '8px 14px',
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
         fontSize: 13,
         fontWeight: 800,
         cursor: 'pointer',
