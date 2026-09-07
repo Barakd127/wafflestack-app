@@ -4,7 +4,7 @@ import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../con
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import BoardShell from './BoardShell'
-import CardIcon, { cardTitle, cardHead, CtaArrow, CARD_ICON_COLOR } from './CardIcon'
+import CardIcon, { cardTitle, cardHead, CtaArrow, CARD_ICON_COLOR, CARD_ICON_MASS, CARD_ICON_DETAIL } from './CardIcon'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
 import { toPng } from 'html-to-image'
@@ -2072,9 +2072,11 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
     const duo = (back: string, front: string) => (
       <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
         {active ? (
+          /* On the white chip the row uses the cards' own pair, so a selected
+             icon in the rail and an icon on a card are the same object. */
           <>
-            <path fill="currentColor" opacity={0.3} d={back} />
-            <path fill="currentColor" d={front} />
+            <path fill={CARD_ICON_MASS} opacity={0.3} d={back} />
+            <path fill={CARD_ICON_DETAIL} d={front} />
           </>
         ) : (
           /* Shirli: white fill, and the second tone is the sidebar showing
