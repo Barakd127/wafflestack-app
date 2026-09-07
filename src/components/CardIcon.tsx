@@ -1,7 +1,7 @@
 /**
  * CardIcon — the line icon that sits above every home-screen container title.
  *
- * One stroke weight, one colour, no background shape. Shirli's brief: thin
+ * Duotone fill: one colour, two opacities, no stroke at all. Shirli's brief: thin
  * outline icons in dark grey, nothing behind them, icon on top and the title
  * underneath, both flush to the right edge in RTL.
  *
@@ -29,77 +29,68 @@ export type CardIconName =
   | 'chart'     // פעילות השבוע — trend line
   | 'world'     // העולם שלי — globe
 
-/** The title's blue, so the icon and the title under it are one colour. It was
- *  the button's darker ink, which on 26px of line work read as black. */
-export const CARD_ICON_COLOR = 'var(--sh-text-med)'
+/** The icon's one colour. Every icon is this hue and nothing else — the two
+ *  tones inside it are the same colour at two opacities, which is what keeps
+ *  91 different drawings reading as one family. Shirli picked the sidebar's
+ *  blue-violet, 2026-09-07 (sketch א in the canvas). */
+export const CARD_ICON_COLOR = '#3351CA'
 
-/** The coral inside each icon. It is never a recoloured line and never a dot
- *  added on top: the outline stays blue all the way round, and the coral is
- *  one enclosed area of the glyph filled in behind it — the play triangle, the
- *  middle knob, the bullseye. Per Shirli, 2026-09-07. */
+/** The back layer's opacity. The whole duotone effect is this number. */
+export const CARD_ICON_BACK = 0.3
+
+/** Coral is no longer part of an icon. It keeps the meaning it has everywhere
+ *  else — "this moved" — and belongs to charts, timelines and achievements,
+ *  plus the selected row in the sidebar rail, which still imports it. */
 export const CARD_ICON_ACCENT = '#FF854C'
 
 const PATHS: Record<CardIconName, JSX.Element> = {
-  plan: (
-    <>
-      <line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" />
-      <circle cx="15" cy="7" r="2.2" fill={CARD_ICON_COLOR} stroke="none" />
-      <circle cx="16" cy="17" r="2.2" fill={CARD_ICON_COLOR} stroke="none" />
-      <circle cx="9" cy="12" r="2.4" fill={CARD_ICON_ACCENT} stroke="none" />
-    </>
-  ),
-  video: (
-    <>
-      <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
-      <path d="M10.5 9.5l4.5 2.5-4.5 2.5z" fill={CARD_ICON_ACCENT} stroke={CARD_ICON_ACCENT} strokeWidth={1.5} />
-    </>
-  ),
-  study: (
-    <>
-      {/* the back cover, showing past the spine */}
-      <path d="M9.5 3.1A3 3 0 0 0 6.5 6.1v11.8a3 3 0 0 0 3 3" />
-      <rect x="9.5" y="3.1" width="10.4" height="17.8" rx="2.6" />
-      <line x1="9.5" y1="16.7" x2="19.9" y2="16.7" />
-      <rect x="11" y="6" width="7.4" height="4.9" rx="1.7" stroke={CARD_ICON_ACCENT} />
-      <path d="M13.1 16.7v4.9l1.6-1.5 1.6 1.5v-4.9" stroke={CARD_ICON_ACCENT} />
-    </>
-  ),
-  practice: (
-    <>
-      <rect x="5" y="3.4" width="14" height="17.2" rx="2.6" />
-      <line x1="8.4" y1="8.2" x2="15.6" y2="8.2" />
-      <line x1="8.4" y1="11.6" x2="13.4" y2="11.6" />
-      <polyline points="8.6,16.1 10.7,18.2 15.5,13.4" stroke={CARD_ICON_ACCENT} strokeWidth={2.2} />
-    </>
-  ),
-  insights: (
-    <>
-      <rect x="4.6" y="13.2" width="4.2" height="6.8" rx=".8" />
-      <rect x="9.9" y="9.2" width="4.2" height="10.8" rx=".8" />
-      <rect x="15.2" y="5.2" width="4.2" height="14.8" rx=".8" />
-      <line x1="3" y1="20" x2="21" y2="20" stroke={CARD_ICON_ACCENT} strokeWidth={2.2} />
-    </>
-  ),
-  risk: (
-    <>
-      <circle cx="12" cy="12" r="8.2" /><circle cx="12" cy="12" r="4" />
-      <circle cx="12" cy="12" r="1.6" fill={CARD_ICON_ACCENT} stroke="none" />
-    </>
-  ),
-  chart: (
-    <>
-      <polyline points="3.5,16.5 9,11 13,15 20.5,7.5" />
-      <path d="M15.8 6.6h5.1v5.1z" fill={CARD_ICON_ACCENT} stroke={CARD_ICON_ACCENT} strokeWidth={1.7} />
-    </>
-  ),
-  world: (
-    <>
-      <path d="M12 4.3a2.8 7.8 0 0 1 0 15.4z" fill={CARD_ICON_ACCENT} stroke="none" />
-      <circle cx="12" cy="12" r="8.6" /><ellipse cx="12" cy="12" rx="3.6" ry="8.6" />
-      <line x1="3.4" y1="12" x2="20.6" y2="12" />
-      <path d="M5.2 7.2c1.9 1 4.2 1.6 6.8 1.6s4.9-.6 6.8-1.6" />
-      <path d="M5.2 16.8c1.9-1 4.2-1.6 6.8-1.6s4.9.6 6.8 1.6" />
-    </>
+  plan: (
+    <>
+      <path fill={CARD_ICON_COLOR} opacity={CARD_ICON_BACK} d="M 9.96 2.81 C 9.56 2.51 9.04 2.44 8.56 2.61 C 7.48 3.00 6.47 3.59 5.58 4.33 C 5.20 4.66 5.00 5.15 5.06 5.64 C 5.13 6.40 5 7.12 4.64 7.75 C 4.28 8.38 3.71 8.86 3.02 9.17 C 2.56 9.37 2.24 9.79 2.15 10.28 C 1.95 11.42 1.95 12.58 2.15 13.72 C 2.24 14.26 2.61 14.65 3.02 14.83 C 3.71 15.14 4.28 15.62 4.64 16.25 C 5 16.88 5.13 17.60 5.06 18.36 C 5.01 18.81 5.17 19.32 5.58 19.67 C 6.47 20.41 7.48 21.00 8.56 21.39 C 9.04 21.56 9.56 21.49 9.96 21.19 C 10.58 20.75 11.28 20.5 12 20.5 C 12.72 20.5 13.42 20.75 14.04 21.19 C 14.40 21.46 14.93 21.58 15.44 21.39 C 16.52 21.00 17.53 20.41 18.42 19.67 C 18.84 19.32 18.99 18.81 18.94 18.36 C 18.87 17.60 19.00 16.88 19.36 16.25 C 19.72 15.62 20.29 15.14 20.98 14.83 C 21.39 14.65 21.76 14.26 21.85 13.72 C 22.05 12.58 22.05 11.42 21.85 10.28 C 21.76 9.79 21.43 9.37 20.98 9.17 C 20.29 8.86 19.72 8.38 19.36 7.75 C 19.00 7.12 18.87 6.40 18.94 5.64 C 19.00 5.15 18.80 4.66 18.42 4.33 C 17.53 3.59 16.52 3.00 15.44 2.61 C 14.96 2.44 14.44 2.51 14.04 2.81 C 13.42 3.25 12.72 3.5 12 3.5 C 11.28 3.5 10.58 3.25 9.96 2.81 Z" />
+      <path fill={CARD_ICON_COLOR} d="M 9 12 C 9 9.69 11.5 8.25 13.5 9.40 C 14.43 9.94 15 10.93 15 12 C 15 14.31 12.5 15.75 10.5 14.60 C 9.57 14.06 9 13.07 9 12 Z" />
+    </>
+  ),
+  video: (
+    <>
+      <path fill={CARD_ICON_COLOR} opacity={CARD_ICON_BACK} d="M 2 5 C 2 3.90 2.90 3 4 3 L 20 3 C 21.11 3 22 3.90 22 5 L 22 19 C 22 20.11 21.11 21 20 21 L 4 21 C 2.90 21 2 20.11 2 19 L 2 5 Z" />
+      <path fill={CARD_ICON_COLOR} d="M 13 8 L 16 8 L 17 5 L 14 5 L 13 8 Z" />
+    </>
+  ),
+  study: (
+    <>
+      <path fill={CARD_ICON_COLOR} opacity={CARD_ICON_BACK} d="M 6 2 C 4.89 2 4 2.90 4 4 L 4 5 C 3.23 5 2.75 5.83 3.13 6.5 C 3.31 6.81 3.64 7 4 7 L 4 9 C 3.23 9 2.75 9.83 3.13 10.5 C 3.31 10.81 3.64 11 4 11 L 4 13 C 3.23 13 2.75 13.83 3.13 14.5 C 3.31 14.81 3.64 15 4 15 L 4 17 C 3.23 17 2.75 17.83 3.13 18.5 C 3.31 18.81 3.64 19 4 19 L 4 20 C 4 21.11 4.89 22 6 22 L 18 22 C 19.11 22 20 21.11 20 20 L 20 4 C 20 2.90 19.11 2 18 2 L 6 2 Z" />
+      <path fill={CARD_ICON_COLOR} d="M 8.5 6 C 7.67 6 7 6.67 7 7.5 L 7 8.5 C 7 9.33 7.67 10 8.5 10 L 15.5 10 C 16.33 10 17 9.33 17 8.5 L 17 7.5 C 17 6.67 16.33 6 15.5 6 L 8.5 6 Z" />
+    </>
+  ),
+  practice: (
+    <>
+      <path fill={CARD_ICON_COLOR} opacity={CARD_ICON_BACK} d="M 7 3 L 7 4 C 7 5.11 7.89 6 9 6 L 15 6 C 16.11 6 17 5.11 17 4 L 17 3 L 18 3 C 19.11 3 20 3.90 20 5 L 20 16 C 20 19.31 17.31 22 14 22 L 6 22 C 4.89 22 4 21.11 4 20 L 4 5 C 4 3.90 4.89 3 6 3 L 7 3 Z" />
+      <path fill={CARD_ICON_COLOR} d="M 14 2 C 14.77 2.00 15.25 2.83 14.86 3.50 C 14.71 3.77 14.43 3.96 14.12 3.99 L 14 4 L 10 4 C 9.23 4.00 8.75 3.17 9.14 2.50 C 9.29 2.23 9.57 2.04 9.88 2.01 L 10 2 L 14 2 Z" />
+    </>
+  ),
+  insights: (
+    <>
+      <path fill={CARD_ICON_COLOR} opacity={CARD_ICON_BACK} d="M4.6 12.6h3.6a1.6 1.6 0 0 1 1.6 1.6v4.2a1.6 1.6 0 0 1-1.6 1.6H4.6A1.6 1.6 0 0 1 3 18.4v-4.2a1.6 1.6 0 0 1 1.6-1.6zM10.4 8.4H14a1.6 1.6 0 0 1 1.6 1.6v8.4a1.6 1.6 0 0 1-1.6 1.6h-3.6a1.6 1.6 0 0 1-1.6-1.6V10a1.6 1.6 0 0 1 1.6-1.6z" />
+      <path fill={CARD_ICON_COLOR} d="M17.8 4h1.6A1.6 1.6 0 0 1 21 5.6v12.8a1.6 1.6 0 0 1-1.6 1.6h-1.6a1.6 1.6 0 0 1-1.6-1.6V5.6A1.6 1.6 0 0 1 17.8 4zM2.2 20h19.6a1.1 1.1 0 0 1 0 2.2H2.2a1.1 1.1 0 0 1 0-2.2z" />
+    </>
+  ),
+  risk: (
+    <>
+      <path fill={CARD_ICON_COLOR} opacity={CARD_ICON_BACK} d="M 12 2 C 12.51 2 12.93 2.38 12.99 2.88 L 13 3 L 13 3.06 C 17.08 3.51 20.33 6.67 20.91 10.73 L 20.95 11 L 21 11 C 21.77 11.00 22.25 11.84 21.86 12.50 C 21.71 12.77 21.43 12.96 21.12 12.99 L 21 13 L 20.95 13 C 20.49 17.08 17.33 20.33 13.27 20.91 L 13 20.95 L 13 21 C 13.00 21.77 12.16 22.25 11.50 21.86 C 11.23 21.71 11.04 21.43 11.01 21.12 L 11 21 L 11 20.95 C 6.92 20.49 3.67 17.33 3.09 13.27 L 3.06 13 L 3 13 C 2.23 13.00 1.75 12.16 2.14 11.50 C 2.29 11.23 2.57 11.04 2.88 11.01 L 3 11 L 3.06 11 C 3.51 6.92 6.67 3.67 10.73 3.09 L 11 3.06 L 11 3 C 11 2.45 11.45 2 12 2 Z" />
+      <path fill={CARD_ICON_COLOR} d="M 12 7 C 8.15 7 5.75 11.17 7.67 14.5 C 8.56 16.05 10.21 17 12 17 C 15.85 17 18.25 12.83 16.33 9.5 C 15.44 7.95 13.79 7 12 7 Z" />
+    </>
+  ),
+  chart: (
+    <>
+      <path fill={CARD_ICON_COLOR} opacity={CARD_ICON_BACK} d="M 19 11 C 20.05 11 20.92 11.81 21.00 12.85 L 21 13 L 21 19 C 21 20.05 20.19 20.92 19.15 21.00 L 19 21 L 15 21 C 13.95 21 13.08 20.19 13.01 19.15 L 13 19 L 13 13 C 13 11.95 13.81 11.08 14.85 11.01 L 15 11 L 19 11 Z" />
+      <path fill={CARD_ICON_COLOR} d="M 9 3 C 10.11 3 11 3.90 11 5 L 11 11 C 11 12.11 10.11 13 9 13 L 5 13 C 3.90 13 3 12.11 3 11 L 3 5 C 3 3.90 3.90 3 5 3 L 9 3 Z" />
+    </>
+  ),
+  world: (
+    <>
+      <path fill={CARD_ICON_COLOR} opacity={CARD_ICON_BACK} d="M 12 2 C 17.52 2 22 6.48 22 12 C 22 17.52 17.52 22 12 22 C 6.48 22 2 17.52 2 12 C 2 6.48 6.48 2 12 2 Z" />
+      <path fill={CARD_ICON_COLOR} d="M 12 4 C 9.52 4.00 7.18 5.15 5.67 7.11 L 5.5 7.33 L 5.5 9.02 C 5.5 10.27 6.28 11.39 7.45 11.83 L 7.62 11.89 L 8.91 12.28 C 10.29 12.70 11.62 11.59 11.49 10.19 L 11.47 10.04 L 11.30 8.99 C 11.22 8.51 11.49 8.05 11.95 7.89 L 12.06 7.86 L 12.67 7.72 C 14.13 7.38 15.03 5.91 14.66 4.45 C 13.81 4.15 12.91 4.00 12 4 Z" />
+    </>
   ),
 }
 
@@ -107,8 +98,6 @@ export default function CardIcon({ name, size = 26 }: { name: CardIconName; size
   return (
     <svg
       width={size} height={size} viewBox="0 0 24 24"
-      fill="none" stroke={CARD_ICON_COLOR} strokeWidth={1.6}
-      strokeLinecap="round" strokeLinejoin="round"
       aria-hidden="true" style={{ display: 'block' }}
     >
       {PATHS[name]}
