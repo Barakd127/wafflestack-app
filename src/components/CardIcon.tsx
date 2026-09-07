@@ -31,9 +31,14 @@ export type CardIconName =
 
 /** The icon's one colour. Every icon is this hue and nothing else — the two
  *  tones inside it are the same colour at two opacities, which is what keeps
- *  91 different drawings reading as one family. Shirli picked the sidebar's
- *  blue-violet, 2026-09-07 (sketch א in the canvas). */
-export const CARD_ICON_COLOR = '#3351CA'
+ *  91 different drawings reading as one family.
+ *
+ *  It is the card title's ink, so the icon and the words under it are one
+ *  object. The first version took the sidebar gradient's #3351CA, which sits
+ *  at 228° while the whole scale is at 222° — six degrees of violet, spread
+ *  over the large soft .3 layer, and at that lightness it read as lavender.
+ *  The sidebar gradient was never part of the scale. */
+export const CARD_ICON_COLOR = 'var(--sh-text-med)'
 
 /** The back layer's opacity. The whole duotone effect is this number. */
 export const CARD_ICON_BACK = 0.3
