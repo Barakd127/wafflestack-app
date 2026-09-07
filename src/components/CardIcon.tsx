@@ -33,17 +33,23 @@ export type CardIconName =
  *  which was one more colour on the screen than the card needed. */
 export const CARD_ICON_COLOR = '#253865'
 
+/** The one coral element inside each icon. It always marks where the action
+ *  happens, so the accent keeps the meaning it has everywhere else in the app
+ *  — "this moved" — instead of becoming decoration. */
+export const CARD_ICON_ACCENT = '#FF854C'
+
 const PATHS: Record<CardIconName, JSX.Element> = {
   plan: (
     <>
       <line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" />
-      <circle cx="15" cy="7" r="2.2" /><circle cx="9" cy="12" r="2.2" /><circle cx="16" cy="17" r="2.2" />
+      <circle cx="15" cy="7" r="2.2" /><circle cx="16" cy="17" r="2.2" />
+      <circle cx="9" cy="12" r="2.4" fill={CARD_ICON_ACCENT} stroke="none" />
     </>
   ),
   video: (
     <>
       <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
-      <path d="M10.5 9.5l4.5 2.5-4.5 2.5z" />
+      <path d="M10.5 9.5l4.5 2.5-4.5 2.5z" fill={CARD_ICON_ACCENT} stroke={CARD_ICON_ACCENT} strokeWidth={1.5} />
     </>
   ),
   study: (
@@ -51,29 +57,33 @@ const PATHS: Record<CardIconName, JSX.Element> = {
       <path d="M12 6.5C10.5 5.2 8.4 4.6 5 4.6v12.8c3.4 0 5.5.6 7 1.9" />
       <path d="M12 6.5c1.5-1.3 3.6-1.9 7-1.9v12.8c-3.4 0-5.5.6-7 1.9z" />
       <line x1="12" y1="6.5" x2="12" y2="19.3" />
+      <rect x="15.4" y="4.4" width="2.4" height="6" rx="1.2" fill={CARD_ICON_ACCENT} stroke="none" />
     </>
   ),
   practice: (
     <>
       <path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 013 3L8 19l-4 1z" />
       <line x1="14.5" y1="6.5" x2="17.5" y2="9.5" />
+      <circle cx="5.6" cy="18.4" r="1.9" fill={CARD_ICON_ACCENT} stroke="none" />
     </>
   ),
   insights: (
     <>
-      <line x1="6" y1="20" x2="6" y2="13" /><line x1="12" y1="20" x2="12" y2="6" /><line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="6" y1="20" x2="6" y2="13" /><line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="6" stroke={CARD_ICON_ACCENT} strokeWidth={2.4} />
     </>
   ),
   risk: (
     <>
       <circle cx="12" cy="12" r="8.2" /><circle cx="12" cy="12" r="4" />
-      <circle cx="12" cy="12" r="0.9" fill={CARD_ICON_COLOR} />
+      <circle cx="12" cy="12" r="1.6" fill={CARD_ICON_ACCENT} stroke="none" />
     </>
   ),
   chart: (
     <>
       <polyline points="3.5,16.5 9,11 13,15 20.5,7.5" />
       <polyline points="15.5,7.5 20.5,7.5 20.5,12.5" />
+      <circle cx="20.5" cy="7.5" r="2" fill={CARD_ICON_ACCENT} stroke="none" />
     </>
   ),
   world: (
@@ -82,6 +92,7 @@ const PATHS: Record<CardIconName, JSX.Element> = {
       <line x1="3.4" y1="12" x2="20.6" y2="12" />
       <path d="M5.2 7.2c1.9 1 4.2 1.6 6.8 1.6s4.9-.6 6.8-1.6" />
       <path d="M5.2 16.8c1.9-1 4.2-1.6 6.8-1.6s4.9.6 6.8 1.6" />
+      <circle cx="15.2" cy="8.6" r="1.9" fill={CARD_ICON_ACCENT} stroke="none" />
     </>
   ),
 }
