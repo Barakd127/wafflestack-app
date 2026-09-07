@@ -2058,34 +2058,12 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
   const _adminMode = useLearningStore(s => s.adminMode)
   const _unlockedFeatures = useLearningStore(s => s.unlockedFeatures)
   const isLocked = (f?: FeatureId) => !!f && !isFeatureUnlocked(f, _unlockedFeatures, _adminMode)
-  /**
-   * The rail icons, in the same duotone as the cards: one colour, drawn twice,
-   * the back layer at .3 and the front at 1. No stroke and no coral — coral
-   * means progress now, and a selected row already says it is selected three
-   * other ways.
-   *
-   * The colour is currentColor, so the row itself decides: white over the
-   * gradient, and the title ink once the white chip is under it. That flip is
-   * also what makes the pressed row read darker than the rest.
-   */
-  const renderIcon = (k: IconKey, active = false) => {
-    const duo = (back: string, front: string) => (
+  const renderIcon = (k: IconKey) => {
+    const duo = (back: string, front: string, sharp = false) => (
       <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-        {active ? (
-          /* On the white chip the row uses the cards' own pair, so a selected
-             icon in the rail and an icon on a card are the same object. */
-          <>
-            <path fill={CARD_ICON_MASS} opacity={0.3} d={back} />
-            <path fill={CARD_ICON_DETAIL} d={front} />
-          </>
-        ) : (
-          /* Shirli: white fill, and the second tone is the sidebar showing
-             through. In every one of these the detail sits wholly inside the
-             mass, so evenodd turns it into a real hole rather than a painted
-             shape — which is the only version that stays exact over a
-             gradient, since a hole IS the background at that point. */
-          <path fill="currentColor" fillRule="evenodd" d={back + ' ' + front} />
-        )}
+        <path fill="currentColor" fillRule="evenodd" d={back + ' ' + front}
+              stroke={sharp ? 'currentColor' : undefined}
+              strokeWidth={0.9} strokeLinejoin="round" />
       </svg>
     )
     switch (k) {
@@ -2098,7 +2076,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
       case 'map':
         return duo('M 9 3.4l6 2 5.2-1.8A1.2 1.2 0 0 1 21.8 4.7v12.9a1.2 1.2 0 0 1-.8 1.1L15 20.6l-6-2-5.2 1.8A1.2 1.2 0 0 1 2.2 19.3V6.4a1.2 1.2 0 0 1 .8-1.1z', 'M 9 3.4l6 2v15.2l-6-2z')
       case 'globe':
-        return duo('M 12 2 C 17.52 2 22 6.48 22 12 C 22 17.52 17.52 22 12 22 C 6.48 22 2 17.52 2 12 C 2 6.48 6.48 2 12 2 Z', 'M 12 4 C 9.52 4.00 7.18 5.15 5.67 7.11 L 5.5 7.33 L 5.5 9.02 C 5.5 10.27 6.28 11.39 7.45 11.83 L 7.62 11.89 L 8.91 12.28 C 10.29 12.70 11.62 11.59 11.49 10.19 L 11.47 10.04 L 11.30 8.99 C 11.22 8.51 11.49 8.05 11.95 7.89 L 12.06 7.86 L 12.67 7.72 C 14.13 7.38 15.03 5.91 14.66 4.45 C 13.81 4.15 12.91 4.00 12 4 Z')
+        return duo('M2.3 13.9 7.3 9.6V21H2.3zM16.7 13.3a1.2 1.2 0 0 1 1.2-1.2h2.6a1.2 1.2 0 0 1 1.2 1.2V21h-5z', 'M9.7 7.4 12 4.5 14.3 7.4V21H9.7z', true)
       case 'tour':
         return duo('M 12 2 C 17.52 2 22 6.48 22 12 C 22 17.52 17.52 22 12 22 C 6.48 22 2 17.52 2 12 C 2 6.48 6.48 2 12 2 Z', 'M 16.24 7.76 C 15.89 7.40 11.29 8.46 9.88 9.88 C 8.46 11.29 7.40 15.89 7.76 16.24 C 8.11 16.60 12.71 15.54 14.12 14.12 C 15.54 12.71 16.60 8.11 16.24 7.76 Z')
     }
@@ -2187,9 +2165,9 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
                 style={{
                   width: 32, height: 32, flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: isActive ? 'var(--sh-text-med)' : '#fff',
+                  color: isActive ? CARD_ICON_DETAIL : '#fff',
                   transition: 'color 0.15s',
-                }}>{renderIcon(item.iconKey, isActive)}</span>
+                }}>{renderIcon(item.iconKey)}</span>
               {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
               {locked && (
                 <span aria-hidden="true" style={{

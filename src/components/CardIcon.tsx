@@ -95,11 +95,15 @@ const PATHS: Record<CardIconName, JSX.Element> = {
       <path fill={CARD_ICON_DETAIL} d="M 9 3 C 10.11 3 11 3.90 11 5 L 11 11 C 11 12.11 10.11 13 9 13 L 5 13 C 3.90 13 3 12.11 3 11 L 3 5 C 3 3.90 3.90 3 5 3 L 9 3 Z" />
     </>
   ),
-  world: (
-    <>
-      <path fill={CARD_ICON_MASS} opacity={CARD_ICON_BACK} d="M 12 2 C 17.52 2 22 6.48 22 12 C 22 17.52 17.52 22 12 22 C 6.48 22 2 17.52 2 12 C 2 6.48 6.48 2 12 2 Z" />
-      <path fill={CARD_ICON_DETAIL} d="M 12 4 C 9.52 4.00 7.18 5.15 5.67 7.11 L 5.5 7.33 L 5.5 9.02 C 5.5 10.27 6.28 11.39 7.45 11.83 L 7.62 11.89 L 8.91 12.28 C 10.29 12.70 11.62 11.59 11.49 10.19 L 11.47 10.04 L 11.30 8.99 C 11.22 8.51 11.49 8.05 11.95 7.89 L 12.06 7.86 L 12.67 7.72 C 14.13 7.38 15.03 5.91 14.66 4.45 C 13.81 4.15 12.91 4.00 12 4 Z" />
-    </>
+  /* העולם שלי — the city, not a planet. Shirli picked it from a reference
+   * and it replaces the globe from the ready-made set: the app's world is a
+   * place you build. The slanted slab and the pitched tower are what keep
+   * three buildings from reading as three measured columns, i.e. a chart. */
+  world: (
+    <>
+      <path fill={CARD_ICON_MASS} opacity={CARD_ICON_BACK} stroke={CARD_ICON_MASS} strokeWidth={0.9} strokeLinejoin="round" d="M2.3 13.9 7.3 9.6V21H2.3zM16.7 13.3a1.2 1.2 0 0 1 1.2-1.2h2.6a1.2 1.2 0 0 1 1.2 1.2V21h-5z" />
+      <path fill={CARD_ICON_DETAIL} stroke={CARD_ICON_DETAIL} strokeWidth={0.9} strokeLinejoin="round" d="M9.7 7.4 12 4.5 14.3 7.4V21H9.7z" />
+    </>
   ),
 }
 
