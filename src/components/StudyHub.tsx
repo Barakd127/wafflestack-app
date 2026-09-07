@@ -4,7 +4,7 @@ import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../con
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import BoardShell from './BoardShell'
-import CardIcon, { cardTitle, cardHead, CtaArrow, CARD_ICON_COLOR } from './CardIcon'
+import CardIcon, { cardTitle, cardHead, CtaArrow, CARD_ICON_COLOR, CARD_ICON_ACCENT } from './CardIcon'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
 import { toPng } from 'html-to-image'
@@ -2058,24 +2058,25 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
   const _adminMode = useLearningStore(s => s.adminMode)
   const _unlockedFeatures = useLearningStore(s => s.unlockedFeatures)
   const isLocked = (f?: FeatureId) => !!f && !isFeatureUnlocked(f, _unlockedFeatures, _adminMode)
-  const renderIcon = (k: IconKey) => {
+  const renderIcon = (k: IconKey, active = false) => {
     const stroke = 'currentColor'
     const sw = 1.8
     const lc = 'round' as const
     const lj = 'round' as const
+    const acc = active ? CARD_ICON_ACCENT : undefined
     switch (k) {
       case 'home':
-        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M3 11.5L12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M3 11.5L12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/><circle cx="12" cy="16" r="1.9" fill={acc} stroke="none" /></svg>
       case 'book':
-        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h11"/></svg>
+        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h11"/><rect x="14.4" y="4.2" width="2.2" height="5.4" rx="1.1" fill={acc} stroke="none" /></svg>
       case 'trophy':
-        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M5 6H3v2a3 3 0 0 0 3 3"/><path d="M19 6h2v2a3 3 0 0 1-3 3"/><path d="M9 19h6"/><path d="M12 14v5"/></svg>
+        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M5 6H3v2a3 3 0 0 0 3 3"/><path d="M19 6h2v2a3 3 0 0 1-3 3"/><path d="M9 19h6"/><path d="M12 14v5"/><circle cx="12" cy="9" r="1.9" fill={acc} stroke="none" /></svg>
       case 'map':
-        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v16"/><path d="M15 6v16"/></svg>
+        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v16"/><path d="M15 6v16"/><circle cx="12" cy="10.5" r="1.9" fill={acc} stroke="none" /></svg>
       case 'globe':
-        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 0 1 0 18"/><path d="M12 3a13 13 0 0 0 0 18"/></svg>
+        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 0 1 0 18"/><path d="M12 3a13 13 0 0 0 0 18"/><circle cx="15.4" cy="8.6" r="1.9" fill={acc} stroke="none" /></svg>
       case 'tour':
-        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M5 21V4"/><path d="M5 4l9 3-9 3"/><path d="M5 13l11 3-11 3" opacity="0.55"/></svg>
+        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M5 21V4"/><path d="M5 4l9 3-9 3"/><path d="M5 13l11 3-11 3" opacity="0.55"/><circle cx="6.5" cy="6" r="1.9" fill={acc} stroke="none" /></svg>
     }
   }
 
@@ -2164,7 +2165,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: isActive ? '#22378E' : 'rgba(255,255,255,0.92)',
                   transition: 'color 0.15s',
-                }}>{renderIcon(item.iconKey)}</span>
+                }}>{renderIcon(item.iconKey, isActive)}</span>
               {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
               {locked && (
                 <span aria-hidden="true" style={{

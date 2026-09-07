@@ -29,9 +29,9 @@ export type CardIconName =
   | 'chart'     // פעילות השבוע — trend line
   | 'world'     // העולם שלי — globe
 
-/** The button’s resting ink. The icons used to sit on a grey of their own,
- *  which was one more colour on the screen than the card needed. */
-export const CARD_ICON_COLOR = '#253865'
+/** The title's blue, so the icon and the title under it are one colour. It was
+ *  the button's darker ink, which on 26px of line work read as black. */
+export const CARD_ICON_COLOR = 'var(--sh-text-med)'
 
 /** The one coral element inside each icon. It always marks where the action
  *  happens, so the accent keeps the meaning it has everywhere else in the app
@@ -42,7 +42,8 @@ const PATHS: Record<CardIconName, JSX.Element> = {
   plan: (
     <>
       <line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" />
-      <circle cx="15" cy="7" r="2.2" /><circle cx="16" cy="17" r="2.2" />
+      <circle cx="15" cy="7" r="2.2" fill={CARD_ICON_COLOR} stroke="none" />
+      <circle cx="16" cy="17" r="2.2" fill={CARD_ICON_COLOR} stroke="none" />
       <circle cx="9" cy="12" r="2.4" fill={CARD_ICON_ACCENT} stroke="none" />
     </>
   ),
@@ -62,15 +63,18 @@ const PATHS: Record<CardIconName, JSX.Element> = {
   ),
   practice: (
     <>
-      <path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 013 3L8 19l-4 1z" />
-      <line x1="14.5" y1="6.5" x2="17.5" y2="9.5" />
-      <circle cx="5.6" cy="18.4" r="1.9" fill={CARD_ICON_ACCENT} stroke="none" />
+      <rect x="5" y="3.4" width="14" height="17.2" rx="2.6" />
+      <line x1="8.4" y1="8.2" x2="15.6" y2="8.2" />
+      <line x1="8.4" y1="11.6" x2="13.4" y2="11.6" />
+      <polyline points="8.6,16.1 10.7,18.2 15.5,13.4" stroke={CARD_ICON_ACCENT} strokeWidth={2.2} />
     </>
   ),
   insights: (
     <>
-      <line x1="6" y1="20" x2="6" y2="13" /><line x1="18" y1="20" x2="18" y2="10" />
-      <line x1="12" y1="20" x2="12" y2="6" stroke={CARD_ICON_ACCENT} strokeWidth={2.4} />
+      <rect x="4.6" y="13.2" width="4.2" height="6.8" rx=".8" />
+      <rect x="9.9" y="9.2" width="4.2" height="10.8" rx=".8" />
+      <rect x="15.2" y="5.2" width="4.2" height="14.8" rx=".8" />
+      <line x1="3" y1="20" x2="21" y2="20" stroke={CARD_ICON_ACCENT} strokeWidth={2.2} />
     </>
   ),
   risk: (
