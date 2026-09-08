@@ -2418,7 +2418,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
   }))
 
   return (
-    <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '59px 40px 32px' }} dir="rtl">
+    <div className="ws-screen-pad" dir="rtl" style={{ flex: 1, overflow: 'auto', scrollbarGutter: 'stable', padding: '59px 40px 32px 35px' }}>
       <PersonalPlanWizard
         open={planWizardOpen}
         onClose={() => { setPlanWizardOpen(false); finishFunnel() }}
@@ -2436,7 +2436,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
           measuring a landmark that no longer exists. With the tutor and the
           pomodoro off the bottom-left corner there is nothing left to leave
           room for either, so it comes down to 20. Per Shirli 2026-09-08. */}
-      <div style={{ maxWidth: 'calc(100% - 20px)', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* ── BANNER ROW ─────────────────────────────────
             The plan CTA and the tutorial-video card used to stack. Side by
