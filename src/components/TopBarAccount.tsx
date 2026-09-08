@@ -352,7 +352,7 @@ export default function TopBarAccount({ userName, onLogout, xp = 0 }: {
           <div style={{ padding: '0 12px 10px' }}>
             <div style={{
               display: 'flex', justifyContent: 'space-between',
-              fontSize: 13, color: 'var(--sh-text-light)', marginBottom: 6,
+              fontSize: 13, color: 'var(--sh-text-med)', marginBottom: 6,
             }}>
               <span>רמה {level}</span>
               <span>{inLevel}/{XP_PER_LEVEL} XP</span>
