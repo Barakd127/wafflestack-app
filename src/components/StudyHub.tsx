@@ -2555,9 +2555,11 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 page, scaled to ~150px tall to fit the home card. Replaces the
                 old static temple PNG with the live cycling preview. */}
             <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', marginBottom: 16, minHeight: 104, height: 104, overflow: 'hidden' }}>
+              <div style={{ width: '100%', height: '100%', transform: 'scale(0.75)', transformOrigin: 'bottom left' }}>
               <Suspense fallback={<div style={{ color: 'rgba(31,41,55,0.4)', fontSize: 15 }}>טוען…</div>}>
                 <HeroScene />
               </Suspense>
+              </div>
             </div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_LIGHT, marginBottom: 8, textAlign: 'right' }}>הצעה למבנה הבא בעירך</div>
             {/* Progress bar — reflects answered share of the current topic */}
