@@ -66,15 +66,15 @@ export default function TourLauncher() {
       <style>{'@keyframes ws-tourbtn-pulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,0.5)}50%{box-shadow:0 0 0 7px rgba(99,102,241,0)}}'}</style>
       <Tooltip label="סיורים מודרכים" description="בחר פיצ'ר וצפה בהדגמה">
         <button
-          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(31,62,108,0.07)')}
-          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          onMouseEnter={e => { if (!open) e.currentTarget.style.background = 'rgba(31,62,108,0.07)' }}
+          onMouseLeave={e => { if (!open) e.currentTarget.style.background = 'transparent' }}
           data-tour="tour-btn"
           onClick={() => setOpen(o => !o)}
           aria-haspopup="menu"
           aria-expanded={open}
           style={{
             position: 'relative',
-            background: 'transparent', border: 'none',
+            background: open ? 'rgba(31,62,108,0.14)' : 'transparent', border: 'none',
             borderRadius: 10, width: 40, height: 40, cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#2530A6', fontFamily: "'Assistant', sans-serif",

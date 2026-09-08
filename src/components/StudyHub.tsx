@@ -476,7 +476,7 @@ import { useTutorialStore } from '../store/tutorialStore'
 import { useTutorStore } from '../store/tutorStore'
 import { registerTourAction, tourStepIds } from './CoachmarkTour'
 import TourLauncher from './TourLauncher'
-import TopBarAccount, { TopBarBell } from './TopBarAccount'
+import TopBarAccount, { TopBarBell, TopBarSettings } from './TopBarAccount'
 import Tooltip from './Tooltip'
 import Ribbon from './Ribbon'
 import { RiskBoard } from './RiskBoard'
@@ -2308,6 +2308,7 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
         <Ribbon label="חשבון" hideLabel>
           <TourLauncher />
           <TopBarBell />
+          <TopBarSettings darkMode={darkMode} onToggleDark={onToggleDark} />
           <TopBarAccount
             userName={userName}
             onLogout={onLogout}
