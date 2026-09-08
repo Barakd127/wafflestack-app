@@ -166,11 +166,11 @@ export function TopBarBell({ items = [] }: { items?: WsNotification[] }) {
 /** A row for something that is planned but not built. It is rendered, and it
  *  is visibly not available — the alternative is either hiding the structure
  *  or shipping a row that silently does nothing when clicked. */
-function SoonRow({ label }: { label: string }) {
+function SoonRow({ label, indent = false }: { label: string; indent?: boolean }) {
   return (
     <div style={{ ...rowStyle, cursor: 'default', color: 'var(--sh-text-light)' }}>
-      <span style={{ width: 16, flexShrink: 0 }} />
-      <span style={{ flex: 1 }}>{label}</span>
+      {indent && <span style={{ width: 16, flexShrink: 0 }} />}
+      <span style={{ flex: 1, textAlign: 'right' }}>{label}</span>
       <span style={{
         fontSize: 11.5, fontWeight: 600, letterSpacing: '.2px',
         background: 'rgba(31,62,108,0.07)', borderRadius: 6, padding: '2px 7px',
@@ -274,12 +274,12 @@ export function TopBarSettings({ darkMode, onToggleDark }: {
 
           <div style={sectionStyle}>תצוגה ושפה</div>
           {onToggleDark && (<>{themeRow('מצב בהיר', false)}{themeRow('מצב כהה', true)}</>)}
-          <SoonRow label="שפת ממשק" />
+          <SoonRow label="שפת ממשק" indent />
           <div style={{ height: 1, background: 'rgba(31,62,108,0.10)', margin: '6px 8px' }} />
 
           <div style={sectionStyle}>התראות מערכת</div>
-          <SoonRow label="תזכורת יומית ללמוד" />
-          <SoonRow label="התראות על בניית העיר" />
+          <SoonRow label="תזכורת יומית ללמוד" indent />
+          <SoonRow label="התראות על בניית העיר" indent />
         </div>
       )}
     </div>
@@ -351,7 +351,7 @@ export default function TopBarAccount({ userName, onLogout, xp = 0 }: {
           }}>{userName}</div>
           <div style={{ padding: '0 12px 10px' }}>
             <div style={{
-              display: 'flex', justifyContent: 'space-between',
+              display: 'flex', justifyContent: 'flex-start', gap: 12,
               fontSize: 13, color: 'var(--sh-text-med)', marginBottom: 6,
             }}>
               <span>רמה {level}</span>
