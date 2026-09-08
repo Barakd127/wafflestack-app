@@ -166,10 +166,9 @@ export function TopBarBell({ items = [] }: { items?: WsNotification[] }) {
 /** A row for something that is planned but not built. It is rendered, and it
  *  is visibly not available — the alternative is either hiding the structure
  *  or shipping a row that silently does nothing when clicked. */
-function SoonRow({ label, indent = false }: { label: string; indent?: boolean }) {
+function SoonRow({ label }: { label: string }) {
   return (
     <div style={{ ...rowStyle, cursor: 'default', color: 'var(--sh-text-light)' }}>
-      {indent && <span style={{ width: 16, flexShrink: 0 }} />}
       <span style={{ flex: 1, textAlign: 'right' }}>{label}</span>
       <span style={{
         fontSize: 11.5, fontWeight: 600, letterSpacing: '.2px',
@@ -236,7 +235,7 @@ export function TopBarSettings({ darkMode, onToggleDark }: {
       <button key={label} onClick={() => { if (!active) onToggleDark?.() }}
               style={{ ...rowStyle, fontWeight: active ? 700 : 400 }}
               aria-pressed={active} {...hoverable}>
-        {check(active)}{label}
+        <span style={{ flex: 1, textAlign: 'right' }}>{label}</span>{check(active)}
       </button>
     )
   }
@@ -268,18 +267,18 @@ export function TopBarSettings({ darkMode, onToggleDark }: {
           <button onClick={() => sound.toggle()}
                   style={{ ...rowStyle, fontWeight: sound.playing ? 700 : 400 }}
                   aria-pressed={sound.playing} {...hoverable}>
-            {check(sound.playing)}מוזיקת רקע
+            <span style={{ flex: 1, textAlign: 'right' }}>מוזיקת רקע</span>{check(sound.playing)}
           </button>
           <div style={{ height: 1, background: 'rgba(31,62,108,0.10)', margin: '6px 8px' }} />
 
           <div style={sectionStyle}>תצוגה ושפה</div>
           {onToggleDark && (<>{themeRow('מצב בהיר', false)}{themeRow('מצב כהה', true)}</>)}
-          <SoonRow label="שפת ממשק" indent />
+          <SoonRow label="שפת ממשק" />
           <div style={{ height: 1, background: 'rgba(31,62,108,0.10)', margin: '6px 8px' }} />
 
           <div style={sectionStyle}>התראות מערכת</div>
-          <SoonRow label="תזכורת יומית ללמוד" indent />
-          <SoonRow label="התראות על בניית העיר" indent />
+          <SoonRow label="תזכורת יומית ללמוד" />
+          <SoonRow label="התראות על בניית העיר" />
         </div>
       )}
     </div>
@@ -374,8 +373,8 @@ export default function TopBarAccount({ userName, onLogout, xp = 0 }: {
               onMouseEnter={e => (e.currentTarget.style.background = 'rgba(192,57,43,0.07)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
+              <span style={{ flex: 1, textAlign: 'right' }}>יציאה</span>
               <span style={{ width: 16, display: 'inline-flex', justifyContent: 'center', flexShrink: 0 }}>↩</span>
-              יציאה
             </button>
           )}
         </div>
