@@ -46,7 +46,7 @@ const panelStyle: React.CSSProperties = {
   position: 'absolute',
   top: 'calc(100% + 10px)',
   left: 0,
-  minWidth: 216,
+  right: 0,
   background: '#fff',
   border: '1px solid rgba(31,62,108,0.14)',
   borderRadius: 16,
@@ -110,7 +110,7 @@ export function TopBarBell({ items = [] }: { items?: WsNotification[] }) {
   const [open, setOpen] = useState(false)
   const ref = useDismiss(open, () => setOpen(false))
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <div ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
         aria-haspopup="dialog"
@@ -242,7 +242,7 @@ export function TopBarSettings({ darkMode, onToggleDark }: {
   }
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <div ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
         aria-haspopup="menu"
@@ -302,7 +302,7 @@ export default function TopBarAccount({ userName, onLogout, xp = 0 }: {
   const initial = (userName || '').trim().charAt(0) || 'א'
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <div ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
         aria-haspopup="menu"

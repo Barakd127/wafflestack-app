@@ -59,10 +59,31 @@ export default function TourLauncher() {
     setOpen(false)
   }
 
+
+  // Geometry of the shared top-bar menu frame, read live because this panel is
+  // portalled out of it. See the data-ws-menuzone div in StudyHub.
+  const [zone, setZone] = useState<{ top: number; left: number; width: number } | null>(null)
+  useEffect(() => {
+    if (!open) return
+    const read = () => {
+      const el = document.querySelector('[data-ws-menuzone]')
+      if (!el) return
+      const r = el.getBoundingClientRect()
+      setZone({ top: r.bottom + 10, left: r.left, width: r.width })
+    }
+    read()
+    window.addEventListener('resize', read)
+    window.addEventListener('scroll', read, true)
+    return () => {
+      window.removeEventListener('resize', read)
+      window.removeEventListener('scroll', read, true)
+    }
+  }, [open])
+
   const pulse = !!pendingTourId && !open
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div>
       <style>{'@keyframes ws-tourbtn-pulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,0.5)}50%{box-shadow:0 0 0 7px rgba(99,102,241,0)}}'}</style>
       <Tooltip label="סיורים מודרכים" description="בחר פיצ'ר וצפה בהדגמה">
         <button
@@ -111,8 +132,9 @@ export default function TourLauncher() {
           <div
             role="menu" dir="rtl"
             style={{
-              position: 'fixed', top: 64, insetInlineEnd: 12, zIndex: 10_001,
-              width: 320, maxWidth: 'calc(100vw - 24px)', maxHeight: '78vh', overflowY: 'auto',
+              position: 'fixed', zIndex: 10_001,
+              top: zone?.top ?? 64, left: zone?.left ?? 12, width: zone?.width ?? 230,
+              maxHeight: '78vh', overflowY: 'auto',
               background: '#fff', borderRadius: 14,
               border: '1px solid rgba(99,102,241,0.25)',
               boxShadow: '0 18px 50px rgba(0,0,0,0.22)',

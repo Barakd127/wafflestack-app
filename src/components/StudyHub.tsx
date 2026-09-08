@@ -2288,14 +2288,17 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
 
         {/* Ribbon C — Account (label hidden per user 2026-05-24) */}
         <Ribbon label="חשבון" hideLabel>
-          <TopBarSettings darkMode={darkMode} onToggleDark={onToggleDark} />
-          <TourLauncher />
-          <TopBarBell />
-          <TopBarAccount
-            userName={userName}
-            onLogout={onLogout}
-            xp={xp}
-          />
+          {/* The frame every menu measures from — see menuzone note. */}
+          <div data-ws-menuzone style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
+            <TopBarSettings darkMode={darkMode} onToggleDark={onToggleDark} />
+            <TourLauncher />
+            <TopBarBell />
+            <TopBarAccount
+              userName={userName}
+              onLogout={onLogout}
+              xp={xp}
+            />
+          </div>
         </Ribbon>
       </div>
     </div>
