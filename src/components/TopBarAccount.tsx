@@ -119,7 +119,7 @@ export function TopBarBell({ items = [] }: { items?: WsNotification[] }) {
         onMouseEnter={e => { if (!open) e.currentTarget.style.background = 'rgba(31,62,108,0.07)' }}
         onMouseLeave={e => { if (!open) e.currentTarget.style.background = 'transparent' }}
         style={{
-          background: open ? 'rgba(31,62,108,0.10)' : 'transparent',
+          background: open ? 'rgba(31,62,108,0.14)' : 'transparent',
           border: 'none', borderRadius: 10, position: 'relative',
           transition: 'background .15s ease',
           width: 40, height: 40,
@@ -203,7 +203,7 @@ export default function TopBarAccount({
         title={userName}
         style={{
           display: 'flex', alignItems: 'center', gap: 7,
-          background: open ? 'rgba(31,62,108,0.10)' : 'transparent',
+          background: open ? 'rgba(31,62,108,0.14)' : 'transparent',
           border: 'none', borderRadius: 999,
           padding: '3px 8px 3px 3px', cursor: 'pointer', color: INK,
         }}
