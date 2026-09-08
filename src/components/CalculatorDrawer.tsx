@@ -167,6 +167,30 @@ function formatResult(n: number): string {
 }
 
 export default function CalculatorDrawer() {
+  /* The drawer is summoned by long-pressing a formula chip ON the keyboard, so
+   * the keyboard is open when it appears. It used to sit at a fixed bottom of
+   * 100px — inside the docked keyboard's own area, which is capped at 46vh —
+   * and with z-index 100001 it covered the very keys that opened it.
+   *
+   * It now rides on top of the keyboard rather than the window bottom, and
+   * shrinks to whatever is left above it. When the keyboard is closed it falls
+   * back to a plain corner offset. */
+  const [kbH, setKbH] = useState(0)
+  useEffect(() => {
+    const el = document.querySelector('.ML__keyboard') as HTMLElement | null
+    if (!el) { setKbH(0); return }
+    const read = () => {
+      const r = el.getBoundingClientRect()
+      // Only count it when it is actually docked at the bottom and visible.
+      setKbH(r.height > 0 && r.bottom > window.innerHeight - 4 ? r.height : 0)
+    }
+    read()
+    const ro = new ResizeObserver(read)
+    ro.observe(el)
+    window.addEventListener('resize', read)
+    return () => { ro.disconnect(); window.removeEventListener('resize', read) }
+  }, [])
+
   const [formula, setFormula] = useState<Formula | null>(null)
   const [vals, setVals] = useState<Record<string, string>>({})
   const [copied, setCopied] = useState(false)
@@ -334,10 +358,10 @@ export default function CalculatorDrawer() {
       style={{
         position: 'fixed',
         right: 'calc(var(--ws-rail-w, 0px) + 16px)',
-        bottom: 100,
+        bottom: kbH ? kbH + 12 : 96,
         width: 360,
         maxWidth: 'calc(100vw - 32px)',
-        maxHeight: 'calc(100vh - 200px)',
+        maxHeight: `calc(100vh - ${(kbH ? kbH + 12 : 96) + 84}px)`,
         overflowY: 'auto',
         zIndex: 100001,
         background: 'linear-gradient(160deg, #FFFFFF 0%, #EAF1FF 100%)',

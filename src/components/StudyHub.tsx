@@ -2279,40 +2279,23 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
         )}
       </div>
       <div className="ws-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }} dir="ltr">
-        <span className="ws-ribbon-divider" />
-        {/* Ribbon A — Progress */}
-        <Ribbon label="התקדמות">
-          <span style={{
-            background: 'rgba(212,175,55,0.15)',
-            border: '1px solid rgba(212,175,55,0.4)',
-            borderRadius: 999,
-            padding: '3px 10px',
-            color: '#D4AF37',
-            fontSize: 13,
-            fontFamily: "'Assistant', sans-serif",
-          }}>
-            ⭐ {xp} XP
-          </span>
-        </Ribbon>
-
-        <span className="ws-ribbon-divider" />
 
         {/* Ribbon B — Potions (label hidden per user 2026-05-24, icons keep aria) */}
         <Ribbon label="שיקויים" hideLabel>
           <PotionInventory />
         </Ribbon>
 
-        <span className="ws-ribbon-divider" />
 
         {/* Ribbon C — Account (label hidden per user 2026-05-24) */}
         <Ribbon label="חשבון" hideLabel>
+          <TopBarSettings darkMode={darkMode} onToggleDark={onToggleDark} />
+          <TourLauncher />
+          <TopBarBell />
           <TopBarAccount
             userName={userName}
             onLogout={onLogout}
+            xp={xp}
           />
-          <TopBarBell />
-          <TourLauncher />
-          <TopBarSettings darkMode={darkMode} onToggleDark={onToggleDark} />
         </Ribbon>
       </div>
     </div>

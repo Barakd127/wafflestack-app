@@ -45,7 +45,7 @@ function useDismiss(open: boolean, close: () => void) {
 const panelStyle: React.CSSProperties = {
   position: 'absolute',
   top: 'calc(100% + 10px)',
-  insetInlineStart: 0,
+  left: 0,
   minWidth: 216,
   background: '#fff',
   border: '1px solid rgba(31,62,108,0.14)',
@@ -286,10 +286,17 @@ export function TopBarSettings({ darkMode, onToggleDark }: {
   )
 }
 
-export default function TopBarAccount({ userName, onLogout }: {
+/** 100 XP a level, matching the progress card in the learning area. */
+const XP_PER_LEVEL = 100
+
+export default function TopBarAccount({ userName, onLogout, xp = 0 }: {
   userName: string
   onLogout?: () => void
+  xp?: number
 }) {
+  const level = Math.floor(xp / XP_PER_LEVEL) + 1
+  const inLevel = xp % XP_PER_LEVEL
+  const pct = (inLevel / XP_PER_LEVEL) * 100
   const [open, setOpen] = useState(false)
   const ref = useDismiss(open, () => setOpen(false))
   const initial = (userName || '').trim().charAt(0) || 'א'
@@ -309,20 +316,47 @@ export default function TopBarAccount({ userName, onLogout }: {
           padding: '3px 8px 3px 3px', cursor: 'pointer', color: INK,
         }}
       >
-        <span style={{
-          width: 34, height: 34, borderRadius: '50%',
-          background: 'var(--sh-sidebar-bg)',
-          border: '1px solid rgba(255,255,255,0.35)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#fff', fontFamily: "'Assistant', sans-serif",
-          fontSize: 15, fontWeight: 700, flexShrink: 0,
-        }}>{initial}</span>
+        {/* The XP used to be its own pill in the bar, in a gold that belongs to no
+            scale we have, saying a number you could not act on. It is progress,
+            and progress belongs to the person — so the avatar wears it: a ring
+            around it fills through the current level. Shirli, 2026-09-08.
+            The number itself lives one click away, in the menu. */}
+        <span
+          title={`רמה ${level} · ${xp} XP`}
+          style={{
+            width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
+            padding: 2.5, boxSizing: 'border-box',
+            background: `conic-gradient(#2530A6 ${pct}%, rgba(31,62,108,0.16) 0)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <span style={{
+            width: '100%', height: '100%', borderRadius: '50%',
+            background: 'var(--sh-sidebar-bg)',
+            boxShadow: '0 0 0 2px #fff inset',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontFamily: "'Assistant', sans-serif",
+            fontSize: 15, fontWeight: 700,
+          }}>{initial}</span>
+        </span>
         <Chevron open={open} />
       </button>
 
       {open && (
         <div style={panelStyle} role="menu">
           <div style={{ ...sectionStyle, paddingTop: 4 }}>{userName}</div>
+          <div style={{ padding: '0 12px 10px' }}>
+            <div style={{
+              display: 'flex', justifyContent: 'space-between',
+              fontSize: 13, color: 'var(--sh-text-med)', marginBottom: 6,
+            }}>
+              <span>רמה {level}</span>
+              <span>{inLevel}/{XP_PER_LEVEL} XP</span>
+            </div>
+            <div style={{ height: 6, borderRadius: 6, background: 'rgba(31,62,108,0.12)', overflow: 'hidden' }}>
+              <div style={{ width: `${pct}%`, height: '100%', background: '#2530A6', transition: 'width .4s' }} />
+            </div>
+          </div>
           <div style={{ height: 1, background: 'rgba(31,62,108,0.10)', margin: '6px 8px' }} />
           <SoonRow label="מנוי ואמצעי תשלום" />
           <SoonRow label="אבטחת חשבון וסיסמה" />
