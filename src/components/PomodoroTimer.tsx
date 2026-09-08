@@ -136,18 +136,17 @@ export default function PomodoroTimer({ leftOffset: _leftOffset }: PomodoroTimer
           background: running ? 'rgba(255,107,107,0.18)' : 'rgba(10,10,20,0.75)',
           backdropFilter: 'blur(10px)',
           border: `1px solid ${running ? accent : 'rgba(255,255,255,0.2)'}`,
-          borderRadius: 22, padding: '10px 14px',
+          width: 56, height: 56, borderRadius: '50%', padding: 0,
           color: running ? accent : 'rgba(255,255,255,0.85)',
-          fontSize: 13, cursor: 'pointer',
+          fontSize: running ? 13 : 22, cursor: 'pointer',
           fontFamily: "'Heebo', system-ui, sans-serif",
-          display: 'flex', alignItems: 'center', gap: 6,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0,
           fontVariantNumeric: 'tabular-nums',
-          // WCAG 2.5.5 touch target (chip stays visually small via minHeight only)
-          minHeight: 36,
+          // WCAG 2.5.5 touch target — 56px clears it outright now.
+          lineHeight: 1,
         }}
       >
-        <span>🍅</span>
-        {running && <span>{fmtTime(secondsLeft)}</span>}
+        {running ? <span>{fmtTime(secondsLeft)}</span> : <span>🍅</span>}
       </button>
     )
   }
