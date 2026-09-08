@@ -326,7 +326,7 @@ export default function TopBarAccount({ userName, onLogout, xp = 0 }: {
           style={{
             width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
             padding: 2.5, boxSizing: 'border-box',
-            background: `conic-gradient(#2530A6 ${pct}%, rgba(31,62,108,0.16) 0)`,
+            background: `conic-gradient(#FF854C ${pct}%, rgba(31,62,108,0.16) 0)`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
@@ -344,17 +344,21 @@ export default function TopBarAccount({ userName, onLogout, xp = 0 }: {
 
       {open && (
         <div style={panelStyle} role="menu">
-          <div style={{ ...sectionStyle, paddingTop: 4 }}>{userName}</div>
+          <div style={{
+            padding: '6px 12px 2px',
+            fontFamily: "'Assistant', sans-serif",
+            fontSize: 16, fontWeight: 700, color: 'var(--sh-text-med)',
+          }}>{userName}</div>
           <div style={{ padding: '0 12px 10px' }}>
             <div style={{
               display: 'flex', justifyContent: 'space-between',
-              fontSize: 13, color: 'var(--sh-text-med)', marginBottom: 6,
+              fontSize: 13, color: 'var(--sh-text-light)', marginBottom: 6,
             }}>
               <span>רמה {level}</span>
               <span>{inLevel}/{XP_PER_LEVEL} XP</span>
             </div>
             <div style={{ height: 6, borderRadius: 6, background: 'rgba(31,62,108,0.12)', overflow: 'hidden' }}>
-              <div style={{ width: `${pct}%`, height: '100%', background: '#2530A6', transition: 'width .4s' }} />
+              <div style={{ width: `${pct}%`, height: '100%', background: '#FF854C', transition: 'width .4s' }} />
             </div>
           </div>
           <div style={{ height: 1, background: 'rgba(31,62,108,0.10)', margin: '6px 8px' }} />
