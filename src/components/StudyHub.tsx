@@ -4,7 +4,7 @@ import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../con
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import BoardShell from './BoardShell'
-import CardIcon, { cardTitle, cardHead, CtaArrow, CARD_ICON_COLOR, CARD_ICON_MASS, CARD_ICON_DETAIL } from './CardIcon'
+import CardIcon, { cardTitle, cardHead, CtaArrow, CARD_ICON_COLOR } from './CardIcon'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
 import { toPng } from 'html-to-image'
@@ -2058,27 +2058,31 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
   const _adminMode = useLearningStore(s => s.adminMode)
   const _unlockedFeatures = useLearningStore(s => s.unlockedFeatures)
   const isLocked = (f?: FeatureId) => !!f && !isFeatureUnlocked(f, _unlockedFeatures, _adminMode)
-  const renderIcon = (k: IconKey) => {
-    const duo = (back: string, front: string, sharp = false) => (
-      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-        <path fill="currentColor" fillRule="evenodd" d={back + ' ' + front}
-              stroke={sharp ? 'currentColor' : undefined}
-              strokeWidth={0.9} strokeLinejoin="round" />
+  const renderIcon = (k: IconKey, active = false) => {
+    const glyph = (line: string, solid: string) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"
+           {...(active
+             ? { fill: 'currentColor', fillRule: 'evenodd' as const }
+             : { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8,
+                 strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const })}>
+        {active
+          ? <path d={solid} />
+          : <g dangerouslySetInnerHTML={{ __html: line }} />}
       </svg>
     )
     switch (k) {
-      case 'home':
-        return duo('M 11.05 2.94a1.6 1.6 0 0 1 1.9 0l7.4 5.55c.41.3.65.78.65 1.28V19.4A1.6 1.6 0 0 1 19.4 21H4.6A1.6 1.6 0 0 1 3 19.4V9.77c0-.5.24-.98.65-1.28z', 'M 12 13.4a2.3 2.3 0 0 1 2.3 2.3V21H9.7v-5.3a2.3 2.3 0 0 1 2.3-2.3z')
-      case 'book':
-        return duo('M 6 2 C 4.89 2 4 2.90 4 4 L 4 5 C 3.23 5 2.75 5.83 3.13 6.5 C 3.31 6.81 3.64 7 4 7 L 4 9 C 3.23 9 2.75 9.83 3.13 10.5 C 3.31 10.81 3.64 11 4 11 L 4 13 C 3.23 13 2.75 13.83 3.13 14.5 C 3.31 14.81 3.64 15 4 15 L 4 17 C 3.23 17 2.75 17.83 3.13 18.5 C 3.31 18.81 3.64 19 4 19 L 4 20 C 4 21.11 4.89 22 6 22 L 18 22 C 19.11 22 20 21.11 20 20 L 20 4 C 20 2.90 19.11 2 18 2 L 6 2 Z', 'M 8.5 6 C 7.67 6 7 6.67 7 7.5 L 7 8.5 C 7 9.33 7.67 10 8.5 10 L 15.5 10 C 16.33 10 17 9.33 17 8.5 L 17 7.5 C 17 6.67 16.33 6 15.5 6 L 8.5 6 Z')
-      case 'trophy':
-        return duo('M 12 2 C 18.16 2 22.01 8.67 18.93 14 C 18.43 14.86 17.78 15.62 17 16.25 L 17 20.86 C 17 21.62 16.23 22.15 15.51 21.89 L 12 20.57 L 8.49 21.89 C 7.77 22.16 7.00 21.62 7 20.86 L 7 16.25 C 2.19 12.40 3.35 4.79 9.09 2.55 C 10.02 2.19 11.00 2 12 2 Z', 'M 12 6 C 15.08 6 17.00 9.33 15.46 12 C 14.75 13.24 13.43 14 12 14 C 8.92 14 7.00 10.67 8.54 8 C 9.25 6.76 10.57 6 12 6 Z')
-      case 'map':
-        return duo('M 9 3.4l6 2 5.2-1.8A1.2 1.2 0 0 1 21.8 4.7v12.9a1.2 1.2 0 0 1-.8 1.1L15 20.6l-6-2-5.2 1.8A1.2 1.2 0 0 1 2.2 19.3V6.4a1.2 1.2 0 0 1 .8-1.1z', 'M 9 3.4l6 2v15.2l-6-2z')
-      case 'globe':
-        return duo('M2.3 13.9 7.3 9.6V21H2.3zM16.7 13.3a1.2 1.2 0 0 1 1.2-1.2h2.6a1.2 1.2 0 0 1 1.2 1.2V21h-5z', 'M9.7 7.4 12 4.5 14.3 7.4V21H9.7z', true)
-      case 'tour':
-        return duo('M 12 2 C 17.52 2 22 6.48 22 12 C 22 17.52 17.52 22 12 22 C 6.48 22 2 17.52 2 12 C 2 6.48 6.48 2 12 2 Z', 'M 16.24 7.76 C 15.89 7.40 11.29 8.46 9.88 9.88 C 8.46 11.29 7.40 15.89 7.76 16.24 C 8.11 16.60 12.71 15.54 14.12 14.12 C 15.54 12.71 16.60 8.11 16.24 7.76 Z')
+      case 'home':
+        return glyph(`<path d="M3 11.5L12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>`, 'M11.05 2.94a1.6 1.6 0 0 1 1.9 0l7.4 5.55c.41.3.65.78.65 1.28V19.4A1.6 1.6 0 0 1 19.4 21H4.6A1.6 1.6 0 0 1 3 19.4V9.77c0-.5.24-.98.65-1.28z M12 13.4a2.3 2.3 0 0 1 2.3 2.3V21H9.7v-5.3a2.3 2.3 0 0 1 2.3-2.3z')
+      case 'book':
+        return glyph(`<path d="M9.5 3.1A3 3 0 0 0 6.5 6.1v11.8a3 3 0 0 0 3 3"/><rect x="9.5" y="3.1" width="10.4" height="17.8" rx="2.6"/><path d="M9.5 16.7h10.4"/><rect x="11" y="6" width="7.4" height="4.9" rx="1.7"/><path d="M13.1 16.7v4.9l1.6-1.5 1.6 1.5v-4.9"/>`, 'M6 2C4.89 2 4 2.9 4 4v1c-.77 0-1.25.83-.87 1.5.18.31.51.5.87.5v2c-.77 0-1.25.83-.87 1.5.18.31.51.5.87.5v2c-.77 0-1.25.83-.87 1.5.18.31.51.5.87.5v2c-.77 0-1.25.83-.87 1.5.18.31.51.5.87.5v1c0 1.11.89 2 2 2h12c1.11 0 2-.89 2-2V4c0-1.1-.89-2-2-2H6z M8.5 6C7.67 6 7 6.67 7 7.5v1C7 9.33 7.67 10 8.5 10h7c.83 0 1.5-.67 1.5-1.5v-1C17 6.67 16.33 6 15.5 6h-7z')
+      case 'trophy':
+        return glyph(`<path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M5 6H3v2a3 3 0 0 0 3 3"/><path d="M19 6h2v2a3 3 0 0 1-3 3"/><path d="M9 19h6"/><path d="M12 14v5"/>`, 'M12 2c6.16 0 10.01 6.67 6.93 12-.5.86-1.15 1.62-1.93 2.25v4.61c0 .76-.77 1.29-1.49 1.03L12 20.57l-3.51 1.32C7.77 22.16 7 21.62 7 20.86v-4.61C2.19 12.4 3.35 4.79 9.09 2.55 10.02 2.19 11 2 12 2z M12 6c3.08 0 5 3.33 3.46 6-.71 1.24-2.03 2-3.46 2-3.08 0-5-3.33-3.46-6C9.25 6.76 10.57 6 12 6z')
+      case 'map':
+        return glyph(`<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v16"/><path d="M15 6v16"/>`, 'M9 3.4l6 2 5.2-1.8A1.2 1.2 0 0 1 21.8 4.7v12.9a1.2 1.2 0 0 1-.8 1.1L15 20.6l-6-2-5.2 1.8A1.2 1.2 0 0 1 2.2 19.3V6.4a1.2 1.2 0 0 1 .8-1.1z M9 3.4l6 2v15.2l-6-2z')
+      case 'globe':
+        return glyph(`<path d="M2.9 13.9 7.7 9.7V20.2H2.9z"/><path d="M9.9 7.6 12 4.9 14.1 7.6V20.2H9.9z"/><path d="M16.4 13.4a1.2 1.2 0 0 1 1.2-1.2h2.3a1.2 1.2 0 0 1 1.2 1.2V20.2h-4.7z"/>`, 'M2.9 13.9 7.7 9.7V20.2H2.9z M9.9 7.6 12 4.9 14.1 7.6V20.2H9.9z M16.4 13.4a1.2 1.2 0 0 1 1.2-1.2h2.3a1.2 1.2 0 0 1 1.2 1.2V20.2h-4.7z')
+      case 'tour':
+        return glyph(`<path d="M5 21V4"/><path d="M5 4l9 3-9 3"/><path d="M5 13l11 3-11 3"/>`, 'M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z M16.24 7.76c-.35-.36-4.95.7-6.36 2.12-1.42 1.41-2.48 6.01-2.12 6.36.35.36 4.95-.7 6.36-2.12 1.42-1.41 2.48-6.01 2.12-6.36z')
     }
   }
 
@@ -2165,9 +2169,9 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
                 style={{
                   width: 32, height: 32, flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: isActive ? CARD_ICON_DETAIL : '#fff',
+                  color: isActive ? '#2530A6' : '#fff',
                   transition: 'color 0.15s',
-                }}>{renderIcon(item.iconKey)}</span>
+                }}>{renderIcon(item.iconKey, isActive)}</span>
               {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
               {locked && (
                 <span aria-hidden="true" style={{

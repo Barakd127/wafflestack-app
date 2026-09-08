@@ -71,7 +71,17 @@ const sectionStyle: React.CSSProperties = {
   color: 'var(--sh-text-light)',
 }
 
-function BellIcon() {
+function BellIcon({ filled = false }: { filled?: boolean }) {
+  /* Line at rest, solid once the panel is open — the same switch the sidebar
+     rows make. Both are the same silhouette, so nothing moves when it flips. */
+  if (filled) {
+    return (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M12 2.4a1.5 1.5 0 0 1 1.5 1.5v.55a6.7 6.7 0 0 1 5.2 6.53v2.92l1.62 2.5a1.05 1.05 0 0 1-.88 1.62H4.56a1.05 1.05 0 0 1-.88-1.62l1.62-2.5V11a6.7 6.7 0 0 1 5.2-6.53V3.9A1.5 1.5 0 0 1 12 2.4z" />
+        <path d="M9.5 19.3h5a2.5 2.5 0 0 1-5 0z" />
+      </svg>
+    )
+  }
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -114,10 +124,10 @@ export function TopBarBell({ items = [] }: { items?: WsNotification[] }) {
           transition: 'background .15s ease',
           width: 40, height: 40,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: INK, cursor: 'pointer',
+          color: '#2530A6', cursor: 'pointer',
         }}
       >
-        <BellIcon />
+        <BellIcon filled={open} />
         {unread > 0 && (
           /* The same mark the tour launcher already uses for "there is
              something new", down to the 2px white ring that keeps it legible
