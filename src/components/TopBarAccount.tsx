@@ -77,14 +77,14 @@ function BellIcon({ filled = false }: { filled?: boolean }) {
      rows make. Both are the same silhouette, so nothing moves when it flips. */
   if (filled) {
     return (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
         <path d="M12 2.4a1.5 1.5 0 0 1 1.5 1.5v.55a6.7 6.7 0 0 1 5.2 6.53v2.92l1.62 2.5a1.05 1.05 0 0 1-.88 1.62H4.56a1.05 1.05 0 0 1-.88-1.62l1.62-2.5V11a6.7 6.7 0 0 1 5.2-6.53V3.9A1.5 1.5 0 0 1 12 2.4z" />
         <path d="M9.5 19.3h5a2.5 2.5 0 0 1-5 0z" />
       </svg>
     )
   }
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d="M18 8.5a6 6 0 1 0-12 0c0 6-2.2 7.5-2.2 7.5h16.4S18 14.5 18 8.5Z" />
       <path d="M13.7 19.5a2 2 0 0 1-3.4 0" />
@@ -94,7 +94,7 @@ function BellIcon({ filled = false }: { filled?: boolean }) {
 
 function Chevron({ open }: { open: boolean }) {
   return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden
          style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .16s ease' }}>
       <polyline points="6,9 12,15 18,9" />
@@ -183,13 +183,13 @@ const GEAR = 'M9.96 2.81c-.4-.3-.92-.37-1.4-.2a11.6 11.6 0 0 0-3 1.72c-.38.33-.5
 function GearIcon({ filled = false }: { filled?: boolean }) {
   if (filled) {
     return (
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" fillRule="evenodd" aria-hidden>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" fillRule="evenodd" aria-hidden>
         <path d={GEAR + ' M9 12c0-2.31 2.5-3.75 4.5-2.6.93.54 1.5 1.53 1.5 2.6 0 2.31-2.5 3.75-4.5 2.6A3 3 0 0 1 9 12z'} />
       </svg>
     )
   }
   return (
-    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <circle cx="12" cy="12" r="3.1" />
       <path d={GEAR} />

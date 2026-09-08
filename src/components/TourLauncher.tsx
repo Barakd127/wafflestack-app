@@ -102,7 +102,7 @@ export default function TourLauncher() {
             transition: 'background .15s ease',
           }}
         >
-          <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden
                {...(open
                  ? { fill: 'currentColor', fillRule: 'evenodd' as const }
                  : { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8,

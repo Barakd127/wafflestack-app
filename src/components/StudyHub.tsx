@@ -529,7 +529,7 @@ const COURSES: CourseDef[] = [
 // with a dashed mean and a confidence-interval bracket; methods: checklist
 // sheet under a magnifier; anova: three groups as vertical 3-point columns
 // (one x per group, means rising) on axes; sql: data cylinder (warehouse).
-function CourseIcon({ id, size = 30 }: { id: CourseDef['id']; size?: number }) {
+function CourseIcon({ id, size = 26 }: { id: CourseDef['id']; size?: number }) {
   const common = {
     width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
     stroke: 'currentColor', strokeWidth: 1.8,
@@ -2555,7 +2555,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 page, scaled to ~150px tall to fit the home card. Replaces the
                 old static temple PNG with the live cycling preview. */}
             <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', marginBottom: 16, minHeight: 104, height: 104, overflow: 'hidden' }}>
-              <div style={{ width: '100%', height: '100%', transform: 'scale(0.75)', transformOrigin: 'bottom left' }}>
+              <div style={{ width: '100%', height: '100%', transform: 'scale(0.75) translateX(-33%)', transformOrigin: 'bottom left' }}>
               <Suspense fallback={<div style={{ color: 'rgba(31,41,55,0.4)', fontSize: 15 }}>טוען…</div>}>
                 <HeroScene />
               </Suspense>
@@ -2653,7 +2653,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     {/* Proper-orientation check ✓ (no Y-flip) */}
-                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M3 8.5l3.2 3.2L13 4.5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </div>
@@ -2666,7 +2666,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     {/* Reached — the same check the completed stages carry */}
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M5.5 12.5l4.3 4.3 8.7-9.6" />
                     </svg>
                   </div>
@@ -2679,7 +2679,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                     borderRadius: 24,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sh-text-light)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sh-text-light)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="6" y="3" width="12" height="16" rx="2" />
                       <path d="M9.5 8h5M9.5 12h3" />
                     </svg>
