@@ -2306,15 +2306,13 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
 
         {/* Ribbon C — Account (label hidden per user 2026-05-24) */}
         <Ribbon label="חשבון" hideLabel>
-          <TourLauncher />
-          <TopBarBell />
-          <TopBarSettings darkMode={darkMode} onToggleDark={onToggleDark} />
           <TopBarAccount
             userName={userName}
             onLogout={onLogout}
-            darkMode={darkMode}
-            onToggleDark={onToggleDark}
           />
+          <TopBarBell />
+          <TourLauncher />
+          <TopBarSettings darkMode={darkMode} onToggleDark={onToggleDark} />
         </Ribbon>
       </div>
     </div>
@@ -2446,14 +2444,13 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
           right edge under the page's 40px pad instead of floating centred at
           900. Keeps every screen on one grid and lets the home cards use the
           full width. Per Shirli 2026-09-03. */}
-      {/* The content column stops on a real landmark instead of an arbitrary
-          ceiling: the top bar's first divider, the one between the dark-mode
-          toggle and the XP ribbon. That divider sits 90px from the left edge
-          of the main area (36 top-bar padding + 40 toggle + 14 gap), and
-          ws-screen-pad already insets 40, so 50 more lands the column's left
-          edge exactly on it. The old 1200 cap left 393px of dead space on the
-          left at a 1920 window. Per Shirli 2026-09-04. */}
-      <div style={{ maxWidth: 'calc(100% - 50px)', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* The 50px gutter used to line the column up with a top-bar divider
+          beside the dark-mode toggle. That toggle and that divider are both
+          gone — the bar is now avatar, bell, help, gear — so the number was
+          measuring a landmark that no longer exists. With the tutor and the
+          pomodoro off the bottom-left corner there is nothing left to leave
+          room for either, so it comes down to 20. Per Shirli 2026-09-08. */}
+      <div style={{ maxWidth: 'calc(100% - 20px)', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
         {/* ── BANNER ROW ─────────────────────────────────
             The plan CTA and the tutorial-video card used to stack. Side by
@@ -4733,6 +4730,13 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
     loadProgress(initializeUser().userId)
   )
   const [sidebarWidth, setSidebarWidth] = useState(247)
+  /* Anything fixed to the right edge — the tutor, the pomodoro, the
+     calculator — has to stop at the rail rather than under it, and the rail
+     is draggable between 60 and 360. Publishing the live width as a custom
+     property is what lets those components stay pure CSS. */
+  useEffect(() => {
+    document.documentElement.style.setProperty('--ws-rail-w', sidebarWidth + 'px')
+  }, [sidebarWidth])
   // Distraction-free fullscreen for the practice/learning view. When true,
   // sidebar + topbar are hidden so only the quiz + companion tool remain.
   const [learningFullscreen, setLearningFullscreen] = useState(false)

@@ -49,7 +49,7 @@ interface PomodoroTimerProps {
 export default function PomodoroTimer({ leftOffset: _leftOffset }: PomodoroTimerProps = {}) {
   const [open, setOpen] = useState(false)
   const kbOpen = useKeyboardOpen()
-  const stackPos = getStackOffset('bl', 'pomodoro')
+  const stackPos = getStackOffset('br-content', 'pomodoro')
   const [mode, setMode] = useState<Mode>('work')
   const [secondsLeft, setSecondsLeft] = useState(WORK_MIN * 60)
   const [running, setRunning] = useState(false)
@@ -128,7 +128,7 @@ export default function PomodoroTimer({ leftOffset: _leftOffset }: PomodoroTimer
           // Hides with 200ms fade when MathLive virtual keyboard is open.
           position: 'fixed',
           bottom: stackPos.bottom,
-          left: stackPos.left,
+          right: stackPos.right,
           zIndex: 235,
           opacity: kbOpen ? 0 : 1,
           pointerEvents: kbOpen ? 'none' : 'auto',

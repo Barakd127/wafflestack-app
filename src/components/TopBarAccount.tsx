@@ -286,36 +286,13 @@ export function TopBarSettings({ darkMode, onToggleDark }: {
   )
 }
 
-export default function TopBarAccount({
-  userName, onLogout, darkMode, onToggleDark,
-}: {
+export default function TopBarAccount({ userName, onLogout }: {
   userName: string
   onLogout?: () => void
-  darkMode?: boolean
-  onToggleDark?: () => void
 }) {
   const [open, setOpen] = useState(false)
   const ref = useDismiss(open, () => setOpen(false))
   const initial = (userName || '').trim().charAt(0) || 'א'
-
-  const themeRow = (label: string, wantDark: boolean) => {
-    const active = !!darkMode === wantDark
-    return (
-      <button
-        key={label}
-        onClick={() => { if (!active) onToggleDark?.(); setOpen(false) }}
-        style={{ ...rowStyle, fontWeight: active ? 700 : 400 }}
-        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(31,62,108,0.06)')}
-        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-        aria-pressed={active}
-      >
-        <span style={{ width: 16, display: 'inline-flex', justifyContent: 'center', flexShrink: 0 }}>
-          {active ? '✓' : ''}
-        </span>
-        {label}
-      </button>
-    )
-  }
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>

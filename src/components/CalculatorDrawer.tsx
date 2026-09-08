@@ -333,7 +333,7 @@ export default function CalculatorDrawer() {
       aria-label="מחשבון נוסחה"
       style={{
         position: 'fixed',
-        right: 16,
+        right: 'calc(var(--ws-rail-w, 0px) + 16px)',
         bottom: 100,
         width: 360,
         maxWidth: 'calc(100vw - 32px)',

@@ -16,13 +16,17 @@
 
 import { useState, useEffect } from 'react'
 
-export type Corner = 'bl' | 'br' | 'tl' | 'tr'
+/** 'br-content' is bottom-right of the CONTENT, not of the window. The rail
+ *  owns the right edge and is user-resizable, so anything anchored there has to
+ *  track it — hence --ws-rail-w, published by the layout on every resize. */
+export type Corner = 'bl' | 'br' | 'tl' | 'tr' | 'br-content'
 
 const STACK_STEP = 72   // px between FAB centres in the same corner stack
 const BASE = 20         // px from the viewport edge to the first FAB centre
 
 const slots: Record<Corner, string[]> = {
-  bl: ['tutor-fab', 'pomodoro', 'restore-chrome'],
+  bl: ['restore-chrome'],
+  'br-content': ['tutor-fab', 'pomodoro'],
   br: ['keyboard-closer', 'calculator-drawer', 'home-fab'],
   tl: ['back-home-btn'],
   tr: ['theme-toggle', 'admin-mode', 'profile-menu'],
@@ -36,7 +40,7 @@ const slots: Record<Corner, string[]> = {
 export function getStackOffset(
   corner: Corner,
   name: string,
-): { bottom?: number; top?: number; left?: number; right?: number } {
+): { bottom?: number; top?: number; left?: number; right?: number | string } {
   const list = slots[corner] ?? []
   const idx = list.indexOf(name)
   const offset = BASE + (idx < 0 ? 0 : idx) * STACK_STEP
@@ -46,6 +50,7 @@ export function getStackOffset(
     case 'br': return { bottom: offset, right: BASE }
     case 'tl': return { top: offset, left: BASE }
     case 'tr': return { top: offset, right: BASE }
+    case 'br-content': return { bottom: offset, right: `calc(var(--ws-rail-w, 0px) + ${BASE}px)` }
   }
 }
 
