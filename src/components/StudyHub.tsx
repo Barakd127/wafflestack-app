@@ -2105,26 +2105,22 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
           it again, which a button in the bar would manage too, but at the
           cost of putting a rail control somewhere the rail is not. */}
       <div style={{
-        display: 'flex', alignItems: 'center',
+        display: 'flex', alignItems: 'center', gap: 11,
         justifyContent: collapsed ? 'center' : 'flex-start',
         padding: collapsed ? '20px 0 39px' : '28px 32px 39px',
       }}>
-        <div style={{
-          width: 64, height: 64,
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.15))',
-          backdropFilter: 'blur(10px)',
-          borderRadius: 20,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 4px 16px rgba(31,41,55,0.2)',
-          border: '1px solid rgba(255,255,255,0.3)',
-        }}>
-          {/* Diamond icon matching Figma */}
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <polygon points="18,4 30,14 18,32 6,14" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" />
-            <polygon points="18,4 30,14 18,17 6,14" fill="rgba(255,255,255,0.3)" />
-            <line x1="6" y1="14" x2="30" y2="14" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" />
-          </svg>
-        </div>
+        <svg width="32" height="32" viewBox="0 0 36 36" aria-hidden
+             style={{ display: 'block', flexShrink: 0 }}>
+          <polygon points="18,3 31,14 18,33 5,14" fill="#fff" />
+        </svg>
+        {!collapsed && (
+          <span style={{
+            fontFamily: "'Assistant', sans-serif",
+            fontWeight: 700, fontSize: 15, letterSpacing: '1.4px',
+            color: '#fff', whiteSpace: 'nowrap',
+            direction: 'ltr', unicodeBidi: 'isolate',
+          }}>WAFFLESTACK</span>
+        )}
         {onToggleCollapse && (
           <button
             onClick={onToggleCollapse}
@@ -2134,7 +2130,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
             onMouseEnter={e => (e.currentTarget.style.background = '#F2F6FE')}
             onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
             style={{
-              position: 'absolute', left: -16, top: 104, zIndex: 3,
+              position: 'absolute', left: -16, top: 72, zIndex: 3,
               width: 32, height: 32, borderRadius: '50%', padding: 0,
               border: '1px solid #E0E7F6', cursor: 'pointer',
               background: '#fff', color: '#2530A6',
@@ -2452,7 +2448,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
   }))
 
   return (
-    <div className="ws-screen-pad" dir="rtl" style={{ flex: 1, overflow: 'auto', scrollbarGutter: 'stable', padding: '77px 40px 32px 35px' }}>
+    <div className="ws-screen-pad" dir="rtl" style={{ flex: 1, overflow: 'auto', scrollbarGutter: 'stable', padding: '46px 40px 32px 35px' }}>
       <PersonalPlanWizard
         open={planWizardOpen}
         onClose={() => { setPlanWizardOpen(false); finishFunnel() }}
@@ -4753,24 +4749,16 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   const [userProgress, setUserProgress] = useState<UserProgress>(() =>
     loadProgress(initializeUser().userId)
   )
-  /* The rail already collapsed itself below 80px — the icon-only mode is old.
-     What it never had was a way in and out on purpose, or a memory of the
-     choice. Folding stores the width you were at, so opening returns you to
-     your own width rather than to a default. */
-  const RAIL_KEY = 'ws-rail-width'
-  const RAIL_MIN = 62
-  const [sidebarWidth, setSidebarWidth] = useState(() => {
-    const n = parseInt(localStorage.getItem(RAIL_KEY) || '')
-    return Number.isFinite(n) ? Math.min(360, Math.max(60, n)) : 247
-  })
-  const lastOpenWidth = useRef(sidebarWidth < 80 ? 247 : sidebarWidth)
-  useEffect(() => {
-    localStorage.setItem(RAIL_KEY, String(sidebarWidth))
-    if (sidebarWidth >= 80) lastOpenWidth.current = sidebarWidth
-  }, [sidebarWidth])
-  const toggleRail = useCallback(() => {
-    setSidebarWidth(w => (w < 80 ? lastOpenWidth.current : RAIL_MIN))
-  }, [])
+  /* Two states, not a range. The icon-only mode below 80px is old; what it
+     never had was a deliberate way in and out, or a memory of the choice.
+     It is a fold now, and the width is derived from it. */
+  const RAIL_KEY = 'ws-rail-folded'
+  const RAIL_OPEN = 247
+  const RAIL_FOLDED = 62
+  const [railFolded, setRailFolded] = useState(() => localStorage.getItem(RAIL_KEY) === '1')
+  const sidebarWidth = railFolded ? RAIL_FOLDED : RAIL_OPEN
+  useEffect(() => { localStorage.setItem(RAIL_KEY, railFolded ? '1' : '0') }, [railFolded])
+  const toggleRail = useCallback(() => setRailFolded(v => !v), [])
   /* Anything fixed to the right edge — the tutor, the pomodoro, the
      calculator — has to stop at the rail rather than under it, and the rail
      is draggable between 60 and 360. Publishing the live width as a custom
@@ -4805,14 +4793,13 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
       else mq.removeListener(onChange)
     }
   }, [])
-  const sidebarDragging = useRef(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const sidebarTutRef = useRef<HTMLElement>(null)
   const topbarTutRef = useRef<HTMLElement>(null)
 
   useTutorialStep('study-sidebar', sidebarTutRef, {
     title: 'התפריט שלך',
-    body:  'מכאן עוברים בין דף הבית, נושאי לימוד, חידונים והקאצ\'ים שאספת. אפשר לגרור את הקצה כדי לשנות רוחב.',
+    body:  'מכאן עוברים בין דף הבית, נושאי לימוד, חידונים והקאצ\'ים שאספת. הכפתור שעל הקצה מקפל אותו כשצריך מקום.',
     placement: 'left',
   })
   useTutorialStep('study-topbar', topbarTutRef, {
@@ -4838,24 +4825,6 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
       }
     })()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const onSidebarDragStart = useCallback((e: React.MouseEvent) => {
-    sidebarDragging.current = true
-    e.preventDefault()
-    const onMove = (ev: MouseEvent) => {
-      if (!sidebarDragging.current || !rootRef.current) return
-      const rect = rootRef.current.getBoundingClientRect()
-      const fromRight = rect.right - ev.clientX
-      setSidebarWidth(Math.min(360, Math.max(60, fromRight)))
-    }
-    const onUp = () => {
-      sidebarDragging.current = false
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup', onUp)
-    }
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup', onUp)
-  }, [])
 
   const topicHe = selectedTopic ? (HEBREW_LABELS[selectedTopic] || selectedTopic) : ''
   const withTopic = (what: string) => (topicHe ? `${topicHe} · ${what}` : what)
@@ -5049,19 +5018,6 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
           onGoNotebook={() => { window.location.hash = '#notebook'; if (isMobile) setMobileSidebarOpen(false) }}
           onOpenTours={() => { useTutorialStore.getState().setLauncherOpen(true); if (isMobile) setMobileSidebarOpen(false) }}
           width={isMobile ? 260 : sidebarWidth}
-        />
-        {/* Sidebar resize handle — on the left edge (RTL: left is outer edge) */}
-        <div
-          onMouseDown={onSidebarDragStart}
-          title="גרור לשינוי רוחב הסרגל"
-          style={{
-            position: 'absolute', left: 0, top: 0, bottom: 0, width: 6,
-            cursor: 'col-resize', zIndex: 10,
-            background: 'transparent',
-            transition: 'background 0.15s',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(127,155,217,0.35)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
         />
       </nav>
 
