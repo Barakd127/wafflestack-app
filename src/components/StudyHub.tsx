@@ -2637,7 +2637,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             {/* Connector line — pulled in from 10% to 16% now that the strip
                 sits in the narrow column, so it starts and ends under the
                 nodes rather than running past them. */}
-            <div style={{ position: 'absolute', left: '16%', right: '16%', top: 17, height: 2, background: '#FF854C', borderRadius: 2, zIndex: 0 }} />
+            <div style={{ position: 'absolute', left: '16%', right: '16%', top: 17.5, height: 1.5, background: '#FFBC9D', borderRadius: 2, zIndex: 0 }} />
 
             {/* Stages — progress-driven slice centered on the current topic.
                 done = green check · current = gold gem · upcoming = small node. */}
@@ -2674,7 +2674,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                   ) : (
                     <div style={{
                       width: 27, height: 27,
-                      background: 'rgba(255,255,255,0.6)',
+                      background: '#fff',
                       border: '1.5px solid rgba(127,155,217,0.5)',
                       boxSizing: 'border-box',
                       borderRadius: 24,
