@@ -2097,7 +2097,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
       display: 'flex',
       flexDirection: 'column',
       boxShadow: '-4px 0 24px rgba(51,81,202,0.25)',
-      overflow: 'hidden',
+      position: 'relative',
     }}>
       {/* Logo, and the control that folds the rail away.
           It lives ON the rail rather than in the top bar because it is the
@@ -2106,9 +2106,8 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
           cost of putting a rail control somewhere the rail is not. */}
       <div style={{
         display: 'flex', alignItems: 'center',
-        justifyContent: collapsed ? 'center' : 'space-between',
-        flexDirection: collapsed ? 'column' : 'row', gap: collapsed ? 14 : 0,
-        padding: collapsed ? '20px 0 18px' : '28px 32px 21px',
+        justifyContent: collapsed ? 'center' : 'flex-start',
+        padding: collapsed ? '20px 0 39px' : '28px 32px 39px',
       }}>
         <div style={{
           width: 64, height: 64,
@@ -2132,11 +2131,14 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
             aria-label={collapsed ? 'פתח את התפריט' : 'צמצם את התפריט'}
             title={collapsed ? 'פתח את התפריט' : 'צמצם את התפריט'}
             aria-expanded={!collapsed}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.30)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.16)')}
+            onMouseEnter={e => (e.currentTarget.style.background = '#F2F6FE')}
+            onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
             style={{
-              width: 32, height: 32, borderRadius: 10, border: 'none', cursor: 'pointer',
-              background: 'rgba(255,255,255,0.16)', color: '#fff',
+              position: 'absolute', left: -16, top: 104, zIndex: 3,
+              width: 32, height: 32, borderRadius: '50%', padding: 0,
+              border: '1px solid #E0E7F6', cursor: 'pointer',
+              background: '#fff', color: '#2530A6',
+              boxShadow: '0 3px 10px rgba(31,62,108,0.20)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'background .15s ease', flexShrink: 0,
             }}
@@ -2450,7 +2452,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
   }))
 
   return (
-    <div className="ws-screen-pad" dir="rtl" style={{ flex: 1, overflow: 'auto', scrollbarGutter: 'stable', padding: '59px 40px 32px 35px' }}>
+    <div className="ws-screen-pad" dir="rtl" style={{ flex: 1, overflow: 'auto', scrollbarGutter: 'stable', padding: '77px 40px 32px 35px' }}>
       <PersonalPlanWizard
         open={planWizardOpen}
         onClose={() => { setPlanWizardOpen(false); finishFunnel() }}
