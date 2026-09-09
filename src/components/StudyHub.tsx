@@ -2637,54 +2637,56 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             {/* Connector line — pulled in from 10% to 16% now that the strip
                 sits in the narrow column, so it starts and ends under the
                 nodes rather than running past them. */}
-            <div style={{ position: 'absolute', left: '16%', right: '16%', top: 28, height: 1, borderTop: '1px solid rgba(255,133,76,0.55)', zIndex: 0 }} />
+            <div style={{ position: 'absolute', left: '16%', right: '16%', top: 17, height: 2, background: '#FF854C', borderRadius: 2, zIndex: 0 }} />
 
             {/* Stages — progress-driven slice centered on the current topic.
                 done = green check · current = gold gem · upcoming = small node. */}
             {timelineSlice.map(stage => (
               <div key={stage.topicId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 1, flex: 1, minWidth: 0 }}>
-                {stage.state === 'done' ? (
-                  <div style={{
-                    width: 38, height: 38,
-                    background: 'linear-gradient(135deg, #34A853 0%, #22833F 100%)',
-                    borderRadius: '50%',
-                    boxShadow: '0 4px 12px rgba(52,168,83,0.4), inset 0 1px 0 rgba(255,255,255,0.25)',
-                    border: '2px solid rgba(255,255,255,0.85)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {/* Proper-orientation check ✓ (no Y-flip) */}
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M3 8.5l3.2 3.2L13 4.5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                ) : stage.state === 'current' ? (
-                  <div style={{
-                    width: 35, height: 35,
-                    background: 'linear-gradient(115.34deg, #FFA073 -8.31%, #ff854c 168.93%)',
-                    borderRadius: 24,
-                    boxShadow: '0px 3px 5.8px rgba(255,133,76,0.45)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {/* Reached — the same check the completed stages carry */}
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5.5 12.5l4.3 4.3 8.7-9.6" />
-                    </svg>
-                  </div>
-                ) : (
-                  <div style={{
-                    width: 27, height: 27,
-                    background: 'rgba(255,255,255,0.6)',
-                    border: '1.5px solid rgba(127,155,217,0.5)',
-                    boxSizing: 'border-box',
-                    borderRadius: 24,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sh-text-light)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="6" y="3" width="12" height="16" rx="2" />
-                      <path d="M9.5 8h5M9.5 12h3" />
-                    </svg>
-                  </div>
-                )}
+                <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {stage.state === 'done' ? (
+                    <div style={{
+                      width: 38, height: 38,
+                      background: 'linear-gradient(135deg, #34A853 0%, #22833F 100%)',
+                      borderRadius: '50%',
+                      boxShadow: '0 4px 12px rgba(52,168,83,0.4), inset 0 1px 0 rgba(255,255,255,0.25)',
+                      border: '2px solid rgba(255,255,255,0.85)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {/* Proper-orientation check ✓ (no Y-flip) */}
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M3 8.5l3.2 3.2L13 4.5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  ) : stage.state === 'current' ? (
+                    <div style={{
+                      width: 35, height: 35,
+                      background: 'linear-gradient(115.34deg, #FFA073 -8.31%, #ff854c 168.93%)',
+                      borderRadius: 24,
+                      boxShadow: '0px 3px 5.8px rgba(255,133,76,0.45)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {/* Reached — the same check the completed stages carry */}
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5.5 12.5l4.3 4.3 8.7-9.6" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <div style={{
+                      width: 27, height: 27,
+                      background: 'rgba(255,255,255,0.6)',
+                      border: '1.5px solid rgba(127,155,217,0.5)',
+                      boxSizing: 'border-box',
+                      borderRadius: 24,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sh-text-light)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="6" y="3" width="12" height="16" rx="2" />
+                        <path d="M9.5 8h5M9.5 12h3" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
                 <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: stage.state === 'current' ? 16 : 14, color: TEXT_DARK, textAlign: 'center', fontWeight: stage.state === 'upcoming' ? 400 : 600 }}>{stage.name}</div>
                 <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: stage.state === 'done' ? '#22833F' : TEXT_LIGHT, fontWeight: stage.state === 'done' ? 600 : 400 }}>
                   {stage.state === 'done' ? '✓ הושלם' : stage.state === 'current' ? '(עכשיו)' : '(בקרוב)'}
