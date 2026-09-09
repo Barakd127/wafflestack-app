@@ -2030,7 +2030,7 @@ function ExternalLinkPanel({ course }: { course: CourseDef }) {
 }
 
 // ── Sidebar ────────────────────────────────────────────────────────────────────
-function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNotebook, onOpenTours, width = 247 }: {
+function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNotebook, onOpenTours, width = 247, onToggleCollapse }: {
   active: InternalView
   onNav: (v: InternalView) => void
   onGoWorld: () => void
@@ -2038,6 +2038,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
   onGoDrawing: () => void
   onGoNotebook: () => void
   onOpenTours: () => void
+  onToggleCollapse?: () => void
   width?: number
 }) {
   // EduCity-style clean line icons. SVG with stroke-currentColor so the
@@ -2098,8 +2099,17 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
       boxShadow: '-4px 0 24px rgba(51,81,202,0.25)',
       overflow: 'hidden',
     }}>
-      {/* Logo / avatar area */}
-      <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '28px 32px 21px' }}>
+      {/* Logo, and the control that folds the rail away.
+          It lives ON the rail rather than in the top bar because it is the
+          rail it acts on — and once folded it has to stay reachable to open
+          it again, which a button in the bar would manage too, but at the
+          cost of putting a rail control somewhere the rail is not. */}
+      <div style={{
+        display: 'flex', alignItems: 'center',
+        justifyContent: collapsed ? 'center' : 'space-between',
+        flexDirection: collapsed ? 'column' : 'row', gap: collapsed ? 14 : 0,
+        padding: collapsed ? '20px 0 18px' : '28px 32px 21px',
+      }}>
         <div style={{
           width: 64, height: 64,
           background: 'linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.15))',
@@ -2116,6 +2126,28 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
             <line x1="6" y1="14" x2="30" y2="14" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" />
           </svg>
         </div>
+        {onToggleCollapse && (
+          <button
+            onClick={onToggleCollapse}
+            aria-label={collapsed ? 'פתח את התפריט' : 'צמצם את התפריט'}
+            title={collapsed ? 'פתח את התפריט' : 'צמצם את התפריט'}
+            aria-expanded={!collapsed}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.30)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.16)')}
+            style={{
+              width: 32, height: 32, borderRadius: 10, border: 'none', cursor: 'pointer',
+              background: 'rgba(255,255,255,0.16)', color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background .15s ease', flexShrink: 0,
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden
+                 style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform .18s ease' }}>
+              <polyline points="15,6 9,12 15,18" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Nav */}
@@ -4719,7 +4751,24 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   const [userProgress, setUserProgress] = useState<UserProgress>(() =>
     loadProgress(initializeUser().userId)
   )
-  const [sidebarWidth, setSidebarWidth] = useState(247)
+  /* The rail already collapsed itself below 80px — the icon-only mode is old.
+     What it never had was a way in and out on purpose, or a memory of the
+     choice. Folding stores the width you were at, so opening returns you to
+     your own width rather than to a default. */
+  const RAIL_KEY = 'ws-rail-width'
+  const RAIL_MIN = 62
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const n = parseInt(localStorage.getItem(RAIL_KEY) || '')
+    return Number.isFinite(n) ? Math.min(360, Math.max(60, n)) : 247
+  })
+  const lastOpenWidth = useRef(sidebarWidth < 80 ? 247 : sidebarWidth)
+  useEffect(() => {
+    localStorage.setItem(RAIL_KEY, String(sidebarWidth))
+    if (sidebarWidth >= 80) lastOpenWidth.current = sidebarWidth
+  }, [sidebarWidth])
+  const toggleRail = useCallback(() => {
+    setSidebarWidth(w => (w < 80 ? lastOpenWidth.current : RAIL_MIN))
+  }, [])
   /* Anything fixed to the right edge — the tutor, the pomodoro, the
      calculator — has to stop at the rail rather than under it, and the rail
      is draggable between 60 and 360. Publishing the live width as a custom
@@ -4806,11 +4855,17 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
     window.addEventListener('mouseup', onUp)
   }, [])
 
+  const topicHe = selectedTopic ? (HEBREW_LABELS[selectedTopic] || selectedTopic) : ''
+  const withTopic = (what: string) => (topicHe ? `${topicHe} · ${what}` : what)
   const title =
     internalView === 'home' ? 'דף הבית' :
     internalView === 'courses' ? 'הקורסים שלי' :
+    internalView === 'arsenal' ? 'הארסנל שלי' :
     internalView === 'topics' ? (activeCourse === 'stat-b' ? "סטטיסטיקה ב' — בחר נושא" : activeCourse === 'sql' ? "SQL — בחר נושא" : activeCourse === 'anova' ? "ניתוח שונות — בחר נושא" : "סטטיסטיקה א' — בחר נושא") :
-    'Study Zone'
+    internalView === 'lesson' ? withTopic('שיעור') :
+    internalView === 'quiz-intro' ? withTopic('תרגול') :
+    internalView === 'learning' ? withTopic('תרגול') :
+    'אזור למידה'
 
   // ── Topbar context controls ─────────────────────────────────────────────
   // Nav controls that used to live INSIDE the content area (topics' מפה/רשימה
@@ -4976,6 +5031,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
         }
       >
         <Sidebar
+          onToggleCollapse={toggleRail}
           active={internalView}
           onNav={(view) => {
             if (view === 'topics') {
