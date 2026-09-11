@@ -1518,12 +1518,6 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
 
   return (
     <div className="ws-screen-pad" style={viewMode === 'mindmap' ? { flex: 1, overflow: 'auto', padding: '5px 8px 6px' } : { flex: 1, overflow: 'auto', padding: '32px 40px' }}>
-      {viewMode === 'mindmap' ? null : (
-        <h2 style={{ fontFamily: 'var(--ws-display)', fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
-          בחר נושא ללמוד
-        </h2>
-      )}
-
       {viewMode === 'list' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 30, maxWidth: 'calc(100% - 50px)' }}>
           {groupedSections.map(section => {
@@ -4806,7 +4800,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
     internalView === 'home' ? 'דף הבית' :
     internalView === 'courses' ? 'הקורסים שלי' :
     internalView === 'arsenal' ? 'הארסנל שלי' :
-    internalView === 'topics' ? (activeCourse === 'stat-b' ? "סטטיסטיקה ב' — בחר נושא" : activeCourse === 'sql' ? "SQL — בחר נושא" : activeCourse === 'anova' ? "ניתוח שונות — בחר נושא" : "סטטיסטיקה א' — בחר נושא") :
+    internalView === 'topics' ? (COURSES.find(c => c.id === activeCourse)?.label ?? '') :
     internalView === 'lesson' ? withTopic('שיעור') :
     internalView === 'quiz-intro' ? withTopic('תרגול') :
     internalView === 'learning' ? withTopic('תרגול') :
