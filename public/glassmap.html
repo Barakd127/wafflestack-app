@@ -1,0 +1,2063 @@
+<meta charset="UTF-8">
+<title>GlassMap</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap">
+<style>
+/* ═════════════════════════════════════════════════════════════════════════
+   GlassMap — tokens
+   Copied verbatim (values only) from wafflestack-glassmap/src/index.css
+   lines 50-100 (--sh-* light + html.dark) plus the .ws-glass-card recipe, so
+   this file never depends on the app's own stylesheet — it must stand alone
+   inside an iframe, inside Obsidian's srcdoc bridge, and opened from disk.
+   Category accents + gold + navy ink are pasted from the contract's "Glass
+   look" section, not re-derived.
+   ═════════════════════════════════════════════════════════════════════════ */
+:root{
+  color-scheme:light;
+  --sh-page-bg: linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 49.05%, #3351CA 136%);
+  --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%);
+  --sh-card-shadow: 0px 15px 30px rgba(31,41,55,0.25);
+  --sh-btn-color: #122460;
+  --sh-text-dark: #1F3E6C;
+  --sh-text-med: #254A9F;
+  --sh-text-light: #7F9BD9;
+  --sh-text-tip: #465CA5;
+  --sh-panel-bg: rgba(255,255,255,0.55);
+  --sh-panel-border: rgba(255,255,255,0.6);
+  --sh-line: rgba(31,62,108,0.16);
+  /* category accents — cycled by top-level branch, contract §Glass look */
+  --gm-teal:#0E9AA7; --gm-purple:#9B5DE5; --gm-green:#2E9E6B; --gm-coral:#E76F51;
+  --gm-gold:#D4AF37; --gm-navy:#1F3E6C;
+  --gm-danger:#C0392B;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --sh-page-bg: linear-gradient(35.22deg, #0a0a16 -9.85%, #111128 49.05%, #181840 136%);
+    --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.07) 54.33%, rgba(255,255,255,0.03) 100%);
+    --sh-card-shadow: 0px 15px 30px rgba(0,0,0,0.5);
+    --sh-btn-color: #4ECDC4;
+    --sh-text-dark: #e2e8f0;
+    --sh-text-med: #a5b4fc;
+    --sh-text-light: #94a3b8;
+    --sh-text-tip: #64748b;
+    --sh-panel-bg: rgba(15,15,30,0.55);
+    --sh-panel-border: rgba(255,255,255,0.12);
+    --sh-line: rgba(255,255,255,0.14);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --sh-page-bg: linear-gradient(35.22deg, #0a0a16 -9.85%, #111128 49.05%, #181840 136%);
+  --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.07) 54.33%, rgba(255,255,255,0.03) 100%);
+  --sh-card-shadow: 0px 15px 30px rgba(0,0,0,0.5);
+  --sh-btn-color: #4ECDC4;
+  --sh-text-dark: #e2e8f0;
+  --sh-text-med: #a5b4fc;
+  --sh-text-light: #94a3b8;
+  --sh-text-tip: #64748b;
+  --sh-panel-bg: rgba(15,15,30,0.55);
+  --sh-panel-border: rgba(255,255,255,0.12);
+  --sh-line: rgba(255,255,255,0.14);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  background:var(--sh-page-bg);
+  color:var(--sh-text-dark);
+  font-family:'Heebo',ui-sans-serif,system-ui,'Segoe UI',Arial,sans-serif; /* degrades clean if the CDN link is stripped (Obsidian sync-canvas) */
+  font-size:14px; line-height:1.4;
+  overflow:hidden;
+  -webkit-text-size-adjust:100%;
+}
+button,input,textarea{font:inherit;color:inherit;}
+button{background:none;border:0;padding:0;cursor:pointer;}
+input,textarea{background:none;border:0;outline:none;}
+::placeholder{color:var(--sh-text-light);}
+:focus-visible{outline:2px solid var(--gm-gold);outline-offset:2px;border-radius:4px;}
+*{scrollbar-width:thin;scrollbar-color:rgba(37,74,159,.35) transparent;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:rgba(37,74,159,.35);border-radius:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+.tnum{font-variant-numeric:tabular-nums;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+/* Hebrew / mixed titles are the norm here, never scramble them inside LTR
+   chrome — same fix WaffleTask needed (contract §Glass look). */
+.gm-bidi{unicode-bidi:plaintext;text-align:start;}
+
+/* ── the glass card recipe ─────────────────────────────────────────────────
+   Pasted from .ws-glass-card in src/index.css: blur 20 / saturate 160%, the
+   --sh-glass-card gradient, 1px white borders with a darker bottom/right
+   edge, two inset highlights. Kept as one reusable class so every card in
+   this file (nodes, header, mapctl, sheets, overlays, toasts) is visually
+   the same material. */
+.gm-glass{
+  position:relative;
+  backdrop-filter:blur(20px) saturate(160%);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);
+  background:var(--sh-glass-card);
+  border:1px solid rgba(255,255,255,.55);
+  border-bottom-color:rgba(255,255,255,.18);
+  border-right-color:rgba(255,255,255,.18);
+  box-shadow:var(--sh-card-shadow), inset 0 1px 0 rgba(255,255,255,.55), inset 0 -1px 0 rgba(31,62,108,.06);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .gm-glass{
+  border-color:rgba(255,255,255,.14); border-bottom-color:rgba(0,0,0,.2); border-right-color:rgba(0,0,0,.2);
+  box-shadow:var(--sh-card-shadow), inset 0 1px 0 rgba(255,255,255,.12), inset 0 -1px 0 rgba(0,0,0,.2);
+} }
+:root[data-theme="dark"] .gm-glass{
+  border-color:rgba(255,255,255,.14); border-bottom-color:rgba(0,0,0,.2); border-right-color:rgba(0,0,0,.2);
+  box-shadow:var(--sh-card-shadow), inset 0 1px 0 rgba(255,255,255,.12), inset 0 -1px 0 rgba(0,0,0,.2);
+}
+
+/* ── shell ───────────────────────────────────────────────────────────────── */
+.gm-app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+.gm-head{flex:none;z-index:30;display:flex;align-items:center;gap:10px;padding:8px 14px;
+  border-radius:0 0 14px 14px;}
+.gm-head[hidden]{display:none;}
+.gm-brand{display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 auto;}
+.gm-brand .gm-mark{flex:none;font-size:18px;}
+.gm-doctitle{flex:1 1 auto;min-width:0;font-weight:600;font-size:16px;color:var(--sh-text-dark);
+  padding:3px 6px;border-radius:6px;cursor:text;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gm-doctitle[contenteditable="true"]{outline:2px solid var(--gm-gold);outline-offset:2px;white-space:normal;}
+.gm-headtools{display:flex;align-items:center;gap:6px;flex:none;position:relative;}
+
+.gm-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  height:30px;padding:0 10px;border-radius:8px;font-size:13px;font-weight:500;
+  color:var(--sh-text-dark);background:rgba(255,255,255,.28);border:1px solid var(--sh-panel-border);
+  transition:background .12s ease,transform .12s ease;white-space:nowrap;}
+.gm-btn:hover{background:rgba(255,255,255,.42);}
+.gm-btn:active{transform:scale(.96);}
+.gm-btn.icon{width:30px;padding:0;font-size:15px;}
+.gm-btn[aria-pressed="true"],.gm-btn.on{background:var(--sh-btn-color);color:var(--gm-gold);border-color:transparent;}
+.gm-btn.danger{color:var(--gm-danger);}
+
+.gm-menu{position:absolute;top:calc(100% + 6px);right:0;z-index:31;min-width:190px;
+  border-radius:12px;padding:6px;display:flex;flex-direction:column;gap:2px;}
+.gm-menu[hidden]{display:none;}
+.gm-menu button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  padding:8px 10px;border-radius:8px;font-size:13px;color:var(--sh-text-dark);}
+.gm-menu button:hover{background:rgba(255,255,255,.35);}
+.gm-menu hr{border:0;border-top:1px solid var(--sh-line);margin:4px 2px;width:100%;}
+
+.gm-body{flex:1 1 auto;min-height:0;position:relative;}
+
+/* ── the plane ───────────────────────────────────────────────────────────── */
+.mapwrap{position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab;
+  background:var(--sh-page-bg);
+  /* nodes are divs, so without this a click-drag rubber-bands a text
+     selection across the whole plane — WaffleTask hit this first. */
+  user-select:none;-webkit-user-select:none;}
+.mapwrap .gm-ttl[contenteditable="true"],.mapwrap .gm-body-ta{user-select:text;-webkit-user-select:text;}
+.mapwrap.panning{cursor:grabbing;}
+.mapwrap.relmode{cursor:crosshair;}
+.world{position:absolute;left:0;top:0;width:0;height:0;transform-origin:0 0;}
+.gm-wires{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none;
+  transition:opacity .18s ease;}
+.gm-wires path.tree{fill:none;stroke-linecap:round;}
+.gm-wires path.rel{fill:none;stroke-linecap:round;stroke-dasharray:2 6;}
+/* cards layer: tree wires + relations hidden by default (contract §Layers);
+   a hovered node ghosts just its own edges back in via .gm-peek (JS-toggled,
+   see mountMap — two separate DOM subtrees can't do this with CSS alone). */
+.mapwrap[data-layer="cards"] .gm-wires{opacity:0;}
+.mapwrap[data-layer="cards"] .gm-wires path.gm-peek{opacity:.35 !important;}
+
+.gm-node{position:absolute;transform:translate(-50%,-50%);min-width:120px;max-width:260px;
+  padding:10px 14px;border-radius:16px;cursor:default;
+  transition:opacity .18s ease,box-shadow .14s ease;}
+.gm-node.grabbed{z-index:6;cursor:grabbing;}
+.gm-node .gm-ttl{font-size:14px;line-height:1.3;color:var(--sh-text-dark);font-weight:500;
+  overflow-wrap:break-word;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}
+.gm-node .gm-ttl[contenteditable="true"]{outline:2px solid var(--gm-gold);outline-offset:3px;border-radius:4px;
+  -webkit-line-clamp:unset;overflow:visible;cursor:text;}
+/* the 4px accent stripe on the card's start edge (contract: cards layer, but
+   kept visible in links layer too — it costs nothing and reads as the same
+   branch colour the wire already carries) */
+.gm-node .gm-stripe{position:absolute;left:0;top:10px;bottom:10px;width:4px;border-radius:3px;background:var(--acc,var(--gm-teal));}
+.gm-node.root{min-width:180px;max-width:320px;padding:16px 20px;border-radius:20px;
+  background:var(--sh-btn-color) !important;}
+.gm-node.root .gm-ttl{font-size:26px;font-weight:700;color:var(--gm-gold);-webkit-line-clamp:2;}
+.gm-node.root .gm-stripe{display:none;}
+.gm-node .gm-meta{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:11px;color:var(--sh-text-med);}
+.gm-node .gm-note-mark{opacity:.85;}
+.gm-node .gm-badge{display:inline-grid;place-items:center;min-width:16px;height:15px;padding:0 4px;
+  border-radius:99px;background:rgba(31,62,108,.16);font-size:9.5px;color:var(--sh-text-dark);}
+.gm-node.root .gm-badge{background:rgba(255,255,255,.18);color:var(--gm-gold);}
+/* depth-dot row — cards layer only, so hierarchy still reads with the wires
+   off (contract §Layers) */
+.gm-depthdots{display:none;gap:3px;margin-top:5px;}
+.mapwrap[data-layer="cards"] .gm-depthdots{display:flex;}
+.gm-depthdots i{width:5px;height:5px;border-radius:50%;background:var(--acc,var(--gm-teal));opacity:.55;}
+
+/* selection / marks / hazing — same visual language as WaffleTask's map */
+.gm-node.sel{box-shadow:var(--sh-card-shadow),0 0 0 3px var(--gm-gold),0 0 18px rgba(212,175,55,.45);}
+.gm-node.marked{box-shadow:var(--sh-card-shadow),0 0 0 2px var(--gm-gold);}
+.gm-node.marked.sel{box-shadow:var(--sh-card-shadow),0 0 0 2px var(--gm-gold),0 0 0 4.5px rgba(212,175,55,.5);}
+.gm-node.relsrc{box-shadow:var(--sh-card-shadow),0 0 0 3px var(--sh-text-med),0 0 16px rgba(37,74,159,.5);}
+.hazed{filter:blur(2.8px) saturate(.45);opacity:.42;box-shadow:none !important;
+  transition:filter .25s ease,opacity .25s ease;}
+.gm-node:not(.hazed){transition:filter .25s ease,opacity .25s ease,box-shadow .14s ease;}
+@media (prefers-reduced-motion:reduce){ .hazed{transition:none;} }
+.gm-node.blocked{box-shadow:var(--sh-card-shadow),0 0 0 3px var(--gm-danger);}
+.gm-node.focusing{animation:gmfocusring .75s ease-out;}
+@keyframes gmfocusring{
+  0%{box-shadow:var(--sh-card-shadow),0 0 0 0 var(--gm-gold);}
+  30%{box-shadow:var(--sh-card-shadow),0 0 0 4px var(--gm-gold);}
+  100%{box-shadow:var(--sh-card-shadow),0 0 0 0 rgba(212,175,55,0);}}
+
+/* the selected node offers the thing you want next: a child under it */
+.addkid{position:absolute;left:50%;bottom:-13px;transform:translateX(-50%);
+  width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  font-size:16px;line-height:1;color:#1b1f24;background:var(--gm-gold);
+  box-shadow:0 3px 8px rgba(0,0,0,.35);z-index:3;}
+.addkid:hover{filter:brightness(1.12);}
+
+.marquee{position:absolute;z-index:9;pointer-events:none;border:1.5px dashed var(--gm-gold);
+  background:rgba(212,175,55,.1);border-radius:4px;}
+
+/* relation label pill — sits mid-way on the dashed arrow, editable */
+.gm-rellabel{position:absolute;transform:translate(-50%,-50%);z-index:5;
+  display:flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;
+  font-size:11px;color:var(--sh-text-dark);cursor:text;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis;}
+.mapwrap[data-layer="cards"] .gm-rellabel{display:none;}
+.gm-rellabel[contenteditable="true"]{outline:2px solid var(--gm-gold);outline-offset:2px;overflow:visible;white-space:normal;}
+.gm-rellabel .gm-relx{opacity:0;flex:none;font-size:10px;color:var(--gm-danger);}
+.gm-rellabel:hover .gm-relx{opacity:1;}
+
+/* gentle bars showing where you are on the plane; drag them to move —
+   content-bounds only (contract / waffletask-board memory: "folding the
+   current view into the span" once threw the board thousands of px/drag) */
+.mbar{position:absolute;z-index:6;background:rgba(31,62,108,.10);border-radius:99px;
+  opacity:0;transition:opacity .25s ease;}
+.mapwrap:hover .mbar,.mbar.live{opacity:1;}
+.mbar i{position:absolute;display:block;background:var(--sh-text-med);border-radius:99px;opacity:.5;}
+.mbar i:hover,.mbar.live i{opacity:.85;}
+.mbar.h{left:10px;right:64px;bottom:6px;height:7px;}
+.mbar.h i{top:0;height:100%;min-width:26px;cursor:grab;}
+.mbar.v{top:10px;bottom:64px;right:6px;width:7px;}
+.mbar.v i{left:0;width:100%;min-height:26px;cursor:grab;}
+@media (max-width:760px){ .mbar{display:none;} }
+
+/* ── map controls pill ──────────────────────────────────────────────────── */
+.mapctl{position:absolute;right:12px;bottom:12px;z-index:7;display:flex;flex-direction:column;gap:6px;
+  padding:6px;border-radius:14px;}
+.gm-find{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:8;
+  display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:99px;min-width:220px;}
+.gm-find[hidden]{display:none;}
+.gm-find input{flex:1 1 auto;min-width:0;font-size:13px;}
+.gm-find .gm-findcount{font-size:11px;color:var(--sh-text-med);white-space:nowrap;}
+.gm-hint{position:absolute;left:13px;bottom:13px;z-index:7;font-size:11px;color:var(--sh-text-tip);
+  pointer-events:none;user-select:none;max-width:60%;}
+@media (max-width:760px){ .gm-hint{display:none;} }
+
+/* ── body sheet (E) ──────────────────────────────────────────────────────── */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(15,25,50,.35);opacity:0;pointer-events:none;
+  transition:opacity .2s ease;}
+.scrim.open{opacity:1;pointer-events:auto;}
+.gm-sheet{position:fixed;top:0;right:0;bottom:0;z-index:50;width:min(380px,100%);
+  display:flex;flex-direction:column;gap:0;
+  border-radius:16px 0 0 16px;
+  transform:translateX(104%);transition:transform .24s cubic-bezier(.4,0,.2,1);}
+.gm-sheet.open{transform:translateX(0);}
+.gm-sheet header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--sh-line);}
+.gm-sheet header h2{margin:0;flex:1 1 auto;min-width:0;font-size:18px;font-weight:600;color:var(--sh-text-dark);
+  word-break:break-word;}
+.gm-sheet header .x{flex:none;width:28px;height:28px;display:grid;place-items:center;border-radius:7px;
+  color:var(--sh-text-med);font-size:14px;}
+.gm-sheet header .x:hover{background:rgba(31,62,108,.1);}
+.gm-sheet .pad{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:10px;padding:16px;}
+.gm-sheet textarea{width:100%;flex:1 1 auto;min-height:200px;padding:10px 12px;border-radius:10px;
+  border:1px solid var(--sh-line);background:rgba(255,255,255,.35);font-size:14px;line-height:1.5;resize:vertical;}
+.gm-sheet textarea:focus{border-color:var(--gm-gold);}
+
+/* ── ? shortcuts overlay ─────────────────────────────────────────────────── */
+.gm-help{position:fixed;inset:0;z-index:60;display:grid;place-items:center;
+  background:rgba(15,25,50,.4);opacity:0;pointer-events:none;transition:opacity .18s ease;}
+.gm-help.open{opacity:1;pointer-events:auto;}
+.gm-help .box{width:min(640px,92vw);max-height:82vh;overflow-y:auto;border-radius:18px;padding:22px 24px;}
+.gm-help h2{margin:0 0 4px;font-size:20px;color:var(--sh-text-dark);}
+.gm-help .sub{font-size:12px;color:var(--sh-text-med);margin-bottom:14px;}
+.gm-help table{width:100%;border-collapse:collapse;font-size:13px;}
+.gm-help td{padding:6px 8px;border-bottom:1px solid var(--sh-line);vertical-align:top;}
+.gm-help td.k{white-space:nowrap;font-weight:600;color:var(--sh-text-dark);width:1%;}
+.gm-help td.he{color:var(--sh-text-med);direction:rtl;text-align:right;}
+.gm-help td.en{color:var(--sh-text-tip);}
+.gm-help .close{margin-top:14px;}
+
+/* ── toast ───────────────────────────────────────────────────────────────── */
+.gm-toast{position:fixed;left:50%;bottom:22px;z-index:80;transform:translate(-50%,26px);
+  padding:9px 16px;border-radius:12px;color:var(--sh-text-dark);font-size:13px;
+  opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;max-width:min(440px,90vw);}
+.gm-toast.show{opacity:1;transform:translate(-50%,0);}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;}
+}
+@media (max-width:760px){
+  /* Two rows on a narrow phone, same trick WaffleTask's rail used: brand
+     stays full-width on its own line, the tool buttons wrap below it,
+     rather than squeezing everything onto one row and clipping the title. */
+  .gm-head{padding:6px 10px;flex-wrap:wrap;row-gap:6px;}
+  .gm-brand{flex-basis:100%;}
+  .gm-headtools{flex-basis:100%;justify-content:flex-end;}
+  .gm-doctitle{font-size:14px;}
+  .mapctl{right:8px;bottom:8px;padding:4px;}
+  .mapctl .gm-btn.icon{width:26px;height:26px;font-size:13px;}
+  .gm-find{min-width:0;width:calc(100% - 24px);top:8px;}
+  .gm-node{min-width:100px;max-width:200px;padding:8px 11px;}
+  .gm-node.root{min-width:150px;max-width:240px;padding:12px 16px;}
+  .gm-node.root .gm-ttl{font-size:21px;}
+  /* the three-column shortcuts table doesn't fit 375px — stack Hebrew under
+     English instead of clipping either one */
+  .gm-help .box{padding:16px 14px;}
+  .gm-help table,.gm-help tbody,.gm-help tr,.gm-help td{display:block;width:100%;}
+  .gm-help tr{padding:8px 0;border-bottom:1px solid var(--sh-line);}
+  .gm-help td{border:0;padding:1px 0;}
+  .gm-sheet{width:100%;border-radius:0;}
+}
+</style>
+
+<script>
+/* Set the page's own light/dark before first paint. Order of authority:
+   an explicit choice saved for THIS map id wins; else ?theme= at boot; else
+   the OS. A `ws-theme` push from the host (once the app mounts) overrides
+   the rendered theme live but never touches what's saved here — see
+   `resolveTheme()` in the main engine, this is only the pre-paint guess. */
+(function () {
+  var r = document.documentElement;
+  function param(name) {
+    try { return new URL(location.href).searchParams.get(name); } catch (e) { return null; }
+  }
+  var mapId = param('map') || 'default';
+  var saved = null;
+  try {
+    var raw = localStorage.getItem('glassmap:' + mapId);
+    if (raw) saved = JSON.parse(raw).theme;
+  } catch (e) {}
+  var mode = (saved === 'light' || saved === 'dark') ? saved : null;
+  if (!mode) {
+    var q = param('theme');
+    if (q === 'light' || q === 'dark') mode = q;
+  }
+  if (mode) r.setAttribute('data-theme', mode);
+})();
+</script>
+
+<div class="gm-app">
+  <header class="gm-head gm-glass" id="gmHead">
+    <div class="gm-brand">
+      <span class="gm-mark" aria-hidden="true">🪟</span>
+      <span class="gm-doctitle gm-bidi" id="docTitle" tabindex="0" title="Click to rename the map"></span>
+    </div>
+    <div class="gm-headtools">
+      <button class="gm-btn icon" id="exportBtn" title="Export / Import" aria-label="Export or import">💾</button>
+      <div class="gm-menu gm-glass" id="exportMenu" hidden>
+        <button data-act="exp-json">📄 ייצוא JSON — Export JSON</button>
+        <button data-act="exp-md">📝 ייצוא Markdown — Export Markdown</button>
+        <hr>
+        <button data-act="imp">📥 ייבוא — Import…</button>
+      </div>
+      <input type="file" id="importFile" accept=".json,.md" hidden>
+      <button class="gm-btn icon" id="themeBtn" title="אור / חושך — Light / dark" aria-label="Toggle theme">☀</button>
+      <button class="gm-btn icon" id="homeBtn" title="בית — Home" aria-label="Home">⌂</button>
+    </div>
+  </header>
+  <div class="gm-body" id="gmBody">
+    <main class="mapwrap" id="mapwrap" tabindex="0">
+      <div class="world" id="world"></div>
+      <div class="gm-find gm-glass" id="findBar" hidden>
+        <span aria-hidden="true">🔎</span>
+        <input type="text" id="findInput" placeholder="חיפוש… — find…" aria-label="Find nodes">
+        <span class="gm-findcount tnum" id="findCount"></span>
+      </div>
+      <div class="mapctl gm-glass" id="mapctl"></div>
+      <div class="mbar h" id="mbarH"><i></i></div><div class="mbar v" id="mbarV"><i></i></div>
+      <div class="gm-hint" id="gmHint"></div>
+    </main>
+  </div>
+  <div class="scrim" id="scrim"></div>
+  <section class="gm-sheet gm-glass" id="bodySheet" role="dialog" aria-modal="false" aria-labelledby="bodySheetTitle" hidden></section>
+  <div class="gm-help" id="helpOverlay"><div class="box gm-glass" id="helpBox"></div></div>
+  <div class="gm-toast gm-glass" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   GlassMap — engine part 1: constants, state shape, persistence.
+
+   Ported from C:\Users\Dell\waffletask\index.html (CSS 5-604, script
+   1284-2764) per the contract at specs/glassmap.md. WaffleTask's map had
+   TWO node kinds (hub / project / task); GlassMap's data model collapses
+   that to ONE kind — every node is `{id, parent, title, body, mx, my,
+   pinned, collapsed, accent}` and exactly one node (parent === null) is the
+   root. Function names, the settling/wobble/wedge algorithms and the
+   comments explaining past bugs are kept as close to the original as the
+   new single-tree model allows; anything that only made sense for
+   projects/tasks/board/timer/gems/1·2·3/done/today has been stripped.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── constants ───────────────────────────────────────────────────────── */
+var ACCENTS = ['--gm-teal', '--gm-purple', '--gm-green', '--gm-coral'];   /* cycled by top-level branch */
+var LS_PREFIX = 'glassmap:';
+
+function qparam(name) {
+  try { return new URL(location.href).searchParams.get(name); } catch (e) { return null; }
+}
+var MAP_ID = qparam('map') || 'default';
+var LS_KEY = LS_PREFIX + MAP_ID;
+var EMBED = qparam('embed') === '1';
+
+/* ── small pieces ────────────────────────────────────────────────────── */
+function uid(p) { return p + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36); }
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+function el(sel, root) { return (root || document).querySelector(sel); }
+function els(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+/* ── the tree ────────────────────────────────────────────────────────────
+   A node with parent === null is the root (there is always exactly one).
+   Every other node hangs off a parent to any depth — the contract's single-
+   tree model replacing WaffleTask's projects[] + tasks[]. */
+function N(id) { for (var i = 0; i < S.nodes.length; i++) if (S.nodes[i].id === id) return S.nodes[i]; return null; }
+function rootNode() { for (var i = 0; i < S.nodes.length; i++) if (S.nodes[i].parent == null) return S.nodes[i]; return S.nodes[0]; }
+function childrenOf(id) { return S.nodes.filter(function (n) { return n.parent === id; }); }
+function descendantsOf(id, depth) {
+  depth = depth || 0;
+  if (depth > 24) return [];
+  var out = [];
+  childrenOf(id).forEach(function (c) { out.push(c); out = out.concat(descendantsOf(c.id, depth + 1)); });
+  return out;
+}
+function leafCount(id, depth) {
+  depth = depth || 0;
+  if (depth > 16) return 1;
+  var k = childrenOf(id);
+  if (!k.length) return 1;
+  var n = 0;
+  k.forEach(function (c) { n += leafCount(c.id, depth + 1); });
+  return n;
+}
+/* Colour of a NEW child under `pid`: a fresh top-level branch (pid IS the
+   root) cycles teal/purple/green/coral; anything deeper inherits its
+   parent's colour, so a whole branch reads as one thing (contract: "Depth
+   accent: cycle … by top-level branch; children inherit"). */
+function accentFor(pid) {
+  var p = N(pid);
+  if (p && p.parent == null) return ACCENTS[childrenOf(pid).length % ACCENTS.length];
+  return (p && p.accent) || ACCENTS[0];
+}
+function linksOf(id) { return S.links.filter(function (l) { return l.from === id || l.to === id; }); }
+
+/* ── seed / normalise ────────────────────────────────────────────────── */
+function seed(id, title) {
+  var rid = uid('n');
+  return {
+    v: 1, id: id || 'default', title: title || 'GlassMap',
+    layer: 'links', theme: 'auto',
+    nodes: [{ id: rid, parent: null, title: 'נושא מרכזי — Central topic', body: '' }],
+    links: [],
+    view: { x: 0, y: 0, z: 1, fit: false, touched: false },
+    edits: 0, updatedAt: Date.now()
+  };
+}
+/* Defensive against a hand-edited or partially-imported file — same spirit
+   as WaffleTask's normalise(): fill in anything missing, drop anything that
+   would make the tree inconsistent, never throw. */
+function normalise(x) {
+  if (!x || typeof x !== 'object' || !Array.isArray(x.nodes) || !x.nodes.length) return null;
+  var roots = x.nodes.filter(function (n) { return n == null || n.parent == null; });
+  if (roots.length !== 1) return null;                    /* must be exactly one root */
+  x.v = 1;
+  x.id = x.id || MAP_ID;
+  x.title = typeof x.title === 'string' && x.title ? x.title : 'GlassMap';
+  x.layer = (x.layer === 'cards') ? 'cards' : 'links';
+  x.theme = (x.theme === 'light' || x.theme === 'dark') ? x.theme : 'auto';
+  x.links = Array.isArray(x.links) ? x.links : [];
+  x.edits = +x.edits || 0;
+  x.updatedAt = +x.updatedAt || Date.now();
+  if (!x.view || typeof x.view !== 'object') x.view = { x: 0, y: 0, z: 1, fit: false, touched: false };
+  x.view.x = +x.view.x || 0; x.view.y = +x.view.y || 0;
+  x.view.z = (+x.view.z) || 1; x.view.fit = !!x.view.fit; x.view.touched = !!x.view.touched;
+  var ids = {};
+  x.nodes.forEach(function (n) { ids[n.id] = 1; });
+  x.nodes.forEach(function (n) {
+    if (typeof n.title !== 'string') n.title = '';
+    if (typeof n.body !== 'string') n.body = '';
+    n.collapsed = !!n.collapsed;
+    if (!isFinite(n.mx) || !isFinite(n.my)) { delete n.mx; delete n.my; } else { n.pinned = true; }
+    if (n.parent != null && (n.parent === n.id || !ids[n.parent])) n.parent = null; /* only the true root may have null */
+  });
+  /* exactly one null-parent node survives; if normalising a bad import left
+     more than one orphaned, the first found stays root and the rest are
+     reattached under it rather than silently vanishing */
+  var trueRoot = x.nodes.filter(function (n) { return n.parent == null; })[0];
+  x.nodes.forEach(function (n) { if (n !== trueRoot && n.parent == null) n.parent = trueRoot.id; });
+  /* break any parent cycle a bad import could carry in */
+  x.nodes.forEach(function (n) {
+    var seen = {}, cur = n, hops = 0;
+    while (cur && cur.parent && hops++ < 40) {
+      if (cur.parent === n.id || seen[cur.parent]) { n.parent = trueRoot.id; break; }
+      seen[cur.parent] = 1;
+      cur = x.nodes.filter(function (y) { return y.id === cur.parent; })[0];
+    }
+  });
+  x.links = x.links.filter(function (l) { return l && ids[l.from] && ids[l.to] && l.from !== l.to; })
+    .map(function (l) { return { id: l.id || uid('l'), from: l.from, to: l.to, label: typeof l.label === 'string' ? l.label : '' }; });
+  return x;
+}
+function readLocal() {
+  try { return normalise(JSON.parse(localStorage.getItem(LS_KEY) || 'null')); } catch (e) { return null; }
+}
+function writeLocal() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {}
+}
+
+/* ── live state ──────────────────────────────────────────────────────── */
+var S = readLocal() || seed(MAP_ID);
+var UI = {
+  sel: null,             /* selected node id, or null */
+  marks: {},             /* multi-select, id -> 1 (contract: Shift+arrows / A / Ctrl+A) */
+  lens: false,           /* the focus lens (mapctl ◉) */
+  relFrom: null,         /* pending Ctrl+L relation source id */
+  find: '',              /* live find text */
+  drafts: {}
+};
+var HOST_DARK = null;    /* set by an inbound {type:'ws-theme'} push; null = "no host opinion yet" */
+
+/* ── dogfood/test hook — exposes live state + UI to the verification
+   harness (Playwright) via page.evaluate(); read-only accessors so tests
+   can assert without poking at module internals directly. */
+window.GM = { S: function () { return S; }, UI: function () { return UI; } };
+
+/* ── persistence ─────────────────────────────────────────────────────────
+   Two save paths, on purpose:
+   - save() is the WaffleTask-style undo-tracked path for real edits (a
+     node's title/body, the tree shape, a relation) — it pushes UNDO,
+     bumps S.edits, and persists.
+   - persistSoft() just writes localStorage (view/layer/theme changes):
+     the contract asks these to survive a reload ("Reload persists …
+     including layer and view", test 5) but they aren't "edits" and
+     shouldn't fill up the undo stack with camera pans. */
+var UNDO = [], REDO = [], snapPrev = null, lastSaveAt = 0, lastCoal = false;
+var UNDO_CAP = 80;
+
+function postToHost(type, data) {
+  if (window.parent === window) return;                  /* not embedded — nothing listening */
+  try { window.parent.postMessage({ type: type, data: data }, '*'); } catch (e) {}
+}
+function save(opts) {
+  opts = opts || {};
+  var now = Date.now();
+  if (snapPrev !== null) {
+    var coalesce = opts.coalesce && lastCoal && (now - lastSaveAt) < 1500;
+    if (!coalesce) {
+      UNDO.push(snapPrev);
+      if (UNDO.length > UNDO_CAP) UNDO.shift();
+      REDO.length = 0;
+    }
+    lastCoal = !!opts.coalesce;
+  }
+  lastSaveAt = now;
+  S.edits = (+S.edits || 0) + 1;
+  S.updatedAt = now;
+  snapPrev = JSON.stringify(S);
+  writeLocal();
+  postToHost('gm:save', S);
+}
+var persistTimer = null;
+function persistSoft() {
+  writeLocal();
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(function () { postToHost('gm:save', S); }, 400);
+}
+function applyState(json) {
+  var next = normalise(JSON.parse(json));
+  if (!next) return false;
+  S = next;
+  snapPrev = json;
+  if (UI.sel && !N(UI.sel)) UI.sel = null;
+  Object.keys(UI.marks).forEach(function (id) { if (!N(id)) delete UI.marks[id]; });
+  writeLocal();
+  render();
+  return true;
+}
+function undo() {
+  if (!UNDO.length) { toast('אין מה לבטל — Nothing to undo'); return; }
+  REDO.push(JSON.stringify(S));
+  applyState(UNDO.pop());
+  toast('בוטל — Undone');
+}
+function redo() {
+  if (!REDO.length) { toast('אין מה לשחזר — Nothing to redo'); return; }
+  UNDO.push(JSON.stringify(S));
+  applyState(REDO.pop());
+  toast('שוחזר — Redone');
+}
+/* Replacing the whole state (a host `gm:load`, or a file import) is always
+   allowed to be undone too — snapshot first, exactly like a normal edit. */
+function replaceState(next, msg) {
+  UNDO.push(JSON.stringify(S));
+  if (UNDO.length > UNDO_CAP) UNDO.shift();
+  REDO.length = 0;
+  S = next;
+  S.updatedAt = Date.now();
+  if (UI.sel && !N(UI.sel)) UI.sel = null;
+  UI.marks = {}; UI.relFrom = null;
+  snapPrev = JSON.stringify(S);
+  writeLocal();
+  render();
+  if (msg) toast(msg);
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   GlassMap — engine part 2: layout geometry, settling, rendering.
+   Ported from WaffleTask's spread()/settleMap()/mapWorld() (index.html
+   1378-1734). The radial-tree wedge algorithm, the wobble on each wire and
+   the settle pass are unchanged in spirit; "project" and "task" collapse
+   into one node kind, and the hub becomes the root.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* A radial tree: every node owns an angular wedge; its children divide that
+   wedge between them, weighted by how many leaves each carries, so a
+   subtree can never swing round on top of its own parent or into a
+   sibling's space. Crowded levels push further out rather than overlapping. */
+var MAP_R = 260;
+var MAP_BOUNDS = [];
+var MAP_DRAG_UNTIL = 0, MAP_DRAG_ID = '';
+/* Belt and braces for the click that goes missing — CLICK_SEEN is stamped
+   whenever a real click lands inside #world; if a press-and-release
+   produced no such click, the pointerup net delivers the action itself.
+   Both bugs are documented in waffletask-board.md ("Drag lock-up",
+   "pointer capture"); the fixes below are copied verbatim. */
+var CLICK_SEEN = 0, CTL_PRESS = null;
+var EDGE = [0, 300, 194, 154, 134, 122];
+function edgeAt(d) { return EDGE[d] || 158; }
+
+function jit(id, salt) {
+  var h = 0, s = String(id) + '|' + salt;
+  for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 10007;
+  return h / 10007 * 2 - 1;
+}
+/* A connector with a little wobble in it — drawn, not ruled. Tree wires
+   only; relation arrows are drawn straight + dashed so the two kinds of
+   line never get confused (contract: "relation arrows (dashed, arrowhead)"
+   says nothing about a bow, and a straight line is what reads as "this is
+   a different kind of connection"). */
+function wire(x1, y1, x2, y2, seed) {
+  var dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx * dx + dy * dy) || 1;
+  var off = jit(seed, 'bow') * Math.min(26, len * 0.11);
+  var cx = (x1 + x2) / 2 - dy / len * off, cy = (y1 + y2) / 2 + dx / len * off;
+  return 'M' + x1.toFixed(1) + ',' + y1.toFixed(1) +
+         ' Q' + cx.toFixed(1) + ',' + cy.toFixed(1) + ' ' + x2.toFixed(1) + ',' + y2.toFixed(1);
+}
+/* How much of the circle each of the root's children may claim, from the
+   gap to its neighbours — so no two top-level branches can grow into each
+   other. */
+function wedges(angs) {
+  var n = angs.length;
+  if (n <= 1) return [Math.PI * 1.9];
+  var ord = angs.map(function (a, i) {
+    return { a: ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI), i: i };
+  }).sort(function (x, y) { return x.a - y.a; });
+  var out = new Array(n);
+  ord.forEach(function (cur, k) {
+    var prev = ord[(k - 1 + n) % n], next = ord[(k + 1) % n];
+    var gp = cur.a - prev.a; if (gp <= 0) gp += 2 * Math.PI;
+    var gn = next.a - cur.a; if (gn <= 0) gn += 2 * Math.PI;
+    out[cur.i] = Math.max(0.4, Math.min(Math.min(gp, gn) * 0.9, Math.PI * 0.9));
+  });
+  return out;
+}
+/* Place every descendant of one node, recursively. A first guess kept
+   deliberately tight; settleMap() afterwards measures the real boxes and
+   pushes apart anything that actually collides — growing the radius to
+   guarantee separation up front is what made WaffleTask's tree sprawl. A
+   collapsed node stops the recursion (its children are simply never
+   emitted — they don't exist on the plane at all while folded). */
+function spread(pId, px, py, center, span, depth, emit) {
+  if (depth > 14) return;
+  var pnode = N(pId);
+  if (pnode && pnode.collapsed) return;
+  var kids = childrenOf(pId);
+  if (!kids.length) return;
+  var w = kids.map(function (k) { return leafCount(k.id); });
+  var tot = w.reduce(function (a, b) { return a + b; }, 0) || 1;
+  var r = edgeAt(depth) + Math.max(0, kids.length - 3) * 14;
+  var a = center - span / 2;
+  kids.forEach(function (k, i) {
+    var s = span * w[i] / tot;
+    var ang = a + s / 2;
+    a += s;
+    var x = px + Math.cos(ang) * r, y = py + Math.sin(ang) * r;
+    if (typeof k.mx === 'number' && typeof k.my === 'number') {
+      x = k.mx; y = k.my;
+      ang = Math.atan2(y - py, x - px);
+      if (!isFinite(ang)) ang = 0;
+    }
+    emit(k, x, y, depth, pId);
+    spread(k.id, x, y, ang, Math.min(s, Math.PI * 0.85), depth + 1, emit);
+  });
+}
+
+/* ── settling ────────────────────────────────────────────────────────────
+   Nudge overlapping nodes apart along whichever axis they overlap least,
+   using the sizes the browser actually laid out. Anything hand-placed is
+   pinned and never shoved. */
+function settleMap(skipRelax) {
+  var world = el('#world'); if (!world) return;
+  var list = els('.gm-node', world).map(function (n) {
+    return {
+      el: n,
+      x: n.dataset.x != null ? +n.dataset.x : 0,
+      y: n.dataset.y != null ? +n.dataset.y : 0,
+      w: n.offsetWidth, h: n.offsetHeight,
+      id: n.dataset.node,
+      par: n.dataset.par || '',
+      col: n.dataset.col || 'var(--gm-teal)',
+      rank: +n.dataset.pinned || 0     /* 2 = root (immovable), 1 = hand-placed, 0 = automatic */
+    };
+  });
+
+  if (!skipRelax) {
+    var PAD = 14;
+    for (var it = 0; it < 60; it++) {
+      var moved = false;
+      for (var i = 0; i < list.length; i++) {
+        for (var j = i + 1; j < list.length; j++) {
+          var A = list[i], B = list[j];
+          if (A.rank && B.rank && A.rank === B.rank) continue;
+          var ox = (A.w + B.w) / 2 + PAD - Math.abs(A.x - B.x);
+          var oy = (A.h + B.h) / 2 + PAD - Math.abs(A.y - B.y);
+          if (ox <= 0 || oy <= 0) continue;
+          moved = true;
+          var moveA = A.rank <= B.rank, moveB = B.rank <= A.rank;
+          if (ox < oy) {
+            var dx = (A.x <= B.x ? -1 : 1) * (ox / 2 + 0.5);
+            if (moveA && moveB) { A.x += dx; B.x -= dx; }
+            else if (moveA) A.x += dx * 2; else B.x -= dx * 2;
+          } else {
+            var dy = (A.y <= B.y ? -1 : 1) * (oy / 2 + 0.5);
+            if (moveA && moveB) { A.y += dy; B.y -= dy; }
+            else if (moveA) A.y += dy * 2; else B.y -= dy * 2;
+          }
+        }
+      }
+      if (!moved) break;
+    }
+  }
+
+  var at = {}, pts = [];
+  list.forEach(function (n) {
+    n.el.style.left = n.x.toFixed(1) + 'px';
+    n.el.style.top = n.y.toFixed(1) + 'px';
+    n.el.dataset.x = n.x.toFixed(1);
+    n.el.dataset.y = n.y.toFixed(1);
+    at[n.id] = n;
+    pts.push([n.x, n.y, n.w / 2 + 10, n.h / 2 + 10]);
+  });
+  MAP_BOUNDS = pts;
+
+  var svg = el('.gm-wires', world);
+  if (svg) {
+    var treePaths = list.map(function (n) {
+      if (!n.par) return '';
+      var p = at[n.par]; if (!p) return '';
+      var d = +n.el.dataset.depth || 1;
+      var dim = n.el.classList.contains('hazed') ? 0.25 : 1;
+      return '<path class="tree" data-id="' + n.id + '" data-par="' + n.par + '" d="' + wire(p.x, p.y, n.x, n.y, n.id) +
+        '" stroke="' + n.col + '" stroke-width="' + Math.max(1.2, 3 - d * 0.4) + '" opacity="' +
+        ((0.32 + Math.max(0, 0.5 - d * 0.08)) * dim).toFixed(2) + '"' +
+        (d > 2 ? ' stroke-dasharray="1 6"' : '') + '/>';
+    }).join('');
+    svg.innerHTML = '<defs><marker id="gmArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">' +
+      '<path d="M0,0 L10,5 L0,10 z" fill="var(--sh-text-med)"/></marker></defs>' + treePaths + relPaths(at);
+  }
+  positionRelLabels(at);
+}
+/* Relations connect ANY two nodes, so their geometry is computed separately
+   from the tree wires above — straight, dashed, an arrowhead at `to`. */
+function relPaths(at) {
+  return S.links.map(function (l) {
+    var a = at[l.from], b = at[l.to]; if (!a || !b) return '';
+    var haze = (a.el.classList.contains('hazed') || b.el.classList.contains('hazed'));
+    return '<path class="rel" data-link="' + l.id + '" d="M' + a.x.toFixed(1) + ',' + a.y.toFixed(1) +
+      ' L' + b.x.toFixed(1) + ',' + b.y.toFixed(1) + '" stroke="var(--sh-text-med)" stroke-width="1.6"' +
+      ' opacity="' + (haze ? 0.15 : 0.65) + '" marker-end="url(#gmArrow)"/>';
+  }).join('');
+}
+function positionRelLabels(at) {
+  els('.gm-rellabel').forEach(function (n) { n.remove(); });
+  if (S.layer === 'cards') return;                        /* labels hidden with the relations in cards layer */
+  var host = el('#world'); if (!host) return;
+  S.links.forEach(function (l) {
+    var a = at[l.from], b = at[l.to]; if (!a || !b) return;
+    var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    var pill = document.createElement('div');
+    pill.className = 'gm-rellabel gm-glass gm-bidi';
+    pill.dataset.link = l.id;
+    pill.style.left = mx.toFixed(1) + 'px'; pill.style.top = my.toFixed(1) + 'px';
+    pill.innerHTML = '<span class="gm-relttl">' + esc(l.label || '···') + '</span><button class="gm-relx" data-dellink="' + l.id + '" aria-label="Remove relation" title="הסר קשר — remove">&#10005;</button>';
+    host.appendChild(pill);
+  });
+}
+
+function isSel(id) { return UI.sel === id; }
+
+/* ── what stays sharp under the lens ─────────────────────────────────────
+   Whatever you're actually on: its ancestor chain up to the root, plus its
+   whole subtree. Nothing selected = nothing hazed (contract ports
+   WaffleTask's lens 1:1, minus the 1·2·3 / today branches that don't exist
+   here). */
+function lensSet() {
+  if (!UI.lens || !UI.sel || !N(UI.sel)) return null;
+  var keep = {}, t = N(UI.sel), hops = 0;
+  while (t && hops++ < 24) { keep[t.id] = 1; t = t.parent ? N(t.parent) : null; }
+  descendantsOf(UI.sel).forEach(function (d) { keep[d.id] = 1; });
+  return keep;
+}
+
+/* ── the plane's contents ────────────────────────────────────────────── */
+function mapWorld() {
+  var LENS = lensSet();
+  var nodes = '';
+  var root = rootNode();
+
+  function depthDots(depth) {
+    var n = Math.min(depth, 5), out = '';
+    for (var i = 0; i < n; i++) out += '<i></i>';
+    return out;
+  }
+  function nodeHTML(node, x, y, depth, parId, accentVar) {
+    var isRoot = !node.parent;
+    var kids = childrenOf(node.id);
+    var haze = LENS && !LENS[node.id];
+    var marked = !!UI.marks[node.id];
+    var pinned = (typeof node.mx === 'number' && typeof node.my === 'number');
+    var accent = isRoot ? '' : (node.accent || accentVar || ACCENTS[0]);
+    var collapsedCount = node.collapsed ? descendantsOf(node.id).length : 0;
+    nodes += '<div class="gm-node gm-glass' + (isRoot ? ' root' : '') + (isSel(node.id) ? ' sel' : '') +
+      (marked ? ' marked' : '') + (haze ? ' hazed' : '') + (UI.relFrom === node.id ? ' relsrc' : '') + '"' +
+      ' data-node="' + node.id + '" data-x="' + x.toFixed(1) + '" data-y="' + y.toFixed(1) + '"' +
+      ' data-depth="' + depth + '" data-par="' + esc(parId || '') + '" data-col="var(' + accent + ')"' +
+      ' data-pinned="' + (isRoot ? 2 : (pinned ? 1 : 0)) + '"' +
+      ' style="left:' + x.toFixed(1) + 'px;top:' + y.toFixed(1) + 'px' + (accent ? ';--acc:var(' + accent + ')' : '') + '"' +
+      ' role="button" tabindex="0" title="לחיצה לבחירה · לחיצה כפולה לעריכה — click to select, double-click to rename">' +
+      (accent ? '<span class="gm-stripe" aria-hidden="true"></span>' : '') +
+      '<span class="gm-ttl gm-bidi" dir="auto">' + esc(node.title) + '</span>' +
+      '<div class="gm-meta">' +
+        (node.body ? '<span class="gm-note-mark" title="יש הערה — has a note">&#9998;</span>' : '') +
+        (node.collapsed && collapsedCount ? '<span class="gm-badge" title="מקופל — collapsed">+' + collapsedCount + '</span>' : '') +
+      '</div>' +
+      '<div class="gm-depthdots" aria-hidden="true">' + depthDots(depth) + '</div>' +
+      (isSel(node.id) ? '<button class="addkid" data-addkid="' + node.id + '" title="הוסף תת-נושא (Tab) — add a child" aria-label="Add a child">+</button>' : '') +
+    '</div>';
+  }
+
+  spread(root.id, 0, 0, 0, Math.PI * 2, 1, function (n, x, y, d, par) {
+    nodeHTML(n, x, y, d, par, n.accent);
+  });
+  var rhaze = LENS && !LENS[root.id];
+  nodeHTML(Object.assign({}, root, { accent: null }), 0, 0, 0, '', null);
+  /* nodeHTML always appends — the call above ran once more for the root
+     itself, after its children were emitted, so it draws on top (z-order:
+     later markup, later in DOM, and .root has no stripe/lens dimming logic
+     collision since isRoot short-circuits accent). */
+
+  return '<svg class="gm-wires"></svg>' + nodes;
+}
+
+function renderMap() {
+  var world = mapWorld();
+  el('#world').innerHTML = world;
+  var findOn = !el('#findBar').hidden;
+  el('#gmHint').innerHTML = findOn ? '' :
+    '<b>Tab</b> תת-נושא &middot; <b>Enter</b> אח אחריך &middot; <b>Ctrl+L</b> קשר &middot; <b>?</b> עזרה' +
+    ' &nbsp;·&nbsp; <b>Tab</b> child &middot; <b>Enter</b> sibling &middot; <b>Ctrl+L</b> relate &middot; <b>?</b> help';
+  el('#mapwrap').dataset.layer = S.layer;
+  renderMapctl();
+}
+function renderMapctl() {
+  var c = el('#mapctl');
+  c.innerHTML =
+    '<button class="gm-btn icon" id="undoBtn" title="בטל (Ctrl+Z) — Undo" aria-label="Undo">&#8630;</button>' +
+    '<button class="gm-btn icon" data-zoom="1" aria-label="Zoom in">+</button>' +
+    '<button class="gm-btn icon" data-zoom="-1" aria-label="Zoom out">&minus;</button>' +
+    '<button class="gm-btn icon" data-zoom="0" title="התאם הכל (Ctrl+0) — fit" aria-label="Fit the map">&#9678;</button>' +
+    '<button class="gm-btn icon' + (S.layer === 'cards' ? ' on' : '') + '" id="layerBtn"' +
+      ' title="שכבה (L) — links/cards layer" aria-label="Toggle layer">' + (S.layer === 'cards' ? '🪟' : '⛓️') + '</button>' +
+    '<button class="gm-btn icon' + (UI.lens ? ' on' : '') + '" id="lensBtn" aria-pressed="' + !!UI.lens + '"' +
+      ' title="עדשת מיקוד — focus lens" aria-label="Toggle the focus lens">&#9673;</button>' +
+    '<button class="gm-btn icon" id="helpBtn" title="עזרה (?) — shortcuts" aria-label="Shortcuts help">?</button>';
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   GlassMap — engine part 3: camera (pan/zoom/fit/glide), selection,
+   the XMind-style keyboard, arrow-key geometry, and the tree-growing ops.
+   Ported from WaffleTask index.html 1736-2141 (mapView/applyMap/mapExtent/
+   barGeom/updateBars/animateMap/focusOn/ensureVisible/selNode/…/mapKeys/
+   fitMap/zoomAt/placeInitial/worldBoxes/hitsAny) with the project/task
+   split removed. The camera itself is persisted in S.view per the contract
+   ("view:{x,y,z,fit,touched}" survives reload) instead of living in a
+   throwaway UI object — `mapView()` keeps its WaffleTask name but now
+   returns S.view.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+function mapView() { return S.view; }
+function applyMap() {
+  var w = el('#world'); if (!w) return;
+  var v = mapView();
+  w.style.transform = 'translate(' + v.x.toFixed(1) + 'px,' + v.y.toFixed(1) + 'px) scale(' + v.z.toFixed(3) + ')';
+  updateBars();
+}
+var viewPersistTimer = null;
+function schedulePersistView() {
+  clearTimeout(viewPersistTimer);
+  viewPersistTimer = setTimeout(persistSoft, 400);
+}
+function mapExtent() {
+  var wrap = el('#mapwrap'); if (!wrap || !MAP_BOUNDS.length) return null;
+  var r = wrap.getBoundingClientRect(); if (!r.width || !r.height) return null;
+  var v = mapView(), pad = 120;
+  var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+  MAP_BOUNDS.forEach(function (b) {
+    minX = Math.min(minX, b[0] - b[2]); maxX = Math.max(maxX, b[0] + b[2]);
+    minY = Math.min(minY, b[1] - b[3]); maxY = Math.max(maxY, b[1] + b[3]);
+  });
+  minX -= pad; maxX += pad; minY -= pad; maxY += pad;   /* content bounds only — see waffletask-board.md */
+  return {
+    L: minX, R: maxX, T: minY, B: maxY,
+    viewL: -v.x / v.z, viewT: -v.y / v.z,
+    viewW: r.width / v.z, viewH: r.height / v.z,
+    z: v.z, r: r
+  };
+}
+function barGeom(e, horiz) {
+  var total = horiz ? (e.R - e.L) : (e.B - e.T);
+  var view = horiz ? e.viewW : e.viewH;
+  var at = (horiz ? e.viewL : e.viewT) - (horiz ? e.L : e.T);
+  var scroll = Math.max(0, total - view);
+  return {
+    total: total, view: view, scroll: scroll,
+    size: Math.max(0.06, Math.min(1, view / (total || 1))),
+    pos: scroll > 0 ? Math.max(0, Math.min(1, at / scroll)) : 0,
+    fits: scroll < 1
+  };
+}
+function updateBars() {
+  var e = mapExtent(); if (!e) return;
+  [[el('#mbarH'), true], [el('#mbarV'), false]].forEach(function (pair) {
+    var bar = pair[0], horiz = pair[1];
+    if (!bar) return;
+    var g = barGeom(e, horiz);
+    bar.style.display = g.fits ? 'none' : '';
+    if (g.fits) return;
+    var th = bar.firstElementChild;
+    var free = 1 - g.size;
+    if (horiz) { th.style.width = (g.size * 100) + '%'; th.style.left = (g.pos * free * 100) + '%'; }
+    else { th.style.height = (g.size * 100) + '%'; th.style.top = (g.pos * free * 100) + '%'; }
+  });
+}
+
+/* ── gliding the view ────────────────────────────────────────────────── */
+var MAP_ANIM = 0, FOCUS_Z = 1.35;
+function cancelMapAnim() { if (MAP_ANIM) { cancelAnimationFrame(MAP_ANIM); MAP_ANIM = 0; } }
+function reduceMotion() {
+  try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
+}
+function animateMap(tx, ty, tz, ms) {
+  cancelMapAnim();
+  var v = mapView();
+  if (!ms || reduceMotion()) { v.x = tx; v.y = ty; v.z = tz; applyMap(); schedulePersistView(); return; }
+  var sx = v.x, sy = v.y, sz = v.z, t0 = 0;
+  MAP_ANIM = requestAnimationFrame(function step(ts) {
+    if (!t0) t0 = ts;
+    var p = Math.min(1, (ts - t0) / ms);
+    var e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+    v.x = sx + (tx - sx) * e; v.y = sy + (ty - sy) * e; v.z = sz + (tz - sz) * e;
+    applyMap();
+    if (p >= 1) { MAP_ANIM = 0; schedulePersistView(); } else MAP_ANIM = requestAnimationFrame(step);
+  });
+}
+function focusOn(wx, wy, z, ms) {
+  var wrap = el('#mapwrap'); if (!wrap) return;
+  var r = wrap.getBoundingClientRect();
+  z = Math.max(0.22, Math.min(2.4, z));
+  mapView().fit = true;
+  animateMap(r.width / 2 - wx * z, r.height / 2 - wy * z, z, ms == null ? 460 : ms);
+}
+function ensureVisible(node) {
+  var wrap = el('#mapwrap'); if (!wrap || !node) return;
+  var r = wrap.getBoundingClientRect(), b = node.getBoundingClientRect();
+  var pad = 70;
+  if (b.left >= r.left + pad && b.right <= r.right - pad &&
+      b.top >= r.top + pad && b.bottom <= r.bottom - pad) return;
+  var x = parseFloat(node.dataset.x), y = parseFloat(node.dataset.y);
+  if (isNaN(x) || isNaN(y)) { x = 0; y = 0; }
+  var v = mapView();
+  v.touched = true;
+  animateMap(r.width / 2 - x * v.z, r.height / 2 - y * v.z, v.z, 380);
+}
+
+/* ── selection ───────────────────────────────────────────────────────── */
+function selDom() { return UI.sel ? el('.gm-node[data-node="' + UI.sel + '"]') : null; }
+function selText(n) { return n ? n.querySelector('.gm-ttl') : null; }
+function selNode(id, opts) {
+  UI.sel = id;
+  render();
+  var n = selDom();
+  if (n && !(opts && opts.quiet)) ensureVisible(n);
+  return n;
+}
+function editSelected() {
+  var node = UI.sel && N(UI.sel), n = selDom(), t = selText(n);
+  if (!node || !t) return;
+  inlineEdit(t, function (v) { node.title = v; save(); render(); }, { grow: true });
+}
+/* Open the body sheet for the selected node's notes (key `E`). */
+function editSelectedBody() {
+  var node = UI.sel && N(UI.sel);
+  if (!node) { toast('בחר נושא קודם — select a node first'); return; }
+  openBodySheet(node.id);
+}
+
+/* ── growing the tree — Tab / Enter / Shift+Enter / Ctrl+Enter / Ctrl+D ──
+   Names kept from WaffleTask (growChild/growSibling/growAndEdit) even
+   though there is no more project/task split to dispatch on. */
+function newChildOf(pid) {
+  var n = { id: uid('n'), parent: pid, title: '', body: '', accent: accentFor(pid) };
+  S.nodes.push(n);
+  save();
+  return n.id;
+}
+function growChild() {
+  var pid = (UI.sel && N(UI.sel)) ? UI.sel : rootNode().id;
+  return newChildOf(pid);
+}
+function growSibling() {
+  var node = UI.sel && N(UI.sel);
+  if (!node) return growChild();
+  if (!node.parent) return newChildOf(node.id);           /* root selected: only "child of root" makes sense */
+  var n = { id: uid('n'), parent: node.parent, title: '', body: '', accent: accentFor(node.parent) };
+  var idx = S.nodes.indexOf(node);
+  S.nodes.splice(idx + 1, 0, n);                            /* next sibling, right after `node` in array order */
+  save();
+  return n.id;
+}
+function growSiblingBefore() {
+  var node = UI.sel && N(UI.sel);
+  if (!node) return growChild();
+  if (!node.parent) return newChildOf(node.id);
+  var n = { id: uid('n'), parent: node.parent, title: '', body: '', accent: accentFor(node.parent) };
+  var idx = S.nodes.indexOf(node);
+  S.nodes.splice(idx, 0, n);                                /* previous sibling, right before `node` */
+  save();
+  return n.id;
+}
+/* Ctrl+Enter — insert a new parent between the selection and its own
+   parent. The new node takes the selection's old slot in the array (so it
+   lands in the same sibling position under the old parent), and the
+   selection is reparented under it. */
+function insertParent() {
+  var node = UI.sel && N(UI.sel);
+  if (!node) return null;
+  if (!node.parent) { toast('לשורש אין הורה — the root has no parent to insert above'); return null; }
+  var p = { id: uid('n'), parent: node.parent, title: '', body: '', accent: node.accent };
+  var idx = S.nodes.indexOf(node);
+  S.nodes.splice(idx, 0, p);
+  node.parent = p.id;
+  save();
+  return p.id;
+}
+/* Ctrl+D — duplicate the selected node and its whole subtree as the next
+   sibling. Hand-placed positions are deliberately NOT copied: laying the
+   clone out fresh keeps it from landing exactly on top of the original. */
+function duplicateNode(id) {
+  var orig = N(id); if (!orig) return null;
+  if (!orig.parent) { toast('אי אפשר לשכפל את השורש — cannot duplicate the root'); return null; }
+  var clones = [];
+  function cloneRec(n, newParent) {
+    var c = { id: uid('n'), parent: newParent, title: n.title, body: n.body, accent: n.accent, collapsed: n.collapsed };
+    clones.push(c);
+    childrenOf(n.id).forEach(function (k) { cloneRec(k, c.id); });
+    return c;
+  }
+  var top = cloneRec(orig, orig.parent);
+  var idx = S.nodes.indexOf(orig);
+  S.nodes.splice(idx + 1, 0, top);
+  clones.filter(function (c) { return c !== top; }).forEach(function (c) { S.nodes.push(c); });
+  save();
+  return top.id;
+}
+function growAndEdit(make) {
+  var next = make();
+  if (!next) return;
+  UI.sel = next;
+  mapView().touched = true;
+  render();
+  var n = selDom();
+  if (n) { ensureVisible(n); setTimeout(function () { editSelected(); }, 30); }
+}
+
+/* ── delete ──────────────────────────────────────────────────────────────
+   Contract: "first press arms + toast, second press deletes subtree" —
+   ported from WaffleTask's DEL_ARMED pattern, extended to a marked set
+   (multi-select is an explicitly-ported engine part; without SOME action it
+   would be pointless — see the design notes returned with this file). */
+var DEL_ARMED = 0;
+var DEL_ARMED_FOR = '';
+function doomedSet(ids) {
+  var d = {};
+  ids.forEach(function (id) { d[id] = 1; descendantsOf(id).forEach(function (x) { d[x.id] = 1; }); });
+  return d;
+}
+function deleteIds(ids) {
+  var d = doomedSet(ids);
+  var n = Object.keys(d).length;
+  S.nodes = S.nodes.filter(function (x) { return !d[x.id]; });
+  S.links = S.links.filter(function (l) { return !d[l.from] && !d[l.to]; });
+  if (UI.sel && d[UI.sel]) UI.sel = null;
+  Object.keys(UI.marks).forEach(function (id) { if (d[id]) delete UI.marks[id]; });
+  save(); render();
+  toast('נמחקו ' + n + ' — Deleted ' + n + ' — Ctrl+Z לביטול / to undo');
+}
+function markedIds() { return Object.keys(UI.marks).filter(function (id) { return N(id); }); }
+function clearMarks() { UI.marks = {}; }
+function toggleMark(id) { if (UI.marks[id]) delete UI.marks[id]; else UI.marks[id] = 1; }
+function markBranch(id) {
+  UI.marks[id] = 1;
+  descendantsOf(id).forEach(function (d) { UI.marks[d.id] = 1; });
+}
+
+/* ── arrow keys: step to the nearest node that way ───────────────────────
+   The map is a plane, not an outline, so arrows navigate by GEOMETRY, not
+   tree structure — ported verbatim from WaffleTask's stepSel/landOn
+   (index.html 1933-2008), including the exact cone/scoring constants. */
+var ARROWS = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] };
+function planeNodes() {
+  return els('.gm-node[data-node]').map(function (n) {
+    return { el: n, id: n.dataset.node, x: +n.dataset.x || 0, y: +n.dataset.y || 0 };
+  });
+}
+function viewCentreWorld() {
+  var wrap = el('#mapwrap'), v = mapView();
+  if (!wrap) return { x: 0, y: 0 };
+  var r = wrap.getBoundingClientRect();
+  return { x: (r.width / 2 - v.x) / v.z, y: (r.height / 2 - v.y) / v.z };
+}
+function landOn(node, from, extend) {
+  if (extend) {
+    UI.marks[node.id] = 1;
+    if (from) UI.marks[from.id] = 1;
+    UI.sel = node.id;
+    render();
+    var n = selDom(); if (n) ensureVisible(n);
+    return;
+  }
+  clearMarks();
+  selNode(node.id);
+}
+function stepSel(dir, extend) {
+  var list = planeNodes();
+  if (!list.length) return false;
+  var from = null;
+  if (UI.sel) list.forEach(function (n) { if (n.id === UI.sel) from = n; });
+  if (!from) {
+    var c = viewCentreWorld(), near = null, nd = Infinity;
+    list.forEach(function (n) {
+      var d = (n.x - c.x) * (n.x - c.x) + (n.y - c.y) * (n.y - c.y);
+      if (d < nd) { nd = d; near = n; }
+    });
+    if (!near) return false;
+    landOn(near, null, false);
+    return true;
+  }
+  var ax = dir[0], ay = dir[1], pick = null, best = Infinity;
+  list.forEach(function (n) {
+    if (n === from) return;
+    var dx = n.x - from.x, dy = n.y - from.y;
+    var along = dx * ax + dy * ay;
+    if (along <= 6) return;
+    var perp = Math.abs(dx * ay - dy * ax);
+    if (perp > along * 1.7 + 40) return;
+    var score = along + perp * 1.9;
+    if (score < best) { best = score; pick = n; }
+  });
+  if (!pick) return false;
+  landOn(pick, from, extend);
+  return true;
+}
+
+/* ── find ────────────────────────────────────────────────────────────────
+   `/` or Ctrl+F opens the pill; typing hazes non-matches live; Enter jumps
+   to the first hit; Esc clears (contract keyboard table). Not part of the
+   ported WaffleTask engine (it had no find) — new, but reuses `.hazed`. */
+function findMatches() {
+  var q = UI.find.trim().toLowerCase();
+  if (!q) return null;
+  var hit = {};
+  S.nodes.forEach(function (n) { if ((n.title || '').toLowerCase().indexOf(q) >= 0) hit[n.id] = 1; });
+  return hit;
+}
+function applyFindHaze() {
+  var hit = findMatches();
+  els('.gm-node').forEach(function (n) {
+    if (!hit) { n.classList.remove('hazed'); return; }
+    n.classList.toggle('hazed', !hit[n.dataset.node]);
+  });
+  el('#findCount').textContent = hit ? 'נמצאו ' + Object.keys(hit).length : '';
+}
+function openFind() {
+  var bar = el('#findBar'); bar.hidden = false;
+  el('#findInput').value = UI.find; el('#findInput').focus(); el('#findInput').select();
+  applyFindHaze();
+}
+function closeFind() {
+  UI.find = '';
+  el('#findBar').hidden = true;
+  els('.gm-node').forEach(function (n) { n.classList.remove('hazed'); });
+  el('#findCount').textContent = '';
+}
+function findJumpFirst() {
+  var hit = findMatches(); if (!hit) return;
+  var id = Object.keys(hit)[0]; if (!id) { toast('אין תוצאות — no matches'); return; }
+  selNode(id);
+}
+
+/* ── relations (Ctrl+L) ─────────────────────────────────────────────────
+   New engine part (WaffleTask had none — it is a task board, not a
+   relations graph). Ctrl+L arms UI.relFrom; the next click on a DIFFERENT
+   node completes it (handled in mountMap's pointerup, `stop()`); Esc
+   cancels first, ahead of clearing marks or deselecting (contract's Esc
+   ordering). */
+function startRelation() {
+  if (!UI.sel) { toast('בחר נושא קודם — select a node first'); return; }
+  UI.relFrom = UI.sel;
+  el('#mapwrap').classList.add('relmode');
+  render();
+  toast('קשר: לחץ על נושא יעד, Esc לביטול — relation: click a target, Esc to cancel');
+}
+function cancelRelation() {
+  UI.relFrom = null;
+  el('#mapwrap').classList.remove('relmode');
+  render();
+}
+function completeRelation(toId) {
+  var fromId = UI.relFrom;
+  cancelRelation();
+  if (!fromId || fromId === toId) return;
+  var exists = S.links.some(function (l) { return (l.from === fromId && l.to === toId) || (l.from === toId && l.to === fromId); });
+  if (exists) { toast('כבר קיים קשר — a relation already exists there'); return; }
+  var l = { id: uid('l'), from: fromId, to: toId, label: '' };
+  S.links.push(l);
+  save(); render();
+  var pill = el('.gm-rellabel[data-link="' + l.id + '"] .gm-relttl');
+  if (pill) setTimeout(function () {
+    inlineEdit(pill, function (v) { l.label = v; save(); render(); });
+  }, 30);
+}
+function deleteLink(id) {
+  S.links = S.links.filter(function (l) { return l.id !== id; });
+  save(); render();
+}
+
+/* ── collapse (Ctrl+/) ──────────────────────────────────────────────────── */
+function toggleCollapse() {
+  var node = UI.sel && N(UI.sel);
+  if (!node) { toast('בחר נושא קודם — select a node first'); return; }
+  var kids = childrenOf(node.id);
+  if (!kids.length && !node.collapsed) { toast('אין תת-נושאים לקפל — nothing to collapse'); return; }
+  node.collapsed = !node.collapsed;
+  save(); render();
+}
+
+/* ── the keyboard dispatcher ─────────────────────────────────────────────
+   Ported from WaffleTask's mapKeys (index.html 2010-2074): arrows always
+   come first and must preventDefault or the page scrolls under them; the
+   rest only fires once something is selected (Tab/Enter can act with
+   nothing selected — they fall back to the root). */
+function inField() {
+  var a = document.activeElement;
+  return a && (a.isContentEditable || a.tagName === 'INPUT' || a.tagName === 'TEXTAREA');
+}
+function mapKeys(ev) {
+  if (inField()) return;
+  if (el('#helpOverlay').classList.contains('open') && ev.key !== '?' && ev.key !== 'Escape') return;
+
+  if (!ev.ctrlKey && !ev.metaKey && !ev.altKey && ARROWS[ev.key]) {
+    ev.preventDefault(); stepSel(ARROWS[ev.key], ev.shiftKey); return;
+  }
+  if ((ev.ctrlKey || ev.metaKey) && !ev.altKey) {
+    var k = ev.key.toLowerCase();
+    if (k === 'z') { ev.preventDefault(); if (ev.shiftKey) redo(); else undo(); return; }
+    if (k === 'y') { ev.preventDefault(); redo(); return; }
+    if (k === 'l') { ev.preventDefault(); if (UI.relFrom) cancelRelation(); else startRelation(); return; }
+    if (k === 'd') { ev.preventDefault(); if (UI.sel) growAndEdit(function () { return duplicateNode(UI.sel); }); return; }
+    if (k === 'enter') { ev.preventDefault(); growAndEdit(insertParent); return; }
+    if (k === '/') { ev.preventDefault(); toggleCollapse(); return; }
+    if (k === 'a') { ev.preventDefault(); S.nodes.forEach(function (n) { UI.marks[n.id] = 1; }); render(); return; }
+    if (k === 'f') { ev.preventDefault(); openFind(); return; }
+    if (k === 'e') { ev.preventDefault(); doExportMarkdown(); return; }
+    if (k === '0') { ev.preventDefault(); fitMap(460); return; }
+    if (k === '=' || k === '+') { ev.preventDefault(); zoomAtCentre(1.2); return; }
+    if (k === '-') { ev.preventDefault(); zoomAtCentre(1 / 1.2); return; }
+    return;
+  }
+  if (ev.key === '/') { ev.preventDefault(); openFind(); return; }
+  if (ev.key === '?') { ev.preventDefault(); toggleHelp(); return; }
+  if (ev.key === 'l' || ev.key === 'L') { ev.preventDefault(); toggleLayer(); return; }
+  if ((ev.key === 'a' || ev.key === 'A') && UI.sel) { ev.preventDefault(); markBranch(UI.sel); render(); return; }
+  if (ev.key === 'e' || ev.key === 'E') { ev.preventDefault(); editSelectedBody(); return; }
+  if (ev.key === 'Escape') {
+    if (el('#helpOverlay').classList.contains('open')) { toggleHelp(); return; }
+    if (UI.relFrom) { cancelRelation(); return; }
+    if (markedIds().length) { clearMarks(); render(); return; }
+    if (UI.sel) { UI.sel = null; DEL_ARMED = 0; DEL_ARMED_FOR = ''; render(); return; }
+    return;
+  }
+  if (!UI.sel && ev.key !== 'Tab' && ev.key !== 'Enter') return;
+  if (ev.key === 'Tab') { ev.preventDefault(); growAndEdit(growChild); return; }
+  if (ev.key === 'Enter') { ev.preventDefault(); growAndEdit(ev.shiftKey ? growSiblingBefore : growSibling); return; }
+  if (ev.key === 'F2' || ev.key === ' ') { ev.preventDefault(); editSelected(); return; }
+  if (ev.key === 'Delete' || ev.key === 'Backspace') {
+    ev.preventDefault();
+    var marked = markedIds();
+    if (marked.length > 1) {
+      var armKey = 'm:' + marked.slice().sort().join(',');
+      if (DEL_ARMED === 1 && DEL_ARMED_FOR === armKey) { DEL_ARMED = 0; DEL_ARMED_FOR = ''; deleteIds(marked); return; }
+      DEL_ARMED = 1; DEL_ARMED_FOR = armKey;
+      setTimeout(function () { DEL_ARMED = 0; DEL_ARMED_FOR = ''; }, 4000);
+      toast('לחץ Delete שוב למחיקת ' + marked.length + ' — press Delete again to remove ' + marked.length);
+      return;
+    }
+    if (!UI.sel) return;
+    var node = N(UI.sel); if (!node) return;
+    if (!node.parent) { toast('אי אפשר למחוק את השורש — the root can’t be deleted'); return; }
+    var kids = descendantsOf(node.id).length;
+    if (!kids) { deleteIds([node.id]); return; }
+    var armKeyN = 'n:' + node.id;
+    if (DEL_ARMED === 1 && DEL_ARMED_FOR === armKeyN) { DEL_ARMED = 0; DEL_ARMED_FOR = ''; deleteIds([node.id]); return; }
+    DEL_ARMED = 1; DEL_ARMED_FOR = armKeyN;
+    setTimeout(function () { DEL_ARMED = 0; DEL_ARMED_FOR = ''; }, 4000);
+    toast('לחץ Delete שוב — press Delete again (כולל ' + kids + ' תת-נושאים / incl. ' + kids + ' below)');
+  }
+}
+document.addEventListener('keydown', mapKeys);
+
+function toggleLayer() {
+  S.layer = S.layer === 'links' ? 'cards' : 'links';
+  persistSoft(); render();
+}
+function toggleHelp() {
+  var o = el('#helpOverlay');
+  if (o.classList.contains('open')) { o.classList.remove('open'); return; }
+  renderHelp();
+  o.classList.add('open');
+}
+
+/* ── fit / zoom / initial placement ─────────────────────────────────────── */
+function fitMap(ms) {
+  var wrap = el('#mapwrap'); if (!wrap) return;
+  var r = wrap.getBoundingClientRect();
+  var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+  MAP_BOUNDS.forEach(function (b) {
+    minX = Math.min(minX, b[0] - b[2]); maxX = Math.max(maxX, b[0] + b[2]);
+    minY = Math.min(minY, b[1] - b[3]); maxY = Math.max(maxY, b[1] + b[3]);
+  });
+  if (minX > maxX) { minX = minY = -320; maxX = maxY = 320; }
+  var pad = 46, bw = (maxX - minX) + pad * 2, bh = (maxY - minY) + pad * 2;
+  var v = mapView();
+  var z = Math.max(0.22, Math.min(1.1, Math.min(r.width / bw, r.height / bh)));
+  v.fit = true;
+  animateMap(r.width / 2 - ((minX + maxX) / 2) * z, r.height / 2 - ((minY + maxY) / 2) * z, z, ms);
+}
+function zoomAt(cx, cy, factor) {
+  cancelMapAnim();
+  var v = mapView();
+  v.touched = true;
+  var z = Math.max(0.22, Math.min(2.4, v.z * factor)), k = z / v.z;
+  v.x = cx - (cx - v.x) * k;
+  v.y = cy - (cy - v.y) * k;
+  v.z = z;
+  applyMap();
+  schedulePersistView();
+}
+function zoomAtCentre(factor) {
+  var wrap = el('#mapwrap'); if (!wrap) return;
+  var r = wrap.getBoundingClientRect();
+  zoomAt(r.width / 2, r.height / 2, factor);
+}
+function placeInitial() {
+  var v = mapView();
+  if (window.innerWidth <= 760) focusOn(0, 0, 0.9, 0); else fitMap(0);
+  v.touched = false;
+}
+function worldBoxes(skip) {
+  var out = [];
+  els('.gm-node').forEach(function (n) {
+    var id = n.dataset.node;
+    if (skip && skip[id]) return;
+    var cx = n.dataset.x != null ? +n.dataset.x : (parseFloat(n.style.left) || 0);
+    var cy = n.dataset.y != null ? +n.dataset.y : (parseFloat(n.style.top) || 0);
+    if (!isFinite(cx) || !isFinite(cy)) return;
+    out.push({ x1: cx - n.offsetWidth / 2, y1: cy - n.offsetHeight / 2,
+               x2: cx + n.offsetWidth / 2, y2: cy + n.offsetHeight / 2 });
+  });
+  return out;
+}
+function hitsAny(cx, cy, hw, hh, boxes) {
+  var x1 = cx - hw, y1 = cy - hh, x2 = cx + hw, y2 = cy + hh;
+  for (var i = 0; i < boxes.length; i++) {
+    var b = boxes[i];
+    if (x1 < b.x2 && x2 > b.x1 && y1 < b.y2 && y2 > b.y1) return true;
+  }
+  return false;
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   GlassMap — engine part 4: pointer model (mountMap), rendering frame,
+   inline editing, toasts, help overlay, body sheet, export/import,
+   postMessage bridge, boot.
+
+   mountMap() is WaffleTask's mountMap (index.html 2142-2448) ported with
+   only the project/task branch removed — the gesture model itself
+   (RIGHT-drag pans anywhere / LEFT on a node moves it / LEFT on bare board
+   marquees, touch pinch, lazy pointer capture, the window-level pointerup
+   net) is the exact "settled 2026-08-28, do not re-muddle it" model from
+   waffletask-board.md, copied on purpose rather than re-derived.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+function mountMap() {
+  var wrap = el('#mapwrap'); if (!wrap) return;
+  settleMap();
+  var v = mapView();
+  if (!v.fit) placeInitial(); else applyMap();
+
+  var resettle = function () {
+    if (!mapView().touched && el('#mapwrap')) placeInitial();
+  };
+  if (!mountMap.settled) {
+    mountMap.settled = true;
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(resettle);
+    setTimeout(resettle, 250);
+    setTimeout(resettle, 1200);
+    if (window.ResizeObserver) {
+      mountMap.ro = new ResizeObserver(resettle);
+      mountMap.ro.observe(el('#gmBody'));
+    }
+  }
+
+  if (mountMap.wired) return;
+  mountMap.wired = true;
+
+  wrap.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    var r = wrap.getBoundingClientRect();
+    zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? 1.12 : 1 / 1.12);
+  }, { passive: false });
+
+  wrap.addEventListener('dblclick', function (e) {
+    var rel = e.target.closest('.gm-rellabel');
+    if (rel) {
+      var l = S.links.filter(function (x) { return x.id === rel.dataset.link; })[0];
+      if (l) inlineEdit(rel.querySelector('.gm-relttl'), function (v) { l.label = v; save(); render(); });
+      return;
+    }
+    if (e.target.closest('.addkid,[data-zoom]')) return;
+    var n = e.target.closest('.gm-node');
+    if (n) { selNode(n.dataset.node, { quiet: true }); editSelected(); return; }
+    if (e.target.closest('button,input,a')) return;
+    fitMap(460);
+  });
+
+  wrap.addEventListener('click', function (e) {
+    if (MAP_DRAG_UNTIL && Date.now() < MAP_DRAG_UNTIL) return;
+    if (e.target.closest('.gm-node,button,input,a')) return;
+    if (UI.sel) { UI.sel = null; render(); }
+  });
+
+  var st = null, pinch = null, pts = {};
+
+  wrap.addEventListener('pointerdown', function (e) {
+    cancelMapAnim();
+    var touch = e.pointerType === 'touch';
+
+    if (touch) {
+      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ids = Object.keys(pts);
+      if (ids.length === 2) {
+        var a = pts[ids[0]], b = pts[ids[1]], vv = mapView();
+        pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, z: vv.z };
+        st = null; wrap.classList.remove('panning');
+        return;
+      }
+    }
+
+    if (!touch && e.button !== 0 && e.button !== 2) return;
+    var right = !touch && e.button === 2;
+
+    var node = e.target.closest('.gm-node');
+    var ctl = node && e.target.closest('.addkid');
+    if (ctl) { CTL_PRESS = { el: ctl, t: Date.now(), x: e.clientX, y: e.clientY }; return; }
+
+    if (right) {                        /* RIGHT-drag pans, wherever you grabbed — the ONLY thing that pans */
+      var mvp = mapView();
+      st = { kind: 'pan', pid: e.pointerId, moved: false, x0: e.clientX, y0: e.clientY, px: mvp.x, py: mvp.y };
+      wrap.classList.add('panning');
+      return;
+    }
+
+    if (node) {
+      var nid = node.dataset.node;
+      var cx = node.dataset.x != null ? +node.dataset.x : (parseFloat(node.style.left) || 0);
+      var cy = node.dataset.y != null ? +node.dataset.y : (parseFloat(node.style.top) || 0);
+      var skip = {}; skip[nid] = 1;
+      descendantsOf(nid).forEach(function (d) { skip[d.id] = 1; });
+      var isRoot = !N(nid).parent;
+      st = { kind: 'node', id: nid, isRoot: isRoot,
+             shift: !!e.shiftKey, ctrl: !!(e.ctrlKey || e.metaKey),
+             pid: e.pointerId, moved: false, x0: e.clientX, y0: e.clientY, ox: cx, oy: cy,
+             hw: node.offsetWidth / 2 + 6, hh: node.offsetHeight / 2 + 6,
+             others: worldBoxes(skip), lastX: cx, lastY: cy };
+      return;
+    }
+    if (e.target.closest('button,input,a')) return;
+
+    if (touch) {
+      var mv = mapView();
+      st = { kind: 'pan', pid: e.pointerId, moved: false, x0: e.clientX, y0: e.clientY, px: mv.x, py: mv.y };
+      wrap.classList.add('panning');
+      return;
+    }
+
+    var wr = wrap.getBoundingClientRect();
+    st = { kind: 'sweep', pid: e.pointerId, moved: false, add: e.shiftKey,
+           x0: e.clientX, y0: e.clientY, ox: wr.left, oy: wr.top };
+    var box = document.createElement('div');
+    box.className = 'marquee';
+    wrap.appendChild(box);
+    st.box = box;
+  });
+
+  wrap.addEventListener('lostpointercapture', function (e) {
+    if (st && st.pid === e.pointerId) stop(e);
+  });
+
+  if (mountMap.net) {
+    window.removeEventListener('pointerup', mountMap.net);
+    window.removeEventListener('pointercancel', mountMap.net);
+  }
+  mountMap.net = function (e) {
+    if (st && st.pid === e.pointerId) stop(e);
+    var c = CTL_PRESS; CTL_PRESS = null;
+    if (!c || Date.now() - c.t > 900) return;
+    if (Math.abs(e.clientX - c.x) + Math.abs(e.clientY - c.y) > 6) return;
+    setTimeout(function () {
+      if (Date.now() - CLICK_SEEN < 400) return;
+      if (c.el && c.el.isConnected) c.el.click();
+    }, 40);
+  };
+  window.addEventListener('pointerup', mountMap.net);
+  window.addEventListener('pointercancel', mountMap.net);
+
+  wrap.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  els('.mbar', wrap).forEach(function (bar) {
+    var horiz = bar.classList.contains('h');
+    bar.addEventListener('pointerdown', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      var ex = mapExtent(); if (!ex) return;
+      var g = barGeom(ex, horiz);
+      if (g.fits) return;
+      bar.classList.add('live');
+      var v = mapView(), start = horiz ? e.clientX : e.clientY;
+      var track = (horiz ? bar.clientWidth : bar.clientHeight) * (1 - g.size);
+      var from = g.pos;
+      function move(ev2) {
+        var d = (horiz ? ev2.clientX : ev2.clientY) - start;
+        var frac = Math.max(0, Math.min(1, from + (track > 0 ? d / track : 0)));
+        var world = (horiz ? ex.L : ex.T) + frac * g.scroll;
+        v.touched = true;
+        if (horiz) v.x = -world * ex.z; else v.y = -world * ex.z;
+        applyMap();
+      }
+      function up() {
+        bar.classList.remove('live');
+        schedulePersistView();
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+      }
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+    });
+  });
+
+  wrap.addEventListener('pointermove', function (e) {
+    if (pts[e.pointerId]) { pts[e.pointerId].x = e.clientX; pts[e.pointerId].y = e.clientY; }
+    if (pinch) {
+      var ids = Object.keys(pts);
+      if (ids.length < 2) return;
+      var a = pts[ids[0]], b = pts[ids[1]];
+      var d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+      var r = wrap.getBoundingClientRect();
+      var vv = mapView();
+      zoomAt((a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top, (pinch.z * (d / pinch.d)) / vv.z);
+      return;
+    }
+    if (!st || e.pointerId !== st.pid) return;
+    var dx = e.clientX - st.x0, dy = e.clientY - st.y0;
+    if (!st.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
+    st.moved = true;
+    /* Capture ONLY once the drag is real — capturing on pointerdown re-
+       targets the trailing click to #mapwrap and a node click/tick never
+       arrives (waffletask-board.md, "pointer capture"). */
+    if (!st.cap) { st.cap = 1; try { wrap.setPointerCapture(st.pid); } catch (err) {} }
+    if (st.kind === 'sweep') {
+      var L = Math.min(st.x0, e.clientX) - st.ox, T2 = Math.min(st.y0, e.clientY) - st.oy;
+      st.box.style.left = L + 'px'; st.box.style.top = T2 + 'px';
+      st.box.style.width = Math.abs(e.clientX - st.x0) + 'px';
+      st.box.style.height = Math.abs(e.clientY - st.y0) + 'px';
+      return;
+    }
+    if (st.kind === 'pan') {
+      var vp = mapView(); vp.x = st.px + dx; vp.y = st.py + dy; vp.touched = true; applyMap();
+      return;
+    }
+    if (st.isRoot) return;                /* the root doesn't move — it's the plane's anchor */
+    var obj = N(st.id);
+    if (!obj) return;
+    var z = mapView().z;
+    var nx = st.ox + dx / z, ny = st.oy + dy / z;
+    var free = !hitsAny(nx, ny, st.hw, st.hh, st.others);
+    if (free) { st.lastX = nx; st.lastY = ny; }
+    else {
+      if (!hitsAny(nx, st.lastY, st.hw, st.hh, st.others)) st.lastX = nx;
+      else if (!hitsAny(st.lastX, ny, st.hw, st.hh, st.others)) st.lastY = ny;
+    }
+    obj.mx = st.lastX; obj.my = st.lastY;
+    st.blocked = !free;
+    var d = st;                            /* stop() nulls st — the frame must not follow it */
+    if (!d.raf) d.raf = requestAnimationFrame(function () {
+      d.raf = 0;
+      var w = el('#world'); if (!w) return;
+      w.innerHTML = mapWorld();
+      settleMap(true);
+      var nn = el('.gm-node[data-node="' + d.id + '"]');
+      if (nn) { nn.classList.add('grabbed'); if (d.blocked) nn.classList.add('blocked'); }
+    });
+  });
+
+  function stop(e) {
+    delete pts[e.pointerId];
+    if (Object.keys(pts).length < 2) pinch = null;
+    if (!st || e.pointerId !== st.pid) return;
+    var d = st; st = null;
+    if (d.raf) { cancelAnimationFrame(d.raf); d.raf = 0; }
+    wrap.classList.remove('panning');
+    if (d.moved) { MAP_DRAG_UNTIL = Date.now() + 400; MAP_DRAG_ID = d.kind === 'node' ? d.id : ''; }
+
+    if (d.kind === 'sweep') {
+      var r = d.box.getBoundingClientRect();
+      d.box.remove();
+      if (d.moved) {
+        var hit = 0;
+        if (!d.add) clearMarks();
+        els('.gm-node[data-node]').forEach(function (n) {
+          var b = n.getBoundingClientRect();
+          if (b.left < r.right && b.right > r.left && b.top < r.bottom && b.bottom > r.top) {
+            UI.marks[n.dataset.node] = 1; hit++;
+          }
+        });
+        render();
+        toast(hit ? 'נבחרו ' + hit + ' — chosen' : 'שום דבר בתחום — nothing in that sweep');
+      } else { schedulePersistView(); }
+      return;
+    }
+    if (d.kind === 'pan') { schedulePersistView(); return; }
+    if (d.kind === 'node' && d.moved) {
+      MAP_DRAG_UNTIL = Date.now() + 400;
+      var mn = N(d.id); if (mn) mn.pinned = true;
+      save(); render();
+    } else if (d.kind === 'node') {
+      setTimeout(function () {
+        if (Date.now() - CLICK_SEEN < 400) return;
+        if (UI.relFrom && UI.relFrom !== d.id) { completeRelation(d.id); return; }
+        if (d.shift) { markBranch(d.id); UI.sel = d.id; render(); }
+        else if (d.ctrl) { toggleMark(d.id); UI.sel = d.id; render(); }
+        else { clearMarks(); selNode(d.id); }
+      }, 40);
+    }
+  }
+  wrap.addEventListener('pointerup', stop);
+  wrap.addEventListener('pointercancel', stop);
+
+  /* Cards layer: hover ghosts the hovered node's OWN edges back in at low
+     opacity (contract §Layers) — the node and the SVG wires are separate
+     DOM subtrees, so this is done in JS rather than a CSS combinator. */
+  wrap.addEventListener('mouseover', function (e) {
+    if (S.layer !== 'cards') return;
+    var n = e.target.closest('.gm-node'); if (!n) return;
+    var id = n.dataset.node;
+    els('.gm-wires path').forEach(function (p) {
+      if (p.dataset.id === id || p.dataset.par === id) p.classList.add('gm-peek');
+    });
+  });
+  wrap.addEventListener('mouseout', function (e) {
+    if (S.layer !== 'cards') return;
+    var n = e.target.closest('.gm-node'); if (!n) return;
+    els('.gm-wires path.gm-peek').forEach(function (p) { p.classList.remove('gm-peek'); });
+  });
+}
+
+/* ── frame ───────────────────────────────────────────────────────────── */
+function render() {
+  renderMap();
+  els('#mapctl [data-zoom]').forEach(function () {});   /* mapctl is rebuilt each render by renderMap() */
+  mountMap();
+  el('#docTitle').textContent = S.title;
+  el('#themeBtn').textContent = resolveTheme() ? '🌙' : '☀';
+  if (UI.find) applyFindHaze();
+}
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   GlassMap — engine part 5: inline editing, toasts, help overlay, body
+   sheet, export / import, theme resolution, postMessage bridge, boot.
+   inlineEdit is WaffleTask's function verbatim (index.html 3593-3627) —
+   Tab/Enter/Shift+Enter while editing behave exactly as they do on a plain
+   selection, so a whole tree can come out of the keyboard without ever
+   stopping to click (that was Barak's original complaint about the
+   prototype, preserved here on purpose).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+function inlineEdit(node, commit, opts) {
+  opts = opts || {};
+  if (!node || node.isContentEditable) return;
+  var old = node.textContent;
+  node.contentEditable = 'true';
+  node.spellcheck = false;
+  node.focus();
+  try {
+    var r = document.createRange(); r.selectNodeContents(node);
+    var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  } catch (e) {}
+  var done = false;
+  function finish(keep) {
+    if (done) return; done = true;
+    node.contentEditable = 'false';
+    var v = node.textContent.replace(/\s+/g, ' ').trim();
+    if (keep && v && v !== old.trim()) commit(v); else node.textContent = old;
+  }
+  node.addEventListener('keydown', function (e) {
+    e.stopPropagation();
+    /* Ctrl+Enter mid-edit is still "insert a parent above this", not "commit
+       + sibling" — e.key is 'Enter' either way, so the modifier has to be
+       checked here, or Ctrl+Enter silently degrades to plain Enter while
+       typing (caught by the contract's own test 1, which fires it right
+       after typing a node's title). */
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault(); finish(true);
+      if (opts.grow) growAndEdit(insertParent);
+    } else if (e.key === 'Enter') {
+      e.preventDefault(); finish(true);
+      if (opts.grow) growAndEdit(e.shiftKey ? growSiblingBefore : growSibling);
+    } else if (e.key === 'Tab') {
+      e.preventDefault(); finish(true);
+      if (opts.grow) growAndEdit(growChild);
+    } else if (e.key === 'Escape') {
+      e.preventDefault(); node.textContent = old; finish(false);
+    }
+  });
+  node.addEventListener('blur', function () { finish(true); }, { once: true });
+}
+
+/* ── toast ───────────────────────────────────────────────────────────── */
+var toastTimer = null;
+function toast(msg) {
+  var n = el('#toast');
+  n.textContent = msg;
+  n.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { n.classList.remove('show'); }, 2600);
+}
+
+/* ── body sheet (E) ─────────────────────────────────────────────────────── */
+function openBodySheet(id) {
+  var node = N(id); if (!node) return;
+  UI.sheetNode = id;
+  var sheet = el('#bodySheet'), scrim = el('#scrim');
+  sheet.innerHTML =
+    '<header><h2 id="bodySheetTitle" class="gm-bidi">' + esc(node.title || 'ללא כותרת') + '</h2>' +
+      '<button class="x" data-close-sheet aria-label="Close">&#10005;</button></header>' +
+    '<div class="pad">' +
+      '<textarea class="gm-body-ta gm-bidi" id="bodyTa" dir="auto" placeholder="הערות על הנושא הזה… — notes on this topic…">' + esc(node.body) + '</textarea>' +
+    '</div>';
+  sheet.hidden = false;
+  requestAnimationFrame(function () { sheet.classList.add('open'); scrim.classList.add('open'); });
+  var ta = el('#bodyTa');
+  var commit = function () {
+    if (!node) return;
+    var v = ta.value;
+    if (v !== node.body) { node.body = v; save({ coalesce: true }); }
+  };
+  ta.addEventListener('input', commit);
+  ta.focus();
+}
+function closeBodySheet() {
+  var sheet = el('#bodySheet'), scrim = el('#scrim');
+  sheet.classList.remove('open'); scrim.classList.remove('open');
+  setTimeout(function () { sheet.hidden = true; sheet.innerHTML = ''; render(); }, 240);
+  UI.sheetNode = null;
+}
+
+/* ── ? shortcuts overlay ─────────────────────────────────────────────────
+   Bilingual, per contract: "glass sheet listing every shortcut in Hebrew +
+   English". */
+var SHORTCUTS = [
+  ['Tab', 'תת-נושא חדש לבחירה (השורש אם אין)', 'New child of selection (root if none)'],
+  ['Enter', 'אח חדש אחרי הבחירה', 'New sibling after selection'],
+  ['Shift+Enter', 'אח חדש לפני הבחירה', 'New sibling before selection'],
+  ['Ctrl+Enter', 'הוסף הורה חדש מעל הבחירה', 'Insert a new parent above the selection'],
+  ['F2 / Space', 'ערוך את כותרת הבחירה', 'Edit selected title'],
+  ['Delete', 'מחיקה (לחיצה שנייה למחיקת ענף)', 'Delete (press again to delete a subtree)'],
+  ['↑ ↓ ← →', 'הזז בחירה לפי כיוון גיאומטרי', 'Move selection geometrically'],
+  ['Shift+חצים', 'הרחב את קבוצת הסימון', 'Extend the marked set'],
+  ['Ctrl+/', 'קפל / הרחב את הענף הנבחר', 'Collapse / expand selected subtree'],
+  ['Ctrl+D', 'שכפל את הבחירה (וענפיה)', 'Duplicate selected node (+subtree)'],
+  ['Ctrl+L', 'התחל קשר מהבחירה', 'Start a relation from the selection'],
+  ['L', 'החלף שכבה: קשרים / כרטיסים', 'Toggle layer: links / cards'],
+  ['A', 'סמן ענף שלם', 'Mark whole branch'],
+  ['Ctrl+A', 'סמן הכל', 'Mark all'],
+  ['Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z', 'בטל / בצע שוב', 'Undo / redo'],
+  ['Ctrl+0 · Ctrl+= · Ctrl+-', 'התאם · הגדל · הקטן', 'Fit · zoom in · zoom out'],
+  ['/ או Ctrl+F', 'חיפוש', 'Find'],
+  ['Ctrl+E', 'ייצוא Markdown', 'Export Markdown outline'],
+  ['E', 'פתח הערות לבחירה', 'Open notes for the selection'],
+  ['?', 'המסך הזה', 'This screen'],
+  ['Esc', 'בטל קשר ← נקה סימון ← בטל בחירה', 'Cancel relation ← clear marks ← deselect']
+];
+function renderHelp() {
+  el('#helpBox').innerHTML =
+    '<h2>מקשי GlassMap — GlassMap shortcuts</h2>' +
+    '<div class="sub">תואם XMind, פעיל כשלא עורכים טקסט — XMind-compatible, active when nothing is being edited</div>' +
+    '<table>' + SHORTCUTS.map(function (r) {
+      return '<tr><td class="k">' + esc(r[0]) + '</td><td class="he">' + esc(r[1]) + '</td><td class="en">' + esc(r[2]) + '</td></tr>';
+    }).join('') + '</table>' +
+    '<button class="gm-btn close" data-close-help>סגור — Close</button>';
+}
+
+/* ── export / import ─────────────────────────────────────────────────────
+   Contract: JSON as `<title>.glassmap.json`; Markdown outline for Obsidian
+   ("- " nesting, relations under `## קשרים` as `[[from]] → [[to]]: label`);
+   PNG export is explicitly out of scope. A plain Blob + <a download> is
+   used rather than any host-specific download API, since this file must
+   work standalone from disk as well as embedded. */
+function safeFileName(s) {
+  return String(s || 'glassmap').replace(/[\\/:*?"<>|]+/g, '-').trim() || 'glassmap';
+}
+function downloadText(filename, text, mime) {
+  try {
+    var blob = new Blob([text], { type: mime || 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  } catch (e) {
+    toast('לא ניתן להוריד כאן — could not download from this view');
+  }
+}
+function doExportJSON() {
+  var name = safeFileName(S.title) + '.glassmap.json';
+  downloadText(name, JSON.stringify(S, null, 2), 'application/json');
+  toast('נשמר ' + name + ' — Saved ' + name);
+}
+function buildMarkdownOutline() {
+  var root = rootNode();
+  var lines = ['# ' + (root.title || 'GlassMap')];
+  if (root.body) lines.push('', root.body, '');
+  (function walk(id, depth) {
+    childrenOf(id).forEach(function (k) {
+      var indent = '  '.repeat(depth);
+      lines.push(indent + '- ' + (k.title || '') + (k.body ? ' — ' + k.body.replace(/\s+/g, ' ') : ''));
+      walk(k.id, depth + 1);
+    });
+  })(root.id, 0);
+  if (S.links.length) {
+    lines.push('', '## קשרים');
+    S.links.forEach(function (l) {
+      var a = N(l.from), b = N(l.to);
+      lines.push('[[' + (a ? a.title : '?') + ']] \u2192 [[' + (b ? b.title : '?') + ']]' + (l.label ? ': ' + l.label : ''));
+    });
+  }
+  return lines.join('\n');
+}
+function doExportMarkdown() {
+  var name = safeFileName(S.title) + '.md';
+  downloadText(name, buildMarkdownOutline(), 'text/markdown');
+  toast('נשמר ' + name + ' — Saved ' + name);
+}
+/* Import: this file's own JSON, or a WaffleTask/WaffleNotes export
+   (`projects` → depth-1 nodes under root, `tasks` with `parent` → tree). */
+function importForeign(x) {
+  if (!Array.isArray(x.projects) || !Array.isArray(x.tasks)) return null;
+  var root = { id: uid('n'), parent: null, title: x.title || 'Imported board', body: '' };
+  var nodes = [root];
+  var pMap = {}, tMap = {};
+  x.projects.forEach(function (p, i) {
+    var nid = uid('n'); pMap[p.id] = nid;
+    nodes.push({ id: nid, parent: root.id, title: p.name || 'Project', body: p.currentGoal || '', accent: ACCENTS[i % ACCENTS.length] });
+  });
+  x.tasks.forEach(function (t) { tMap[t.id] = uid('n'); });
+  x.tasks.forEach(function (t) {
+    var nid = tMap[t.id];
+    var pid = (t.parent && tMap[t.parent]) ? tMap[t.parent] : (pMap[t.proj] || root.id);
+    var parentNode = nodes.filter(function (n) { return n.id === pid; })[0];
+    nodes.push({ id: nid, parent: pid, title: t.title || 'Task', body: t.notes || '', accent: parentNode ? (parentNode.accent || ACCENTS[0]) : ACCENTS[0] });
+  });
+  return {
+    v: 1, id: S.id, title: x.title || 'Imported board', layer: 'links', theme: S.theme || 'auto',
+    nodes: nodes, links: [], view: { x: 0, y: 0, z: 1, fit: false, touched: false },
+    edits: 1, updatedAt: Date.now()
+  };
+}
+function importText(txt, filename) {
+  var parsed;
+  try { parsed = JSON.parse(txt); } catch (e) {
+    toast('הקובץ אינו JSON תקין — that file is not valid JSON');
+    return;
+  }
+  var own = normalise(JSON.parse(JSON.stringify(parsed)));
+  if (own) { replaceState(own, 'הייבוא הושלם — board imported'); return; }
+  var foreign = importForeign(parsed);
+  if (foreign) { replaceState(foreign, 'יובא מ-WaffleTask — imported from WaffleTask/WaffleNotes'); return; }
+  toast('לא זוהתה צורת קובץ — file shape not recognised');
+}
+
+/* ── theme ───────────────────────────────────────────────────────────────
+   `resolveTheme()` decides light/dark right now: a live push from the host
+   (HOST_DARK, once one has arrived) always wins — "glassmap FOLLOWS the
+   host" — otherwise the document's own S.theme, otherwise the OS. The
+   standalone header's theme button only ever touches S.theme; it never
+   exists in ?embed=1, where the host is assumed to be the only source of
+   truth (contract: header — including theme — hidden in embed). */
+function resolveTheme() {
+  if (HOST_DARK !== null) return HOST_DARK;
+  if (S.theme === 'light') return false;
+  if (S.theme === 'dark') return true;
+  try { return matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) { return false; }
+}
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', resolveTheme() ? 'dark' : 'light');
+}
+function cycleTheme() {
+  S.theme = S.theme === 'auto' ? 'light' : (S.theme === 'light' ? 'dark' : 'auto');
+  applyTheme(); persistSoft(); render();
+  toast('ערכת נושא: ' + (S.theme === 'auto' ? 'אוטומטי' : S.theme === 'light' ? 'בהיר' : 'כהה'));
+}
+
+/* ── postMessage bridge (mirrors mindmap.html conventions) ──────────────── */
+window.addEventListener('message', function (ev) {
+  if (window.parent === window) return;                 /* nothing embedding this page */
+  if (ev.origin !== location.origin && ev.origin !== 'null') return;   /* same-origin only; 'null' = file:// / sandboxed srcdoc */
+  var d = ev.data;
+  if (!d || typeof d !== 'object') return;
+  if (d.type === 'ws-theme' && typeof d.dark === 'boolean') { HOST_DARK = d.dark; applyTheme(); render(); return; }
+  if (d.type === 'gm:load' && d.data) {
+    var next = normalise(JSON.parse(JSON.stringify(d.data)));
+    if (next) replaceState(next, 'המפה נטענה — map loaded');
+    return;
+  }
+});
+
+/* ── click routing for the chrome around the map (header, sheets,
+   overlays, mapctl) — the map's OWN clicks are handled inside mountMap(). */
+document.addEventListener('click', function (ev) {
+  var n;
+  if ((n = ev.target.closest('#docTitle'))) {
+    inlineEdit(n, function (v) { S.title = v; save(); }, {});
+    return;
+  }
+  if (ev.target.closest('#exportBtn')) { el('#exportMenu').hidden = !el('#exportMenu').hidden; return; }
+  if ((n = ev.target.closest('#exportMenu button'))) {
+    el('#exportMenu').hidden = true;
+    if (n.dataset.act === 'exp-json') doExportJSON();
+    else if (n.dataset.act === 'exp-md') doExportMarkdown();
+    else if (n.dataset.act === 'imp') el('#importFile').click();
+    return;
+  }
+  if (!ev.target.closest('#exportMenu,#exportBtn')) el('#exportMenu').hidden = true;
+  if (ev.target.closest('#themeBtn')) { cycleTheme(); return; }
+  if (ev.target.closest('#homeBtn')) { postToHost('ws-go-home', null); return; }
+  if (ev.target.closest('#undoBtn')) { undo(); return; }
+  if ((n = ev.target.closest('[data-zoom]'))) {
+    var z = n.dataset.zoom;
+    if (z === '0') fitMap(460); else zoomAtCentre(z === '1' ? 1.25 : 1 / 1.25);
+    return;
+  }
+  if (ev.target.closest('#layerBtn')) { toggleLayer(); return; }
+  if (ev.target.closest('#lensBtn')) { UI.lens = !UI.lens; render(); return; }
+  if (ev.target.closest('#helpBtn')) { toggleHelp(); return; }
+  if (ev.target.closest('[data-close-help]') || ev.target.closest('#helpOverlay') === el('#helpOverlay') && ev.target.id === 'helpOverlay') { toggleHelp(); return; }
+  if ((n = ev.target.closest('[data-addkid]'))) { selNode(n.dataset.addkid, { quiet: true }); growAndEdit(growChild); return; }
+  if ((n = ev.target.closest('[data-dellink]'))) { deleteLink(n.dataset.dellink); return; }
+  if (ev.target.closest('.gm-rellabel')) { return; }
+  if (ev.target.closest('#scrim') || ev.target.closest('[data-close-sheet]')) { closeBodySheet(); return; }
+});
+document.addEventListener('input', function (ev) {
+  if (ev.target.id === 'findInput') {
+    UI.find = ev.target.value;
+    applyFindHaze();
+  }
+});
+document.addEventListener('keydown', function (ev) {
+  if (ev.target.id !== 'findInput') return;
+  if (ev.key === 'Enter') { ev.preventDefault(); findJumpFirst(); }
+  else if (ev.key === 'Escape') { ev.preventDefault(); closeFind(); el('#mapwrap').focus(); }
+});
+document.addEventListener('change', function (ev) {
+  if (ev.target.id !== 'importFile') return;
+  var f = ev.target.files && ev.target.files[0]; if (!f) return;
+  f.text().then(function (txt) { importText(txt, f.name); }).catch(function () {
+    toast('לא ניתן לקרוא את הקובץ — could not read that file');
+  });
+  ev.target.value = '';
+});
+
+/* ── boot ────────────────────────────────────────────────────────────────
+   `?embed=1` hides the header row (the host provides its own chrome);
+   `?map=<id>` (default 'default') selects which stored map to open — a
+   fresh id starts empty, per the contract's own verification plan. */
+(function boot() {
+  if (EMBED) el('#gmHead').hidden = true;
+  el('#docTitle').textContent = S.title;
+  /* `?theme=dark|light` is the initial hint a host gives before it can even
+     postMessage yet (the iframe's own src is the only channel that early) —
+     treat it exactly like an inbound `ws-theme` push so it wins the same
+     way, until a real ws-theme message (or none ever arrives, e.g. opened
+     standalone) takes over. */
+  var qTheme = qparam('theme');
+  if (qTheme === 'dark' || qTheme === 'light') HOST_DARK = (qTheme === 'dark');
+  applyTheme();
+  snapPrev = JSON.stringify(S);
+  render();
+  el('#mapwrap').focus();
+})();
+</script>

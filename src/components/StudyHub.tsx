@@ -2862,9 +2862,12 @@ interface LearningScreenProps {
   /** Distraction-free mode: parent hides sidebar+topbar when true. */
   fullscreen?: boolean
   onToggleFullscreen?: () => void
+  /** Which course's glass map to load (`glassmap:study-<course>`). Defaults to Stat-A. */
+  course?: 'stat-a' | 'stat-b' | 'sql' | 'anova'
+  darkMode?: boolean
 }
 
-function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userProgress, onProgressUpdate, userId, isMobile = false, fullscreen = false, onToggleFullscreen }: LearningScreenProps) {
+function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userProgress, onProgressUpdate, userId, isMobile = false, fullscreen = false, onToggleFullscreen, course = 'stat-a', darkMode }: LearningScreenProps) {
   const [currentQ, setCurrentQ] = useState(0)
   const [answer, setAnswer] = useState('')
   // Coachmark anchor for the quiz card (first time the user sees a question)
@@ -2892,7 +2895,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   //                     floating chip docked top-right (RTL primary corner).
   //                     chipExpanded toggles between a tiny pill and a full
   //                     compact card with answer field + dots.
-  const [tab, setTab] = useState<'none' | 'mindmap' | 'arsenal' | 'canvas' | 'excalidraw'>('none')
+  const [tab, setTab] = useState<'none' | 'mindmap' | 'glassmap' | 'arsenal' | 'canvas' | 'excalidraw'>('none')
   const [chipExpanded, setChipExpanded] = useState<boolean>(true)
   // "⊟ פיצול מסך" FAB → swap-pane dropdown. Lists the companion surfaces that
   // can fill the BOTTOM pane (תרגול is always locked on top). The currently
@@ -2939,6 +2942,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     window.addEventListener('mouseup', onUp)
   }, [floatMode, floatPos.x, floatPos.y, isMobile, tab])
   const contentRowRef = useRef<HTMLDivElement>(null)
+  // GlassMap follows the host theme (it has no toggle of its own): post
+  // ws-theme on mount and whenever darkMode changes, mirroring how App.tsx
+  // tracks darkMode for the standalone mindmap iframe's OWN outbound ws-theme.
+  const glassMapFrameRef = useRef<HTMLIFrameElement>(null)
+  useEffect(() => {
+    if (tab !== 'glassmap') return
+    try { glassMapFrameRef.current?.contentWindow?.postMessage({ type: 'ws-theme', dark: !!darkMode }, window.location.origin) } catch { /* */ }
+  }, [tab, darkMode])
   const recordAnswer = useLearningStore(s => s.recordAnswer)
   const recordErrorTag = useLearningStore(s => s.recordErrorTag)
   const completePracticeSession = useLearningStore(s => s.completePracticeSession)
@@ -2950,7 +2961,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   const _adminMode = useLearningStore(s => s.adminMode)
   const _unlockedFeatures = useLearningStore(s => s.unlockedFeatures)
   const TOOL_FEATURE: Partial<Record<typeof tab, FeatureId>> = {
-    mindmap: 'mindmap-edit', canvas: 'whiteboard-basic', excalidraw: 'whiteboard-full', arsenal: 'arsenal',
+    mindmap: 'mindmap-edit', glassmap: 'mindmap-edit', canvas: 'whiteboard-basic', excalidraw: 'whiteboard-full', arsenal: 'arsenal',
   }
   const toolLocked = (key: typeof tab): boolean => {
     const f = TOOL_FEATURE[key]
@@ -3463,6 +3474,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#1F3E6C', opacity: 0.6, padding: '8px 10px 4px', borderTop: '1px solid rgba(212,175,55,0.3)', marginTop: 4 }}>פיצול מסך</div>
                 {([
                   ['mindmap',    '🧠 מפת חשיבה'],
+                  ['glassmap',   '🪟 מפת זכוכית'],
                   ['canvas',     '✏️ קנבס'],
                   ['excalidraw', '🎨 לוח ציור'],
                   ['arsenal',    '🎯 הארסנל שלי'],
@@ -3543,6 +3555,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 </div>
                 {([
                   ['mindmap',    '🧠 מפת חשיבה'],
+                  ['glassmap',   '🪟 מפת זכוכית'],
                   ['canvas',     '✏️ קנבס'],
                   ['excalidraw', '🎨 לוח ציור'],
                   ['arsenal',    '🎯 הארסנל שלי'],
@@ -3798,6 +3811,19 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 title="מפת חשיבה — תוך כדי תרגול"
                 style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
                 allow="clipboard-read; clipboard-write"
+              />
+            )}
+            {tab === 'glassmap' && (
+              <iframe
+                key="quiz-gm"
+                ref={glassMapFrameRef}
+                src={`${import.meta.env.BASE_URL}glassmap.html?embed=1&map=study-${course}${darkMode ? '&theme=dark' : ''}`}
+                title="מפת זכוכית — תוך כדי תרגול"
+                style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
+                allow="clipboard-read; clipboard-write"
+                onLoad={() => {
+                  try { glassMapFrameRef.current?.contentWindow?.postMessage({ type: 'ws-theme', dark: !!darkMode }, window.location.origin) } catch { /* */ }
+                }}
               />
             )}
             {tab === 'canvas' && !isMobile && (
@@ -5108,6 +5134,8 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
             isMobile={isMobile}
             fullscreen={learningFullscreen}
             onToggleFullscreen={() => setLearningFullscreen(f => !f)}
+            course={activeCourse}
+            darkMode={darkMode}
           />
         )}
       </main>

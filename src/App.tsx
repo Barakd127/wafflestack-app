@@ -34,7 +34,7 @@ const LandingPage = lazy(() => import('./landing/LandingPage'))
 // wired here — kept on disk for reference. Unified data source: notebook and
 // mindmap share the same MM.nodes[id].body field inside mindmap.html.
 
-type View = 'onboarding' | 'study' | 'mindmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook'
+type View = 'onboarding' | 'study' | 'mindmap' | 'glassmap' | 'wafflecity' | 'mission' | 'split' | 'split-mindmap' | 'split-study-mindmap' | 'drawing' | 'landing' | 'notebook'
 
 function App() {
   const [activeView, setActiveView] = useState<View>(() => {
@@ -46,6 +46,7 @@ function App() {
     if (h === '#split-mindmap') return 'split-mindmap'
     if (h === '#split-study-mindmap') return 'split-study-mindmap'
     if (h === '#mindmap') return 'mindmap'
+    if (h === '#glassmap') return 'glassmap'
     if (h === '#notebook') return 'notebook'
     // First-time / no-hash visitor → landing page. Returning users keep their
     // hash route (#study, #mindmap, etc.) so refreshing stays in-app.
@@ -61,6 +62,10 @@ function App() {
   // mindmap iframe, remember that frame so the CalculatorDrawer's insert can be
   // posted back into it (it has no live math-field to write into). See Bug 2.
   const calcFrameRef = useRef<MessageEventSource | null>(null)
+  // GlassMap has no theme toggle of its own — it follows the host. Post
+  // ws-theme on mount and whenever darkMode changes (mirrors the outbound
+  // ws-theme the mindmap iframe posts TO us, just in the other direction).
+  const glassMapFrameRef = useRef<HTMLIFrameElement>(null)
 
   const openMindMap = (from: string) => {
     setMindmapFrom(from)
@@ -145,6 +150,11 @@ function App() {
     }
   }, [])
 
+  useEffect(() => {
+    if (activeView !== 'glassmap') return
+    try { glassMapFrameRef.current?.contentWindow?.postMessage({ type: 'ws-theme', dark: !!darkMode }, window.location.origin) } catch { /* */ }
+  }, [activeView, darkMode])
+
   // Hash-driven navigation: <a href="#study"> on the landing page (and
   // anywhere else) needs to re-route activeView. Without this, clicking a
   // CTA on the landing page only changes the URL — the React state stays
@@ -154,6 +164,7 @@ function App() {
       const h = window.location.hash
       if (h === '#landing') setActiveView('landing')
       else if (h === '#mindmap') setActiveView('mindmap')
+      else if (h === '#glassmap') setActiveView('glassmap')
       else if (h === '#notebook') setActiveView('notebook')
       else if (h === '#split') setActiveView('split')
       else if (h === '#split-mindmap') setActiveView('split-mindmap')
@@ -173,6 +184,7 @@ function App() {
     else if (activeView === 'split-study-mindmap') window.location.hash = '#split-study-mindmap'
     else if (activeView === 'wafflecity') { /* WaffleStackCity owns hash in this view */ }
     else if (activeView === 'mindmap') window.location.hash = '#mindmap'
+    else if (activeView === 'glassmap') window.location.hash = '#glassmap'
     else if (activeView === 'notebook') window.location.hash = '#notebook'
   }, [activeView])
 
@@ -223,7 +235,7 @@ function App() {
   // Floating dark-mode toggle hides on views that have their own integrated
   // dark-mode control (study screen ships one inside its TopBar per user
   // feedback 2026-05-24 — was obscuring sidebar lock icons at top-right).
-  const showDarkToggle = activeView !== 'study' && activeView !== 'mindmap' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'landing'
+  const showDarkToggle = activeView !== 'study' && activeView !== 'mindmap' && activeView !== 'glassmap' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'landing'
 
   return (
     <div className="relative w-full h-full bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 dark:from-[#0f0f14] dark:via-[#1a1a2e] dark:to-[#0f0f14]">
@@ -337,6 +349,21 @@ function App() {
           </div>
         )}
 
+        {activeView === 'glassmap' && (
+          <div className="relative w-full h-full">
+            <iframe
+              ref={glassMapFrameRef}
+              src={`glassmap.html?embed=1${darkMode ? '&theme=dark' : ''}`}
+              title="מפת זכוכית"
+              style={{ position: 'absolute', inset: 0, border: 'none', width: '100%', height: '100%', display: 'block' }}
+              allow="clipboard-read; clipboard-write"
+              onLoad={() => {
+                try { glassMapFrameRef.current?.contentWindow?.postMessage({ type: 'ws-theme', dark: !!darkMode }, window.location.origin) } catch { /* */ }
+              }}
+            />
+          </div>
+        )}
+
         {activeView === 'wafflecity' && (
           <div className="w-full h-full relative">
             <WaffleStackCity onBack={() => setActiveView('study')} />
@@ -418,7 +445,7 @@ function App() {
 
       {/* AI Study Tutor — global FAB + slide-out drawer, shown on study views only
           (hidden in wafflecity so the city back button sits cleanly at bottom-left) */}
-      {activeView !== 'landing' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'split-study-mindmap' && activeView !== 'mindmap' && activeView !== 'drawing' && (
+      {activeView !== 'landing' && activeView !== 'wafflecity' && activeView !== 'split' && activeView !== 'split-mindmap' && activeView !== 'split-study-mindmap' && activeView !== 'mindmap' && activeView !== 'glassmap' && activeView !== 'drawing' && (
         <>
           <FeatureGate id="ai-tutor" mode="hide"><TutorFAB /></FeatureGate>
           <TutorDrawer />
