@@ -1437,8 +1437,8 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
           ;(e.currentTarget as HTMLElement).style.boxShadow = CARD_SHADOW
         }}
       >
-        <div>
-          <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 20, color: TEXT_DARK, textAlign: 'right', textWrap: 'balance' }}>
+        <div style={{ minHeight: 52, display: 'flex', alignItems: 'flex-start' }}>
+          <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 20, lineHeight: 1.3, color: TEXT_DARK, textAlign: 'right', textWrap: 'balance' }}>
             {topic.label}
           </div>
         </div>
@@ -1496,7 +1496,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
             same button one step quieter, outlined in the card title's own blue.
             Both come from index.css: a button styled inline loses :hover and
             :active outright, because an inline style outranks every class. */}
-        <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+        <div style={{ display: 'flex', gap: 10, marginTop: 'auto', paddingTop: 4 }}>
           <button
             className="ws-cta"
             onClick={() => onSelectTopic(topic.id, 'lesson')}
@@ -2264,9 +2264,9 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '1 1 auto', minWidth: 0 }}>
         <h1 style={{
           fontFamily: 'var(--ws-display)',
-          fontWeight: 800,
-          fontSize: 28,
-          color: TEXT_DARK,
+          fontWeight: 600,
+          fontSize: 20,
+          color: TEXT_MED,
           margin: 0,
           letterSpacing: '-0.5px',
           textShadow: '0 1px 4px rgba(255,255,255,0.8)',

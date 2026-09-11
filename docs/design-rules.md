@@ -42,7 +42,8 @@ Three faces, one job each. A fourth face is a bug.
 
 | Role | Spec |
 |---|---|
-| Page title | Modernist 28 / 800, `--sh-text-dark` |
+| Screen heading | Modernist 28 / 700, `--sh-text-dark` — the page's own h2 |
+| Location label | Modernist 20 / 600, `--sh-text-med` — the line in the top bar |
 | Card title | Modernist 23 / 700, `--sh-text-med` |
 | Prose | Assistant 16 / 400, line-height 1.6, `--sh-text-tip` |
 | Button | Assistant 16 / 600 |
