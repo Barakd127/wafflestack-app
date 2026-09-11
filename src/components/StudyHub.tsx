@@ -1424,7 +1424,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
           display: 'flex',
           flexDirection: 'column',
           gap: 16,
-          textAlign: 'center',
+          textAlign: 'right',
           transition: 'all 0.3s',
           boxShadow: CARD_SHADOW,
         }}
@@ -1437,15 +1437,9 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
           ;(e.currentTarget as HTMLElement).style.boxShadow = CARD_SHADOW
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-          <div style={{ fontSize: 32 }}>{isMastered ? '⭐' : '📖'}</div>
-          <div>
-            <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 20, color: TEXT_DARK, textAlign: 'center' }}>
-              {topic.label}
-            </div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginTop: 4, textAlign: 'center' }}>
-              {topic.building}
-            </div>
+        <div>
+          <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 20, color: TEXT_DARK, textAlign: 'right', textWrap: 'balance' }}>
+            {topic.label}
           </div>
         </div>
 
@@ -1498,42 +1492,24 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
           </div>
         )}
 
-        {/* Lesson / Quiz action buttons */}
-        <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+        {/* Theory is the primary — it is where a topic starts. Practice is the
+            same button one step quieter, outlined in the card title's own blue.
+            Both come from index.css: a button styled inline loses :hover and
+            :active outright, because an inline style outranks every class. */}
+        <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
           <button
+            className="ws-cta"
             onClick={() => onSelectTopic(topic.id, 'lesson')}
-            style={{
-              flex: 1,
-              background: BUTTON_COLOR,
-              color: '#fff',
-              border: 'none',
-              borderRadius: 14,
-              padding: '10px 0',
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: 'pointer',
-              fontFamily: "'Assistant', sans-serif",
-              boxShadow: '0px 2px 6px rgba(51,81,202,0.35)',
-            }}
+            style={{ flex: 1, justifyContent: 'center', padding: '11px 14px' }}
           >
-            📚 תיאוריה
+            תיאוריה<CtaArrow />
           </button>
           <button
+            className="ws-cta-outline"
             onClick={() => onSelectTopic(topic.id, 'quiz')}
-            style={{
-              flex: 1,
-              background: 'rgba(255,255,255,0.7)',
-              color: TEXT_DARK,
-              border: '1px solid rgba(127,155,217,0.4)',
-              borderRadius: 14,
-              padding: '10px 0',
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: 'pointer',
-              fontFamily: "'Assistant', sans-serif",
-            }}
+            style={{ flex: 1, padding: '9.5px 14px' }}
           >
-            📝 תרגול
+            תרגול
           </button>
         </div>
       </div>
@@ -1544,7 +1520,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
     <div className="ws-screen-pad" style={viewMode === 'mindmap' ? { flex: 1, overflow: 'auto', padding: '5px 8px 6px' } : { flex: 1, overflow: 'auto', padding: '32px 40px' }}>
       {viewMode === 'mindmap' ? null : (
         <h2 style={{ fontFamily: 'var(--ws-display)', fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
-          בחר נושא ללמוד 📚
+          בחר נושא ללמוד
         </h2>
       )}
 
@@ -1555,7 +1531,6 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
             return (
               <div key={section.id}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 24 }}>{section.emoji}</span>
                   <h3 style={{ fontFamily: 'var(--ws-display)', fontSize: 21, fontWeight: 800, color: TEXT_DARK, margin: 0 }}>{section.labelHe}</h3>
                   <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, background: 'rgba(127,155,217,0.12)', borderRadius: 999, padding: '2px 10px' }}>
                     {masteredCount}/{section.topics.length} נושאים
@@ -1656,7 +1631,6 @@ function TopicMindmap({ groups, userProgress, onSelectTopic }: {
               fontFamily: "'Assistant', sans-serif", fontWeight: 800, fontSize: 14,
               boxShadow: '0 4px 12px rgba(0,0,0,0.28)',
             }}>
-              <span style={{ fontSize: 16 }}>{g.emoji}</span>
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{g.labelHe}</span>
             </div>
           )

@@ -728,6 +728,51 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   box-shadow: inset 0 2px 5px rgba(11,6,48,0.55);
   transform: translateY(1px);
 }
+/* Secondary action — the same button one step quieter.
+ *
+ * A weak fill on its own is what reads as unfinished, which is why the rule
+ * elsewhere is "secondary is a text button". The border is what changes that:
+ * a defined edge makes a light fill read as a deliberate object rather than
+ * as something still loading. It takes the card title's own blue, so the
+ * button belongs to the card it sits in.
+ *
+ * Same geometry as .ws-cta so the pair lines up, and the same state ladder —
+ * rest, then darker on hover, darker still when pressed.
+ */
+.ws-cta-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 9.5px 24px;
+  border: 1.5px solid #254A9F;
+  border-radius: 16px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #254A9F;
+  cursor: pointer;
+  background: transparent;
+  transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
+              background 0.18s ease, color 0.18s ease;
+}
+.ws-cta-outline:hover {
+  background: #DFE8FB;
+  color: #253865;
+  box-shadow: 0 4px 9px rgba(39,24,126,0.18);
+  transform: translateY(-3px);
+}
+.ws-cta-outline:active {
+  background: #C0D0F6;
+  color: #18247E;
+  box-shadow: inset 0 2px 5px rgba(11,6,48,0.35);
+  transform: translateY(1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ws-cta-outline { transition: background 0.18s ease; }
+  .ws-cta-outline:hover, .ws-cta-outline:active { transform: none; }
+}
+
 .ws-cta[disabled] {
   opacity: 0.45;
   filter: grayscale(0.3);
