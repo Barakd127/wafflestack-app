@@ -1573,15 +1573,13 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
   }
 
   return (
-    <div className="ws-screen-pad" style={viewMode === 'mindmap' ? { flex: 1, overflow: 'auto', padding: '5px 8px 6px' } : { flex: 1, overflow: 'auto', padding: '32px 40px' }}>
+    <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px 32px 35px' }}>
       {/* Where I came from, and how I am looking at it — one row, one sentence.
           It renders in both views: the map needs the way out more than the list
           does, because it has nothing else on screen that leads anywhere. */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        maxWidth: viewMode === 'mindmap' ? '100%' : 'calc(100% - 50px)',
-        marginBottom: viewMode === 'mindmap' ? 10 : 20,
-        padding: viewMode === 'mindmap' ? '6px 6px 0' : 0,
+        maxWidth: '100%', marginBottom: 20,
       }}>
           <button
             onClick={onBack}
@@ -1602,7 +1600,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
       </div>
 
       {viewMode === 'list' ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 30, maxWidth: 'calc(100% - 50px)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 30, maxWidth: '100%' }}>
           {groupedSections.map(section => {
             const masteredCount = section.topics.filter(t => userProgress.topics[t.id]?.mastered).length
             return (
@@ -1626,7 +1624,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
         <iframe
           src={`${import.meta.env.BASE_URL}mindmap.html?v=mm19-20260708&scene=topics&course=${course}&admin=${_adminMode ? '1' : '0'}`}
           title="מפת הנושאים"
-          style={{ width: '100%', height: 'calc(100dvh - 158px)', border: 'none', borderRadius: 14, boxShadow: CARD_SHADOW, display: 'block' }}
+          style={{ width: '100%', height: 'calc(100dvh - 192px)', border: 'none', borderRadius: 14, boxShadow: CARD_SHADOW, display: 'block' }}
           allow="clipboard-read; clipboard-write"
         />
       )}
