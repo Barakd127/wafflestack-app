@@ -1353,6 +1353,62 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
   )
 }
 
+/**
+ * Two views of one list, so a segmented control — the shape that says "these
+ * are alternatives, one of them is on" without a label explaining it. The
+ * locked side keeps a padlock rather than an emoji prefix, so the lock reads
+ * as a state of the option and not as part of its name.
+ */
+function ViewSwitch({ viewMode, onViewModeChange }: {
+  viewMode: 'list' | 'mindmap'
+  onViewModeChange?: (m: 'list' | 'mindmap') => void
+}) {
+  const adminMode = useLearningStore(s => s.adminMode)
+  const unlocked = useLearningStore(s => s.unlockedFeatures)
+  const mapUnlocked = isFeatureUnlocked('mindmap-view', unlocked, adminMode)
+  const ICONS = {
+    list: <><path d="M8 6h13" /><path d="M8 12h13" /><path d="M8 18h13" /><path d="M3.5 6h.01" /><path d="M3.5 12h.01" /><path d="M3.5 18h.01" /></>,
+    mindmap: <><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z" /><path d="M9 4v16" /><path d="M15 6v16" /></>,
+  } as const
+  return (
+    <div style={{ display: 'flex', gap: 2, background: 'rgba(127,155,217,0.14)', padding: 3, borderRadius: 999 }}>
+      {([['list', 'רשימה'], ['mindmap', 'מפה']] as const).map(([m, label]) => {
+        const on = viewMode === m
+        const locked = m === 'mindmap' && !mapUnlocked
+        const tip = locked ? FEATURE_UNLOCKS_BY_ID['mindmap-view']?.descriptionHe : undefined
+        return (
+          <button
+            key={m}
+            onClick={() => { if (!locked) onViewModeChange?.(m) }}
+            title={tip} aria-label={tip} aria-pressed={on} aria-disabled={locked || undefined}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              border: 'none', borderRadius: 999, padding: '7px 15px',
+              cursor: locked ? 'not-allowed' : 'pointer',
+              fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
+              background: on ? TEXT_MED : 'transparent',
+              color: on ? '#fff' : locked ? TEXT_LIGHT : TEXT_MED,
+              transition: 'background 0.15s, color 0.15s',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              {ICONS[m]}
+            </svg>
+            {label}
+            {locked && (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
+              </svg>
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggleDark, onMapModeChange, course = 'stat-a', viewMode, onViewModeChange }: TopicSelectorProps) {
   // Course-scoped topic list + taxonomy. The two courses are kept disjoint so
   // neither grid ever leaks the other's topics (see QUIZ_TOPICS_A/_B above).
@@ -1518,6 +1574,31 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
 
   return (
     <div className="ws-screen-pad" style={viewMode === 'mindmap' ? { flex: 1, overflow: 'auto', padding: '5px 8px 6px' } : { flex: 1, overflow: 'auto', padding: '32px 40px' }}>
+      {/* Where I came from, and how I am looking at it — one row, one sentence. */}
+      {viewMode === 'mindmap' ? null : (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          maxWidth: 'calc(100% - 50px)', marginBottom: 20,
+        }}>
+          <button
+            onClick={onBack}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7, background: 'none',
+              border: 'none', cursor: 'pointer', padding: 0,
+              fontFamily: "'Assistant', sans-serif", fontSize: 15, fontWeight: 600,
+              color: TEXT_MED,
+            }}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M5 12h14" /><polyline points="12,5 19,12 12,19" />
+            </svg>
+            כל הקורסים
+          </button>
+          <ViewSwitch viewMode={viewMode} onViewModeChange={onViewModeChange} />
+        </div>
+      )}
+
       {viewMode === 'list' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 30, maxWidth: 'calc(100% - 50px)' }}>
           {groupedSections.map(section => {
@@ -4811,29 +4892,12 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   // toggle + back button; lesson/quiz's back button) now render in the topbar
   // itself, next to the title, so the board/content pane below gets the full
   // remaining height. See TopBar's contextControls prop.
+  /* The topics screen keeps nothing here. Its back and its view switch sit
+     above its own content — back is about this screen, not about the app, and
+     the view switch does not navigate at all: it changes how the same list is
+     drawn, so it belongs beside the list. Per Shirli, option ב. */
   const topBarContextControls: React.ReactNode =
-    internalView === 'topics' ? (
-      <>
-        <button
-          onClick={() => setInternalView('courses')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
-        >
-          → חזרה
-        </button>
-        <div style={{ display: 'flex', gap: 4, background: 'rgba(127,155,217,0.12)', padding: 3, borderRadius: 999, flexShrink: 0 }}>
-          {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => {
-            const locked = m === 'mindmap' && !mapUnlocked
-            const tip = locked ? FEATURE_UNLOCKS_BY_ID['mindmap-view']?.descriptionHe : undefined
-            return (
-              <button key={m} onClick={() => { if (!locked) setViewMode(m) }} title={tip} aria-label={tip} aria-disabled={locked || undefined}
-                style={{ border: 'none', borderRadius: 999, padding: '4px 12px', cursor: locked ? 'not-allowed' : 'pointer', fontFamily: "'Assistant', sans-serif", fontSize: 12, fontWeight: 700, background: viewMode === m ? BUTTON_COLOR : 'transparent', color: viewMode === m ? '#fff' : TEXT_MED, transition: 'all 0.15s', opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none', whiteSpace: 'nowrap' }}>
-                {locked ? '🔒 ' : ''}{lbl}
-              </button>
-            )
-          })}
-        </div>
-      </>
-    ) : (internalView === 'lesson' || internalView === 'quiz-intro' || internalView === 'learning') ? (
+    (internalView === 'lesson' || internalView === 'quiz-intro' || internalView === 'learning') ? (
       <button
         onClick={() => setInternalView('topics')}
         style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
