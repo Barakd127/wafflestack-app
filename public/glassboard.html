@@ -1,0 +1,472 @@
+<meta charset="UTF-8">
+<title>GlassBoard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://esm.sh/@excalidraw/excalidraw@0.18.0/dist/prod/index.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Rubik:wght@500;600&display=swap">
+<style>
+/* ═════════════════════════════════════════════════════════════════════════
+   GlassBoard — Excalidraw IS the mind map, drawn on Shirli's glass.
+
+   Not a separate map page with an export button: the canvas is Excalidraw,
+   every drawing tool stays, and the mind-map behaviour (Tab child, Enter
+   sibling, K kind, Delete branch) lives on top of it. The canvas background
+   is transparent, so what sits behind it is the app's own board: sky, the
+   city block, a deep frost pane, a corner sheen and the dot grid — the
+   values copied from src/components/glass/GlassBoardShell.tsx.
+   ═════════════════════════════════════════════════════════════════════════ */
+:root{
+  --gb-t:.85;
+  --gb-ink:#1F3E6C;
+  --gb-gold:#D4AF37;
+}
+html,body{margin:0;height:100%;overflow:hidden;font-family:'Heebo',system-ui,sans-serif;background:#EAF2FF;}
+
+/* ── the world behind the glass ─────────────────────────────────────────── */
+.gb-world,.gb-frost,.gb-sheen,.gb-dots{position:fixed;inset:0;pointer-events:none;}
+.gb-world{z-index:0;background:linear-gradient(180deg,#EAF2FF 0%,#CFE0FA 62%,#EAF2FF 100%);overflow:hidden;}
+.gb-world::after{content:'';position:absolute;left:0;right:0;bottom:0;height:34%;
+  background:linear-gradient(180deg,rgba(223,234,255,0) 0%,rgba(207,224,250,.55) 100%);}
+.gb-city{position:absolute;bottom:0;left:50%;width:82%;transform:translateX(-50%);
+  filter:brightness(1.04) saturate(.7) contrast(.92);}
+.gb-frost{z-index:1;
+  background:linear-gradient(155deg,rgba(223,234,255,.74),rgba(198,218,250,.68) 60%,rgba(216,231,250,.72));
+  backdrop-filter:blur(calc(var(--gb-t) * 34px)) saturate(135%);
+  -webkit-backdrop-filter:blur(calc(var(--gb-t) * 34px)) saturate(135%);
+  opacity:calc(.45 + .55 * var(--gb-t));
+  transition:opacity .35s ease,backdrop-filter .35s ease;}
+.gb-sheen{z-index:1;inset:0 0 auto auto;width:58%;height:44%;
+  background:linear-gradient(215deg,rgba(255,255,255,.34),rgba(255,255,255,0) 60%);
+  opacity:calc(.25 + .75 * var(--gb-t));}
+.gb-dots{z-index:1;background-image:radial-gradient(rgba(255,255,255,.55) 1px,transparent 1px);
+  background-size:28px 28px;opacity:.7;}
+
+/* ── Excalidraw, see-through ────────────────────────────────────────────── */
+#app{position:fixed;inset:0;z-index:2;}
+#app .excalidraw,#app .excalidraw-container,#app .excalidraw .App-canvas{background:transparent!important;}
+#app .excalidraw{--color-surface-lowest:transparent;}
+
+/* ── chrome: one glass pill, bottom centre, clear of Excalidraw's footer ── */
+.gb-pill{position:fixed;z-index:5;left:50%;bottom:14px;transform:translateX(-50%);
+  display:flex;align-items:center;gap:4px;padding:4px;border-radius:999px;
+  background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.62);
+  box-shadow:0 8px 22px rgba(11,27,62,.2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  font-family:'Rubik','Heebo',sans-serif;font-size:12.5px;font-weight:600;color:var(--gb-ink);}
+.gb-seg{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 12px;border:0;border-radius:999px;
+  background:transparent;color:inherit;font:inherit;cursor:pointer;position:relative;}
+.gb-seg:hover{background:rgba(31,62,108,.06);}
+.gb-seg[aria-pressed="true"]{color:#A8841B;}
+.gb-seg[aria-pressed="true"]::after{content:'';position:absolute;left:12px;right:12px;bottom:3px;height:2px;border-radius:2px;background:var(--gb-gold);}
+.gb-sep{width:1px;height:18px;background:rgba(31,62,108,.14);margin:0 4px;}
+.gb-hint{padding:0 10px;font-weight:500;font-size:12px;color:#465CA5;white-space:nowrap;}
+.gb-hint kbd{font-family:inherit;font-weight:600;font-size:11px;color:var(--gb-ink);padding:1px 5px;border-radius:5px;
+  background:rgba(255,255,255,.85);border:1px solid rgba(31,62,108,.14);}
+@media (max-width:900px){ .gb-hint{display:none;} }
+/* under ~730px Excalidraw swaps to its mobile UI, a full-width bottom bar */
+@media (max-width:760px){ .gb-pill{bottom:76px;} }
+
+/* ── the title editor that appears over a node ──────────────────────────── */
+.gb-edit{position:fixed;z-index:6;box-sizing:border-box;border:2px solid var(--gb-gold);border-radius:14px;
+  background:rgba(255,255,255,.96);color:var(--gb-ink);font-family:'Heebo',sans-serif;font-weight:500;
+  text-align:center;outline:none;padding:0 10px;box-shadow:0 8px 24px rgba(11,27,62,.18);}
+.gb-edit[hidden]{display:none;}
+</style>
+
+<div class="gb-world" aria-hidden="true"><img class="gb-city" src="glass/city-block.webp" alt=""></div>
+<div class="gb-frost" aria-hidden="true"></div>
+<div class="gb-sheen" aria-hidden="true"></div>
+<div class="gb-dots" aria-hidden="true"></div>
+<div id="app"></div>
+<input class="gb-edit" id="gbEdit" dir="auto" hidden autocomplete="off" spellcheck="false">
+
+<div class="gb-pill" role="group" aria-label="GlassBoard">
+  <button class="gb-seg" data-frost=".85" aria-pressed="true" title="זכוכית חלבית — לכתיבה">מיקוד</button>
+  <button class="gb-seg" data-frost=".4" aria-pressed="false" title="חצי שקוף — להדגמה">הדגמה</button>
+  <button class="gb-seg" data-frost="0" aria-pressed="false" title="זכוכית שקופה — רואים את העיר">עיר</button>
+  <span class="gb-sep"></span>
+  <span class="gb-hint"><kbd>Tab</kbd> תת-נושא · <kbd>Enter</kbd> אח · <kbd>K</kbd> סוג · <kbd>Delete</kbd> מחיקה</span>
+</div>
+
+<script>
+window.EXCALIDRAW_ASSET_PATH = "https://esm.sh/@excalidraw/excalidraw@0.18.0/dist/prod/";
+</script>
+<script type="module">
+import React from "https://esm.sh/react@18.3.1";
+import { createRoot } from "https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1";
+import { Excalidraw, convertToExcalidrawElements, CaptureUpdateAction }
+  from "https://esm.sh/@excalidraw/excalidraw@0.18.0?deps=react@18.3.1,react-dom@18.3.1";
+
+const h = React.createElement;
+const STORE = "glassboard:v1";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   The mind map is a small model; Excalidraw renders it.
+   Each node is a container element carrying customData.gm = {id, parent,
+   kind} plus a bound label, and each tree edge is a bound arrow. The model
+   is rebuilt from those elements on load and whenever an unknown node
+   appears (undo, paste), so the saved scene alone is the source of truth
+   and free drawing sits beside the map untouched.
+   ═══════════════════════════════════════════════════════════════════════ */
+const M = { nodes: {}, rootId: null };
+let api = null;
+let committing = false;
+let booted = false;
+
+const KINDS = ["concept", "known", "bridge", "gap", "question"];
+/* The concept-canvas grammar, kept soft so it reads as tinted glass. A plain
+   concept is white glass with its branch's accent line — colour is saved for
+   the kinds that mean something. */
+const KIND_STYLE = {
+  known:    { fill: "rgba(211,249,216,0.86)", stroke: "#2b8a3e", shape: "rectangle" },
+  bridge:   { fill: "rgba(255,236,153,0.88)", stroke: "#e67700", shape: "ellipse" },
+  gap:      { fill: "rgba(255,227,227,0.88)", stroke: "#c92a2a", shape: "diamond" },
+  question: { fill: "rgba(238,190,250,0.86)", stroke: "#862e9c", shape: "rectangle" },
+};
+const ACCENTS = ["#0E9AA7", "#9B5DE5", "#2E9E6B", "#E76F51"];
+const INK = "#1F3E6C";
+const COL_GAP = 72;    /* space between a parent's edge and its children's edge */
+const ROW_H = 66;      /* one leaf's vertical slot */
+
+const rid = () => Math.random().toString(36).slice(2, 10);
+const kids = id => Object.values(M.nodes).filter(n => n.parent === id).sort((a, b) => a.order - b.order);
+const leafRows = id => { const k = kids(id); return k.length ? k.reduce((s, c) => s + leafRows(c.id), 0) : 1; };
+const branchOf = n => { while (n.parent && M.nodes[n.parent] && M.nodes[n.parent].parent) n = M.nodes[n.parent]; return n; };
+const accentOf = n => {
+  if (!n.parent) return "#D4AF37";
+  const top = branchOf(n);
+  const i = kids(M.rootId).findIndex(k => k.id === top.id);
+  return ACCENTS[(i < 0 ? 0 : i) % ACCENTS.length];
+};
+
+const measure = (() => {
+  const c = document.createElement("canvas").getContext("2d");
+  return (text, px) => { c.font = `500 ${px}px Helvetica, Arial, sans-serif`; return c.measureText(text || " ").width; };
+})();
+function sizeOf(n) {
+  const root = !n.parent, px = root ? 22 : 18;
+  const w = Math.min(root ? 320 : 260, Math.max(root ? 170 : 120, measure(n.title, px) + 48));
+  const lines = Math.max(1, Math.ceil((measure(n.title, px) + 48) / w));
+  return { w: Math.round(w), h: Math.round((root ? 34 : 26) + lines * px * 1.25), px };
+}
+
+/* Tidy tree: children in the next column to the right, siblings stacked,
+   a subtree claims as many rows as it has leaves. Hand-moved nodes keep
+   their spot and their unmoved children follow them. */
+function layout(id) {
+  const p = M.nodes[id], ks = kids(id);
+  if (!ks.length) return;
+  const ps = sizeOf(p);
+  const total = ks.reduce((s, k) => s + leafRows(k.id), 0);
+  let top = p.y - (total * ROW_H) / 2;
+  for (const k of ks) {
+    const rows = leafRows(k.id), ks2 = sizeOf(k);
+    if (!k.pinned) { k.x = p.x + ps.w / 2 + COL_GAP + ks2.w / 2; k.y = top + (rows * ROW_H) / 2; }
+    top += rows * ROW_H;
+    layout(k.id);
+  }
+}
+
+function skeletons() {
+  if (M.rootId) layout(M.rootId);
+  const out = [];
+  for (const n of Object.values(M.nodes)) {
+    const { w, h, px } = sizeOf(n), root = !n.parent;
+    const ks = KIND_STYLE[n.kind];
+    out.push({
+      type: ks ? ks.shape : "rectangle", id: n.id,
+      x: n.x - w / 2, y: n.y - h / 2, width: w, height: h,
+      backgroundColor: root ? "rgba(255,255,255,0.92)" : ks ? ks.fill : "rgba(255,255,255,0.80)",
+      strokeColor: root ? "#D4AF37" : ks ? ks.stroke : accentOf(n),
+      strokeWidth: root ? 2 : 1.5, fillStyle: "solid", roughness: 0, roundness: { type: 3 },
+      label: { text: n.title || " ", fontSize: px, fontFamily: 2, strokeColor: INK,
+               textAlign: "center", verticalAlign: "middle" },
+      customData: { gm: { id: n.id, parent: n.parent, kind: n.kind, order: n.order } },
+    });
+  }
+  for (const n of Object.values(M.nodes)) {
+    if (!n.parent || !M.nodes[n.parent]) continue;
+    const p = M.nodes[n.parent], ps = sizeOf(p), cs = sizeOf(n);
+    const x1 = p.x + ps.w / 2, y1 = p.y, x2 = n.x - cs.w / 2, y2 = n.y;
+    out.push({
+      type: "arrow", id: "e_" + n.id, x: x1, y: y1, width: x2 - x1, height: y2 - y1,
+      points: [[0, 0], [x2 - x1, y2 - y1]],
+      start: { id: p.id }, end: { id: n.id },
+      strokeColor: accentOf(n), strokeWidth: 1.5, roughness: 0, opacity: 60,
+      startArrowhead: null, endArrowhead: null, roundness: { type: 2 },
+      customData: { gm: { edge: n.id } },
+    });
+  }
+  return out;
+}
+
+function commit(selectId) {
+  if (!api) return;
+  committing = true;
+  const others = api.getSceneElements().filter(e => !(e.customData && e.customData.gm) && !isGmLabel(e));
+  const mm = convertToExcalidrawElements(skeletons(), { regenerateIds: false });
+  api.updateScene({
+    elements: [...others, ...mm],
+    appState: selectId ? { selectedElementIds: { [selectId]: true } } : undefined,
+    captureUpdate: CaptureUpdateAction.IMMEDIATELY,
+  });
+  setTimeout(() => { committing = false; }, 60);
+}
+function isGmLabel(e) {
+  if (e.type !== "text" || !e.containerId) return false;
+  const c = api.getSceneElements().find(x => x.id === e.containerId);
+  return !!(c && c.customData && c.customData.gm);
+}
+
+/* Rebuild the model from whatever the scene holds — load, undo, paste. */
+function readScene(elements) {
+  const live = elements.filter(e => !e.isDeleted);
+  const byId = Object.fromEntries(live.map(e => [e.id, e]));
+  const seen = new Set();
+  for (const e of live) {
+    const gm = e.customData && e.customData.gm;
+    if (!gm || !gm.id) continue;
+    seen.add(gm.id);
+    const label = live.find(t => t.type === "text" && t.containerId === e.id);
+    const cx = e.x + e.width / 2, cy = e.y + e.height / 2;
+    let n = M.nodes[gm.id];
+    if (!n) {
+      n = M.nodes[gm.id] = { id: gm.id, parent: gm.parent || null, kind: gm.kind || "concept",
+                             order: gm.order || 0, title: "", x: cx, y: cy, pinned: true };
+    } else if (Math.abs(cx - n.x) > 3 || Math.abs(cy - n.y) > 3) {
+      n.x = cx; n.y = cy; n.pinned = true;              /* the user dragged it */
+    }
+    if (label) n.title = (label.originalText != null ? label.originalText : label.text).trim();
+    if (!n.parent) M.rootId = n.id;
+  }
+  for (const id of Object.keys(M.nodes)) if (!seen.has(id)) delete M.nodes[id];
+  for (const n of Object.values(M.nodes)) if (n.parent && !M.nodes[n.parent]) n.parent = M.rootId;
+  if (M.rootId && !M.nodes[M.rootId]) M.rootId = null;
+  void byId;
+}
+
+/* ── the keys ────────────────────────────────────────────────────────── */
+function nodeIdFor(elId) {
+  const els = api.getSceneElements();
+  const e = els.find(x => x.id === elId);
+  if (!e) return null;
+  if (e.customData && e.customData.gm && e.customData.gm.id) return e.customData.gm.id;
+  if (e.type === "text" && e.containerId) return nodeIdFor(e.containerId);
+  return null;
+}
+function selectedNodes() {
+  const st = api.getAppState();
+  return [...new Set(Object.keys(st.selectedElementIds || {}).map(nodeIdFor).filter(Boolean))];
+}
+function addNode(parentId, afterId) {
+  const sib = kids(parentId);
+  const after = afterId ? M.nodes[afterId].order : (sib.length ? sib[sib.length - 1].order : 0);
+  for (const s of sib) if (s.order > after) s.order += 1;
+  const n = { id: "n" + rid(), parent: parentId, kind: "concept", order: after + 1, title: "", x: 0, y: 0, pinned: false };
+  M.nodes[n.id] = n;
+  commit(n.id);
+  openEditor(n.id, true);                       /* same tick: the next keystroke must land in the box */
+  requestAnimationFrame(() => { ensureVisible(n.id); requestAnimationFrame(() => placeEditor(n.id)); });
+}
+function deleteNodes(ids) {
+  const doomed = new Set();
+  const walk = id => { doomed.add(id); kids(id).forEach(k => walk(k.id)); };
+  ids.filter(id => M.nodes[id] && M.nodes[id].parent).forEach(walk);
+  if (!doomed.size) { toast("אי אפשר למחוק את הנושא המרכזי"); return; }
+  const parent = M.nodes[ids[0]] && M.nodes[ids[0]].parent;
+  doomed.forEach(id => delete M.nodes[id]);
+  const next = parent && M.nodes[parent] ? parent : M.rootId;
+  commit(next);
+}
+function cycleKind(ids, dir) {
+  for (const id of ids) {
+    const n = M.nodes[id]; if (!n || !n.parent) continue;
+    n.kind = KINDS[(KINDS.indexOf(n.kind) + dir + KINDS.length) % KINDS.length];
+  }
+  commit(ids[0]);
+}
+
+addEventListener("keydown", e => {
+  if (!api || !editor.hidden) return;
+  const st = api.getAppState();
+  const a = document.activeElement;
+  if (st.editingTextElement || st.newElement || (a && /INPUT|TEXTAREA/.test(a.tagName) && a !== document.body)) return;
+  const sel = selectedNodes();
+  const id = sel[0];
+  /* stopImmediatePropagation, not stopPropagation: the title box's own
+     window listener sits on this same target, and addNode now opens the box
+     inside this very keydown — without it the same Tab reached the fresh,
+     empty box and closed it, deleting the node it had just created. */
+  const stop = () => { e.preventDefault(); e.stopImmediatePropagation(); };
+  if (e.key === "Tab" && id) { stop(); addNode(id); }
+  else if (e.key === "Enter" && id && !e.ctrlKey) { stop(); const n = M.nodes[id]; n.parent ? addNode(n.parent, id) : addNode(id); }
+  else if (e.key === "F2" && id) { stop(); openEditor(id, false); }
+  else if ((e.key === "Delete" || e.key === "Backspace") && sel.length) { stop(); deleteNodes(sel); }
+  else if ((e.key === "k" || e.key === "K") && id && !e.ctrlKey && !e.metaKey && !e.altKey) { stop(); cycleKind(sel, e.shiftKey ? -1 : 1); }
+}, true);
+
+/* Moving a node by hand re-tidies its unmoved children around it. */
+addEventListener("pointerup", () => {
+  if (!api) return;
+  setTimeout(() => {
+    const before = JSON.stringify(Object.values(M.nodes).map(n => [n.id, Math.round(n.x), Math.round(n.y)]));
+    readScene(api.getSceneElements());
+    const after = JSON.stringify(Object.values(M.nodes).map(n => [n.id, Math.round(n.x), Math.round(n.y)]));
+    if (before !== after) commit(selectedNodes()[0]);
+  }, 30);
+}, true);
+
+/* A new node born past the edge of the screen gets the camera brought to it
+   — only when it is actually off-screen, so typing a list never jitters. */
+function ensureVisible(id) {
+  const el = api.getSceneElements().find(x => x.id === id);
+  if (!el) return;
+  const st = api.getAppState(), z = st.zoom.value, pad = 60;
+  const x1 = (el.x + st.scrollX) * z, y1 = (el.y + st.scrollY) * z;
+  const x2 = x1 + el.width * z, y2 = y1 + el.height * z;
+  if (x1 < pad || y1 < pad || x2 > st.width - pad || y2 > st.height - pad - 70) {
+    api.scrollToContent(el, { animate: true, duration: 260 });
+  }
+}
+
+/* ── the title editor ────────────────────────────────────────────────── */
+const editor = document.getElementById("gbEdit");
+let editing = null, fresh = false;
+function openEditor(id, isNew) {
+  if (!M.nodes[id]) return;
+  editing = id; fresh = isNew;
+  editor.value = M.nodes[id].title;
+  placeEditor(id);
+  editor.hidden = false;
+  editor.focus(); editor.select();
+}
+/* Position from the scene element when it exists, else from the model —
+   right after a commit the element may not be readable yet, and waiting a
+   frame is exactly what used to swallow the first typed characters. */
+function placeEditor(id) {
+  const n = M.nodes[id]; if (!n || editing !== id) return;
+  const el = api.getSceneElements().find(x => x.id === id);
+  const sz = sizeOf(n);
+  const r = el ? { x: el.x, y: el.y, w: el.width, h: el.height } : { x: n.x - sz.w / 2, y: n.y - sz.h / 2, w: sz.w, h: sz.h };
+  const st = api.getAppState(), z = st.zoom.value;
+  const w = Math.max(r.w * z, 140), hgt = Math.max(r.h * z, 40);
+  Object.assign(editor.style, {
+    left: ((r.x + r.w / 2 + st.scrollX) * z + st.offsetLeft - w / 2) + "px",
+    top: ((r.y + r.h / 2 + st.scrollY) * z + st.offsetTop - hgt / 2) + "px",
+    width: w + "px", height: hgt + "px", fontSize: Math.max(14, 18 * z) + "px",
+  });
+}
+function closeEditor(keep) {
+  if (!editing) return;
+  const id = editing, n = M.nodes[id], v = editor.value.trim();
+  editor.hidden = true; editing = null;
+  if (!n) return;
+  if (!v && fresh) { delete M.nodes[id]; commit(n.parent); return id; }
+  if (keep) n.title = v;
+  commit(id);
+  return id;
+}
+/* Excalidraw claims Enter at the window (it opens text editing on the
+   selected shape), so a keydown listener on the input itself never saw it —
+   typing a title and pressing Enter merged the next title into the same
+   node. A window capture listener registered before Excalidraw mounts runs
+   first; it owns the editor's keys and stops them from going any further. */
+addEventListener("keydown", e => {
+  if (editor.hidden || document.activeElement !== editor || e.isComposing) return;
+  const isEnter = e.key === "Enter" || e.code === "Enter" || e.code === "NumpadEnter" || e.keyCode === 13;
+  if (!isEnter && e.key !== "Tab" && e.key !== "Escape") return;
+  if (isEnter && e.key !== "Enter") Object.defineProperty(e, "key", { value: "Enter" });
+  e.stopImmediatePropagation();
+  editorKey(e);
+}, true);
+function editorKey(e) {
+  if (e.key === "Enter") {
+    e.preventDefault(); e.stopPropagation();
+    const id = editing, n = M.nodes[id], hadText = !!editor.value.trim();
+    closeEditor(true);
+    if (hadText && n) n.parent ? addNode(n.parent, id) : addNode(id);    /* Enter = next sibling, like XMind */
+  } else if (e.key === "Tab") {
+    e.preventDefault(); e.stopPropagation();
+    const id = editing, hadText = !!editor.value.trim();
+    closeEditor(true);
+    if (hadText && M.nodes[id]) addNode(id);                             /* Tab = child of what you just typed */
+  } else if (e.key === "Escape") {
+    e.preventDefault(); e.stopPropagation(); closeEditor(true);
+  }
+}
+/* Close on a real press outside the box, never on blur: Enter/Tab close
+   this box and open the next one in the same tick, and the late blur from
+   the first used to close — and, being empty, delete — the second. */
+addEventListener("pointerdown", e => {
+  if (!editor.hidden && e.target !== editor) closeEditor(true);
+}, true);
+
+/* ── frost control ───────────────────────────────────────────────────── */
+function setFrost(t) {
+  document.documentElement.style.setProperty("--gb-t", String(t));
+  document.querySelectorAll(".gb-seg").forEach(b =>
+    b.setAttribute("aria-pressed", String(Math.abs(parseFloat(b.dataset.frost) - t) < 0.001)));
+  try { localStorage.setItem("gb-frost", String(t)); } catch (_) {}
+}
+document.querySelectorAll(".gb-seg").forEach(b => b.addEventListener("click", () => setFrost(parseFloat(b.dataset.frost))));
+try { const f = localStorage.getItem("gb-frost"); if (f !== null) setFrost(parseFloat(f)); } catch (_) {}
+
+function toast(msg) {
+  if (api) api.setToast({ message: msg, duration: 2200 });
+}
+
+/* ── persistence ─────────────────────────────────────────────────────── */
+function load() {
+  try { const s = JSON.parse(localStorage.getItem(STORE) || "null"); if (s && Array.isArray(s.elements)) return s; } catch (_) {}
+  return { elements: [], files: {} };
+}
+let saveT = 0;
+function save(elements, files) {
+  clearTimeout(saveT);
+  saveT = setTimeout(() => {
+    try { localStorage.setItem(STORE, JSON.stringify({ elements: elements.filter(e => !e.isDeleted), files })); } catch (_) {}
+  }, 400);
+}
+
+/* ── mount ───────────────────────────────────────────────────────────── */
+const initial = load();
+function App() {
+  return h(Excalidraw, {
+    excalidrawAPI: a => {
+      if (api) return;
+      api = a;
+      window.__gb = { api, M, commit };
+    },
+    initialData: {
+      elements: initial.elements, files: initial.files,
+      appState: { viewBackgroundColor: "transparent", currentItemFontFamily: 2, currentItemRoughness: 0,
+                  currentItemStrokeColor: INK, gridSize: null },
+      scrollToContent: true,
+    },
+    onChange: (elements, st, files) => {
+      /* Excalidraw applies initialData asynchronously after the API callback
+         fires, so anything committed from that callback is overwritten by the
+         saved scene a moment later. The first onChange is the first moment
+         the scene is really ours: read the map out of it, or plant a root. */
+      if (!booted && api) {
+        booted = true;
+        readScene(elements);
+        if (!M.rootId) {
+          M.nodes.root = { id: "root", parent: null, kind: "concept", order: 0, title: "נושא מרכזי", x: 0, y: 0, pinned: true };
+          M.rootId = "root";
+          commit("root");
+          setTimeout(() => api.scrollToContent(undefined, { fitToViewport: false, animate: false }), 80);
+        }
+        return;
+      }
+      save(elements, files);
+      if (committing || editing) return;
+      const known = new Set(Object.keys(M.nodes));
+      const gm = elements.filter(e => !e.isDeleted && e.customData && e.customData.gm && e.customData.gm.id);
+      const changed = gm.length !== known.size || gm.some(e => !known.has(e.customData.gm.id));
+      if (changed) readScene(elements);
+    },
+    langCode: "he-IL",
+    UIOptions: { canvasActions: { changeViewBackgroundColor: false, toggleTheme: false, loadScene: true, saveToActiveFile: false } },
+  });
+}
+createRoot(document.getElementById("app")).render(h(App));
+</script>
