@@ -198,13 +198,43 @@ function skeletons() {
   return out;
 }
 
+/* Render the model into the scene as ONE undoable step.
+   Excalidraw never removes an element — it tombstones it (isDeleted) — and
+   its history diffs element versions. The first version of this function
+   dropped removed nodes from the array and gave every label a fresh random
+   id on each render, so the undo button was live but a deleted branch could
+   never come back. Now: removed map elements become tombstones, labels keep
+   a stable id per node ("t_<node>"), and every re-rendered element's version
+   moves forward past the one already in the scene. */
+const nonce = () => Math.floor(Math.random() * 2 ** 31);
 function commit(selectId) {
   if (!api) return;
   committing = true;
-  const others = api.getSceneElements().filter(e => !(e.customData && e.customData.gm) && !isGmLabel(e));
-  const mm = convertToExcalidrawElements(skeletons(), { regenerateIds: false });
+  const prev = api.getSceneElementsIncludingDeleted();
+  const prevById = new Map(prev.map(e => [e.id, e]));
+  const isMapEl = e => !!(e.customData && e.customData.gm) ||
+    (e.type === "text" && !!e.containerId && !!(prevById.get(e.containerId) || {}).customData?.gm);
+  const others = prev.filter(e => !isMapEl(e));
+
+  let mm = convertToExcalidrawElements(skeletons(), { regenerateIds: false });
+  const relabel = new Map();
+  mm = mm.map(e => {
+    if (e.type !== "text" || !e.containerId) return e;
+    const id = "t_" + e.containerId; relabel.set(e.id, id); return { ...e, id };
+  });
+  mm = mm.map(e => e.boundElements
+    ? { ...e, boundElements: e.boundElements.map(b => relabel.has(b.id) ? { ...b, id: relabel.get(b.id) } : b) }
+    : e);
+  const nextIds = new Set(mm.map(e => e.id));
+  mm = mm.map(e => {
+    const old = prevById.get(e.id);
+    return old ? { ...e, isDeleted: false, version: Math.max(e.version || 1, old.version + 1), versionNonce: nonce() } : e;
+  });
+  const tombs = prev.filter(e => isMapEl(e) && !nextIds.has(e.id))
+    .map(e => e.isDeleted ? e : { ...e, isDeleted: true, version: e.version + 1, versionNonce: nonce() });
+
   api.updateScene({
-    elements: [...others, ...mm],
+    elements: [...others, ...mm, ...tombs],
     appState: selectId ? { selectedElementIds: { [selectId]: true } } : undefined,
     captureUpdate: CaptureUpdateAction.IMMEDIATELY,
   });
@@ -307,10 +337,17 @@ addEventListener("keydown", e => {
 addEventListener("pointerup", () => {
   if (!api) return;
   setTimeout(() => {
-    const before = JSON.stringify(Object.values(M.nodes).map(n => [n.id, Math.round(n.x), Math.round(n.y)]));
+    /* Re-tidy only when a node that already existed was dragged. Nodes that
+       merely appeared or vanished (Undo / Redo buttons, paste) are read into
+       the model without a commit — committing there would push a new history
+       entry and wipe the redo stack the user just created. */
+    const before = new Map(Object.values(M.nodes).map(n => [n.id, [Math.round(n.x), Math.round(n.y)]]));
     readScene(api.getSceneElements());
-    const after = JSON.stringify(Object.values(M.nodes).map(n => [n.id, Math.round(n.x), Math.round(n.y)]));
-    if (before !== after) commit(selectedNodes()[0]);
+    const moved = Object.values(M.nodes).some(n => {
+      const b = before.get(n.id);
+      return b && (b[0] !== Math.round(n.x) || b[1] !== Math.round(n.y));
+    });
+    if (moved) commit(selectedNodes()[0]);
   }, 30);
 }, true);
 
