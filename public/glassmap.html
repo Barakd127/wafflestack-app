@@ -600,7 +600,14 @@ input,textarea{background:none;border:0;outline:none;}
    layers; their own position/inset from the base stylesheet is untouched —
    an earlier attempt set position:relative here and knocked the rail, hint
    and legend out of their corners. */
-.world,.gm-wires{z-index:3;}
+.world{z-index:3;}
+/* Inside the map plane: lines at the bottom, relation labels above the lines,
+   cards above both, and the selected card above its neighbours. The lines
+   used to share the plane's z-index and so painted across the cards. */
+.world > .gm-wires{z-index:0;}
+.world .gm-rellabel{z-index:2 !important;}
+.world > .gm-node{z-index:4;}
+.world > .gm-node.sel,.world > .gm-node:hover,.world > .gm-node:focus-within{z-index:6;}
 .mapwrap > .gm-crumbs,.mapwrap > .gm-find,.mapwrap > .mapctl,.mapwrap > .gm-legend,
 .mapwrap > .gm-hint,.mapwrap > .mbar,.mapwrap > .gm-peektip{z-index:8;}
 @media (prefers-reduced-motion:reduce){ .gm-frost{backdrop-filter:none;-webkit-backdrop-filter:none;} }
@@ -1387,7 +1394,7 @@ function mapWorld() {
       (accent ? '<span class="gm-stripe" aria-hidden="true"></span>' : '') +
       '<span class="gm-ttl gm-bidi" dir="auto">' +
         (glyph ? '<span class="gm-glyph gm-swatch gm-swatch-' + kind + '" aria-hidden="true">' + glyph + '</span>' : '') +
-        esc(node.title) + '</span>' +
+        (typeof window.titleHTML === 'function' ? window.titleHTML(node.title) : esc(node.title)) + '</span>' +
       (node.bridge != null ? '<div class="gm-bridge gm-bidi' + (bridgeEditing ? ' force' : '') + '" data-bridge="' + node.id + '">' +
         '<span aria-hidden="true">🪙</span><span class="gm-bridge-txt" dir="auto">' + esc(node.bridge) + '</span></div>' : '') +
       '<div class="gm-meta">' +
@@ -1417,8 +1424,8 @@ function renderMap() {
   el('#world').innerHTML = world;
   var findOn = !el('#findBar').hidden;
   el('#gmHint').innerHTML = findOn ? '' :
-    '<b>Tab</b> תת-נושא &middot; <b>Enter</b> אח אחריך &middot; <b>Ctrl+L</b> קשר &middot; <b>?</b> עזרה' +
-    ' &nbsp;·&nbsp; <b>Tab</b> child &middot; <b>Enter</b> sibling &middot; <b>Ctrl+L</b> relate &middot; <b>?</b> help';
+    '<b>Tab</b> תת-נושא &middot; <b>Enter</b> אח אחריך &middot; <b>Shift+L</b> קשר &middot; <b>Alt+=</b> משוואה &middot; <b>?</b> עזרה' +
+    ' &nbsp;·&nbsp; <b>Tab</b> child &middot; <b>Enter</b> sibling &middot; <b>Shift+L</b> relate &middot; <b>Alt+=</b> equation &middot; <b>?</b> help';
   el('#mapwrap').dataset.layer = S.layer;
   renderMapctl();
 }
@@ -1433,6 +1440,9 @@ function renderMapctl() {
       ' title="שכבה (L) — links/cards layer" aria-label="Toggle layer"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.18-9.17 4.17a2 2 0 0 1-1.66 0L2 12.18"/><path d="m22 17.18-9.17 4.17a2 2 0 0 1-1.66 0L2 17.18"/></svg></button>' +
     '<button class="gm-btn icon' + (UI.lens ? ' on' : '') + '" id="lensBtn" aria-pressed="' + !!UI.lens + '"' +
       ' title="עדשת מיקוד — focus lens" aria-label="Toggle the focus lens"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg></button>' +
+    '<button class="gm-btn icon' + (UI.relFrom ? ' on' : '') + '" id="relBtn" aria-pressed="' + !!UI.relFrom + '"' +
+      ' title="קשר בין נושאים (Shift+L) — relate two nodes" aria-label="Relate two nodes"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><path d="M8 12h8"/></svg></button>' +
+    '<button class="gm-btn icon" id="eqBtn" title="משוואה (Alt+=) — equation" aria-label="Insert an equation"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 7V4H6l6 8-6 8h12v-3"/></svg></button>' +
     '<button class="gm-btn icon" id="helpBtn" title="עזרה (?) — shortcuts" aria-label="Shortcuts help"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>';
 }
 </script>
@@ -1898,7 +1908,8 @@ function toggleCollapse() {
    nothing selected — they fall back to the root). */
 function inField() {
   var a = document.activeElement;
-  return a && (a.isContentEditable || a.tagName === 'INPUT' || a.tagName === 'TEXTAREA');
+  return a && (a.isContentEditable || a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' ||
+    a.tagName === 'MATH-FIELD' || !!(a.closest && a.closest('#eqPanel')));
 }
 function mapKeys(ev) {
   if (inField()) return;
@@ -1920,6 +1931,7 @@ function mapKeys(ev) {
   /* A3 jump history: Alt+← / Alt+→, ahead of everything else so no other
      binding can shadow it (there is no unmodified use of these arrows). */
   if (ev.altKey && !ev.ctrlKey && !ev.metaKey) {
+    if (ev.key === '=' || ev.code === 'Equal') { ev.preventDefault(); if (typeof window.openEquation === 'function') window.openEquation(); return; }
     if (ev.key === 'ArrowLeft') { ev.preventDefault(); historyBack(); return; }
     if (ev.key === 'ArrowRight') { ev.preventDefault(); historyForward(); return; }
     return;
@@ -1956,6 +1968,12 @@ function mapKeys(ev) {
   if (ev.key === '?') { ev.preventDefault(); toggleHelp(); return; }
   if (ev.key === 'z' || ev.key === 'Z') { ev.preventDefault(); onKeyZ(); return; }         /* A2 */
   if (ev.key === 'Home') { ev.preventDefault(); goHome(); return; }                        /* A1 preset */
+  /* Shift+L starts a relation. Ctrl+L, the original binding, is the browser's
+     "focus the address bar" key: in Chrome/Edge the page never receives it,
+     so relations were unreachable from the keyboard on the web. Ctrl+L is
+     kept for Obsidian, which has no address bar. Plain L still flips the
+     links/cards layer. */
+  if (ev.key === 'L' && ev.shiftKey) { ev.preventDefault(); if (UI.relFrom) cancelRelation(); else startRelation(); return; }
   if (ev.key === 'l' || ev.key === 'L') { ev.preventDefault(); toggleLayer(); return; }
   if (ev.key === 'k') { ev.preventDefault(); cycleKind(1); return; }                       /* A4 */
   if (ev.key === 'K') { ev.preventDefault(); cycleKind(-1); return; }                       /* A4 Shift+K */
@@ -3105,7 +3123,8 @@ var SHORTCUTS = [
   ['Shift+חצים', 'הרחב את קבוצת הסימון', 'Extend the marked set'],
   ['Ctrl+/', 'קפל / הרחב את הענף הנבחר', 'Collapse / expand selected subtree'],
   ['Ctrl+D', 'שכפל את הבחירה (וענפיה)', 'Duplicate selected node (+subtree)'],
-  ['Ctrl+L', 'התחל קשר מהבחירה', 'Start a relation from the selection'],
+  ['Shift+L', 'התחל קשר מהבחירה', 'Start a relation from the selection'],
+  ['Alt+=', 'עורך משוואות לנושא הנבחר, כמו ב-Word', 'Equation editor for the selected node, like Word'],
   ['L', 'החלף שכבה: קשרים / כרטיסים', 'Toggle layer: links / cards'],
   ['A', 'סמן ענף שלם', 'Mark whole branch'],
   ['Ctrl+A', 'סמן הכל', 'Mark all'],
@@ -3329,11 +3348,22 @@ document.addEventListener('click', function (ev) {
   }
   if (ev.target.closest('#layerBtn')) { toggleLayer(); return; }
   if (ev.target.closest('#lensBtn')) { UI.lens = !UI.lens; render(); return; }
+  if (ev.target.closest('#relBtn')) { if (UI.relFrom) cancelRelation(); else startRelation(); render(); return; }
+  if (ev.target.closest('#eqBtn')) { if (typeof window.openEquation === 'function') window.openEquation(); return; }
   if (ev.target.closest('#helpBtn')) { toggleHelp(); return; }
   if (ev.target.closest('[data-close-help]') || ev.target.closest('#helpOverlay') === el('#helpOverlay') && ev.target.id === 'helpOverlay') { toggleHelp(); return; }
   /* The +N badge on a folded node is a button: a click folds / unfolds that
      node (Ctrl+/ does the same from the keyboard). Handled before any other
      node click so it never turns into a rename or a drag. */
+  /* A click on an equation inside a title reopens it in the editor. */
+  if ((n = ev.target.closest('.gm-node .gm-eq'))) {
+    var eqHost = n.closest('.gm-node[data-node]');
+    if (eqHost && typeof window.openEquation === 'function') {
+      selNode(eqHost.dataset.node, { quiet: true });
+      window.openEquation(eqHost.dataset.node, +n.dataset.eqIndex);
+    }
+    return;
+  }
   if ((n = ev.target.closest('.gm-badge'))) {
     var host = n.closest('.gm-node[data-node]');
     if (host) { selNode(host.dataset.node, { quiet: true }); toggleCollapse(); }
@@ -3496,5 +3526,325 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       if (typeof renderCrumbs === 'function') renderCrumbs();
     }
   });
+})();
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   Equations — a Word-style equation editor on the glass map.
+
+   Equations live inside a node's title as $...$ (the same notation Obsidian
+   renders, so the Markdown export keeps them). The editor is MathLive, the
+   library the WaffleStack keyboard is built on: typing / makes a fraction,
+   ^ a power, _ a subscript, sqrt a root — like Word. Its virtual keyboard
+   carries a וופלסטאק tab with every formula from formula-library.json (the
+   same library as the app's keyboard), next to the standard number and
+   symbol tabs. MathLive loads from the CDN only when a map has equations or
+   the editor is opened.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  var ML_URL = 'https://cdn.jsdelivr.net/npm/mathlive@0.105.3/mathlive.min.mjs';
+  var ML_CSS = 'https://cdn.jsdelivr.net/npm/mathlive@0.105.3/mathlive-static.css';
+  var ML = null, loading = null;
+
+  function loadMathLive() {
+    if (ML) return Promise.resolve(ML);
+    if (loading) return loading;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet'; link.href = ML_CSS;
+    document.head.appendChild(link);
+    loading = import(ML_URL).then(function (m) {
+      ML = m;
+      try { m.MathfieldElement.soundsDirectory = null; } catch (_) {}
+      return m;
+    }, function (err) { loading = null; throw err; });
+    return loading;
+  }
+
+  /* ── titles: $...$ becomes rendered math ───────────────────────────── */
+  var EQ_RE = /\$([^$]+)\$/g;
+  function markup(latex) {
+    try { return ML.convertLatexToMarkup(latex); } catch (_) { return esc('$' + latex + '$'); }
+  }
+  window.titleHTML = function (title) {
+    var t = String(title == null ? '' : title);
+    if (t.indexOf('$') < 0) return esc(t);
+    var out = '', last = 0, idx = 0, m;
+    EQ_RE.lastIndex = 0;
+    while ((m = EQ_RE.exec(t))) {
+      out += esc(t.slice(last, m.index));
+      out += '<span class="gm-eq" dir="ltr" data-eq-index="' + idx + '" title="לחיצה לעריכה — click to edit">' +
+        (ML ? markup(m[1]) : esc(m[0])) + '</span>';
+      idx++; last = m.index + m[0].length;
+    }
+    return out + esc(t.slice(last));
+  };
+  function eqAt(title, index) {
+    var m, i = 0; EQ_RE.lastIndex = 0;
+    while ((m = EQ_RE.exec(title))) { if (i++ === index) return m[1]; }
+    return '';
+  }
+  function replaceEq(title, index, latex) {
+    var i = 0;
+    return title.replace(EQ_RE, function (whole) { return (i++ === index) ? '$' + latex + '$' : whole; });
+  }
+
+  /* ── styles ────────────────────────────────────────────────────────── */
+  var css = document.createElement('style');
+  css.textContent =
+    '.gm-eq{display:inline-block;unicode-bidi:isolate;cursor:pointer;border-radius:5px;padding:0 3px;vertical-align:middle;}' +
+    '.gm-eq:hover{background:rgba(212,175,55,.16);}' +
+    '.gm-eq-panel{position:fixed;z-index:40;width:min(460px,calc(100vw - 24px));padding:12px;border-radius:16px;' +
+      'display:flex;flex-direction:column;gap:10px;box-sizing:border-box;}' +
+    '.gm-eq-panel[hidden]{display:none;}' +
+    '.gm-eq-head{display:flex;flex-direction:column;gap:2px;}' +
+    '.gm-eq-title{font-weight:700;font-size:14px;color:var(--sh-text-dark);}' +
+    '.gm-eq-sub{font-size:11.5px;color:var(--sh-text-med);}' +
+    '.gm-eq-field math-field{display:block;width:100%;min-height:56px;font-size:24px;padding:8px 10px;box-sizing:border-box;' +
+      'border-radius:12px;background:rgba(255,255,255,.94);border:1px solid rgba(31,62,108,.18);color:#1F3E6C;}' +
+    '.gm-eq-field math-field:focus-within{outline:2px solid var(--gm-gold);outline-offset:1px;}' +
+    '.gm-eq-loading{display:block;padding:14px;font-size:12px;color:var(--sh-text-med);}' +
+    '.gm-eq-actions{display:flex;align-items:center;gap:6px;}' +
+    '.gm-eq-spacer{flex:1 1 auto;}' +
+    '.gm-eq-open .gm-legend,.gm-eq-open .gm-hint{visibility:hidden;}' +
+    /* MathLive's keyboard reads its colours from CSS variables on the page;
+       defaults follow the OS theme (a black keyboard over a light map).
+       These give it the WaffleStack light blue, navy ink and a gold tab. */
+    'body{--keyboard-background:rgba(234,242,255,.97);--keyboard-border:rgba(31,62,108,.14);' +
+      '--keyboard-toolbar-text:#465CA5;--keyboard-toolbar-text-active:#1F3E6C;' +
+      '--keyboard-toolbar-background-hover:rgba(31,62,108,.06);--keyboard-toolbar-background-selected:rgba(212,175,55,.2);' +
+      '--keyboard-accent-color:#D4AF37;--keyboard-horizontal-rule:rgba(31,62,108,.12);' +
+      '--keycap-background:#ffffff;--keycap-background-hover:#f1f6ff;--keycap-background-active:#e6eefc;' +
+      '--keycap-border:rgba(31,62,108,.14);--keycap-border-bottom:rgba(31,62,108,.28);--keycap-text:#1F3E6C;' +
+      '--keycap-secondary-background:#dfe9fb;--keycap-secondary-background-hover:#d3e2fa;--keycap-secondary-text:#1F3E6C;}' +
+    ':root[data-theme="dark"] body{--keyboard-background:rgba(11,27,62,.97);--keyboard-border:rgba(255,255,255,.12);' +
+      '--keyboard-toolbar-text:#B8C6EA;--keyboard-toolbar-text-active:#EAF2FF;--keyboard-horizontal-rule:rgba(255,255,255,.1);' +
+      '--keycap-background:rgba(255,255,255,.10);--keycap-background-hover:rgba(255,255,255,.16);--keycap-background-active:rgba(255,255,255,.2);' +
+      '--keycap-border:rgba(255,255,255,.14);--keycap-border-bottom:rgba(0,0,0,.35);--keycap-text:#EAF2FF;' +
+      '--keycap-secondary-background:rgba(255,255,255,.06);--keycap-secondary-text:#EAF2FF;}' +
+    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body{--keyboard-background:rgba(11,27,62,.97);' +
+      '--keyboard-toolbar-text:#B8C6EA;--keyboard-toolbar-text-active:#EAF2FF;--keycap-background:rgba(255,255,255,.10);' +
+      '--keycap-border:rgba(255,255,255,.14);--keycap-text:#EAF2FF;--keycap-secondary-background:rgba(255,255,255,.06);--keycap-secondary-text:#EAF2FF;}}' +
+    /* Hebrew category names were clipped at both ends inside the LTR keyboard */
+    '.ML__keyboard .gm-kb-sep{direction:rtl;unicode-bidi:plaintext;white-space:nowrap;overflow:visible;' +
+      'font-family:Heebo,system-ui,sans-serif;font-weight:600;font-size:13px;color:#465CA5;}' +
+    ':root[data-theme="dark"] .ML__keyboard .gm-kb-sep{color:#B8C6EA;}';
+  document.head.appendChild(css);
+
+  /* ── the panel ─────────────────────────────────────────────────────── */
+  function ic(p) {
+    return '<svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+  }
+  var panel = document.createElement('div');
+  panel.id = 'eqPanel';
+  panel.className = 'gm-eq-panel gm-glass';
+  panel.setAttribute('data-float', 'eq');
+  panel.setAttribute('data-chrome', '1');
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-label', 'עורך משוואות');
+  panel.hidden = true;
+  panel.innerHTML =
+    '<div class="gm-eq-head"><span class="gm-eq-title">משוואה</span>' +
+    '<span class="gm-eq-sub">הקלדה כמו ב-Word: הקו / יוצר שבר, ^ חזקה, _ אינדקס, sqrt שורש</span></div>' +
+    '<div class="gm-eq-field" id="eqFieldWrap"><span class="gm-eq-loading">טוען את עורך המשוואות…</span></div>' +
+    '<div class="gm-eq-actions">' +
+      '<button class="gm-btn icon" id="eqKbd" title="מקלדת הנוסחאות של וופלסטאק — formula keyboard" aria-label="Formula keyboard">' +
+        ic('<rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/>') + '</button>' +
+      '<span class="gm-eq-spacer"></span>' +
+      '<button class="gm-btn" id="eqCancel" title="ביטול (Esc) — cancel">' + ic('<path d="M18 6 6 18M6 6l12 12"/>') + '<span>ביטול</span></button>' +
+      '<button class="gm-btn on" id="eqInsert" title="הכנס (Enter) — insert">' + ic('<path d="M9 10 4 15l5 5"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/>') + '<span>הכנס</span></button>' +
+    '</div>';
+  document.body.appendChild(panel);
+
+  var EQ = { node: null, index: -1 };
+  function field() { return panel.querySelector('math-field'); }
+
+  function place(id) {
+    var host = document.querySelector('.gm-node[data-node="' + id + '"]');
+    var w = panel.offsetWidth || 460, h = panel.offsetHeight || 180;
+    var r = host ? host.getBoundingClientRect() : { left: innerWidth / 2, right: innerWidth / 2, top: innerHeight / 3, bottom: innerHeight / 3, width: 0 };
+    var left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 12));
+    var top = r.bottom + 10;
+    if (top + h > innerHeight - 12) top = r.top - h - 10;
+    top = Math.max(64, Math.min(top, innerHeight - h - 12));
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+  }
+
+  function openEquation(nodeId, eqIndex) {
+    var id = nodeId || UI.sel, node = id && N(id);
+    if (!node) { toast('בחר נושא קודם — select a node first'); return; }
+    EQ.node = id;
+    EQ.index = typeof eqIndex === 'number' && eqIndex >= 0 ? eqIndex : -1;
+    var existing = EQ.index >= 0 ? eqAt(node.title || '', EQ.index) : '';
+    panel.hidden = false;
+    document.querySelector('.gm-app') && document.querySelector('.gm-app').classList.add('gm-eq-open');
+    place(id);
+    loadMathLive().then(function (m) {
+      var mf = field();
+      if (!mf) {
+        var wrap = document.getElementById('eqFieldWrap');
+        wrap.innerHTML = '';
+        mf = new m.MathfieldElement();
+        mf.setAttribute('math-virtual-keyboard-policy', 'manual');
+        mf.smartFence = true;
+        mf.smartSuperscript = true;
+        wrap.appendChild(mf);
+        /* capture on the host runs before MathLive's own handlers inside
+           its shadow DOM, so Enter inserts instead of being swallowed */
+        mf.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); e.stopPropagation(); insertEquation(); }
+          else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeEquation(); }
+        }, true);
+      }
+      mf.value = existing;
+      registerKeyboard();
+      place(id);
+      mf.focus();
+    }, function () {
+      document.getElementById('eqFieldWrap').innerHTML =
+        '<span class="gm-eq-loading">עורך המשוואות לא נטען — צריך חיבור לאינטרנט</span>';
+    });
+  }
+
+  function closeEquation() {
+    if (panel.hidden) return;
+    panel.hidden = true;
+    document.querySelector('.gm-app') && document.querySelector('.gm-app').classList.remove('gm-eq-open');
+    try { if (window.mathVirtualKeyboard && window.mathVirtualKeyboard.visible) window.mathVirtualKeyboard.hide(); } catch (_) {}
+    EQ.node = null; EQ.index = -1;
+    var wrap = document.getElementById('mapwrap');
+    if (wrap) wrap.focus();
+  }
+
+  function insertEquation() {
+    var mf = field(), node = EQ.node && N(EQ.node);
+    if (!mf || !node) { closeEquation(); return; }
+    var latex = String(mf.getValue ? mf.getValue('latex') : mf.value || '').trim();
+    if (!latex) { closeEquation(); return; }
+    var title = node.title || '';
+    node.title = EQ.index >= 0 ? replaceEq(title, EQ.index, latex)
+                               : (title ? title.replace(/\s+$/, '') + ' ' : '') + '$' + latex + '$';
+    closeEquation();
+    save(); render();
+  }
+
+  /* ── the WaffleStack formula keyboard ──────────────────────────────── */
+  var kbDone = false, kbLoading = false;
+  function chip(f) {
+    var eq = f.latex.indexOf('=');
+    var short = f.shortLabel || (eq === -1 ? f.latex : f.latex.slice(0, eq).trim());
+    return { latex: short, insert: f.latex, class: 'small', tooltip: f.label + (f.desc ? ' — ' + f.desc : ''), width: 2 };
+  }
+  /* An embedded copy of the formula library (public/formula-library.json at
+     the time of writing). The live file wins when it can be fetched; inside
+     Obsidian the map runs as inline HTML with no folder to fetch from, so
+     this copy keeps the keyboard full there. */
+  var FORMULA_INLINE = [{"id":"center","label":"תיאורית — מדדי מרכז","formulas":[{"id":"mean_raw","label":"ממוצע (גולמי)","latex":"\\bar{x}=\\frac{\\sum x_i}{n}","desc":"ממוצע אריתמטי","slots":[{"key":"sum","label":"Σx","placeholder":"60+70+80","sym":"\\sum x_i"},{"key":"n","label":"n","placeholder":"3","sym":"n"}],"hasEval":true,"topics":["mean","weighted-combined"],"courseId":"stat-a"},{"id":"mean_freq","label":"ממוצע (טבלת שכיחויות)","latex":"\\bar{x}=\\frac{\\sum x_i f(x_i)}{n}","desc":"ממוצע משוקלל","slots":[{"key":"sumxf","label":"Σx·f(x)","sym":"\\sum x_i f(x_i)"},{"key":"n","label":"n","sym":"n"}],"hasEval":true,"topics":["mean","weighted-combined"],"courseId":"stat-a"},{"id":"grand_mean","label":"ממוצע כללי","latex":"\\bar{\\bar{x}}=\\frac{\\sum_j \\bar{x}_j n_j}{N}","desc":"ממוצע משולב בין קבוצות","slots":[{"key":"sumxn","label":"Σ x̄ⱼ·nⱼ","sym":"\\sum_j \\bar{x}_j n_j"},{"key":"N","label":"N","sym":"N"}],"hasEval":true,"topics":["weighted-combined"],"courseId":"stat-a"},{"id":"midrange","label":"אמצע טווח","latex":"MR=\\frac{x_{max}+x_{min}}{2}","desc":"ממוצע הקצוות","slots":[{"key":"max","label":"xₘₐₓ","sym":"x_{max}"},{"key":"min","label":"xₘᵢₙ","sym":"x_{min}"}],"hasEval":true,"topics":["mean","std-dev"],"courseId":"stat-a"}]},{"id":"dispersion","label":"תיאורית — מדדי פיזור","formulas":[{"id":"var_raw","label":"שונות (גולמי)","latex":"s^2=\\frac{\\sum(x_i-\\bar{x})^2}{n}=\\frac{\\sum x_i^2}{n}-\\bar{x}^2","desc":"שונות אוכלוסיה","slots":[{"key":"sumx2","label":"Σx²","sym":"\\sum x_i^2"},{"key":"n","label":"n","sym":"n"},{"key":"mean","label":"x̄","sym":"\\bar{x}"}],"hasEval":true,"topics":["std-dev","observation-changes"],"courseId":"stat-a"},{"id":"var_freq","label":"שונות (שכיחויות)","latex":"s^2=\\frac{\\sum x_i^2 f(x_i)}{n}-\\bar{x}^2","desc":"שונות מטבלת שכיחויות","slots":[{"key":"sumx2f","label":"Σx²·f(x)","sym":"\\sum x_i^2 f(x_i)"},{"key":"n","label":"n","sym":"n"},{"key":"mean","label":"x̄","sym":"\\bar{x}"}],"hasEval":true,"topics":["std-dev"],"courseId":"stat-a"},{"id":"std","label":"סטיית תקן","latex":"s=\\sqrt{s^2}","desc":"סטיית תקן","slots":[{"key":"var","label":"s²","sym":"s^2"}],"hasEval":true,"topics":["std-dev","observation-changes"],"courseId":"stat-a"},{"id":"pooled_var","label":"שונות משולבת","latex":"s_c^2=\\frac{\\sum n_j s_j^2}{N}+\\frac{\\sum n_j(\\bar{x}_j-\\bar{\\bar{x}})^2}{N}","desc":"שונות בתוך + בין קבוצות","slots":[{"key":"within","label":"Σnⱼ·sⱼ²","sym":"\\sum n_j s_j^2"},{"key":"between","label":"Σnⱼ(x̄ⱼ-x̄̄)²","sym":"\\sum n_j(\\bar{x}_j-\\bar{\\bar{x}})^2"},{"key":"N","label":"N","sym":"N"}],"hasEval":true,"topics":["weighted-combined"],"courseId":"stat-a"}]},{"id":"transform","label":"טרנספורמציות לינאריות","formulas":[{"id":"tr_mean","label":"ממוצע אחרי טרנספורמציה","latex":"\\bar{x}'=b\\bar{x}+a","desc":"אם x'=bx+a","slots":[{"key":"b","label":"b","sym":"b"},{"key":"mean","label":"x̄","sym":"\\bar{x}"},{"key":"a","label":"a","sym":"a"}],"hasEval":true,"topics":["linear-transformations"],"courseId":"stat-a"},{"id":"tr_var","label":"שונות אחרי טרנספורמציה","latex":"s_{x'}^2=b^2 s_x^2","desc":"שונות מוכפלת ב-b²","slots":[{"key":"b","label":"b","sym":"b"},{"key":"var","label":"s²","sym":"s_x^2"}],"hasEval":true,"topics":["linear-transformations"],"courseId":"stat-a"},{"id":"tr_sd","label":"סטיית תקן אחרי טרנספורמציה","latex":"s_{x'}=|b|\\cdot s_x","desc":"SD מוכפלת ב-|b|","slots":[{"key":"b","label":"b","sym":"b"},{"key":"sd","label":"s","sym":"s_x"}],"hasEval":true,"topics":["linear-transformations"],"courseId":"stat-a"},{"id":"zscore","label":"ציון z","latex":"Z=\\frac{x-\\bar{x}}{s}","desc":"ציון תקני","slots":[{"key":"x","label":"x","sym":"x"},{"key":"mean","label":"x̄","sym":"\\bar{x}"},{"key":"s","label":"s","sym":"s"}],"hasEval":true,"topics":["std-dev","linear-transformations","percentiles"],"courseId":"stat-a"}]},{"id":"normal","label":"התפלגות נורמלית","formulas":[{"id":"norm_cdf","label":"CDF — Φ(z)","latex":"P(Z\\leq z)=\\Phi(z)","desc":"פונקציית התפלגות מצטברת","slots":[{"key":"z","label":"z","sym":"z"}],"hasEval":true,"topics":["percentiles"],"courseId":"stat-a"},{"id":"norm_right","label":"זנב ימני","latex":"P(Z>z)=1-\\Phi(z)","desc":"הסתברות זנב ימני","slots":[{"key":"z","label":"z","sym":"z"}],"hasEval":true,"topics":["percentiles"],"courseId":"stat-a"},{"id":"norm_interval","label":"הסתברות בתוך תחום","latex":"P(z_1<Z\\leq z_2)=\\Phi(z_2)-\\Phi(z_1)","desc":"בין שני ערכי z","slots":[{"key":"z1","label":"z₁","sym":"z_1"},{"key":"z2","label":"z₂","sym":"z_2"}],"hasEval":true,"topics":["percentiles"],"courseId":"stat-a"},{"id":"norm_pdf","label":"PDF — צפיפות","latex":"f(x)=\\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{1}{2}\\left(\\frac{x-\\mu}{\\sigma}\\right)^2}","desc":"פונקציית צפיפות נורמלית","slots":[{"key":"x","label":"x","sym":"x"},{"key":"mu","label":"μ","sym":"\\mu"},{"key":"sigma","label":"σ","sym":"\\sigma"}],"hasEval":true,"topics":["percentiles"],"courseId":"stat-a"}]},{"id":"correlation","label":"קורלציה","formulas":[{"id":"pearson","label":"מקדם Pearson","latex":"r=\\frac{\\mathrm{cov}(x,y)}{s_x\\cdot s_y}","desc":"קורלציה לינארית [-1,1]","slots":[{"key":"cov","label":"cov(x,y)","sym":"\\mathrm{cov}(x,y)"},{"key":"sx","label":"sₓ","sym":"s_x"},{"key":"sy","label":"s_y","sym":"s_y"}],"hasEval":true,"topics":["pearson","correlation"],"courseId":"stat-a"},{"id":"cov","label":"שונות משותפת","latex":"\\mathrm{cov}(x,y)=\\frac{\\sum x_i y_i}{n}-\\bar{x}\\bar{y}","desc":"שונות בין X ל-Y","slots":[{"key":"sumxy","label":"Σxᵢyᵢ","sym":"\\sum x_i y_i"},{"key":"n","label":"n","sym":"n"},{"key":"xbar","label":"x̄","sym":"\\bar{x}"},{"key":"ybar","label":"ȳ","sym":"\\bar{y}"}],"hasEval":true,"topics":["pearson","correlation"],"courseId":"stat-a"},{"id":"spearman","label":"מקדם Spearman","latex":"r_s=1-\\frac{6\\sum d_i^2}{n(n^2-1)}","desc":"קורלציה לפי דירוג","slots":[{"key":"sumd2","label":"Σdᵢ²","sym":"\\sum d_i^2"},{"key":"n","label":"n","sym":"n"}],"hasEval":true,"topics":["spearman"],"courseId":"stat-a"},{"id":"chi2","label":"χ² (חי בריבוע)","latex":"\\chi^2=\\sum\\frac{(O_i-E_i)^2}{E_i}","desc":"נצפה מול צפוי","slots":[{"key":"chi2","label":"Σ(O-E)²/E"}],"hasEval":true,"topics":["cramer"],"courseId":"stat-a"},{"id":"phi","label":"מקדם Phi","latex":"\\phi=\\sqrt{\\frac{\\chi^2}{n}}","desc":"קישור בטבלה 2×2","slots":[{"key":"chi2","label":"χ²"},{"key":"n","label":"n"}],"hasEval":true,"topics":["cramer"],"courseId":"stat-a"},{"id":"rc","label":"מקדם תיאום rᴄ","latex":"r_c=\\sqrt{\\frac{\\chi^2}{n(L-1)}}","desc":"L=min(שורות, עמודות)","slots":[{"key":"chi2","label":"χ²"},{"key":"n","label":"n"},{"key":"L","label":"L"}],"hasEval":true,"topics":["cramer"],"courseId":"stat-a"}]},{"id":"regression","label":"רגרסיה","formulas":[{"id":"reg_line","label":"קו הרגרסיה","latex":"\\tilde{y}=bx+a","desc":"חיזוי Y מתוך X","slots":[{"key":"b","label":"b"},{"key":"x","label":"x"},{"key":"a","label":"a"}],"hasEval":true,"topics":["regression"],"courseId":"stat-a"},{"id":"slope","label":"שיפוע b","latex":"b=\\frac{r\\cdot s_y}{s_x}","desc":"שיפוע רגרסיה Y על X","slots":[{"key":"r","label":"r"},{"key":"sy","label":"s_y"},{"key":"sx","label":"sₓ"}],"hasEval":true,"topics":["regression"],"courseId":"stat-a"},{"id":"intercept","label":"חיתוך a","latex":"a=\\bar{y}-b\\bar{x}","desc":"חיתוך רגרסיה","slots":[{"key":"ybar","label":"ȳ"},{"key":"b","label":"b"},{"key":"xbar","label":"x̄"}],"hasEval":true,"topics":["regression"],"courseId":"stat-a"},{"id":"r2","label":"R² — קביעה","latex":"r^2=\\frac{s_{\\tilde{y}}^2}{s_y^2}","desc":"אחוז השונות המוסבר","slots":[{"key":"syhat2","label":"s²(ỹ)"},{"key":"sy2","label":"s²(y)"}],"hasEval":true,"topics":["regression"],"courseId":"stat-a"},{"id":"var_decomp","label":"פירוק שונות","latex":"s_y^2=s_{\\tilde{y}}^2+s_{y-\\tilde{y}}^2","desc":"סה\"כ = מוסבר + שגיאה","slots":[{"key":"syhat2","label":"s²(ỹ)"},{"key":"serr2","label":"s²(y-ỹ)"}],"hasEval":true,"topics":["regression"],"courseId":"stat-a"}]},{"id":"combinatorics","label":"קומבינטוריקה","formulas":[{"id":"perm","label":"תמורות","latex":"(n)_k=\\frac{n!}{(n-k)!}","desc":"מסודר, ללא חזרות","slots":[{"key":"n","label":"n"},{"key":"k","label":"k"}],"hasEval":true,"topics":["combinatorics"],"courseId":"stat-a"},{"id":"comb","label":"צירופים","latex":"\\binom{n}{k}=\\frac{n!}{(n-k)!\\,k!}","desc":"בלי סדר, ללא חזרות","slots":[{"key":"n","label":"n"},{"key":"k","label":"k"}],"hasEval":true,"topics":["combinatorics","binomial"],"courseId":"stat-a"},{"id":"ordered_rep","label":"מסודר עם חזרות","latex":"n^k","desc":"סדרות עם חזרה","slots":[{"key":"n","label":"n"},{"key":"k","label":"k"}],"hasEval":true,"topics":["combinatorics"],"courseId":"stat-a"},{"id":"factorial","label":"עצרת","latex":"n!=n\\cdot(n-1)\\cdots 1,\\;0!=1","desc":"מכפלת השלמים עד n","slots":[{"key":"n","label":"n"}],"hasEval":true,"topics":["combinatorics"],"courseId":"stat-a"}]},{"id":"probability","label":"כללי הסתברות","formulas":[{"id":"addition","label":"כלל החיבור","latex":"P(A\\cup B)=P(A)+P(B)-P(A\\cap B)","desc":"הכלה-הוצאה","slots":[{"key":"pa","label":"P(A)"},{"key":"pb","label":"P(B)"},{"key":"pab","label":"P(A∩B)"}],"hasEval":true,"topics":["probability"],"courseId":"stat-a"},{"id":"complement","label":"משלים","latex":"P(A^c)=1-P(A)","desc":"הסתברות \"לא A\"","slots":[{"key":"pa","label":"P(A)"}],"hasEval":true,"topics":["probability"],"courseId":"stat-a"},{"id":"conditional","label":"הסתברות מותנית","latex":"P(B|A)=\\frac{P(A\\cap B)}{P(A)}","desc":"בהינתן A","slots":[{"key":"pab","label":"P(A∩B)"},{"key":"pa","label":"P(A)"}],"hasEval":true,"topics":["probability"],"courseId":"stat-a"},{"id":"multiplication","label":"כלל הכפל","latex":"P(A\\cap B)=P(A)\\cdot P(B|A)","desc":"הסתברות משותפת","slots":[{"key":"pa","label":"P(A)"},{"key":"pba","label":"P(B|A)"}],"hasEval":true,"topics":["probability"],"courseId":"stat-a"},{"id":"independence","label":"אי-תלות","latex":"P(A\\cap B)=P(A)\\cdot P(B)","desc":"A ו-B בלתי תלויים","slots":[{"key":"pa","label":"P(A)"},{"key":"pb","label":"P(B)"}],"hasEval":true,"topics":["probability"],"courseId":"stat-a"},{"id":"total_prob","label":"הסתברות שלמה","latex":"P(B)=\\sum_i P(B|A_i)P(A_i)","desc":"חלוקה למרחב מדגם","slots":[{"key":"sum","label":"Σ P(B|Aᵢ)P(Aᵢ)"}],"hasEval":true,"topics":["probability"],"courseId":"stat-a"},{"id":"bayes","label":"משפט בייס","latex":"P(A_i|B)=\\frac{P(B|A_i)P(A_i)}{\\sum_j P(B|A_j)P(A_j)}","desc":"הסתברות פוסטריורית","slots":[{"key":"pbai","label":"P(B|Aᵢ)"},{"key":"pai","label":"P(Aᵢ)"},{"key":"denom","label":"Σⱼ P(B|Aⱼ)P(Aⱼ)"}],"hasEval":true,"topics":["probability"],"courseId":"stat-a"}]},{"id":"rv","label":"משתנים אקראיים","formulas":[{"id":"ev","label":"תוחלת E(X)","latex":"E(X)=\\sum_i x_i P(x_i)=\\mu","desc":"ממוצע משוקלל של תוצאות","slots":[{"key":"sum","label":"Σ xᵢ·P(xᵢ)"}],"hasEval":true,"topics":["discrete-rv"],"courseId":"stat-a"},{"id":"var_rv","label":"שונות V(X)","latex":"V(X)=\\sum_i x_i^2 P(x_i)-\\mu^2=\\sigma^2","desc":"תוחלת ריבוע הסטייה","slots":[{"key":"sumx2p","label":"Σ xᵢ²·P(xᵢ)"},{"key":"mu","label":"μ"}],"hasEval":true,"topics":["discrete-rv"],"courseId":"stat-a"},{"id":"ev_linear","label":"E(bX+a)","latex":"E(bX+a)=bE(X)+a","desc":"לינאריות התוחלת","slots":[{"key":"b","label":"b"},{"key":"ex","label":"E(X)"},{"key":"a","label":"a"}],"hasEval":true,"topics":["discrete-rv","linear-transformations"],"courseId":"stat-a"},{"id":"var_linear","label":"V(bX+a)","latex":"V(bX+a)=b^2 V(X)","desc":"שונות אחרי טרנספ׳ לינארית","slots":[{"key":"b","label":"b"},{"key":"vx","label":"V(X)"}],"hasEval":true,"topics":["discrete-rv","linear-transformations"],"courseId":"stat-a"},{"id":"ev_sum","label":"E(X₁+…+Xₙ)","latex":"E\\left(\\sum X_i\\right)=\\sum E(X_i)","desc":"אדיטיביות התוחלת","slots":[{"key":"sum","label":"Σ E(Xᵢ)"}],"hasEval":true,"topics":["discrete-rv"],"courseId":"stat-a"},{"id":"var_sum_ind","label":"V(X₁+…+Xₙ) באי-תלות","latex":"V\\left(\\sum X_i\\right)=\\sum V(X_i)","desc":"עבור משתנים בלתי תלויים","slots":[{"key":"sum","label":"Σ V(Xᵢ)"}],"hasEval":true,"topics":["discrete-rv"],"courseId":"stat-a"}]},{"id":"binomial","label":"התפלגות בינומית","formulas":[{"id":"binom_pmf","label":"B(n,p) — PMF","latex":"P(X=k)=\\binom{n}{k}p^k(1-p)^{n-k}","desc":"k הצלחות מתוך n ניסויים","slots":[{"key":"n","label":"n"},{"key":"k","label":"k"},{"key":"p","label":"p"}],"hasEval":true,"topics":["binomial"],"courseId":"stat-a"},{"id":"binom_mean","label":"תוחלת בינומית E(X)","latex":"E(X)=np","desc":"מספר הצלחות צפוי","slots":[{"key":"n","label":"n"},{"key":"p","label":"p"}],"hasEval":true,"topics":["binomial"],"courseId":"stat-a"},{"id":"binom_var","label":"שונות בינומית V(X)","latex":"V(X)=np(1-p)=npq","desc":"שונות בינומית","slots":[{"key":"n","label":"n"},{"key":"p","label":"p"}],"hasEval":true,"topics":["binomial"],"courseId":"stat-a"}]},{"id":"b-sampling","label":"סטטיסטיקה ב׳ — דגימה ומשפטי גבול","formulas":[{"id":"b_se_mean","label":"שגיאת התקן של הממוצע","latex":"\\sigma_{\\bar{X}}=\\dfrac{\\sigma}{\\sqrt{n}}","desc":"סטיית התקן של ממוצע המדגם","slots":[{"key":"sigma","label":"σ"},{"key":"n","label":"n"}],"hasEval":true,"topics":["b-sampling-dist","b-clt"],"courseId":"stat-b"},{"id":"b_z_mean","label":"תקנון ממוצע המדגם","latex":"Z=\\dfrac{\\bar{X}-\\mu}{\\sigma/\\sqrt{n}}","desc":"תקנון הממוצע לפי CLT","slots":[{"key":"xbar","label":"x̄"},{"key":"mu","label":"μ"},{"key":"sigma","label":"σ"},{"key":"n","label":"n"}],"hasEval":true,"topics":["b-clt","b-sampling-dist"],"courseId":"stat-b"},{"id":"b_chebyshev","label":"חסם צ׳בישב","latex":"P(|X-\\mu|\\ge k\\sigma)\\le \\dfrac{1}{k^2}","desc":"חסם עליון לזנבות — כל התפלגות","slots":[{"key":"k","label":"k"}],"hasEval":true,"topics":["b-chebyshev-lln"],"courseId":"stat-b"},{"id":"b_se_prop","label":"שגיאת התקן של פרופורציה","latex":"\\sigma_{\\hat{p}}=\\sqrt{\\dfrac{p(1-p)}{n}}","slots":[{"key":"p","label":"p"},{"key":"n","label":"n"}],"hasEval":true,"topics":["b-proportion","b-clt"],"courseId":"stat-b"}]},{"id":"b-inference","label":"סטטיסטיקה ב׳ — אמידה, רווחי סמך ובדיקת השערות","formulas":[{"id":"b_ci_z","label":"רווח סמך לתוחלת (σ ידועה)","latex":"\\bar{X}\\pm z_{\\alpha/2}\\dfrac{\\sigma}{\\sqrt{n}}","desc":"רווח סמך כאשר סטיית התקן ידועה","slots":[{"key":"xbar","label":"x̄"},{"key":"z","label":"z"},{"key":"sigma","label":"σ"},{"key":"n","label":"n"}],"hasEval":false,"topics":["b-confidence-intervals"],"courseId":"stat-b"},{"id":"b_ci_t","label":"רווח סמך לתוחלת (σ לא ידועה)","latex":"\\bar{X}\\pm t_{\\alpha/2,\\,n-1}\\dfrac{S}{\\sqrt{n}}","desc":"רווח סמך עם אומד סטיית התקן","slots":[{"key":"xbar","label":"x̄"},{"key":"t","label":"t"},{"key":"S","label":"S"},{"key":"n","label":"n"}],"hasEval":false,"topics":["b-confidence-intervals"],"courseId":"stat-b"},{"id":"b_z_stat","label":"סטטיסטי מבחן Z","latex":"Z=\\dfrac{\\bar{X}-\\mu_0}{\\sigma/\\sqrt{n}}","slots":[{"key":"xbar","label":"x̄"},{"key":"mu0","label":"μ₀"},{"key":"sigma","label":"σ"},{"key":"n","label":"n"}],"hasEval":true,"topics":["b-hypothesis-testing"],"courseId":"stat-b"},{"id":"b_t_stat","label":"סטטיסטי מבחן t","latex":"t=\\dfrac{\\bar{X}-\\mu_0}{S/\\sqrt{n}}","slots":[{"key":"xbar","label":"x̄"},{"key":"mu0","label":"μ₀"},{"key":"S","label":"S"},{"key":"n","label":"n"}],"hasEval":true,"topics":["b-hypothesis-testing"],"courseId":"stat-b"},{"id":"b_paired_t","label":"מבחן t לדגימות מזווגות","latex":"t=\\dfrac{\\bar{d}}{S_d/\\sqrt{n}}","slots":[{"key":"dbar","label":"d̄"},{"key":"Sd","label":"S_d"},{"key":"n","label":"n"}],"hasEval":true,"topics":["b-paired-samples"],"courseId":"stat-b"},{"id":"b_prop_z","label":"מבחן Z לפרופורציה","latex":"Z=\\dfrac{\\hat{p}-p_0}{\\sqrt{p_0(1-p_0)/n}}","slots":[{"key":"phat","label":"p̂"},{"key":"p0","label":"p₀"},{"key":"n","label":"n"}],"hasEval":true,"topics":["b-proportion"],"courseId":"stat-b"},{"id":"b_two_means_z","label":"הפרש תוחלות (σ ידועות)","latex":"Z=\\dfrac{(\\bar{X}_1-\\bar{X}_2)}{\\sqrt{\\sigma_1^2/n_1+\\sigma_2^2/n_2}}","desc":"תחת H₀: μ₁ = μ₂","slots":[{"key":"x1","label":"x̄₁"},{"key":"x2","label":"x̄₂"},{"key":"s1","label":"σ₁"},{"key":"s2","label":"σ₂"},{"key":"n1","label":"n₁"},{"key":"n2","label":"n₂"}],"hasEval":true,"topics":["b-diff-means"],"courseId":"stat-b"}]},{"id":"b-nonparam-reg","label":"סטטיסטיקה ב׳ — א-פרמטריים ורגרסיה","formulas":[{"id":"b_chi2","label":"סטטיסטי כי בריבוע","latex":"\\chi^2=\\sum\\dfrac{(O-E)^2}{E}","desc":"נצפה מול צפוי","slots":[{"key":"O","label":"O"},{"key":"E","label":"E"}],"hasEval":true,"topics":["b-binomial-chisquare","b-independence-mcnemar","b-variance-test"],"courseId":"stat-b"},{"id":"b_mcnemar","label":"מבחן מקנמר","latex":"\\chi^2=\\dfrac{(b-c)^2}{b+c}","desc":"תאים בלתי-מתאימים בטבלה מזווגת","slots":[{"key":"b","label":"b"},{"key":"c","label":"c"}],"hasEval":true,"topics":["b-independence-mcnemar"],"courseId":"stat-b"},{"id":"b_reg_slope","label":"שיפוע הרגרסיה","latex":"\\hat{\\beta}_1=\\dfrac{\\sum(x_i-\\bar{x})(y_i-\\bar{y})}{\\sum(x_i-\\bar{x})^2}","desc":"שיטת הריבועים הפחותים","slots":[{"key":"Sxy","label":"Σ(x-x̄)(y-ȳ)"},{"key":"Sxx","label":"Σ(x-x̄)²"}],"hasEval":true,"topics":["b-simple-regression"],"courseId":"stat-b"},{"id":"b_reg_intercept","label":"חותך הרגרסיה","latex":"\\hat{\\beta}_0=\\bar{y}-\\hat{\\beta}_1\\bar{x}","slots":[{"key":"ybar","label":"ȳ"},{"key":"b1","label":"β̂₁"},{"key":"xbar","label":"x̄"}],"hasEval":true,"topics":["b-simple-regression"],"courseId":"stat-b"},{"id":"b_r_squared","label":"מקדם ההסבר","latex":"R^2=\\dfrac{SSR}{SST}=1-\\dfrac{SSE}{SST}","desc":"שיעור השונות המוסברת","slots":[{"key":"SSR","label":"SSR"},{"key":"SST","label":"SST"}],"hasEval":true,"topics":["b-simple-regression","b-multiple-regression"],"courseId":"stat-b"},{"id":"b_slope_t","label":"מבחן t לשיפוע","latex":"t=\\dfrac{\\hat{\\beta}_1}{SE(\\hat{\\beta}_1)}","desc":"H₀: השיפוע באוכלוסייה הוא אפס","slots":[{"key":"b1","label":"β̂₁"},{"key":"seb1","label":"SE"}],"hasEval":true,"topics":["b-simple-regression"],"courseId":"stat-b"}]}];
+
+  /* Topic tabs instead of one 32-row sheet that covered the whole screen.
+     MathLive shows every layout as a tab; five topics keep each sheet to a
+     few rows. Category ids follow src/data/formula-library.ts. */
+  var KB_TABS = [
+    { label: 'מרכז ופיזור', cats: ['center', 'dispersion', 'transform'] },
+    { label: 'קשרים', cats: ['correlation', 'regression'] },
+    { label: 'הסתברות', cats: ['combinatorics', 'probability', 'binomial'] },
+    { label: 'התפלגויות', cats: ['normal', 'rv'] },
+    { label: 'סטטיסטיקה ב׳', cats: ['b-sampling', 'b-inference', 'b-nonparam-reg'] }
+  ];
+  function rowsFor(cats) {
+    var rows = [];
+    cats.forEach(function (c) {
+      var fs = (c.formulas || []).filter(function (f) { return f && f.latex; });
+      if (!fs.length) return;
+      rows.push([{ class: 'separator w10 gm-kb-sep', label: c.label }]);
+      for (var i = 0; i < fs.length; i += 5) rows.push(fs.slice(i, i + 5).map(chip));
+    });
+    return rows;
+  }
+  function buildLayouts(cats) {
+    var byId = {}, used = {};
+    (cats || []).forEach(function (c) { byId[c.id] = c; });
+    var tabs = KB_TABS.map(function (t) {
+      var picked = t.cats.map(function (id) { used[id] = 1; return byId[id]; }).filter(Boolean);
+      var rows = rowsFor(picked);
+      return rows.length ? { label: t.label, tooltip: 'נוסחאות וופלסטאק: ' + t.label, rows: rows } : null;
+    }).filter(Boolean);
+    /* a category added to the library later still appears, on its own tab */
+    var rest = (cats || []).filter(function (c) { return !used[c.id]; });
+    if (rest.length) tabs.push({ label: 'עוד', tooltip: 'נוסחאות נוספות', rows: rowsFor(rest) });
+    return tabs.concat(['numeric', 'symbols', 'greek']);
+  }
+  var kbListening = false;
+  function registerKeyboard() {
+    if (kbDone || kbLoading || !window.mathVirtualKeyboard) return;
+    kbLoading = true;
+    var kb = window.mathVirtualKeyboard;
+    if (!kbListening) {
+      kbListening = true;
+      try { kb.addEventListener('geometrychange', avoidKeyboard); } catch (_) {}
+    }
+    var apply = function (cats) { kb.layouts = buildLayouts(cats); kbDone = true; };
+    fetch('formula-library.json')
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(apply, function () { apply(FORMULA_INLINE); })
+      .then(function () { kbLoading = false; }, function () { kbLoading = false; });
+  }
+
+  /* When the keyboard slides up, lift the editor above it. */
+  function avoidKeyboard() {
+    var kb = window.mathVirtualKeyboard;
+    if (panel.hidden) return;
+    if (!kb || !kb.visible) { if (EQ.node) place(EQ.node); return; }
+    var r = kb.boundingRect;
+    if (!r || !r.height) return;
+    var h = panel.offsetHeight || 180;
+    var top = Math.min(parseFloat(panel.style.top) || 0, r.top - h - 10);
+    panel.style.top = Math.max(64, top) + 'px';
+  }
+
+  /* ── wiring ────────────────────────────────────────────────────────── */
+  panel.addEventListener('click', function (e) {
+    if (e.target.closest('#eqInsert')) { insertEquation(); return; }
+    if (e.target.closest('#eqCancel')) { closeEquation(); return; }
+    if (e.target.closest('#eqKbd')) {
+      var kb = window.mathVirtualKeyboard, mf = field();
+      if (!kb || !mf) return;
+      mf.focus();
+      if (kb.visible) kb.hide(); else kb.show();
+      setTimeout(avoidKeyboard, 350);
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!panel.hidden && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeEquation(); }
+  }, true);
+  document.addEventListener('pointerdown', function (e) {
+    if (panel.hidden) return;
+    if (e.target.closest && e.target.closest('#eqPanel, .ML__keyboard, .gm-eq')) return;
+    closeEquation();
+  }, true);
+
+  window.openEquation = openEquation;
+  window.closeEquation = closeEquation;
+
+  /* A map that already holds equations loads MathLive straight away and
+     re-renders, so its titles show math instead of $...$ text. */
+  if ((S.nodes || []).some(function (n) { return n.title && n.title.indexOf('$') >= 0; })) {
+    loadMathLive().then(function () {
+      render();
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { render(); });
+    }, function () {});
+  } else {
+    render();
+  }
+  var origOpen = openEquation;
+  window.openEquation = function (a, b) {
+    loadMathLive().then(function () {
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { render(); });
+    }, function () {});
+    return origOpen(a, b);
+  };
 })();
 </script>
