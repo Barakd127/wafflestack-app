@@ -220,12 +220,16 @@ input,textarea{background:none;border:0;outline:none;}
    counter-scale below tracks the camera continuously, not just at the
    three thresholds. */
 .gm-node,.gm-ttl,.gm-note-mark,.gm-depthdots,.gm-rellabel{transition:opacity .18s ease,transform .18s ease,box-shadow .14s ease;}
+.mapwrap.lod-far .gm-node.root{max-width:min(44vw,520px);}
+.mapwrap.lod-far .gm-node[data-depth="1"]{max-width:min(26vw,340px);}
 .mapwrap.lod-far .gm-node.root .gm-ttl{
-  font-size:calc(26px * min(4.55, calc(1 / var(--gm-z, 1))));
+  font-size:calc(18px * min(2.6, calc(1 / var(--gm-z, 1))));
 }
 .mapwrap.lod-far .gm-node[data-depth="1"] .gm-ttl{
-  font-size:calc(14px * min(4.55, calc(1 / var(--gm-z, 1))));
+  font-size:calc(14px * min(2.2, calc(1 / var(--gm-z, 1))));
 }
+/* a title must never break mid-word into a vertical stack of letters */
+.gm-ttl{overflow-wrap:break-word;word-break:normal;}
 /* depth ≥ 2 collapse to a small dot-pill: no text, just the accent stripe,
    scaled down around the node's own centre (its translate(-50%,-50%)
    anchor point is untouched, so it never drifts). */
@@ -506,14 +510,14 @@ input,textarea{background:none;border:0;outline:none;}
    ═════════════════════════════════════════════════════════════════════════ */
 :root{
   --gm-t:.85;                     /* frost 0..1 — מיקוד .85 / הדגמה .4 / עיר 0 */
-  --gm-sky-a:#EAF2FF; --gm-sky-b:#D8E7FA;
+  --gm-sky-a:#EAF2FF; --gm-sky-b:#CFE0FA;
   --gm-pill:rgba(255,255,255,.72);
   --gm-pill-bd:rgba(255,255,255,.62);
   --gm-pill-sh:0 8px 22px rgba(11,27,62,.2);
   --gm-ink:#1F3E6C;
   --gm-city-filter:brightness(1.04) saturate(.7) contrast(.92);
-  --gm-frost-grad:linear-gradient(155deg,rgba(255,255,255,.78),rgba(219,232,255,.68) 60%,rgba(255,255,255,.74));
-  --gm-sheen-grad:linear-gradient(215deg,rgba(255,255,255,.5),rgba(255,255,255,0) 60%);
+  --gm-frost-grad:linear-gradient(155deg,rgba(223,234,255,.74),rgba(198,218,250,.68) 60%,rgba(216,231,250,.72));
+  --gm-sheen-grad:linear-gradient(215deg,rgba(255,255,255,.34),rgba(255,255,255,0) 60%);
 }
 :root[data-theme="dark"], :root:not([data-theme="light"]){ --gm-dark-ready:1; }
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
@@ -553,7 +557,7 @@ input,textarea{background:none;border:0;outline:none;}
 .gm-world,.gm-frost,.gm-sheen,.gm-dots{position:absolute;inset:0;pointer-events:none;}
 .gm-world{z-index:0;background:linear-gradient(180deg,var(--gm-sky-a) 0%,var(--gm-sky-b) 62%,var(--gm-sky-a) 100%);overflow:hidden;}
 .gm-world::after{content:'';position:absolute;left:0;right:0;bottom:0;height:34%;
-  background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.45) 100%);}
+  background:linear-gradient(180deg,rgba(223,234,255,0) 0%,rgba(207,224,250,.55) 100%);}
 .gm-city{position:absolute;bottom:0;left:50%;width:82%;transform:translateX(-50%);
   filter:var(--gm-city-filter);transition:filter .3s ease;will-change:transform;}
 .gm-frost{z-index:1;
@@ -1903,7 +1907,11 @@ function mapKeys(ev) {
     if (UI.sel) { UI.sel = null; DEL_ARMED = 0; DEL_ARMED_FOR = ''; render(); return; }
     return;
   }
-  if (!UI.sel && ev.key !== 'Tab' && ev.key !== 'Enter') return;
+  /* A marquee marks nodes without setting UI.sel, and this guard used to
+     swallow Delete in exactly that case — so selecting a handful of nodes
+     and pressing Delete did nothing at all. Marks are a selection too. */
+  if (!UI.sel && ev.key !== 'Tab' && ev.key !== 'Enter' &&
+      !((ev.key === 'Delete' || ev.key === 'Backspace') && markedIds().length)) return;
   if (ev.key === 'Tab') { ev.preventDefault(); growAndEdit(growChild, true); return; }
   if (ev.key === 'Enter') { ev.preventDefault(); growAndEdit(ev.shiftKey ? growSiblingBefore : growSibling, true); return; }
   if (ev.key === 'F2' || ev.key === ' ') { ev.preventDefault(); editSelected(); return; }
