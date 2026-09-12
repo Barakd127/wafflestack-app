@@ -201,7 +201,7 @@ input,textarea{background:none;border:0;outline:none;}
 .gm-node.root .gm-stripe{display:none;}
 .gm-node .gm-meta{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:11px;color:var(--sh-text-med);}
 .gm-node .gm-note-mark{opacity:.85;}
-.gm-node .gm-badge{display:inline-grid;place-items:center;min-width:16px;height:15px;padding:0 4px;
+.gm-node .gm-badge{cursor:pointer;display:inline-grid;place-items:center;min-width:16px;height:15px;padding:0 4px;
   border-radius:99px;background:rgba(31,62,108,.16);font-size:9.5px;color:var(--sh-text-dark);}
 .gm-node.root .gm-badge{background:rgba(212,175,55,.18);color:var(--sh-text-dark);}
 /* depth-dot row — cards layer only, so hierarchy still reads with the wires
@@ -1902,6 +1902,19 @@ function inField() {
 }
 function mapKeys(ev) {
   if (inField()) return;
+  /* Physical-key fallback. Titles are typed in Hebrew, and the keyboard stays
+     on the Hebrew layout afterwards: there the K key reports a Hebrew letter,
+     Z another, and the slash key a dot, so every letter shortcut (K, L, Z, B,
+     R, E, Ctrl+Z, Ctrl+/ ...) silently did nothing. When the layout gives a
+     non-Latin character, read the key from its physical position instead.
+     Runs after inField(), so typing into a title is never touched. */
+  var phys = null;
+  if (/^Key[A-Z]$/.test(ev.code || '') && !/^[a-z]$/i.test(ev.key)) {
+    phys = ev.shiftKey ? ev.code.slice(3) : ev.code.slice(3).toLowerCase();
+  } else if (ev.code === 'Slash' && ev.key !== '/' && ev.key !== '?') {
+    phys = ev.shiftKey ? '?' : '/';
+  }
+  if (phys) { try { Object.defineProperty(ev, 'key', { value: phys }); } catch (_) {} }
   if (el('#helpOverlay').classList.contains('open') && ev.key !== '?' && ev.key !== 'Escape') return;
 
   /* A3 jump history: Alt+← / Alt+→, ahead of everything else so no other
@@ -3318,6 +3331,14 @@ document.addEventListener('click', function (ev) {
   if (ev.target.closest('#lensBtn')) { UI.lens = !UI.lens; render(); return; }
   if (ev.target.closest('#helpBtn')) { toggleHelp(); return; }
   if (ev.target.closest('[data-close-help]') || ev.target.closest('#helpOverlay') === el('#helpOverlay') && ev.target.id === 'helpOverlay') { toggleHelp(); return; }
+  /* The +N badge on a folded node is a button: a click folds / unfolds that
+     node (Ctrl+/ does the same from the keyboard). Handled before any other
+     node click so it never turns into a rename or a drag. */
+  if ((n = ev.target.closest('.gm-badge'))) {
+    var host = n.closest('.gm-node[data-node]');
+    if (host) { selNode(host.dataset.node, { quiet: true }); toggleCollapse(); }
+    return;
+  }
   if ((n = ev.target.closest('[data-addkid]'))) { selNode(n.dataset.addkid, { quiet: true }); growAndEdit(growChild, true); return; }
   if ((n = ev.target.closest('[data-dellink]'))) { deleteLink(n.dataset.dellink); return; }
   if ((n = ev.target.closest('.gm-crumb[data-crumb]'))) { crumbClick(n.dataset.crumb); return; }   /* A8 */
