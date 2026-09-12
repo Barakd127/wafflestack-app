@@ -178,7 +178,23 @@ input,textarea{background:none;border:0;outline:none;}
 .gm-node .gm-stripe{position:absolute;left:0;top:10px;bottom:10px;width:4px;border-radius:3px;background:var(--acc,var(--gm-teal));}
 .gm-node.root{min-width:180px;max-width:320px;padding:16px 20px;border-radius:20px;
   background:var(--sh-btn-color) !important;}
-.gm-node.root .gm-ttl{font-size:26px;font-weight:700;color:var(--gm-gold);-webkit-line-clamp:2;}
+/* P2 fix: --sh-btn-color is teal (#4ECDC4) in dark mode (it's meant for the
+   little "pressed" toggle buttons there) — using it for the root chip's
+   background too made the root card render teal-on-teal in dark, instead of
+   the navy-with-gold-text look the root chip is supposed to have in both
+   themes. Give the root card its own dark-mode background instead of
+   reusing that variable. */
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .gm-node.root{
+  background:linear-gradient(160deg,#1a2080,#0f1245) !important;
+} }
+:root[data-theme="dark"] .gm-node.root{
+  background:linear-gradient(160deg,#1a2080,#0f1245) !important;
+}
+/* P1 fix: at max-width:320 and 26px bold, a realistic bilingual root title
+   (the seeded default itself: "נושא מרכזי — Central topic") still needed a
+   3rd line and was getting clipped with an ellipsis after 2 — bump the
+   clamp so the card wraps the whole title instead of cutting it off. */
+.gm-node.root .gm-ttl{font-size:26px;font-weight:700;color:var(--gm-gold);-webkit-line-clamp:3;}
 .gm-node.root .gm-stripe{display:none;}
 .gm-node .gm-meta{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:11px;color:var(--sh-text-med);}
 .gm-node .gm-note-mark{opacity:.85;}
@@ -191,6 +207,38 @@ input,textarea{background:none;border:0;outline:none;}
 .mapwrap[data-layer="cards"] .gm-depthdots{display:flex;}
 .gm-depthdots i{width:5px;height:5px;border-radius:50%;background:var(--acc,var(--gm-teal));opacity:.55;}
 
+/* ── A1 semantic zoom (level of detail) ───────────────────────────────────
+   Three altitudes derived from view.z and stamped on #mapwrap by applyMap()
+   (contract Addendum A1): lod-far (z<0.45) / lod-mid (0.45-0.9) / lod-near
+   (>=0.9). Everything here is opacity/transform only — never a size change
+   to the box a node is laid out at (its left/top anchor from settleMap
+   never moves), so switching class is a fade, not a reflow. --gm-z is set
+   alongside the class by the same applyMap() call, so the root/depth-1
+   counter-scale below tracks the camera continuously, not just at the
+   three thresholds. */
+.gm-node,.gm-ttl,.gm-note-mark,.gm-depthdots,.gm-rellabel{transition:opacity .18s ease,transform .18s ease,box-shadow .14s ease;}
+.mapwrap.lod-far .gm-node.root .gm-ttl{
+  font-size:calc(26px * min(4.55, calc(1 / var(--gm-z, 1))));
+}
+.mapwrap.lod-far .gm-node[data-depth="1"] .gm-ttl{
+  font-size:calc(14px * min(4.55, calc(1 / var(--gm-z, 1))));
+}
+/* depth ≥ 2 collapse to a small dot-pill: no text, just the accent stripe,
+   scaled down around the node's own centre (its translate(-50%,-50%)
+   anchor point is untouched, so it never drifts). */
+.mapwrap.lod-far .gm-node:not(.root):not([data-depth="0"]):not([data-depth="1"]){
+  transform:translate(-50%,-50%) scale(.14);
+  border-radius:50%;
+}
+.mapwrap.lod-far .gm-node:not(.root):not([data-depth="1"]) .gm-ttl,
+.mapwrap.lod-far .gm-node:not(.root):not([data-depth="1"]) .gm-meta,
+.mapwrap.lod-far .gm-node:not(.root):not([data-depth="1"]) .gm-depthdots{
+  opacity:0;pointer-events:none;
+}
+.mapwrap.lod-far .gm-rellabel{opacity:0;pointer-events:none;}      /* far: relation LINES stay (SVG), labels hide */
+.mapwrap.lod-mid .gm-node .gm-note-mark{opacity:0;pointer-events:none;}  /* mid: titles only, no ✎ body marker */
+.mapwrap.lod-near .gm-depthdots{display:flex;}                     /* near: "everything" — depth dots even in links layer */
+
 /* selection / marks / hazing — same visual language as WaffleTask's map */
 .gm-node.sel{box-shadow:var(--sh-card-shadow),0 0 0 3px var(--gm-gold),0 0 18px rgba(212,175,55,.45);}
 .gm-node.marked{box-shadow:var(--sh-card-shadow),0 0 0 2px var(--gm-gold);}
@@ -198,7 +246,7 @@ input,textarea{background:none;border:0;outline:none;}
 .gm-node.relsrc{box-shadow:var(--sh-card-shadow),0 0 0 3px var(--sh-text-med),0 0 16px rgba(37,74,159,.5);}
 .hazed{filter:blur(2.8px) saturate(.45);opacity:.42;box-shadow:none !important;
   transition:filter .25s ease,opacity .25s ease;}
-.gm-node:not(.hazed){transition:filter .25s ease,opacity .25s ease,box-shadow .14s ease;}
+.gm-node:not(.hazed){transition:filter .25s ease,opacity .25s ease,box-shadow .14s ease,transform .18s ease;}
 @media (prefers-reduced-motion:reduce){ .hazed{transition:none;} }
 .gm-node.blocked{box-shadow:var(--sh-card-shadow),0 0 0 3px var(--gm-danger);}
 .gm-node.focusing{animation:gmfocusring .75s ease-out;}
@@ -251,6 +299,106 @@ input,textarea{background:none;border:0;outline:none;}
 .gm-hint{position:absolute;left:13px;bottom:13px;z-index:7;font-size:11px;color:var(--sh-text-tip);
   pointer-events:none;user-select:none;max-width:60%;}
 @media (max-width:760px){ .gm-hint{display:none;} }
+
+/* ── A4 node kinds ─────────────────────────────────────────────────────────
+   node.kind cycles concept→known→bridge→gap→question via K / Shift+K.
+   Visuals apply at mid+near only (contract Addendum A4) — at lod-far every
+   non-root/depth-1 node is already a textless dot-pill, so kind tinting
+   there would just recolour a dot nobody reads as a "kind" yet. */
+.gm-node .gm-glyph{font-size:12px;opacity:.7;margin-inline-end:4px;}
+.mapwrap:not(.lod-far) .gm-node.gm-kind-known{background-image:linear-gradient(rgba(46,158,107,.16),rgba(46,158,107,.16)),var(--sh-glass-card);}
+.mapwrap:not(.lod-far) .gm-node.gm-kind-known .gm-stripe{background:#2E9E6B;}
+.mapwrap:not(.lod-far) .gm-node.gm-kind-bridge{border-radius:999px;background-image:linear-gradient(rgba(212,175,55,.18),rgba(212,175,55,.18)),var(--sh-glass-card);}
+.mapwrap:not(.lod-far) .gm-node.gm-kind-gap{border-color:rgba(201,42,42,.55);}
+.mapwrap:not(.lod-far) .gm-node.gm-kind-question{background-image:linear-gradient(rgba(155,93,229,.14),rgba(155,93,229,.14)),var(--sh-glass-card);}
+.mapwrap:not(.lod-far) .gm-node.gm-kind-question .gm-stripe{background:var(--gm-purple);}
+
+/* ── A5 anchor chip ("in your world this is…") ────────────────────────────
+   node.bridge; shown inline only at lod-near, otherwise folded into the
+   node's own native title= tooltip so it still reads on hover at any zoom
+   (contract: "Shown only at lod-near; on hover at any zoom as a tooltip"). */
+.gm-bridge{margin-top:4px;display:none;align-items:center;gap:4px;max-width:100%;
+  padding:2px 8px;border-radius:999px;background:rgba(212,175,55,.22);
+  color:var(--gm-navy);font-size:10.5px;font-weight:600;cursor:text;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mapwrap.lod-near .gm-bridge{display:inline-flex;}
+.gm-bridge.force{display:inline-flex !important;}
+.gm-bridge .gm-bridge-txt[contenteditable="true"]{outline:2px solid var(--gm-gold);white-space:normal;overflow:visible;}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .gm-bridge{color:#3a2f06;} }
+:root[data-theme="dark"] .gm-bridge{color:#3a2f06;}
+
+/* ── A7 hub halo — a node with ≥2 cross-links, links layer only ──────────
+   A ::after glow rather than another box-shadow layer, so it never has to
+   be combined with .sel/.marked's own box-shadow in the CSS cascade. */
+.gm-node.hub::after{content:"";position:absolute;inset:-4px;border-radius:inherit;pointer-events:none;
+  box-shadow:0 0 0 4px rgba(212,175,55,.18),0 0 24px rgba(212,175,55,.28);}
+.mapwrap[data-layer="cards"] .gm-node.hub::after{display:none;}
+
+/* ── A9 branch legend + solo ──────────────────────────────────────────────
+   Bottom-start glass strip, one chip per top-level branch (contract
+   Addendum A9); draggable (JS sets left/top and clears the default
+   inset/bottom once moved), position remembered in S.legendPos. */
+.gm-legend{position:absolute;left:12px;bottom:56px;z-index:7;display:flex;flex-wrap:wrap;
+  gap:4px;max-width:min(72%,540px);padding:6px;border-radius:14px;cursor:grab;}
+.gm-legend[hidden]{display:none;}
+.gm-legend-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:99px;
+  font-size:11.5px;color:var(--sh-text-dark);background:rgba(255,255,255,.22);white-space:nowrap;
+  max-width:170px;overflow:hidden;}
+.gm-legend-chip span{overflow:hidden;text-overflow:ellipsis;}
+.gm-legend-chip i{width:8px;height:8px;border-radius:50%;flex:none;}
+.gm-legend-chip.on{background:var(--sh-btn-color);color:var(--gm-gold);}
+.gm-legend-more{font-size:11px;color:var(--sh-text-tip);padding:4px 6px;align-self:center;}
+/* E11 fix: at the phone breakpoint .mapctl sits in its own column at
+   right:8px, ~34px wide (26px icon buttons + 4px padding each side) — the
+   old `calc(100% - 20px)` only accounted for the legend's OWN left/right
+   margins and let a realistic multi-branch legend's glass panel run
+   directly under that column. Reserve room for it (34px + its 8px offset,
+   plus a visible gap) on top of the legend's own 20px margin. */
+@media (max-width:760px){ .gm-legend{bottom:48px;max-width:calc(100% - 20px - 54px);} }
+
+/* ── A10 quick switcher (Ctrl+K) ──────────────────────────────────────────── */
+.gm-switcher{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:65;
+  width:min(480px,92vw);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:6px;}
+.gm-switcher[hidden]{display:none;}
+.gm-switcher input{width:100%;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.35);font-size:14px;}
+.gm-switcher-list{max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+.gm-switch-row{padding:7px 10px;border-radius:9px;font-size:13px;color:var(--sh-text-dark);cursor:pointer;}
+.gm-switch-row .sub{font-size:11px;color:var(--sh-text-med);margin-top:1px;}
+.gm-switch-row.active{background:rgba(212,175,55,.22);}
+
+/* ── A11 collapsed-node peek ─────────────────────────────────────────────── */
+.gm-peektip{position:fixed;z-index:66;transform:translate(-50%,0);max-width:240px;
+  padding:8px 10px;border-radius:12px;font-size:12px;color:var(--sh-text-dark);pointer-events:none;}
+.gm-peektip[hidden]{display:none;}
+.gm-peektip div{padding:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gm-peektip .more{color:var(--sh-text-med);font-size:11px;}
+
+/* ── A8 breadcrumb spine ───────────────────────────────────────────────────
+   Top-start glass chip row: root › … › parent › selected (contract Addendum
+   A8). Positioned with logical inset-inline-start rather than left/right so
+   it sits on the correct side under the `dir` attribute renderCrumbs() sets
+   from the ROOT title's own script direction — a Hebrew map's spine reads
+   from the right, an English one from the left, without a second code path. */
+.gm-crumbs{position:absolute;top:12px;inset-inline-start:12px;z-index:7;
+  display:flex;align-items:center;gap:2px;max-width:calc(100% - 24px);
+  padding:6px 10px;border-radius:99px;overflow:hidden;}
+.gm-crumbs[hidden]{display:none;}
+.gm-crumb{display:inline-block;padding:3px 8px;border-radius:99px;font-size:12px;
+  color:var(--sh-text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:150px;cursor:pointer;}
+.gm-crumb:hover{background:rgba(255,255,255,.35);}
+.gm-crumb.sel{font-weight:700;color:var(--gm-gold);cursor:default;}
+.gm-crumb.sel:hover{background:none;}
+.gm-crumb-sep{font-size:11px;color:var(--sh-text-tip);opacity:.7;padding:0 1px;}
+.gm-crumb-more{position:relative;display:inline-block;}
+.gm-crumb-morelist{display:none;position:absolute;top:100%;inset-inline-start:0;margin-top:6px;
+  min-width:170px;max-width:260px;padding:6px;border-radius:12px;z-index:8;
+  background:var(--sh-glass-card);backdrop-filter:blur(20px) saturate(160%);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:var(--sh-card-shadow);}
+.gm-crumb-more:hover .gm-crumb-morelist,.gm-crumb-more:focus-within .gm-crumb-morelist{display:block;}
+.gm-crumb-morelist div{padding:4px 8px;font-size:12px;color:var(--sh-text-dark);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+@media (max-width:760px){ .gm-crumb{max-width:96px;font-size:11px;} }
 
 /* ── body sheet (E) ──────────────────────────────────────────────────────── */
 .scrim{position:fixed;inset:0;z-index:40;background:rgba(15,25,50,.35);opacity:0;pointer-events:none;
@@ -368,19 +516,26 @@ input,textarea{background:none;border:0;outline:none;}
   <div class="gm-body" id="gmBody">
     <main class="mapwrap" id="mapwrap" tabindex="0">
       <div class="world" id="world"></div>
+      <nav class="gm-crumbs gm-glass" id="crumbBar" aria-label="Breadcrumb" hidden></nav>
       <div class="gm-find gm-glass" id="findBar" hidden>
         <span aria-hidden="true">🔎</span>
         <input type="text" id="findInput" placeholder="חיפוש… — find…" aria-label="Find nodes">
         <span class="gm-findcount tnum" id="findCount"></span>
       </div>
       <div class="mapctl gm-glass" id="mapctl"></div>
+      <div class="gm-legend gm-glass" id="legendBar" hidden></div>
       <div class="mbar h" id="mbarH"><i></i></div><div class="mbar v" id="mbarV"><i></i></div>
       <div class="gm-hint" id="gmHint"></div>
+      <div class="gm-peektip gm-glass" id="peekTip" hidden></div>
     </main>
   </div>
   <div class="scrim" id="scrim"></div>
   <section class="gm-sheet gm-glass" id="bodySheet" role="dialog" aria-modal="false" aria-labelledby="bodySheetTitle" hidden></section>
   <div class="gm-help" id="helpOverlay"><div class="box gm-glass" id="helpBox"></div></div>
+  <div class="gm-switcher gm-glass" id="switcher" hidden>
+    <input type="text" id="switcherInput" placeholder="חיפוש מהיר… — quick search…" aria-label="Quick switcher">
+    <div class="gm-switcher-list" id="switcherList"></div>
+  </div>
   <div class="gm-toast gm-glass" id="toast" role="status" aria-live="polite"></div>
 </div>
 
@@ -403,6 +558,11 @@ input,textarea{background:none;border:0;outline:none;}
 /* ── constants ───────────────────────────────────────────────────────── */
 var ACCENTS = ['--gm-teal', '--gm-purple', '--gm-green', '--gm-coral'];   /* cycled by top-level branch */
 var LS_PREFIX = 'glassmap:';
+/* A4: node.kind cycle order (K / Shift+K); 'concept' is the implicit default
+   and is never actually stored on the node (absent === concept) so an
+   un-kinded node round-trips through JSON/undo with no extra field. */
+var KINDS = ['concept', 'known', 'bridge', 'gap', 'question'];
+var KIND_GLYPH = { known: '✓', bridge: '⇄', gap: '◆', question: '?' };
 
 function qparam(name) {
   try { return new URL(location.href).searchParams.get(name); } catch (e) { return null; }
@@ -474,6 +634,21 @@ function normalise(x) {
   if (!x || typeof x !== 'object' || !Array.isArray(x.nodes) || !x.nodes.length) return null;
   var roots = x.nodes.filter(function (n) { return n == null || n.parent == null; });
   if (roots.length !== 1) return null;                    /* must be exactly one root */
+  /* D8 fix: de-dupe literal id collisions BEFORE anything below keys off id.
+     A hand-edited or badly-merged import can carry two distinct nodes that
+     happen to share one id; left alone, deleteIds() (keyed purely by id)
+     would delete both together the moment either is removed, silently
+     wiping an unrelated node/subtree the user never selected. Keep the
+     first occurrence's id (so anything already pointing at it — a `parent`
+     or a link endpoint — still resolves the way it did before) and give
+     every later duplicate a fresh one. */
+  (function dedupeIds() {
+    var seenIds = {};
+    x.nodes.forEach(function (n) {
+      if (!n || n.id == null) return;
+      if (seenIds[n.id]) n.id = uid('n'); else seenIds[n.id] = 1;
+    });
+  })();
   x.v = 1;
   x.id = x.id || MAP_ID;
   x.title = typeof x.title === 'string' && x.title ? x.title : 'GlassMap';
@@ -493,7 +668,16 @@ function normalise(x) {
     n.collapsed = !!n.collapsed;
     if (!isFinite(n.mx) || !isFinite(n.my)) { delete n.mx; delete n.my; } else { n.pinned = true; }
     if (n.parent != null && (n.parent === n.id || !ids[n.parent])) n.parent = null; /* only the true root may have null */
+    /* A4 / A5: validate kind + bridge on the way in (hand-edited JSON, an
+       older save, a foreign import) — 'concept' is never stored (see KINDS
+       comment above), anything unrecognised is dropped rather than kept as
+       a dead string the UI can't cycle back to. */
+    if (n.kind != null && (KINDS.indexOf(n.kind) < 0 || n.kind === 'concept')) delete n.kind;
+    if (n.bridge != null && typeof n.bridge !== 'string') delete n.bridge;
   });
+  if (x.legendPos && typeof x.legendPos.x === 'number' && typeof x.legendPos.y === 'number') {
+    x.legendPos = { x: x.legendPos.x, y: x.legendPos.y };
+  } else { delete x.legendPos; }
   /* exactly one null-parent node survives; if normalising a bad import left
      more than one orphaned, the first found stays root and the rest are
      reattached under it rather than silently vanishing */
@@ -515,26 +699,81 @@ function normalise(x) {
 function readLocal() {
   try { return normalise(JSON.parse(localStorage.getItem(LS_KEY) || 'null')); } catch (e) { return null; }
 }
+/* D6/D7 fix: writeLocal() used to be `try { setItem(...) } catch (e) {}` --
+   a full localStorage (QuotaExceededError) was swallowed with zero
+   indication anything went wrong, so an edit could look completely normal
+   in memory yet never reach disk and vanish silently on reload (D6). And a
+   second tab/window open on the same ?map= id would blindly overwrite
+   whatever the first tab had just saved with its own stale in-memory copy
+   (D7). Neither is a full solution (no attempt at real conflict UI, no
+   retry/backoff for the quota case) but both failure modes are now surfaced
+   and the common "two tabs each add something" case no longer destroys
+   data: before writing, fold in any node/link the OTHER tab persisted since
+   we last synced that we don't already have, and toast if a save can't be
+   written at all. */
+var LAST_SYNCED_UPDATED_AT = 0, QUOTA_WARN_AT = 0, CONFLICT_WARN_AT = 0;
 function writeLocal() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {}
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      var other = null;
+      try { other = JSON.parse(raw); } catch (e2) {}
+      if (other && typeof other.updatedAt === 'number' && other.updatedAt > LAST_SYNCED_UPDATED_AT) {
+        var mineN = {}; S.nodes.forEach(function (n) { mineN[n.id] = 1; });
+        var addedN = 0;
+        (other.nodes || []).forEach(function (n) { if (n && n.id != null && !mineN[n.id]) { S.nodes.push(n); addedN++; } });
+        var mineL = {}; S.links.forEach(function (l) { mineL[l.id] = 1; });
+        (other.links || []).forEach(function (l) { if (l && l.id != null && !mineL[l.id]) S.links.push(l); });
+        if (addedN && Date.now() - CONFLICT_WARN_AT > 4000) {
+          CONFLICT_WARN_AT = Date.now();
+          toast('מפה זו נשמרה גם בכרטיסייה אחרת, מוזג — this map was saved in another tab too; merged ' + addedN + ' item(s)');
+        }
+      }
+    }
+    localStorage.setItem(LS_KEY, JSON.stringify(S));
+    LAST_SYNCED_UPDATED_AT = S.updatedAt;
+  } catch (e) {
+    if (Date.now() - QUOTA_WARN_AT > 4000) {
+      QUOTA_WARN_AT = Date.now();
+      toast('שגיאה בשמירה — save error: storage quota is full, this change was not saved');
+    }
+  }
 }
 
 /* ── live state ──────────────────────────────────────────────────────── */
 var S = readLocal() || seed(MAP_ID);
+LAST_SYNCED_UPDATED_AT = S.updatedAt;
 var UI = {
   sel: null,             /* selected node id, or null */
   marks: {},             /* multi-select, id -> 1 (contract: Shift+arrows / A / Ctrl+A) */
   lens: false,           /* the focus lens (mapctl ◉) */
   relFrom: null,         /* pending Ctrl+L relation source id */
   find: '',              /* live find text */
-  drafts: {}
+  drafts: {},
+  radar: false,          /* A6: link radar toggle (R) */
+  radarExpanded: [],     /* A6: collapsed ancestors radar force-opened, restored on off */
+  soloBranch: null,      /* A9: top-level branch id currently soloed (legend / 1-9) */
+  editingBridge: null,   /* A5: node id whose anchor chip is mid-edit (forces it visible off lod-near) */
+  switcher: null         /* A10: {q, idx, results} while the quick switcher is open, else null */
 };
 var HOST_DARK = null;    /* set by an inbound {type:'ws-theme'} push; null = "no host opinion yet" */
 
 /* ── dogfood/test hook — exposes live state + UI to the verification
    harness (Playwright) via page.evaluate(); read-only accessors so tests
    can assert without poking at module internals directly. */
-window.GM = { S: function () { return S; }, UI: function () { return UI; } };
+window.GM = {
+  S: function () { return S; }, UI: function () { return UI; },
+  /* Round-2a addition (Addendum A1): GM.S().view is the live object, so a
+     test can mutate its z directly to force an LOD tier and then call this
+     to make applyMap() (the one place the lod-* class is ever set) pick it
+     up — mirrors how a real zoom always runs through applyMap(). A real
+     camera command always cancels whatever tween was still running first
+     (animateMap/zoomAt both call cancelMapAnim() before moving) — without
+     the same here, a tween still in flight from an earlier action (e.g. an
+     ensureVisible glide right after growing a node) would win the very next
+     animation frame and silently overwrite the test's direct z write. */
+  applyMap: function () { cancelMapAnim(); applyMap(); }
+};
 
 /* ── persistence ─────────────────────────────────────────────────────────
    Two save paths, on purpose:
@@ -584,6 +823,16 @@ function applyState(json) {
   snapPrev = json;
   if (UI.sel && !N(UI.sel)) UI.sel = null;
   Object.keys(UI.marks).forEach(function (id) { if (!N(id)) delete UI.marks[id]; });
+  /* E5: an undo/redo just replaced S wholesale — a node radar is holding
+     open (in UI.radarExpanded) may have had its OWN collapsed flag restored
+     to false by the very edit being undone, independent of radar. Radar's
+     memory doesn't know that "the reason it was collapsed" no longer
+     applies, so forget it entirely and let refreshRadarExpansion() (called
+     by render() just below) rebuild it fresh against the now-current state:
+     anything still collapsed and still required gets force-opened again;
+     anything the undo/redo already opened on its own is simply left alone,
+     so radar-off later can never re-collapse what the user just undid. */
+  if (UI.radar) UI.radarExpanded = [];
   writeLocal();
   render();
   return true;
@@ -715,12 +964,31 @@ function spread(pId, px, py, center, span, depth, emit) {
    pinned and never shoved. */
 function settleMap(skipRelax) {
   var world = el('#world'); if (!world) return;
+  /* D10 fix (part 2): settleMap() only ever measures each node's CURRENT
+     offsetWidth/offsetHeight — i.e. its size at whatever LOD tier the view
+     happens to be in the moment render() runs. But root and depth-1 titles
+     counter-scale their font UP TO 2.2x at lod-far (A1, "so root/depth-1
+     titles stay legible" — see the .mapwrap.lod-far CSS above), and that is
+     a real font-size change, not a transform, so it genuinely grows the
+     node's world-space box. A 200-node map settles at lod-near/mid sizing
+     (that's what's on screen when render() runs), then Ctrl+0 zooms out to
+     fit everything, crossing into lod-far — at which point sibling
+     root-children's titles balloon up to 2.2x AFTER settling already
+     decided they had just enough room apart at their small size, so they
+     end up overlapping with no further settle pass ever re-checking it.
+     Reserve room for that worst case up front for exactly the two levels
+     that ever counter-scale (root = depth 0, and depth 1), so the very
+     first settle already leaves enough of a gap that ballooning into it
+     later at lod-far can never reopen an overlap. */
+  var LOD_GROW = 2.2;
   var list = els('.gm-node', world).map(function (n) {
+    var depth = n.dataset.depth != null ? +n.dataset.depth : 1;
+    var grow = (depth === 0 || depth === 1) ? LOD_GROW : 1;
     return {
       el: n,
       x: n.dataset.x != null ? +n.dataset.x : 0,
       y: n.dataset.y != null ? +n.dataset.y : 0,
-      w: n.offsetWidth, h: n.offsetHeight,
+      w: n.offsetWidth * grow, h: n.offsetHeight * grow,
       id: n.dataset.node,
       par: n.dataset.par || '',
       col: n.dataset.col || 'var(--gm-teal)',
@@ -730,7 +998,15 @@ function settleMap(skipRelax) {
 
   if (!skipRelax) {
     var PAD = 14;
-    for (var it = 0; it < 60; it++) {
+    /* D10 fix (part 1): 60 passes settles a typical few-dozen-node map fine,
+       but a dense 200-node stress map needs more rounds for a pairwise
+       relaxation to propagate all the way through — scale the cap with node
+       count (cheap: O(n^2) per pass, still trivial at this size) instead of
+       a fixed constant that only covers small maps. (Part 2, below, is the
+       actual root cause of the residual overlaps a bigger cap alone didn't
+       fix — the LOD_GROW reservation above.) */
+    var ITER_CAP = Math.max(60, Math.min(400, list.length * 3));
+    for (var it = 0; it < ITER_CAP; it++) {
       var moved = false;
       for (var i = 0; i < list.length; i++) {
         for (var j = i + 1; j < list.length; j++) {
@@ -774,7 +1050,12 @@ function settleMap(skipRelax) {
       var p = at[n.par]; if (!p) return '';
       var d = +n.el.dataset.depth || 1;
       var dim = n.el.classList.contains('hazed') ? 0.25 : 1;
-      return '<path class="tree" data-id="' + n.id + '" data-par="' + n.par + '" d="' + wire(p.x, p.y, n.x, n.y, n.id) +
+      /* A6: in the cards layer, radar ghosts the SELECTED node's own wires
+         back in via the same .gm-peek mechanism hover already uses there
+         (contract: "in cards layer the radar draws the selected node's
+         wires as ghosts") — no separate code path needed. */
+      var radarPeek = UI.radar && (n.id === UI.sel || n.par === UI.sel);
+      return '<path class="tree' + (radarPeek ? ' gm-peek' : '') + '" data-id="' + n.id + '" data-par="' + n.par + '" d="' + wire(p.x, p.y, n.x, n.y, n.id) +
         '" stroke="' + n.col + '" stroke-width="' + Math.max(1.2, 3 - d * 0.4) + '" opacity="' +
         ((0.32 + Math.max(0, 0.5 - d * 0.08)) * dim).toFixed(2) + '"' +
         (d > 2 ? ' stroke-dasharray="1 6"' : '') + '/>';
@@ -790,9 +1071,14 @@ function relPaths(at) {
   return S.links.map(function (l) {
     var a = at[l.from], b = at[l.to]; if (!a || !b) return '';
     var haze = (a.el.classList.contains('hazed') || b.el.classList.contains('hazed'));
+    /* A6: the selected node's OWN relations always draw at full opacity and
+       2px while radar is on, regardless of haze (contract Addendum A6). */
+    var radarFull = UI.radar && UI.sel && (l.from === UI.sel || l.to === UI.sel);
+    var op = radarFull ? 1 : (haze ? 0.15 : 0.65);
+    var w = radarFull ? 2 : 1.6;
     return '<path class="rel" data-link="' + l.id + '" d="M' + a.x.toFixed(1) + ',' + a.y.toFixed(1) +
-      ' L' + b.x.toFixed(1) + ',' + b.y.toFixed(1) + '" stroke="var(--sh-text-med)" stroke-width="1.6"' +
-      ' opacity="' + (haze ? 0.15 : 0.65) + '" marker-end="url(#gmArrow)"/>';
+      ' L' + b.x.toFixed(1) + ',' + b.y.toFixed(1) + '" stroke="var(--sh-text-med)" stroke-width="' + w + '"' +
+      ' opacity="' + op + '" marker-end="url(#gmArrow)"/>';
   }).join('');
 }
 function positionRelLabels(at) {
@@ -825,10 +1111,43 @@ function lensSet() {
   descendantsOf(UI.sel).forEach(function (d) { keep[d.id] = 1; });
   return keep;
 }
+/* ── A6 link radar — what stays sharp while it's on ─────────────────────
+   Selected node, its parent, its children, and everything it's cross-
+   linked with either direction (contract Addendum A6). Independent of the
+   focus lens above — a node must survive EVERY active filter to stay sharp
+   (see haze() below), so radar and lens compose rather than fight. */
+function radarSet() {
+  if (!UI.radar || !UI.sel || !N(UI.sel)) return null;
+  var sel = N(UI.sel), keep = {};
+  keep[sel.id] = 1;
+  if (sel.parent != null) keep[sel.parent] = 1;
+  childrenOf(sel.id).forEach(function (c) { keep[c.id] = 1; });
+  linksOf(sel.id).forEach(function (l) { keep[l.from] = 1; keep[l.to] = 1; });
+  return keep;
+}
+/* ── A9 branch solo — everything under the soloed top-level branch (plus
+   the root itself, so the spine reads) stays sharp; the rest of the map
+   hazes exactly like the lens. */
+function soloSet() {
+  if (!UI.soloBranch || !N(UI.soloBranch)) return null;
+  var keep = {}, root = rootNode();
+  keep[root.id] = 1;
+  keep[UI.soloBranch] = 1;
+  descendantsOf(UI.soloBranch).forEach(function (d) { keep[d.id] = 1; });
+  return keep;
+}
+/* Combine lens/radar/solo: a node must pass every currently-active filter
+   to stay sharp — hazed if ANY active filter excludes it. Each of the three
+   *Set() functions above already returns null when its own toggle is off,
+   so an inactive filter never contributes a haze. */
+function hazeSets() { return { lens: lensSet(), radar: radarSet(), solo: soloSet() }; }
+function isHazed(sets, id) {
+  return (sets.lens && !sets.lens[id]) || (sets.radar && !sets.radar[id]) || (sets.solo && !sets.solo[id]);
+}
 
 /* ── the plane's contents ────────────────────────────────────────────── */
 function mapWorld() {
-  var LENS = lensSet();
+  var HAZE = hazeSets();
   var nodes = '';
   var root = rootNode();
 
@@ -840,20 +1159,32 @@ function mapWorld() {
   function nodeHTML(node, x, y, depth, parId, accentVar) {
     var isRoot = !node.parent;
     var kids = childrenOf(node.id);
-    var haze = LENS && !LENS[node.id];
+    var haze = isHazed(HAZE, node.id);
     var marked = !!UI.marks[node.id];
     var pinned = (typeof node.mx === 'number' && typeof node.my === 'number');
     var accent = isRoot ? '' : (node.accent || accentVar || ACCENTS[0]);
     var collapsedCount = node.collapsed ? descendantsOf(node.id).length : 0;
+    var kind = node.kind && KINDS.indexOf(node.kind) > 0 ? node.kind : '';  /* A4: 'concept' (index 0) never gets a class */
+    var glyph = kind ? KIND_GLYPH[kind] : '';
+    var hub = linksOf(node.id).length >= 2;                                /* A7 */
+    var bridgeEditing = UI.editingBridge === node.id;
+    var hint = 'לחיצה לבחירה · לחיצה כפולה לעריכה — click to select, double-click to rename' +
+      (node.bridge ? ' — 🪙 ' + node.bridge : '');                          /* A5: tooltip works at any zoom */
     nodes += '<div class="gm-node gm-glass' + (isRoot ? ' root' : '') + (isSel(node.id) ? ' sel' : '') +
-      (marked ? ' marked' : '') + (haze ? ' hazed' : '') + (UI.relFrom === node.id ? ' relsrc' : '') + '"' +
+      (marked ? ' marked' : '') + (haze ? ' hazed' : '') + (UI.relFrom === node.id ? ' relsrc' : '') +
+      (kind ? ' gm-kind-' + kind : '') + (hub ? ' hub' : '') + '"' +
       ' data-node="' + node.id + '" data-x="' + x.toFixed(1) + '" data-y="' + y.toFixed(1) + '"' +
       ' data-depth="' + depth + '" data-par="' + esc(parId || '') + '" data-col="var(' + accent + ')"' +
       ' data-pinned="' + (isRoot ? 2 : (pinned ? 1 : 0)) + '"' +
+      (node.collapsed ? ' data-collapsed="1"' : '') +
       ' style="left:' + x.toFixed(1) + 'px;top:' + y.toFixed(1) + 'px' + (accent ? ';--acc:var(' + accent + ')' : '') + '"' +
-      ' role="button" tabindex="0" title="לחיצה לבחירה · לחיצה כפולה לעריכה — click to select, double-click to rename">' +
+      ' role="button" tabindex="0" title="' + esc(hint) + '">' +
       (accent ? '<span class="gm-stripe" aria-hidden="true"></span>' : '') +
-      '<span class="gm-ttl gm-bidi" dir="auto">' + esc(node.title) + '</span>' +
+      '<span class="gm-ttl gm-bidi" dir="auto">' +
+        (glyph ? '<span class="gm-glyph" aria-hidden="true">' + glyph + '</span>' : '') +
+        esc(node.title) + '</span>' +
+      (node.bridge != null ? '<div class="gm-bridge gm-bidi' + (bridgeEditing ? ' force' : '') + '" data-bridge="' + node.id + '">' +
+        '<span aria-hidden="true">🪙</span><span class="gm-bridge-txt" dir="auto">' + esc(node.bridge) + '</span></div>' : '') +
       '<div class="gm-meta">' +
         (node.body ? '<span class="gm-note-mark" title="יש הערה — has a note">&#9998;</span>' : '') +
         (node.collapsed && collapsedCount ? '<span class="gm-badge" title="מקופל — collapsed">+' + collapsedCount + '</span>' : '') +
@@ -866,7 +1197,6 @@ function mapWorld() {
   spread(root.id, 0, 0, 0, Math.PI * 2, 1, function (n, x, y, d, par) {
     nodeHTML(n, x, y, d, par, n.accent);
   });
-  var rhaze = LENS && !LENS[root.id];
   nodeHTML(Object.assign({}, root, { accent: null }), 0, 0, 0, '', null);
   /* nodeHTML always appends — the call above ran once more for the root
      itself, after its children were emitted, so it draws on top (z-order:
@@ -916,10 +1246,30 @@ function renderMapctl() {
    ═══════════════════════════════════════════════════════════════════════ */
 
 function mapView() { return S.view; }
+/* A1: the three altitudes, purely a function of z — see contract Addendum
+   A1's thresholds verbatim. */
+function lodClass(z) {
+  if (z < 0.45) return 'lod-far';
+  if (z < 0.9) return 'lod-mid';
+  return 'lod-near';
+}
 function applyMap() {
   var w = el('#world'); if (!w) return;
   var v = mapView();
   w.style.transform = 'translate(' + v.x.toFixed(1) + 'px,' + v.y.toFixed(1) + 'px) scale(' + v.z.toFixed(3) + ')';
+  /* A1 semantic zoom: every camera move (pan, zoom, glide, tween step) runs
+     through here, so the LOD class and the --gm-z counter-scale variable
+     are always current — never set anywhere else. */
+  var wrap = el('#mapwrap');
+  if (wrap) {
+    wrap.style.setProperty('--gm-z', v.z);
+    var cls = lodClass(v.z);
+    if (wrap.dataset.lod !== cls) {
+      wrap.classList.remove('lod-far', 'lod-mid', 'lod-near');
+      wrap.classList.add(cls);
+      wrap.dataset.lod = cls;
+    }
+  }
   updateBars();
 }
 var viewPersistTimer = null;
@@ -973,6 +1323,13 @@ function updateBars() {
 
 /* ── gliding the view ────────────────────────────────────────────────── */
 var MAP_ANIM = 0, FOCUS_Z = 1.35;
+/* E8 fix: the tween's own destination, while one is in flight; null once it
+   settles (or never started). jumpSnapshot() (A3 jump history) reads THIS
+   instead of the live view when set, so interrupting a tween with Alt+←
+   records where the camera was actually GOING, not an arbitrary mid-glide
+   position — otherwise Alt+→ "redo" would restore that arbitrary point
+   instead of the dive/zoom-to-branch's real, fully-settled target. */
+var MAP_ANIM_TARGET = null;
 function cancelMapAnim() { if (MAP_ANIM) { cancelAnimationFrame(MAP_ANIM); MAP_ANIM = 0; } }
 function reduceMotion() {
   try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
@@ -980,7 +1337,8 @@ function reduceMotion() {
 function animateMap(tx, ty, tz, ms) {
   cancelMapAnim();
   var v = mapView();
-  if (!ms || reduceMotion()) { v.x = tx; v.y = ty; v.z = tz; applyMap(); schedulePersistView(); return; }
+  MAP_ANIM_TARGET = { x: tx, y: ty, z: tz };
+  if (!ms || reduceMotion()) { v.x = tx; v.y = ty; v.z = tz; applyMap(); schedulePersistView(); MAP_ANIM_TARGET = null; return; }
   var sx = v.x, sy = v.y, sz = v.z, t0 = 0;
   MAP_ANIM = requestAnimationFrame(function step(ts) {
     if (!t0) t0 = ts;
@@ -988,7 +1346,7 @@ function animateMap(tx, ty, tz, ms) {
     var e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
     v.x = sx + (tx - sx) * e; v.y = sy + (ty - sy) * e; v.z = sz + (tz - sz) * e;
     applyMap();
-    if (p >= 1) { MAP_ANIM = 0; schedulePersistView(); } else MAP_ANIM = requestAnimationFrame(step);
+    if (p >= 1) { MAP_ANIM = 0; MAP_ANIM_TARGET = null; schedulePersistView(); } else MAP_ANIM = requestAnimationFrame(step);
   });
 }
 function focusOn(wx, wy, z, ms) {
@@ -1021,10 +1379,10 @@ function selNode(id, opts) {
   if (n && !(opts && opts.quiet)) ensureVisible(n);
   return n;
 }
-function editSelected() {
+function editSelected(onCancel) {
   var node = UI.sel && N(UI.sel), n = selDom(), t = selText(n);
   if (!node || !t) return;
-  inlineEdit(t, function (v) { node.title = v; save(); render(); }, { grow: true });
+  inlineEdit(t, function (v) { node.title = v; save(); render(); }, { grow: true, onCancel: onCancel });
 }
 /* Open the body sheet for the selected node's notes (key `E`). */
 function editSelectedBody() {
@@ -1036,10 +1394,21 @@ function editSelectedBody() {
 /* ── growing the tree — Tab / Enter / Shift+Enter / Ctrl+Enter / Ctrl+D ──
    Names kept from WaffleTask (growChild/growSibling/growAndEdit) even
    though there is no more project/task split to dispatch on. */
+/* D1/D11 fix: these four "grow" functions used to call save() the instant
+   they ran — pushing a blank-titled node into S AND committing it to the
+   undo stack and localStorage before the inline-edit box the caller opens
+   right after even exists. That meant (a) a single Ctrl+Z after typing a
+   real title only undid the LABEL commit, leaving a permanent empty-titled
+   orphan behind (a second Ctrl+Z was needed), and (b) Escape — or simply
+   reloading — before ever typing anything still left that blank node
+   sitting in the tree and already durably saved. They now only mutate
+   S.nodes/S.links in memory; growAndEdit() (below) is the sole caller and
+   owns the single save() for the whole gesture — either committing the
+   real title in one shot, or rolling the in-memory mutation back to
+   nothing if the edit is cancelled. */
 function newChildOf(pid) {
   var n = { id: uid('n'), parent: pid, title: '', body: '', accent: accentFor(pid) };
   S.nodes.push(n);
-  save();
   return n.id;
 }
 function growChild() {
@@ -1053,7 +1422,6 @@ function growSibling() {
   var n = { id: uid('n'), parent: node.parent, title: '', body: '', accent: accentFor(node.parent) };
   var idx = S.nodes.indexOf(node);
   S.nodes.splice(idx + 1, 0, n);                            /* next sibling, right after `node` in array order */
-  save();
   return n.id;
 }
 function growSiblingBefore() {
@@ -1063,7 +1431,6 @@ function growSiblingBefore() {
   var n = { id: uid('n'), parent: node.parent, title: '', body: '', accent: accentFor(node.parent) };
   var idx = S.nodes.indexOf(node);
   S.nodes.splice(idx, 0, n);                                /* previous sibling, right before `node` */
-  save();
   return n.id;
 }
 /* Ctrl+Enter — insert a new parent between the selection and its own
@@ -1078,7 +1445,6 @@ function insertParent() {
   var idx = S.nodes.indexOf(node);
   S.nodes.splice(idx, 0, p);
   node.parent = p.id;
-  save();
   return p.id;
 }
 /* Ctrl+D — duplicate the selected node and its whole subtree as the next
@@ -1089,7 +1455,7 @@ function duplicateNode(id) {
   if (!orig.parent) { toast('אי אפשר לשכפל את השורש — cannot duplicate the root'); return null; }
   var clones = [];
   function cloneRec(n, newParent) {
-    var c = { id: uid('n'), parent: newParent, title: n.title, body: n.body, accent: n.accent, collapsed: n.collapsed };
+    var c = { id: uid('n'), parent: newParent, title: n.title, body: n.body, accent: n.accent, collapsed: n.collapsed, kind: n.kind, bridge: n.bridge };
     clones.push(c);
     childrenOf(n.id).forEach(function (k) { cloneRec(k, c.id); });
     return c;
@@ -1101,14 +1467,36 @@ function duplicateNode(id) {
   save();
   return top.id;
 }
-function growAndEdit(make) {
+/* `blank` marks the four Tab/Enter/Shift+Enter/Ctrl+Enter creation paths,
+   whose new node/parent starts out titleless: their whole gesture (the
+   structural mutation `make()` just performed, PLUS the title the user is
+   about to type) is one undo step and one save (D1), and if the inline
+   edit that follows is cancelled — Escape, or a blur/Tab with nothing ever
+   typed — the mutation is rolled back in memory to before it happened,
+   nothing having been saved at all (D11). Ctrl+D (duplicateNode) does NOT
+   pass `blank`: it already has real content and already saved itself, so
+   accepting its pre-filled title as-is (the common "just duplicate it, no
+   rename needed" flow) must NOT be treated as "cancelled" and rolled back. */
+function growAndEdit(make, blank) {
+  if (UI.relFrom) cancelRelation();     /* D3: a growth action always retires a pending Ctrl+L relation */
+  var beforeSel = UI.sel;
+  var beforeNodes = blank ? JSON.parse(JSON.stringify(S.nodes)) : null;
   var next = make();
   if (!next) return;
   UI.sel = next;
   mapView().touched = true;
   render();
   var n = selDom();
-  if (n) { ensureVisible(n); setTimeout(function () { editSelected(); }, 30); }
+  if (n) {
+    ensureVisible(n);
+    setTimeout(function () {
+      editSelected(blank ? function () {
+        S.nodes = beforeNodes;
+        UI.sel = (beforeSel && N(beforeSel)) ? beforeSel : null;
+        render();
+      } : null);
+    }, 30);
+  }
 }
 
 /* ── delete ──────────────────────────────────────────────────────────────
@@ -1233,6 +1621,7 @@ function closeFind() {
 function findJumpFirst() {
   var hit = findMatches(); if (!hit) return;
   var id = Object.keys(hit)[0]; if (!id) { toast('אין תוצאות — no matches'); return; }
+  pushJumpHistory();   /* A3: find-Enter is one of the listed "programmatic jump" triggers */
   selNode(id);
 }
 
@@ -1260,12 +1649,25 @@ function completeRelation(toId) {
   if (!fromId || fromId === toId) return;
   var exists = S.links.some(function (l) { return (l.from === fromId && l.to === toId) || (l.from === toId && l.to === fromId); });
   if (exists) { toast('כבר קיים קשר — a relation already exists there'); return; }
+  /* D1 (relation variant) fix: this used to save() the blank-labelled link
+     immediately, then save() AGAIN when the label's inline edit committed —
+     one Ctrl+L gesture, two undo entries, so a single Ctrl+Z only reverted
+     the label and left the link behind. Mirror the node-growth fix: don't
+     save() until the label is actually committed; if that edit is
+     cancelled instead (Escape, or blur with nothing typed), the relation
+     never happened and is removed rather than persisted half-done. */
   var l = { id: uid('l'), from: fromId, to: toId, label: '' };
   S.links.push(l);
-  save(); render();
+  render();
   var pill = el('.gm-rellabel[data-link="' + l.id + '"] .gm-relttl');
-  if (pill) setTimeout(function () {
-    inlineEdit(pill, function (v) { l.label = v; save(); render(); });
+  if (!pill) { save(); return; }         /* no label UI available — persist the (unlabelled) relation as-is */
+  setTimeout(function () {
+    inlineEdit(pill, function (v) { l.label = v; save(); render(); }, {
+      onCancel: function () {
+        S.links = S.links.filter(function (x) { return x.id !== l.id; });
+        render();
+      }
+    });
   }, 30);
 }
 function deleteLink(id) {
@@ -1296,16 +1698,31 @@ function mapKeys(ev) {
   if (inField()) return;
   if (el('#helpOverlay').classList.contains('open') && ev.key !== '?' && ev.key !== 'Escape') return;
 
+  /* A3 jump history: Alt+← / Alt+→, ahead of everything else so no other
+     binding can shadow it (there is no unmodified use of these arrows). */
+  if (ev.altKey && !ev.ctrlKey && !ev.metaKey) {
+    if (ev.key === 'ArrowLeft') { ev.preventDefault(); historyBack(); return; }
+    if (ev.key === 'ArrowRight') { ev.preventDefault(); historyForward(); return; }
+    return;
+  }
   if (!ev.ctrlKey && !ev.metaKey && !ev.altKey && ARROWS[ev.key]) {
     ev.preventDefault(); stepSel(ARROWS[ev.key], ev.shiftKey); return;
   }
   if ((ev.ctrlKey || ev.metaKey) && !ev.altKey) {
+    /* A3: Ctrl+↓/↑ dive/surface, Ctrl+←/→ previous/next sibling — checked
+       before the lower-cased letter dispatch below since arrow key names
+       aren't letters anyway, but keeping the tree-navigation keys grouped
+       together here matches how they're grouped in the contract. */
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); diveOneLevel(); return; }
+    if (ev.key === 'ArrowUp') { ev.preventDefault(); surfaceOneLevel(); return; }
+    if (ev.key === 'ArrowLeft') { ev.preventDefault(); siblingStep(-1); return; }
+    if (ev.key === 'ArrowRight') { ev.preventDefault(); siblingStep(1); return; }
     var k = ev.key.toLowerCase();
     if (k === 'z') { ev.preventDefault(); if (ev.shiftKey) redo(); else undo(); return; }
     if (k === 'y') { ev.preventDefault(); redo(); return; }
     if (k === 'l') { ev.preventDefault(); if (UI.relFrom) cancelRelation(); else startRelation(); return; }
     if (k === 'd') { ev.preventDefault(); if (UI.sel) growAndEdit(function () { return duplicateNode(UI.sel); }); return; }
-    if (k === 'enter') { ev.preventDefault(); growAndEdit(insertParent); return; }
+    if (k === 'enter') { ev.preventDefault(); growAndEdit(insertParent, true); return; }
     if (k === '/') { ev.preventDefault(); toggleCollapse(); return; }
     if (k === 'a') { ev.preventDefault(); S.nodes.forEach(function (n) { UI.marks[n.id] = 1; }); render(); return; }
     if (k === 'f') { ev.preventDefault(); openFind(); return; }
@@ -1313,23 +1730,33 @@ function mapKeys(ev) {
     if (k === '0') { ev.preventDefault(); fitMap(460); return; }
     if (k === '=' || k === '+') { ev.preventDefault(); zoomAtCentre(1.2); return; }
     if (k === '-') { ev.preventDefault(); zoomAtCentre(1 / 1.2); return; }
+    if (k === 'k') { ev.preventDefault(); openSwitcher(); return; }                       /* A10 */
     return;
   }
   if (ev.key === '/') { ev.preventDefault(); openFind(); return; }
   if (ev.key === '?') { ev.preventDefault(); toggleHelp(); return; }
+  if (ev.key === 'z' || ev.key === 'Z') { ev.preventDefault(); onKeyZ(); return; }         /* A2 */
+  if (ev.key === 'Home') { ev.preventDefault(); goHome(); return; }                        /* A1 preset */
   if (ev.key === 'l' || ev.key === 'L') { ev.preventDefault(); toggleLayer(); return; }
+  if (ev.key === 'k') { ev.preventDefault(); cycleKind(1); return; }                       /* A4 */
+  if (ev.key === 'K') { ev.preventDefault(); cycleKind(-1); return; }                       /* A4 Shift+K */
+  if (ev.key === 'b' || ev.key === 'B') { ev.preventDefault(); editBridge(); return; }      /* A5 */
+  if (ev.key === 'r' || ev.key === 'R') { ev.preventDefault(); toggleRadar(); return; }     /* A6 */
+  if (/^[1-9]$/.test(ev.key)) { ev.preventDefault(); soloByDigit(+ev.key); return; }         /* A9 */
   if ((ev.key === 'a' || ev.key === 'A') && UI.sel) { ev.preventDefault(); markBranch(UI.sel); render(); return; }
   if (ev.key === 'e' || ev.key === 'E') { ev.preventDefault(); editSelectedBody(); return; }
   if (ev.key === 'Escape') {
     if (el('#helpOverlay').classList.contains('open')) { toggleHelp(); return; }
     if (UI.relFrom) { cancelRelation(); return; }
+    if (UI.radar) { setRadar(false); return; }                                             /* A6: before marks */
+    if (UI.soloBranch) { clearSolo(); return; }                                            /* A9: before marks */
     if (markedIds().length) { clearMarks(); render(); return; }
     if (UI.sel) { UI.sel = null; DEL_ARMED = 0; DEL_ARMED_FOR = ''; render(); return; }
     return;
   }
   if (!UI.sel && ev.key !== 'Tab' && ev.key !== 'Enter') return;
-  if (ev.key === 'Tab') { ev.preventDefault(); growAndEdit(growChild); return; }
-  if (ev.key === 'Enter') { ev.preventDefault(); growAndEdit(ev.shiftKey ? growSiblingBefore : growSibling); return; }
+  if (ev.key === 'Tab') { ev.preventDefault(); growAndEdit(growChild, true); return; }
+  if (ev.key === 'Enter') { ev.preventDefault(); growAndEdit(ev.shiftKey ? growSiblingBefore : growSibling, true); return; }
   if (ev.key === 'F2' || ev.key === ' ') { ev.preventDefault(); editSelected(); return; }
   if (ev.key === 'Delete' || ev.key === 'Backspace') {
     ev.preventDefault();
@@ -1383,6 +1810,144 @@ function fitMap(ms) {
   v.fit = true;
   animateMap(r.width / 2 - ((minX + maxX) / 2) * z, r.height / 2 - ((minY + maxY) / 2) * z, z, ms);
 }
+/* ── A2 zoom-to-branch (Z) ────────────────────────────────────────────────
+   Fit the viewport to the bounding box of a node's VISIBLE subtree (itself
+   plus every descendant not hidden behind a collapsed ancestor) — contract
+   Addendum A2. Reuses fitMap's own tween (animateMap), just over a subtree
+   box instead of the whole map's; capped at z 1.4 instead of fitMap's 1.1
+   so zooming into one small leaf doesn't blow past a sane closeup. */
+function visibleSubtreeIds(id) {
+  var out = [id];
+  (function walk(pid) {
+    var node = N(pid);
+    if (node && node.collapsed) return;      /* children exist in S but aren't on the plane */
+    childrenOf(pid).forEach(function (c) { out.push(c.id); walk(c.id); });
+  })(id);
+  return out;
+}
+function subtreeWorldBox(ids) {
+  var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9, any = false;
+  ids.forEach(function (id) {
+    var n = el('.gm-node[data-node="' + id + '"]'); if (!n) return;
+    any = true;
+    var x = +n.dataset.x || 0, y = +n.dataset.y || 0;
+    var hw = (n.offsetWidth || 160) / 2, hh = (n.offsetHeight || 60) / 2;
+    minX = Math.min(minX, x - hw); maxX = Math.max(maxX, x + hw);
+    minY = Math.min(minY, y - hh); maxY = Math.max(maxY, y + hh);
+  });
+  return any ? { minX: minX, minY: minY, maxX: maxX, maxY: maxY } : null;
+}
+function zoomToBranch(id, ms) {
+  if (!id || !N(id)) { fitMap(ms); return; }         /* "with no selection = fit all" */
+  var box = subtreeWorldBox(visibleSubtreeIds(id));
+  var wrap = el('#mapwrap'); if (!wrap || !box) return;
+  var r = wrap.getBoundingClientRect();
+  var pad = 80, bw = (box.maxX - box.minX) + pad * 2, bh = (box.maxY - box.minY) + pad * 2;
+  var v = mapView();
+  var z = Math.max(0.22, Math.min(1.4, Math.min(r.width / bw, r.height / bh)));
+  v.fit = true;
+  animateMap(r.width / 2 - ((box.minX + box.maxX) / 2) * z, r.height / 2 - ((box.minY + box.maxY) / 2) * z, z, ms == null ? 460 : ms);
+}
+/* Z zoomed once already inside 400ms → this second press dives instead
+   (contract A2: "double-tap Z (within 400ms) = dive one level (A3)"). */
+var LAST_Z_AT = 0, LAST_Z_SEL = null;
+function onKeyZ() {
+  var now = Date.now();
+  /* E12 fix: double-tap detection was time-only, so switching the
+     selection to a different node and pressing Z once — anywhere inside
+     400ms of an EARLIER Z press on a DIFFERENT node — misfired as a dive.
+     Require the current selection to be the same node the previous Z
+     acted on, not just "recently enough", before treating this press as
+     the second tap. */
+  if (now - LAST_Z_AT < 400 && UI.sel && UI.sel === LAST_Z_SEL) { LAST_Z_AT = 0; LAST_Z_SEL = null; diveOneLevel(); }
+  else { LAST_Z_AT = now; LAST_Z_SEL = UI.sel; zoomToBranch(UI.sel, 460); }
+}
+/* Home (A1 camera preset): glide to the root at a mid-altitude zoom. The
+   root is always placed at world (0,0) — spread() starts it there and
+   settleMap()'s rank===2 keeps it pinned — so there is nothing to look up.
+   E13 fix: this used to move only the camera, never the selection — a node
+   selected (and on screen) somewhere far from the root stayed "selected"
+   after the glide while its gold ring/addkid sat off-screen with nothing
+   on screen showing it, so the very next selection-scoped shortcut would
+   silently act on a node the user could no longer see. Selecting the root
+   (a programmatic jump, so it goes through the same history stack as
+   dive/surface/switcher/breadcrumb) keeps the selection and the camera in
+   sync, same as every other camera preset here. */
+function goHome() {
+  pushJumpHistory();
+  UI.sel = rootNode().id;
+  render();
+  focusOn(0, 0, 0.65, 460);
+}
+
+/* ── A3 dive / surface / siblings + jump history ─────────────────────────
+   Ctrl+↓ / Ctrl+↑ / Ctrl+← / Ctrl+→ walk the tree with the camera glued to
+   the selection; every one of them is a "programmatic jump" (contract: "…
+   pushes {sel, view} onto a history stack"), so Alt+← / Alt+→ can always
+   step back through wherever the keyboard (or a breadcrumb chip, A8) has
+   taken you. History push happens BEFORE the jump — it records where you
+   were, not where you're going. */
+var JUMP_HIST = [], JUMP_FUTURE = [], HIST_CAP = 50;
+function jumpSnapshot() {
+  var v = mapView();
+  var view = MAP_ANIM_TARGET ? { x: MAP_ANIM_TARGET.x, y: MAP_ANIM_TARGET.y, z: MAP_ANIM_TARGET.z } : { x: v.x, y: v.y, z: v.z };
+  return { sel: UI.sel, view: view };
+}
+function pushJumpHistory() {
+  JUMP_HIST.push(jumpSnapshot());
+  if (JUMP_HIST.length > HIST_CAP) JUMP_HIST.shift();
+  JUMP_FUTURE.length = 0;               /* a fresh jump retires whatever redo there was */
+}
+function goToJump(snap) {
+  UI.sel = snap.sel && N(snap.sel) ? snap.sel : null;
+  render();
+  var v = mapView();
+  v.fit = true;
+  animateMap(snap.view.x, snap.view.y, snap.view.z, 460);
+}
+function historyBack() {
+  if (!JUMP_HIST.length) { toast('אין עוד היסטוריה — no more history'); return; }
+  JUMP_FUTURE.push(jumpSnapshot());
+  goToJump(JUMP_HIST.pop());
+}
+function historyForward() {
+  if (!JUMP_FUTURE.length) { toast('אין קדימה — nothing to redo'); return; }
+  JUMP_HIST.push(jumpSnapshot());
+  goToJump(JUMP_FUTURE.pop());
+}
+function diveOneLevel() {
+  var cur = UI.sel && N(UI.sel);
+  if (!cur) { toast('בחר נושא קודם — select a node first'); return; }
+  var kids = childrenOf(cur.id);
+  if (!kids.length) { toast('אין תת-נושאים — no children'); return; }
+  pushJumpHistory();
+  if (cur.collapsed) { cur.collapsed = false; save(); }
+  UI.sel = kids[0].id;
+  render();
+  zoomToBranch(UI.sel, 460);
+}
+function surfaceOneLevel() {
+  var cur = UI.sel && N(UI.sel);
+  if (!cur || cur.parent == null) { toast('כבר בשורש — already at the root'); return; }
+  pushJumpHistory();
+  UI.sel = cur.parent;
+  render();
+  zoomToBranch(UI.sel, 460);
+}
+function siblingStep(dir) {
+  var cur = UI.sel && N(UI.sel);
+  if (!cur || cur.parent == null) return;
+  var sibs = childrenOf(cur.parent);
+  if (sibs.length < 2) return;
+  var idx = -1;
+  sibs.forEach(function (s, i) { if (s.id === cur.id) idx = i; });
+  if (idx < 0) return;
+  pushJumpHistory();
+  UI.sel = sibs[(idx + dir + sibs.length) % sibs.length].id;
+  render();
+  var n = selDom();                      /* "glide only" — recentre, don't zoom-to-branch */
+  if (n) focusOn(+n.dataset.x || 0, +n.dataset.y || 0, mapView().z, 380);
+}
 function zoomAt(cx, cy, factor) {
   cancelMapAnim();
   var v = mapView();
@@ -1425,6 +1990,131 @@ function hitsAny(cx, cy, hw, hh, boxes) {
   }
   return false;
 }
+
+/* ── A4 node kinds — K / Shift+K ─────────────────────────────────────────
+   Cycles concept→known→bridge→gap→question (Shift+K goes the other way).
+   Applies to the whole marked set when one exists, else just the
+   selection — a plain single-node edit either way. */
+function cycleKind(dir) {
+  var ids = markedIds();
+  if (!ids.length) {
+    if (!UI.sel) { toast('בחר נושא קודם — select a node first'); return; }
+    ids = [UI.sel];
+  }
+  ids.forEach(function (id) {
+    var n = N(id); if (!n) return;
+    var cur = KINDS.indexOf(n.kind || 'concept'); if (cur < 0) cur = 0;
+    var next = (cur + dir + KINDS.length) % KINDS.length;
+    if (KINDS[next] === 'concept') delete n.kind; else n.kind = KINDS[next];
+  });
+  save(); render();
+}
+
+/* ── A5 anchor chip — B ───────────────────────────────────────────────────
+   Creates an empty chip on the first press (contract: "empty chip is
+   created on first B"); UI.editingBridge forces it visible regardless of
+   LOD while the inline edit is open (see the .gm-bridge.force CSS). Left
+   empty on commit → removed entirely rather than kept as a blank chip. */
+function editBridge() {
+  var node = UI.sel && N(UI.sel);
+  if (!node) { toast('בחר נושא קודם — select a node first'); return; }
+  var had = typeof node.bridge === 'string';
+  if (!had) node.bridge = '';
+  UI.editingBridge = node.id;
+  render();
+  setTimeout(function () {
+    var txt = el('.gm-node[data-node="' + node.id + '"] .gm-bridge-txt');
+    if (!txt) { UI.editingBridge = null; return; }
+    inlineEdit(txt, function (v) {
+      node.bridge = v;
+      if (!v) delete node.bridge;
+      UI.editingBridge = null;
+      save(); render();
+    }, {
+      onCancel: function () {
+        if (!had || !node.bridge) delete node.bridge;
+        UI.editingBridge = null; render();
+      }
+    });
+  }, 30);
+}
+
+/* ── A6 link radar — R ────────────────────────────────────────────────────
+   Turning on temporarily expands any collapsed ancestor of a cross-linked
+   node (contract: "collapsed ancestors of a linked node are temporarily
+   expanded"), remembered in UI.radarExpanded so turning it off restores
+   exactly those and no others. Deliberately does NOT go through save(): a
+   radar peek is a view thing, not an edit, and mustn't fill the undo stack
+   or be reported as a change. */
+/* E4/E5 fix: the ancestor-expansion used to be captured ONCE, at the exact
+   moment `R` was pressed, against whatever UI.sel was then — reselecting
+   while radar stayed on never re-ran it (the newly-linked node's collapsed
+   ancestor stayed shut, and the OLD selection's expanded ancestor was never
+   cleaned up either), and an intervening undo/redo could restore a node's
+   collapsed flag out from under radar's stale bookkeeping, only for
+   radar-off to blindly stomp it back (E5). Recomputing the required set
+   from the LIVE selection every time (render(), and after undo/redo) and
+   diffing it against what radar itself currently holds open fixes both:
+   anything no longer required is handed back (recollapsed) here and then,
+   so any state change that happens in between (an undo undoing the very
+   collapse radar had forced open) is never fought later by a stale entry. */
+function radarRequiredAncestorIds() {
+  if (!UI.radar || !UI.sel || !N(UI.sel)) return [];
+  var ids = [];
+  linksOf(UI.sel).forEach(function (l) {
+    var otherId = l.from === UI.sel ? l.to : l.from;
+    ancestorChain(otherId).forEach(function (a) { if (ids.indexOf(a.id) < 0) ids.push(a.id); });
+  });
+  return ids;
+}
+function refreshRadarExpansion() {
+  if (!UI.radar) return;
+  var required = radarRequiredAncestorIds();
+  UI.radarExpanded = UI.radarExpanded.filter(function (id) {
+    if (required.indexOf(id) !== -1) return true;
+    var n = N(id); if (n) n.collapsed = true;                 /* no longer needed — hand it back */
+    return false;
+  });
+  required.forEach(function (id) {
+    if (UI.radarExpanded.indexOf(id) !== -1) return;
+    var n = N(id);
+    if (n && n.collapsed) { n.collapsed = false; UI.radarExpanded.push(id); }
+  });
+}
+function setRadar(on) {
+  if (on) {
+    if (!UI.sel) { toast('בחר נושא קודם — select a node first'); return; }
+    UI.radar = true;
+    UI.radarExpanded = [];
+    refreshRadarExpansion();
+  } else {
+    UI.radar = false;
+    UI.radarExpanded.forEach(function (id) { var n = N(id); if (n) n.collapsed = true; });
+    UI.radarExpanded = [];
+  }
+  render();
+}
+function toggleRadar() { setRadar(!UI.radar); }
+
+/* ── A9 branch legend + solo ──────────────────────────────────────────────
+   Digits 1-9 and legend-chip clicks (wired in the document click delegate,
+   part 5) both land here. */
+function topBranches() { return childrenOf(rootNode().id); }
+function soloBranchClick(id) {
+  if (UI.soloBranch === id) { clearSolo(); return; }
+  UI.soloBranch = id;
+  render();
+  zoomToBranch(id, 460);
+}
+function clearSolo() {
+  if (!UI.soloBranch) return;
+  UI.soloBranch = null;
+  render();
+}
+function soloByDigit(n) {
+  var b = topBranches()[n - 1];
+  if (b) soloBranchClick(b.id);
+}
 </script>
 
 <script>
@@ -1442,6 +2132,27 @@ function hitsAny(cx, cy, hw, hh, boxes) {
    waffletask-board.md, copied on purpose rather than re-derived.
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* E10 fix: the resettle timers below were guarded only by `view.touched`,
+   which a real, sustained node-drag never set (fixed separately, above, in
+   the pointermove handler) — but even that only covers gestures the map's
+   OWN pointerdown handler recognised. Belt-and-suspenders: track ANY
+   pointer currently held down ANYWHERE on the page (capture phase, so it
+   sees the press regardless of what it lands on) and have resettle() defer
+   to it too, so a resettle can never fire — and silently reposition
+   whatever is under the user's held-down pointer — while a press is still
+   in progress. Nothing is lost: releasing the pointer re-runs the same
+   check once, so a still-untouched view still gets its auto-fit the
+   moment the press ends. */
+var POINTERS_DOWN = 0;
+window.addEventListener('pointerdown', function () { POINTERS_DOWN++; }, true);
+window.addEventListener('pointerup', function () {
+  POINTERS_DOWN = Math.max(0, POINTERS_DOWN - 1);
+  if (!POINTERS_DOWN && mountMap.resettle) mountMap.resettle();
+}, true);
+window.addEventListener('pointercancel', function () {
+  POINTERS_DOWN = Math.max(0, POINTERS_DOWN - 1);
+  if (!POINTERS_DOWN && mountMap.resettle) mountMap.resettle();
+}, true);
 function mountMap() {
   var wrap = el('#mapwrap'); if (!wrap) return;
   settleMap();
@@ -1449,8 +2160,9 @@ function mountMap() {
   if (!v.fit) placeInitial(); else applyMap();
 
   var resettle = function () {
-    if (!mapView().touched && el('#mapwrap')) placeInitial();
+    if (!mapView().touched && !POINTERS_DOWN && el('#mapwrap')) placeInitial();
   };
+  mountMap.resettle = resettle;
   if (!mountMap.settled) {
     mountMap.settled = true;
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(resettle);
@@ -1472,6 +2184,14 @@ function mountMap() {
   }, { passive: false });
 
   wrap.addEventListener('dblclick', function (e) {
+    /* D12 fix: CLICK_SEEN was declared but never assigned anywhere, so the
+       guard in stop()'s deferred setTimeout (`if (Date.now() - CLICK_SEEN <
+       400) return;`) never tripped. A real double-click is two plain clicks,
+       each queuing that 40ms-deferred selNode() call; whichever fired next
+       re-rendered the node from scratch and clobbered the contentEditable
+       state this handler is about to open, a beat before a person could
+       actually start typing. Stamping it here lets that guard do its job. */
+    CLICK_SEEN = Date.now();
     var rel = e.target.closest('.gm-rellabel');
     if (rel) {
       var l = S.links.filter(function (x) { return x.id === rel.dataset.link; })[0];
@@ -1623,6 +2343,17 @@ function mountMap() {
     var dx = e.clientX - st.x0, dy = e.clientY - st.y0;
     if (!st.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
     st.moved = true;
+    /* E10 fix: mountMap()'s ResizeObserver + the 250ms/1200ms setTimeouts
+       all call placeInitial() (an INSTANT re-fit) whenever `!view.touched`.
+       Only the pan branch below ever set touched — a real, sustained node
+       drag mutated node.mx/my for the whole hold without ever marking the
+       view touched, so a resettle firing mid-drag (nothing to do with the
+       node being dragged) could silently snap the whole camera — and the
+       node under the pointer along with it — out from under a user who
+       never touched the camera at all. Any real drag on the map (pan,
+       node-move, or marquee) is exactly the kind of "user is engaged with
+       the current framing" signal `touched` exists to capture. */
+    mapView().touched = true;
     /* Capture ONLY once the drag is real — capturing on pointerdown re-
        targets the trailing click to #mapwrap and a node click/tick never
        arrives (waffletask-board.md, "pointer capture"). */
@@ -1724,14 +2455,188 @@ function mountMap() {
   });
 }
 
+/* ── A8 breadcrumb spine ──────────────────────────────────────────────────
+   root › … › parent › selected, top-start, RTL-aware from the ROOT title's
+   own script direction (contract Addendum A8). Hidden when nothing is
+   selected; more than 5 chips and the middle collapses into one "…" chip
+   with a hover list of what it's hiding. Each real chip is a jump: it
+   pushes history exactly like dive/surface/siblings do, then glides
+   (doesn't zoom-to-branch — a breadcrumb click is "take me there", not
+   "frame that whole branch"). */
+function textDir(s) {
+  s = s || '';
+  for (var i = 0; i < s.length; i++) {
+    var c = s.charCodeAt(i);
+    if (c >= 0x0590 && c <= 0x08FF) return 'rtl';     /* Hebrew…Arabic block */
+    if ((c >= 0x0041 && c <= 0x005A) || (c >= 0x0061 && c <= 0x007A)) return 'ltr';
+  }
+  return 'ltr';
+}
+function ancestorChain(id) {
+  var chain = [], n = id && N(id), hops = 0;
+  while (n && hops++ < 30) { chain.unshift(n); n = n.parent != null ? N(n.parent) : null; }
+  return chain;
+}
+function crumbClick(id) {
+  if (!N(id) || id === UI.sel) return;
+  pushJumpHistory();
+  UI.sel = id;
+  render();
+  var n = selDom();
+  if (n) focusOn(+n.dataset.x || 0, +n.dataset.y || 0, mapView().z, 380);
+}
+function renderCrumbs() {
+  var bar = el('#crumbBar'); if (!bar) return;
+  if (!UI.sel || !N(UI.sel)) { bar.hidden = true; bar.innerHTML = ''; return; }
+  var chain = ancestorChain(UI.sel);
+  var cells = [];
+  if (chain.length <= 5) {
+    chain.forEach(function (n) { cells.push({ node: n }); });
+  } else {
+    cells.push({ node: chain[0] });
+    cells.push({ ellipsis: chain.slice(1, chain.length - 3) });
+    chain.slice(chain.length - 3).forEach(function (n) { cells.push({ node: n }); });
+  }
+  var rtl = textDir(rootNode().title) === 'rtl';
+  var sepGlyph = rtl ? '‹' : '›';
+  var html = cells.map(function (c, i) {
+    var sep = i > 0 ? '<span class="gm-crumb-sep" aria-hidden="true">' + sepGlyph + '</span>' : '';
+    if (c.ellipsis) {
+      var list = c.ellipsis.map(function (n) { return '<div class="gm-bidi">' + esc(n.title || '···') + '</div>'; }).join('');
+      return sep + '<span class="gm-crumb-more" tabindex="0"><span class="gm-crumb">&hellip;</span>' +
+        '<div class="gm-crumb-morelist">' + list + '</div></span>';
+    }
+    var isSelf = c.node.id === UI.sel;
+    return sep + '<span class="gm-crumb gm-bidi' + (isSelf ? ' sel' : '') + '"' +
+      (isSelf ? '' : ' data-crumb="' + c.node.id + '" role="button" tabindex="0"') +
+      '>' + esc(c.node.title || '···') + '</span>';
+  }).join('');
+  bar.hidden = false;
+  bar.dir = rtl ? 'rtl' : 'ltr';
+  bar.innerHTML = html;
+}
+
+/* ── A9 branch legend rendering + drag ────────────────────────────────────
+   One chip per top-level branch (max 9, "+n" beyond that); drag anywhere on
+   the bar itself (not a chip) to reposition it, remembered in S.legendPos
+   (contract: "Legend is draggable off the way (remember pos)"). */
+function renderLegend() {
+  var bar = el('#legendBar'); if (!bar) return;
+  var branches = topBranches();
+  if (!branches.length) { bar.hidden = true; bar.innerHTML = ''; return; }
+  var show = branches.slice(0, 9), extra = branches.length - show.length;
+  bar.innerHTML = show.map(function (b, i) {
+    var acc = b.accent || ACCENTS[i % ACCENTS.length];
+    var on = UI.soloBranch === b.id;
+    return '<button class="gm-legend-chip' + (on ? ' on' : '') + '" data-branch="' + b.id + '" title="' + esc(b.title || '') + '">' +
+      '<i aria-hidden="true" style="background:var(' + acc + ')"></i><span class="gm-bidi">' + esc(b.title || '···') + '</span></button>';
+  }).join('') + (extra > 0 ? '<span class="gm-legend-more">+' + extra + '</span>' : '');
+  bar.hidden = false;
+  var pos = S.legendPos;
+  if (pos) { bar.style.left = pos.x + 'px'; bar.style.top = pos.y + 'px'; bar.style.bottom = 'auto'; }
+  wireLegendDrag(bar);
+}
+function wireLegendDrag(bar) {
+  if (bar.dataset.dragWired) return;
+  bar.dataset.dragWired = '1';
+  var drag = null;
+  bar.addEventListener('pointerdown', function (e) {
+    if (e.target.closest('.gm-legend-chip')) return;
+    var r = bar.getBoundingClientRect();
+    drag = { pid: e.pointerId, x0: e.clientX, y0: e.clientY, ox: r.left, oy: r.top };
+    try { bar.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  bar.addEventListener('pointermove', function (e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    bar.style.left = (drag.ox + (e.clientX - drag.x0)) + 'px';
+    bar.style.top = (drag.oy + (e.clientY - drag.y0)) + 'px';
+    bar.style.bottom = 'auto';
+  });
+  function release(e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    var r = bar.getBoundingClientRect();
+    S.legendPos = { x: r.left, y: r.top };
+    drag = null;
+    persistSoft();
+  }
+  bar.addEventListener('pointerup', release);
+  bar.addEventListener('pointercancel', release);
+}
+
+/* ── A11 collapsed-node peek ──────────────────────────────────────────────
+   Hover (small debounce) or keyboard focus (400ms, contract) on a collapsed
+   node shows up to 6 child titles + "+n" in a glass tooltip. Wired once,
+   delegated on #mapwrap since nodes are replaced wholesale on every
+   render(). */
+var PEEK_TIMER = null;
+function showPeek(nodeEl) {
+  var id = nodeEl.dataset.node, node = N(id);
+  if (!node || !node.collapsed) return;
+  var kids = childrenOf(id); if (!kids.length) return;
+  var tip = el('#peekTip'); if (!tip) return;
+  tip.innerHTML = kids.slice(0, 6).map(function (k) {
+    return '<div class="gm-bidi">' + esc(k.title || '···') + '</div>';
+  }).join('') + (kids.length > 6 ? '<div class="more">+' + (kids.length - 6) + '</div>' : '');
+  var r = nodeEl.getBoundingClientRect();
+  tip.style.left = (r.left + r.width / 2) + 'px';
+  tip.style.top = (r.bottom + 8) + 'px';
+  tip.hidden = false;
+}
+function hidePeek() {
+  clearTimeout(PEEK_TIMER); PEEK_TIMER = null;
+  var tip = el('#peekTip'); if (tip) tip.hidden = true;
+}
+function wirePeek(wrap) {
+  if (wrap.dataset.peekWired) return;
+  wrap.dataset.peekWired = '1';
+  wrap.addEventListener('mouseover', function (e) {
+    var n = e.target.closest('.gm-node[data-collapsed]'); if (!n) return;
+    clearTimeout(PEEK_TIMER);
+    PEEK_TIMER = setTimeout(function () { showPeek(n); }, 150);
+  });
+  wrap.addEventListener('mouseout', function (e) {
+    if (e.target.closest('.gm-node[data-collapsed]')) hidePeek();
+  });
+  wrap.addEventListener('focusin', function (e) {
+    var n = e.target.closest('.gm-node[data-collapsed]'); if (!n) return;
+    clearTimeout(PEEK_TIMER);
+    PEEK_TIMER = setTimeout(function () { showPeek(n); }, 400);
+  });
+  wrap.addEventListener('focusout', function (e) {
+    if (e.target.closest('.gm-node[data-collapsed]')) hidePeek();
+  });
+}
+
 /* ── frame ───────────────────────────────────────────────────────────── */
 function render() {
+  refreshRadarExpansion();
   renderMap();
   els('#mapctl [data-zoom]').forEach(function () {});   /* mapctl is rebuilt each render by renderMap() */
   mountMap();
+  wirePeek(el('#mapwrap'));
   el('#docTitle').textContent = S.title;
   el('#themeBtn').textContent = resolveTheme() ? '🌙' : '☀';
   if (UI.find) applyFindHaze();
+  renderCrumbs();
+  renderLegend();
+  /* E2 fix: render() replaces #world's whole subtree every time, which
+     silently drops DOM focus off whatever node held it — so a keyboard
+     user who moves selection with the arrow keys (stepSel/selNode, both of
+     which call render()) never has the browser's own focus follow along,
+     and A11's "focus via keyboard for 400ms" peek path was unreachable by
+     any real keyboard interaction. Put focus back on the selected node's
+     freshly-rendered element after every render, unless focus is currently
+     inside a field (inField()) or inside any open floating-chrome panel
+     (sheet/switcher/palette/quiz/help — all carry data-float per D4), so
+     typing and those panels' own keyboard handling are never interrupted. */
+  (function restoreSelectionFocus() {
+    if (!UI.sel) return;
+    var a = document.activeElement;
+    if (a && a.closest && a.closest('[data-float]')) return;
+    if (inField()) return;
+    var n = selDom();
+    if (n && document.activeElement !== n) n.focus({ preventScroll: true });
+  })();
 }
 </script>
 
@@ -1759,13 +2664,20 @@ function inlineEdit(node, commit, opts) {
     var s = getSelection(); s.removeAllRanges(); s.addRange(r);
   } catch (e) {}
   var done = false;
-  function finish(keep) {
-    if (done) return; done = true;
-    node.contentEditable = 'false';
-    var v = node.textContent.replace(/\s+/g, ' ').trim();
-    if (keep && v && v !== old.trim()) commit(v); else node.textContent = old;
-  }
-  node.addEventListener('keydown', function (e) {
+  /* D4 fix: this listener used to be attached anonymously and NEVER removed,
+     and finish() never moved focus off `node`. For most nodes that's masked
+     because render() replaces the whole element on a real commit — but on
+     Escape/cancel (nothing changes, so nothing re-renders) the element, its
+     focus AND this listener all survive untouched. #docTitle in particular
+     is never rebuilt by render() at all, so every rename attempt stacked
+     another live listener on it forever; with the node still focused, its
+     `stopPropagation()` ate every later keydown before `document`'s global
+     mapKeys ever saw it, freezing every map shortcut until the user clicked
+     elsewhere by hand. Naming the handler so it can be removed, and
+     explicitly handing focus back to the map when we're done, fixes this
+     for every inlineEdit() call site (node titles and relation labels too),
+     not just the header. */
+  function onKeydown(e) {
     e.stopPropagation();
     /* Ctrl+Enter mid-edit is still "insert a parent above this", not "commit
        + sibling" — e.key is 'Enter' either way, so the modifier has to be
@@ -1774,17 +2686,29 @@ function inlineEdit(node, commit, opts) {
        after typing a node's title). */
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault(); finish(true);
-      if (opts.grow) growAndEdit(insertParent);
+      if (opts.grow) growAndEdit(insertParent, true);
     } else if (e.key === 'Enter') {
       e.preventDefault(); finish(true);
-      if (opts.grow) growAndEdit(e.shiftKey ? growSiblingBefore : growSibling);
+      if (opts.grow) growAndEdit(e.shiftKey ? growSiblingBefore : growSibling, true);
     } else if (e.key === 'Tab') {
       e.preventDefault(); finish(true);
-      if (opts.grow) growAndEdit(growChild);
+      if (opts.grow) growAndEdit(growChild, true);
     } else if (e.key === 'Escape') {
       e.preventDefault(); node.textContent = old; finish(false);
     }
-  });
+  }
+  function finish(keep) {
+    if (done) return; done = true;
+    node.removeEventListener('keydown', onKeydown);
+    node.contentEditable = 'false';
+    var v = node.textContent.replace(/\s+/g, ' ').trim();
+    if (keep && v && v !== old.trim()) { commit(v); }
+    else { node.textContent = old; if (opts.onCancel) opts.onCancel(); }
+    if (document.activeElement === node) node.blur();
+    var mw = el('#mapwrap');
+    if (mw && document.activeElement !== mw) mw.focus();
+  }
+  node.addEventListener('keydown', onKeydown);
   node.addEventListener('blur', function () { finish(true); }, { once: true });
 }
 
@@ -1818,6 +2742,15 @@ function openBodySheet(id) {
     if (v !== node.body) { node.body = v; save({ coalesce: true }); }
   };
   ta.addEventListener('input', commit);
+  /* D5 fix: the global mapKeys dispatcher bails out immediately whenever a
+     field has focus (`if (inField()) return;`), and this textarea is a
+     field — so Escape used to do nothing here at all, unlike every other
+     editable surface in the file (inline title/relation-label edit, find
+     bar), which all cancel/close on Escape. Handle it locally instead of
+     touching that global early-exit. */
+  ta.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeBodySheet(); }
+  });
   ta.focus();
 }
 function closeBodySheet() {
@@ -1825,6 +2758,100 @@ function closeBodySheet() {
   sheet.classList.remove('open'); scrim.classList.remove('open');
   setTimeout(function () { sheet.hidden = true; sheet.innerHTML = ''; render(); }, 240);
   UI.sheetNode = null;
+}
+
+/* ── A10 quick switcher — Ctrl+K ───────────────────────────────────────────
+   Simple subsequence fuzzy match (no library, per contract) over node
+   titles, bridge chips, and relation labels; Hebrew and English, case-
+   insensitive (case-folding is meaningless for Hebrew but harmless). A
+   denser run of matched characters scores higher than the same letters
+   scattered apart, so "grd" ranks "Gradient Descent" above a coincidental
+   scatter-match in a longer unrelated title. */
+function fuzzyScore(q, s) {
+  q = String(q || '').toLowerCase(); s = String(s || '').toLowerCase();
+  if (!q) return 0;
+  var qi = 0, score = 0, lastMatch = -1;
+  for (var i = 0; i < s.length && qi < q.length; i++) {
+    if (s[i] === q[qi]) { score += (lastMatch === i - 1 ? 3 : 1); lastMatch = i; qi++; }
+  }
+  return qi === q.length ? score : -1;
+}
+function crumbOf(id) { return ancestorChain(id).map(function (n) { return n.title || '···'; }).join(' › '); }
+function switcherCandidates() {
+  var out = [];
+  S.nodes.forEach(function (n) {
+    out.push({ kind: 'node', id: n.id, text: n.title || '···', crumb: crumbOf(n.id) });
+    if (n.bridge) out.push({ kind: 'node', id: n.id, text: n.bridge, crumb: '🪙 ' + crumbOf(n.id) });
+  });
+  S.links.forEach(function (l) {
+    if (!l.label) return;
+    var a = N(l.from), b = N(l.to);
+    out.push({ kind: 'link', id: l.id, text: l.label, crumb: (a ? a.title : '?') + ' ↔ ' + (b ? b.title : '?') });
+  });
+  return out;
+}
+function runSwitcherQuery(q) {
+  return switcherCandidates()
+    .map(function (c) { return { c: c, s: fuzzyScore(q, c.text) }; })
+    .filter(function (x) { return x.s >= 0; })
+    .sort(function (a, b) { return b.s - a.s; })
+    .slice(0, 8)
+    .map(function (x) { return x.c; });
+}
+function renderSwitcher() {
+  if (!UI.switcher) return;
+  var results = runSwitcherQuery(UI.switcher.q);
+  UI.switcher.results = results;
+  if (UI.switcher.idx >= results.length) UI.switcher.idx = Math.max(0, results.length - 1);
+  el('#switcherList').innerHTML = results.length ? results.map(function (r, i) {
+    return '<div class="gm-switch-row gm-bidi' + (i === UI.switcher.idx ? ' active' : '') + '" data-swidx="' + i + '">' +
+      '<div>' + esc(r.text) + '</div><div class="sub gm-bidi">' + esc(r.crumb) + '</div></div>';
+  }).join('') : '<div class="gm-switch-row" style="opacity:.6">אין תוצאות — no matches</div>';
+}
+function openSwitcher() {
+  UI.switcher = { q: '', idx: 0, results: [] };
+  el('#switcher').hidden = false;
+  var input = el('#switcherInput'); input.value = '';
+  renderSwitcher();
+  /* E7 fix: focus synchronously, in the same tick as the Ctrl+K keydown
+     that opened the switcher. The old setTimeout(...,10) left a ~10ms
+     window where document.activeElement was still #mapwrap, so a keystroke
+     typed right away (a fast typist, or a scripted test with no delay)
+     was read by mapKeys()'s global shortcut handling instead of landing in
+     the search box — inField()'s guard only works once focus has actually
+     moved. Removing hidden already made the input focusable; nothing here
+     needs to wait for layout or a transition. */
+  input.focus();
+}
+function closeSwitcher() {
+  UI.switcher = null;
+  el('#switcher').hidden = true;
+  var mw = el('#mapwrap'); if (mw) mw.focus();
+}
+function switcherPick(i) {
+  if (!UI.switcher) return;
+  var r = UI.switcher.results[i]; if (!r) return;
+  closeSwitcher();
+  pushJumpHistory();
+  var linkRec = r.kind === 'link' ? S.links.filter(function (l) { return l.id === r.id; })[0] : null;
+  var anchor = r.kind === 'node' ? N(r.id) : (linkRec ? N(linkRec.from) : null);
+  if (!anchor) return;
+  /* E9 fix: a picked node can sit behind a collapsed ancestor, in which
+     case it never has a DOM element at all — the old code's `var n =
+     selDom(); if (n) focusOn(...)` simply no-op'd, leaving UI.sel pointed
+     at an invisible node with the camera never having moved. Expand every
+     collapsed ancestor on the path to it first (same "make it reachable"
+     move diveOneLevel already does for Ctrl+↓), so the node always has a
+     DOM element by the time we go looking for it below. */
+  var expandedAny = false;
+  ancestorChain(anchor.id).slice(0, -1).forEach(function (a) {
+    if (a.collapsed) { a.collapsed = false; expandedAny = true; }
+  });
+  if (expandedAny) save();
+  UI.sel = anchor.id;
+  render();
+  var n = selDom();
+  if (n) focusOn(+n.dataset.x || 0, +n.dataset.y || 0, Math.max(mapView().z, 0.9), 380);
 }
 
 /* ── ? shortcuts overlay ─────────────────────────────────────────────────
@@ -1847,11 +2874,31 @@ var SHORTCUTS = [
   ['Ctrl+A', 'סמן הכל', 'Mark all'],
   ['Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z', 'בטל / בצע שוב', 'Undo / redo'],
   ['Ctrl+0 · Ctrl+= · Ctrl+-', 'התאם · הגדל · הקטן', 'Fit · zoom in · zoom out'],
+  ['Z', 'התאם תצוגה לענף הנבחר (לחיצה כפולה בתוך 400ms = צלילה שכבה)', 'Zoom to fit the selected branch (double-tap within 400ms dives one level)'],
+  ['Ctrl+↓ / Ctrl+↑', 'צלילה לתת-הנושא הראשון / עלייה להורה', 'Dive to the first child / surface to the parent'],
+  ['Ctrl+← / Ctrl+→', 'אח קודם / אח הבא', 'Previous / next sibling'],
+  ['Alt+← / Alt+→', 'אחורה / קדימה בהיסטוריית הקפיצות', 'Back / forward through the jump history'],
+  ['Home', 'גלישה לשורש בזום בינוני', 'Glide to the root at a mid-altitude zoom'],
+  ['K', 'החלף את סוג הנושא הנבחר קדימה', "Cycle the selected node's kind forward"],
+  ['Shift+K', 'החלף את סוג הנושא הנבחר אחורה', "Cycle the selected node's kind backward"],
+  ['B', 'ערוך תווית עוגן — "בעולם שלי זה…"', 'Edit the anchor chip — "in your world this is…"'],
+  ['R', 'רדאר קשרים — הצג רק את המסלול המקושר לבחירה', 'Link radar — show only the path connected to the selection'],
+  ['1–9', 'התמקד בענף לפי מספרו מהמקרא', 'Solo a branch by its number from the legend'],
+  ['Ctrl+K', 'מחליף מהיר — קפיצה לפי חיפוש', 'Quick switcher — jump to anything by search'],
   ['/ או Ctrl+F', 'חיפוש', 'Find'],
   ['Ctrl+E', 'ייצוא Markdown', 'Export Markdown outline'],
   ['E', 'פתח הערות לבחירה', 'Open notes for the selection'],
   ['?', 'המסך הזה', 'This screen'],
-  ['Esc', 'בטל קשר ← נקה סימון ← בטל בחירה', 'Cancel relation ← clear marks ← deselect']
+  ['Esc', 'בטל קשר ← כבה רדאר ← בטל התמקדות ← נקה סימון ← בטל בחירה', 'Cancel relation ← radar off ← clear solo ← clear marks ← deselect']
+];
+/* A4: the five node kinds, explained for the '?' overlay (contract: "Legend
+   row in the ? overlay explains the five kinds in Hebrew"). */
+var KIND_LEGEND = [
+  ['', 'מושג — ברירת המחדל, ללא סימון מיוחד', 'Concept — the default, no special marking'],
+  ['✓', 'ידוע — משהו שכבר שולטים בו', 'Known — something already mastered'],
+  ['⇄', 'גשר — מקשר בין שני רעיונות', 'Bridge — connects two ideas'],
+  ['◆', 'פער — משהו שעדיין לא ברור', 'Gap — something not yet understood'],
+  ['?', 'שאלה פתוחה', 'Open question']
 ];
 function renderHelp() {
   el('#helpBox').innerHTML =
@@ -1859,6 +2906,10 @@ function renderHelp() {
     '<div class="sub">תואם XMind, פעיל כשלא עורכים טקסט — XMind-compatible, active when nothing is being edited</div>' +
     '<table>' + SHORTCUTS.map(function (r) {
       return '<tr><td class="k">' + esc(r[0]) + '</td><td class="he">' + esc(r[1]) + '</td><td class="en">' + esc(r[2]) + '</td></tr>';
+    }).join('') + '</table>' +
+    '<h2 style="margin-top:16px;font-size:15px">סוגי נושאים (K / Shift+K) — Node kinds</h2>' +
+    '<table>' + KIND_LEGEND.map(function (r) {
+      return '<tr><td class="k">' + (r[0] ? esc(r[0]) : '·') + '</td><td class="he">' + esc(r[1]) + '</td><td class="en">' + esc(r[2]) + '</td></tr>';
     }).join('') + '</table>' +
     '<button class="gm-btn close" data-close-help>סגור — Close</button>';
 }
@@ -1897,9 +2948,11 @@ function buildMarkdownOutline() {
     childrenOf(id).forEach(function (k) {
       var indent = '  '.repeat(depth);
       lines.push(indent + '- ' + (k.title || '') + (k.body ? ' — ' + k.body.replace(/\s+/g, ' ') : ''));
+      if (k.bridge) lines.push(indent + '  ↳ 🪙 ' + k.bridge);   /* A5 */
       walk(k.id, depth + 1);
     });
   })(root.id, 0);
+  if (root.bridge) lines.splice(1, 0, '  ↳ 🪙 ' + root.bridge);
   if (S.links.length) {
     lines.push('', '## קשרים');
     S.links.forEach(function (l) {
@@ -1947,7 +3000,18 @@ function importText(txt, filename) {
   var own = normalise(JSON.parse(JSON.stringify(parsed)));
   if (own) { replaceState(own, 'הייבוא הושלם — board imported'); return; }
   var foreign = importForeign(parsed);
-  if (foreign) { replaceState(foreign, 'יובא מ-WaffleTask — imported from WaffleTask/WaffleNotes'); return; }
+  if (foreign) {
+    /* D9 fix: importForeign()'s output used to go straight into
+       replaceState(), which never calls normalise() — so a task whose own
+       `parent` pointed at itself (or any other malformed shape a foreign
+       export could carry) produced a node that IS its own parent: never
+       reachable from root, never rendered, never selectable/deletable
+       through the UI, yet saved to localStorage forever. Route it through
+       the same integrity checks the own-JSON import path already gets —
+       normalise() already breaks parent cycles and self-references. */
+    replaceState(normalise(foreign) || foreign, 'יובא מ-WaffleTask — imported from WaffleTask/WaffleNotes');
+    return;
+  }
   toast('לא זוהתה צורת קובץ — file shape not recognised');
 }
 
@@ -2016,18 +3080,33 @@ document.addEventListener('click', function (ev) {
   if (ev.target.closest('#lensBtn')) { UI.lens = !UI.lens; render(); return; }
   if (ev.target.closest('#helpBtn')) { toggleHelp(); return; }
   if (ev.target.closest('[data-close-help]') || ev.target.closest('#helpOverlay') === el('#helpOverlay') && ev.target.id === 'helpOverlay') { toggleHelp(); return; }
-  if ((n = ev.target.closest('[data-addkid]'))) { selNode(n.dataset.addkid, { quiet: true }); growAndEdit(growChild); return; }
+  if ((n = ev.target.closest('[data-addkid]'))) { selNode(n.dataset.addkid, { quiet: true }); growAndEdit(growChild, true); return; }
   if ((n = ev.target.closest('[data-dellink]'))) { deleteLink(n.dataset.dellink); return; }
+  if ((n = ev.target.closest('.gm-crumb[data-crumb]'))) { crumbClick(n.dataset.crumb); return; }   /* A8 */
   if (ev.target.closest('.gm-rellabel')) { return; }
+  if ((n = ev.target.closest('.gm-legend-chip[data-branch]'))) { soloBranchClick(n.dataset.branch); return; }  /* A9 */
+  if ((n = ev.target.closest('.gm-switch-row[data-swidx]'))) { switcherPick(+n.dataset.swidx); return; }        /* A10 */
   if (ev.target.closest('#scrim') || ev.target.closest('[data-close-sheet]')) { closeBodySheet(); return; }
 });
 document.addEventListener('input', function (ev) {
   if (ev.target.id === 'findInput') {
     UI.find = ev.target.value;
     applyFindHaze();
+  } else if (ev.target.id === 'switcherInput' && UI.switcher) {
+    UI.switcher.q = ev.target.value;
+    UI.switcher.idx = 0;
+    renderSwitcher();
   }
 });
 document.addEventListener('keydown', function (ev) {
+  if (ev.target.id === 'switcherInput') {
+    if (!UI.switcher) return;
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); UI.switcher.idx = Math.min(UI.switcher.results.length - 1, UI.switcher.idx + 1); renderSwitcher(); }
+    else if (ev.key === 'ArrowUp') { ev.preventDefault(); UI.switcher.idx = Math.max(0, UI.switcher.idx - 1); renderSwitcher(); }
+    else if (ev.key === 'Enter') { ev.preventDefault(); switcherPick(UI.switcher.idx); }
+    else if (ev.key === 'Escape') { ev.preventDefault(); closeSwitcher(); }
+    return;
+  }
   if (ev.target.id !== 'findInput') return;
   if (ev.key === 'Enter') { ev.preventDefault(); findJumpFirst(); }
   else if (ev.key === 'Escape') { ev.preventDefault(); closeFind(); el('#mapwrap').focus(); }
