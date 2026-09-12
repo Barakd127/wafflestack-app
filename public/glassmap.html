@@ -241,7 +241,10 @@ input,textarea{background:none;border:0;outline:none;}
 }
 .mapwrap.lod-far .gm-node:not(.root):not([data-depth="1"]) .gm-ttl,
 .mapwrap.lod-far .gm-node:not(.root):not([data-depth="1"]) .gm-meta,
-.mapwrap.lod-far .gm-node:not(.root):not([data-depth="1"]) .gm-depthdots{
+.mapwrap.lod-far .gm-node:not(.root):not([data-depth="1"]) .gm-depthdots,
+.mapwrap.lod-far .gm-node:not(.root):not([data-depth="1"]) .gm-thumb,
+.mapwrap.lod-far .gm-node:not(.root):not([data-depth="1"]) .gm-diagram,
+.mapwrap.lod-far .gm-node:not(.root):not([data-depth="1"]) .gm-eqs{
   opacity:0;pointer-events:none;
 }
 .mapwrap.lod-far .gm-rellabel{opacity:0;pointer-events:none;}      /* far: relation LINES stay (SVG), labels hide */
@@ -770,6 +773,11 @@ var LS_PREFIX = 'glassmap:';
    un-kinded node round-trips through JSON/undo with no extra field. */
 var KINDS = ['concept', 'known', 'bridge', 'gap', 'question'];
 var KIND_GLYPH = { known: '✓', bridge: '⇄', gap: '◆', question: '?' };
+/* render() calls every one of these after it repaints #world — Images/
+   Diagrams (appended near the end of the file) push their own post-paint
+   work here (wiring a thumbnail's onload, kicking off a Mermaid render)
+   instead of touching render()/renderMap() itself. */
+var RENDER_HOOKS = [];
 
 function qparam(name) {
   try { return new URL(location.href).searchParams.get(name); } catch (e) { return null; }
@@ -826,7 +834,7 @@ function linksOf(id) { return S.links.filter(function (l) { return l.from === id
 function seed(id, title) {
   var rid = uid('n');
   return {
-    v: 1, id: id || 'default', title: title || 'GlassMap',
+    v: 1, schema: 1, id: id || 'default', title: title || 'GlassMap',
     layer: 'links', theme: 'auto',
     nodes: [{ id: rid, parent: null, title: 'נושא מרכזי — Central topic', body: '' }],
     links: [],
@@ -857,6 +865,16 @@ function normalise(x) {
     });
   })();
   x.v = 1;
+  /* Barak, 13.09: schema is a floor, never a ceiling. This engine writes
+     schema 1; a newer engine that opens the same stored map later may bump
+     it higher for a shape this copy doesn't know about yet — round-tripping
+     through THIS normalise() must never stomp that back down to 1, or an
+     older pinned Obsidian copy would silently downgrade a map a newer
+     engine is also editing. Unknown top-level keys (like a future engine's
+     own extra fields) are never touched here either — `x` is mutated in
+     place, not rebuilt, so anything this normalise() doesn't recognise
+     simply rides along untouched. */
+  x.schema = (typeof x.schema === 'number' && isFinite(x.schema) && x.schema > 1) ? x.schema : 1;
   x.id = x.id || MAP_ID;
   x.title = typeof x.title === 'string' && x.title ? x.title : 'GlassMap';
   x.layer = (x.layer === 'cards') ? 'cards' : 'links';
@@ -881,6 +899,25 @@ function normalise(x) {
        a dead string the UI can't cycle back to. */
     if (n.kind != null && (KINDS.indexOf(n.kind) < 0 || n.kind === 'concept')) delete n.kind;
     if (n.bridge != null && typeof n.bridge !== 'string') delete n.bridge;
+    /* images/diagrams: type-check only. Every node here is mutated in
+       place (never rebuilt as a fresh object), so any field this engine
+       doesn't know about yet — a future engine's own addition — rides
+       through untouched, exactly like img/diagram do for an OLDER engine
+       that has never heard of them (Barak, 13.09: "unknown fields survive"). */
+    if (n.img != null && typeof n.img !== 'string') delete n.img;
+    if (n.diagram != null && typeof n.diagram !== 'string') delete n.diagram;
+    /* Equations: node.eqs is an array of LaTeX strings, separate from the
+       title (Barak, 13.09: "make the name of a node and an equation
+       separable"). Older $...$-in-title equations are untouched by this —
+       titleHTML still renders them, and nothing here migrates them into
+       eqs, per "add no automatic migration". */
+    if (n.eqs != null) {
+      if (!Array.isArray(n.eqs)) delete n.eqs;
+      else {
+        n.eqs = n.eqs.filter(function (e) { return typeof e === 'string' && e.trim(); });
+        if (!n.eqs.length) delete n.eqs;
+      }
+    }
   });
   if (x.legendPos && typeof x.legendPos.x === 'number' && typeof x.legendPos.y === 'number') {
     x.legendPos = { x: x.legendPos.x, y: x.legendPos.y };
@@ -899,12 +936,56 @@ function normalise(x) {
       cur = x.nodes.filter(function (y) { return y.id === cur.parent; })[0];
     }
   });
+  /* D-safety (Barak, 13.09): this used to rebuild each link as a brand-new
+     `{id,from,to,label}` literal, which silently dropped any field this
+     engine doesn't recognise — a future engine's own addition on the same
+     stored link would be gone the moment an older copy round-tripped it.
+     Spread the original object first so unknown keys survive, then fix up
+     only the four fields this engine actually validates. */
   x.links = x.links.filter(function (l) { return l && ids[l.from] && ids[l.to] && l.from !== l.to; })
-    .map(function (l) { return { id: l.id || uid('l'), from: l.from, to: l.to, label: typeof l.label === 'string' ? l.label : '' }; });
+    .map(function (l) {
+      var out = Object.assign({}, l);
+      out.id = l.id || uid('l');
+      out.from = l.from; out.to = l.to;
+      out.label = typeof l.label === 'string' ? l.label : '';
+      return out;
+    });
   return x;
 }
+/* D-safety (Barak, 13.09): set when a stored map exists but this engine
+   could not read it — boot() toasts it once toast() exists (this runs
+   before that script block has even parsed). Never overwritten back to
+   null so a later successful call to readLocal() (there is only ever one)
+   can't lose the message. */
+var LS_RECOVERY_MSG = null;
 function readLocal() {
-  try { return normalise(JSON.parse(localStorage.getItem(LS_KEY) || 'null')); } catch (e) { return null; }
+  var raw;
+  try { raw = localStorage.getItem(LS_KEY); } catch (e) { return null; }
+  if (raw == null) return null;                          /* nothing stored yet — a plain fresh seed is correct */
+  var parsed = null, parseOk = true;
+  try { parsed = JSON.parse(raw); } catch (e) { parseOk = false; }
+  var normalised = parseOk ? normalise(parsed) : null;
+  if (normalised) return normalised;
+  /* The key holds SOMETHING, but this engine can't turn it into a map —
+     corrupted JSON, or a shape normalise() refuses. The old code fell
+     through to seed() here, which looks harmless until the very next
+     save() overwrites this same key with the fresh seed's JSON: the
+     original bytes are gone forever, on the one thing on this whole file
+     Barak said must never happen. Copy the raw text out, untouched, to its
+     own timestamped key BEFORE any seed ever gets a chance to overwrite
+     the original — then the caller's seed() fallback is safe, because a
+     copy already exists. */
+  try {
+    var backupKey = LS_KEY + ':unreadable:' + Date.now();
+    localStorage.setItem(backupKey, raw);
+    LS_RECOVERY_MSG = 'המפה השמורה לא הייתה קריאה; נשמר גיבוי של המקור — the saved map could not be read; the original was kept as a backup (' + backupKey + ')';
+  } catch (e2) {
+    /* Even the backup write failed (quota?). Leave LS_KEY completely
+       untouched either way — refusing to seed-overwrite it is still the
+       safe default even without a confirmed backup — and say so plainly. */
+    LS_RECOVERY_MSG = 'המפה השמורה לא הייתה קריאה וגם הגיבוי נכשל; המקור לא נגע בו — the saved map could not be read and the backup itself failed; the original was left untouched';
+  }
+  return null;
 }
 /* D6/D7 fix: writeLocal() used to be `try { setItem(...) } catch (e) {}` --
    a full localStorage (QuotaExceededError) was swallowed with zero
@@ -1152,13 +1233,24 @@ var COL_GAP_1 = 250;   /* root → depth-1 column (the root card is widest) */
 var COL_GAP_N = 215;   /* every column after that */
 var ROW_H = 54;        /* one leaf's vertical slot, card + breathing room */
 
+/* An image/diagram card renders much taller than a plain text card (a
+   thumbnail up to 220px, a diagram up to ~320px, plus the title above it) —
+   ROW_H (54px) is sized for ordinary cards, so a childless image/diagram
+   node would otherwise only ever claim ONE slot's worth of vertical room
+   here, and settleMap()'s relax pass would have to shove it and its
+   siblings apart from a standing start the instant the real thumbnail/SVG
+   loads in. Claim enough slots up front instead, so the very first layout
+   already has the room (contract: "spread()'s row height must account for
+   tall cards"). */
+var TALL_CARD_ROWS = 5;    /* 5 * ROW_H ≈ 270px — a generous first guess */
+function nodeRowSpan(node) { return (node && (node.img || node.diagram)) ? TALL_CARD_ROWS : 1; }
 function spread(pId, px, py, center, span, depth, emit) {
   if (depth > 14) return;
   var pnode = N(pId);
   if (pnode && pnode.collapsed) return;
   var kids = childrenOf(pId);
   if (!kids.length) return;
-  var rows = kids.map(function (k) { return Math.max(1, leafCount(k.id)); });
+  var rows = kids.map(function (k) { return Math.max(nodeRowSpan(k), leafCount(k.id)); });
   var total = rows.reduce(function (a, b) { return a + b; }, 0) || 1;
   var x = px + (depth === 1 ? COL_GAP_1 : COL_GAP_N);
   var top = py - (total * ROW_H) / 2;          /* centre the block on the parent */
@@ -1397,6 +1489,12 @@ function mapWorld() {
       '<span class="gm-ttl gm-bidi" dir="auto">' +
         (glyph ? '<span class="gm-glyph gm-swatch gm-swatch-' + kind + '" aria-hidden="true">' + glyph + '</span>' : '') +
         (typeof window.titleHTML === 'function' ? window.titleHTML(node.title) : esc(node.title)) + '</span>' +
+      (node.eqs && node.eqs.length ? '<div class="gm-eqs">' + node.eqs.map(function (latex, eqi) {
+        return '<div class="gm-eqline" dir="ltr" data-eq-node="' + node.id + '" data-eq-idx="' + eqi + '" title="לחיצה לעריכה — click to edit">' +
+          (typeof window.eqLineHTML === 'function' ? window.eqLineHTML(latex) : esc(latex)) + '</div>';
+      }).join('') + '</div>' : '') +
+      (node.img ? '<img class="gm-thumb" data-gm-thumb src="' + esc(node.img) + '" alt="" title="לחיצה להגדלה — click to enlarge">' : '') +
+      (node.diagram ? '<div class="gm-diagram" data-diagram-node="' + node.id + '" title="לחיצה לעריכה — click to edit"><span class="gm-diagram-loading">…</span></div>' : '') +
       (node.bridge != null ? '<div class="gm-bridge gm-bidi' + (bridgeEditing ? ' force' : '') + '" data-bridge="' + node.id + '">' +
         '<span aria-hidden="true">🪙</span><span class="gm-bridge-txt" dir="auto">' + esc(node.bridge) + '</span></div>' : '') +
       '<div class="gm-meta">' +
@@ -1427,10 +1525,13 @@ function renderMap() {
   var findOn = !el('#findBar').hidden;
   el('#gmHint').innerHTML = findOn ? '' :
     '<span dir="rtl"><kbd dir="ltr">Tab</kbd> תת-נושא · <kbd dir="ltr">Enter</kbd> נושא אח · ' +
-    '<kbd dir="ltr">Shift+L</kbd> קשר · <kbd dir="ltr">Alt+=</kbd> משוואה · <kbd dir="ltr">Ctrl+/</kbd> קיפול · ' +
+    '<kbd dir="ltr">Shift+L</kbd> קשר · <kbd dir="ltr">Alt+=</kbd> משוואה · <kbd dir="ltr">Alt+M</kbd> דיאגרמה · <kbd dir="ltr">Ctrl+/</kbd> קיפול · ' +
     '<kbd dir="ltr">?</kbd> עזרה</span>';
   el('#mapwrap').dataset.layer = S.layer;
   renderMapctl();
+  /* Images/Diagrams: wire thumbnail-load listeners + kick off Mermaid
+     renders now that the fresh markup is in the DOM (see RENDER_HOOKS). */
+  RENDER_HOOKS.forEach(function (fn) { try { fn(); } catch (e) {} });
 }
 function renderMapctl() {
   var c = el('#mapctl');
@@ -1446,6 +1547,7 @@ function renderMapctl() {
     '<button class="gm-btn icon' + (UI.relFrom ? ' on' : '') + '" id="relBtn" aria-pressed="' + !!UI.relFrom + '"' +
       ' title="קשר בין נושאים (Shift+L) — relate two nodes" aria-label="Relate two nodes"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><path d="M8 12h8"/></svg></button>' +
     '<button class="gm-btn icon" id="eqBtn" title="משוואה (Alt+=) — equation" aria-label="Insert an equation"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 7V4H6l6 8-6 8h12v-3"/></svg></button>' +
+    '<button class="gm-btn icon" id="diagramBtn" title="דיאגרמה מהירה (Alt+M) — quick diagram" aria-label="Insert a quick diagram"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></svg></button>' +
     '<button class="gm-btn icon" id="helpBtn" title="עזרה (?) — shortcuts" aria-label="Shortcuts help"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>';
 }
 </script>
@@ -1673,8 +1775,12 @@ function duplicateNode(id) {
   var orig = N(id); if (!orig) return null;
   if (!orig.parent) { toast('אי אפשר לשכפל את השורש — cannot duplicate the root'); return null; }
   var clones = [];
+  /* D-safety (Barak, 13.09): spread the source node first so ANY field it
+     carries survives the clone — img/diagram, and anything a future
+     engine adds that this copy doesn't even know about — instead of
+     hand-picking a fixed field list that quietly drops everything else. */
   function cloneRec(n, newParent) {
-    var c = { id: uid('n'), parent: newParent, title: n.title, body: n.body, accent: n.accent, collapsed: n.collapsed, kind: n.kind, bridge: n.bridge };
+    var c = Object.assign({}, n, { id: uid('n'), parent: newParent });
     clones.push(c);
     childrenOf(n.id).forEach(function (k) { cloneRec(k, c.id); });
     return c;
@@ -1912,7 +2018,8 @@ function toggleCollapse() {
 function inField() {
   var a = document.activeElement;
   return a && (a.isContentEditable || a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' ||
-    a.tagName === 'MATH-FIELD' || !!(a.closest && a.closest('#eqPanel')));
+    a.tagName === 'MATH-FIELD' || !!(a.closest && a.closest('#eqPanel')) ||
+    !!(a.closest && a.closest('#diagramPanel')));
 }
 function mapKeys(ev) {
   if (inField()) return;
@@ -1935,6 +2042,7 @@ function mapKeys(ev) {
      binding can shadow it (there is no unmodified use of these arrows). */
   if (ev.altKey && !ev.ctrlKey && !ev.metaKey) {
     if (ev.key === '=' || ev.code === 'Equal') { ev.preventDefault(); if (typeof window.openEquation === 'function') window.openEquation(); return; }
+    if (ev.key === 'm' || ev.key === 'M' || ev.code === 'KeyM') { ev.preventDefault(); if (typeof window.openDiagramEditor === 'function') window.openDiagramEditor(); return; }
     if (ev.key === 'ArrowLeft') { ev.preventDefault(); historyBack(); return; }
     if (ev.key === 'ArrowRight') { ev.preventDefault(); historyForward(); return; }
     return;
@@ -3128,6 +3236,9 @@ var SHORTCUTS = [
   ['Ctrl+D', 'שכפל את הבחירה (וענפיה)', 'Duplicate selected node (+subtree)'],
   ['Shift+L', 'התחל קשר מהבחירה', 'Start a relation from the selection'],
   ['Alt+=', 'עורך משוואות לנושא הנבחר, כמו ב-Word', 'Equation editor for the selected node, like Word'],
+  ['Alt+M', 'דיאגרמת Mermaid מהירה לנושא הנבחר', 'Quick Mermaid diagram for the selected node'],
+  ['Ctrl+V', 'הדבק תמונה מהלוח כתת-נושא (או גרירה לתוך המפה)', 'Paste an image from the clipboard as a child node (or drop one onto the map)'],
+  ['Shift+Ctrl+V', 'צרף תמונה לנושא הנבחר עצמו, בלי ליצור תת-נושא', 'Attach an image to the selected node itself, instead of a new child'],
   ['L', 'החלף שכבה: קשרים / כרטיסים', 'Toggle layer: links / cards'],
   ['A', 'סמן ענף שלם', 'Mark whole branch'],
   ['Ctrl+A', 'סמן הכל', 'Mark all'],
@@ -3213,15 +3324,36 @@ function doExportJSON() {
   downloadText(name, JSON.stringify(S, null, 2), 'application/json');
   toast('נשמר ' + name + ' — Saved ' + name);
 }
+/* Images/diagrams inside the outline: an image is never inlined as data —
+   a placeholder HTML comment only (contract: "writes an image line only as
+   a placeholder comment"; the actual pixels only ever leave via the JSON
+   export's data URL). A diagram writes its Mermaid source as a fenced
+   ```mermaid block, which Obsidian renders natively — indented one level
+   deeper than the bullet so it reads as that bullet's own content. */
+function pushNodeExtras(lines, node, indent) {
+  if (node.img) lines.push(indent + '  <!-- image: ' + (node.title || 'תמונה — image') + ' -->');
+  if (node.diagram) {
+    lines.push(indent + '  ```mermaid');
+    String(node.diagram).split('\n').forEach(function (dl) { lines.push(indent + '  ' + dl); });
+    lines.push(indent + '  ```');
+  }
+  /* Equations live in node.eqs, separate from the title (Barak, 13.09) —
+     each gets its own $$ ... $$ line, which Obsidian renders natively. */
+  if (node.eqs && node.eqs.length) {
+    node.eqs.forEach(function (eq) { lines.push(indent + '  $$ ' + eq + ' $$'); });
+  }
+}
 function buildMarkdownOutline() {
   var root = rootNode();
   var lines = ['# ' + (root.title || 'GlassMap')];
   if (root.body) lines.push('', root.body, '');
+  pushNodeExtras(lines, root, '');
   (function walk(id, depth) {
     childrenOf(id).forEach(function (k) {
       var indent = '  '.repeat(depth);
       lines.push(indent + '- ' + (k.title || '') + (k.body ? ' — ' + k.body.replace(/\s+/g, ' ') : ''));
       if (k.bridge) lines.push(indent + '  ↳ 🪙 ' + k.bridge);   /* A5 */
+      pushNodeExtras(lines, k, indent);
       walk(k.id, depth + 1);
     });
   })(root.id, 0);
@@ -3353,6 +3485,7 @@ document.addEventListener('click', function (ev) {
   if (ev.target.closest('#lensBtn')) { UI.lens = !UI.lens; render(); return; }
   if (ev.target.closest('#relBtn')) { if (UI.relFrom) cancelRelation(); else startRelation(); render(); return; }
   if (ev.target.closest('#eqBtn')) { if (typeof window.openEquation === 'function') window.openEquation(); return; }
+  if (ev.target.closest('#diagramBtn')) { if (typeof window.openDiagramEditor === 'function') window.openDiagramEditor(); return; }
   if (ev.target.closest('#helpBtn')) { toggleHelp(); return; }
   if (ev.target.closest('[data-close-help]') || ev.target.closest('#helpOverlay') === el('#helpOverlay') && ev.target.id === 'helpOverlay') { toggleHelp(); return; }
   /* The +N badge on a folded node is a button: a click folds / unfolds that
@@ -3369,12 +3502,38 @@ document.addEventListener('click', function (ev) {
     }
     return;
   }
-  /* A click on an equation inside a title reopens it in the editor. */
+  /* A legacy $...$ equation still rendered inline in a title (titleHTML) is
+     just selected, not reopened for editing — editing now happens only
+     through node.eqs (Barak, 13.09: "make the name of a node and an
+     equation separable"); nothing here migrates it, it just keeps
+     rendering as before. */
   if ((n = ev.target.closest('.gm-node .gm-eq'))) {
     var eqHost = n.closest('.gm-node[data-node]');
-    if (eqHost && typeof window.openEquation === 'function') {
-      selNode(eqHost.dataset.node, { quiet: true });
-      window.openEquation(eqHost.dataset.node, +n.dataset.eqIndex);
+    if (eqHost) selNode(eqHost.dataset.node, { quiet: true });
+    return;
+  }
+  /* A click on one of a card's own node.eqs lines reopens it in the editor,
+     prefilled, ready to replace or delete. */
+  if ((n = ev.target.closest('.gm-node .gm-eqline'))) {
+    var eqlHost = n.closest('.gm-node[data-node]');
+    if (eqlHost && typeof window.openEquation === 'function') {
+      selNode(eqlHost.dataset.node, { quiet: true });
+      window.openEquation(eqlHost.dataset.node, +n.dataset.eqIdx);
+    }
+    return;
+  }
+  /* A click on a card's image thumbnail opens the glass lightbox. */
+  if ((n = ev.target.closest('.gm-node .gm-thumb'))) {
+    if (typeof window.openLightbox === 'function') window.openLightbox(n.getAttribute('src'));
+    return;
+  }
+  /* A click on a card's diagram reopens it in the Mermaid editor with its
+     current source, ready to tweak. */
+  if ((n = ev.target.closest('.gm-node .gm-diagram'))) {
+    var dHost = n.closest('.gm-node[data-node]');
+    if (dHost && typeof window.openDiagramEditor === 'function') {
+      selNode(dHost.dataset.node, { quiet: true });
+      window.openDiagramEditor(dHost.dataset.node);
     }
     return;
   }
@@ -3442,6 +3601,9 @@ document.addEventListener('change', function (ev) {
   snapPrev = JSON.stringify(S);
   render();
   el('#mapwrap').focus();
+  /* D-safety: readLocal() ran long before toast() existed — surface its
+     message now that it does. */
+  if (LS_RECOVERY_MSG) { toast(LS_RECOVERY_MSG); LS_RECOVERY_MSG = null; }
 })();
 </script>
 
@@ -3571,6 +3733,10 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     loading = import(ML_URL).then(function (m) {
       ML = m;
       try { m.MathfieldElement.soundsDirectory = null; } catch (_) {}
+      /* Loaded through a dynamic import, MathLive guesses its fonts folder from
+         the bundle URL and asks for .../mathlive.min.mjs/fonts/*.woff2 (about
+         twenty 404s). Point it at the package's real fonts folder. */
+      try { m.MathfieldElement.fontsDirectory = 'https://cdn.jsdelivr.net/npm/mathlive@0.105.3/fonts'; } catch (_) {}
       return m;
     }, function (err) { loading = null; throw err; });
     return loading;
@@ -3590,6 +3756,13 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   function markup(latex) {
     try { return ML.convertLatexToMarkup(latex); } catch (_) { return esc('$' + latex + '$'); }
   }
+  /* node.eqs line — same MathLive markup as an inline title equation, just
+     without the surrounding $...$ (there's nothing to delimit: the whole
+     line IS the equation). Falls back to plain escaped LaTeX before
+     MathLive has loaded, same as titleHTML above. */
+  window.eqLineHTML = function (latex) {
+    return ML ? markup(latex) : esc(latex);
+  };
   window.titleHTML = function (title) {
     var t = String(title == null ? '' : title);
     if (t.indexOf('$') < 0) return txt(t);
@@ -3666,7 +3839,20 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     /* [[wikilinks]] inside titles */
     '.gm-wlink{color:#3351CA;text-decoration:underline;text-decoration-color:rgba(51,81,202,.35);' +
       'text-underline-offset:2px;cursor:pointer;unicode-bidi:isolate;}' +
-    ':root[data-theme="dark"] .gm-wlink{color:#A9C1FF;text-decoration-color:rgba(169,193,255,.4);}';
+    ':root[data-theme="dark"] .gm-wlink{color:#A9C1FF;text-decoration-color:rgba(169,193,255,.4);}' +
+    /* Equations as their own card block, separate from the title (Barak,
+       13.09): centred, LTR, a touch larger than the 14px title so a long
+       name and a long equation each read as their own line and never wrap
+       into one another. */
+    '.gm-eqs{display:flex;flex-direction:column;gap:4px;margin-top:6px;}' +
+    '.gm-eqline{display:block;direction:ltr;unicode-bidi:isolate;text-align:center;cursor:pointer;' +
+      'border-radius:8px;padding:4px 6px;font-size:16px;line-height:1.3;color:var(--sh-text-dark);' +
+      'background:rgba(255,255,255,.28);}' +
+    '.gm-eqline:hover{background:rgba(255,255,255,.42);}' +
+    '.gm-node.root .gm-eqline{font-size:19px;}' +
+    ':root[data-theme="dark"] .gm-eqline{background:rgba(255,255,255,.08);}' +
+    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gm-eqline{background:rgba(255,255,255,.08);}}' +
+    '#eqDelete[hidden]{display:none;}';
   document.head.appendChild(css);
 
   /* ── the panel ─────────────────────────────────────────────────────── */
@@ -3691,6 +3877,8 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     '<div class="gm-eq-actions">' +
       '<button class="gm-btn icon" id="eqKbd" title="מקלדת הנוסחאות של וופלסטאק — formula keyboard" aria-label="Formula keyboard">' +
         ic('<rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/>') + '</button>' +
+      '<button class="gm-btn icon danger" id="eqDelete" hidden title="מחק משוואה — delete this equation" aria-label="Delete this equation">' +
+        ic('<path d="M18 6 6 18M6 6l12 12"/>') + '</button>' +
       '<span class="gm-eq-spacer"></span>' +
       '<button class="gm-btn" id="eqCancel" title="ביטול (Esc) — cancel">' + ic('<path d="M18 6 6 18M6 6l12 12"/>') + '<span>ביטול</span></button>' +
       '<button class="gm-btn on" id="eqInsert" title="הכנס (Enter) — insert">' + ic('<path d="M9 10 4 15l5 5"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/>') + '<span>הכנס</span></button>' +
@@ -3716,8 +3904,14 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     var id = nodeId || UI.sel, node = id && N(id);
     if (!node) { toast('בחר נושא קודם — select a node first'); return; }
     EQ.node = id;
+    /* eqIndex indexes node.eqs (Barak, 13.09: equations live in their own
+       array, separate from the title). No index (Alt+=, the Σ rail button)
+       means "add a new one"; a valid index (clicking an existing .gm-eqline)
+       means "edit that one, and offer to delete it". */
     EQ.index = typeof eqIndex === 'number' && eqIndex >= 0 ? eqIndex : -1;
-    var existing = EQ.index >= 0 ? eqAt(node.title || '', EQ.index) : '';
+    var existing = (EQ.index >= 0 && node.eqs) ? (node.eqs[EQ.index] || '') : '';
+    var delBtn = document.getElementById('eqDelete');
+    if (delBtn) delBtn.hidden = EQ.index < 0;
     panel.hidden = false;
     document.querySelector('.gm-app') && document.querySelector('.gm-app').classList.add('gm-eq-open');
     place(id);
@@ -3763,11 +3957,25 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     if (!mf || !node) { closeEquation(); return; }
     var latex = String(mf.getValue ? mf.getValue('latex') : mf.value || '').trim();
     if (!latex) { closeEquation(); return; }
-    var title = node.title || '';
-    node.title = EQ.index >= 0 ? replaceEq(title, EQ.index, latex)
-                               : (title ? title.replace(/\s+$/, '') + ' ' : '') + '$' + latex + '$';
+    /* node.eqs, not the title (Barak, 13.09) — the title stays plain text.
+       Editing an existing line replaces just that entry; otherwise this is
+       a new line appended to the card. */
+    var eqs = Array.isArray(node.eqs) ? node.eqs.slice() : [];
+    if (EQ.index >= 0 && EQ.index < eqs.length) eqs[EQ.index] = latex;
+    else eqs.push(latex);
+    node.eqs = eqs;
     closeEquation();
     save(); render();
+  }
+  function deleteEquation() {
+    var node = EQ.node && N(EQ.node);
+    if (!node || EQ.index < 0 || !Array.isArray(node.eqs)) { closeEquation(); return; }
+    var eqs = node.eqs.slice();
+    eqs.splice(EQ.index, 1);
+    if (eqs.length) node.eqs = eqs; else delete node.eqs;
+    closeEquation();
+    save(); render();
+    toast('המשוואה נמחקה — equation deleted');
   }
 
   /* ── the WaffleStack formula keyboard ──────────────────────────────── */
@@ -3848,6 +4056,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   panel.addEventListener('click', function (e) {
     if (e.target.closest('#eqInsert')) { insertEquation(); return; }
     if (e.target.closest('#eqCancel')) { closeEquation(); return; }
+    if (e.target.closest('#eqDelete')) { deleteEquation(); return; }
     if (e.target.closest('#eqKbd')) {
       var kb = window.mathVirtualKeyboard, mf = field();
       if (!kb || !mf) return;
@@ -3869,8 +4078,12 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   window.closeEquation = closeEquation;
 
   /* A map that already holds equations loads MathLive straight away and
-     re-renders, so its titles show math instead of $...$ text. */
-  if ((S.nodes || []).some(function (n) { return n.title && n.title.indexOf('$') >= 0; })) {
+     re-renders — legacy $...$-in-title text becomes math, and node.eqs
+     lines (Barak, 13.09) become MathLive markup instead of raw LaTeX. The
+     re-render after document.fonts.ready is what re-triggers settleMap()
+     once the real (font-loaded) size of every equation line is known, so
+     nothing added while offline ends up overlapping once the fonts arrive. */
+  if ((S.nodes || []).some(function (n) { return (n.title && n.title.indexOf('$') >= 0) || (n.eqs && n.eqs.length); })) {
     loadMathLive().then(function () {
       render();
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { render(); });
@@ -3885,5 +4098,404 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     }, function () {});
     return origOpen(a, b);
   };
+})();
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   Images — paste (Ctrl+V) or drop an image straight onto the map.
+
+   Placement: a new child of the selected node, of the node it was dropped
+   ON, or of the root when nothing is selected — EXCEPT Shift+Ctrl+V, the
+   "attach" gesture, which sets the image on the currently selected node
+   itself instead of making a child. Every image is downscaled in a canvas
+   (longest side 480px, JPEG q=0.75) before it ever touches node.img, and
+   refused with a toast if it's still over 150KB after that, or if the map
+   already holds 40 images — so a full-resolution phone photo can never
+   quietly bloat localStorage or a JSON export.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  var MAX_IMAGES = 40;
+  var MAX_IMG_BYTES = 150 * 1024;
+  var IMG_MAX_DIM = 480;
+  var IMG_QUALITY = 0.75;
+
+  /* ── styles ────────────────────────────────────────────────────────── */
+  var css = document.createElement('style');
+  css.textContent =
+    '.gm-thumb{display:block;margin-top:6px;max-width:220px;width:100%;height:auto;' +
+      'border-radius:10px;cursor:zoom-in;box-shadow:0 2px 8px rgba(31,41,55,.22);}' +
+    '.gm-lightbox{position:fixed;inset:0;z-index:75;display:grid;place-items:center;' +
+      'background:rgba(15,25,50,.55);opacity:0;pointer-events:none;transition:opacity .18s ease;cursor:zoom-out;}' +
+    '.gm-lightbox.open{opacity:1;pointer-events:auto;}' +
+    '.gm-lightbox[hidden]{display:none;}' +
+    '.gm-lightbox-card{padding:10px;border-radius:18px;max-width:92vw;max-height:90vh;}' +
+    '.gm-lightbox-card img{display:block;max-width:min(88vw,880px);max-height:80vh;border-radius:12px;}';
+  document.head.appendChild(css);
+
+  /* ── the glass lightbox — click or Esc closes ─────────────────────── */
+  var box = document.createElement('div');
+  box.className = 'gm-lightbox';
+  box.setAttribute('data-float', 'lightbox');
+  box.setAttribute('data-chrome', '1');
+  box.hidden = true;
+  box.innerHTML = '<div class="gm-lightbox-card gm-glass"><img alt=""></div>';
+  document.body.appendChild(box);
+  function openLightbox(src) {
+    if (!src) return;
+    box.querySelector('img').src = src;
+    box.hidden = false;
+    requestAnimationFrame(function () { box.classList.add('open'); });
+  }
+  function closeLightbox() {
+    if (box.hidden) return;
+    box.classList.remove('open');
+    setTimeout(function () { box.hidden = true; }, 180);
+  }
+  box.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function (e) {
+    if (!box.hidden && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeLightbox(); }
+  }, true);
+  window.openLightbox = openLightbox;
+
+  /* ── Shift held? A paste event carries no reliable modifier state of its
+     own, so track it the same way the D-runtime script already tracks Alt
+     for "hold to look". ─────────────────────────────────────────────── */
+  var shiftHeld = false;
+  document.addEventListener('keydown', function (e) { if (e.key === 'Shift') shiftHeld = true; }, true);
+  document.addEventListener('keyup', function (e) { if (e.key === 'Shift') shiftHeld = false; }, true);
+  addEventListener('blur', function () { shiftHeld = false; });
+
+  /* ── downscale + budget ────────────────────────────────────────────── */
+  function countImages() { return S.nodes.filter(function (n) { return !!n.img; }).length; }
+  function dataUrlBytes(u) {
+    var i = u.indexOf(','), b64 = i >= 0 ? u.slice(i + 1) : u;
+    return Math.ceil(b64.length * 3 / 4);
+  }
+  function loadImageFile(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function (e) { URL.revokeObjectURL(url); reject(e); };
+      img.src = url;
+    });
+  }
+  function downscaleToJPEG(img) {
+    var w = img.naturalWidth || img.width || 1, h = img.naturalHeight || img.height || 1;
+    var scale = Math.min(1, IMG_MAX_DIM / Math.max(w, h));
+    var cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
+    var c = document.createElement('canvas');
+    c.width = cw; c.height = ch;
+    c.getContext('2d').drawImage(img, 0, 0, cw, ch);
+    return c.toDataURL('image/jpeg', IMG_QUALITY);
+  }
+  function placementParent(opts) {
+    if (opts.dropNodeId && N(opts.dropNodeId)) return opts.dropNodeId;
+    if (UI.sel && N(UI.sel)) return UI.sel;
+    return rootNode().id;
+  }
+
+  /* file -> downscaled data URL -> onto the map, per the rules above. */
+  function handleIncomingImage(file, opts) {
+    opts = opts || {};
+    loadImageFile(file).then(function (img) {
+      var dataUrl = downscaleToJPEG(img);
+      var bytes = dataUrlBytes(dataUrl);
+      if (bytes > MAX_IMG_BYTES) {
+        toast('התמונה גדולה מדי גם אחרי כיווץ (מעל 150KB) — image is too large even after downscaling (over 150KB)');
+        return;
+      }
+      if (opts.attach) {
+        var node = UI.sel && N(UI.sel);
+        if (!node) { toast('בחר נושא קודם כדי לצרף תמונה — select a node first to attach an image'); return; }
+        if (!node.img && countImages() >= MAX_IMAGES) {
+          toast('הגיעה למגבלת 40 תמונות במפה — reached the 40-image limit for this map');
+          return;
+        }
+        node.img = dataUrl;
+        save(); render();
+        toast('התמונה צורפה לנושא — image attached to the node');
+        return;
+      }
+      if (countImages() >= MAX_IMAGES) {
+        toast('הגיעה למגבלת 40 תמונות במפה — reached the 40-image limit for this map');
+        return;
+      }
+      var pid = placementParent(opts);
+      var id = uid('n');
+      S.nodes.push({ id: id, parent: pid, title: '', body: '', accent: accentFor(pid), img: dataUrl });
+      UI.sel = id;
+      mapView().touched = true;
+      save(); render();
+      var n = el('.gm-node[data-node="' + id + '"]');
+      if (n) ensureVisible(n);
+      toast('נוספה תמונה — image added');
+    }, function () {
+      toast('לא ניתן היה לטעון את התמונה — could not load that image');
+    });
+  }
+
+  /* ── paste ─────────────────────────────────────────────────────────── */
+  document.addEventListener('paste', function (ev) {
+    if (inField()) return;
+    var items = (ev.clipboardData && ev.clipboardData.items) || [];
+    var file = null;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind === 'file' && /^image\//.test(items[i].type)) { file = items[i].getAsFile(); break; }
+    }
+    if (!file) return;
+    ev.preventDefault();
+    handleIncomingImage(file, { attach: !!(ev.shiftKey || shiftHeld) });
+  });
+
+  /* ── drop ──────────────────────────────────────────────────────────── */
+  var wrap = el('#mapwrap');
+  if (wrap) {
+    wrap.addEventListener('dragover', function (e) { e.preventDefault(); });
+    wrap.addEventListener('drop', function (e) {
+      var dt = e.dataTransfer;
+      if (!dt || !dt.files || !dt.files.length) return;
+      var file = null;
+      for (var i = 0; i < dt.files.length; i++) {
+        if (/^image\//.test(dt.files[i].type)) { file = dt.files[i]; break; }
+      }
+      if (!file) return;
+      e.preventDefault();
+      var hostNode = e.target.closest && e.target.closest('.gm-node');
+      handleIncomingImage(file, { dropNodeId: hostNode ? hostNode.dataset.node : null });
+    });
+  }
+
+  /* ── anti-overlap: a thumbnail's real height is unknown until it loads,
+     so re-settle once it does (contract: "re-run settleMap() so nothing
+     overlaps"). Runs after every render() via RENDER_HOOKS — a fresh <img>
+     element every time (render() replaces #world's whole subtree), so the
+     "already bound" guard is per-element, not per-node. ───────────────── */
+  RENDER_HOOKS.push(function () {
+    els('.gm-thumb[data-gm-thumb]').forEach(function (img) {
+      if (img.dataset.gmBound) return;
+      img.dataset.gmBound = '1';
+      if (img.complete && img.naturalWidth) { settleMap(); return; }
+      img.addEventListener('load', function () { settleMap(); }, { once: true });
+    });
+  });
+})();
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   Diagrams — a quick Mermaid editor on the glass map (Alt+M / rail button).
+
+   Mermaid source lives in node.diagram and renders as an inline SVG inside
+   the card; Obsidian renders the same source natively from the Markdown
+   export's ```mermaid fence, so nothing here is GlassMap-only notation.
+   Mermaid itself loads lazily from a PINNED jsdelivr URL (verified with
+   curl to return 200 before this shipped — contract note: "a previous
+   builder shipped 404 CDN paths").
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  var MERMAID_URL = 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+  var MMD = null, mmdLoading = null, mmdInit = false, mmdSeq = 0;
+  function loadMermaid() {
+    if (MMD) return Promise.resolve(MMD);
+    if (mmdLoading) return mmdLoading;
+    mmdLoading = import(MERMAID_URL).then(function (m) {
+      MMD = m.default || m;
+      if (!mmdInit) {
+        mmdInit = true;
+        try { MMD.initialize({ startOnLoad: false, securityLevel: 'strict', theme: resolveTheme() ? 'dark' : 'neutral' }); } catch (e) {}
+      }
+      return MMD;
+    }, function (err) { mmdLoading = null; throw err; });
+    return mmdLoading;
+  }
+  function renderMermaidTo(container, source) {
+    return loadMermaid().then(function (m) {
+      var id = 'gmmmd' + (mmdSeq++);
+      return m.render(id, source).then(function (res) { container.innerHTML = res.svg; });
+    });
+  }
+
+  /* ── styles ────────────────────────────────────────────────────────── */
+  var css = document.createElement('style');
+  css.textContent =
+    '.gm-diagram{margin-top:6px;max-width:320px;cursor:pointer;border-radius:10px;overflow:hidden;' +
+      'background:rgba(255,255,255,.5);padding:6px;box-shadow:0 2px 8px rgba(31,41,55,.16);}' +
+    '.gm-diagram svg{max-width:100%;height:auto;display:block;}' +
+    '.gm-diagram-loading{font-size:11px;color:var(--sh-text-med);}' +
+    ':root[data-theme="dark"] .gm-diagram{background:rgba(255,255,255,.06);}' +
+    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gm-diagram{background:rgba(255,255,255,.06);}}' +
+    '.gm-dg-panel{width:min(520px,calc(100vw - 24px));}' +
+    '.gm-dg-chips{display:flex;flex-wrap:wrap;gap:6px;}' +
+    '.gm-dg-src{width:100%;min-height:90px;max-height:220px;padding:8px 10px;border-radius:10px;box-sizing:border-box;' +
+      'font:12.5px/1.5 ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;direction:ltr;' +
+      'background:rgba(255,255,255,.9);border:1px solid rgba(31,62,108,.18);color:#1F3E6C;resize:vertical;}' +
+    '.gm-dg-src:focus{outline:2px solid var(--gm-gold);outline-offset:1px;}' +
+    ':root[data-theme="dark"] .gm-dg-src{background:rgba(10,15,30,.55);color:#e2e8f0;border-color:rgba(255,255,255,.16);}' +
+    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gm-dg-src{background:rgba(10,15,30,.55);color:#e2e8f0;border-color:rgba(255,255,255,.16);}}' +
+    '.gm-dg-preview{min-height:60px;max-height:220px;overflow:auto;border-radius:10px;padding:8px;background:rgba(255,255,255,.35);}' +
+    '.gm-dg-preview svg{max-width:100%;height:auto;display:block;margin:0 auto;}' +
+    '.gm-dg-preview .gm-eq-loading{font-size:11px;color:var(--sh-text-med);}';
+  document.head.appendChild(css);
+
+  function ic(p) {
+    return '<svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+  }
+  var DIAGRAM_CHIPS = [
+    { key: 'flow', label: 'זרימה', src: 'flowchart LR\n  A[התחלה] --> B[שלב]\n  B --> C[סיום]' },
+    { key: 'seq', label: 'רצף', src: 'sequenceDiagram\n  participant A\n  participant B\n  A->>B: הודעה' },
+    { key: 'pie', label: 'עוגה', src: 'pie title כותרת\n  "א" : 40\n  "ב" : 60' },
+    { key: 'cycle', label: 'מחזור', src: 'flowchart LR\n  A --> B --> C --> A' }
+  ];
+
+  /* ── the panel ─────────────────────────────────────────────────────── */
+  var panel = document.createElement('div');
+  panel.id = 'diagramPanel';
+  panel.className = 'gm-eq-panel gm-dg-panel gm-glass';
+  panel.setAttribute('data-float', 'diagram');
+  panel.setAttribute('data-chrome', '1');
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('dir', 'rtl');
+  panel.setAttribute('aria-label', 'עורך דיאגרמות');
+  panel.hidden = true;
+  panel.innerHTML =
+    '<div class="gm-eq-head"><span class="gm-eq-title">דיאגרמה מהירה</span>' +
+    '<span class="gm-eq-sub" dir="rtl">מבוסס <bdi>Mermaid</bdi> — <bdi>Obsidian</bdi> מציג את זה ישירות</span></div>' +
+    '<div class="gm-dg-chips" dir="rtl">' +
+      DIAGRAM_CHIPS.map(function (c) { return '<button class="gm-btn" data-dg-chip="' + c.key + '">' + esc(c.label) + '</button>'; }).join('') +
+    '</div>' +
+    '<textarea id="diagramSrc" class="gm-dg-src" dir="ltr" spellcheck="false" placeholder="flowchart LR&#10;  A --&gt; B"></textarea>' +
+    '<div class="gm-dg-preview" id="diagramPreview"></div>' +
+    '<div class="gm-eq-actions">' +
+      '<span class="gm-eq-spacer"></span>' +
+      '<button class="gm-btn" id="diagramCancel" title="ביטול (Esc) — cancel">' + ic('<path d="M18 6 6 18M6 6l12 12"/>') + '<span>ביטול</span></button>' +
+      '<button class="gm-btn on" id="diagramInsert" title="הכנס (Ctrl+Enter) — insert">' + ic('<path d="M9 10 4 15l5 5"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/>') + '<span>הכנס</span></button>' +
+    '</div>';
+  document.body.appendChild(panel);
+
+  var DG = { nodeId: null, parentId: null };
+  var srcField = panel.querySelector('#diagramSrc');
+  var previewEl = panel.querySelector('#diagramPreview');
+
+  function place(id) {
+    var host = id && document.querySelector('.gm-node[data-node="' + id + '"]');
+    var w = panel.offsetWidth || 520, h = panel.offsetHeight || 260;
+    var r = host ? host.getBoundingClientRect() : { left: innerWidth / 2, right: innerWidth / 2, top: innerHeight / 3, bottom: innerHeight / 3, width: 0 };
+    var left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 12));
+    var top = r.bottom + 10;
+    if (top + h > innerHeight - 12) top = r.top - h - 10;
+    top = Math.max(64, Math.min(top, innerHeight - h - 12));
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+  }
+
+  var previewTimer = null;
+  function schedulePreview() {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(function () {
+      var src = srcField.value.trim();
+      if (!src) { previewEl.innerHTML = ''; return; }
+      renderMermaidTo(previewEl, src).catch(function () {
+        previewEl.innerHTML = '<span class="gm-eq-loading">שגיאה בתרשים — diagram error</span>';
+      });
+    }, 250);
+  }
+
+  function openDiagramEditor(existingNodeId) {
+    var node = existingNodeId && N(existingNodeId);
+    if (node && node.diagram) {
+      DG.nodeId = existingNodeId; DG.parentId = null;
+      srcField.value = node.diagram;
+    } else {
+      var pid = (UI.sel && N(UI.sel)) ? UI.sel : rootNode().id;
+      DG.nodeId = null; DG.parentId = pid;
+      srcField.value = '';
+      previewEl.innerHTML = '';
+    }
+    panel.hidden = false;
+    place(existingNodeId || DG.parentId);
+    requestAnimationFrame(function () { srcField.focus(); place(existingNodeId || DG.parentId); });
+    if (srcField.value.trim()) schedulePreview();
+  }
+  function closeDiagramEditor() {
+    if (panel.hidden) return;
+    panel.hidden = true;
+    DG.nodeId = null; DG.parentId = null;
+    var wrap = el('#mapwrap');
+    if (wrap) wrap.focus();
+  }
+  function insertDiagram() {
+    var src = srcField.value.trim();
+    if (!src) { closeDiagramEditor(); return; }
+    if (DG.nodeId && N(DG.nodeId)) {
+      N(DG.nodeId).diagram = src;
+      save(); render();
+    } else {
+      var pid = DG.parentId || rootNode().id;
+      var id = uid('n');
+      S.nodes.push({ id: id, parent: pid, title: '', body: '', accent: accentFor(pid), diagram: src });
+      UI.sel = id;
+      mapView().touched = true;
+      save(); render();
+      var n = el('.gm-node[data-node="' + id + '"]');
+      if (n) ensureVisible(n);
+    }
+    closeDiagramEditor();
+    toast('הדיאגרמה נוספה — diagram added');
+  }
+
+  /* ── wiring ────────────────────────────────────────────────────────── */
+  panel.addEventListener('click', function (e) {
+    if (e.target.closest('#diagramInsert')) { insertDiagram(); return; }
+    if (e.target.closest('#diagramCancel')) { closeDiagramEditor(); return; }
+    var chip = e.target.closest('[data-dg-chip]');
+    if (chip) {
+      var found = DIAGRAM_CHIPS.filter(function (c) { return c.key === chip.dataset.dgChip; })[0];
+      if (found) { srcField.value = found.src; schedulePreview(); srcField.focus(); }
+    }
+  });
+  srcField.addEventListener('input', schedulePreview);
+  /* Keys typed here never reach the map's own shortcuts — inField() (engine
+     part 3) already treats any element inside #diagramPanel as a field.
+     Only Ctrl+Enter (insert) and Escape (cancel) are handled locally; plain
+     Enter must stay a normal newline, since Mermaid source is multi-line. */
+  srcField.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeDiagramEditor(); }
+    else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); insertDiagram(); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!panel.hidden && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeDiagramEditor(); }
+  }, true);
+  document.addEventListener('pointerdown', function (e) {
+    if (panel.hidden) return;
+    if (e.target.closest && e.target.closest('#diagramPanel, .gm-diagram')) return;
+    closeDiagramEditor();
+  }, true);
+
+  window.openDiagramEditor = openDiagramEditor;
+  window.closeDiagramEditor = closeDiagramEditor;
+
+  /* ── anti-overlap: render each diagram card's SVG once its node.diagram
+     is known, then re-settle (contract: "re-run settleMap() so nothing
+     overlaps"). A fresh placeholder div every render() (the whole #world
+     subtree is replaced), so re-rendering unchanged source each time is
+     cheap enough not to bother caching across renders. ─────────────────── */
+  RENDER_HOOKS.push(function () {
+    els('.gm-diagram[data-diagram-node]').forEach(function (host) {
+      var node = N(host.dataset.diagramNode);
+      if (!node || !node.diagram) return;
+      renderMermaidTo(host, node.diagram).then(function () { settleMap(); }, function () {
+        host.innerHTML = '<span class="gm-diagram-loading">שגיאה בתרשים — diagram error</span>';
+      });
+    });
+  });
+
+  /* A map that already holds a diagram loads Mermaid straight away, same
+     as the equation editor does for MathLive. */
+  if ((S.nodes || []).some(function (n) { return !!n.diagram; })) loadMermaid().catch(function () {});
 })();
 </script>
