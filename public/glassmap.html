@@ -161,8 +161,10 @@ input,textarea{background:none;border:0;outline:none;}
 /* cards layer: tree wires + relations hidden by default (contract §Layers);
    a hovered node ghosts just its own edges back in via .gm-peek (JS-toggled,
    see mountMap — two separate DOM subtrees can't do this with CSS alone). */
-.mapwrap[data-layer="cards"] .gm-wires{opacity:0;}
-.mapwrap[data-layer="cards"] .gm-wires path.gm-peek{opacity:.35 !important;}
+/* The layer switch hides only the relations you draw between topics; the
+   topic-to-subtopic lines are the map itself and always stay (Barak, 13.09). */
+.mapwrap[data-layer="cards"] .gm-wires path.rel{opacity:0;}
+/* (tree lines are always visible now, so the cards-layer ghost is gone) */
 
 .gm-node{position:absolute;transform:translate(-50%,-50%);min-width:120px;max-width:260px;
   padding:10px 14px;border-radius:16px;cursor:default;
@@ -1424,8 +1426,9 @@ function renderMap() {
   el('#world').innerHTML = world;
   var findOn = !el('#findBar').hidden;
   el('#gmHint').innerHTML = findOn ? '' :
-    '<b>Tab</b> תת-נושא &middot; <b>Enter</b> אח אחריך &middot; <b>Shift+L</b> קשר &middot; <b>Alt+=</b> משוואה &middot; <b>?</b> עזרה' +
-    ' &nbsp;·&nbsp; <b>Tab</b> child &middot; <b>Enter</b> sibling &middot; <b>Shift+L</b> relate &middot; <b>Alt+=</b> equation &middot; <b>?</b> help';
+    '<span dir="rtl"><kbd dir="ltr">Tab</kbd> תת-נושא · <kbd dir="ltr">Enter</kbd> נושא אח · ' +
+    '<kbd dir="ltr">Shift+L</kbd> קשר · <kbd dir="ltr">Alt+=</kbd> משוואה · <kbd dir="ltr">Ctrl+/</kbd> קיפול · ' +
+    '<kbd dir="ltr">?</kbd> עזרה</span>';
   el('#mapwrap').dataset.layer = S.layer;
   renderMapctl();
 }
@@ -1437,7 +1440,7 @@ function renderMapctl() {
     '<button class="gm-btn icon" data-zoom="-1" title="התרחק — Zoom out" aria-label="Zoom out"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>' +
     '<button class="gm-btn icon" data-zoom="0" title="התאם הכל (Ctrl+0) — fit" aria-label="Fit the map"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>' +
     '<button class="gm-btn icon' + (S.layer === 'cards' ? ' on' : '') + '" id="layerBtn"' +
-      ' title="שכבה (L) — links/cards layer" aria-label="Toggle layer"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.18-9.17 4.17a2 2 0 0 1-1.66 0L2 12.18"/><path d="m22 17.18-9.17 4.17a2 2 0 0 1-1.66 0L2 17.18"/></svg></button>' +
+      ' title="הקשרים שלי: הצג או הסתר (L) — show or hide your own relations" aria-label="Show or hide your relations"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.18-9.17 4.17a2 2 0 0 1-1.66 0L2 12.18"/><path d="m22 17.18-9.17 4.17a2 2 0 0 1-1.66 0L2 17.18"/></svg></button>' +
     '<button class="gm-btn icon' + (UI.lens ? ' on' : '') + '" id="lensBtn" aria-pressed="' + !!UI.lens + '"' +
       ' title="עדשת מיקוד — focus lens" aria-label="Toggle the focus lens"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg></button>' +
     '<button class="gm-btn icon' + (UI.relFrom ? ' on' : '') + '" id="relBtn" aria-pressed="' + !!UI.relFrom + '"' +
@@ -3355,6 +3358,17 @@ document.addEventListener('click', function (ev) {
   /* The +N badge on a folded node is a button: a click folds / unfolds that
      node (Ctrl+/ does the same from the keyboard). Handled before any other
      node click so it never turns into a rename or a drag. */
+  /* A click on a [[wikilink]] opens that note when the map runs inside
+     Obsidian; on the web there is no vault, so it just says so. */
+  if ((n = ev.target.closest('.gm-node .gm-wlink'))) {
+    ev.preventDefault();
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'gm:open-note', target: n.dataset.note }, '*');
+    } else {
+      toast('קישור לפתק ' + n.dataset.note + ' — נפתח מתוך Obsidian');
+    }
+    return;
+  }
   /* A click on an equation inside a title reopens it in the editor. */
   if ((n = ev.target.closest('.gm-node .gm-eq'))) {
     var eqHost = n.closest('.gm-node[data-node]');
@@ -3564,21 +3578,30 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
 
   /* ── titles: $...$ becomes rendered math ───────────────────────────── */
   var EQ_RE = /\$([^$]+)\$/g;
+  /* [[Note]] and [[Note|alias]] become links. Inside Obsidian a click opens
+     the note: the map posts {type:'gm:open-note', target} to its host. */
+  var WL_RE = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
+  function txt(x) {
+    return esc(x).replace(WL_RE, function (_, target, alias) {
+      var t = target.trim();
+      return '<a class="gm-wlink" dir="auto" data-note="' + t + '" title="' + t + '">' + (alias || target).trim() + '</a>';
+    });
+  }
   function markup(latex) {
     try { return ML.convertLatexToMarkup(latex); } catch (_) { return esc('$' + latex + '$'); }
   }
   window.titleHTML = function (title) {
     var t = String(title == null ? '' : title);
-    if (t.indexOf('$') < 0) return esc(t);
+    if (t.indexOf('$') < 0) return txt(t);
     var out = '', last = 0, idx = 0, m;
     EQ_RE.lastIndex = 0;
     while ((m = EQ_RE.exec(t))) {
-      out += esc(t.slice(last, m.index));
+      out += txt(t.slice(last, m.index));
       out += '<span class="gm-eq" dir="ltr" data-eq-index="' + idx + '" title="לחיצה לעריכה — click to edit">' +
         (ML ? markup(m[1]) : esc(m[0])) + '</span>';
       idx++; last = m.index + m[0].length;
     }
-    return out + esc(t.slice(last));
+    return out + txt(t.slice(last));
   };
   function eqAt(title, index) {
     var m, i = 0; EQ_RE.lastIndex = 0;
@@ -3629,7 +3652,21 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     /* Hebrew category names were clipped at both ends inside the LTR keyboard */
     '.ML__keyboard .gm-kb-sep{direction:rtl;unicode-bidi:plaintext;white-space:nowrap;overflow:visible;' +
       'font-family:Heebo,system-ui,sans-serif;font-weight:600;font-size:13px;color:#465CA5;}' +
-    ':root[data-theme="dark"] .ML__keyboard .gm-kb-sep{color:#B8C6EA;}';
+    ':root[data-theme="dark"] .ML__keyboard .gm-kb-sep{color:#B8C6EA;}' +
+    /* keys inside Hebrew sentences: isolated so punctuation cannot jump sides */
+    '.gm-hint kbd,.gm-eq-sub kbd{display:inline-block;unicode-bidi:isolate;font:600 11px/1.2 ui-monospace,Consolas,monospace;' +
+      'padding:1px 5px;margin:0 1px;border-radius:5px;background:rgba(255,255,255,.75);' +
+      'border:1px solid rgba(31,62,108,.16);border-bottom-width:2px;color:var(--sh-text-dark);}' +
+    ':root[data-theme="dark"] .gm-hint kbd,:root[data-theme="dark"] .gm-eq-sub kbd{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);}' +
+    '.gm-eq-sub bdi{unicode-bidi:isolate;}' +
+    /* math reads left to right even inside a right-to-left panel */
+    '.gm-eq-field math-field{direction:ltr;}' +
+    /* one keyboard button: MathLive draws its own toggle and menu inside the field */
+    'math-field::part(virtual-keyboard-toggle),math-field::part(menu-toggle){display:none;}' +
+    /* [[wikilinks]] inside titles */
+    '.gm-wlink{color:#3351CA;text-decoration:underline;text-decoration-color:rgba(51,81,202,.35);' +
+      'text-underline-offset:2px;cursor:pointer;unicode-bidi:isolate;}' +
+    ':root[data-theme="dark"] .gm-wlink{color:#A9C1FF;text-decoration-color:rgba(169,193,255,.4);}';
   document.head.appendChild(css);
 
   /* ── the panel ─────────────────────────────────────────────────────── */
@@ -3643,11 +3680,13 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   panel.setAttribute('data-float', 'eq');
   panel.setAttribute('data-chrome', '1');
   panel.setAttribute('role', 'dialog');
+  panel.setAttribute('dir', 'rtl');
   panel.setAttribute('aria-label', 'עורך משוואות');
   panel.hidden = true;
   panel.innerHTML =
     '<div class="gm-eq-head"><span class="gm-eq-title">משוואה</span>' +
-    '<span class="gm-eq-sub">הקלדה כמו ב-Word: הקו / יוצר שבר, ^ חזקה, _ אינדקס, sqrt שורש</span></div>' +
+    '<span class="gm-eq-sub" dir="rtl">מקלידים כמו ב־<bdi>Word</bdi>: <kbd dir="ltr">/</kbd> שבר · ' +
+    '<kbd dir="ltr">^</kbd> חזקה · <kbd dir="ltr">_</kbd> אינדקס · <kbd dir="ltr">sqrt</kbd> שורש</span></div>' +
     '<div class="gm-eq-field" id="eqFieldWrap"><span class="gm-eq-loading">טוען את עורך המשוואות…</span></div>' +
     '<div class="gm-eq-actions">' +
       '<button class="gm-btn icon" id="eqKbd" title="מקלדת הנוסחאות של וופלסטאק — formula keyboard" aria-label="Formula keyboard">' +
