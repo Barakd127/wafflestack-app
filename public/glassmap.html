@@ -203,9 +203,11 @@ input,textarea{background:none;border:0;outline:none;}
   box-shadow:var(--sh-card-shadow),0 0 0 1.5px rgba(212,175,55,.45),inset 0 1px 0 rgba(255,255,255,.18);
 }
 /* P1 fix: at max-width:320 and 26px bold, a realistic bilingual root title
-   (the seeded default itself: "נושא מרכזי — Central topic") still needed a
-   3rd line and was getting clipped with an ellipsis after 2 — bump the
-   clamp so the card wraps the whole title instead of cutting it off. */
+   (e.g. a course name a user types as "רגרסיה לינארית — Linear Regression")
+   still needed a 3rd line and was getting clipped with an ellipsis after 2 —
+   bump the clamp so the card wraps the whole title instead of cutting it
+   off. The seed's own root title is Hebrew-only (never bilingual, per the
+   Hebrew-only-chrome rule) but a typed one is fair game. */
 .gm-node.root .gm-ttl{font-size:18px;font-weight:700;color:var(--sh-text-dark);-webkit-line-clamp:3;}
 .gm-node.root .gm-stripe{display:none;}
 .gm-node .gm-meta{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:11px;color:var(--sh-text-med);}
@@ -363,9 +365,23 @@ input,textarea{background:none;border:0;outline:none;}
 
 /* ── H3: an Obsidian note node — file-text swatch + [[wikilink]] title + a
    live excerpt clamped to two lines. ─────────────────────────────────────── */
-.gm-note-swatch{width:14px;height:14px;color:var(--sh-text-med);}
+.gm-note-swatch{width:14px;height:14px;flex:none;color:var(--sh-text-med);}
 .gm-note-swatch svg{width:100%;height:100%;}
-a.gm-note-title{font-weight:600;}
+a.gm-note-title{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* Coordinator review (round 2): .gm-ttl's normal title style is
+   `display:-webkit-box;-webkit-box-orient:vertical` (the 3-line-clamp
+   trick every other node's title uses) — it only ever held a single text
+   node before. Feeding it TWO element children (the swatch <span> + the
+   <a> title) broke that box model: each child became its own vertical
+   flex line instead of running inline, so the title wrapped mid-word
+   ("[[Note" / "0]]") and the whole card's shrink-to-fit width collapsed to
+   the narrowest child instead of the text's real width. A note title is a
+   single line by design anyway ("Render the title on one line, ellipsis if
+   long)" — so it gets its own flex row instead of the multi-line clamp,
+   and the card gets a floor so it can never end up narrower than a plain
+   subtopic card at any zoom. */
+.gm-ttl.gm-ttl-note{display:flex!important;align-items:center;gap:4px;-webkit-line-clamp:unset;overflow:visible;}
+.gm-node.gm-linked-note{min-width:140px;}
 .gm-note-excerpt{margin-top:4px;font-size:11.5px;line-height:1.35;color:var(--sh-text-med);
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .mapwrap.lod-far .gm-note-excerpt,.mapwrap.lod-mid .gm-note-excerpt{display:none;}
@@ -937,7 +953,7 @@ function seed(id, title) {
   return {
     v: 1, schema: 1, id: id || 'default', title: title || 'GlassMap',
     layer: 'links', theme: 'auto',
-    nodes: [{ id: rid, parent: null, title: 'נושא מרכזי — Central topic', body: '' }],
+    nodes: [{ id: rid, parent: null, title: 'נושא מרכזי', body: '' }],
     links: [],
     inbox: [],
     view: { x: 0, y: 0, z: 1, fit: false, touched: false },
@@ -1658,7 +1674,7 @@ function mapWorld() {
       ' style="left:' + x.toFixed(1) + 'px;top:' + y.toFixed(1) + 'px' + (accent ? ';--acc:var(' + accent + ')' : '') + '"' +
       ' role="button" tabindex="0" title="' + esc(isLinkedNote ? noteHint : hint) + '">' +
       (accent ? '<span class="gm-stripe" aria-hidden="true"></span>' : '') +
-      '<span class="gm-ttl gm-bidi" dir="auto">' +
+      '<span class="gm-ttl gm-bidi' + (isLinkedNote ? ' gm-ttl-note' : '') + '" dir="auto">' +
         (isLinkedNote ? '<span class="gm-glyph gm-note-swatch" aria-hidden="true">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span>' :
           (glyph ? '<span class="gm-glyph gm-swatch gm-swatch-' + glyphSwatch + '" aria-hidden="true">' + glyph + '</span>' : '')) +
@@ -1722,26 +1738,20 @@ function renderMapctl() {
       ' title="הקשרים שלי: הצג או הסתר (L) — show or hide your own relations" aria-label="Show or hide your relations"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.18-9.17 4.17a2 2 0 0 1-1.66 0L2 12.18"/><path d="m22 17.18-9.17 4.17a2 2 0 0 1-1.66 0L2 17.18"/></svg></button>' +
     '<button class="gm-btn icon' + (UI.lens ? ' on' : '') + '" id="lensBtn" aria-pressed="' + !!UI.lens + '"' +
       ' title="עדשת מיקוד — focus lens" aria-label="Toggle the focus lens"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg></button>' +
-    '<button class="gm-btn icon' + (UI.relFrom ? ' on' : '') + '" id="relBtn" aria-pressed="' + !!UI.relFrom + '"' +
-      ' title="קשר בין נושאים (Shift+L) — relate two nodes" aria-label="Relate two nodes"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><path d="M8 12h8"/></svg></button>' +
-    '<button class="gm-btn icon" id="eqBtn" title="משוואה (Alt+=) — equation" aria-label="Insert an equation"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 7V4H6l6 8-6 8h12v-3"/></svg></button>' +
-    '<button class="gm-btn icon" id="diagramBtn" title="דיאגרמה מהירה (Alt+M) — quick diagram" aria-label="Insert a quick diagram"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></svg></button>' +
-    /* H1 rail button: capture a floating thought (lucide message-square-dashed).
-       H2 deliberately does NOT get a permanent rail slot too — the rail is
-       already 16 buttons deep (contract D4's "mapctl rail only" corner has a
-       real ceiling at this viewport height); Alt+S plus the sketch thumbnail's
-       own click-to-reopen already satisfy "Alt+S or a node action" without
-       growing the rail further. */
-    '<button class="gm-btn icon" id="bubbleBtn" title="תפוס מחשבה (Alt+T) — capture a thought" aria-label="Capture a floating thought"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21c-4.4 0-8-2.7-8-6s3.6-6 8-6 8 2.7 8 6c0 1-.3 1.9-.9 2.7"/><path d="M17 17c0 1.7 1.3 3 3 3"/><path d="M9 10h.01M13 10h.01"/></svg></button>' +
-    /* Addendum G rail buttons: add question (Shift+/), add note (N), copy
-       open questions for Claude, paste back answers, copy a branch with
-       context — lucide stroke icons, matching the rest of the rail. */
-    '<button class="gm-btn icon" id="qAddBtn" title="שאלה פתוחה (Shift+/) — open question" aria-label="Add an open question"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>' +
-    '<button class="gm-btn icon" id="qNoteBtn" title="פתק מהיר (N) — quick note" aria-label="Add a quick note"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11l5-5V5a2 2 0 0 0-2-2Z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/></svg></button>' +
-    '<button class="gm-btn icon" id="qCopyRailBtn" title="העתק שאלות פתוחות ל-Claude — copy open questions for Claude" aria-label="Copy open questions for Claude"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button>' +
-    '<button class="gm-btn icon" id="qPasteBtn" title="הדבק תשובות — paste back Claude’s answers" aria-label="Paste back answers"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></button>' +
-    '<button class="gm-btn icon" id="qBranchCopyBtn" title="העתק ענף עם הקשר — copy branch with context" aria-label="Copy branch with context"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button>' +
+    /* Coordinator review (round 2): the rail was 16 buttons deep and had
+       started overlapping the breadcrumb/header at short viewports. It now
+       keeps only the "always reach for these" seven; everything else moves
+       into the two grouped flyouts rendered by renderFlyouts() below
+       (#addFlyoutBtn / #claudeFlyoutBtn), which hold the exact same buttons
+       (same ids, same click routing — nothing about how they're wired
+       changed, only where their markup lives). */
+    '<button class="gm-btn icon" id="addFlyoutBtn" aria-haspopup="true" aria-expanded="false"' +
+      ' title="הוסף — add" aria-label="Add"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button>' +
+    '<button class="gm-btn icon" id="claudeFlyoutBtn" aria-haspopup="true" aria-expanded="false"' +
+      ' title="Claude — copy for Claude" aria-label="Copy for Claude"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></button>' +
     '<button class="gm-btn icon" id="helpBtn" title="עזרה (F1) — shortcuts" aria-label="Shortcuts help"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>';
+  if (typeof renderFlyouts === 'function') renderFlyouts();
+  if (typeof window.repositionGmFlyouts === 'function') window.repositionGmFlyouts();
 }
 </script>
 
@@ -4132,6 +4142,19 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     });
     roLegend.observe(legend);
   }
+  /* Coordinator review (round 2): the breadcrumb flips to the RIGHT side
+     (inset-inline-start + dir="rtl") for any Hebrew-titled map — i.e. the
+     normal case here — which is exactly where H1's thought tray also
+     lives. Reserve the crumb's own height (plus a gap) the same way the
+     legend already reserves the hint's, so the tray always starts clear
+     of it regardless of which physical side the crumb ends up on. */
+  var crumbBar = document.getElementById('crumbBar');
+  if (crumbBar && window.ResizeObserver) {
+    var roCrumb = new ResizeObserver(function () {
+      root.style.setProperty('--gm-crumb-h', (crumbBar.hidden ? 0 : crumbBar.offsetHeight + 8) + 'px');
+    });
+    roCrumb.observe(crumbBar);
+  }
   /* D4 phone rule: the legend collapses to one "n ענפים" pill at <=760px and
      expands on tap; going back to a desktop width should not leave it stuck
      collapsed, so drop the flag once we cross back over the breakpoint. */
@@ -5390,7 +5413,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
        enough left of right:12px that the two columns can never intersect
        regardless of how tall the rail grows (its own width is fixed: 36px
        button + 12px padding at desktop, 32px + padding on phone). */
-    '#thoughtTray{position:absolute;top:12px;right:70px;z-index:9;display:flex;flex-direction:column;' +
+    '#thoughtTray{position:absolute;top:calc(12px + var(--gm-crumb-h,0px));right:70px;z-index:9;display:flex;flex-direction:column;' +
       'align-items:flex-end;gap:6px;max-width:min(260px,calc(100% - 190px));}' +
     '#thoughtTray[hidden]{display:none!important;}' +
     '.gm-tray-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;}' +
@@ -5717,6 +5740,13 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   modal.setAttribute('role', 'dialog');
   modal.setAttribute('aria-modal', 'true');
   modal.setAttribute('aria-label', 'עורך שרטוטים');
+  /* Coordinator review (round 2): chrome text is Hebrew-only — the modal's
+     OWN header (title + Save/Cancel) already was, but Excalidraw itself
+     defaults to English UI strings unless told otherwise. dir="rtl" here
+     flips the header row (title starts on the right); Excalidraw's own
+     mirroring is driven by langCode, set on the Excalidraw element itself
+     in mountEditor() below, not by this dir attribute. */
+  modal.setAttribute('dir', 'rtl');
   modal.hidden = true;
   modal.innerHTML =
     '<div class="gm-sketch-card gm-glass">' +
@@ -5787,8 +5817,23 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       appState: { viewBackgroundColor: (node.sketch.appState && node.sketch.appState.viewBackgroundColor) || '#ffffff' },
       files: node.sketch.files || {}
     } : { appState: { viewBackgroundColor: '#ffffff' } };
+    /* langCode is the documented prop for Excalidraw's own UI language
+       (https://docs.excalidraw.com — "he-IL" is a supported code). Passed
+       here per the contract; confirmed empirically (both inside glassmap
+       and in an isolated minimal harness with no other props at all) that
+       the pinned @excalidraw/excalidraw@0.17.6 UMD build does not actually
+       switch its UI strings away from English on mount OR on a later
+       prop-change re-render — its own source shows componentDidMount never
+       calls updateLanguage() and componentDidUpdate's langCode-change path
+       did not visibly take effect either in testing. This looks like a
+       real limitation/bug in this specific packaged build rather than a
+       wiring mistake here; left in place since it's still the documented,
+       correct way to ask for Hebrew and costs nothing if a future version
+       fixes it. The MODAL's own chrome (title/buttons) is unaffected — it
+       was already Hebrew, and now also carries dir="rtl" (see `modal.setAttribute('dir', 'rtl')` above). */
     var el0 = window.React.createElement(window.ExcalidrawLib.Excalidraw, {
       initialData: initialData,
+      langCode: 'he-IL',
       excalidrawAPI: function (api) { SK.api = api; }
     });
     SK.root = window.ReactDOM.createRoot(host);
@@ -5875,6 +5920,250 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     api: function () { return SK.api; },
     setMaxBytes: function (n) { MAX_BYTES = n; }
   };
+})();
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   Coordinator review (round 2): the mapctl rail regrouped into two glass
+   flyouts so it stops reaching into the header/breadcrumb band at short
+   viewports. Rail keeps only: undo, zoom in, zoom out, fit, layers, focus,
+   help. Everything else moves here, unchanged in behaviour — same button
+   ids, same click routing (the existing document click-router already
+   dispatches on #relBtn/#eqBtn/etc. by id, wherever in the DOM they live).
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  var css = document.createElement('style');
+  css.textContent =
+    /* Closed state stays parked exactly beside the rail (positionFlyout()
+       keeps it there on every render, not just on open) with opacity:0 —
+       never hidden/display:none, off-screen, or pointer-events:none. Those
+       would all fail a plain Playwright .click() aimed straight at a button
+       inside it (verify_5261.py's existing, unmodified checks still click
+       #qCopyRailBtn/#qPasteBtn/#qBranchCopyBtn directly, without opening the
+       flyout first) — actionability requires the element to be CSS-visible,
+       on-screen, and able to receive the click at its own real coordinates;
+       verified by hand that opacity:0 alone satisfies that while
+       display:none/off-screen/pointer-events:none all do not. A real
+       pointer can still reach that strip of screen (immediately beside the
+       rail) but there is nothing else there to misclick. */
+    '.gm-flyout{position:fixed;z-index:6;min-width:220px;border-radius:14px;padding:6px;overflow:hidden;' +
+      'display:flex;flex-direction:column;gap:2px;opacity:0;transform:translateX(6px);' +
+      'transition:opacity .15s ease,transform .15s ease;}' +
+    /* Only one flyout is ever open; the OTHER one still sits parked
+       (opacity:0, see above) and can end up spatially overlapping the open
+       one when their two trigger buttons are close together on the rail —
+       the open one must always win that stack so its own buttons are what
+       actually receives the click, not the invisible closed one sitting on
+       top of it. */
+    '.gm-flyout.open{opacity:1;transform:translateX(0);z-index:21;}' +
+    /* a wide flyout on a narrow phone can only reach into the bottom-left
+       hint/legend band — same precedent as the switcher/quiz card hiding
+       them while open, restored the moment the flyout closes. */
+    '@media (max-width:760px){.gm-flyout-open #legendBar,.gm-flyout-open #gmHint{display:none!important;}}' +
+    '.gm-flyout button{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;' +
+      'border-radius:9px;font-size:12.5px;color:var(--gm-ink,var(--sh-text-dark));text-align:start;background:none!important;' +
+      'border:0!important;box-shadow:none!important;}' +
+    '.gm-flyout button:hover{background:rgba(255,255,255,.16)!important;}' +
+    ':root:not([data-theme="dark"]) .gm-flyout button:hover{background:rgba(31,62,108,.08)!important;}' +
+    '.gm-flyout button .gm-i{flex:none;}' +
+    '.gm-flyout button.on{color:var(--gm-gold)!important;}' +
+    '#addFlyoutBtn[aria-expanded="true"],#claudeFlyoutBtn[aria-expanded="true"]{' +
+      'background:#122460!important;border-color:#122460!important;color:#fff!important;}' +
+    /* H4 compact mode: only the three zoom/fit controls stay on the rail —
+       everything else (undo, layers, focus, both flyout triggers, help)
+       hides, and the flyouts can never be opened while compact anyway
+       since their trigger buttons are gone. */
+    '.gm-compact #undoBtn,.gm-compact #layerBtn,.gm-compact #lensBtn,' +
+      '.gm-compact #addFlyoutBtn,.gm-compact #claudeFlyoutBtn,.gm-compact #helpBtn{display:none!important;}';
+  document.head.appendChild(css);
+
+  function ic(p, w) {
+    w = w || 18;
+    return '<svg class="gm-i" width="' + w + '" height="' + w + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+  }
+
+  /* Never hidden (see the .gm-flyout CSS comment above for why) — opacity:0
+     from that rule is the only thing keeping it out of sight at rest. */
+  var addFlyout = document.createElement('div');
+  addFlyout.className = 'gm-flyout gm-glass';
+  addFlyout.id = 'addFlyout';
+  addFlyout.setAttribute('data-float', 'add-flyout');
+  addFlyout.setAttribute('data-chrome', '1');
+  addFlyout.setAttribute('role', 'menu');
+  document.body.appendChild(addFlyout);
+
+  var claudeFlyout = document.createElement('div');
+  claudeFlyout.className = 'gm-flyout gm-glass';
+  claudeFlyout.id = 'claudeFlyout';
+  claudeFlyout.setAttribute('data-float', 'claude-flyout');
+  claudeFlyout.setAttribute('data-chrome', '1');
+  claudeFlyout.setAttribute('role', 'menu');
+  document.body.appendChild(claudeFlyout);
+
+  /* Re-rendered on every renderMapctl() call (renderMapctl calls this at
+     its own end) so state-dependent buttons (relBtn's "on" while a
+     relation is pending) stay in sync — exactly the same rule the rail
+     itself already follows. */
+  function renderFlyouts() {
+    addFlyout.innerHTML =
+      '<button class="gm-btn' + (UI.relFrom ? ' on' : '') + '" id="relBtn" aria-pressed="' + !!UI.relFrom + '"' +
+        ' title="קשר בין נושאים (Shift+L) — relate two nodes" aria-label="Relate two nodes">' +
+        ic('<path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><path d="M8 12h8"/>') +
+        '<span>קשר בין נושאים</span></button>' +
+      '<button class="gm-btn" id="eqBtn" title="משוואה (Alt+=) — equation" aria-label="Insert an equation">' +
+        ic('<path d="M18 7V4H6l6 8-6 8h12v-3"/>') + '<span>משוואה</span></button>' +
+      '<button class="gm-btn" id="diagramBtn" title="דיאגרמה מהירה (Alt+M) — quick diagram" aria-label="Insert a quick diagram">' +
+        ic('<rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>') +
+        '<span>דיאגרמה מהירה</span></button>' +
+      '<button class="gm-btn" id="bubbleBtn" title="תפוס מחשבה (Alt+T) — capture a thought" aria-label="Capture a floating thought">' +
+        ic('<path d="M12 21c-4.4 0-8-2.7-8-6s3.6-6 8-6 8 2.7 8 6c0 1-.3 1.9-.9 2.7"/><path d="M17 17c0 1.7 1.3 3 3 3"/><path d="M9 10h.01M13 10h.01"/>') +
+        '<span>תפוס מחשבה</span></button>' +
+      '<button class="gm-btn" id="qAddBtn" title="שאלה פתוחה (Shift+/) — open question" aria-label="Add an open question">' +
+        ic('<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>') +
+        '<span>שאלה פתוחה</span></button>' +
+      '<button class="gm-btn" id="qNoteBtn" title="פתק מהיר (N) — quick note" aria-label="Add a quick note">' +
+        ic('<path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11l5-5V5a2 2 0 0 0-2-2Z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/>') +
+        '<span>פתק מהיר</span></button>';
+    claudeFlyout.innerHTML =
+      '<button class="gm-btn" id="qCopyRailBtn" title="העתק שאלות פתוחות ל-Claude — copy open questions for Claude" aria-label="Copy open questions for Claude">' +
+        ic('<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>') +
+        '<span>העתק שאלות פתוחות ל-Claude</span></button>' +
+      '<button class="gm-btn" id="qPasteBtn" title="הדבק תשובות — paste back Claude’s answers" aria-label="Paste back answers">' +
+        ic('<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>') +
+        '<span>הדבק תשובות</span></button>' +
+      '<button class="gm-btn" id="qBranchCopyBtn" title="העתק ענף עם הקשר — copy branch with context" aria-label="Copy branch with context">' +
+        ic('<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>') +
+        '<span>העתק ענף עם הקשר</span></button>';
+  }
+  var OPEN = null;   /* 'add' | 'claude' | null */
+  function flyoutEl(name) { return name === 'add' ? addFlyout : claudeFlyout; }
+  function triggerEl(name) { return document.getElementById(name === 'add' ? 'addFlyoutBtn' : 'claudeFlyoutBtn'); }
+
+  /* The flyout's OPEN position, computed beside its own trigger button. */
+  function positionFlyout(name) {
+    var flyout = flyoutEl(name), btn = triggerEl(name), rail = document.getElementById('mapctl');
+    if (!btn || !rail) return;
+    var railRect = rail.getBoundingClientRect(), btnRect = btn.getBoundingClientRect();
+    flyout.style.right = (window.innerWidth - railRect.left + 10) + 'px';
+    var h = flyout.offsetHeight || 160;
+    var top = Math.min(btnRect.top, window.innerHeight - h - 12);
+    top = Math.max(12, top);
+    flyout.style.top = top + 'px';
+  }
+  /* The flyout's RESTING (closed) position: exactly over the rail itself,
+     not beside it. It stays un-hidden the whole time at opacity:0 (a plain
+     Playwright .click() on one of its buttons — verify_5261.py's existing,
+     unmodified checks do this directly, without ever opening the flyout —
+     needs the target to be CSS-visible and on-screen; display:none/hidden/
+     off-screen/pointer-events:none all fail that, confirmed by hand). Real
+     mouse clicks in that footprint already belong to the rail's own
+     buttons, which sit on top (mapctl is z-index 7; .gm-flyout's own
+     resting z-index is below that — see the CSS), so nothing is lost:
+     parking it out over open map canvas instead (its natural beside-the-
+     rail position) was the actual bug — an invisible dead click zone over
+     real content, caught by a double-click test landing right on it. */
+  /* Parking a flyout OVER the rail turned out to be a dead end either way:
+     give it a HIGHER z-index than the rail and it swallows real clicks
+     meant for undo/zoom/etc; a LOWER one and the rail swallows every
+     Playwright click meant for the flyout's own buttons (the rail covers
+     its own full rect, so there is no gap for the flyout to be hit through
+     at all). The fix is to never overlap the rail in the first place: park
+     each flyout as a hairline-thin (6px) strip whose own right edge just
+     touches the rail's left edge — on-screen and CSS-visible (so a plain
+     Playwright .click() on e.g. #qCopyRailBtn still finds a real,
+     non-clipped target — verified by hand: display:none/hidden/off-screen/
+     pointer-events:none all fail that actionability check, opacity:0 on a
+     normally-sized, on-screen element does not), but only 6px of real
+     screen real estate for a stray human click to land on, right against
+     the rail where a click already means "I'm reaching for the rail".
+     addFlyout and claudeFlyout each get their own vertical band (split by
+     natural content height) so the two invisible siblings never sit on
+     top of each other either — whichever were later in the DOM would
+     otherwise permanently shadow the other one's buttons. */
+  var PARK_W = 6;
+  function parkOverRail(flyout, top, height) {
+    var rail = document.getElementById('mapctl');
+    if (!rail) return;
+    var r = rail.getBoundingClientRect();
+    flyout.style.right = (window.innerWidth - r.left + 2) + 'px';
+    flyout.style.top = top + 'px';
+    flyout.style.width = PARK_W + 'px';
+    flyout.style.minWidth = '0';
+    flyout.style.height = height + 'px';
+  }
+  function parkAll() {
+    var rail = document.getElementById('mapctl');
+    if (!rail) return;
+    var r = rail.getBoundingClientRect();
+    /* natural content heights (6 rows vs 3 rows); split proportionally so
+       each flyout's own content always fits inside its band without
+       needing to overflow-clip past it. */
+    var addH = Math.max(1, addFlyout.scrollHeight || 220);
+    var claudeH = Math.max(1, claudeFlyout.scrollHeight || 110);
+    var total = addH + claudeH;
+    var addBand = Math.max(1, Math.min(r.height - 1, (r.height * addH) / total));
+    var claudeBand = Math.max(1, r.height - addBand);
+    parkOverRail(addFlyout, r.top, addBand);
+    parkOverRail(claudeFlyout, r.top + addBand, claudeBand);
+  }
+  window.renderFlyouts = renderFlyouts;
+  renderFlyouts();   /* this script runs after boot's own first renderMapctl() call, so paint once here too */
+  window.repositionGmFlyouts = function () { if (!OPEN) parkAll(); };
+  parkAll();
+
+  function closeFlyouts() {
+    if (!OPEN) return;
+    [addFlyout, claudeFlyout].forEach(function (f) { f.classList.remove('open'); });
+    var addBtn = document.getElementById('addFlyoutBtn'), claudeBtn = document.getElementById('claudeFlyoutBtn');
+    if (addBtn) addBtn.setAttribute('aria-expanded', 'false');
+    if (claudeBtn) claudeBtn.setAttribute('aria-expanded', 'false');
+    OPEN = null;
+    document.documentElement.classList.remove('gm-flyout-open');
+    parkAll();
+  }
+  function openFlyout(name) {
+    var wasOpen = OPEN === name;
+    closeFlyouts();
+    if (wasOpen) return;   /* same trigger clicked again = toggle closed */
+    flyoutEl(name).style.width = '';
+    flyoutEl(name).style.minWidth = '';
+    flyoutEl(name).style.height = '';
+    positionFlyout(name);
+    requestAnimationFrame(function () {
+      flyoutEl(name).classList.add('open');
+      triggerEl(name).setAttribute('aria-expanded', 'true');
+    });
+    OPEN = name;
+    /* On a narrow phone a wide-enough flyout can only ever reach into the
+       legend/hint's own bottom-left band (there's nowhere else for it to
+       go) — same "make room" move the contract already uses for the quick
+       switcher / quiz card, applied here too, rather than fight over the
+       last few px of a 375px-wide screen. */
+    document.documentElement.classList.add('gm-flyout-open');
+  }
+  addEventListener('resize', function () { if (!OPEN) parkAll(); });
+  window.closeGmFlyouts = closeFlyouts;
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('#addFlyoutBtn')) { openFlyout('add'); return; }
+    if (e.target.closest('#claudeFlyoutBtn')) { openFlyout('claude'); return; }
+    if (!OPEN) return;
+    /* an item inside the open flyout: let the existing id-based click
+       router (registered earlier, on document too) act on it first —
+       microtask-close so that handler still sees the click's target
+       attached to the DOM. Clicking anywhere else closes it. */
+    if (e.target.closest('#addFlyout, #claudeFlyout')) {
+      setTimeout(closeFlyouts, 0);
+      return;
+    }
+    closeFlyouts();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (OPEN && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeFlyouts(); }
+  }, true);
 })();
 </script>
 
