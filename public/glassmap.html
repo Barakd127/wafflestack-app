@@ -35,48 +35,57 @@
   --sh-topbar-bg: linear-gradient(135deg, rgba(255,255,255,.82) 0%, rgba(228,238,255,.78) 60%, rgba(255,245,210,.60) 100%);
   --sh-topbar-border: rgba(212,175,55,.40);
   --gm-focus: #3351CA;
+  --gm-doctitle-ink: var(--gm-ink,#1F3E6C);
 }
+/* Colour correction (Barak, 13.09 follow-up): Shirli's glass does NOT change
+   in dark mode — it stays a white frost over a light sky in every theme; the
+   app's own html.dark tokens (index.css) are a SEPARATE dark palette that
+   only ever applied to the rest of StudyHub, never to this glass board (see
+   html.dark .ws-glass-board .ws-glass-dots — the ONE dark rule the board's
+   own stylesheet carries). This file used to copy those app-wide dark tokens
+   onto every --sh-* variable, which painted the map's glass navy/blue in
+   Obsidian's dark theme. Only color-scheme (for native form-control/scrollbar
+   painting) and the focus-ring accent are legitimately theme-dependent here;
+   everything else keeps its light-mode value in both themes. */
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;
-    --sh-page-bg: linear-gradient(35.22deg, #0a0a16 -9.85%, #111128 49.05%, #181840 136%);
-    --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.07) 54.33%, rgba(255,255,255,0.03) 100%);
-    --sh-card-shadow: 0px 15px 30px rgba(0,0,0,0.5);
-    --sh-btn-color: #4ECDC4;
-    --sh-text-dark: #e2e8f0;
-    --sh-text-med: #a5b4fc;
-    --sh-text-light: #94a3b8;
-    --sh-text-tip: #64748b;
-    --sh-panel-bg: rgba(15,15,30,0.55);
-    --sh-panel-border: rgba(255,255,255,0.12);
-    --sh-line: rgba(255,255,255,0.14);
     --gm-focus: var(--gm-gold);
+    /* the header is the one element that DOES follow the theme (Barak,
+       13.09 follow-up) — its own gradient + a dimmer gold border, plus a
+       light ink for the bare title text sitting directly on it (every
+       other piece of chrome sits on its own light pill/card and keeps navy
+       ink regardless of theme, see --gm-ink below). */
+    --sh-topbar-bg: linear-gradient(135deg, rgba(15,22,60,.92) 0%, rgba(20,30,80,.90) 70%, rgba(100,80,0,.12) 100%);
+    --sh-topbar-border: rgba(212,175,55,.20);
+    --gm-doctitle-ink: #EAF2FF;
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --sh-page-bg: linear-gradient(35.22deg, #0a0a16 -9.85%, #111128 49.05%, #181840 136%);
-  --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.07) 54.33%, rgba(255,255,255,0.03) 100%);
-  --sh-card-shadow: 0px 15px 30px rgba(0,0,0,0.5);
-  --sh-btn-color: #4ECDC4;
-  --sh-text-dark: #e2e8f0;
-  --sh-text-med: #a5b4fc;
-  --sh-text-light: #94a3b8;
-  --sh-text-tip: #64748b;
-  --sh-panel-bg: rgba(15,15,30,0.55);
-  --sh-panel-border: rgba(255,255,255,0.12);
-  --sh-line: rgba(255,255,255,0.14);
   --gm-focus: var(--gm-gold);
+  --sh-topbar-bg: linear-gradient(135deg, rgba(15,22,60,.92) 0%, rgba(20,30,80,.90) 70%, rgba(100,80,0,.12) 100%);
+  --sh-topbar-border: rgba(212,175,55,.20);
+  --gm-doctitle-ink: #EAF2FF;
 }
 
 *{box-sizing:border-box;}
+/* Barak (13.09 follow-up): a horizontal scrollbar showed up under the hint
+   bar inside Obsidian's srcdoc host at ~1518×826. This file has no
+   <!DOCTYPE>, so it renders in quirks mode — document.scrollingElement is
+   BODY there, but ONLY when body's overflow is the thing hiding it; giving
+   the HTML element its own overflow-x too flips document.scrollingElement
+   to null in that same quirks mode (confirmed: it broke a page-shift check
+   that reads document.scrollingElement.scrollTop). So the belt-and-braces
+   half of the original fix — overflow-x on html as well as body — has to
+   stay off; body's own explicit width/max-width below is the safe part. */
 html,body{margin:0;padding:0;height:100%;}
 body{
   background:var(--sh-page-bg);
   color:var(--sh-text-dark);
   font-family:'Heebo',ui-sans-serif,system-ui,'Segoe UI',Arial,sans-serif; /* degrades clean if the CDN link is stripped (Obsidian sync-canvas) */
   font-size:14px; line-height:1.4;
-  overflow:hidden;
+  width:100%;max-width:100%;overflow:hidden;overflow-x:hidden;
   -webkit-text-size-adjust:100%;
 }
 button,input,textarea{font:inherit;color:inherit;}
@@ -110,14 +119,8 @@ input,textarea{background:none;border:0;outline:none;}
   border-right-color:rgba(255,255,255,.18);
   box-shadow:var(--sh-card-shadow), inset 0 1px 0 rgba(255,255,255,.55), inset 0 -1px 0 rgba(31,62,108,.06);
 }
-@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .gm-glass{
-  border-color:rgba(255,255,255,.14); border-bottom-color:rgba(0,0,0,.2); border-right-color:rgba(0,0,0,.2);
-  box-shadow:var(--sh-card-shadow), inset 0 1px 0 rgba(255,255,255,.12), inset 0 -1px 0 rgba(0,0,0,.2);
-} }
-:root[data-theme="dark"] .gm-glass{
-  border-color:rgba(255,255,255,.14); border-bottom-color:rgba(0,0,0,.2); border-right-color:rgba(0,0,0,.2);
-  box-shadow:var(--sh-card-shadow), inset 0 1px 0 rgba(255,255,255,.12), inset 0 -1px 0 rgba(0,0,0,.2);
-}
+/* Colour correction (Barak, 13.09 follow-up): .gm-glass keeps this exact
+   light recipe in dark mode too — no separate dark border/shadow any more. */
 
 /* ── shell ───────────────────────────────────────────────────────────────── */
 .gm-app{display:flex;flex-direction:column;height:100vh;height:100dvh;height:var(--gm-vvh,100dvh);overflow:hidden;}
@@ -176,6 +179,18 @@ input,textarea{background:none;border:0;outline:none;}
 .gm-node{position:absolute;transform:translate(-50%,-50%);min-width:120px;max-width:260px;
   padding:10px 14px;border-radius:16px;cursor:default;
   transition:opacity .18s ease,box-shadow .14s ease;}
+/* Colour correction (Barak, 13.09 follow-up): the node card is its own
+   recipe (GBS's tray-sheet gradient, scaled down for a small card), not the
+   generic --sh-glass-card — and it never changes with the theme, same as
+   every other piece of chrome here. `.gm-node.gm-glass` (two classes) beats
+   the generic `.gm-glass` rule above on specificity alone, so this is the
+   only override .gm-node needs. */
+.gm-node.gm-glass{
+  background:var(--gm-card-grad);
+  backdrop-filter:blur(26px) saturate(160%);-webkit-backdrop-filter:blur(26px) saturate(160%);
+  border-color:rgba(255,255,255,.55);border-bottom-color:rgba(255,255,255,.55);border-right-color:rgba(255,255,255,.55);
+  box-shadow:0 16px 40px rgba(11,27,62,.28), inset 0 1px 0 rgba(255,255,255,.6);
+}
 .gm-node.grabbed{z-index:6;cursor:grabbing;}
 .gm-node .gm-ttl{font-size:14px;line-height:1.3;color:var(--sh-text-dark);font-weight:500;
   overflow-wrap:break-word;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}
@@ -604,58 +619,41 @@ a.gm-note-title{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellips
    ═════════════════════════════════════════════════════════════════════════ */
 :root{
   --gm-t:.85;                     /* frost 0..1 — מיקוד .85 / הדגמה .4 / עיר 0 */
-  --gm-sky-a:#EAF2FF; --gm-sky-b:#CFE0FA;
   --gm-pill:rgba(255,255,255,.72);
   --gm-pill-bd:rgba(255,255,255,.62);
   --gm-pill-sh:0 8px 22px rgba(11,27,62,.2);
   --gm-ink:#1F3E6C;
   --gm-city-filter:brightness(1.04) saturate(.7) contrast(.92);
-  /* Addendum F: the shell's own white milk over the city — no blue tint,
-     the deep blur below (34px at מיקוד) is unchanged. */
+  /* the shell's own white milk over the city — no blue tint, the deep blur
+     below (34px at מיקוד) is unchanged. */
   --gm-frost-grad:linear-gradient(155deg,rgba(255,255,255,.5),rgba(214,230,255,.3) 60%,rgba(255,255,255,.4));
-  --gm-sheen-grad:linear-gradient(215deg,rgba(255,255,255,.34),rgba(255,255,255,0) 60%);
+  --gm-sheen-grad:linear-gradient(215deg,rgba(255,255,255,.5),rgba(255,255,255,0) 60%);
+  /* the node-card recipe (GBS's tray sheet, scaled down): constant in both
+     themes, same as everything else below — cards sit ON the frost, not
+     behind it, so they stay this light regardless of theme. */
+  --gm-card-grad:linear-gradient(155deg,rgba(255,255,255,.88),rgba(214,230,255,.55) 55%,rgba(255,255,255,.84));
 }
-:root[data-theme="dark"], :root:not([data-theme="light"]){ --gm-dark-ready:1; }
-@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
-  --gm-sky-a:#0B1B3E; --gm-sky-b:#122460;
-  --sh-page-bg:linear-gradient(180deg,#0B1B3E 0%,#122460 100%);
-  --sh-glass-card:linear-gradient(180deg,rgba(255,255,255,.22) 54.33%,rgba(255,255,255,.10) 100%);
-  --sh-text-dark:#EAF2FF; --sh-text-med:#C2D2F2; --sh-text-light:#8FA6D8; --sh-text-tip:#B8C6EA;
-  --sh-panel-bg:rgba(20,30,80,.72); --sh-panel-border:rgba(255,255,255,.18);
-  --sh-line:rgba(255,255,255,.16);
-  --gm-pill:rgba(255,255,255,.10); --gm-pill-bd:rgba(255,255,255,.20);
-  --gm-pill-sh:0 8px 22px rgba(0,0,0,.45);
-  --gm-ink:#EAF2FF;
-  --gm-city-filter:brightness(.3) saturate(.4) contrast(.95);
-  --gm-frost-grad:linear-gradient(155deg,rgba(20,38,96,.86),rgba(11,27,62,.78) 60%,rgba(20,38,96,.84));
-  --gm-sheen-grad:linear-gradient(215deg,rgba(255,255,255,.16),rgba(255,255,255,0) 60%);
-} }
-:root[data-theme="dark"]{
-  --gm-sky-a:#0B1B3E; --gm-sky-b:#122460;
-  --sh-page-bg:linear-gradient(180deg,#0B1B3E 0%,#122460 100%);
-  --sh-glass-card:linear-gradient(180deg,rgba(255,255,255,.22) 54.33%,rgba(255,255,255,.10) 100%);
-  --sh-text-dark:#EAF2FF; --sh-text-med:#C2D2F2; --sh-text-light:#8FA6D8; --sh-text-tip:#B8C6EA;
-  --sh-panel-bg:rgba(20,30,80,.72); --sh-panel-border:rgba(255,255,255,.18);
-  --sh-line:rgba(255,255,255,.16);
-  --gm-pill:rgba(255,255,255,.10); --gm-pill-bd:rgba(255,255,255,.20);
-  --gm-pill-sh:0 8px 22px rgba(0,0,0,.45);
-  --gm-ink:#EAF2FF;
-  --gm-city-filter:brightness(.3) saturate(.4) contrast(.95);
-  --gm-frost-grad:linear-gradient(155deg,rgba(20,38,96,.86),rgba(11,27,62,.78) 60%,rgba(20,38,96,.84));
-  --gm-sheen-grad:linear-gradient(215deg,rgba(255,255,255,.16),rgba(255,255,255,0) 60%);
-}
-:root[data-theme="dark"] .gm-glass, :root[data-theme="dark"] .gm-node{
-  border-color:rgba(255,255,255,.35)!important;
-}
+/* Colour correction (Barak, 13.09 follow-up): Shirli's glass does not
+   change in dark mode — no navy/blue tint anywhere below. The board's own
+   stylesheet carries exactly ONE dark rule (html.dark .ws-glass-board
+   .ws-glass-dots{opacity:.35}), reproduced as the single :root[data-theme
+   ="dark"] .gm-dots rule further down; every other token here is themeless
+   on purpose. */
 
 /* ── D1 world: sky, city, frost, highlight, dots ─────────────────────────── */
 .mapwrap{background:transparent!important;}
 .gm-world,.gm-frost,.gm-sheen,.gm-dots{position:absolute;inset:0;pointer-events:none;}
-.gm-world{z-index:0;background:linear-gradient(180deg,var(--gm-sky-a) 0%,var(--gm-sky-b) 62%,var(--gm-sky-a) 100%);overflow:hidden;}
-.gm-world::after{content:'';position:absolute;left:0;right:0;bottom:0;height:34%;
-  background:linear-gradient(180deg,rgba(223,234,255,0) 0%,rgba(207,224,250,.55) 100%);}
+/* CityBackdrop's own sky gradient, literal, same in both themes. */
+.gm-world{z-index:0;background:linear-gradient(35.22deg,#FFFFFF -9.85%,#D8E7FA 49.05%,#3351CA 136%);overflow:hidden;}
+.gm-world::after{content:'';position:absolute;left:0;right:0;bottom:0;height:38%;
+  background:linear-gradient(to top,rgba(51,81,202,.24),rgba(51,81,202,0));}
 .gm-city{position:absolute;bottom:0;left:50%;width:82%;transform:translateX(-50%);
-  filter:var(--gm-city-filter);transition:filter .3s ease;will-change:transform;}
+  filter:var(--gm-city-filter);
+  /* CityBackdrop's own worldOpacity formula: capped ~0.55, tapering further
+     as frost climbs past .6 so the block never fights the cards for
+     attention (leave glasscity.js's 3D canvas itself untouched). */
+  opacity:calc(.55 * (1 - max(0,(var(--gm-t) - .6) / .4) * .45));
+  transition:filter .3s ease,opacity .35s ease;will-change:transform;}
 .gm-frost{z-index:1;
   background:var(--gm-frost-grad);
   /* deep frost: the city is a hint of a place, never a picture competing
@@ -670,6 +668,8 @@ a.gm-note-title{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellips
   opacity:calc(.25 + .75 * var(--gm-t));transition:opacity .35s ease;}
 .gm-dots{z-index:2;background-image:radial-gradient(rgba(255,255,255,.5) 1px,transparent 1px);
   background-size:28px 28px;opacity:.7;}
+/* the one and only dark-mode rule the glass board itself carries (index.css
+   line 576, "the glass whites stay, the dot grid quiets down"). */
 :root[data-theme="dark"] .gm-dots{opacity:.35;}
 /* the map plane and every floating control ride ABOVE the three glass
    layers; their own position/inset from the base stylesheet is untouched —
@@ -701,20 +701,13 @@ a.gm-note-title{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellips
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .15s,background .15s,border-color .15s;}
 .gm-btn:hover,.gm-seg:hover{transform:translateY(-1px);}
 .gm-btn.icon{width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;}
-/* Addendum F: in light mode the active segment / pressed toggle is a solid
-   navy pill with white text — the shell's own "lit" segment — not a gold
-   whisper (that stays for dark, unchanged below). */
+/* Colour correction (Barak, 13.09 follow-up): the active pill is the solid
+   navy #122460 with white text in BOTH themes now (the mode pill's own
+   "active" recipe) — the gold-whisper dark variant this used to swap to is
+   gone, same "rail/pills never change with theme" rule as everywhere else. */
 .gm-btn[aria-pressed="true"],.gm-btn.on,.gm-seg[aria-pressed="true"],.gm-legend-chip.on{
   background:#122460!important;border-color:#122460!important;
   color:#ffffff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.25);}
-@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .gm-btn[aria-pressed="true"],
-:root:not([data-theme="light"]) .gm-btn.on,
-:root:not([data-theme="light"]) .gm-seg[aria-pressed="true"],
-:root:not([data-theme="light"]) .gm-legend-chip.on{
-  color:#E3C877!important;background:rgba(212,175,55,.14)!important;border-color:rgba(212,175,55,.40)!important;} }
-:root[data-theme="dark"] .gm-btn[aria-pressed="true"],:root[data-theme="dark"] .gm-btn.on,
-:root[data-theme="dark"] .gm-seg[aria-pressed="true"],:root[data-theme="dark"] .gm-legend-chip.on{
-  color:#E3C877!important;background:rgba(212,175,55,.14)!important;border-color:rgba(212,175,55,.40)!important;}
 .gm-i{flex:none;}
 /* themeBtn: two permanent SVGs, swapped by class — render() used to set
    textContent to a moon/sun emoji every frame, which silently deleted the
@@ -725,18 +718,21 @@ a.gm-note-title{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellips
 #themeBtn.is-dark .i-moon{display:inline-flex;}
 .mapctl{gap:4px!important;padding:6px!important;background:transparent!important;
   border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
-/* Addendum F: light mode gets the app's real top-bar back — the gradient +
-   gold bottom line — instead of the flat transparent strip; dark mode is
-   explicitly kept exactly as it was (transparent). */
+/* Colour correction (Barak, 13.09 follow-up): the header is the ONE element
+   that follows the theme (everything else stays the same light glass in
+   both — see the gm-restyle block below). Same gradient recipe in both
+   themes, just its own --sh-topbar-bg/border values swapped by theme; blur
+   12px per the exact recipe (not 16, that was this file's own earlier
+   guess). */
 .gm-head{background:var(--sh-topbar-bg)!important;border:0!important;
   border-bottom:1px solid var(--sh-topbar-border)!important;
   box-shadow:0 4px 18px rgba(31,62,108,.10)!important;
-  backdrop-filter:blur(16px) saturate(150%)!important;-webkit-backdrop-filter:blur(16px) saturate(150%)!important;}
-@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .gm-head{
-  background:transparent!important;border:0!important;box-shadow:none!important;
-  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;} }
-:root[data-theme="dark"] .gm-head{background:transparent!important;border:0!important;box-shadow:none!important;
-  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+  backdrop-filter:blur(12px) saturate(150%)!important;-webkit-backdrop-filter:blur(12px) saturate(150%)!important;}
+/* the title text sits directly on the header's own background (no pill
+   under it), so it alone follows the theme too — everything else in the
+   header (buttons, segments, pills) keeps its own light material + navy
+   ink regardless, and stays legible on the dark header the same way. */
+.gm-doctitle,.gm-brand .gm-mark{color:var(--gm-doctitle-ink,var(--sh-text-dark));}
 .gm-menu button{border-radius:10px;}
 .gm-menu button .gm-i{opacity:.75;}
 
@@ -957,6 +953,8 @@ function seed(id, title) {
   return {
     v: 1, schema: 1, id: id || 'default', title: title || 'GlassMap',
     layer: 'links', theme: 'auto',
+    layoutDir: 'down',      /* top-down (Barak, 13.09) — the only direction there is now */
+    lenses: { questions: false, known: false },
     nodes: [{ id: rid, parent: null, title: 'נושא מרכזי', body: '' }],
     links: [],
     inbox: [],
@@ -1001,6 +999,15 @@ function normalise(x) {
   x.title = typeof x.title === 'string' && x.title ? x.title : 'GlassMap';
   x.layer = (x.layer === 'cards') ? 'cards' : 'links';
   x.theme = (x.theme === 'light' || x.theme === 'dark') ? x.theme : 'auto';
+  /* top-down is the only layout direction (Barak, 13.09); the field is kept
+     (rather than assumed silently) so a future engine that adds a second
+     direction can tell "this map was saved by an engine that only ever
+     wrote 'down'" apart from "this map has no opinion yet" — both currently
+     behave the same, but only one of them is a promise about the past. */
+  x.layoutDir = (x.layoutDir === 'down') ? 'down' : 'down';
+  if (!x.lenses || typeof x.lenses !== 'object') x.lenses = {};
+  x.lenses.questions = !!x.lenses.questions;
+  x.lenses.known = !!x.lenses.known;
   x.links = Array.isArray(x.links) ? x.links : [];
   /* Addendum H1: floating thought bubbles, preserved like every other field —
      never placed on the map plane, so they carry no x/y. Malformed entries
@@ -1354,13 +1361,21 @@ function jit(id, salt) {
    only; relation arrows are drawn straight + dashed so the two kinds of
    line never get confused (contract: "relation arrows (dashed, arrowhead)"
    says nothing about a bow, and a straight line is what reads as "this is
-   a different kind of connection"). */
+   a different kind of connection").
+   Top-down (Barak, 13.09): the wire now runs from the parent's BOTTOM
+   centre to the child's TOP centre — a vertical S-curve, not the old
+   horizontal one — so it reads as "flows downward" instead of "flows
+   rightward". User relations (relPaths(), below) are untouched: they still
+   draw a plain straight dashed line between whatever two points the two
+   endpoints happen to be at, in any layout direction. */
 function wire(x1, y1, x2, y2, seed) {
-  var dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx * dx + dy * dy) || 1;
-  var off = jit(seed, 'bow') * Math.min(26, len * 0.11);
-  var cx = (x1 + x2) / 2 - dy / len * off, cy = (y1 + y2) / 2 + dx / len * off;
+  var dx = x2 - x1, dy = y2 - y1;
+  var off = jit(seed, 'bow') * Math.min(22, Math.abs(dx) * 0.18);
+  var midY = (y1 + y2) / 2;
   return 'M' + x1.toFixed(1) + ',' + y1.toFixed(1) +
-         ' Q' + cx.toFixed(1) + ',' + cy.toFixed(1) + ' ' + x2.toFixed(1) + ',' + y2.toFixed(1);
+         ' C' + (x1 + off).toFixed(1) + ',' + midY.toFixed(1) +
+         ' ' + (x2 - off).toFixed(1) + ',' + midY.toFixed(1) +
+         ' ' + x2.toFixed(1) + ',' + y2.toFixed(1);
 }
 /* How much of the circle each of the root's children may claim, from the
    gap to its neighbours — so no two top-level branches can grow into each
@@ -1386,29 +1401,38 @@ function wedges(angs) {
    guarantee separation up front is what made WaffleTask's tree sprawl. A
    collapsed node stops the recursion (its children are simply never
    emitted — they don't exist on the plane at all while folded). */
-/* Tidy tree, not a starburst. The first version fanned children around the
-   root over a full circle (one to the right, one to the left, one below…),
-   which threw two sub-topics to opposite ends of the screen the moment you
-   pressed Tab twice. A mind map reads as a tidy tree: every child sits in
-   the next column, siblings stack vertically, and a subtree claims exactly
-   as many rows as it has leaves — so adding a branch never moves the ones
-   already on screen further apart. Hand-placed nodes (mx/my) still win.  */
-var COL_GAP_1 = 250;   /* root → depth-1 column (the root card is widest) */
-var COL_GAP_N = 215;   /* every column after that */
-var ROW_H = 54;        /* one leaf's vertical slot, card + breathing room */
-
+/* Top-down tree, not a starburst (Barak, 13.09: "I want the mindmap to be
+   top to bottom orientation!"). Every depth is one row further DOWN from
+   the root; siblings spread horizontally, each claiming exactly as many
+   columns as it has leaves, so adding a branch never shoves the ones
+   already on screen further apart. Since the map is Hebrew, the FIRST
+   child sits on the RIGHT and each new one continues further left — a
+   mirror of the old left-right version's "first child topmost, subsequent
+   ones stack below it", just swapped onto the other axis.
+   Hand-placed nodes (mx/my) still win, exactly as before. New here:
+   AUTO_SEED (below) — a session-only, never-persisted position hint for a
+   just-grown automatic node, so Tab/Enter can drop it in a sensible spot
+   relative to whatever is already there (including hand-placed siblings)
+   without ever setting mx/my on it — it stays a fully automatic node,
+   free to be swept into the tidy layout the next time spread() has no
+   hint to honour (a reload, or after Alt+R clears AUTO_SEED too). */
+var ROW_GAP_1 = 150;   /* root → depth-1 row (the root card is tallest) */
+var ROW_GAP_N = 120;   /* every row after that */
+var COL_W_1 = 240;      /* one depth-1 leaf's horizontal slot */
+var COL_W_N = 200;      /* one leaf's horizontal slot at any deeper depth */
+var AUTO_SEED = {};     /* id -> {x,y}; session-only, never in S, never saved */
+function rowGapFor(depth) { return depth === 1 ? ROW_GAP_1 : ROW_GAP_N; }
+function colWFor(depth) { return depth === 1 ? COL_W_1 : COL_W_N; }
+function hasMxMy(k) { return typeof k.mx === 'number' && typeof k.my === 'number'; }
 /* An image/diagram card renders much taller than a plain text card (a
    thumbnail up to 220px, a diagram up to ~320px, plus the title above it) —
-   ROW_H (54px) is sized for ordinary cards, so a childless image/diagram
-   node would otherwise only ever claim ONE slot's worth of vertical room
-   here, and settleMap()'s relax pass would have to shove it and its
-   siblings apart from a standing start the instant the real thumbnail/SVG
-   loads in. Claim enough slots up front instead, so the very first layout
-   already has the room (contract: "spread()'s row height must account for
-   tall cards"). */
-var TALL_CARD_ROWS = 5;    /* 5 * ROW_H ≈ 270px — a generous first guess */
-function nodeRowSpan(node) {
-  return (node && (node.img || node.diagram || node.sketchSvg || (node.kind === 'note' && node.note))) ? TALL_CARD_ROWS : 1;
+   give it extra COLUMNS of width too, so it (and its own children, one row
+   further down) get some breathing room from the very first layout instead
+   of settleMap()'s relax pass having to shove things apart from a standing
+   start the instant the real thumbnail/SVG loads in. */
+var TALL_CARD_COLS = 3;
+function nodeColSpan(node) {
+  return (node && (node.img || node.diagram || node.sketchSvg || (node.kind === 'note' && node.note))) ? TALL_CARD_COLS : 1;
 }
 function spread(pId, px, py, center, span, depth, emit) {
   if (depth > 14) return;
@@ -1416,18 +1440,110 @@ function spread(pId, px, py, center, span, depth, emit) {
   if (pnode && pnode.collapsed) return;
   var kids = childrenOf(pId);
   if (!kids.length) return;
-  var rows = kids.map(function (k) { return Math.max(nodeRowSpan(k), leafCount(k.id)); });
-  var total = rows.reduce(function (a, b) { return a + b; }, 0) || 1;
-  var x = px + (depth === 1 ? COL_GAP_1 : COL_GAP_N);
-  var top = py - (total * ROW_H) / 2;          /* centre the block on the parent */
-  kids.forEach(function (k, i) {
-    var h = rows[i] * ROW_H;
-    var cx = x, cy = top + h / 2;
-    top += h;
-    if (typeof k.mx === 'number' && typeof k.my === 'number') { cx = k.mx; cy = k.my; }
-    emit(k, cx, cy, depth, pId);
-    spread(k.id, cx, cy, 0, 0, depth + 1, emit);
+  var rowGap = rowGapFor(depth), colW = colWFor(depth);
+  /* Anything already known — hand-placed (mx/my) or session-seeded
+     (AUTO_SEED, set by growChild/growSibling right when they create the
+     node) — keeps that exact position; only nodes with neither get the
+     generic tidy-tree placement below. */
+  var resolved = {}, known = [];
+  kids.forEach(function (k) {
+    var p = hasMxMy(k) ? { x: k.mx, y: k.my } : AUTO_SEED[k.id];
+    if (p) { resolved[k.id] = p; known.push(p); }
   });
+  /* Row: the lowest existing row (children already there, hand-placed or
+     seeded) if any, else one row below the parent. Left edge: the current
+     leftmost of those, so anything still unresolved continues the row
+     further left, past everything already on it. */
+  var rowY = known.length ? Math.max.apply(null, known.map(function (p) { return p.y; })) : (py + rowGap);
+  var leftEdge = known.length ? Math.min.apply(null, known.map(function (p) { return p.x; })) : px;
+  var unresolved = kids.filter(function (k) { return !resolved[k.id]; });
+  var cols = unresolved.map(function (k) { return Math.max(nodeColSpan(k), leafCount(k.id)); });
+  var cursor;
+  if (known.length) {
+    cursor = leftEdge;                                    /* continue the existing row, further left */
+  } else {
+    var totalCols = cols.reduce(function (a, b) { return a + b; }, 0) || 1;
+    cursor = px + (totalCols * colW) / 2;                 /* nothing to anchor on: centre the block under the parent */
+  }
+  unresolved.forEach(function (k, i) {
+    var w = cols[i] * colW;
+    var cx = cursor - w / 2;
+    cursor -= w;
+    resolved[k.id] = { x: cx, y: rowY };
+  });
+  kids.forEach(function (k) {
+    var p = resolved[k.id];
+    emit(k, p.x, p.y, depth, pId);
+    spread(k.id, p.x, p.y, 0, 0, depth + 1, emit);
+  });
+}
+/* ── session seeding for Tab/Enter — see AUTO_SEED above ─────────────────
+   Read a sibling/reference's CURRENT position: its own mx/my if hand-placed,
+   else its own live seed, else whatever the last render actually measured
+   for it (the DOM dataset — accurate immediately after a render, which is
+   always the state growChild/growSibling run in). */
+function knownPos(id) {
+  var n = N(id); if (!n) return null;
+  if (hasMxMy(n)) return { x: n.mx, y: n.my };
+  if (AUTO_SEED[id]) return AUTO_SEED[id];
+  var dom = document.querySelector('.gm-node[data-node="' + id + '"]');
+  if (dom) return { x: +dom.dataset.x || 0, y: +dom.dataset.y || 0 };
+  return null;
+}
+function nodeDepth(id) {
+  var n = N(id), d = 0, hops = 0;
+  while (n && n.parent != null && hops++ < 40) { d++; n = N(n.parent); }
+  return d;
+}
+/* Anti-overlap must never push a fresh child/sibling into another row
+   (Barak, 13.09 follow-up) — a hand-placed map's existing siblings can sit
+   much closer together than an automatic colW slot, and settleMap()'s own
+   generic relax pass resolves whichever axis overlaps least, which for a
+   same-row collision can just as easily shove the new node down into the
+   NEXT row as sideways. Clear the row ourselves before settleMap ever runs:
+   walk every other node that shares this row and keep stepping the
+   candidate x further in `dir` until nothing there still collides with a
+   realistic (blank-card-sized) footprint. */
+function avoidRowCollision(x, y, dir) {
+  var THRESH = 130, STEP = 150, guard = 0, moved = true;
+  while (moved && guard++ < 80) {
+    moved = false;
+    S.nodes.forEach(function (n) {
+      var p = knownPos(n.id); if (!p) return;
+      if (Math.abs(p.y - y) > 40) return;             /* not this row */
+      if (Math.abs(p.x - x) < THRESH) { x += dir * STEP; moved = true; }
+    });
+  }
+  return x;
+}
+/* Tab: the new child joins its parent's existing children row (or starts
+   one row below the parent if it's the first child), at the LEFT end of
+   that row — continuing the RTL "first child rightmost" sequence. */
+function seedChildPosition(pid, newId) {
+  var depth = nodeDepth(newId) || 1;
+  var rowGap = rowGapFor(depth), colW = colWFor(depth);
+  var pPos = knownPos(pid) || { x: 0, y: 0 };
+  var xs = [], ys = [];
+  childrenOf(pid).forEach(function (k) {
+    if (k.id === newId) return;
+    var p = knownPos(k.id); if (p) { xs.push(p.x); ys.push(p.y); }
+  });
+  var y = ys.length ? Math.max.apply(null, ys) : (pPos.y + rowGap);
+  var x = xs.length ? (Math.min.apply(null, xs) - colW) : pPos.x;
+  x = avoidRowCollision(x, y, -1);
+  AUTO_SEED[newId] = { x: x, y: y };
+}
+/* Enter / Shift+Enter: the new sibling goes on the SAME row as the node it
+   was created from, immediately to its left (Enter) or right (Shift+Enter,
+   `before` — "before" in RTL reading order is the side towards the first
+   child, i.e. the right). */
+function seedSiblingPosition(refId, newId, before) {
+  var depth = nodeDepth(newId) || 1;
+  var colW = colWFor(depth);
+  var ref = knownPos(refId) || { x: 0, y: 0 };
+  var dir = before ? 1 : -1;
+  var x = avoidRowCollision(ref.x + dir * colW, ref.y, dir);
+  AUTO_SEED[newId] = { x: x, y: ref.y };
 }
 
 /* ── settling ────────────────────────────────────────────────────────────
@@ -1527,7 +1643,11 @@ function settleMap(skipRelax) {
          (contract: "in cards layer the radar draws the selected node's
          wires as ghosts") — no separate code path needed. */
       var radarPeek = UI.radar && (n.id === UI.sel || n.par === UI.sel);
-      return '<path class="tree' + (radarPeek ? ' gm-peek' : '') + '" data-id="' + n.id + '" data-par="' + n.par + '" d="' + wire(p.x, p.y, n.x, n.y, n.id) +
+      /* Top-down (Barak, 13.09): parent's BOTTOM centre to child's TOP
+         centre, using each card's own measured height (already on hand from
+         settleMap()'s own DOM pass, same `at[]` entries fitMap() etc. use). */
+      var py1 = p.y + p.h / 2, cy1 = n.y - n.h / 2;
+      return '<path class="tree' + (radarPeek ? ' gm-peek' : '') + '" data-id="' + n.id + '" data-par="' + n.par + '" d="' + wire(p.x, py1, n.x, cy1, n.id) +
         '" stroke="' + n.col + '" stroke-width="' + Math.max(1.2, 3 - d * 0.4) + '" opacity="' +
         ((0.32 + Math.max(0, 0.5 - d * 0.08)) * dim).toFixed(2) + '"' +
         (d > 2 ? ' stroke-dasharray="1 6"' : '') + '/>';
@@ -1887,9 +2007,15 @@ function focusOn(wx, wy, z, ms) {
   mapView().fit = true;
   animateMap(r.width / 2 - wx * z, r.height / 2 - wy * z, z, ms == null ? 460 : ms);
 }
+/* Barak (13.09 follow-up): a freshly Tab/Enter-grown node could land right
+   under the open thought tray — this used to measure against the mapwrap's
+   own raw rect, ignoring every floating chrome band (tray, crumb, rail,
+   hint/legend) that fitMap() already dodges via chromeSafeRect(). Reuse the
+   same safe rect here so "make the new node visible" and "fit the whole
+   map" never disagree about what counts as visible. */
 function ensureVisible(node) {
   var wrap = el('#mapwrap'); if (!wrap || !node) return;
-  var r = wrap.getBoundingClientRect(), b = node.getBoundingClientRect();
+  var r = chromeSafeRect(), b = node.getBoundingClientRect();
   var pad = 70;
   if (b.left >= r.left + pad && b.right <= r.right - pad &&
       b.top >= r.top + pad && b.bottom <= r.bottom - pad) return;
@@ -1897,7 +2023,9 @@ function ensureVisible(node) {
   if (isNaN(x) || isNaN(y)) { x = 0; y = 0; }
   var v = mapView();
   v.touched = true;
-  animateMap(r.width / 2 - x * v.z, r.height / 2 - y * v.z, v.z, 380);
+  var wr = wrap.getBoundingClientRect();
+  var cx = (r.left + r.right) / 2 - wr.left, cy = (r.top + r.bottom) / 2 - wr.top;
+  animateMap(cx - x * v.z, cy - y * v.z, v.z, 380);
 }
 
 /* ── selection ───────────────────────────────────────────────────────── */
@@ -1957,6 +2085,7 @@ function editSelectedBody() {
 function newChildOf(pid) {
   var n = { id: uid('n'), parent: pid, title: '', body: '', accent: accentFor(pid) };
   S.nodes.push(n);
+  seedChildPosition(pid, n.id);      /* top-down (Barak, 13.09): below the parent, left end of its row */
   return n.id;
 }
 function growChild() {
@@ -1970,6 +2099,7 @@ function growSibling() {
   var n = { id: uid('n'), parent: node.parent, title: '', body: '', accent: accentFor(node.parent) };
   var idx = S.nodes.indexOf(node);
   S.nodes.splice(idx + 1, 0, n);                            /* next sibling, right after `node` in array order */
+  seedSiblingPosition(node.id, n.id, false);                /* same row, immediately to its left */
   return n.id;
 }
 function growSiblingBefore() {
@@ -1979,6 +2109,7 @@ function growSiblingBefore() {
   var n = { id: uid('n'), parent: node.parent, title: '', body: '', accent: accentFor(node.parent) };
   var idx = S.nodes.indexOf(node);
   S.nodes.splice(idx, 0, n);                                /* previous sibling, right before `node` */
+  seedSiblingPosition(node.id, n.id, true);                 /* same row, immediately to its right */
   return n.id;
 }
 /* Ctrl+Enter — insert a new parent between the selection and its own
@@ -2008,6 +2139,12 @@ function duplicateNode(id) {
      hand-picking a fixed field list that quietly drops everything else. */
   function cloneRec(n, newParent) {
     var c = Object.assign({}, n, { id: uid('n'), parent: newParent });
+    /* the comment above promises hand-placed positions are never copied —
+       Object.assign was carrying mx/my/pinned along regardless, landing the
+       whole cloned subtree exactly on top of the original. Strip it from
+       every clone, not just the top one; each falls back to the tidy
+       automatic layout under its (also freshly cloned) parent. */
+    delete c.mx; delete c.my; delete c.pinned;
     clones.push(c);
     childrenOf(n.id).forEach(function (k) { cloneRec(k, c.id); });
     return c;
@@ -2016,6 +2153,7 @@ function duplicateNode(id) {
   var idx = S.nodes.indexOf(orig);
   S.nodes.splice(idx + 1, 0, top);
   clones.filter(function (c) { return c !== top; }).forEach(function (c) { S.nodes.push(c); });
+  seedSiblingPosition(orig.id, top.id, false);
   save();
   return top.id;
 }
@@ -2286,6 +2424,9 @@ function mapKeys(ev) {
        Hebrew-layout keyboard still triggers them (same convention as Alt+M). */
     if (ev.key === 't' || ev.key === 'T' || ev.code === 'KeyT') { ev.preventDefault(); if (typeof window.openThoughtCapture === 'function') window.openThoughtCapture(); return; }
     if (ev.key === 's' || ev.key === 'S' || ev.code === 'KeyS') { ev.preventDefault(); if (typeof window.openSketchModal === 'function') window.openSketchModal(); return; }
+    /* "סידור מלמעלה למטה" — Alt+R, physical KeyR fallback for the Hebrew
+       layout (same convention as Alt+M/T/S above). */
+    if (ev.key === 'r' || ev.key === 'R' || ev.code === 'KeyR') { ev.preventDefault(); resetLayoutTopDown(); return; }
     if (ev.key === 'ArrowLeft') { ev.preventDefault(); historyBack(); return; }
     if (ev.key === 'ArrowRight') { ev.preventDefault(); historyForward(); return; }
     return;
@@ -2388,6 +2529,34 @@ function toggleLayer() {
   S.layer = S.layer === 'links' ? 'cards' : 'links';
   persistSoft(); render();
 }
+/* Alt+R — "סידור מלמעלה למטה": re-lay the WHOLE map out top-down from
+   scratch, one undo step. Clears every node's hand-placed mx/my/pinned (the
+   root has none to clear) and the session's AUTO_SEED hints, so spread()'s
+   generic tidy top-down formula places everything fresh; a single Ctrl+Z
+   restores every previous position exactly, because this is one save()
+   call wrapping the whole mutation, same as any other multi-node edit
+   (delete, mark-all-as-known, …). Never touches id/title/body/kind/eqs/
+   links/or any other field. */
+function resetLayoutTopDown() {
+  var root = rootNode();
+  var moved = 0;
+  S.nodes.forEach(function (n) {
+    if (n === root) return;
+    if (typeof n.mx === 'number' || typeof n.my === 'number' || n.pinned) moved++;
+    delete n.mx; delete n.my; delete n.pinned;
+  });
+  AUTO_SEED = {};
+  save();
+  render();
+  fitMap(420);
+  toast(moved ? ('סודר מלמעלה למטה — <kbd dir="ltr">Ctrl+Z</kbd> לביטול') : 'כבר מסודר מלמעלה למטה', { html: true });
+}
+function toggleHelp() {
+  var o = el('#helpOverlay');
+  if (o.classList.contains('open')) { o.classList.remove('open'); return; }
+  renderHelp();
+  o.classList.add('open');
+}
 function toggleHelp() {
   var o = el('#helpOverlay');
   if (o.classList.contains('open')) { o.classList.remove('open'); return; }
@@ -2451,7 +2620,13 @@ function fitMap(ms) {
   if (minX > maxX) { minX = minY = -320; maxX = maxY = 320; }
   var pad = 46, bw = (maxX - minX) + pad * 2, bh = (maxY - minY) + pad * 2;
   var v = mapView();
-  var z = Math.max(0.22, Math.min(1.1, Math.min(safe.width / bw, safe.height / bh)));
+  /* Top-down (Barak, 13.09 follow-up): a wide fan-out row can need to zoom
+     out further than 0.22 to actually clear the chrome on a narrow phone —
+     0.22 was tuned for the old, taller left-right tree. Every node past
+     depth 1 is already a small dot at this altitude (lod-far, A1), so a
+     lower floor still reads fine; it only kicks in when content genuinely
+     doesn't fit at 0.22, same fit-to-content shape as every other size. */
+  var z = Math.max(0.1, Math.min(1.1, Math.min(safe.width / bw, safe.height / bh)));
   v.fit = true;
   /* Centre of the SAFE box, expressed in #mapwrap-local coordinates (the
      camera's x/y are relative to the wrap, not the viewport). */
@@ -2616,7 +2791,15 @@ function zoomAtCentre(factor) {
 }
 function placeInitial() {
   var v = mapView();
-  if (window.innerWidth <= 760) focusOn(0, 0, 0.9, 0); else fitMap(0);
+  /* Top-down (Barak, 13.09 follow-up): a node with several children now
+     spreads WIDE rather than tall, so the old fixed "just centre on the
+     root at 0.9" for phone-width could easily leave a wide top row running
+     under the rail on first load — fitMap() already measures the actual
+     content bounds against chromeSafeRect() (which reserves the rail/hint/
+     legend/tray bands) on every OTHER viewport size; phone gets no special
+     case any more; a tiny map still lands about the same place because
+     fitMap() itself caps at 1.1x. */
+  fitMap(0);
   v.touched = false;
 }
 function worldBoxes(skip) {
@@ -3657,6 +3840,7 @@ var SHORTCUTS = [
   ['Alt+M', 'דיאגרמת Mermaid מהירה לנושא הנבחר', 'Quick Mermaid diagram for the selected node'],
   ['Alt+T', 'תפוס מחשבה — פתח בועת קלט צפה', 'Capture a floating thought bubble'],
   ['Alt+S', 'שרטוט לנושא הנבחר (Excalidraw בחלון קופץ)', 'Sketch for the selected node (Excalidraw pop-up)'],
+  ['Alt+R', 'סידור כל המפה מלמעלה למטה (צעד ביטול אחד)', 'Arrange the whole map top-down (one undo step)'],
   ['Ctrl+V', 'הדבק תמונה מהלוח כתת-נושא (או גרירה לתוך המפה)', 'Paste an image from the clipboard as a child node (or drop one onto the map)'],
   ['Shift+Ctrl+V', 'צרף תמונה לנושא הנבחר עצמו, בלי ליצור תת-נושא', 'Attach an image to the selected node itself, instead of a new child'],
   ['L', 'החלף שכבה: קשרים / כרטיסים', 'Toggle layer: links / cards'],
@@ -3939,6 +4123,7 @@ document.addEventListener('click', function (ev) {
   if (ev.target.closest('#qCopyBtn') || ev.target.closest('#qCopyRailBtn')) { copyOpenQuestionsToClaude(); return; }
   if (ev.target.closest('#qAddBtn')) { addQuestionChild(); return; }
   if (ev.target.closest('#qNoteBtn')) { addNoteChild(); return; }
+  if (ev.target.closest('#layoutResetBtn')) { resetLayoutTopDown(); return; }
   if (ev.target.closest('#qPasteBtn')) { openPasteAnswersDialog(); return; }
   if (ev.target.closest('#qBranchCopyBtn')) { copyBranchWithContext(); return; }
   if (ev.target.closest('#qMarkAnswered')) { markQuestionAnswered(UI.sheetNode); return; }
@@ -4315,8 +4500,6 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     '.gm-eq-search{width:100%;box-sizing:border-box;padding:8px 10px;border-radius:10px;' +
       'background:rgba(255,255,255,.9);border:1px solid rgba(31,62,108,.18);color:#1F3E6C;font-size:13px;}' +
     '.gm-eq-search:focus{outline:2px solid var(--gm-gold);outline-offset:1px;}' +
-    ':root[data-theme="dark"] .gm-eq-search{background:rgba(10,15,30,.55);color:#e2e8f0;border-color:rgba(255,255,255,.16);}' +
-    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gm-eq-search{background:rgba(10,15,30,.55);color:#e2e8f0;border-color:rgba(255,255,255,.16);}}' +
     /* Coordinator fix: this used to be position:absolute, which floated the
        list on TOP of the math field and the Insert/Cancel buttons below it
        instead of making room for them — and its 240px cap could still run
@@ -4349,23 +4532,16 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       '--keycap-background:#ffffff;--keycap-background-hover:#f1f6ff;--keycap-background-active:#e6eefc;' +
       '--keycap-border:rgba(31,62,108,.14);--keycap-border-bottom:rgba(31,62,108,.28);--keycap-text:#1F3E6C;' +
       '--keycap-secondary-background:#dfe9fb;--keycap-secondary-background-hover:#d3e2fa;--keycap-secondary-text:#1F3E6C;}' +
-    ':root[data-theme="dark"] body{--keyboard-background:rgba(11,27,62,.97);--keyboard-border:rgba(255,255,255,.12);' +
-      '--keyboard-toolbar-text:#B8C6EA;--keyboard-toolbar-text-active:#EAF2FF;--keyboard-horizontal-rule:rgba(255,255,255,.1);' +
-      '--keycap-background:rgba(255,255,255,.10);--keycap-background-hover:rgba(255,255,255,.16);--keycap-background-active:rgba(255,255,255,.2);' +
-      '--keycap-border:rgba(255,255,255,.14);--keycap-border-bottom:rgba(0,0,0,.35);--keycap-text:#EAF2FF;' +
-      '--keycap-secondary-background:rgba(255,255,255,.06);--keycap-secondary-text:#EAF2FF;}' +
-    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body{--keyboard-background:rgba(11,27,62,.97);' +
-      '--keyboard-toolbar-text:#B8C6EA;--keyboard-toolbar-text-active:#EAF2FF;--keycap-background:rgba(255,255,255,.10);' +
-      '--keycap-border:rgba(255,255,255,.14);--keycap-text:#EAF2FF;--keycap-secondary-background:rgba(255,255,255,.06);--keycap-secondary-text:#EAF2FF;}}' +
+    /* Colour correction (Barak, 13.09 follow-up): the formula keyboard stays
+       this same light/navy/gold theme in dark mode too — no separate dark
+       palette any more. */
     /* Hebrew category names were clipped at both ends inside the LTR keyboard */
     '.ML__keyboard .gm-kb-sep{direction:rtl;unicode-bidi:plaintext;white-space:nowrap;overflow:visible;' +
       'font-family:Heebo,system-ui,sans-serif;font-weight:600;font-size:13px;color:#465CA5;}' +
-    ':root[data-theme="dark"] .ML__keyboard .gm-kb-sep{color:#B8C6EA;}' +
     /* keys inside Hebrew sentences: isolated so punctuation cannot jump sides */
     '.gm-hint kbd,.gm-eq-sub kbd{display:inline-block;unicode-bidi:isolate;font:600 11px/1.2 ui-monospace,Consolas,monospace;' +
       'padding:1px 5px;margin:0 1px;border-radius:5px;background:rgba(255,255,255,.75);' +
       'border:1px solid rgba(31,62,108,.16);border-bottom-width:2px;color:var(--sh-text-dark);}' +
-    ':root[data-theme="dark"] .gm-hint kbd,:root[data-theme="dark"] .gm-eq-sub kbd{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);}' +
     '.gm-eq-sub bdi{unicode-bidi:isolate;}' +
     /* math reads left to right even inside a right-to-left panel */
     '.gm-eq-field math-field{direction:ltr;}' +
@@ -4385,8 +4561,6 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       'background:rgba(255,255,255,.28);}' +
     '.gm-eqline:hover{background:rgba(255,255,255,.42);}' +
     '.gm-node.root .gm-eqline{font-size:19px;}' +
-    ':root[data-theme="dark"] .gm-eqline{background:rgba(255,255,255,.08);}' +
-    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gm-eqline{background:rgba(255,255,255,.08);}}' +
     '#eqDelete[hidden]{display:none;}';
   document.head.appendChild(css);
 
@@ -5227,16 +5401,12 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       'background:rgba(255,255,255,.5);padding:6px;box-shadow:0 2px 8px rgba(31,41,55,.16);}' +
     '.gm-diagram svg{max-width:100%;height:auto;display:block;}' +
     '.gm-diagram-loading{font-size:11px;color:var(--sh-text-med);}' +
-    ':root[data-theme="dark"] .gm-diagram{background:rgba(255,255,255,.06);}' +
-    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gm-diagram{background:rgba(255,255,255,.06);}}' +
     '.gm-dg-panel{width:min(520px,calc(100vw - 24px));}' +
     '.gm-dg-chips{display:flex;flex-wrap:wrap;gap:6px;}' +
     '.gm-dg-src{width:100%;min-height:90px;max-height:220px;padding:8px 10px;border-radius:10px;box-sizing:border-box;' +
       'font:12.5px/1.5 ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;direction:ltr;' +
       'background:rgba(255,255,255,.9);border:1px solid rgba(31,62,108,.18);color:#1F3E6C;resize:vertical;}' +
     '.gm-dg-src:focus{outline:2px solid var(--gm-gold);outline-offset:1px;}' +
-    ':root[data-theme="dark"] .gm-dg-src{background:rgba(10,15,30,.55);color:#e2e8f0;border-color:rgba(255,255,255,.16);}' +
-    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gm-dg-src{background:rgba(10,15,30,.55);color:#e2e8f0;border-color:rgba(255,255,255,.16);}}' +
     '.gm-dg-preview{min-height:60px;max-height:220px;overflow:auto;border-radius:10px;padding:8px;background:rgba(255,255,255,.35);}' +
     '.gm-dg-preview svg{max-width:100%;height:auto;display:block;margin:0 auto;}' +
     '.gm-dg-preview .gm-eq-loading{font-size:11px;color:var(--sh-text-med);}';
@@ -5435,8 +5605,6 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     '.gm-tray-list{display:flex;flex-direction:column;gap:6px;overflow-y:auto;max-height:calc(100vh - 190px);}' +
     '.gm-bubble{display:flex;align-items:flex-start;gap:6px;padding:7px 9px;border-radius:12px;' +
       'background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.5);cursor:grab;font-size:12px;}' +
-    ':root[data-theme="dark"] .gm-bubble{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);}' +
-    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gm-bubble{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);}}' +
     '.gm-bubble.dragging{opacity:.4;}' +
     '.gm-bubble-txt{flex:1;min-width:0;white-space:pre-wrap;word-break:break-word;max-height:4.2em;overflow:hidden;}' +
     '.gm-bubble-link{flex:none;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;' +
@@ -5746,7 +5914,6 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     '.gm-sketch-mount .excalidraw{height:100%;}' +
     '.gm-sketch-loading{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;' +
       'color:var(--sh-text-med);background:rgba(255,255,255,.85);}' +
-    ':root[data-theme="dark"] .gm-sketch-loading{background:rgba(10,15,30,.85);}' +
     /* Coordinator (round 3): Excalidraw's own English chrome, hidden rather
        than translated (see the langCode comment above) — every one of
        these is a stroke-icon trigger, so hiding it loses no functionality
@@ -6070,7 +6237,10 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
         '<span>שאלה פתוחה</span></button>' +
       '<button class="gm-btn" id="qNoteBtn" title="פתק מהיר (N) — quick note" aria-label="Add a quick note">' +
         ic('<path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11l5-5V5a2 2 0 0 0-2-2Z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/>') +
-        '<span>פתק מהיר</span></button>';
+        '<span>פתק מהיר</span></button>' +
+      '<button class="gm-btn" id="layoutResetBtn" title="סידור מלמעלה למטה (Alt+R) — arrange the whole map top-down" aria-label="Arrange the whole map top-down">' +
+        ic('<path d="M12 3v18"/><path d="m18 9-6-6-6 6"/><path d="M5 21h14"/>') +
+        '<span>סידור מלמעלה למטה</span></button>';
     claudeFlyout.innerHTML =
       '<button class="gm-btn" id="qCopyRailBtn" title="העתק שאלות פתוחות ל-Claude — copy open questions for Claude" aria-label="Copy open questions for Claude">' +
         ic('<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>') +
