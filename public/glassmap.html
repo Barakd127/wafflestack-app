@@ -381,7 +381,11 @@ a.gm-note-title{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellips
    and the card gets a floor so it can never end up narrower than a plain
    subtopic card at any zoom. */
 .gm-ttl.gm-ttl-note{display:flex!important;align-items:center;gap:4px;-webkit-line-clamp:unset;overflow:visible;}
-.gm-node.gm-linked-note{min-width:140px;}
+/* Round 3: removing the visible [[brackets]] shortened the title text
+   enough that a short note name (e.g. "Note 0") could shrink-to-fit
+   narrower than a plain sibling card at lod-far — bumped from 140 to
+   170px (world-space, pre-scale) so it stays wider at every zoom. */
+.gm-node.gm-linked-note{min-width:170px;}
 .gm-note-excerpt{margin-top:4px;font-size:11.5px;line-height:1.35;color:var(--sh-text-med);
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .mapwrap.lod-far .gm-note-excerpt,.mapwrap.lod-mid .gm-note-excerpt{display:none;}
@@ -807,8 +811,8 @@ a.gm-note-title{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellips
     <div class="gm-headtools">
       <div class="gm-frostseg" id="frostSeg" data-float="frost" data-chrome="1" role="group" aria-label="שקיפות הזכוכית"><button class="gm-seg" data-frost=".85" aria-pressed="true" title="זכוכית חלבית — לכתיבה"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg><span>מיקוד</span></button><button class="gm-seg" data-frost=".4" aria-pressed="false" title="חצי שקוף — להדגמה על העיר"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg><span>הדגמה</span></button><button class="gm-seg" data-frost="0" aria-pressed="false" title="זכוכית שקופה — רואים את העיר"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M10 21V11h6v10"/><path d="M16 21v-7l3 1v6"/></svg><span>עיר</span></button></div><div class="gm-qpill" id="qPill" data-float="qpill" data-chrome="1" hidden><button class="gm-btn" id="qLayerToggle" aria-pressed="false" title="שכבת שאלות — questions layer: brighten open questions and their path"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg><span id="qCountTxt" class="tnum gm-bidi">שאלות פתוחות: <bdi>0</bdi></span></button><button class="gm-btn icon" id="qCopyBtn" title="העתק שאלות פתוחות ל-Claude — copy open questions for Claude" aria-label="Copy open questions for Claude"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button><label class="gm-q-notes-toggle gm-bidi" title="כלול פתקים מהאותו ענף בהעתקה"><input type="checkbox" id="qIncludeNotes"><span>כולל פתקים</span></label></div><button class="gm-btn icon" id="exportBtn" title="ייצוא / ייבוא — Export / Import" aria-label="Export or import"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></button>
       <div class="gm-menu gm-glass" id="exportMenu" data-chrome="1" hidden>
-        <button data-act="exp-json" title="Export JSON" aria-label="Export JSON"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M9 13v4M15 13v4"/></svg> ייצוא JSON</button>
-        <button data-act="exp-md" title="Export Markdown" aria-label="Export Markdown"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M8 13h8M8 17h5"/></svg> ייצוא Markdown</button>
+        <button data-act="exp-json" title="Export JSON" aria-label="Export JSON"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M9 13v4M15 13v4"/></svg> ייצוא <bdi>JSON</bdi></button>
+        <button data-act="exp-md" title="Export Markdown" aria-label="Export Markdown"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M8 13h8M8 17h5"/></svg> ייצוא <bdi>Markdown</bdi></button>
         <hr>
         <button data-act="imp" title="Import…" aria-label="Import"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg> ייבוא…</button>
       </div>
@@ -1679,7 +1683,11 @@ function mapWorld() {
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span>' :
           (glyph ? '<span class="gm-glyph gm-swatch gm-swatch-' + glyphSwatch + '" aria-hidden="true">' + glyph + '</span>' : '')) +
         (isLinkedNote ?
-          '<a class="gm-wlink gm-note-title" dir="auto" data-note="' + esc(node.note.path) + '" title="' + esc(node.note.title || node.title) + '">[[' + esc(node.note.title || node.title) + ']]</a>' :
+          /* H3: the title is STORED as [[title]] for backlinks (so a
+             markdown map lists it), but rendered the same way every other
+             [[wikilink]] in this file renders (see WL_RE/txt() below) — as
+             a plain link label, no visible brackets. */
+          '<a class="gm-wlink gm-note-title" dir="auto" data-note="' + esc(node.note.path) + '" title="' + esc(node.note.title || node.title) + '">' + esc(node.note.title || node.title) + '</a>' :
           (typeof window.titleHTML === 'function' ? window.titleHTML(node.title) : esc(node.title))) + '</span>' +
       (isLinkedNote ? '<div class="gm-note-excerpt gm-bidi" dir="auto">' + esc((node.note.excerpt || '').slice(0, 300)) + '</div>' : '') +
       (node.eqs && node.eqs.length ? '<div class="gm-eqs">' + node.eqs.map(function (latex, eqi) {
@@ -1751,7 +1759,6 @@ function renderMapctl() {
       ' title="Claude — copy for Claude" aria-label="Copy for Claude"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></button>' +
     '<button class="gm-btn icon" id="helpBtn" title="עזרה (F1) — shortcuts" aria-label="Shortcuts help"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>';
   if (typeof renderFlyouts === 'function') renderFlyouts();
-  if (typeof window.repositionGmFlyouts === 'function') window.repositionGmFlyouts();
 }
 </script>
 
@@ -3273,8 +3280,13 @@ function renderLegend() {
      runtime script) resets it so it never gets stuck collapsed at 1280px. */
   if (window.innerWidth <= 760 && !UI.legendExpanded) {
     bar.hidden = false;
-    bar.innerHTML = '<button class="gm-legend-chip gm-legend-pill" data-legend-expand="1">' +
-      branches.length + ' ענפים — ' + branches.length + ' branches</button>';
+    /* Coordinator review (round 3): was "N ענפים — N branches" — a Hebrew
+       chrome line must never start with a digit, let alone trail into a
+       second, English-language repeat of the same count. Hebrew only,
+       count in <bdi> (contract convention, e.g. qCountTxt); the English
+       gloss moves to the title attribute, same as everywhere else. */
+    bar.innerHTML = '<button class="gm-legend-chip gm-legend-pill gm-bidi" data-legend-expand="1" ' +
+      'title="' + branches.length + ' branches">ענפים: <bdi>' + branches.length + '</bdi></button>';
     return;
   }
   var show = branches.slice(0, 9), extra = branches.length - show.length;
@@ -3695,8 +3707,8 @@ function kbdify(s) {
 }
 function renderHelp() {
   el('#helpBox').innerHTML =
-    '<h2 title="GlassMap shortcuts">מקשי GlassMap</h2>' +
-    '<div class="sub" title="XMind-compatible, active when nothing is being edited">תואם XMind, פעיל כשלא עורכים טקסט</div>' +
+    '<h2 title="GlassMap shortcuts">מקשי <bdi>GlassMap</bdi></h2>' +
+    '<div class="sub" title="XMind-compatible, active when nothing is being edited">תואם <bdi>XMind</bdi>, פעיל כשלא עורכים טקסט</div>' +
     '<table>' + SHORTCUTS.map(function (r) {
       return '<tr><td class="k">' + kbdify(r[0]) + '</td><td class="he">' + esc(r[1]) + '</td><td class="en">' + esc(r[2]) + '</td></tr>';
     }).join('') + '</table>' +
@@ -5637,8 +5649,16 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       var existing = S.nodes.filter(function (n) { return n.kind === 'note' && n.note && n.note.path === nt.path; })[0];
       if (existing) { dupe = existing.id; return; }
       var id = uid('n');
+      /* H3: node.title (the generic field every export/breadcrumb/switcher
+         path already reads) is stored AS "[[title]]" so a plain Markdown
+         export of the map lists it as a real Obsidian backlink; the card
+         itself never renders this field directly for a linked note (see
+         nodeHTML's isLinkedNote branch, which reads node.note.title
+         instead) — chromeTxt()/chromeTitlePlain() already strip [[...]]
+         for the breadcrumb/legend/switcher's plain-text needs. */
+      var wikiTitle = '[[' + (nt.title || nt.path) + ']]';
       S.nodes.push({
-        id: id, parent: parentId, title: nt.title || nt.path, body: '', accent: accentFor(parentId),
+        id: id, parent: parentId, title: wikiTitle, body: '', accent: accentFor(parentId),
         kind: 'note', note: { path: nt.path, title: nt.title || nt.path, excerpt: nt.excerpt || '' }
       });
       addedAny = true; lastId = id;
@@ -5726,7 +5746,18 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     '.gm-sketch-mount .excalidraw{height:100%;}' +
     '.gm-sketch-loading{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;' +
       'color:var(--sh-text-med);background:rgba(255,255,255,.85);}' +
-    ':root[data-theme="dark"] .gm-sketch-loading{background:rgba(10,15,30,.85);}';
+    ':root[data-theme="dark"] .gm-sketch-loading{background:rgba(10,15,30,.85);}' +
+    /* Coordinator (round 3): Excalidraw's own English chrome, hidden rather
+       than translated (see the langCode comment above) — every one of
+       these is a stroke-icon trigger, so hiding it loses no functionality
+       Barak actually uses: the Library sidebar, the "To move canvas…"
+       corner hint, the hamburger main menu, and the help "?" button (and
+       whatever dialog it would have opened — it can't be reached with the
+       trigger gone). Drawing tools, zoom, undo/redo all stay. */
+    '.gm-sketch-mount .default-sidebar-trigger{display:none!important;}' +
+    '.gm-sketch-mount .HintViewer{display:none!important;}' +
+    '.gm-sketch-mount .main-menu-trigger{display:none!important;}' +
+    '.gm-sketch-mount .help-icon{display:none!important;}';
   document.head.appendChild(css);
 
   function ic(p) {
@@ -5834,6 +5865,19 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     var el0 = window.React.createElement(window.ExcalidrawLib.Excalidraw, {
       initialData: initialData,
       langCode: 'he-IL',
+      /* Coordinator (round 3): a second, independent test confirmed the
+         Hebrew locale chunk for langCode is never even requested by this
+         CDN build (0.17.6 and 0.18.1 both) — so instead of chasing a
+         translation that will never load, every part of Excalidraw's own
+         chrome that would show English prose is turned off or hidden
+         outright. Tooltips (title/aria-label) are exempt, same rule as the
+         rest of this file. */
+      UIOptions: {
+        canvasActions: {
+          export: false, loadScene: false, saveToActiveFile: false,
+          clearCanvas: false, toggleTheme: false
+        }
+      },
       excalidrawAPI: function (api) { SK.api = api; }
     });
     SK.root = window.ReactDOM.createRoot(host);
@@ -5936,28 +5980,20 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
 (function () {
   var css = document.createElement('style');
   css.textContent =
-    /* Closed state stays parked exactly beside the rail (positionFlyout()
-       keeps it there on every render, not just on open) with opacity:0 —
-       never hidden/display:none, off-screen, or pointer-events:none. Those
-       would all fail a plain Playwright .click() aimed straight at a button
-       inside it (verify_5261.py's existing, unmodified checks still click
-       #qCopyRailBtn/#qPasteBtn/#qBranchCopyBtn directly, without opening the
-       flyout first) — actionability requires the element to be CSS-visible,
-       on-screen, and able to receive the click at its own real coordinates;
-       verified by hand that opacity:0 alone satisfies that while
-       display:none/off-screen/pointer-events:none all do not. A real
-       pointer can still reach that strip of screen (immediately beside the
-       rail) but there is nothing else there to misclick. */
-    '.gm-flyout{position:fixed;z-index:6;min-width:220px;border-radius:14px;padding:6px;overflow:hidden;' +
+    /* Coordinator review (round 3): a closed flyout must have ZERO hit area
+       — genuinely `hidden` (display:none), not an invisible-but-clickable
+       strip kept around for a test's convenience (that was round 2's
+       compromise; the actual fix was to change the TEST — verify_5261.py
+       now opens #claudeFlyoutBtn before clicking one of its items, same as
+       a real user would). `[hidden]` needs `!important` here because this
+       author stylesheet's own `.gm-flyout{display:flex}` would otherwise
+       beat the UA default `[hidden]{display:none}` (same specificity,
+       later source order) and silently un-hide it. */
+    '.gm-flyout{position:fixed;z-index:20;min-width:220px;border-radius:14px;padding:6px;' +
       'display:flex;flex-direction:column;gap:2px;opacity:0;transform:translateX(6px);' +
       'transition:opacity .15s ease,transform .15s ease;}' +
-    /* Only one flyout is ever open; the OTHER one still sits parked
-       (opacity:0, see above) and can end up spatially overlapping the open
-       one when their two trigger buttons are close together on the rail —
-       the open one must always win that stack so its own buttons are what
-       actually receives the click, not the invisible closed one sitting on
-       top of it. */
-    '.gm-flyout.open{opacity:1;transform:translateX(0);z-index:21;}' +
+    '.gm-flyout[hidden]{display:none!important;}' +
+    '.gm-flyout.open{opacity:1;transform:translateX(0);}' +
     /* a wide flyout on a narrow phone can only reach into the bottom-left
        hint/legend band — same precedent as the switcher/quiz card hiding
        them while open, restored the moment the flyout closes. */
@@ -5985,14 +6021,21 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
   }
 
-  /* Never hidden (see the .gm-flyout CSS comment above for why) — opacity:0
-     from that rule is the only thing keeping it out of sight at rest. */
+  /* Coordinator review (round 3): a closed flyout is properly hidden
+     (the `hidden` attribute — real display:none) with ZERO hit area, full
+     stop. The earlier "invisible 6px strip beside the rail" compromise
+     existed only to keep verify_5261.py's direct-by-id clicks on the three
+     relocated Claude buttons passing without opening the menu first — the
+     right fix is the test, not a permanent dead click target for real
+     users. verify_5261.py now opens #claudeFlyoutBtn before clicking
+     #qCopyRailBtn/#qPasteBtn/#qBranchCopyBtn, same as any real user would. */
   var addFlyout = document.createElement('div');
   addFlyout.className = 'gm-flyout gm-glass';
   addFlyout.id = 'addFlyout';
   addFlyout.setAttribute('data-float', 'add-flyout');
   addFlyout.setAttribute('data-chrome', '1');
   addFlyout.setAttribute('role', 'menu');
+  addFlyout.hidden = true;
   document.body.appendChild(addFlyout);
 
   var claudeFlyout = document.createElement('div');
@@ -6001,6 +6044,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   claudeFlyout.setAttribute('data-float', 'claude-flyout');
   claudeFlyout.setAttribute('data-chrome', '1');
   claudeFlyout.setAttribute('role', 'menu');
+  claudeFlyout.hidden = true;
   document.body.appendChild(claudeFlyout);
 
   /* Re-rendered on every renderMapctl() call (renderMapctl calls this at
@@ -6030,7 +6074,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     claudeFlyout.innerHTML =
       '<button class="gm-btn" id="qCopyRailBtn" title="העתק שאלות פתוחות ל-Claude — copy open questions for Claude" aria-label="Copy open questions for Claude">' +
         ic('<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>') +
-        '<span>העתק שאלות פתוחות ל-Claude</span></button>' +
+        '<span class="gm-bidi">העתק שאלות פתוחות ל־<bdi>Claude</bdi></span></button>' +
       '<button class="gm-btn" id="qPasteBtn" title="הדבק תשובות — paste back Claude’s answers" aria-label="Paste back answers">' +
         ic('<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>') +
         '<span>הדבק תשובות</span></button>' +
@@ -6053,84 +6097,23 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     top = Math.max(12, top);
     flyout.style.top = top + 'px';
   }
-  /* The flyout's RESTING (closed) position: exactly over the rail itself,
-     not beside it. It stays un-hidden the whole time at opacity:0 (a plain
-     Playwright .click() on one of its buttons — verify_5261.py's existing,
-     unmodified checks do this directly, without ever opening the flyout —
-     needs the target to be CSS-visible and on-screen; display:none/hidden/
-     off-screen/pointer-events:none all fail that, confirmed by hand). Real
-     mouse clicks in that footprint already belong to the rail's own
-     buttons, which sit on top (mapctl is z-index 7; .gm-flyout's own
-     resting z-index is below that — see the CSS), so nothing is lost:
-     parking it out over open map canvas instead (its natural beside-the-
-     rail position) was the actual bug — an invisible dead click zone over
-     real content, caught by a double-click test landing right on it. */
-  /* Parking a flyout OVER the rail turned out to be a dead end either way:
-     give it a HIGHER z-index than the rail and it swallows real clicks
-     meant for undo/zoom/etc; a LOWER one and the rail swallows every
-     Playwright click meant for the flyout's own buttons (the rail covers
-     its own full rect, so there is no gap for the flyout to be hit through
-     at all). The fix is to never overlap the rail in the first place: park
-     each flyout as a hairline-thin (6px) strip whose own right edge just
-     touches the rail's left edge — on-screen and CSS-visible (so a plain
-     Playwright .click() on e.g. #qCopyRailBtn still finds a real,
-     non-clipped target — verified by hand: display:none/hidden/off-screen/
-     pointer-events:none all fail that actionability check, opacity:0 on a
-     normally-sized, on-screen element does not), but only 6px of real
-     screen real estate for a stray human click to land on, right against
-     the rail where a click already means "I'm reaching for the rail".
-     addFlyout and claudeFlyout each get their own vertical band (split by
-     natural content height) so the two invisible siblings never sit on
-     top of each other either — whichever were later in the DOM would
-     otherwise permanently shadow the other one's buttons. */
-  var PARK_W = 6;
-  function parkOverRail(flyout, top, height) {
-    var rail = document.getElementById('mapctl');
-    if (!rail) return;
-    var r = rail.getBoundingClientRect();
-    flyout.style.right = (window.innerWidth - r.left + 2) + 'px';
-    flyout.style.top = top + 'px';
-    flyout.style.width = PARK_W + 'px';
-    flyout.style.minWidth = '0';
-    flyout.style.height = height + 'px';
-  }
-  function parkAll() {
-    var rail = document.getElementById('mapctl');
-    if (!rail) return;
-    var r = rail.getBoundingClientRect();
-    /* natural content heights (6 rows vs 3 rows); split proportionally so
-       each flyout's own content always fits inside its band without
-       needing to overflow-clip past it. */
-    var addH = Math.max(1, addFlyout.scrollHeight || 220);
-    var claudeH = Math.max(1, claudeFlyout.scrollHeight || 110);
-    var total = addH + claudeH;
-    var addBand = Math.max(1, Math.min(r.height - 1, (r.height * addH) / total));
-    var claudeBand = Math.max(1, r.height - addBand);
-    parkOverRail(addFlyout, r.top, addBand);
-    parkOverRail(claudeFlyout, r.top + addBand, claudeBand);
-  }
   window.renderFlyouts = renderFlyouts;
   renderFlyouts();   /* this script runs after boot's own first renderMapctl() call, so paint once here too */
-  window.repositionGmFlyouts = function () { if (!OPEN) parkAll(); };
-  parkAll();
 
   function closeFlyouts() {
     if (!OPEN) return;
-    [addFlyout, claudeFlyout].forEach(function (f) { f.classList.remove('open'); });
+    [addFlyout, claudeFlyout].forEach(function (f) { f.classList.remove('open'); f.hidden = true; });
     var addBtn = document.getElementById('addFlyoutBtn'), claudeBtn = document.getElementById('claudeFlyoutBtn');
     if (addBtn) addBtn.setAttribute('aria-expanded', 'false');
     if (claudeBtn) claudeBtn.setAttribute('aria-expanded', 'false');
     OPEN = null;
     document.documentElement.classList.remove('gm-flyout-open');
-    parkAll();
   }
   function openFlyout(name) {
     var wasOpen = OPEN === name;
     closeFlyouts();
     if (wasOpen) return;   /* same trigger clicked again = toggle closed */
-    flyoutEl(name).style.width = '';
-    flyoutEl(name).style.minWidth = '';
-    flyoutEl(name).style.height = '';
+    flyoutEl(name).hidden = false;
     positionFlyout(name);
     requestAnimationFrame(function () {
       flyoutEl(name).classList.add('open');
@@ -6144,7 +6127,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
        last few px of a 375px-wide screen. */
     document.documentElement.classList.add('gm-flyout-open');
   }
-  addEventListener('resize', function () { if (!OPEN) parkAll(); });
+  addEventListener('resize', function () { if (OPEN) positionFlyout(OPEN); });
   window.closeGmFlyouts = closeFlyouts;
 
   document.addEventListener('click', function (e) {
