@@ -39,7 +39,7 @@ export function TutorFAB() {
 
   if (open) return null
 
-  const stackPos = getStackOffset('bl', 'tutor-fab')
+  const stackPos = getStackOffset('br-content', 'tutor-fab')
 
   return (
     <button
@@ -50,7 +50,7 @@ export function TutorFAB() {
       style={{
         position: 'fixed',
         bottom: stackPos.bottom,
-        left: stackPos.left,
+        right: stackPos.right,
         // z-index 230: FAB band (tutor-fab slot, per uiStacks z-index discipline).
         zIndex: 230,
         width: 56,

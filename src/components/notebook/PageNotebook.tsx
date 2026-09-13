@@ -233,7 +233,7 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
         position: 'fixed', inset: 0,
         background: 'linear-gradient(135deg, #0B1B3E 0%, #1E3A8A 100%)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: '#fff', fontFamily: "'Rubik', sans-serif",
+        color: '#fff', fontFamily: "'Assistant', sans-serif",
       }}>
         טוען מחברת…
       </div>
@@ -279,7 +279,7 @@ export default function PageNotebook({ onBack }: PageNotebookProps) {
         >
           {viewKind === 'notebook' ? '🧠 מפת חשיבה' : '📓 מחברת'}
         </button>
-        <div style={{ marginInlineStart: 'auto', fontSize: 14, opacity: 0.7, fontFamily: "'Rubik', sans-serif" }}>
+        <div style={{ marginInlineStart: 'auto', fontSize: 14, opacity: 0.7, fontFamily: "'Assistant', sans-serif" }}>
           📓 המחברת שלי — נשמר אוטומטית
         </div>
       </div>
@@ -360,7 +360,7 @@ const btnGoldStyle: React.CSSProperties = {
   color: '#0B1B3E',
   border: 0, borderRadius: 20,
   padding: '8px 18px',
-  fontFamily: "'Rubik', sans-serif",
+  fontFamily: "'Assistant', sans-serif",
   fontWeight: 700, fontSize: 13,
   cursor: 'pointer',
   boxShadow: '0 4px 14px rgba(212,175,55,0.45)',
@@ -371,7 +371,7 @@ const btnGlassStyle: React.CSSProperties = {
   color: '#fff',
   border: '1px solid rgba(255,255,255,0.18)',
   borderRadius: 18, padding: '7px 16px',
-  fontFamily: "'Rubik', sans-serif",
+  fontFamily: "'Assistant', sans-serif",
   fontWeight: 500, fontSize: 13,
   cursor: 'pointer',
   transition: 'background 0.15s',

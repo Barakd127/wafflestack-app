@@ -31,7 +31,7 @@ export const LeadMeasureCard = ({ topics_mastered }: LeadMeasureCardProps) => {
     >
       <h2 style={{
         margin: "0 0 14px",
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
         fontSize: 18,
         fontWeight: 700,
         color: "var(--sh-text-dark)",

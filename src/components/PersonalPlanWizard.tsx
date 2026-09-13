@@ -159,7 +159,7 @@ export default function PersonalPlanWizard({ open, onClose, onSelectTopic }: Per
           padding: '32px 36px 28px',
           width: '100%', maxWidth: 560, maxHeight: '92vh', overflow: 'auto',
           boxShadow: '0 24px 70px rgba(0,0,0,0.32)',
-          fontFamily: "'Rubik', sans-serif", color: '#0B1B3E',
+          fontFamily: "'Assistant', sans-serif", color: '#0B1B3E',
         }}
       >
         {/* Header */}

@@ -100,7 +100,7 @@ export default function PagesNav({ editor }: PagesNavProps) {
           fontSize: 11,
           fontWeight: 700,
           color: '#F5C842',
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           marginInlineEnd: 4,
           flexShrink: 0,
         }}
@@ -120,7 +120,7 @@ export default function PagesNav({ editor }: PagesNavProps) {
             border: `1px solid ${p.isCurrent ? '#F5C842' : 'rgba(255,255,255,0.1)'}`,
             color: '#fff',
             fontSize: 12,
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             display: 'flex',
             alignItems: 'center',
             gap: 6,
@@ -161,7 +161,7 @@ export default function PagesNav({ editor }: PagesNavProps) {
           border: '1px dashed rgba(245,200,66,0.5)',
           cursor: 'pointer',
           fontSize: 12,
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           flexShrink: 0,
         }}
       >

@@ -79,7 +79,7 @@ export default function TagsFilter({ editor }: TagsFilterProps) {
           fontSize: 11,
           fontWeight: 700,
           color: '#F5C842',
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           marginInlineEnd: 4,
           flexShrink: 0,
         }}
@@ -122,7 +122,7 @@ const chipStyle: React.CSSProperties = {
   border: '1px solid rgba(255,255,255,0.18)',
   color: '#fff',
   fontSize: 12,
-  fontFamily: "'Rubik', sans-serif",
+  fontFamily: "'Assistant', sans-serif",
   cursor: 'pointer',
   flexShrink: 0,
 }

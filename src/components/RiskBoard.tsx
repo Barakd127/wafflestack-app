@@ -1,3 +1,4 @@
+import CardIcon, { cardTitle, cardHead } from './CardIcon'
 import { useState, useMemo } from 'react'
 import { useLearningStore } from '../store/learningStore'
 import { computeTopicRisks, type TopicRisk } from '../utils/riskScore'
@@ -213,13 +214,13 @@ function PlanTargetCard({ row, onSelect, onExtend }: {
         <div
           role="button"
           tabIndex={0}
-          aria-label={`${row.hebrewTitle}, יעד ${formatTargetDate(row.targetDate)}, נשארו ${row.daysLeft} ימים. לחץ לתרגול`}
+          aria-label={`${row.hebrewTitle}, יעד ${formatTargetDate(row.targetDate)}, נשארו ${row.daysLeft} ימים. למעבר לתרגול`}
           onClick={() => onSelect(row.topicId)}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onSelect(row.topicId) }}
           style={{
-            fontFamily: "'Rubik', 'Assistant', sans-serif",
+            fontFamily: "'Assistant', 'Assistant', sans-serif",
             fontWeight: 700,
-            fontSize: 14,
+            fontSize: 16,
             color: 'var(--sh-text-dark)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -230,14 +231,14 @@ function PlanTargetCard({ row, onSelect, onExtend }: {
           {row.hebrewTitle}
         </div>
 
-        <div style={{ fontSize: 11, color: 'var(--sh-text-light)', marginTop: 3, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ fontSize: 13, color: 'var(--sh-text-light)', marginTop: 3, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <span>יעד: <b style={{ color: 'var(--sh-text-med)' }}>{formatTargetDate(row.targetDate)}</b></span>
           <span>נשארו {row.daysLeft} ימים</span>
           <span style={{ color: paceColor, fontWeight: 600 }}>{paceCaption(row)}</span>
         </div>
 
         {row.cappedAtExam && (
-          <div style={{ fontSize: 10, color: 'var(--sh-text-light)', marginTop: 2, opacity: 0.85 }}>
+          <div style={{ fontSize: 13, color: 'var(--sh-text-light)', marginTop: 2, opacity: 0.85 }}>
             התאריך מוגבל למועד הבחינה
           </div>
         )}
@@ -252,10 +253,10 @@ function PlanTargetCard({ row, onSelect, onExtend }: {
           border: '1px solid rgba(212,175,55,0.40)',
           borderRadius: 8,
           padding: '5px 10px',
-          fontSize: 11,
+          fontSize: 13,
           color: 'var(--sh-gold, #D4A017)',
           cursor: 'pointer',
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           fontWeight: 600,
           whiteSpace: 'nowrap',
           transition: 'border-color 0.15s, background 0.15s',
@@ -325,7 +326,7 @@ function RiskCard({ risk, rank, onSelect }: {
     <div
       role="button"
       tabIndex={0}
-      aria-label={`${risk.hebrewTitle}, רמת סיכון ${risk.riskScore}. לחץ להתחיל תרגול`}
+      aria-label={`${risk.hebrewTitle}, רמת סיכון ${risk.riskScore}. למעבר לתרגול`}
       onClick={() => onSelect(risk.topicId)}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onSelect(risk.topicId) }}
       onMouseEnter={() => setHovered(true)}
@@ -352,15 +353,15 @@ function RiskCard({ risk, rank, onSelect }: {
         userSelect: 'none',
       }}
     >
-      <span style={{ width: 20, textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--sh-text-light)', flexShrink: 0 }}>
+      <span style={{ width: 20, textAlign: 'center', fontSize: 15, fontWeight: 700, color: 'var(--sh-text-light)', flexShrink: 0 }}>
         #{rank}
       </span>
       <span style={{ fontSize: 20, flexShrink: 0 }}>{risk.icon}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontFamily: "'Rubik', 'Assistant', sans-serif",
+          fontFamily: "'Assistant', 'Assistant', sans-serif",
           fontWeight: 700,
-          fontSize: 14,
+          fontSize: 16,
           color: 'var(--sh-text-dark)',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -368,7 +369,7 @@ function RiskCard({ risk, rank, onSelect }: {
         }}>
           {risk.hebrewTitle}
         </div>
-        <div style={{ fontSize: 11, color: 'var(--sh-text-light)', marginTop: 3, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <div style={{ fontSize: 13, color: 'var(--sh-text-light)', marginTop: 3, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <span>
             משקל:{' '}
             <b style={{ color: risk.examWeightLabel === 'גבוה' ? 'var(--sh-text-med)' : 'var(--sh-text-light)' }}>
@@ -410,7 +411,7 @@ function ExamDateControl({ examDate, setExamDate }: {
             border: '1.5px solid rgba(212,175,55,0.6)',
             borderRadius: 8,
             padding: '4px 8px',
-            fontSize: 13,
+            fontSize: 15,
             color: 'var(--sh-text-dark)',
             background: 'var(--sh-answer-bg, rgba(255,255,255,0.75))',
             outline: 'none',
@@ -425,10 +426,10 @@ function ExamDateControl({ examDate, setExamDate }: {
             border: 'none',
             borderRadius: 8,
             padding: '5px 14px',
-            fontSize: 13,
+            fontSize: 15,
             cursor: 'pointer',
             fontWeight: 600,
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
           }}
         >
           שמור
@@ -441,7 +442,7 @@ function ExamDateControl({ examDate, setExamDate }: {
             border: 'none',
             borderRadius: 8,
             padding: '5px 8px',
-            fontSize: 13,
+            fontSize: 15,
             cursor: 'pointer',
           }}
         >
@@ -459,15 +460,15 @@ function ExamDateControl({ examDate, setExamDate }: {
         border: '1px solid rgba(212,175,55,0.35)',
         borderRadius: 8,
         padding: '5px 12px',
-        fontSize: 12,
+        fontSize: 15,
         color: 'rgba(212,175,55,0.85)',
         cursor: 'pointer',
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
         transition: 'border-color 0.15s',
         whiteSpace: 'nowrap',
       }}
     >
-      {examDate ? 'שנה תאריך בחינה' : '+ הגדר תאריך בחינה'}
+      {examDate ? 'שנה תאריך בחינה' : '+ תאריך בחינה'}
     </button>
   )
 }
@@ -534,7 +535,8 @@ export function RiskBoard({ onSelectTopic }: RiskBoardProps) {
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         boxShadow: 'var(--sh-card-shadow, 0 8px 32px rgba(31,62,108,0.10))',
-        borderRadius: 20,
+        borderRadius: 24, // was 20 — every home container is 24 (Shirli 2026-09-04)
+        aspectRatio: '4.832',
         padding: '20px 22px 16px',
         border: '1px solid rgba(255,255,255,0.50)',
       }}
@@ -542,17 +544,12 @@ export function RiskBoard({ onSelectTopic }: RiskBoardProps) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
         <div>
-          <div style={{
-            fontFamily: "'Rubik', sans-serif",
-            fontWeight: 700,
-            fontSize: 16,
-            color: 'var(--sh-text-dark)',
-            lineHeight: 1.3,
-          }}>
-            🎯 לוח סיכונים
+          <div style={{ ...cardHead, marginBottom: 6 }}>
+            <CardIcon name="risk" />
+            <div style={cardTitle}>לוח סיכונים</div>
           </div>
           <div style={{
-            fontSize: 12,
+            fontSize: 15,
             marginTop: 3,
             color: subtitleUrgent ? 'var(--sh-sidebar-active, #3351CA)' : 'var(--sh-text-light)',
             fontWeight: subtitleUrgent ? 600 : 400,
@@ -567,9 +564,9 @@ export function RiskBoard({ onSelectTopic }: RiskBoardProps) {
       {planTargetRows.length > 0 && (
         <div style={{ marginBottom: 14 }}>
           <div style={{
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             fontWeight: 700,
-            fontSize: 12,
+            fontSize: 15,
             color: 'var(--sh-text-med)',
             marginBottom: 7,
             display: 'flex',
@@ -606,7 +603,7 @@ export function RiskBoard({ onSelectTopic }: RiskBoardProps) {
       {/* Footer */}
       <div style={{
         marginTop: 12,
-        fontSize: 10,
+        fontSize: 13,
         color: 'var(--sh-text-light)',
         textAlign: 'center',
         opacity: 0.7,

@@ -1,3 +1,19 @@
+/* Tel Aviv Modernist — Fontef. Licensed to Shirli Alton, order #04350.
+   Two files, declared as one family so font-weight picks between them. */
+@font-face {
+  font-family: 'Tel Aviv Modernist';
+  src: url('./assets/fonts/telaviv-modernistregular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Tel Aviv Modernist';
+  src: url('./assets/fonts/telaviv-modernistbold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -32,6 +48,15 @@
      board" block at the end of this file
      (`.ws-glass-board .ws-lesson-bullet > div`); it does not reach the
      whiteboard. */
+  /* The headline face — Tel Aviv Modernist, Fontef 2020, Yanek Iontef and
+     Daniel Grumer. Hebrew-first and geometric: it was drawn from the signage
+     of the White City's 1930s buildings, which is the same Bauhaus geometry a
+     tech headline wants, and it means something in an app about building a
+     city. It is the headings face ONLY — Assistant keeps everything you scan
+     rather than read: labels, buttons, nav, numbers. One face to scan, one to
+     read. Fallbacks stay Hebrew-capable. */
+  --ws-display: 'Tel Aviv Modernist', 'Assistant', 'Heebo', sans-serif;
+
   --ws-hand: 'Gveret Levin', 'Playpen Sans Hebrew', 'Assistant', sans-serif;
 
   /* Bottom-left FAB slot tokens — shared between TutorFAB (fixed) and the
@@ -53,7 +78,7 @@
   --mm-divider: #e5e7eb;
 
   /* StudyHub theme tokens (light mode) */
-  --sh-page-bg: linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 49.05%, #3351CA 136%);
+  --sh-page-bg: linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 78%, #3351CA 210%);
   --sh-sidebar-bg: linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%);
   --sh-sidebar-active: #254A9F;
   --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%);
@@ -64,8 +89,9 @@
   --sh-text-med: #254A9F;
   --sh-text-light: #7F9BD9;
   --sh-text-tip: #465CA5;
-  --sh-topbar-bg: linear-gradient(135deg, rgba(255,255,255,0.82) 0%, rgba(228,238,255,0.78) 60%, rgba(255,245,210,0.60) 100%);
-  --sh-topbar-border: rgba(212,175,55,0.40);
+  --sh-topbar-bg: transparent;
+  --sh-topbar-border: #FFFFFF;
+  --sh-topbar-seam: 0 1px 0 rgba(31,62,108,0.22);
   --sh-q-card-bg: linear-gradient(178.82deg, rgba(255,255,255,0.82) 17.91%, rgba(192,216,255,0.77) 199.73%);
   --sh-answer-bg: rgba(255,255,255,0.7);
   --sh-answer-border: rgba(51,81,202,0.2);
@@ -94,8 +120,9 @@ html.dark {
   --sh-text-med: #a5b4fc;
   --sh-text-light: #94a3b8;
   --sh-text-tip: #64748b;
-  --sh-topbar-bg: linear-gradient(135deg, rgba(15,22,60,0.92) 0%, rgba(20,30,80,0.90) 70%, rgba(100,80,0,0.12) 100%);
-  --sh-topbar-border: rgba(212,175,55,0.20);
+  --sh-topbar-bg: transparent;
+  --sh-topbar-border: rgba(255,255,255,0.16);
+  --sh-topbar-seam: 0 1px 0 rgba(0,0,0,0.30);
   --sh-q-card-bg: linear-gradient(178.82deg, rgba(20,20,60,0.9) 17.91%, rgba(15,20,55,0.85) 199.73%);
   --sh-answer-bg: rgba(20,20,50,0.8);
   --sh-answer-border: rgba(78,205,196,0.25);
@@ -264,7 +291,7 @@ html.dark :focus-visible {
   .ws-topbar-actions button { padding: 4px 8px !important; }
 
   /* Home screen grid */
-  .ws-home-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 14px !important; }
+  .ws-home-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 14px !important; aspect-ratio: auto !important; }
   .ws-home-grid > div { padding: 18px !important; }
 
   /* Topic cards */
@@ -495,6 +522,7 @@ html.dark .ws-glass-card:hover {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.2) !important;
 }
 
+
 /* ── Solid CTA Button with glass sheen (hybrid: solid color + specular) ── */
 /*
  * Apple hybrid pattern: pill buttons stay SOLID colored (readable, tappable)
@@ -648,4 +676,111 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   margin-top: auto !important;
   padding-top: 10px !important;
   background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.82) 45%, rgba(255,255,255,0.92) 100%) !important;
+}
+
+/* ── Home CTA ──────────────────────────────────────────────────────────────
+   The whole button lives here, not in an inline style object. Inline styles
+   outrank any class selector, so a rest appearance set inline silently wins
+   over :hover and :active and the states never fire.
+
+   Depth carries the three states; colour follows.
+
+     rest   raised            #4438A0 → #6354C6, 3px shadow
+     hover  rises further     #27187E → #5031CE, 6px shadow, -3px
+     press  sinks BELOW       #1B1060 → #3B22A4, inset shadow, +1px
+
+   Rest is the LIGHTER end of the indigo ramp on purpose. A pressed button is
+   dark and flat, so a saturated flat fill reads as already-pressed and leaves
+   nowhere to travel; starting light gives the hover somewhere to go. The inset
+   on press is what makes it read as "it went in" rather than "the same button,
+   slightly darker".
+
+   Tried and rejected along the way: navy ink (sat in the same family as the
+   page blues), teal ink (stepped too far out), and #B0B8F9 with a dark label
+   (too quiet for a primary action). Per Shirli 2026-09-04. */
+.ws-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  align-self: flex-start;
+  padding: 11px 26px;
+  border: none;
+  border-radius: 16px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #253865;
+  cursor: pointer;
+  background: #C0D0F6;
+  box-shadow: 0 3px 8px rgba(39,24,126,0.20);
+  transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
+              background 0.18s ease, color 0.18s ease;
+}
+.ws-cta:hover {
+  background: linear-gradient(270deg, #3848A0 0%, #5463C6 100%);
+  color: #fff;
+  box-shadow: 0 5px 10px rgba(39,24,126,0.24);
+  transform: translateY(-3px);
+}
+.ws-cta:active {
+  background: linear-gradient(270deg, #18247E 0%, #313CCE 100%);
+  color: #fff;
+  box-shadow: inset 0 2px 5px rgba(11,6,48,0.55);
+  transform: translateY(1px);
+}
+/* Secondary action — the same button one step quieter.
+ *
+ * A weak fill on its own is what reads as unfinished, which is why the rule
+ * elsewhere is "secondary is a text button". The border is what changes that:
+ * a defined edge makes a light fill read as a deliberate object rather than
+ * as something still loading. It takes the card title's own blue, so the
+ * button belongs to the card it sits in.
+ *
+ * Same geometry as .ws-cta so the pair lines up, and the same state ladder —
+ * rest, then darker on hover, darker still when pressed.
+ */
+.ws-cta-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 9.5px 24px;
+  border: 1.5px solid #254A9F;
+  border-radius: 16px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #254A9F;
+  cursor: pointer;
+  background: transparent;
+  transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
+              background 0.18s ease, color 0.18s ease;
+}
+.ws-cta-outline:hover {
+  background: #DFE8FB;
+  color: #253865;
+  box-shadow: 0 4px 9px rgba(39,24,126,0.18);
+  transform: translateY(-3px);
+}
+.ws-cta-outline:active {
+  background: #C0D0F6;
+  color: #18247E;
+  box-shadow: inset 0 2px 5px rgba(11,6,48,0.35);
+  transform: translateY(1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ws-cta-outline { transition: background 0.18s ease; }
+  .ws-cta-outline:hover, .ws-cta-outline:active { transform: none; }
+}
+
+.ws-cta[disabled] {
+  opacity: 0.45;
+  filter: grayscale(0.3);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ws-cta { transition: background 0.18s ease; }
+  .ws-cta:hover, .ws-cta:active { transform: none; }
 }

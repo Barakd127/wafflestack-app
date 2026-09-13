@@ -352,7 +352,7 @@ export default function CityBackdrop({ topicId, progress, frost, mastered: maste
               <path d="M3 17h14M4 8h12M10 3l7 5H3l7-5zM6 8v9M10 8v9M14 8v9" />
             </svg>
           </span>
-          <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12.5, fontWeight: 600, color: NAVY, lineHeight: 1 }}>
+          <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12.5, fontWeight: 600, color: NAVY, lineHeight: 1 }}>
             {nameHe}
             {hasProgress && (
               <>

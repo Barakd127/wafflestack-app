@@ -3,6 +3,7 @@
 // Video lives at public/videos/intro-tutorial.mp4 (720p, ~3MB, faststart).
 // Per user 2026-06-01.
 import { useState } from 'react'
+import CardIcon, { cardTitle, cardHead, CtaArrow } from './CardIcon'
 
 const SRC = `${import.meta.env.BASE_URL}videos/intro-tutorial.mp4`
 
@@ -14,28 +15,29 @@ export default function IntroTutorialVideo() {
 
   return (
     <>
-      {/* Replay card on the home page */}
-      <button
-        onClick={() => setOpen(true)}
+      {/* Replay card on the home page — a card like every other container:
+          icon, title, copy, then the CTA at the bottom-right. It used to be one
+          wide button with the text stretched across it and no call to action of
+          its own. Per Shirli 2026-09-04. */}
+      <div
         dir="rtl"
+        className="ws-glass-card"
         style={{
-          display: 'flex', alignItems: 'center', gap: 14, width: '100%',
-          background: 'linear-gradient(135deg, rgba(245,200,66,0.16), rgba(212,175,55,0.08))',
-          border: '1.5px solid rgba(212,175,55,0.5)', borderRadius: 18,
-          padding: '16px 22px', cursor: 'pointer', textAlign: 'right',
-          fontFamily: "'Rubik', sans-serif",
+          display: 'flex', flexDirection: 'column',
+          borderRadius: 24,
+          padding: '22px 26px', textAlign: 'right',
+          fontFamily: "'Assistant', sans-serif",
         }}
       >
-        <div style={{
-          width: 46, height: 46, borderRadius: 12, flexShrink: 0,
-          background: 'linear-gradient(135deg,#F5C842,#D4AF37)', color: '#1F3E6C',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
-        }}>▶</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#1F3E6C' }}>סרטון הדרכה — איך מתחילים</div>
-          <div style={{ fontSize: 13, color: '#5b6f93', marginTop: 2 }}>סיור קצר בפלטפורמה · פחות מ-3 דקות</div>
+        <div style={cardHead}><CardIcon name="video" /><div style={cardTitle}>סרטון הדרכה</div></div>
+        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: '#5b6f93', marginTop: 6, lineHeight: 1.5 }}>
+          סיור קצר בפלטפורמה · פחות מ-3 דקות
         </div>
-      </button>
+        {/* Flexible spacer with a floor — margin-top:auto alone collapses to zero
+            once the copy fills the card, which puts the button on the text. */}
+        <div style={{ flex: 1, minHeight: 20 }} />
+        <button onClick={() => setOpen(true)} className="ws-cta">הדרכה מהירה<CtaArrow /></button>
+      </div>
 
       {/* Modal player */}
       {open && (
@@ -53,7 +55,7 @@ export default function IntroTutorialVideo() {
             style={{
               background: '#fff', borderRadius: 20, padding: 16,
               width: '100%', maxWidth: 880, boxShadow: '0 24px 70px rgba(0,0,0,0.4)',
-              fontFamily: "'Rubik', sans-serif",
+              fontFamily: "'Assistant', sans-serif",
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -63,7 +65,7 @@ export default function IntroTutorialVideo() {
                 aria-label="סגור"
                 style={{
                   background: 'transparent', border: 'none', cursor: 'pointer',
-                  fontSize: 22, color: '#5b6f93', lineHeight: 1, padding: 4,
+                  fontSize: 23, color: '#5b6f93', lineHeight: 1, padding: 4,
                 }}
               >×</button>
             </div>
@@ -80,7 +82,7 @@ export default function IntroTutorialVideo() {
                 style={{
                   background: 'linear-gradient(135deg,#1F3E6C,#254A9F)', color: '#fff',
                   border: 0, borderRadius: 12, padding: '10px 28px', cursor: 'pointer',
-                  fontFamily: 'inherit', fontSize: 15, fontWeight: 700,
+                  fontFamily: 'inherit', fontSize: 16, fontWeight: 700,
                 }}
               >קדימה ללמוד ←</button>
             </div>

@@ -167,6 +167,30 @@ function formatResult(n: number): string {
 }
 
 export default function CalculatorDrawer() {
+  /* The drawer is summoned by long-pressing a formula chip ON the keyboard, so
+   * the keyboard is open when it appears. It used to sit at a fixed bottom of
+   * 100px — inside the docked keyboard's own area, which is capped at 46vh —
+   * and with z-index 100001 it covered the very keys that opened it.
+   *
+   * It now rides on top of the keyboard rather than the window bottom, and
+   * shrinks to whatever is left above it. When the keyboard is closed it falls
+   * back to a plain corner offset. */
+  const [kbH, setKbH] = useState(0)
+  useEffect(() => {
+    const el = document.querySelector('.ML__keyboard') as HTMLElement | null
+    if (!el) { setKbH(0); return }
+    const read = () => {
+      const r = el.getBoundingClientRect()
+      // Only count it when it is actually docked at the bottom and visible.
+      setKbH(r.height > 0 && r.bottom > window.innerHeight - 4 ? r.height : 0)
+    }
+    read()
+    const ro = new ResizeObserver(read)
+    ro.observe(el)
+    window.addEventListener('resize', read)
+    return () => { ro.disconnect(); window.removeEventListener('resize', read) }
+  }, [])
+
   const [formula, setFormula] = useState<Formula | null>(null)
   const [vals, setVals] = useState<Record<string, string>>({})
   const [copied, setCopied] = useState(false)
@@ -333,11 +357,11 @@ export default function CalculatorDrawer() {
       aria-label="מחשבון נוסחה"
       style={{
         position: 'fixed',
-        right: 16,
-        bottom: 100,
+        right: 'calc(var(--ws-rail-w, 0px) + 16px)',
+        bottom: kbH ? kbH + 12 : 96,
         width: 360,
         maxWidth: 'calc(100vw - 32px)',
-        maxHeight: 'calc(100vh - 200px)',
+        maxHeight: `calc(100vh - ${(kbH ? kbH + 12 : 96) + 84}px)`,
         overflowY: 'auto',
         zIndex: 100001,
         background: 'linear-gradient(160deg, #FFFFFF 0%, #EAF1FF 100%)',
@@ -347,7 +371,7 @@ export default function CalculatorDrawer() {
         boxShadow: '0 18px 48px rgba(31,62,108,0.28), 0 0 0 1px rgba(212,175,55,0.25)',
         padding: 16,
         color: PAPER,
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
       }}
     >
       {/* Header */}
@@ -545,7 +569,7 @@ export default function CalculatorDrawer() {
           border: '1px solid ' + (enabled ? 'rgba(212,175,55,0.8)' : 'rgba(31,62,108,0.18)'),
           borderRadius: 12,
           color: enabled ? INK : 'rgba(31,62,108,0.4)',
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           fontSize: 13,
           fontWeight: 800,
           cursor: enabled ? 'pointer' : 'not-allowed',

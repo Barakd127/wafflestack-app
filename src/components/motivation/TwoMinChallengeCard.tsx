@@ -39,7 +39,7 @@ export const TwoMinChallengeCard = ({ topicId, onStart }: TwoMinChallengeCardPro
           background: `linear-gradient(135deg, ${GOLD_BRIGHT}, ${GOLD})`,
           fontWeight: 700,
           fontSize: 12,
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           boxShadow: "0 2px 6px rgba(212,175,55,0.35)",
         }}
       >
@@ -48,7 +48,7 @@ export const TwoMinChallengeCard = ({ topicId, onStart }: TwoMinChallengeCardPro
 
       <h2 style={{
         margin: "12px 0 6px",
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
         fontSize: 18,
         fontWeight: 700,
         color: "var(--sh-text-dark)",
@@ -78,7 +78,7 @@ export const TwoMinChallengeCard = ({ topicId, onStart }: TwoMinChallengeCardPro
           background: disabled ? "rgba(31,62,108,0.12)" : "var(--sh-btn-color)",
           fontWeight: 600,
           fontSize: 15,
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           cursor: disabled ? "not-allowed" : "pointer",
           boxShadow: disabled ? "none" : "0px 2px 6px #8DA7FF",
         }}

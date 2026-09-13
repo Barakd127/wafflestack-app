@@ -1765,7 +1765,7 @@ export default function StatChallenge({ building, onClose, onComplete, soundEnab
                     display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6,
                     background: 'rgba(180,83,9,0.08)', border: '1px solid rgba(180,83,9,0.25)',
                     borderRadius: 8, padding: '5px 10px', fontSize: 11,
-                    color: '#b45309', fontFamily: "'Rubik', sans-serif",
+                    color: '#b45309', fontFamily: "'Assistant', sans-serif",
                   }}>
                     <span>🔮</span>
                     <span>עדשת תובנה פעילה — תשובה אחת מוצללת</span>

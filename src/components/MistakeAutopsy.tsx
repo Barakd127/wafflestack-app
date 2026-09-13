@@ -78,7 +78,7 @@ export default function MistakeAutopsy({ onDone, correctAnswer, explanation }: P
         {/* Header */}
         <div style={{ marginBottom: 18 }}>
           <div style={{
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             fontWeight: 700,
             fontSize: 17,
             color: 'var(--sh-text-dark)',
@@ -96,7 +96,7 @@ export default function MistakeAutopsy({ onDone, correctAnswer, explanation }: P
         {(correctAnswer || explanation) && (
           <div style={{ background: 'linear-gradient(135deg, rgba(52,168,83,0.12), rgba(52,168,83,0.05))', border: '1.5px solid rgba(52,168,83,0.4)', borderRadius: 12, padding: '12px 14px', marginBottom: 16, textAlign: 'right' }} dir="rtl">
             {correctAnswer && (
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 14, color: '#1E7E34', marginBottom: explanation ? 6 : 0 }}>
+              <div style={{ fontFamily: "'Assistant', sans-serif", fontWeight: 700, fontSize: 14, color: '#1E7E34', marginBottom: explanation ? 6 : 0 }}>
                 ✓ התשובה הנכונה: <span style={{ fontWeight: 600, color: 'var(--sh-text-dark)' }}><MathText text={correctAnswer} /></span>
               </div>
             )}
@@ -139,7 +139,7 @@ export default function MistakeAutopsy({ onDone, correctAnswer, explanation }: P
               >
                 <span style={{ fontSize: 22 }}>{t.icon}</span>
                 <span style={{
-                  fontFamily: "'Rubik', sans-serif",
+                  fontFamily: "'Assistant', sans-serif",
                   fontWeight: 700,
                   fontSize: 13,
                   color: isSelected ? 'var(--sh-sidebar-active, #254A9F)' : 'var(--sh-text-dark)',

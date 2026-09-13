@@ -173,7 +173,7 @@ export default function CommunityArsenalTab() {
             border: '1px solid rgba(239,68,68,0.35)',
             borderRadius: 12, padding: '10px 14px',
             marginBottom: 12, fontSize: 13,
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
           }}
         >
@@ -193,7 +193,7 @@ export default function CommunityArsenalTab() {
               background: 'rgba(255,255,255,0.10)', color: '#b91c1c',
               border: '1.5px solid rgba(239,68,68,0.5)',
               borderRadius: 999, padding: '6px 14px',
-              fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700,
+              fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 700,
               cursor: 'pointer', minHeight: 44,
               backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
             }}
@@ -223,7 +223,7 @@ export default function CommunityArsenalTab() {
         <div style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center',
           padding: '60px 20px', textAlign: 'center',
-          color: TEXT_LIGHT, fontFamily: "'Rubik', sans-serif",
+          color: TEXT_LIGHT, fontFamily: "'Assistant', sans-serif",
         }}>
           <div style={{ fontSize: 64, marginBottom: 18, opacity: 0.85 }}>🌐</div>
           <div style={{ fontSize: 16, color: TEXT_DARK, fontWeight: 600 }}>
@@ -330,7 +330,7 @@ function CommunityCard({
             color: upvoteColor,
             borderRadius: 10, padding: '5px 11px', cursor: 'pointer',
             fontSize: 12, fontWeight: 700,
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             display: 'inline-flex', alignItems: 'center', gap: 4,
             transition: 'all 0.15s',
           }}
@@ -349,7 +349,7 @@ function CommunityCard({
               borderRadius: 10, padding: '5px 11px',
               cursor: alreadyCopied ? 'default' : 'pointer',
               fontSize: 12, fontWeight: 700,
-              fontFamily: "'Rubik', sans-serif",
+              fontFamily: "'Assistant', sans-serif",
             }}
           >
             {alreadyCopied ? '✓ נוסף' : '📥 הוסף לארסנל שלי'}
@@ -363,7 +363,7 @@ function CommunityCard({
                 color: '#b91c1c',
                 borderRadius: 10, padding: '5px 11px', cursor: 'pointer',
                 fontSize: 12, fontWeight: 700,
-                fontFamily: "'Rubik', sans-serif",
+                fontFamily: "'Assistant', sans-serif",
               }}
               title="מחק"
             >
@@ -390,7 +390,7 @@ function PillBtn({ label, icon, selected, onClick, color, bg }: {
         color: selected ? '#fff' : color,
         borderRadius: 18, padding: '7px 14px',
         cursor: 'pointer', fontWeight: 600, fontSize: 13,
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
         transition: 'all 0.18s ease',
         boxShadow: selected ? `0 4px 14px ${color}55` : 'none',
         transform: selected ? 'translateY(-1px)' : 'translateY(0)',
@@ -406,7 +406,7 @@ const selectStyle: React.CSSProperties = {
   background: 'rgba(255,255,255,0.6)',
   border: '1px solid rgba(127,155,217,0.4)',
   borderRadius: 18, padding: '8px 14px',
-  fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_DARK,
+  fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_DARK,
   cursor: 'pointer',
 }
 
@@ -414,7 +414,7 @@ const noticeStyle: React.CSSProperties = {
   background: 'rgba(245,158,11,0.10)',
   border: '1px solid rgba(245,158,11,0.35)',
   color: '#92400e', padding: '24px 28px', borderRadius: 14,
-  fontFamily: "'Rubik', sans-serif", fontSize: 15, fontWeight: 600,
+  fontFamily: "'Assistant', sans-serif", fontSize: 15, fontWeight: 600,
   textAlign: 'center', maxWidth: 560, margin: '40px auto',
   lineHeight: 1.7,
 }

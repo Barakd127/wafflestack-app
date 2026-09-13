@@ -73,7 +73,7 @@ export default function VersionChecker() {
         background: '#1F3E6C', color: '#fff', borderRadius: 12,
         padding: '12px 16px', boxShadow: '0 8px 28px rgba(0,0,0,0.35)',
         display: 'flex', alignItems: 'center', gap: 12,
-        fontFamily: "'Rubik', sans-serif", fontSize: 14,
+        fontFamily: "'Assistant', sans-serif", fontSize: 14,
         maxWidth: 'calc(100vw - 32px)',
       }}
     >

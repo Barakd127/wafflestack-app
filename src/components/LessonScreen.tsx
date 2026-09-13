@@ -284,11 +284,11 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   // Graceful fallback when no lesson is authored yet
   if (!lesson || total === 0) {
     return (
-      <div data-tour="theory-screen" dir="rtl" style={{ flex: 1, overflow: 'auto', padding: '32px 40px', fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
+      <div data-tour="theory-screen" dir="rtl" style={{ flex: 1, overflow: 'auto', padding: '32px 40px', fontFamily: "'Assistant', 'Assistant', sans-serif" }}>
         <button onClick={onBack} style={backLinkStyle}>→ חזרה לבחירת נושא</button>
         <div style={{ ...glassCardStyle, padding: 40, marginTop: 24, textAlign: 'center' }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>📖</div>
-          <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 12 }}>
+          <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 12 }}>
             תוכן לימוד עבור נושא זה עדיין בהכנה
           </div>
           <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_LIGHT, marginBottom: 24 }}>
@@ -318,7 +318,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   const rightPane = (
     <div ref={rightPaneRef} dir="rtl" className="ws-lesson-rightpane" style={{
       flex: 1, overflow: 'auto', padding: '24px 28px',
-      fontFamily: "'Rubik', 'Assistant', sans-serif",
+      fontFamily: "'Assistant', 'Assistant', sans-serif",
     }}>
       {/* Floating "save to arsenal" chip listens at document level */}
       <ArsenalCapture />
@@ -341,7 +341,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               background: presenting ? '#b91c1c' : BUTTON_COLOR,
               color: '#fff', border: 'none', borderRadius: 10,
               padding: '7px 14px', fontSize: 13, fontWeight: 700,
-              fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+              fontFamily: "'Assistant', sans-serif", cursor: 'pointer',
               boxShadow: '0 2px 10px rgba(31,62,108,0.25)', transition: 'all 0.18s',
               whiteSpace: 'nowrap',
             }}
@@ -361,7 +361,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
 
       {/* Title row with copy-to-mindmap action */}
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4, gap: 12 }}>
-        <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 26, fontWeight: 700, color: TEXT_DARK, margin: 0, textAlign: 'right' }}>
+        <h2 style={{ fontFamily: 'var(--ws-display)', fontSize: 26, fontWeight: 700, color: TEXT_DARK, margin: 0, textAlign: 'right' }}>
           📚 {lesson.hebrewName}
         </h2>
         {mindmapOpen && (
@@ -399,7 +399,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             borderRadius: 8, padding: '4px 12px',
             cursor: isFirst ? 'not-allowed' : 'pointer',
             fontSize: 12.5, fontWeight: 700,
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             display: 'flex', alignItems: 'center', gap: 5,
             opacity: isFirst ? 0.55 : 1,
             transition: 'all 0.18s',
@@ -423,7 +423,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             borderRadius: 8, padding: '4px 14px',
             cursor: 'pointer',
             fontSize: 12.5, fontWeight: 700,
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             display: 'flex', alignItems: 'center', gap: 5,
             boxShadow: isLast ? '0 2px 10px rgba(212,175,55,0.40)' : '0 2px 10px rgba(31,62,108,0.25)',
             transition: 'all 0.18s',
@@ -449,7 +449,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               color: presAuto ? '#8a6d1a' : TEXT_DARK,
               border: '1.5px solid rgba(127,155,217,0.45)', borderRadius: 10,
               padding: '6px 13px', fontSize: 13, fontWeight: 700,
-              fontFamily: "'Rubik', sans-serif", cursor: 'pointer', whiteSpace: 'nowrap',
+              fontFamily: "'Assistant', sans-serif", cursor: 'pointer', whiteSpace: 'nowrap',
             }}
           >
             {presAuto ? '⏸ עצור הדגמה' : '▶ הדגמה אוטומטית'}
@@ -465,7 +465,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 color: !presAuto && presTool === id ? '#fff' : TEXT_DARK,
                 border: `1.5px solid ${!presAuto && presTool === id ? BUTTON_COLOR : 'rgba(127,155,217,0.40)'}`,
                 borderRadius: 10, padding: '6px 13px', fontSize: 13, fontWeight: 700,
-                fontFamily: "'Rubik', sans-serif", cursor: 'pointer', whiteSpace: 'nowrap',
+                fontFamily: "'Assistant', sans-serif", cursor: 'pointer', whiteSpace: 'nowrap',
                 transition: 'all 0.15s',
               }}
             >
@@ -508,7 +508,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 14, marginBottom: 22 }}>
           <h3 style={{
-            fontFamily: "'Rubik', sans-serif", fontSize: 30, fontWeight: 700,
+            fontFamily: 'var(--ws-display)', fontSize: 30, fontWeight: 700,
             color: TEXT_DARK, marginTop: 0, marginBottom: 0, textAlign: 'right',
             lineHeight: 1.3, letterSpacing: '-0.01em', flex: 1,
           }}>
@@ -531,7 +531,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 border: `1.5px solid ${copied === 'title-mm' ? 'rgba(52,168,83,0.5)' : 'rgba(99,102,241,0.3)'}`,
                 color: copied === 'title-mm' ? '#34A853' : '#6366f1',
                 borderRadius: 10, padding: '6px 12px', fontSize: 12, fontWeight: 600,
-                fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+                fontFamily: "'Assistant', sans-serif", cursor: 'pointer',
                 whiteSpace: 'nowrap', transition: 'all 0.2s',
               }}
             >
@@ -552,7 +552,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 border: `1.5px solid ${copied === 'title-nb' ? 'rgba(52,168,83,0.5)' : 'rgba(245,158,11,0.35)'}`,
                 color: copied === 'title-nb' ? '#34A853' : '#b45309',
                 borderRadius: 10, padding: '6px 12px', fontSize: 12, fontWeight: 600,
-                fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+                fontFamily: "'Assistant', sans-serif", cursor: 'pointer',
                 whiteSpace: 'nowrap', transition: 'all 0.2s',
               }}
             >
@@ -648,7 +648,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                     {marker ? (
                       // Number marker: dot LEFT of number (".1"). RTL container +
                       // two LTR-isolated children → num right, dot left, non-mirrored.
-                      <span dir="rtl" style={{ unicodeBidi: 'isolate', fontFamily: "'Rubik', sans-serif", fontWeight: 800, fontSize: 17, color: '#C97C18' }}>
+                      <span dir="rtl" style={{ unicodeBidi: 'isolate', fontFamily: "'Assistant', sans-serif", fontWeight: 800, fontSize: 17, color: '#C97C18' }}>
                         <span dir="ltr">{marker.num}</span>
                         <span dir="ltr">.</span>
                       </span>
@@ -749,7 +749,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             gap: 12, marginBottom: 10, paddingBottom: 10,
             borderBottom: '1px solid rgba(212,175,55,0.25)',
           }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--sh-text-dark)', fontFamily: "'Rubik', sans-serif" }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--sh-text-dark)', fontFamily: "'Assistant', sans-serif" }}>
               📊 {effectiveGraphs[graphIdx].title}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -927,7 +927,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               maxWidth: 460, width: '100%',
               boxShadow: '0 24px 60px rgba(0,0,0,0.45)',
               border: '1px solid rgba(127,155,217,0.30)',
-              fontFamily: "'Rubik','Assistant',sans-serif",
+              fontFamily: "'Assistant','Assistant',sans-serif",
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
@@ -1012,7 +1012,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             transform: 'translateX(-50%)', zIndex: 1200,
             background: 'rgba(16,185,129,0.96)', color: '#fff',
             borderRadius: 14, padding: '12px 22px',
-            fontFamily: "'Rubik','Assistant',sans-serif", fontSize: 15, fontWeight: 700,
+            fontFamily: "'Assistant','Assistant',sans-serif", fontSize: 15, fontWeight: 700,
             boxShadow: '0 10px 30px rgba(16,185,129,0.4)',
             display: 'flex', alignItems: 'center', gap: 8,
             pointerEvents: 'none',
@@ -1044,7 +1044,7 @@ const primaryBtnStyle: React.CSSProperties = {
   fontWeight: 600,
   fontSize: 15,
   cursor: 'pointer',
-  fontFamily: "'Rubik', sans-serif",
+  fontFamily: "'Assistant', sans-serif",
   boxShadow: '0px 2px 6px #8DA7FF',
 }
 
@@ -1057,7 +1057,7 @@ const secondaryBtnStyle: React.CSSProperties = {
   fontWeight: 600,
   fontSize: 15,
   cursor: 'pointer',
-  fontFamily: "'Rubik', sans-serif",
+  fontFamily: "'Assistant', sans-serif",
 }
 
 const backLinkStyle: React.CSSProperties = {
@@ -1065,7 +1065,7 @@ const backLinkStyle: React.CSSProperties = {
   border: 'none',
   cursor: 'pointer',
   color: TEXT_DARK,
-  fontFamily: "'Rubik', sans-serif",
+  fontFamily: "'Assistant', sans-serif",
   fontSize: 16,
   padding: 0,
   display: 'flex',
@@ -1078,7 +1078,7 @@ const skipLinkStyle: React.CSSProperties = {
   border: 'none',
   cursor: 'pointer',
   color: TEXT_LIGHT,
-  fontFamily: "'Rubik', sans-serif",
+  fontFamily: "'Assistant', sans-serif",
   fontSize: 14,
   padding: 0,
   textDecoration: 'underline',
@@ -1091,7 +1091,7 @@ function mindmapToggleStyle(open: boolean): React.CSSProperties {
     border: `1px solid ${open ? 'rgba(99,102,241,0.45)' : 'rgba(127,155,217,0.4)'}`,
     borderRadius: 18, padding: '6px 14px',
     cursor: 'pointer', fontWeight: 600, fontSize: 13,
-    fontFamily: "'Rubik', sans-serif",
+    fontFamily: "'Assistant', sans-serif",
     transition: 'all 0.18s',
   }
 }
@@ -1103,7 +1103,7 @@ function copyChipStyle(success: boolean): React.CSSProperties {
     border: `1px solid ${success ? 'rgba(16,185,129,0.4)' : 'rgba(99,102,241,0.3)'}`,
     borderRadius: 14, padding: '4px 12px',
     cursor: 'pointer', fontWeight: 600, fontSize: 11,
-    fontFamily: "'Rubik', sans-serif",
+    fontFamily: "'Assistant', sans-serif",
     whiteSpace: 'nowrap',
     transition: 'all 0.18s',
   }
@@ -1117,7 +1117,7 @@ function formulaCopyBtnStyle(success: boolean): React.CSSProperties {
     border: 'none', borderRadius: 14,
     padding: '5px 10px',
     cursor: 'pointer',
-    fontFamily: "'Rubik', sans-serif",
+    fontFamily: "'Assistant', sans-serif",
     fontSize: 12, fontWeight: 700,
     display: 'flex', alignItems: 'center',
     boxShadow: '0 2px 8px rgba(99,102,241,0.3)',

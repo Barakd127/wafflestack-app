@@ -127,7 +127,7 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
           style={{
             background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(85,122,222,0.20) 0%, #0c1535 70%)',
             zIndex: 30,
-            fontFamily: "'Rubik', 'Assistant', sans-serif",
+            fontFamily: "'Assistant', 'Assistant', sans-serif",
             pointerEvents: 'none',
           }}
         >
@@ -213,7 +213,7 @@ export default function WaffleStackCityGodot({ onBack }: { onBack?: () => void }
               color: '#fff',
               fontSize: 14,
               fontWeight: 700,
-              fontFamily: "'Rubik','Assistant',sans-serif",
+              fontFamily: "'Assistant','Assistant',sans-serif",
               boxShadow: '0 6px 20px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset',
               cursor: 'pointer',
               display: 'flex',

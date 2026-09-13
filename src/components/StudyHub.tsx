@@ -4,7 +4,7 @@ import { FEATURE_UNLOCKS_BY_ID, isFeatureUnlocked, type FeatureId } from '../con
 import PomodoroTimer from './PomodoroTimer'
 import FeatureGate from './FeatureGate'
 import BoardShell from './BoardShell'
-import { useGlassBoard } from '../hooks/useGlassBoard'
+import CardIcon, { cardTitle, cardHead, CtaArrow, CARD_ICON_COLOR } from './CardIcon'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import { submitHelpRequest, fetchHelpAnswer, hasPendingHelp, emailHelpRequest } from '../lib/helpRequests'
 import { toPng } from 'html-to-image'
@@ -409,7 +409,7 @@ function InteractiveGraphCarousel({ selectedTopic }: { selectedTopic: string }) 
       }}>
         <span style={{ fontSize: 22 }}>📊</span>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 16, fontWeight: 700, fontFamily: "'Rubik', sans-serif", color: 'var(--sh-text-dark)' }}>
+          <div style={{ fontSize: 16, fontWeight: 700, fontFamily: "'Assistant', sans-serif", color: 'var(--sh-text-dark)' }}>
             גרפים אינטראקטיביים — {graphs.length} {graphs.length === 1 ? 'היבט' : 'היבטים'}
           </div>
           <div style={{ fontSize: 12, color: 'var(--sh-text-med)', marginTop: 2 }}>
@@ -433,7 +433,7 @@ function InteractiveGraphCarousel({ selectedTopic }: { selectedTopic: string }) 
                 border: '1px solid ' + (i === graphIdx ? '#D4AF37' : 'rgba(31,62,108,0.15)'),
                 padding: '6px 14px', borderRadius: 20,
                 fontWeight: i === graphIdx ? 700 : 500,
-                fontSize: 13, fontFamily: "'Rubik', sans-serif",
+                fontSize: 13, fontFamily: "'Assistant', sans-serif",
                 cursor: 'pointer', transition: 'all 0.15s',
               }}>
               {g.title}
@@ -443,7 +443,7 @@ function InteractiveGraphCarousel({ selectedTopic }: { selectedTopic: string }) 
             style={{
               background: 'var(--sh-btn-color)', color: '#fff', border: 0,
               padding: '6px 16px', borderRadius: 20, fontWeight: 700, fontSize: 13,
-              fontFamily: "'Rubik', sans-serif", cursor: 'pointer',
+              fontFamily: "'Assistant', sans-serif", cursor: 'pointer',
               boxShadow: '0 2px 6px #8DA7FF',
             }}>
             הבא ←
@@ -476,6 +476,7 @@ import { useTutorialStore } from '../store/tutorialStore'
 import { useTutorStore } from '../store/tutorStore'
 import { registerTourAction, tourStepIds } from './CoachmarkTour'
 import TourLauncher from './TourLauncher'
+import TopBarAccount, { TopBarBell, TopBarSettings } from './TopBarAccount'
 import Tooltip from './Tooltip'
 import Ribbon from './Ribbon'
 import { RiskBoard } from './RiskBoard'
@@ -528,7 +529,7 @@ const COURSES: CourseDef[] = [
 // with a dashed mean and a confidence-interval bracket; methods: checklist
 // sheet under a magnifier; anova: three groups as vertical 3-point columns
 // (one x per group, means rising) on axes; sql: data cylinder (warehouse).
-function CourseIcon({ id, size = 30 }: { id: CourseDef['id']; size?: number }) {
+function CourseIcon({ id, size = 26 }: { id: CourseDef['id']; size?: number }) {
   const common = {
     width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
     stroke: 'currentColor', strokeWidth: 1.8,
@@ -769,7 +770,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
       width: '100%', minHeight: '100vh',
       background: 'linear-gradient(145deg, #c8dcff 0%, #d6e8ff 35%, #e8f0ff 65%, #bdd4ff 100%)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: "'Rubik', 'Assistant', sans-serif",
+      fontFamily: "'Assistant', 'Assistant', sans-serif",
       position: 'fixed', inset: 0, overflow: 'auto',
     }}>
       {/* Ambient glow blobs behind the card */}
@@ -818,7 +819,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                   fontWeight: 600, fontSize: 14,
                   boxShadow: mode === m ? '0 4px 14px rgba(31,62,108,0.3), inset 0 1px 0 rgba(255,255,255,0.25)' : 'none',
                   transition: 'all 0.2s',
-                  fontFamily: "'Rubik', sans-serif",
+                  fontFamily: "'Assistant', sans-serif",
                 }}>
                 {m === 'login' ? '🔑 כניסה' : '✨ הרשמה'}
               </button>
@@ -863,14 +864,13 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
             )}
             {error && <div style={{ background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.3)', borderRadius: 10, padding: '10px 14px', color: '#d32f2f', fontSize: 13, textAlign: 'center' }}>{error}</div>}
             <button type="submit" disabled={loading || (mode === 'register' && !agreedIP)}
-              className="ws-cta-btn"
-              style={{
+                            style={{
                 marginTop: 6, padding: '14px 0',
                 background: 'linear-gradient(135deg,#1F3E6C,#254A9F)',
                 color: '#fff', borderRadius: 14, fontSize: 16, fontWeight: 700,
                 cursor: (loading || (mode === 'register' && !agreedIP)) ? 'not-allowed' : 'pointer',
                 opacity: (loading || (mode === 'register' && !agreedIP)) ? 0.6 : 1,
-                fontFamily: "'Rubik', sans-serif",
+                fontFamily: "'Assistant', sans-serif",
                 boxShadow: '0 6px 20px rgba(31,62,108,0.35), inset 0 1px 0 rgba(255,255,255,0.25)',
                 width: '100%',
               }}>
@@ -896,7 +896,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                 background: 'rgba(31,62,108,0.06)',
                 border: '1px solid rgba(31,62,108,0.22)',
                 borderRadius: 14, color: '#254A9F',
-                fontSize: 14, fontWeight: 600, fontFamily: "'Rubik', sans-serif",
+                fontSize: 14, fontWeight: 600, fontFamily: "'Assistant', sans-serif",
                 cursor: 'pointer',
               }}
             >
@@ -988,7 +988,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
   return (
     <div dir="rtl" style={{
       flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: 32, fontFamily: "'Rubik', 'Assistant', sans-serif",
+      padding: 32, fontFamily: "'Assistant', 'Assistant', sans-serif",
     }}>
       <div className="ws-quiz-intro" style={{
         width: '100%', maxWidth: 540,
@@ -1054,7 +1054,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
             fontWeight: 700, fontSize: 16,
             cursor: counts[selected] === 0 ? 'not-allowed' : 'pointer',
             opacity: counts[selected] === 0 ? 0.4 : 1,
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             boxShadow: '0 4px 14px rgba(99,102,241,0.4)',
           }}>
             התחל תרגול ({counts[selected]} שאלות) ←
@@ -1065,7 +1065,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
               border: '1px solid rgba(127,155,217,0.4)',
               borderRadius: 24, padding: '12px 22px',
               fontWeight: 600, fontSize: 15, cursor: 'pointer',
-              fontFamily: "'Rubik', sans-serif",
+              fontFamily: "'Assistant', sans-serif",
             }}>
               📚 קרא תיאוריה
             </button>
@@ -1073,7 +1073,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
           <button onClick={onBack} style={{
             background: 'transparent', color: TEXT_LIGHT,
             border: 'none', cursor: 'pointer',
-            fontSize: 14, padding: '12px 16px', fontFamily: "'Rubik', sans-serif",
+            fontSize: 14, padding: '12px 16px', fontFamily: "'Assistant', sans-serif",
           }}>
             → חזרה
           </button>
@@ -1103,7 +1103,7 @@ function ArsenalQuizCaptureChip({ explanation, topicId }: { explanation: string;
         border: `1px solid ${saved ? '#10b981' : 'rgba(99,102,241,0.35)'}`,
         borderRadius: 12, padding: '4px 10px',
         cursor: saved ? 'default' : 'pointer',
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
         fontSize: 11, fontWeight: 700,
         display: 'inline-flex', alignItems: 'center', gap: 5,
         transition: 'all 0.2s ease',
@@ -1184,7 +1184,7 @@ function DifficultySelectorCard({ label, count, icon, color, bg, selected, onCli
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.4 : 1,
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
         transition: 'all 0.18s ease',
         boxShadow: selected ? `0 6px 18px ${color}60` : 'none',
         transform: selected ? 'translateY(-2px)' : 'translateY(0)',
@@ -1259,15 +1259,11 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
   }
   return (
     <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
-      <div style={{ marginBottom: 22 }}>
-        <h2 style={{ fontFamily: "'Rubik', sans-serif", color: TEXT_DARK, fontSize: 26, fontWeight: 700, margin: 0 }}>הקורסים שלי</h2>
-        <p style={{ color: TEXT_MED, fontSize: 14, margin: '6px 0 0' }}>בחר את הקורס בו ברצונך להתחיל ללמוד</p>
-      </div>
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
         gap: 22,
-        maxWidth: 1200,
+        maxWidth: 'calc(100% - 50px)',
       }}>
         {COURSES.map(c => (
           <button
@@ -1279,21 +1275,16 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
               padding: '28px 24px',
               cursor: 'pointer',
               textAlign: 'right',
-              fontFamily: "'Rubik', sans-serif",
+              fontFamily: "'Assistant', sans-serif",
               direction: 'rtl',
             }}
           >
-            {/* Icon chip — same visual language as the sidebar nav: flat
-                translucent chip + stroke-only line icon, no gradient fill. */}
-            <div style={{
-              width: 56, height: 56, borderRadius: 14,
-              background: 'var(--sh-sidebar-bg)',
-              border: '1px solid rgba(255,255,255,0.25)',
-              color: '#fff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 14,
-            }}><CourseIcon id={c.id} size={30} /></div>
-            <div style={{ fontSize: 19, fontWeight: 700, color: TEXT_DARK, marginBottom: 4 }}>{c.label}</div>
+            {/* Icon — the home-screen language exactly: one stroke, one colour,
+                nothing behind it. */}
+            <div style={{ color: CARD_ICON_COLOR, marginBottom: 12, display: 'flex' }}>
+              <CourseIcon id={c.id} size={26} />
+            </div>
+            <div style={{ fontFamily: 'var(--ws-display)', fontSize: 19, fontWeight: 700, color: TEXT_DARK, marginBottom: 4 }}>{c.label}</div>
             <div style={{ fontSize: 13, color: TEXT_MED, lineHeight: 1.45 }}>{c.desc}</div>
             {!c.active && (
               // Pin moved from insetInlineStart (right edge in RTL — collided
@@ -1329,7 +1320,7 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
               padding: '36px 40px',
               maxWidth: 460, textAlign: 'center',
               boxShadow: '0 24px 70px rgba(0,0,0,0.3)',
-              fontFamily: "'Rubik', sans-serif",
+              fontFamily: "'Assistant', sans-serif",
             }}
             dir="rtl"
           >
@@ -1358,6 +1349,62 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+/**
+ * Two views of one list, so a segmented control — the shape that says "these
+ * are alternatives, one of them is on" without a label explaining it. The
+ * locked side keeps a padlock rather than an emoji prefix, so the lock reads
+ * as a state of the option and not as part of its name.
+ */
+function ViewSwitch({ viewMode, onViewModeChange }: {
+  viewMode: 'list' | 'mindmap'
+  onViewModeChange?: (m: 'list' | 'mindmap') => void
+}) {
+  const adminMode = useLearningStore(s => s.adminMode)
+  const unlocked = useLearningStore(s => s.unlockedFeatures)
+  const mapUnlocked = isFeatureUnlocked('mindmap-view', unlocked, adminMode)
+  const ICONS = {
+    list: <><path d="M8 6h13" /><path d="M8 12h13" /><path d="M8 18h13" /><path d="M3.5 6h.01" /><path d="M3.5 12h.01" /><path d="M3.5 18h.01" /></>,
+    mindmap: <><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z" /><path d="M9 4v16" /><path d="M15 6v16" /></>,
+  } as const
+  return (
+    <div style={{ display: 'flex', gap: 2, background: 'rgba(127,155,217,0.14)', padding: 3, borderRadius: 999 }}>
+      {([['list', 'רשימה'], ['mindmap', 'מפה']] as const).map(([m, label]) => {
+        const on = viewMode === m
+        const locked = m === 'mindmap' && !mapUnlocked
+        const tip = locked ? FEATURE_UNLOCKS_BY_ID['mindmap-view']?.descriptionHe : undefined
+        return (
+          <button
+            key={m}
+            onClick={() => { if (!locked) onViewModeChange?.(m) }}
+            title={tip} aria-label={tip} aria-pressed={on} aria-disabled={locked || undefined}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              border: 'none', borderRadius: 999, padding: '7px 15px',
+              cursor: locked ? 'not-allowed' : 'pointer',
+              fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
+              background: on ? TEXT_MED : 'transparent',
+              color: on ? '#fff' : locked ? TEXT_LIGHT : TEXT_MED,
+              transition: 'background 0.15s, color 0.15s',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              {ICONS[m]}
+            </svg>
+            {label}
+            {locked && (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
+              </svg>
+            )}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -1433,7 +1480,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
           display: 'flex',
           flexDirection: 'column',
           gap: 16,
-          textAlign: 'center',
+          textAlign: 'right',
           transition: 'all 0.3s',
           boxShadow: CARD_SHADOW,
         }}
@@ -1446,15 +1493,9 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
           ;(e.currentTarget as HTMLElement).style.boxShadow = CARD_SHADOW
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-          <div style={{ fontSize: 32 }}>{isMastered ? '⭐' : '📖'}</div>
-          <div>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK, textAlign: 'center' }}>
-              {topic.label}
-            </div>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginTop: 4, textAlign: 'center' }}>
-              {topic.building}
-            </div>
+        <div style={{ minHeight: 52, display: 'flex', alignItems: 'flex-start' }}>
+          <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 20, lineHeight: 1.3, color: TEXT_DARK, textAlign: 'right', textWrap: 'balance' }}>
+            {topic.label}
           </div>
         </div>
 
@@ -1463,7 +1504,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
             background: 'linear-gradient(135deg, rgba(245,200,66,0.22), rgba(212,175,55,0.12))',
             border: '1px solid rgba(212,175,55,0.5)',
             borderRadius: 10, padding: '6px 10px',
-            fontFamily: "'Rubik', sans-serif", fontSize: 12,
+            fontFamily: "'Assistant', sans-serif", fontSize: 12,
             color: '#8a6d1c', fontWeight: 600, textAlign: 'right',
           }}>
             🎯 {planHint}
@@ -1475,19 +1516,19 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
             <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: TEXT_MED }}>
               {sessionsAttempted}
             </div>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>סשנים</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>סשנים</div>
           </div>
           <div style={{ textAlign: 'center', flex: 1 }}>
             <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: bestScore > 85 ? '#34A853' : TEXT_MED }}>
               {bestScore}%
             </div>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ציון הטוב</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ציון הטוב</div>
           </div>
           <div style={{ textAlign: 'center', flex: 1 }}>
             <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: '#D4AF37' }}>
               {topic.questionCount}
             </div>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>שאלות</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>שאלות</div>
           </div>
         </div>
 
@@ -1497,7 +1538,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
             border: '1px solid rgba(212,175,55,0.4)',
             borderRadius: 8,
             padding: '6px 10px',
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             fontSize: 12,
             color: '#D4AF37',
             fontWeight: 600,
@@ -1507,42 +1548,24 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
           </div>
         )}
 
-        {/* Lesson / Quiz action buttons */}
-        <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+        {/* Theory is the primary — it is where a topic starts. Practice is the
+            same button one step quieter, outlined in the card title's own blue.
+            Both come from index.css: a button styled inline loses :hover and
+            :active outright, because an inline style outranks every class. */}
+        <div style={{ display: 'flex', gap: 10, marginTop: 'auto', paddingTop: 4 }}>
           <button
+            className="ws-cta"
             onClick={() => onSelectTopic(topic.id, 'lesson')}
-            style={{
-              flex: 1,
-              background: BUTTON_COLOR,
-              color: '#fff',
-              border: 'none',
-              borderRadius: 14,
-              padding: '10px 0',
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: 'pointer',
-              fontFamily: "'Rubik', sans-serif",
-              boxShadow: '0px 2px 6px rgba(51,81,202,0.35)',
-            }}
+            style={{ flex: 1, justifyContent: 'center', padding: '11px 14px' }}
           >
-            📚 תיאוריה
+            תיאוריה<CtaArrow />
           </button>
           <button
+            className="ws-cta-outline"
             onClick={() => onSelectTopic(topic.id, 'quiz')}
-            style={{
-              flex: 1,
-              background: 'rgba(255,255,255,0.7)',
-              color: TEXT_DARK,
-              border: '1px solid rgba(127,155,217,0.4)',
-              borderRadius: 14,
-              padding: '10px 0',
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: 'pointer',
-              fontFamily: "'Rubik', sans-serif",
-            }}
+            style={{ flex: 1, padding: '9.5px 14px' }}
           >
-            📝 תרגול
+            תרגול
           </button>
         </div>
       </div>
@@ -1550,23 +1573,41 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
   }
 
   return (
-    <div className="ws-screen-pad" style={viewMode === 'mindmap' ? { flex: 1, overflow: 'auto', padding: '5px 8px 6px' } : { flex: 1, overflow: 'auto', padding: '32px 40px' }}>
-      {viewMode === 'mindmap' ? null : (
-        <h2 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 28, fontWeight: 700, color: TEXT_DARK, marginBottom: 28, textAlign: 'right' }}>
-          בחר נושא ללמוד 📚
-        </h2>
-      )}
+    <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px 32px 35px' }}>
+      {/* Where I came from, and how I am looking at it — one row, one sentence.
+          It renders in both views: the map needs the way out more than the list
+          does, because it has nothing else on screen that leads anywhere. */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        maxWidth: '100%', marginBottom: 20,
+      }}>
+          <button
+            onClick={onBack}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7, background: 'none',
+              border: 'none', cursor: 'pointer', padding: 0,
+              fontFamily: "'Assistant', sans-serif", fontSize: 15, fontWeight: 600,
+              color: TEXT_MED,
+            }}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M5 12h14" /><polyline points="12,5 19,12 12,19" />
+            </svg>
+            כל הקורסים
+          </button>
+        <ViewSwitch viewMode={viewMode} onViewModeChange={onViewModeChange} />
+      </div>
 
       {viewMode === 'list' ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 30, maxWidth: 1200 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 30, maxWidth: '100%' }}>
           {groupedSections.map(section => {
             const masteredCount = section.topics.filter(t => userProgress.topics[t.id]?.mastered).length
             return (
               <div key={section.id}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 24 }}>{section.emoji}</span>
-                  <h3 style={{ fontFamily: "'Rubik', sans-serif", fontSize: 21, fontWeight: 800, color: TEXT_DARK, margin: 0 }}>{section.labelHe}</h3>
-                  <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT, background: 'rgba(127,155,217,0.12)', borderRadius: 999, padding: '2px 10px' }}>
+                  <h3 style={{ fontFamily: 'var(--ws-display)', fontSize: 21, fontWeight: 800, color: TEXT_DARK, margin: 0 }}>{section.labelHe}</h3>
+                  <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, background: 'rgba(127,155,217,0.12)', borderRadius: 999, padding: '2px 10px' }}>
                     {masteredCount}/{section.topics.length} נושאים
                   </span>
                 </div>
@@ -1583,7 +1624,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
         <iframe
           src={`${import.meta.env.BASE_URL}mindmap.html?v=mm19-20260708&scene=topics&course=${course}&admin=${_adminMode ? '1' : '0'}`}
           title="מפת הנושאים"
-          style={{ width: '100%', height: 'calc(100dvh - 104px)', border: 'none', borderRadius: 14, boxShadow: CARD_SHADOW, display: 'block' }}
+          style={{ width: '100%', height: 'calc(100dvh - 192px)', border: 'none', borderRadius: 14, boxShadow: CARD_SHADOW, display: 'block' }}
           allow="clipboard-read; clipboard-write"
         />
       )}
@@ -1649,7 +1690,7 @@ function TopicMindmap({ groups, userProgress, onSelectTopic }: {
           height: ROOT_H, display: 'flex', alignItems: 'center', gap: 8, padding: '0 22px',
           background: 'linear-gradient(135deg,#FFFFFF,#EEF2FB)', color: '#1F2640',
           borderRadius: 23, border: '2px solid rgba(212,175,55,0.7)', whiteSpace: 'nowrap',
-          fontFamily: "'Rubik', sans-serif", fontWeight: 800, fontSize: 16,
+          fontFamily: "'Assistant', sans-serif", fontWeight: 800, fontSize: 16,
           boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
         }}>📊 סטטיסטיקה</div>
 
@@ -1662,10 +1703,9 @@ function TopicMindmap({ groups, userProgress, onSelectTopic }: {
               height: GROUP_H, maxWidth: COL_W - 12, display: 'flex', alignItems: 'center', gap: 6, padding: '0 14px',
               background: c, color: '#fff', borderRadius: 21, whiteSpace: 'nowrap',
               overflow: 'hidden', textOverflow: 'ellipsis',
-              fontFamily: "'Rubik', sans-serif", fontWeight: 800, fontSize: 14,
+              fontFamily: "'Assistant', sans-serif", fontWeight: 800, fontSize: 14,
               boxShadow: '0 4px 12px rgba(0,0,0,0.28)',
             }}>
-              <span style={{ fontSize: 16 }}>{g.emoji}</span>
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{g.labelHe}</span>
             </div>
           )
@@ -1688,7 +1728,7 @@ function TopicMindmap({ groups, userProgress, onSelectTopic }: {
                   color: '#1F2640', borderRadius: 19,
                   border: `1.5px solid ${mastered ? '#E6A800' : 'rgba(255,255,255,0.6)'}`,
                   whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                  fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 12.5,
+                  fontFamily: "'Assistant', sans-serif", fontWeight: 700, fontSize: 12.5,
                   boxShadow: '0 3px 9px rgba(0,0,0,0.22)',
                 }}
               >
@@ -1828,17 +1868,16 @@ function ActivityChart() {
   return (
     <div>
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
         padding: '0 4px 10px', direction: 'rtl' as const,
       }}>
+        <div style={cardHead}>
+          <CardIcon name="chart" />
+          <div style={cardTitle}>פעילות השבוע</div>
+        </div>
         <span style={{
-          fontFamily: "'Rubik', sans-serif", fontSize: 16, fontWeight: 700, color: TEXT_DARK,
-        }}>
-          📈 פעילות השבוע
-        </span>
-        <span style={{
-          fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600,
-          color: total > 0 ? '#D4AF37' : TEXT_LIGHT, fontVariantNumeric: 'tabular-nums',
+          fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600,
+          color: total > 0 ? '#C2410C' : TEXT_LIGHT, fontVariantNumeric: 'tabular-nums',
         }}>
           {total > 0 ? `+${total.toLocaleString('he-IL')} XP` : 'אין פעילות עדיין'}
         </span>
@@ -1855,8 +1894,8 @@ function ActivityChart() {
         <title>{total > 0 ? `+${total.toLocaleString('he-IL')} XP בשבוע האחרון` : 'אין פעילות בשבוע האחרון'}</title>
         <defs>
           <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(212,175,55,0.45)" />
-            <stop offset="100%" stopColor="rgba(212,175,55,0.03)" />
+            <stop offset="0%" stopColor="rgba(255,133,76,0.42)" />
+            <stop offset="100%" stopColor="rgba(255,133,76,0.03)" />
           </linearGradient>
         </defs>
         {ticks.map(v => (
@@ -1866,7 +1905,7 @@ function ActivityChart() {
           </g>
         ))}
         <path d={area} fill="url(#chartArea)" />
-        <path d={line} fill="none" stroke="rgba(212,175,55,0.8)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={line} fill="none" stroke="#ff854c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         {pts.map(([x, y], i) => {
           const day = week[i]
           return (
@@ -1874,7 +1913,7 @@ function ActivityChart() {
               <circle
                 cx={x} cy={y}
                 r={day.isToday ? 5 : 3.5}
-                fill={day.isToday ? '#FFC700' : '#D4AF37'}
+                fill={day.isToday ? '#FF6A2B' : '#ff854c'}
                 stroke={day.isToday ? '#fff' : 'none'}
                 strokeWidth={day.isToday ? 1.5 : 0}
               >
@@ -1889,9 +1928,9 @@ function ActivityChart() {
             x={toX(i)} y={H-4}
             textAnchor="middle"
             fontSize={9}
-            fill={day.isToday ? '#D4AF37' : '#54555A'}
+            fill={day.isToday ? '#C2410C' : '#54555A'}
             fontWeight={day.isToday ? 700 : 400}
-            fontFamily="Rubik"
+            fontFamily="Assistant"
           >
             {day.dayHe}
           </text>
@@ -1932,7 +1971,7 @@ function CoursePlayer({ course, onClose }: {
         position: 'fixed', inset: 0, zIndex: 150,
         background: 'linear-gradient(180deg, #F0F4FB 0%, #E8EFF8 100%)',
         display: 'flex', flexDirection: 'column',
-        fontFamily: "'Rubik', 'Assistant', sans-serif",
+        fontFamily: "'Assistant', 'Assistant', sans-serif",
       }}
       dir="rtl"
     >
@@ -2007,7 +2046,7 @@ function ExternalLinkPanel({ course }: { course: CourseDef }) {
       maxWidth: 560, margin: '60px auto', padding: '40px 36px',
       background: '#fff', borderRadius: 22, textAlign: 'center',
       boxShadow: '0 24px 70px rgba(0,0,0,0.10)',
-      fontFamily: "'Rubik', sans-serif",
+      fontFamily: "'Assistant', sans-serif",
     }}>
       <div style={{
         width: 80, height: 80, borderRadius: 20,
@@ -2030,7 +2069,7 @@ function ExternalLinkPanel({ course }: { course: CourseDef }) {
         style={{
           background: 'linear-gradient(135deg,#F5C842,#D4AF37)',
           color: '#0B1B3E', border: 0, borderRadius: 12,
-          padding: '12px 28px', fontFamily: "'Rubik', sans-serif",
+          padding: '12px 28px', fontFamily: "'Assistant', sans-serif",
           fontWeight: 700, fontSize: 14, cursor: 'pointer',
           boxShadow: '0 6px 18px rgba(212,175,55,0.45)',
         }}
@@ -2040,7 +2079,7 @@ function ExternalLinkPanel({ course }: { course: CourseDef }) {
 }
 
 // ── Sidebar ────────────────────────────────────────────────────────────────────
-function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNotebook, onOpenTours, width = 247 }: {
+function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNotebook, onOpenTours, width = 247, onToggleCollapse }: {
   active: InternalView
   onNav: (v: InternalView) => void
   onGoWorld: () => void
@@ -2048,6 +2087,7 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
   onGoDrawing: () => void
   onGoNotebook: () => void
   onOpenTours: () => void
+  onToggleCollapse?: () => void
   width?: number
 }) {
   // EduCity-style clean line icons. SVG with stroke-currentColor so the
@@ -2068,24 +2108,31 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
   const _adminMode = useLearningStore(s => s.adminMode)
   const _unlockedFeatures = useLearningStore(s => s.unlockedFeatures)
   const isLocked = (f?: FeatureId) => !!f && !isFeatureUnlocked(f, _unlockedFeatures, _adminMode)
-  const renderIcon = (k: IconKey) => {
-    const stroke = 'currentColor'
-    const sw = 1.8
-    const lc = 'round' as const
-    const lj = 'round' as const
+  const renderIcon = (k: IconKey, active = false) => {
+    const glyph = (line: string, solid: string) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"
+           {...(active
+             ? { fill: 'currentColor', fillRule: 'evenodd' as const }
+             : { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8,
+                 strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const })}>
+        {active
+          ? <path d={solid} />
+          : <g dangerouslySetInnerHTML={{ __html: line }} />}
+      </svg>
+    )
     switch (k) {
-      case 'home':
-        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M3 11.5L12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
-      case 'book':
-        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h11"/></svg>
-      case 'trophy':
-        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M5 6H3v2a3 3 0 0 0 3 3"/><path d="M19 6h2v2a3 3 0 0 1-3 3"/><path d="M9 19h6"/><path d="M12 14v5"/></svg>
-      case 'map':
-        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v16"/><path d="M15 6v16"/></svg>
-      case 'globe':
-        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 0 1 0 18"/><path d="M12 3a13 13 0 0 0 0 18"/></svg>
-      case 'tour':
-        return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap={lc} strokeLinejoin={lj}><path d="M5 21V4"/><path d="M5 4l9 3-9 3"/><path d="M5 13l11 3-11 3" opacity="0.55"/></svg>
+      case 'home':
+        return glyph(`<path d="M3 11.5L12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>`, 'M11.05 2.94a1.6 1.6 0 0 1 1.9 0l7.4 5.55c.41.3.65.78.65 1.28V19.4A1.6 1.6 0 0 1 19.4 21H4.6A1.6 1.6 0 0 1 3 19.4V9.77c0-.5.24-.98.65-1.28z M12 13.4a2.3 2.3 0 0 1 2.3 2.3V21H9.7v-5.3a2.3 2.3 0 0 1 2.3-2.3z')
+      case 'book':
+        return glyph(`<path d="M9.5 3.1A3 3 0 0 0 6.5 6.1v11.8a3 3 0 0 0 3 3"/><rect x="9.5" y="3.1" width="10.4" height="17.8" rx="2.6"/><path d="M9.5 16.7h10.4"/><rect x="11" y="6" width="7.4" height="4.9" rx="1.7"/><path d="M13.1 16.7v4.9l1.6-1.5 1.6 1.5v-4.9"/>`, 'M6 2C4.89 2 4 2.9 4 4v1c-.77 0-1.25.83-.87 1.5.18.31.51.5.87.5v2c-.77 0-1.25.83-.87 1.5.18.31.51.5.87.5v2c-.77 0-1.25.83-.87 1.5.18.31.51.5.87.5v2c-.77 0-1.25.83-.87 1.5.18.31.51.5.87.5v1c0 1.11.89 2 2 2h12c1.11 0 2-.89 2-2V4c0-1.1-.89-2-2-2H6z M8.5 6C7.67 6 7 6.67 7 7.5v1C7 9.33 7.67 10 8.5 10h7c.83 0 1.5-.67 1.5-1.5v-1C17 6.67 16.33 6 15.5 6h-7z')
+      case 'trophy':
+        return glyph(`<path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M5 6H3v2a3 3 0 0 0 3 3"/><path d="M19 6h2v2a3 3 0 0 1-3 3"/><path d="M9 19h6"/><path d="M12 14v5"/>`, 'M12 2c6.16 0 10.01 6.67 6.93 12-.5.86-1.15 1.62-1.93 2.25v4.61c0 .76-.77 1.29-1.49 1.03L12 20.57l-3.51 1.32C7.77 22.16 7 21.62 7 20.86v-4.61C2.19 12.4 3.35 4.79 9.09 2.55 10.02 2.19 11 2 12 2z M12 6c3.08 0 5 3.33 3.46 6-.71 1.24-2.03 2-3.46 2-3.08 0-5-3.33-3.46-6C9.25 6.76 10.57 6 12 6z')
+      case 'map':
+        return glyph(`<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v16"/><path d="M15 6v16"/>`, 'M9 3.4l6 2 5.2-1.8A1.2 1.2 0 0 1 21.8 4.7v12.9a1.2 1.2 0 0 1-.8 1.1L15 20.6l-6-2-5.2 1.8A1.2 1.2 0 0 1 2.2 19.3V6.4a1.2 1.2 0 0 1 .8-1.1z M9 3.4l6 2v15.2l-6-2z')
+      case 'globe':
+        return glyph(`<path d="M2.9 13.9 7.7 9.7V20.2H2.9z"/><path d="M9.9 7.6 12 4.9 14.1 7.6V20.2H9.9z"/><path d="M16.4 13.4a1.2 1.2 0 0 1 1.2-1.2h2.3a1.2 1.2 0 0 1 1.2 1.2V20.2h-4.7z"/>`, 'M2.9 13.9 7.7 9.7V20.2H2.9z M9.9 7.6 12 4.9 14.1 7.6V20.2H9.9z M16.4 13.4a1.2 1.2 0 0 1 1.2-1.2h2.3a1.2 1.2 0 0 1 1.2 1.2V20.2h-4.7z')
+      case 'tour':
+        return glyph(`<path d="M5 21V4"/><path d="M5 4l9 3-9 3"/><path d="M5 13l11 3-11 3"/>`, 'M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z M16.24 7.76c-.35-.36-4.95.7-6.36 2.12-1.42 1.41-2.48 6.01-2.12 6.36.35.36 4.95-.7 6.36-2.12 1.42-1.41 2.48-6.01 2.12-6.36z')
     }
   }
 
@@ -2099,26 +2146,55 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
       display: 'flex',
       flexDirection: 'column',
       boxShadow: '-4px 0 24px rgba(51,81,202,0.25)',
-      overflow: 'hidden',
+      position: 'relative',
     }}>
-      {/* Logo / avatar area */}
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '28px 0 20px', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
-        <div style={{
-          width: 64, height: 64,
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.15))',
-          backdropFilter: 'blur(10px)',
-          borderRadius: 20,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 4px 16px rgba(31,41,55,0.2)',
-          border: '1px solid rgba(255,255,255,0.3)',
-        }}>
-          {/* Diamond icon matching Figma */}
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <polygon points="18,4 30,14 18,32 6,14" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" />
-            <polygon points="18,4 30,14 18,17 6,14" fill="rgba(255,255,255,0.3)" />
-            <line x1="6" y1="14" x2="30" y2="14" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" />
-          </svg>
-        </div>
+      {/* Logo, and the control that folds the rail away.
+          It lives ON the rail rather than in the top bar because it is the
+          rail it acts on — and once folded it has to stay reachable to open
+          it again, which a button in the bar would manage too, but at the
+          cost of putting a rail control somewhere the rail is not. */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 11,
+        justifyContent: collapsed ? 'center' : 'flex-start',
+        padding: collapsed ? '20px 0 39px' : '28px 32px 39px',
+      }}>
+        <svg width="32" height="32" viewBox="0 0 36 36" aria-hidden
+             style={{ display: 'block', flexShrink: 0 }}>
+          <polygon points="18,3 31,14 18,33 5,14" fill="#fff" />
+        </svg>
+        {!collapsed && (
+          <span style={{
+            fontFamily: "'Assistant', sans-serif",
+            fontWeight: 700, fontSize: 15, letterSpacing: '1.4px',
+            color: '#fff', whiteSpace: 'nowrap',
+            direction: 'ltr', unicodeBidi: 'isolate',
+          }}>WAFFLESTACK</span>
+        )}
+        {onToggleCollapse && (
+          <button
+            onClick={onToggleCollapse}
+            aria-label={collapsed ? 'פתח את התפריט' : 'צמצם את התפריט'}
+            title={collapsed ? 'פתח את התפריט' : 'צמצם את התפריט'}
+            aria-expanded={!collapsed}
+            onMouseEnter={e => (e.currentTarget.style.background = '#F2F6FE')}
+            onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
+            style={{
+              position: 'absolute', left: -16, top: 72, zIndex: 3,
+              width: 32, height: 32, borderRadius: '50%', padding: 0,
+              border: '1px solid #E0E7F6', cursor: 'pointer',
+              background: '#fff', color: '#2530A6',
+              boxShadow: '0 3px 10px rgba(31,62,108,0.20)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background .15s ease', flexShrink: 0,
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden
+                 style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform .18s ease' }}>
+              <polyline points="15,6 9,12 15,18" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Nav */}
@@ -2141,8 +2217,12 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
               }}
               title={locked ? lockTip : (collapsed ? item.label : undefined)}
               style={{
-                background: isActive ? SIDEBAR_ACTIVE : 'transparent',
-                borderRadius: 32,
+                background: isActive ? '#fff' : 'transparent',
+                boxShadow: isActive
+                  ? 'inset 0 2px 5px rgba(31,50,120,0.16), 0 1px 2px rgba(10,20,62,0.18)'
+                  : 'none',
+                transform: isActive ? 'translateY(1px)' : 'none',
+                borderRadius: 16,
                 padding: collapsed ? '12px 0' : '12px 20px',
                 display: 'flex',
                 alignItems: 'center',
@@ -2152,10 +2232,10 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
                 border: 'none',
                 cursor: locked ? 'not-allowed' : 'pointer',
                 width: '100%',
-                fontFamily: "'Rubik', sans-serif",
+                fontFamily: "'Assistant', sans-serif",
                 fontSize: 17,
-                fontWeight: isActive ? 600 : 400,
-                color: '#FFFFFF',
+                fontWeight: isActive ? 700 : 400,
+                color: isActive ? '#22378E' : '#FFFFFF',
                 opacity: locked ? 0.5 : 1,
                 filter: locked ? 'grayscale(0.7)' : 'none',
                 transition: 'background 0.15s',
@@ -2165,16 +2245,12 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
               onMouseLeave={e => { if (!isActive && !locked) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
             >
               <span
-                className={`ws-icon-chip ${isActive ? 'ws-icon-chip--active' : 'ws-icon-chip--inactive'}`}
                 style={{
                   width: 32, height: 32, flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: isActive ? '#FFD700' : 'rgba(255,255,255,0.92)',
-                  borderRadius: 10,
-                  border: '1px solid',
-                  transition: 'color 0.15s, background 0.15s, transform 0.15s',
-                  transform: isActive ? 'scale(1.06)' : 'scale(1)',
-                }}>{renderIcon(item.iconKey)}</span>
+                  color: isActive ? '#2530A6' : '#fff',
+                  transition: 'color 0.15s',
+                }}>{renderIcon(item.iconKey, isActive)}</span>
               {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
               {locked && (
                 <span aria-hidden="true" style={{
@@ -2221,7 +2297,7 @@ function AdminToggle({ collapsed }: { collapsed: boolean }) {
         border: '1px solid ' + (adminMode ? 'rgba(245,200,66,0.55)' : 'rgba(255,255,255,0.18)'),
         color: adminMode ? '#FFD700' : 'rgba(255,255,255,0.85)',
         borderRadius: 10, cursor: 'pointer',
-        fontFamily: "'Rubik', sans-serif", fontSize: 12, fontWeight: 700,
+        fontFamily: "'Assistant', sans-serif", fontSize: 12, fontWeight: 700,
         direction: 'rtl', transition: 'all 0.15s',
       }}
     >
@@ -2242,42 +2318,14 @@ function AdminToggle({ collapsed }: { collapsed: boolean }) {
 }
 
 // ── Top bar ────────────────────────────────────────────────────────────────────
-/**
- * GlassBoardAdminToggle — admin-only flag switch for the glass board (the
- * lesson/quiz whiteboard → pane of glass in front of the knowledge city, see
- * hooks/useGlassBoard.ts). Renders nothing for students; when adminMode is ON
- * it sits in the topbar next to the 🎓 סיור pill with the same styling.
- */
-function GlassBoardAdminToggle() {
-  const adminMode = useLearningStore(s => s.adminMode)
-  const [enabled, setEnabled] = useGlassBoard()
-  if (!adminMode) return null
-  return (
-    <button
-      onClick={() => setEnabled(!enabled)}
-      aria-pressed={enabled}
-      title={enabled ? 'לוח זכוכית פעיל — לחץ לחזרה ללוח המחיק' : 'לוח זכוכית כבוי — לחץ להפעלה'}
-      style={{
-        background: enabled ? 'rgba(51,81,202,0.14)' : 'rgba(99,102,241,0.10)',
-        border: '1px solid ' + (enabled ? 'rgba(51,81,202,0.55)' : 'rgba(99,102,241,0.3)'),
-        borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
-        color: enabled ? '#3351CA' : '#6366f1', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
-        whiteSpace: 'nowrap',
-      }}
-    >
-      🪟 לוח זכוכית
-    </button>
-  )
-}
-
 function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { title: string; onLogout?: () => void; darkMode?: boolean; onToggleDark?: () => void; contextControls?: React.ReactNode }) {
   const userName = localStorage.getItem('userName') || 'Student'
   const xp = useLearningStore(state => state.xp)
   return (
     <div className="ws-topbar" style={{
       background: 'var(--sh-topbar-bg)',
-      backdropFilter: 'blur(12px)',
       borderBottom: '1px solid var(--sh-topbar-border)',
+      boxShadow: 'var(--sh-topbar-seam)',
       height: 70,
       display: 'flex',
       alignItems: 'center',
@@ -2290,10 +2338,10 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
           title instead of stealing space from the board content area. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: '1 1 auto', minWidth: 0 }}>
         <h1 style={{
-          fontFamily: "'Rubik', sans-serif",
-          fontWeight: 800,
-          fontSize: 28,
-          color: TEXT_DARK,
+          fontFamily: 'var(--ws-display)',
+          fontWeight: 600,
+          fontSize: 20,
+          color: TEXT_MED,
           margin: 0,
           letterSpacing: '-0.5px',
           textShadow: '0 1px 4px rgba(255,255,255,0.8)',
@@ -2310,67 +2358,26 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
         )}
       </div>
       <div className="ws-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }} dir="ltr">
-        {/* Dark-mode toggle, integrated into topbar per user 2026-05-24
-            (was a floating fixed button at top-right obscuring sidebar icons). */}
-        {onToggleDark && (
-          <button
-            onClick={onToggleDark}
-            aria-label={darkMode ? 'הפעל מצב בהיר' : 'הפעל מצב כהה'}
-            title={darkMode ? 'מצב בהיר' : 'מצב כהה'}
-            style={{
-              background: 'rgba(31,62,108,0.08)',
-              border: '1px solid rgba(31,62,108,0.25)',
-              borderRadius: 10,
-              width: 40, height: 40,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'var(--sh-text-dark)',
-              cursor: 'pointer',
-            }}
-          >
-            {darkMode ? '☀' : '☾'}
-          </button>
-        )}
-        <span className="ws-ribbon-divider" />
-        {/* Ribbon A — Progress */}
-        <Ribbon label="התקדמות">
-          <span style={{
-            background: 'rgba(212,175,55,0.15)',
-            border: '1px solid rgba(212,175,55,0.4)',
-            borderRadius: 999,
-            padding: '3px 10px',
-            color: '#D4AF37',
-            fontSize: 13,
-            fontFamily: "'Rubik', sans-serif",
-          }}>
-            ⭐ {xp} XP
-          </span>
-        </Ribbon>
-
-        <span className="ws-ribbon-divider" />
 
         {/* Ribbon B — Potions (label hidden per user 2026-05-24, icons keep aria) */}
         <Ribbon label="שיקויים" hideLabel>
           <PotionInventory />
         </Ribbon>
 
-        <span className="ws-ribbon-divider" />
 
         {/* Ribbon C — Account (label hidden per user 2026-05-24) */}
         <Ribbon label="חשבון" hideLabel>
-          <span className="hidden md:inline" style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_DARK }}>שלום, {userName}</span>
-          <TourLauncher />
-          <GlassBoardAdminToggle />
-          {onLogout && (
-            <Tooltip label="יציאה" description="התנתק מהחשבון">
-              <button onClick={onLogout} style={{
-                background: 'rgba(234,67,53,0.08)', border: '1px solid rgba(234,67,53,0.2)',
-                borderRadius: 8, padding: '5px 12px', cursor: 'pointer',
-                color: '#d32f2f', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
-              }}>
-                ↩ יציאה
-              </button>
-            </Tooltip>
-          )}
+          {/* The frame every menu measures from — see menuzone note. */}
+          <div data-ws-menuzone style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
+            <TopBarSettings darkMode={darkMode} onToggleDark={onToggleDark} />
+            <TourLauncher />
+            <TopBarBell />
+            <TopBarAccount
+              userName={userName}
+              onLogout={onLogout}
+              xp={xp}
+            />
+          </div>
         </Ribbon>
       </div>
     </div>
@@ -2490,43 +2497,61 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
   }))
 
   return (
-    <div className="ws-screen-pad" style={{ flex: 1, overflow: 'auto', padding: '32px 40px' }} dir="rtl">
+    <div className="ws-screen-pad" dir="rtl" style={{ flex: 1, overflow: 'auto', scrollbarGutter: 'stable', padding: '46px 40px 32px 35px' }}>
       <PersonalPlanWizard
         open={planWizardOpen}
         onClose={() => { setPlanWizardOpen(false); finishFunnel() }}
         onSelectTopic={onSelectTopic}
       />
       <style>{'@keyframes ws-card-pulse{0%,100%{box-shadow:0 0 0 0 rgba(51,81,202,0)}50%{box-shadow:0 0 0 6px rgba(51,81,202,0.28)}}'}</style>
-      <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* Same content grid as the learning area (CourseGate / TopicSelector):
+          maxWidth 1200 with NO auto margins, so in RTL the column starts at the
+          right edge under the page's 40px pad instead of floating centred at
+          900. Keeps every screen on one grid and lets the home cards use the
+          full width. Per Shirli 2026-09-03. */}
+      {/* The 50px gutter used to line the column up with a top-bar divider
+          beside the dark-mode toggle. That toggle and that divider are both
+          gone — the bar is now avatar, bell, help, gear — so the number was
+          measuring a landmark that no longer exists. With the tutor and the
+          pomodoro off the bottom-left corner there is nothing left to leave
+          room for either, so it comes down to 20. Per Shirli 2026-09-08. */}
+      <div style={{ maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+        {/* ── BANNER ROW ─────────────────────────────────
+            The plan CTA and the tutorial-video card used to stack. Side by
+            side they read as one bento row, and grid stretch gives them a
+            shared height whatever the copy length. 1.25fr / 1fr is the single
+            asymmetric ratio used by every two-column row on this screen, so
+            they all break at the same vertical seam. ws-home-grid keeps the
+            mobile override (one column under 768px). Per Shirli 2026-09-04. */}
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '4.921' }}>
 
         {/* Personal study plan CTA / banner — opens 3-step intake wizard. */}
         {!personalPlan ? (
-          <button
-            onClick={() => setPlanWizardOpen(true)}
+          /* A card like every other container: icon, title, copy, then the CTA
+             at the bottom-right. It used to be one big <button> with a chip
+             floating at its left edge, which is why the chip never sat where
+             the other buttons do. The real <button> is now inside, so the
+             label describes the action for screen readers too. */
+          <div
+            className="ws-glass-card"
             style={{
-              background: 'linear-gradient(135deg, rgba(245,200,66,0.18), rgba(212,175,55,0.10))',
-              border: '1.5px solid rgba(212,175,55,0.55)',
               borderRadius: CARD_RADIUS,
-              padding: '18px 24px', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: 16, textAlign: 'right',
-              fontFamily: "'Rubik', sans-serif",
-              boxShadow: '0 4px 16px rgba(212,175,55,0.18)',
+              padding: '22px 26px',
+              display: 'flex', flexDirection: 'column', textAlign: 'right',
+              fontFamily: "'Assistant', sans-serif",
             }}
           >
-            <div style={{ fontSize: 36 }}>🎯</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 17, fontWeight: 700, color: TEXT_DARK }}>התאם תכנית אישית</div>
-              <div style={{ fontSize: 13, color: TEXT_MED, marginTop: 3 }}>
-                שאלון של פחות מדקה — נסדר את הנושאים בדיוק לפי המטרה והזמן שלך
-              </div>
+            <div style={{ ...cardHead }}><CardIcon name="plan" /><div style={cardTitle}>התאמת תכנית אישית</div></div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_MED, marginTop: 6, lineHeight: 1.5 }}>
+              שאלון של פחות מדקה — נסדר את הנושאים בדיוק לפי המטרה והזמן שלך
             </div>
-            <div style={{
-              background: 'linear-gradient(135deg,#F5C842,#D4AF37)', color: '#0B1B3E',
-              padding: '8px 16px', borderRadius: 24, fontSize: 13, fontWeight: 700,
-            }}>
-              התחל ←
-            </div>
-          </button>
+            {/* Flexible spacer with a floor: margin-top:auto alone collapses to
+                zero once the copy fills the card, which put the button on the
+                text. This keeps 20px whatever the copy length. */}
+            <div style={{ flex: 1, minHeight: 20 }} />
+            <button onClick={() => setPlanWizardOpen(true)} className="ws-cta">להתאמה<CtaArrow /></button>
+          </div>
         ) : (
           <div style={{
             background: GLASS_CARD_SM,
@@ -2535,15 +2560,15 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             padding: '16px 22px',
             border: '1px solid rgba(212,175,55,0.45)',
             display: 'flex', alignItems: 'center', gap: 14,
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             boxShadow: CARD_SHADOW,
           }}>
-            <div style={{ fontSize: 28 }}>🎯</div>
+            <div style={{ fontSize: 30 }}>🎯</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: TEXT_DARK }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: TEXT_DARK }}>
                 התכנית שלך · {personalPlan.sequence.length} נושאים · {personalPlan.dailyTargetMin} דק׳ ביום
               </div>
-              <div style={{ fontSize: 12, color: TEXT_MED, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 15, color: TEXT_MED, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {personalPlan.sequence.slice(0, 4).map(s => HEBREW_LABELS[s.topicId] || s.topicId).join(' → ')}
                 {personalPlan.sequence.length > 4 ? ' …' : ''}
               </div>
@@ -2553,7 +2578,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
               style={{
                 background: 'rgba(212,175,55,0.18)', color: '#8a6d1c',
                 border: '1px solid rgba(212,175,55,0.45)',
-                borderRadius: 10, padding: '6px 12px', fontSize: 12, fontWeight: 700,
+                borderRadius: 10, padding: '6px 12px', fontSize: 15, fontWeight: 700,
                 cursor: 'pointer', fontFamily: 'inherit',
               }}
             >✏️ ערוך</button>
@@ -2562,7 +2587,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
               style={{
                 background: 'transparent', color: '#9a3b3b',
                 border: '1px solid rgba(154,59,59,0.3)',
-                borderRadius: 10, padding: '6px 10px', fontSize: 12, fontWeight: 700,
+                borderRadius: 10, padding: '6px 10px', fontSize: 15, fontWeight: 700,
                 cursor: 'pointer', fontFamily: 'inherit',
               }}
             >🗑</button>
@@ -2574,11 +2599,17 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             accessible via the TwoMinChallengeCard preserved in motivation/,
             ready to be wired into a dedicated motivation tab in the future. */}
 
-        {/* Onboarding tutorial video — replay card + first-visit auto-modal. */}
+        {/* Onboarding tutorial video — replay card + first-visit auto-modal.
+            Its modal is position:fixed, so only the replay card lands in the
+            grid cell. */}
         <IntroTutorialVideo />
+        </div>{/* end banner row */}
 
-        {/* ── ROW 1 ──────────────────────────────────── */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'stretch' }}>
+        {/* ── ROW 1 — study (wide, right) + practice (narrow, left) ──
+            לימוד חומר carries order:1, so it takes the wide 1.25fr track,
+            which is the RIGHT column in RTL. It is the point of the app and
+            now reads that way. */}
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '2.580' }}>
 
           {/* Card: כמעט שם! (תרגול) — order:2 so it sits on the LEFT in RTL,
               after the study card. User asked to swap study↔practice. */}
@@ -2589,25 +2620,27 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             order: 2,
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 6 }}>תרגול</div>
+            <div style={{ ...cardHead, marginBottom: 6 }}><CardIcon name="practice" /><div style={cardTitle}>תרגול</div></div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
               {completedLessons.length === 0 ? (
-                <>בואו נתחיל בהתחלה<br />{currentTopicName}</>
+                <>מתחילים מהתחלה · {currentTopicName}</>
               ) : answeredInTopic > 0 && remainingInTopic > 0 ? (
-                <>נשארו לך עוד {remainingInTopic} שאלות<br />{currentTopicName}</>
+                <>נשארו לך עוד {remainingInTopic} שאלות · {currentTopicName}</>
               ) : (
-                <>נמשיך מאיפה שעצרת<br />{currentTopicName}</>
+                <>נמשיך מאיפה שעצרת · {currentTopicName}</>
               )}
             </div>
             {/* Rotating 3D hero — same Kenney-building cycler as the landing
                 page, scaled to ~150px tall to fit the home card. Replaces the
                 old static temple PNG with the live cycling preview. */}
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 16, minHeight: 150, height: 150, borderRadius: 12, overflow: 'hidden' }}>
-              <Suspense fallback={<div style={{ color: 'rgba(31,41,55,0.4)', fontSize: 12 }}>טוען…</div>}>
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', marginBottom: 16, minHeight: 104, height: 104, overflow: 'hidden' }}>
+              <div style={{ width: '100%', height: '100%', transform: 'scale(0.75) translateX(-33%)', transformOrigin: 'bottom left' }}>
+              <Suspense fallback={<div style={{ color: 'rgba(31,41,55,0.4)', fontSize: 15 }}>טוען…</div>}>
                 <HeroScene />
               </Suspense>
+              </div>
             </div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginBottom: 8, textAlign: 'right' }}>הצעה למבנה הבא בעירך</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_LIGHT, marginBottom: 8, textAlign: 'right' }}>הצעה למבנה הבא בעירך</div>
             {/* Progress bar — reflects answered share of the current topic */}
             <div style={{ height: 7, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden', marginBottom: 16 }}>
               <div style={{ width: `${topicPct}%`, height: '100%', background: 'rgba(212,175,55,0.7)', borderRadius: 10, transition: 'width 0.4s' }} />
@@ -2616,14 +2649,13 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                 practice quiz, bypassing the difficulty picker. Returning users
                 keep the existing picker flow so they can pick difficulty / resume. */}
             <button onClick={() => (completedLessons.length > 0 ? onSelectTopic(currentTopicId) : onStartPractice(currentTopicId))}
-              className="ws-cta-btn"
-              style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, fontFamily: "'Rubik', sans-serif", boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}>
-              {completedLessons.length > 0 ? 'המשך ←' : 'בוא נתרגל ←'}
+                            className="ws-cta">
+              {completedLessons.length > 0 ? 'ממשיכים בתרגול' : 'מתחילים לתרגל'}<CtaArrow />
             </button>
           </div>
 
           {/* Card: לימוד חומר — order:1 so it sits on the RIGHT in RTL (first). */}
-          <div className="ws-glass-card" style={{
+          <div className="ws-glass-card ws-lesson" style={{
             borderRadius: CARD_RADIUS,
             padding: '28px 28px 24px',
             display: 'flex', flexDirection: 'column',
@@ -2631,130 +2663,130 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             order: 1,
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_MED, marginBottom: 16, textAlign: 'right' }}>לימוד חומר</div>
+            {/* The orange orb — a real circle, blurred, behind the board. */}
+            <div style={{ ...cardHead, marginBottom: 16 }}><CardIcon name="study" /><div style={cardTitle}>לימוד חומר</div></div>
             {/* Whiteboard area with glassmorphism */}
             <div style={{
               flex: 1,
               background: 'linear-gradient(180deg, rgba(255,255,255,0.51) 54.33%, rgba(255,255,255,0.17) 100%)',
-              backdropFilter: 'blur(20px)',
+              backdropFilter: 'blur(18px) saturate(140%)',
               boxShadow: CARD_SHADOW,
-              borderRadius: CARD_RADIUS,
+              borderRadius: 16, // inner panel: outer 24 minus the padding step — 24 inside 24 read as a mis-drawn corner
               padding: '20px 24px',
               position: 'relative',
               overflow: 'hidden',
               minHeight: 160,
             }}>
               {/* "טיפ" label */}
-              <div style={{ position: 'absolute', top: 16, left: 20, fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_TIP }}>טיפ</div>
-              {/* Floating 3D cube (CSS) */}
-              <div style={{ position: 'absolute', top: -10, right: -10, width: 80, height: 80, opacity: 0.7, transform: 'rotate(22deg)' }}>
-                <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <polygon points="40,5 75,22 75,58 40,75 5,58 5,22" fill="rgba(131,178,248,0.35)" stroke="rgba(131,178,248,0.6)" strokeWidth="1.5" />
-                  <polygon points="40,5 75,22 40,39 5,22" fill="rgba(131,178,248,0.5)" stroke="rgba(131,178,248,0.7)" strokeWidth="1" />
-                  <polygon points="40,39 75,22 75,58 40,75" fill="rgba(51,81,202,0.25)" />
-                </svg>
-              </div>
-              <div style={{ position: 'absolute', bottom: -15, left: -15, width: 70, height: 70, opacity: 0.5, transform: 'rotate(-89deg)' }}>
-                <svg viewBox="0 0 70 70" fill="none">
-                  <ellipse cx="35" cy="35" rx="30" ry="28" fill="rgba(51,81,202,0.2)" stroke="rgba(131,178,248,0.4)" strokeWidth="1" />
-                  <ellipse cx="35" cy="35" rx="18" ry="16" fill="rgba(51,81,202,0.3)" />
-                </svg>
-              </div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 18, color: TEXT_DARK, lineHeight: 1.9, textAlign: 'right', marginTop: 40 }}>
-                בוא נמפה את הנושאים בקורס שלך
+              <div style={{ position: 'absolute', top: 16, right: 24, fontFamily: "'Assistant', sans-serif", fontSize: 18, color: TEXT_TIP, textAlign: 'right' }}>טיפ יומי</div>
+              <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 18, color: TEXT_DARK, lineHeight: 1.9, textAlign: 'right', marginTop: 40 }}>
+                נמפה את הנושאים בקורס שלך
               </div>
             </div>
-            {/* CTA button — liquid-glass to match the תרגול card's ws-cta-btn.
-                Map starts collapsed, so the label is "בוא נלמד" (let's learn). */}
-            <button onClick={onGoMindmap} className="ws-cta-btn"
-              style={{ marginTop: 12, background: BUTTON_COLOR, color: '#fff', border:'none', borderRadius:24, padding:'11px 0', fontWeight:600, fontSize:16, cursor:'pointer', fontFamily:"'Rubik',sans-serif", width:'100%', boxShadow:'0px 2px 6px rgba(18,36,96,0.3)' }}>
-              📖 בוא נלמד ←
+            {/* CTA button — .ws-cta, shared with every other action on the screen.
+                Map starts collapsed, so the label names the destination, not a gendered
+                imperative. */}
+            <button onClick={onGoMindmap}
+                            className="ws-cta" style={{ marginTop: 20 }}>
+              מתחילים ללמוד<CtaArrow />
             </button>
           </div>
         </div>
 
-        {/* ── LEARNING INSIGHTS — accuracy + what to strengthen ── */}
+        {/* ── INSIGHTS ROW — insights (wide, right) + path strip (left) ──
+            Same 1.25fr / 1fr seam as every other row. The path strip used to
+            be a GLASS_CARD_SM surface with its own border and shadow; beside
+            the insights card that difference in material read as a mistake,
+            so it now uses the same ws-glass-card. Padding levelled 40 → 28 to
+            match, and the strip's rail re-anchored to the narrower box. */}
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '6.903' }}>
+
+        {/* LEARNING INSIGHTS — accuracy + what to strengthen */}
         <LearningInsights />
 
         {/* ── LEARNING PATH STRIP ─────────────────────── */}
-        <div style={{
-          background: GLASS_CARD_SM,
-          backdropFilter: 'blur(20px)',
-          boxShadow: CARD_SHADOW,
+        <div className="ws-glass-card" style={{
           borderRadius: CARD_RADIUS,
-          padding: '22px 40px',
-          border: '1px solid rgba(255,255,255,0.4)',
+          padding: '22px 28px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
         }}>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
-            {/* Connector line */}
-            <div style={{ position: 'absolute', left: '10%', right: '10%', top: 28, height: 1, border: '1px solid #F4C52E', zIndex: 0 }} />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+            {/* Connector line — pulled in from 10% to 16% now that the strip
+                sits in the narrow column, so it starts and ends under the
+                nodes rather than running past them. */}
+            <div style={{ position: 'absolute', left: '16%', right: '16%', top: 17.5, height: 1.5, background: '#FFBC9D', borderRadius: 2, zIndex: 0 }} />
 
             {/* Stages — progress-driven slice centered on the current topic.
                 done = green check · current = gold gem · upcoming = small node. */}
             {timelineSlice.map(stage => (
-              <div key={stage.topicId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 1 }}>
-                {stage.state === 'done' ? (
-                  <div style={{
-                    width: 38, height: 38,
-                    background: 'linear-gradient(135deg, #34A853 0%, #22833F 100%)',
-                    borderRadius: '50%',
-                    boxShadow: '0 4px 12px rgba(52,168,83,0.4), inset 0 1px 0 rgba(255,255,255,0.25)',
-                    border: '2px solid rgba(255,255,255,0.85)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {/* Proper-orientation check ✓ (no Y-flip) */}
-                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-                      <path d="M3 8.5l3.2 3.2L13 4.5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                ) : stage.state === 'current' ? (
-                  <div style={{
-                    width: 35, height: 35,
-                    background: 'linear-gradient(115.34deg, rgba(255,194,0,0.35) -8.31%, rgba(154,106,4,0.5) 168.93%)',
-                    backdropFilter: 'blur(20px)',
-                    borderRadius: 24,
-                    boxShadow: '0px 3px 5.8px rgba(142,122,59,0.5)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {/* Gold gem */}
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                      <polygon points="9,2 15,7 9,16 3,7" fill="rgba(212,175,55,0.8)" stroke="rgba(212,175,55,1)" strokeWidth="1" />
-                      <polygon points="9,2 15,7 9,10 3,7" fill="rgba(255,220,80,0.5)" />
-                    </svg>
-                  </div>
-                ) : (
-                  <div style={{
-                    width: 27, height: 27,
-                    background: 'linear-gradient(34.36deg, #E6C55D -10.48%, #806E34 267.01%)',
-                    backdropFilter: 'blur(20px)',
-                    borderRadius: 24,
-                    boxShadow: '0px 3px 5.8px rgba(142,122,59,0.5)',
-                    transform: 'matrix(1,0,0,-1,0,0)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <rect x="4" y="2" width="6" height="8" rx="1" fill="rgba(255,255,255,0.5)" />
-                      <path d="M5 5.5h4M5 7.5h3" stroke="rgba(255,255,255,0.8)" strokeWidth="1" />
-                      <circle cx="7" cy="11" r="1.5" fill="rgba(255,255,255,0.5)" />
-                    </svg>
-                  </div>
-                )}
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: stage.state === 'current' ? 16 : 14, color: TEXT_DARK, textAlign: 'center', fontWeight: stage.state === 'upcoming' ? 400 : 600 }}>{stage.name}</div>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: stage.state === 'done' ? '#22833F' : TEXT_LIGHT, fontWeight: stage.state === 'done' ? 600 : 400 }}>
+              <div key={stage.topicId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 1, flex: 1, minWidth: 0 }}>
+                <div style={{ height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {stage.state === 'done' ? (
+                    <div style={{
+                      width: 38, height: 38,
+                      background: 'linear-gradient(135deg, #34A853 0%, #22833F 100%)',
+                      borderRadius: '50%',
+                      boxShadow: '0 4px 12px rgba(52,168,83,0.4), inset 0 1px 0 rgba(255,255,255,0.25)',
+                      border: '2px solid rgba(255,255,255,0.85)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {/* Proper-orientation check ✓ (no Y-flip) */}
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M3 8.5l3.2 3.2L13 4.5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  ) : stage.state === 'current' ? (
+                    <div style={{
+                      width: 35, height: 35,
+                      background: 'linear-gradient(115.34deg, #FFA073 -8.31%, #ff854c 168.93%)',
+                      borderRadius: 24,
+                      boxShadow: '0px 3px 5.8px rgba(255,133,76,0.45)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {/* Reached — the same check the completed stages carry */}
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5.5 12.5l4.3 4.3 8.7-9.6" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <div style={{
+                      width: 27, height: 27,
+                      background: '#fff',
+                      border: '1.5px solid rgba(127,155,217,0.5)',
+                      boxSizing: 'border-box',
+                      borderRadius: 24,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sh-text-light)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="6" y="3" width="12" height="16" rx="2" />
+                        <path d="M9.5 8h5M9.5 12h3" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: stage.state === 'current' ? 16 : 14, color: TEXT_DARK, textAlign: 'center', fontWeight: stage.state === 'upcoming' ? 400 : 600 }}>{stage.name}</div>
+                <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: stage.state === 'done' ? '#22833F' : TEXT_LIGHT, fontWeight: stage.state === 'done' ? 600 : 400 }}>
                   {stage.state === 'done' ? '✓ הושלם' : stage.state === 'current' ? '(עכשיו)' : '(בקרוב)'}
                 </div>
               </div>
             ))}
           </div>
         </div>
+        </div>{/* end insights row */}
 
-        {/* ── RISK BOARD ─────────────────────────────── */}
+        {/* ── RISK BOARD — full width ─────────────────── */}
         <RiskBoard onSelectTopic={onSelectTopic} />
 
-        {/* ── ROW 2 ──────────────────────────────────── */}
-        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        {/* ── ROW 2 — week activity (wide, right) + my world (left) ──
+            The chart needs the horizontal room for seven days; "העולם שלי" is
+            three chips, a bar and a button, so it was holding width it did not
+            use. Same 1.25fr / 1fr seam as every other row. */}
+        <div className="ws-home-grid" style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24, alignItems: 'stretch', aspectRatio: '3.88' }}>
 
-          {/* Card: Activity chart */}
+          {/* Card: Activity chart — centred, so the row's height floor reads as
+              breathing room rather than a gap under the chart. */}
           <div className="ws-card-pad" style={{
             background: GLASS_CARD,
             backdropFilter: 'blur(20px)',
@@ -2762,6 +2794,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             borderRadius: CARD_RADIUS,
             padding: '24px 20px 16px',
             border: '1px solid rgba(255,255,255,0.5)',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center',
           }}>
             <ActivityChart />
           </div>
@@ -2776,29 +2809,29 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             display: 'flex', flexDirection: 'column', gap: 12,
             border: '1px solid rgba(255,255,255,0.5)',
           }}>
-            <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22, color: TEXT_DARK, textAlign: 'right' }}>העולם שלי</div>
+            <div style={{ ...cardHead, marginBottom: 12 }}><CardIcon name="world" /><div style={cardTitle}>העולם שלי</div></div>
 
             {/* Stats row */}
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <div style={{ textAlign: 'center', background: 'rgba(212,175,55,0.12)', borderRadius: 14, padding: '8px 14px', border: '1px solid rgba(212,175,55,0.3)' }}>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: '#D4AF37' }}>⭐ {xp}</div>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>XP סה"כ</div>
+                <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>XP סה"כ</div>
               </div>
               <div style={{ textAlign: 'center', background: 'rgba(52,168,83,0.10)', borderRadius: 14, padding: '8px 14px', border: '1px solid rgba(52,168,83,0.25)' }}>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: '#34A853' }}>✓ {totalCorrect}</div>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>תשובות נכונות</div>
+                <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>תשובות נכונות</div>
               </div>
               <div style={{ textAlign: 'center', background: 'rgba(51,81,202,0.10)', borderRadius: 14, padding: '8px 14px', border: '1px solid rgba(51,81,202,0.22)' }}>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_MED }}>🔥 {currentStreak}</div>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ימים ברצף</div>
+                <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>ימים ברצף</div>
               </div>
             </div>
 
             {/* XP level bar */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT }}>רמה {level}</span>
-                <span style={{ fontFamily: "'Rubik', sans-serif", fontSize: 12, color: TEXT_LIGHT }}>{xpInLevel}/{XP_PER_LEVEL} נק׳</span>
+                <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_LIGHT }}>רמה {level}</span>
+                <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_LIGHT }}>{xpInLevel}/{XP_PER_LEVEL} נק׳</span>
               </div>
               <div style={{ height: 7, background: 'rgba(212,175,55,0.15)', borderRadius: 10, overflow: 'hidden' }}>
                 <div style={{ width: `${(xpInLevel / XP_PER_LEVEL) * 100}%`, height: '100%', background: 'rgba(212,175,55,0.75)', borderRadius: 10, transition: 'width 0.4s' }} />
@@ -2806,9 +2839,8 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             </div>
 
             <div style={{ flex: 1 }} />
-            <button onClick={onGoWorld} className="ws-cta-btn"
-              style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '11px 0', fontWeight: 600, fontSize: 16, cursor: 'pointer', fontFamily: "'Rubik', sans-serif", boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}>
-              כניסה לעולם
+            <button onClick={onGoWorld} className="ws-cta">
+              כניסה לעולם<CtaArrow />
             </button>
           </div>
         </div>
@@ -2841,7 +2873,7 @@ function XpBurst({ amount, onDone }: { amount: number; onDone: () => void }) {
         background: 'linear-gradient(135deg,#D4AF37,#F5CC50)',
         borderRadius: 99, padding: '10px 22px',
         boxShadow: '0 4px 24px rgba(212,175,55,0.5)',
-        fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 22,
+        fontFamily: "'Assistant', sans-serif", fontWeight: 700, fontSize: 22,
         color: '#fff', whiteSpace: 'nowrap',
       }}>
         +{amount} XP ⭐
@@ -3443,7 +3475,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   position: 'fixed', top: 124, left: 16, zIndex: 306,
                   background: '#FBF8F1', border: '1px solid rgba(212,175,55,0.55)',
                   borderRadius: 12, boxShadow: '0 10px 28px rgba(11,27,62,0.30)',
-                  padding: 6, minWidth: 200, fontFamily: "'Rubik', sans-serif",
+                  padding: 6, minWidth: 200, fontFamily: "'Assistant', sans-serif",
                 }}
               >
                 <button
@@ -3502,7 +3534,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               color: '#0B1B3E',
               border: 0, borderRadius: 14,
               padding: '8px 14px',
-              fontFamily: "'Rubik', sans-serif",
+              fontFamily: "'Assistant', sans-serif",
               fontSize: 12, fontWeight: 800,
               cursor: splitLocked ? 'not-allowed' : 'pointer',
               boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
@@ -3535,7 +3567,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   borderRadius: 12,
                   boxShadow: '0 10px 28px rgba(11,27,62,0.30)',
                   padding: 6, minWidth: 188,
-                  fontFamily: "'Rubik', sans-serif",
+                  fontFamily: "'Assistant', sans-serif",
                 }}
               >
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#1F3E6C', opacity: 0.7, padding: '4px 10px 6px' }}>
@@ -3563,7 +3595,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         background: 'transparent',
                         border: '1px solid transparent',
                         borderRadius: 8, padding: '9px 10px',
-                        color: '#1F3E6C', fontFamily: "'Rubik', sans-serif",
+                        color: '#1F3E6C', fontFamily: "'Assistant', sans-serif",
                         fontSize: 13, fontWeight: 600, cursor: locked ? 'not-allowed' : 'pointer',
                         minHeight: 40, opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none',
                       }}
@@ -3596,7 +3628,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               color: '#1F2640',
               border: 0, borderRadius: 14,
               padding: '8px 14px',
-              fontFamily: "'Rubik', sans-serif",
+              fontFamily: "'Assistant', sans-serif",
               fontSize: 12, fontWeight: 800,
               cursor: 'pointer',
               boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
@@ -3619,7 +3651,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               color: '#0B1B3E',
               border: 0, borderRadius: 14,
               padding: '8px 14px',
-              fontFamily: "'Rubik', sans-serif",
+              fontFamily: "'Assistant', sans-serif",
               fontSize: 12, fontWeight: 700,
               cursor: 'pointer',
               boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
@@ -3663,7 +3695,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             color: '#7A5C00',
             borderRadius: 12,
             padding: '4px 10px',
-            fontFamily: "'Rubik', sans-serif",
+            fontFamily: "'Assistant', sans-serif",
             fontSize: 12, fontWeight: 700,
           }}>+{q.xp} XP ⭐</div>
         )}
@@ -3680,7 +3712,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               border: '1px solid rgba(127,155,217,0.30)',
               color: TEXT_DARK,
               borderRadius: 8, padding: '6px 10px',
-              cursor: 'pointer', fontFamily: "'Rubik', sans-serif",
+              cursor: 'pointer', fontFamily: "'Assistant', sans-serif",
               fontSize: 12, fontWeight: 700,
               display: 'flex', alignItems: 'center', gap: 6,
             }}
@@ -3697,7 +3729,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               border: '1px solid ' + (fullscreen ? 'rgba(212,175,55,0.55)' : 'rgba(127,155,217,0.30)'),
               color: fullscreen ? '#7A5C00' : TEXT_DARK,
               borderRadius: 8, padding: '6px 10px',
-              cursor: 'pointer', fontFamily: "'Rubik', sans-serif",
+              cursor: 'pointer', fontFamily: "'Assistant', sans-serif",
               fontSize: 12, fontWeight: 700,
               display: 'flex', alignItems: 'center', gap: 6,
             }}
@@ -3746,7 +3778,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 onClick={() => { if (locked) return; handleSetTab(key === 'none' ? 'none' : 'canvas') }}
                 style={{
                   border: 'none', borderRadius: 999, padding: '8px 18px', cursor: locked ? 'not-allowed' : 'pointer',
-                  fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700, minHeight: 40,
+                  fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 700, minHeight: 40,
                   background: active ? 'linear-gradient(135deg,#F5C842,#D4AF37)' : 'transparent',
                   color: active ? '#0B1B3E' : 'rgba(255,255,255,0.85)',
                   transition: 'all 0.15s', opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none',
@@ -3813,7 +3845,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   display: 'flex', alignItems: 'center', gap: 6,
                   background: 'rgba(13,22,40,0.82)', backdropFilter: 'blur(6px)',
                   border: '1px solid rgba(212,175,55,0.35)', borderRadius: 999,
-                  padding: '4px 10px', fontFamily: "'Rubik', sans-serif",
+                  padding: '4px 10px', fontFamily: "'Assistant', sans-serif",
                   fontSize: 12, color: '#e9edf7', boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
                 }}>
                   <button
@@ -3891,7 +3923,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               border: '1px solid rgba(127,155,217,0.5)',
               borderRadius: 22, padding: '8px 16px',
               color: '#fff', cursor: 'pointer',
-              fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700,
+              fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 700,
               boxShadow: '0 8px 24px rgba(0,0,0,0.45)',
               display: 'flex', alignItems: 'center', gap: 8,
             }}
@@ -4016,7 +4048,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 background: 'linear-gradient(135deg,#1F3E6C,#2c4f8a)',
                 color: '#fff', padding: '10px 14px',
                 display: 'flex', alignItems: 'center', gap: 8,
-                fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
+                fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
                 flexShrink: 0,
                 cursor: (tab !== 'none' && !isMobile) ? 'move' : 'default',
                 userSelect: (tab !== 'none' && !isMobile) ? 'none' : undefined,
@@ -4153,7 +4185,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 {boardFullBleed && !isDone && (
                   <span style={{
                     marginInlineStart: 'auto',
-                    fontFamily: "'Rubik', sans-serif",
+                    fontFamily: "'Assistant', sans-serif",
                     fontSize: bigBoard ? 16 : 14,
                     fontWeight: 700,
                     color: 'var(--sh-text-dark)',
@@ -4189,38 +4221,38 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             /* ── Completion panel ── */
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 0', gap: 18 }}>
               <div style={{ fontSize: 60 }}>🏆</div>
-              <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 28, color: TEXT_DARK, textAlign: 'center' }}>
+              <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 28, color: TEXT_DARK, textAlign: 'center' }}>
                 סיימת את הסשן!
               </div>
               <div style={{ display: 'flex', gap: 24, margin: '4px 0' }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#34A853' }}>{correctCount}</div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>נכון</div>
+                  <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>נכון</div>
                 </div>
                 {/* "לשיפור" counts only questions you actually ANSWERED wrong.
                     Questions you moved past unanswered are reported separately
                     as "דילגת" — free forward nav must not look like failure. */}
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#EA4335' }}>{answeredCount - correctCount}</div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>לשיפור</div>
+                  <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>לשיפור</div>
                 </div>
                 {total - answeredCount > 0 && (
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: TEXT_LIGHT }}>{total - answeredCount}</div>
-                    <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>דילגת</div>
+                    <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>דילגת</div>
                   </div>
                 )}
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 32, color: '#D4AF37' }}>
                     {questions.filter((_: any, i: number) => dotStates[i] === 'correct').reduce((s: number, q: any) => s + q.xp, 0)}
                   </div>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>XP הרווחת</div>
+                  <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>XP הרווחת</div>
                 </div>
               </div>
               {/* Accuracy headline — out of the questions you answered, not out
                   of the whole set (skipping shouldn't tank the number). */}
               {answeredCount > 0 && (
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 15, color: TEXT_LIGHT, marginTop: -4 }}>
+                <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_LIGHT, marginTop: -4 }}>
                   דיוק: <span style={{ fontWeight: 800, color: correctCount / answeredCount >= 0.7 ? '#34A853' : '#D4AF37' }}>{Math.round((correctCount / answeredCount) * 100)}%</span>
                   <span style={{ opacity: 0.75 }}> ({correctCount}/{answeredCount} שנענו)</span>
                 </div>
@@ -4229,7 +4261,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 {/* Retry only the mistakes — spaced practice of errors. */}
                 {total - correctCount > 0 && (
                   <button onClick={handleRetryWrong}
-                    style={{ background: 'linear-gradient(135deg,#EA4335,#C5221F)', color: '#fff', border: 'none', borderRadius: 24, padding: '12px 28px', fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px rgba(234,67,53,0.4)', minHeight: 44 }}>
+                    style={{ background: 'linear-gradient(135deg,#EA4335,#C5221F)', color: '#fff', border: 'none', borderRadius: 24, padding: '12px 28px', fontFamily: "'Assistant', sans-serif", fontWeight: 700, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px rgba(234,67,53,0.4)', minHeight: 44 }}>
                     🔁 תרגל מה שפספסת ({total - correctCount})
                   </button>
                 )}
@@ -4237,11 +4269,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   handleQuizComplete()
                   onBack()
                 }}
-                  style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '12px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}>
+                  style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '12px 32px', fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}>
                   חזור לדף הבית
                 </button>
                 <button onClick={handleReset}
-                  style={{ background: 'rgba(255,255,255,0.10)', color: BUTTON_COLOR, border: `2px solid ${BUTTON_COLOR}`, borderRadius: 24, padding: '12px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', minHeight: 44, backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}>
+                  style={{ background: 'rgba(255,255,255,0.10)', color: BUTTON_COLOR, border: `2px solid ${BUTTON_COLOR}`, borderRadius: 24, padding: '12px 32px', fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', minHeight: 44, backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}>
                   סשן נוסף
                 </button>
               </div>
@@ -4257,7 +4289,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   directly above already reads "שאלה X / Y"; two of them just
                   ate ~44px of board height. */}
               {!boardFullBleed && (
-                <div style={{ fontFamily: "'Inter', 'Rubik', sans-serif", fontWeight: 700, fontSize: 18, color: TEXT_DARK, marginBottom: 10, textAlign: 'right' }}>
+                <div style={{ fontFamily: "'Inter', 'Assistant', sans-serif", fontWeight: 700, fontSize: 18, color: TEXT_DARK, marginBottom: 10, textAlign: 'right' }}>
                   שאלה {currentQ + 1} / {total}
                 </div>
               )}
@@ -4371,7 +4403,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 {mcSelected !== null && mcSelected === (q as any).correctIndex && (q as any).answer ? (
                   <div style={{ maxWidth: bigBoard ? 1180 : 640, margin: '0 auto 14px', background: 'linear-gradient(135deg, rgba(52,168,83,0.12), rgba(52,168,83,0.05))', border: '1.5px solid rgba(52,168,83,0.4)', borderRadius: 12, padding: bigBoard ? '16px 22px' : '12px 16px', textAlign: 'right', direction: 'rtl' }} dir="rtl">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <div style={{ fontFamily: "'Rubik', sans-serif", fontWeight: 700, fontSize: 14, color: '#1E7E34' }}>✓ נכון! הנה למה:</div>
+                      <div style={{ fontFamily: "'Assistant', sans-serif", fontWeight: 700, fontSize: 14, color: '#1E7E34' }}>✓ נכון! הנה למה:</div>
                       <ArsenalQuizCaptureChip explanation={(q as any).answer} topicId={selectedTopic} />
                     </div>
                     <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 18 : 15, color: TEXT_DARK, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}><MathText text={(q as any).answer} /></div>
@@ -4413,14 +4445,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                       background: 'rgba(212,175,55,0.12)', color: '#9A7B1A',
                       border: '1.5px dashed rgba(212,175,55,0.6)', borderRadius: 20,
                       padding: '8px 18px', cursor: 'pointer',
-                      fontFamily: "'Rubik', sans-serif", fontSize: 14, fontWeight: 600,
+                      fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
                     }}
                   >
                     🙋 שאל בן אדם
                   </button>
                 )}
                 {helpStatus === 'sending' && (
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>שולח…</div>
+                  <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>שולח…</div>
                 )}
                 {helpStatus === 'pending' && (
                   <div style={{
@@ -4429,7 +4461,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     background: 'rgba(51,81,202,0.10)', color: BUTTON_COLOR,
                     border: '1.5px solid rgba(51,81,202,0.3)', borderRadius: 20,
                     padding: '8px 16px',
-                    fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600,
+                    fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600,
                   }}>
                     🙋 נשלח — ממתין לתשובה מבן אדם
                   </div>
@@ -4440,7 +4472,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     border: '1.5px solid rgba(52,168,83,0.35)', borderRadius: 12,
                     padding: '12px 16px', textAlign: 'right',
                   }}>
-                    <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 700, color: '#1E7E34', marginBottom: 6 }}>
+                    <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 700, color: '#1E7E34', marginBottom: 6 }}>
                       🙋 תשובה מבן אדם:
                     </div>
                     <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
@@ -4490,7 +4522,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   <div style={{ width: 120 }} />
                 ) : (
                   <button onClick={handleReveal} disabled={!answer.trim()}
-                    style={{ background: answer.trim() ? BUTTON_COLOR : '#C8D0E0', color: answer.trim() ? '#fff' : 'rgba(100,110,140,0.75)', border: 'none', borderRadius: 24, padding: '10px 28px', fontFamily: "'Rubik', sans-serif", fontSize: 16, fontWeight: 700, cursor: answer.trim() ? 'pointer' : 'not-allowed', boxShadow: answer.trim() ? '0px 2px 6px #8DA7FF' : 'none', transition: 'all 0.2s', minHeight: 44, opacity: answer.trim() ? 1 : 0.65 }}>
+                    style={{ background: answer.trim() ? BUTTON_COLOR : '#C8D0E0', color: answer.trim() ? '#fff' : 'rgba(100,110,140,0.75)', border: 'none', borderRadius: 24, padding: '10px 28px', fontFamily: "'Assistant', sans-serif", fontSize: 16, fontWeight: 700, cursor: answer.trim() ? 'pointer' : 'not-allowed', boxShadow: answer.trim() ? '0px 2px 6px #8DA7FF' : 'none', transition: 'all 0.2s', minHeight: 44, opacity: answer.trim() ? 1 : 0.65 }}>
                     בדוק תשובה ←
                   </button>
                 )}
@@ -4501,17 +4533,17 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             /* ── Review: show model answer ── */
             <>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>+{q.xp} XP ⭐ אם נכון</div>
+                <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>+{q.xp} XP ⭐ אם נכון</div>
                 {/* Counter hidden on the full-bleed board — it's written in the
                     board's header band instead. */}
                 {!boardFullBleed && (
-                  <div style={{ fontFamily: "'Inter', 'Rubik', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>שאלה {currentQ + 1} / {total}</div>
+                  <div style={{ fontFamily: "'Inter', 'Assistant', sans-serif", fontWeight: 700, fontSize: 20, color: TEXT_DARK }}>שאלה {currentQ + 1} / {total}</div>
                 )}
               </div>
 
               {/* User's answer */}
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: TEXT_LIGHT, marginBottom: 6, textAlign: 'right' }}>התשובה שלך:</div>
+                <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT, marginBottom: 6, textAlign: 'right' }}>התשובה שלך:</div>
                 <div style={{ background: 'var(--sh-answer-bg)', borderRadius: 10, padding: '12px 16px', border: '1.5px solid var(--sh-answer-border)', fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK, lineHeight: 1.7, whiteSpace: 'pre-wrap', textAlign: 'right' }}>
                   {answer}
                 </div>
@@ -4520,7 +4552,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               {/* Model answer */}
               <div style={{ marginBottom: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 13, color: '#34A853', textAlign: 'right', fontWeight: 600 }}>✅ פתרון מלא:</div>
+                  <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: '#34A853', textAlign: 'right', fontWeight: 600 }}>✅ פתרון מלא:</div>
                   <ArsenalQuizCaptureChip explanation={q.answer} topicId={selectedTopic} />
                 </div>
                 <div
@@ -4541,7 +4573,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     padding: '8px 20px', borderRadius: 99,
                     background: dotStates[currentQ] === 'correct' ? 'rgba(52,168,83,0.12)' : 'rgba(234,67,53,0.10)',
                     border: `1.5px solid ${dotStates[currentQ] === 'correct' ? 'rgba(52,168,83,0.4)' : 'rgba(234,67,53,0.35)'}`,
-                    fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 15,
+                    fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 15,
                     color: dotStates[currentQ] === 'correct' ? '#34A853' : '#EA4335',
                   }}>
                     {dotStates[currentQ] === 'correct' ? '✅ Marked correct' : '❌ Marked incorrect'}
@@ -4549,18 +4581,18 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   <div style={{ display: 'flex', gap: 12 }}>
                     {currentQ > 0 && (
                       <button onClick={() => navigateToQuestion(currentQ - 1)}
-                        style={{ background: 'rgba(51,81,202,0.08)', color: BUTTON_COLOR, border: `1.5px solid rgba(51,81,202,0.25)`, borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', minHeight: 44 }}>
+                        style={{ background: 'rgba(51,81,202,0.08)', color: BUTTON_COLOR, border: `1.5px solid rgba(51,81,202,0.25)`, borderRadius: 20, padding: '8px 22px', fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', minHeight: 44 }}>
                         → הקודם
                       </button>
                     )}
                     {currentQ < total - 1 ? (
                       <button onClick={() => navigateToQuestion(currentQ + 1)}
-                        style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', boxShadow: '0 2px 8px rgba(51,81,202,0.3)', minHeight: 44 }}>
+                        style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 20, padding: '8px 22px', fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', boxShadow: '0 2px 8px rgba(51,81,202,0.3)', minHeight: 44 }}>
                         הבא ←
                       </button>
                     ) : (
                       <button onClick={() => setPhase('done')}
-                        style={{ background: '#D4AF37', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 22px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', minHeight: 44 }}>
+                        style={{ background: '#D4AF37', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 22px', fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 14, cursor: 'pointer', minHeight: 44 }}>
                         סיום 🏆
                       </button>
                     )}
@@ -4574,7 +4606,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     padding: '10px 22px', borderRadius: 99, marginBottom: 14,
                     background: autoCheckResult.correct ? 'rgba(52,168,83,0.12)' : 'rgba(234,67,53,0.10)',
                     border: `1.5px solid ${autoCheckResult.correct ? 'rgba(52,168,83,0.4)' : 'rgba(234,67,53,0.35)'}`,
-                    fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 15,
+                    fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 15,
                     color: autoCheckResult.correct ? '#34A853' : '#EA4335',
                   }}>
                     {autoCheckResult.correct
@@ -4583,7 +4615,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   </div>
                   <div>
                     <button onClick={() => handleSelfAssess(autoCheckResult.correct)}
-                      style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '10px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px rgba(51,81,202,0.3)' }}>
+                      style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '10px 32px', fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', boxShadow: '0 2px 8px rgba(51,81,202,0.3)' }}>
                       המשך →
                     </button>
                   </div>
@@ -4591,16 +4623,16 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               ) : (
                 /* Fresh review — non-numeric, fall back to self-assessment */
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontFamily: "'Rubik', sans-serif", fontSize: 16, color: TEXT_MED, marginBottom: 14 }}>
+                  <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_MED, marginBottom: 14 }}>
                     כמה הצלחת? (לא ניתן היה לבדוק אוטומטית)
                   </div>
                   <div style={{ display: 'flex', gap: 14, justifyContent: 'center' }}>
                     <button onClick={() => handleSelfAssess(false)}
-                      style={{ background: 'rgba(234,67,53,0.1)', color: '#EA4335', border: '2px solid rgba(234,67,53,0.35)', borderRadius: 24, padding: '10px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
+                      style={{ background: 'rgba(234,67,53,0.1)', color: '#EA4335', border: '2px solid rgba(234,67,53,0.35)', borderRadius: 24, padding: '10px 32px', fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
                       😅 לא ממש
                     </button>
                     <button onClick={() => handleSelfAssess(true)}
-                      style={{ background: 'rgba(52,168,83,0.1)', color: '#34A853', border: '2px solid rgba(52,168,83,0.35)', borderRadius: 24, padding: '10px 32px', fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
+                      style={{ background: 'rgba(52,168,83,0.1)', color: '#34A853', border: '2px solid rgba(52,168,83,0.35)', borderRadius: 24, padding: '10px 32px', fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
                       ✅ הצלחתי!
                     </button>
                   </div>
@@ -4642,7 +4674,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   borderRadius: 22,
                   padding: bigBoard ? '9px 22px' : '8px 16px',
                   cursor: isFirstQ ? 'default' : 'pointer',
-                  fontFamily: "'Rubik', sans-serif",
+                  fontFamily: "'Assistant', sans-serif",
                   fontSize: bigBoard ? 15 : 14, fontWeight: 700,
                   minHeight: 44,
                 }}
@@ -4662,7 +4694,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   borderRadius: 22,
                   padding: bigBoard ? '10px 30px' : '9px 22px',
                   cursor: 'pointer',
-                  fontFamily: "'Rubik', sans-serif",
+                  fontFamily: "'Assistant', sans-serif",
                   fontSize: bigBoard ? 15 : 14, fontWeight: 700,
                   minHeight: 44,
                   boxShadow: '0 2px 10px rgba(212,175,55,0.40)',
@@ -4726,7 +4758,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     color: active ? '#fff' : TEXT_DARK,
                     border: `1.5px solid ${active ? BUTTON_COLOR : (onTool ? 'rgba(127,155,217,0.55)' : 'rgba(127,155,217,0.35)')}`,
                     borderRadius: 22, padding: '8px 18px',
-                    fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600,
+                    fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600,
                     cursor: locked ? 'not-allowed' : 'pointer', transition: 'all 0.18s ease',
                     boxShadow: active ? '0 4px 14px rgba(51,81,202,0.30)' : (onTool ? '0 2px 8px rgba(0,0,0,0.25)' : 'none'),
                     transform: active ? 'translateY(-1px)' : 'translateY(0)',
@@ -4766,7 +4798,23 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   const [userProgress, setUserProgress] = useState<UserProgress>(() =>
     loadProgress(initializeUser().userId)
   )
-  const [sidebarWidth, setSidebarWidth] = useState(247)
+  /* Two states, not a range. The icon-only mode below 80px is old; what it
+     never had was a deliberate way in and out, or a memory of the choice.
+     It is a fold now, and the width is derived from it. */
+  const RAIL_KEY = 'ws-rail-folded'
+  const RAIL_OPEN = 247
+  const RAIL_FOLDED = 62
+  const [railFolded, setRailFolded] = useState(() => localStorage.getItem(RAIL_KEY) === '1')
+  const sidebarWidth = railFolded ? RAIL_FOLDED : RAIL_OPEN
+  useEffect(() => { localStorage.setItem(RAIL_KEY, railFolded ? '1' : '0') }, [railFolded])
+  const toggleRail = useCallback(() => setRailFolded(v => !v), [])
+  /* Anything fixed to the right edge — the tutor, the pomodoro, the
+     calculator — has to stop at the rail rather than under it, and the rail
+     is draggable between 60 and 360. Publishing the live width as a custom
+     property is what lets those components stay pure CSS. */
+  useEffect(() => {
+    document.documentElement.style.setProperty('--ws-rail-w', sidebarWidth + 'px')
+  }, [sidebarWidth])
   // Distraction-free fullscreen for the practice/learning view. When true,
   // sidebar + topbar are hidden so only the quiz + companion tool remain.
   const [learningFullscreen, setLearningFullscreen] = useState(false)
@@ -4794,14 +4842,13 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
       else mq.removeListener(onChange)
     }
   }, [])
-  const sidebarDragging = useRef(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const sidebarTutRef = useRef<HTMLElement>(null)
   const topbarTutRef = useRef<HTMLElement>(null)
 
   useTutorialStep('study-sidebar', sidebarTutRef, {
     title: 'התפריט שלך',
-    body:  'מכאן עוברים בין דף הבית, נושאי לימוד, חידונים והקאצ\'ים שאספת. אפשר לגרור את הקצה כדי לשנות רוחב.',
+    body:  'מכאן עוברים בין דף הבית, נושאי לימוד, חידונים והקאצ\'ים שאספת. הכפתור שעל הקצה מקפל אותו כשצריך מקום.',
     placement: 'left',
   })
   useTutorialStep('study-topbar', topbarTutRef, {
@@ -4828,61 +4875,32 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
     })()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onSidebarDragStart = useCallback((e: React.MouseEvent) => {
-    sidebarDragging.current = true
-    e.preventDefault()
-    const onMove = (ev: MouseEvent) => {
-      if (!sidebarDragging.current || !rootRef.current) return
-      const rect = rootRef.current.getBoundingClientRect()
-      const fromRight = rect.right - ev.clientX
-      setSidebarWidth(Math.min(360, Math.max(60, fromRight)))
-    }
-    const onUp = () => {
-      sidebarDragging.current = false
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup', onUp)
-    }
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup', onUp)
-  }, [])
-
+  const topicHe = selectedTopic ? (HEBREW_LABELS[selectedTopic] || selectedTopic) : ''
+  const withTopic = (what: string) => (topicHe ? `${topicHe} · ${what}` : what)
   const title =
     internalView === 'home' ? 'דף הבית' :
     internalView === 'courses' ? 'הקורסים שלי' :
-    internalView === 'topics' ? (activeCourse === 'stat-b' ? "סטטיסטיקה ב' — בחר נושא" : activeCourse === 'sql' ? "SQL — בחר נושא" : activeCourse === 'anova' ? "ניתוח שונות — בחר נושא" : "סטטיסטיקה א' — בחר נושא") :
-    'Study Zone'
+    internalView === 'arsenal' ? 'הארסנל שלי' :
+    internalView === 'topics' ? (COURSES.find(c => c.id === activeCourse)?.label ?? '') :
+    internalView === 'lesson' ? withTopic('שיעור') :
+    internalView === 'quiz-intro' ? withTopic('תרגול') :
+    internalView === 'learning' ? withTopic('תרגול') :
+    'אזור למידה'
 
   // ── Topbar context controls ─────────────────────────────────────────────
   // Nav controls that used to live INSIDE the content area (topics' מפה/רשימה
   // toggle + back button; lesson/quiz's back button) now render in the topbar
   // itself, next to the title, so the board/content pane below gets the full
   // remaining height. See TopBar's contextControls prop.
+  /* The topics screen keeps nothing here. Its back and its view switch sit
+     above its own content — back is about this screen, not about the app, and
+     the view switch does not navigate at all: it changes how the same list is
+     drawn, so it belongs beside the list. Per Shirli, option ב. */
   const topBarContextControls: React.ReactNode =
-    internalView === 'topics' ? (
-      <>
-        <button
-          onClick={() => setInternalView('courses')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
-        >
-          → חזרה
-        </button>
-        <div style={{ display: 'flex', gap: 4, background: 'rgba(127,155,217,0.12)', padding: 3, borderRadius: 999, flexShrink: 0 }}>
-          {([['list', '📋 רשימה'], ['mindmap', '🗺️ מפה']] as const).map(([m, lbl]) => {
-            const locked = m === 'mindmap' && !mapUnlocked
-            const tip = locked ? FEATURE_UNLOCKS_BY_ID['mindmap-view']?.descriptionHe : undefined
-            return (
-              <button key={m} onClick={() => { if (!locked) setViewMode(m) }} title={tip} aria-label={tip} aria-disabled={locked || undefined}
-                style={{ border: 'none', borderRadius: 999, padding: '4px 12px', cursor: locked ? 'not-allowed' : 'pointer', fontFamily: "'Rubik', sans-serif", fontSize: 12, fontWeight: 700, background: viewMode === m ? BUTTON_COLOR : 'transparent', color: viewMode === m ? '#fff' : TEXT_MED, transition: 'all 0.15s', opacity: locked ? 0.5 : 1, filter: locked ? 'grayscale(0.8)' : 'none', whiteSpace: 'nowrap' }}>
-                {locked ? '🔒 ' : ''}{lbl}
-              </button>
-            )
-          })}
-        </div>
-      </>
-    ) : (internalView === 'lesson' || internalView === 'quiz-intro' || internalView === 'learning') ? (
+    (internalView === 'lesson' || internalView === 'quiz-intro' || internalView === 'learning') ? (
       <button
         onClick={() => setInternalView('topics')}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Rubik', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
       >
         → חזרה
       </button>
@@ -4967,7 +4985,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
   }
 
   return (
-    <div ref={rootRef} style={{ width: '100%', height: '100%', display: 'flex', overflow: 'hidden', direction: 'rtl', background: PAGE_BG, fontFamily: "'Rubik', 'Assistant', sans-serif" }}>
+    <div ref={rootRef} style={{ width: '100%', height: '100%', display: 'flex', overflow: 'hidden', direction: 'rtl', background: PAGE_BG, fontFamily: "'Assistant', 'Assistant', sans-serif" }}>
       <h1 style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>WaffleStack — דף הבית</h1>
       {/* Mobile hamburger button — only on small screens. Stays clear of the
           dark-mode toggle (top-right) by anchoring to top-right with a left offset. */}
@@ -5016,6 +5034,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
         }
       >
         <Sidebar
+          onToggleCollapse={toggleRail}
           active={internalView}
           onNav={(view) => {
             if (view === 'topics') {
@@ -5031,19 +5050,6 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
           onGoNotebook={() => { window.location.hash = '#notebook'; if (isMobile) setMobileSidebarOpen(false) }}
           onOpenTours={() => { useTutorialStore.getState().setLauncherOpen(true); if (isMobile) setMobileSidebarOpen(false) }}
           width={isMobile ? 260 : sidebarWidth}
-        />
-        {/* Sidebar resize handle — on the left edge (RTL: left is outer edge) */}
-        <div
-          onMouseDown={onSidebarDragStart}
-          title="גרור לשינוי רוחב הסרגל"
-          style={{
-            position: 'absolute', left: 0, top: 0, bottom: 0, width: 6,
-            cursor: 'col-resize', zIndex: 10,
-            background: 'transparent',
-            transition: 'background 0.15s',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(127,155,217,0.35)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
         />
       </nav>
 

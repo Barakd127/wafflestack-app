@@ -228,7 +228,7 @@ export default function CoachmarkTour() {
           cursor: isFirst ? 'not-allowed' : 'pointer',
           padding: '6px 12px',
           borderRadius: 8,
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
         }}
       >
         ← קודם
@@ -238,7 +238,7 @@ export default function CoachmarkTour() {
         style={{
           background: 'transparent', border: 'none',
           color: '#9aa4c7', fontSize: 12, cursor: 'pointer',
-          padding: '4px 6px', fontFamily: "'Rubik', sans-serif",
+          padding: '4px 6px', fontFamily: "'Assistant', sans-serif",
         }}
       >
         דלג
@@ -250,7 +250,7 @@ export default function CoachmarkTour() {
           border: 'none', color: '#fff',
           fontSize: 14, fontWeight: 700, padding: '9px 20px',
           borderRadius: 999, cursor: 'pointer',
-          fontFamily: "'Rubik', sans-serif",
+          fontFamily: "'Assistant', sans-serif",
           boxShadow: '0 4px 16px rgba(91,139,255,0.5)',
         }}
       >
@@ -297,7 +297,7 @@ export default function CoachmarkTour() {
     padding: '16px 18px',
     color: '#f1f5ff',
     boxShadow: '0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.18), 0 0 40px rgba(91,139,255,0.18)',
-    fontFamily: "'Rubik', sans-serif",
+    fontFamily: "'Assistant', sans-serif",
     backdropFilter: 'blur(10px)',
   }
 

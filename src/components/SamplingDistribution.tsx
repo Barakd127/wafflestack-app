@@ -201,7 +201,7 @@ export default function SamplingDistribution() {
 
   return (
     <div dir="rtl" style={{
-      fontFamily: "'Rubik', 'Assistant', sans-serif",
+      fontFamily: "'Assistant', 'Assistant', sans-serif",
       color: C_TEXT_DARK,
       padding: '20px 24px',
       maxWidth: 1200,
@@ -460,7 +460,7 @@ function SampleStrip({ values, statValue }: { values: number[]; statValue: numbe
           />
           <text x={20 + statValue * binW + binW / 2 - 6} y={16}
             textAnchor="end" direction="ltr" fontSize={11} fill={C_SAMPLE_DEEP} fontWeight={700}
-            style={{ fontFamily: "'Inter','Rubik',sans-serif" }}>
+            style={{ fontFamily: "'Inter','Assistant',sans-serif" }}>
             x̄ = {statValue.toFixed(2)}
           </text>
         </>
@@ -531,7 +531,7 @@ function SamplingDistHist({ values, mu, stat, theorySE }: {
         stroke={C_POP} strokeWidth={2} />
       <text x={xToPx(mu) - 6} y={16} textAnchor="end" direction="ltr"
         fontSize={11} fill={C_POP} fontWeight={700}
-        style={{ fontFamily: "'Inter','Rubik',sans-serif" }}>
+        style={{ fontFamily: "'Inter','Assistant',sans-serif" }}>
         μ = {mu.toFixed(2)}
       </text>
       {/* empirical mean marker — same convention: label LEFT of line, LTR */}
@@ -541,7 +541,7 @@ function SamplingDistHist({ values, mu, stat, theorySE }: {
             stroke="#b91c1c" strokeWidth={2} strokeDasharray="4,3" />
           <text x={xToPx(empMean) - 6} y={32} textAnchor="end" direction="ltr"
             fontSize={11} fill="#b91c1c" fontWeight={700}
-            style={{ fontFamily: "'Inter','Rubik',sans-serif" }}>
+            style={{ fontFamily: "'Inter','Assistant',sans-serif" }}>
             x̄ = {empMean.toFixed(2)}
           </text>
         </>
@@ -563,12 +563,12 @@ const presetBtn: React.CSSProperties = {
   background: 'rgba(31,62,108,0.08)', color: C_POP,
   border: `1px solid rgba(31,62,108,0.30)`,
   borderRadius: 8, padding: '4px 10px',
-  fontFamily: "'Rubik', sans-serif", fontWeight: 600, fontSize: 12,
+  fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 12,
   cursor: 'pointer',
 }
 const primaryBtn: React.CSSProperties = {
   background: C_POP, color: '#fff', border: 0,
-  borderRadius: 10, padding: '8px 16px', fontFamily: "'Rubik', sans-serif",
+  borderRadius: 10, padding: '8px 16px', fontFamily: "'Assistant', sans-serif",
   fontWeight: 700, fontSize: 13, cursor: 'pointer',
   boxShadow: '0 4px 12px rgba(31,62,108,0.20)',
 }

@@ -135,7 +135,7 @@ export class NoteContainerShapeUtil extends ShapeUtil<NoteContainerShape> {
           height: h,
           pointerEvents: 'all',
           // Phase B.2 polish — calm, neat typography per "neat & inviting writing field" brief
-          fontFamily: "'Assistant', 'Rubik', 'Segoe UI', sans-serif",
+          fontFamily: "'Assistant', 'Assistant', 'Segoe UI', sans-serif",
           fontSize,
           lineHeight: 1.55,
           padding: NOTE_CONTAINER_PAD + 4, // 16 → 20
@@ -190,7 +190,7 @@ export class NoteContainerShapeUtil extends ShapeUtil<NoteContainerShape> {
                   borderRadius: 10,
                   padding: '1px 8px',
                   fontSize: 11,
-                  fontFamily: "'Rubik', sans-serif",
+                  fontFamily: "'Assistant', sans-serif",
                   cursor: 'pointer',
                 }}
               >
@@ -207,7 +207,7 @@ export class NoteContainerShapeUtil extends ShapeUtil<NoteContainerShape> {
                   color: '#7A5C00',
                   padding: '0 8px',
                   fontSize: 11,
-                  fontFamily: "'Rubik', sans-serif",
+                  fontFamily: "'Assistant', sans-serif",
                   cursor: 'pointer',
                 }}
               >

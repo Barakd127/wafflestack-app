@@ -118,7 +118,7 @@ export default function VirtualKeyboardCloser() {
         border: 0,
         borderRadius: 24,
         padding: '10px 18px',
-        fontFamily: "'Rubik', sans-serif",
+        fontFamily: "'Assistant', sans-serif",
         fontSize: 13,
         fontWeight: 800,
         cursor: 'pointer',

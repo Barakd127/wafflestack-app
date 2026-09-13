@@ -59,26 +59,75 @@ export default function TourLauncher() {
     setOpen(false)
   }
 
+
+  // Geometry of the shared top-bar menu frame, read live because this panel is
+  // portalled out of it. See the data-ws-menuzone div in StudyHub.
+  const [zone, setZone] = useState<{ top: number; left: number; width: number } | null>(null)
+  useEffect(() => {
+    if (!open) return
+    const read = () => {
+      const el = document.querySelector('[data-ws-menuzone]')
+      if (!el) return
+      const r = el.getBoundingClientRect()
+      setZone({ top: r.bottom + 10, left: r.left, width: r.width })
+    }
+    read()
+    window.addEventListener('resize', read)
+    window.addEventListener('scroll', read, true)
+    return () => {
+      window.removeEventListener('resize', read)
+      window.removeEventListener('scroll', read, true)
+    }
+  }, [open])
+
   const pulse = !!pendingTourId && !open
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div>
       <style>{'@keyframes ws-tourbtn-pulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,0.5)}50%{box-shadow:0 0 0 7px rgba(99,102,241,0)}}'}</style>
       <Tooltip label="סיורים מודרכים" description="בחר פיצ'ר וצפה בהדגמה">
         <button
+          onMouseEnter={e => { if (!open) e.currentTarget.style.background = 'rgba(31,62,108,0.07)' }}
+          onMouseLeave={e => { if (!open) e.currentTarget.style.background = 'transparent' }}
           data-tour="tour-btn"
           onClick={() => setOpen(o => !o)}
           aria-haspopup="menu"
           aria-expanded={open}
           style={{
             position: 'relative',
-            background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.3)',
-            borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
-            color: '#6366f1', fontSize: 12, fontFamily: "'Rubik', sans-serif", fontWeight: 600,
-            animation: pulse ? 'ws-tourbtn-pulse 1.4s ease-out infinite' : undefined,
+            background: open ? 'rgba(31,62,108,0.14)' : 'transparent', border: 'none',
+            borderRadius: 10, width: 40, height: 40, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#2530A6', fontFamily: "'Assistant', sans-serif",
+            transition: 'background .15s ease',
           }}
         >
-          🎓 סיור
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden
+               {...(open
+                 ? { fill: 'currentColor', fillRule: 'evenodd' as const }
+                 : { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8,
+                     strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const })}>
+            {open ? (
+              <>
+                <mask id="ws-qmark-cut">
+                  <rect width="24" height="24" fill="#fff" />
+                  <g transform="translate(12 12) scale(0.85) translate(-12 -12)">
+                    <path d="M12 5.4c-2.4 0-4.15 1.45-4.45 3.44a1.38 1.38 0 0 0 2.73.42c.13-.85.8-1.1 1.72-1.1.97 0 1.63.51 1.63 1.27 0 .63-.3 1.02-1.18 1.65-1.13.82-1.83 1.64-1.83 3.11v.41a1.38 1.38 0 0 0 2.76 0v-.33c0-.63.25-.96 1.04-1.53 1.19-.86 1.98-1.81 1.98-3.37 0-2.25-1.83-3.97-4.4-3.97z" />
+                    <path d="M12 16.5a1.65 1.65 0 1 1 0 3.3 1.65 1.65 0 0 1 0-3.3z" />
+                  </g>
+                </mask>
+                <path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20z" mask="url(#ws-qmark-cut)" />
+              </>
+            ) : (
+              <>
+                <circle cx="12" cy="12" r="9" />
+                <g transform="translate(12 12) scale(0.85) translate(-12 -12)">
+                  <path d="M9.6 9.3a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.6" />
+                  <circle cx="12" cy="17" r=".7" fill="currentColor" />
+                </g>
+              </>
+            )}
+          </svg>
           {pulse && (
             <span style={{
               position: 'absolute', top: -4, insetInlineEnd: -4, width: 9, height: 9,
@@ -94,12 +143,13 @@ export default function TourLauncher() {
           <div
             role="menu" dir="rtl"
             style={{
-              position: 'fixed', top: 64, insetInlineEnd: 12, zIndex: 10_001,
-              width: 320, maxWidth: 'calc(100vw - 24px)', maxHeight: '78vh', overflowY: 'auto',
+              position: 'fixed', zIndex: 10_001,
+              top: zone?.top ?? 64, left: zone?.left ?? 12, width: zone?.width ?? 230,
+              maxHeight: '78vh', overflowY: 'auto',
               background: '#fff', borderRadius: 14,
               border: '1px solid rgba(99,102,241,0.25)',
               boxShadow: '0 18px 50px rgba(0,0,0,0.22)',
-              padding: 12, fontFamily: "'Rubik', sans-serif",
+              padding: 12, fontFamily: "'Assistant', sans-serif",
             }}
           >
             <div style={{ fontWeight: 800, fontSize: 15, color: '#1F2640', marginBottom: 2 }}>סיורים מודרכים</div>
