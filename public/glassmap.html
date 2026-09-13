@@ -767,10 +767,10 @@ input,textarea{background:none;border:0;outline:none;}
     <div class="gm-headtools">
       <div class="gm-frostseg" id="frostSeg" data-float="frost" data-chrome="1" role="group" aria-label="שקיפות הזכוכית"><button class="gm-seg" data-frost=".85" aria-pressed="true" title="זכוכית חלבית — לכתיבה"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg><span>מיקוד</span></button><button class="gm-seg" data-frost=".4" aria-pressed="false" title="חצי שקוף — להדגמה על העיר"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg><span>הדגמה</span></button><button class="gm-seg" data-frost="0" aria-pressed="false" title="זכוכית שקופה — רואים את העיר"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M10 21V11h6v10"/><path d="M16 21v-7l3 1v6"/></svg><span>עיר</span></button></div><div class="gm-qpill" id="qPill" data-float="qpill" data-chrome="1" hidden><button class="gm-btn" id="qLayerToggle" aria-pressed="false" title="שכבת שאלות — questions layer: brighten open questions and their path"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg><span id="qCountTxt" class="tnum gm-bidi">שאלות פתוחות: <bdi>0</bdi></span></button><button class="gm-btn icon" id="qCopyBtn" title="העתק שאלות פתוחות ל-Claude — copy open questions for Claude" aria-label="Copy open questions for Claude"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button><label class="gm-q-notes-toggle gm-bidi" title="כלול פתקים מהאותו ענף בהעתקה"><input type="checkbox" id="qIncludeNotes"><span>כולל פתקים</span></label></div><button class="gm-btn icon" id="exportBtn" title="ייצוא / ייבוא — Export / Import" aria-label="Export or import"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></button>
       <div class="gm-menu gm-glass" id="exportMenu" data-chrome="1" hidden>
-        <button data-act="exp-json"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M9 13v4M15 13v4"/></svg> ייצוא JSON — Export JSON</button>
-        <button data-act="exp-md"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M8 13h8M8 17h5"/></svg> ייצוא Markdown — Export Markdown</button>
+        <button data-act="exp-json" title="Export JSON" aria-label="Export JSON"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M9 13v4M15 13v4"/></svg> ייצוא JSON</button>
+        <button data-act="exp-md" title="Export Markdown" aria-label="Export Markdown"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M8 13h8M8 17h5"/></svg> ייצוא Markdown</button>
         <hr>
-        <button data-act="imp"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg> ייבוא — Import…</button>
+        <button data-act="imp" title="Import…" aria-label="Import"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg> ייבוא…</button>
       </div>
       <input type="file" id="importFile" accept=".json,.md" hidden>
       <button class="gm-btn icon" id="themeBtn" title="אור / חושך — Light / dark" aria-label="Toggle theme"><svg class="gm-i i-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></svg><svg class="gm-i i-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
@@ -1070,12 +1070,12 @@ function readLocal() {
   try {
     var backupKey = LS_KEY + ':unreadable:' + Date.now();
     localStorage.setItem(backupKey, raw);
-    LS_RECOVERY_MSG = 'המפה השמורה לא הייתה קריאה; נשמר גיבוי של המקור — the saved map could not be read; the original was kept as a backup (' + backupKey + ')';
+    LS_RECOVERY_MSG = 'המפה השמורה לא הייתה קריאה; נשמר גיבוי של המקור (<bdi>' + backupKey + '</bdi>)';
   } catch (e2) {
     /* Even the backup write failed (quota?). Leave LS_KEY completely
        untouched either way — refusing to seed-overwrite it is still the
        safe default even without a confirmed backup — and say so plainly. */
-    LS_RECOVERY_MSG = 'המפה השמורה לא הייתה קריאה וגם הגיבוי נכשל; המקור לא נגע בו — the saved map could not be read and the backup itself failed; the original was left untouched';
+    LS_RECOVERY_MSG = 'המפה השמורה לא הייתה קריאה וגם הגיבוי נכשל; המקור לא נגע בו';
   }
   return null;
 }
@@ -1106,7 +1106,7 @@ function writeLocal() {
         (other.links || []).forEach(function (l) { if (l && l.id != null && !mineL[l.id]) S.links.push(l); });
         if (addedN && Date.now() - CONFLICT_WARN_AT > 4000) {
           CONFLICT_WARN_AT = Date.now();
-          toast('מפה זו נשמרה גם בכרטיסייה אחרת, מוזג — this map was saved in another tab too; merged ' + addedN + ' item(s)');
+          toast('מפה זו נשמרה גם בכרטיסייה אחרת, מוזג: <bdi>' + addedN + '</bdi>');
         }
       }
     }
@@ -1115,7 +1115,7 @@ function writeLocal() {
   } catch (e) {
     if (Date.now() - QUOTA_WARN_AT > 4000) {
       QUOTA_WARN_AT = Date.now();
-      toast('שגיאה בשמירה — save error: storage quota is full, this change was not saved');
+      toast('שגיאה בשמירה');
     }
   }
 }
@@ -1220,16 +1220,16 @@ function applyState(json) {
   return true;
 }
 function undo() {
-  if (!UNDO.length) { toast('אין מה לבטל — Nothing to undo'); return; }
+  if (!UNDO.length) { toast('אין מה לבטל'); return; }
   REDO.push(JSON.stringify(S));
   applyState(UNDO.pop());
-  toast('בוטל — Undone');
+  toast('בוטל');
 }
 function redo() {
-  if (!REDO.length) { toast('אין מה לשחזר — Nothing to redo'); return; }
+  if (!REDO.length) { toast('אין מה לשחזר'); return; }
   UNDO.push(JSON.stringify(S));
   applyState(REDO.pop());
-  toast('שוחזר — Redone');
+  toast('שוחזר');
 }
 /* Replacing the whole state (a host `gm:load`, or a file import) is always
    allowed to be undone too — snapshot first, exactly like a normal edit. */
@@ -1487,8 +1487,16 @@ function positionRelLabels(at) {
   S.links.forEach(function (l) {
     var a = at[l.from], b = at[l.to]; if (!a || !b) return;
     var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    /* Coordinator fix: a relation label pill stayed sharp even when both of
+       its endpoints were hazed (it had no haze logic at all). Rule: haze the
+       label UNLESS at least one endpoint is kept — i.e. only haze it when
+       BOTH ends are hazed; if either end is still sharp (kept by the active
+       lens/radar/solo/questions filter), the label stays legible too. This is
+       deliberately AND, not OR — the wire itself (relPaths(), above) already
+       fades on EITHER endpoint being hazed, a separate, coarser effect. */
+    var haze = a.el.classList.contains('hazed') && b.el.classList.contains('hazed');
     var pill = document.createElement('div');
-    pill.className = 'gm-rellabel gm-glass gm-bidi';
+    pill.className = 'gm-rellabel gm-glass gm-bidi' + (haze ? ' hazed' : '');
     pill.dataset.link = l.id;
     pill.style.left = mx.toFixed(1) + 'px'; pill.style.top = my.toFixed(1) + 'px';
     pill.innerHTML = '<span class="gm-relttl">' + esc(l.label || '···') + '</span><button class="gm-relx" data-dellink="' + l.id + '" aria-label="Remove relation" title="הסר קשר — remove"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>';
@@ -1819,7 +1827,7 @@ function editSelected(onCancel) {
 /* Open the body sheet for the selected node's notes (key `E`). */
 function editSelectedBody() {
   var node = UI.sel && N(UI.sel);
-  if (!node) { toast('בחר נושא קודם — select a node first'); return; }
+  if (!node) { toast('בחר נושא קודם'); return; }
   openBodySheet(node.id);
 }
 
@@ -1872,7 +1880,7 @@ function growSiblingBefore() {
 function insertParent() {
   var node = UI.sel && N(UI.sel);
   if (!node) return null;
-  if (!node.parent) { toast('לשורש אין הורה — the root has no parent to insert above'); return null; }
+  if (!node.parent) { toast('לשורש אין הורה'); return null; }
   var p = { id: uid('n'), parent: node.parent, title: '', body: '', accent: node.accent };
   var idx = S.nodes.indexOf(node);
   S.nodes.splice(idx, 0, p);
@@ -1884,7 +1892,7 @@ function insertParent() {
    clone out fresh keeps it from landing exactly on top of the original. */
 function duplicateNode(id) {
   var orig = N(id); if (!orig) return null;
-  if (!orig.parent) { toast('אי אפשר לשכפל את השורש — cannot duplicate the root'); return null; }
+  if (!orig.parent) { toast('אי אפשר לשכפל את השורש'); return null; }
   var clones = [];
   /* D-safety (Barak, 13.09): spread the source node first so ANY field it
      carries survives the clone — img/diagram, and anything a future
@@ -1955,7 +1963,7 @@ function deleteIds(ids) {
   if (UI.sel && d[UI.sel]) UI.sel = null;
   Object.keys(UI.marks).forEach(function (id) { if (d[id]) delete UI.marks[id]; });
   save(); render();
-  toast('נמחקו ' + n + ' — Deleted ' + n + ' — Ctrl+Z לביטול / to undo');
+  toast('נמחקו <bdi>' + n + '</bdi> — <kbd dir="ltr">Ctrl+Z</kbd> לביטול', { html: true });
 }
 function markedIds() { return Object.keys(UI.marks).filter(function (id) { return N(id); }); }
 function clearMarks() { UI.marks = {}; }
@@ -2056,7 +2064,7 @@ function closeFind() {
 }
 function findJumpFirst() {
   var hit = findMatches(); if (!hit) return;
-  var id = Object.keys(hit)[0]; if (!id) { toast('אין תוצאות — no matches'); return; }
+  var id = Object.keys(hit)[0]; if (!id) { toast('אין תוצאות'); return; }
   pushJumpHistory();   /* A3: find-Enter is one of the listed "programmatic jump" triggers */
   selNode(id);
 }
@@ -2068,11 +2076,11 @@ function findJumpFirst() {
    cancels first, ahead of clearing marks or deselecting (contract's Esc
    ordering). */
 function startRelation() {
-  if (!UI.sel) { toast('בחר נושא קודם — select a node first'); return; }
+  if (!UI.sel) { toast('בחר נושא קודם'); return; }
   UI.relFrom = UI.sel;
   el('#mapwrap').classList.add('relmode');
   render();
-  toast('קשר: לחץ על נושא יעד, Esc לביטול — relation: click a target, Esc to cancel');
+  toast('קשר: לחץ על נושא יעד, <kbd dir="ltr">Esc</kbd> לביטול', { html: true });
 }
 function cancelRelation() {
   UI.relFrom = null;
@@ -2084,7 +2092,7 @@ function completeRelation(toId) {
   cancelRelation();
   if (!fromId || fromId === toId) return;
   var exists = S.links.some(function (l) { return (l.from === fromId && l.to === toId) || (l.from === toId && l.to === fromId); });
-  if (exists) { toast('כבר קיים קשר — a relation already exists there'); return; }
+  if (exists) { toast('כבר קיים קשר'); return; }
   /* D1 (relation variant) fix: this used to save() the blank-labelled link
      immediately, then save() AGAIN when the label's inline edit committed —
      one Ctrl+L gesture, two undo entries, so a single Ctrl+Z only reverted
@@ -2114,9 +2122,9 @@ function deleteLink(id) {
 /* ── collapse (Ctrl+/) ──────────────────────────────────────────────────── */
 function toggleCollapse() {
   var node = UI.sel && N(UI.sel);
-  if (!node) { toast('בחר נושא קודם — select a node first'); return; }
+  if (!node) { toast('בחר נושא קודם'); return; }
   var kids = childrenOf(node.id);
-  if (!kids.length && !node.collapsed) { toast('אין תת-נושאים לקפל — nothing to collapse'); return; }
+  if (!kids.length && !node.collapsed) { toast('אין תת-נושאים לקפל'); return; }
   node.collapsed = !node.collapsed;
   save(); render();
 }
@@ -2237,19 +2245,19 @@ function mapKeys(ev) {
       if (DEL_ARMED === 1 && DEL_ARMED_FOR === armKey) { DEL_ARMED = 0; DEL_ARMED_FOR = ''; deleteIds(marked); return; }
       DEL_ARMED = 1; DEL_ARMED_FOR = armKey;
       setTimeout(function () { DEL_ARMED = 0; DEL_ARMED_FOR = ''; }, 4000);
-      toast('לחץ Delete שוב למחיקת ' + marked.length + ' — press Delete again to remove ' + marked.length);
+      toast('לחץ <kbd dir="ltr">Delete</kbd> שוב למחיקת <bdi>' + marked.length + '</bdi>', { html: true });
       return;
     }
     if (!UI.sel) return;
     var node = N(UI.sel); if (!node) return;
-    if (!node.parent) { toast('אי אפשר למחוק את השורש — the root can’t be deleted'); return; }
+    if (!node.parent) { toast('אי אפשר למחוק את השורש'); return; }
     var kids = descendantsOf(node.id).length;
     if (!kids) { deleteIds([node.id]); return; }
     var armKeyN = 'n:' + node.id;
     if (DEL_ARMED === 1 && DEL_ARMED_FOR === armKeyN) { DEL_ARMED = 0; DEL_ARMED_FOR = ''; deleteIds([node.id]); return; }
     DEL_ARMED = 1; DEL_ARMED_FOR = armKeyN;
     setTimeout(function () { DEL_ARMED = 0; DEL_ARMED_FOR = ''; }, 4000);
-    toast('לחץ Delete שוב — press Delete again (כולל ' + kids + ' תת-נושאים / incl. ' + kids + ' below)');
+    toast('לחץ <kbd dir="ltr">Delete</kbd> שוב (כולל <bdi>' + kids + '</bdi> תת-נושאים)', { html: true });
   }
 }
 document.addEventListener('keydown', mapKeys);
@@ -2420,20 +2428,20 @@ function goToJump(snap) {
   animateMap(snap.view.x, snap.view.y, snap.view.z, 460);
 }
 function historyBack() {
-  if (!JUMP_HIST.length) { toast('אין עוד היסטוריה — no more history'); return; }
+  if (!JUMP_HIST.length) { toast('אין עוד היסטוריה'); return; }
   JUMP_FUTURE.push(jumpSnapshot());
   goToJump(JUMP_HIST.pop());
 }
 function historyForward() {
-  if (!JUMP_FUTURE.length) { toast('אין קדימה — nothing to redo'); return; }
+  if (!JUMP_FUTURE.length) { toast('אין קדימה'); return; }
   JUMP_HIST.push(jumpSnapshot());
   goToJump(JUMP_FUTURE.pop());
 }
 function diveOneLevel() {
   var cur = UI.sel && N(UI.sel);
-  if (!cur) { toast('בחר נושא קודם — select a node first'); return; }
+  if (!cur) { toast('בחר נושא קודם'); return; }
   var kids = childrenOf(cur.id);
-  if (!kids.length) { toast('אין תת-נושאים — no children'); return; }
+  if (!kids.length) { toast('אין תת-נושאים'); return; }
   pushJumpHistory();
   if (cur.collapsed) { cur.collapsed = false; save(); }
   UI.sel = kids[0].id;
@@ -2442,7 +2450,7 @@ function diveOneLevel() {
 }
 function surfaceOneLevel() {
   var cur = UI.sel && N(UI.sel);
-  if (!cur || cur.parent == null) { toast('כבר בשורש — already at the root'); return; }
+  if (!cur || cur.parent == null) { toast('כבר בשורש'); return; }
   pushJumpHistory();
   UI.sel = cur.parent;
   render();
@@ -2512,7 +2520,7 @@ function hitsAny(cx, cy, hw, hh, boxes) {
 function cycleKind(dir) {
   var ids = markedIds();
   if (!ids.length) {
-    if (!UI.sel) { toast('בחר נושא קודם — select a node first'); return; }
+    if (!UI.sel) { toast('בחר נושא קודם'); return; }
     ids = [UI.sel];
   }
   ids.forEach(function (id) {
@@ -2531,7 +2539,7 @@ function cycleKind(dir) {
    empty on commit → removed entirely rather than kept as a blank chip. */
 function editBridge() {
   var node = UI.sel && N(UI.sel);
-  if (!node) { toast('בחר נושא קודם — select a node first'); return; }
+  if (!node) { toast('בחר נושא קודם'); return; }
   var had = typeof node.bridge === 'string';
   if (!had) node.bridge = '';
   UI.editingBridge = node.id;
@@ -2586,7 +2594,7 @@ function markQuestionAnswered(id) {
   n.q.answered = new Date().toISOString();
   save(); render();
   if (el('#bodySheet.open')) openBodySheet(id);  /* refresh the open sheet in place */
-  toast('סומן כנענה — marked answered');
+  toast('סומן כנענה');
 }
 /* The questions layer: brighten every open question AND its full path back
    to the root, dim everything else — combines with lens/radar/solo exactly
@@ -2667,7 +2675,7 @@ function refreshRadarExpansion() {
 }
 function setRadar(on) {
   if (on) {
-    if (!UI.sel) { toast('בחר נושא קודם — select a node first'); return; }
+    if (!UI.sel) { toast('בחר נושא קודם'); return; }
     UI.radar = true;
     UI.radarExpanded = [];
     refreshRadarExpansion();
@@ -2999,7 +3007,7 @@ function mountMap() {
           }
         });
         render();
-        toast(hit ? 'נבחרו ' + hit + ' — chosen' : 'שום דבר בתחום — nothing in that sweep');
+        toast(hit ? 'נבחרו <bdi>' + hit + '</bdi>' : 'שום דבר בתחום', { html: true });
       } else { schedulePersistView(); }
       return;
     }
@@ -3344,11 +3352,11 @@ function openBodySheet(id) {
   if (isQ) {
     var answered = node.q && node.q.status === 'answered';
     sheet.innerHTML =
-      '<header><h2 id="bodySheetTitle" class="gm-bidi">' + esc(node.title || 'שאלה — Question') + '</h2>' + closeBtn + '</header>' +
+      '<header><h2 id="bodySheetTitle" class="gm-bidi">' + esc(node.title || 'שאלה') + '</h2>' + closeBtn + '</header>' +
       '<div class="pad">' +
-        '<textarea class="gm-body-ta gm-bidi" id="qAnswerTa" dir="auto" placeholder="כתוב תשובה… — write an answer…">' + esc(node.answer || '') + '</textarea>' +
-        '<button class="gm-btn on" id="qMarkAnswered"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>סמן כנענה — mark answered</span></button>' +
-        (answered ? '<div class="gm-bidi" style="font-size:11px;color:var(--sh-text-med)">נענה — answered ' + esc(new Date(node.q.answered).toLocaleString()) + '</div>' : '') +
+        '<textarea class="gm-body-ta gm-bidi" id="qAnswerTa" dir="auto" placeholder="כתוב תשובה…" title="Write an answer">' + esc(node.answer || '') + '</textarea>' +
+        '<button class="gm-btn on" id="qMarkAnswered" title="Mark answered" aria-label="Mark answered"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>סמן כנענה</span></button>' +
+        (answered ? '<div class="gm-bidi" style="font-size:11px;color:var(--sh-text-med)">נענה ב-<bdi>' + esc(new Date(node.q.answered).toLocaleString('he')) + '</bdi></div>' : '') +
       '</div>';
   } else {
     sheet.innerHTML =
@@ -3430,7 +3438,7 @@ function renderSwitcher() {
   el('#switcherList').innerHTML = results.length ? results.map(function (r, i) {
     return '<div class="gm-switch-row gm-bidi' + (i === UI.switcher.idx ? ' active' : '') + '" data-swidx="' + i + '">' +
       '<div>' + chromeTxt(r.text) + '</div><div class="sub gm-bidi">' + chromeTxt(r.crumb) + '</div></div>';
-  }).join('') : '<div class="gm-switch-row" style="opacity:.6">אין תוצאות — no matches</div>';
+  }).join('') : '<div class="gm-switch-row" style="opacity:.6">אין תוצאות</div>';
 }
 function openSwitcher() {
   UI.switcher = { q: '', idx: 0, results: [] };
@@ -3545,17 +3553,17 @@ function kbdify(s) {
 }
 function renderHelp() {
   el('#helpBox').innerHTML =
-    '<h2>מקשי GlassMap — GlassMap shortcuts</h2>' +
-    '<div class="sub">תואם XMind, פעיל כשלא עורכים טקסט — XMind-compatible, active when nothing is being edited</div>' +
+    '<h2 title="GlassMap shortcuts">מקשי GlassMap</h2>' +
+    '<div class="sub" title="XMind-compatible, active when nothing is being edited">תואם XMind, פעיל כשלא עורכים טקסט</div>' +
     '<table>' + SHORTCUTS.map(function (r) {
       return '<tr><td class="k">' + kbdify(r[0]) + '</td><td class="he">' + esc(r[1]) + '</td><td class="en">' + esc(r[2]) + '</td></tr>';
     }).join('') + '</table>' +
-    '<h2 style="margin-top:16px;font-size:15px">סוגי נושאים (K / Shift+K) — Node kinds</h2>' +
+    '<h2 style="margin-top:16px;font-size:15px" title="Node kinds">סוגי נושאים (<kbd dir="ltr">K</kbd> / <kbd dir="ltr">Shift+K</kbd>)</h2>' +
     '<table>' + KIND_LEGEND.map(function (r) {
       return '<tr><td class="k"><span class="gm-swatch gm-swatch-' + r[0] + '" aria-hidden="true">' + esc(KIND_GLYPH[r[0]] || '') + '</span></td>' +
         '<td class="he">' + esc(r[1]) + '</td><td class="en">' + esc(r[2]) + '</td></tr>';
     }).join('') + '</table>' +
-    '<button class="gm-btn close" data-close-help>סגור — Close</button>';
+    '<button class="gm-btn close" data-close-help title="Close" aria-label="Close">סגור</button>';
 }
 
 /* ── export / import ─────────────────────────────────────────────────────
@@ -3576,13 +3584,13 @@ function downloadText(filename, text, mime) {
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   } catch (e) {
-    toast('לא ניתן להוריד כאן — could not download from this view');
+    toast('לא ניתן להוריד כאן');
   }
 }
 function doExportJSON() {
   var name = safeFileName(S.title) + '.glassmap.json';
   downloadText(name, JSON.stringify(S, null, 2), 'application/json');
-  toast('נשמר ' + bdi(name) + ' — Saved ' + bdi(name), { html: true });
+  toast('נשמר ' + bdi(name), { html: true });
 }
 /* Images/diagrams inside the outline: an image is never inlined as data —
    a placeholder HTML comment only (contract: "writes an image line only as
@@ -3630,7 +3638,7 @@ function buildMarkdownOutline() {
 function doExportMarkdown() {
   var name = safeFileName(S.title) + '.md';
   downloadText(name, buildMarkdownOutline(), 'text/markdown');
-  toast('נשמר ' + bdi(name) + ' — Saved ' + bdi(name), { html: true });
+  toast('נשמר ' + bdi(name), { html: true });
 }
 /* Import: this file's own JSON, or a WaffleTask/WaffleNotes export
    (`projects` → depth-1 nodes under root, `tasks` with `parent` → tree). */
@@ -3659,7 +3667,7 @@ function importForeign(x) {
 function importText(txt, filename) {
   var parsed;
   try { parsed = JSON.parse(txt); } catch (e) {
-    toast('הקובץ אינו JSON תקין — that file is not valid JSON');
+    toast('הקובץ אינו JSON תקין');
     return;
   }
   var own = normalise(JSON.parse(JSON.stringify(parsed)));
@@ -3677,7 +3685,7 @@ function importText(txt, filename) {
     replaceState(normalise(foreign) || foreign, 'יובא מ-WaffleTask — imported from WaffleTask/WaffleNotes');
     return;
   }
-  toast('לא זוהתה צורת קובץ — file shape not recognised');
+  toast('לא זוהתה צורת קובץ');
 }
 
 /* ── theme ───────────────────────────────────────────────────────────────
@@ -3849,7 +3857,7 @@ document.addEventListener('change', function (ev) {
   if (ev.target.id !== 'importFile') return;
   var f = ev.target.files && ev.target.files[0]; if (!f) return;
   f.text().then(function (txt) { importText(txt, f.name); }).catch(function () {
-    toast('לא ניתן לקרוא את הקובץ — could not read that file');
+    toast('לא ניתן לקרוא את הקובץ');
   });
   ev.target.value = '';
 });
@@ -3874,7 +3882,7 @@ document.addEventListener('change', function (ev) {
   el('#mapwrap').focus();
   /* D-safety: readLocal() ran long before toast() existed — surface its
      message now that it does. */
-  if (LS_RECOVERY_MSG) { toast(LS_RECOVERY_MSG); LS_RECOVERY_MSG = null; }
+  if (LS_RECOVERY_MSG) { toast(LS_RECOVERY_MSG, { html: true }); LS_RECOVERY_MSG = null; }
 })();
 </script>
 
@@ -4110,7 +4118,17 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     '.gm-eq-search:focus{outline:2px solid var(--gm-gold);outline-offset:1px;}' +
     ':root[data-theme="dark"] .gm-eq-search{background:rgba(10,15,30,.55);color:#e2e8f0;border-color:rgba(255,255,255,.16);}' +
     '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gm-eq-search{background:rgba(10,15,30,.55);color:#e2e8f0;border-color:rgba(255,255,255,.16);}}' +
-    '.gm-eq-suggest{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;max-height:240px;overflow-y:auto;' +
+    /* Coordinator fix: this used to be position:absolute, which floated the
+       list on TOP of the math field and the Insert/Cancel buttons below it
+       instead of making room for them — and its 240px cap could still run
+       past the bottom of a 720px-tall viewport. Normal flow (it just sits
+       between the search field and the math field, like a real dropdown)
+       means the rest of the panel is naturally pushed down by however much
+       of it is visible, capped at ~5 rows with its own internal scroll for
+       the rest; place() is re-run after every render (see renderEqSuggest)
+       so the WHOLE panel re-clamps/flips against the current viewport once
+       its height has changed, keeping the list's bottom edge on-screen too. */
+    '.gm-eq-suggest{margin-top:4px;max-height:190px;overflow-y:auto;' +
       'border-radius:12px;padding:4px;background:var(--sh-glass-card);backdrop-filter:blur(20px) saturate(160%);' +
       '-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:var(--sh-card-shadow);}' +
     '.gm-eq-suggest[hidden]{display:none;}' +
@@ -4193,7 +4211,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     '<kbd dir="ltr">^</kbd> חזקה · <kbd dir="ltr">_</kbd> אינדקס · <kbd dir="ltr">sqrt</kbd> שורש</span></div>' +
     '<div class="gm-eq-search-wrap">' +
       '<input type="text" id="eqSearchInput" class="gm-eq-search" dir="auto" autocomplete="off" ' +
-        'placeholder="חיפוש נוסחה — search formulas" aria-label="חיפוש נוסחה">' +
+        'placeholder="חיפוש נוסחה" title="Search formulas" aria-label="חיפוש נוסחה">' +
       '<div class="gm-eq-suggest" id="eqSuggest" role="listbox" hidden></div>' +
     '</div>' +
     '<div class="gm-eq-field" id="eqFieldWrap"><span class="gm-eq-loading">טוען את עורך המשוואות…</span></div>' +
@@ -4225,7 +4243,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
 
   function openEquation(nodeId, eqIndex) {
     var id = nodeId || UI.sel, node = id && N(id);
-    if (!node) { toast('בחר נושא קודם — select a node first'); return; }
+    if (!node) { toast('בחר נושא קודם'); return; }
     EQ.node = id;
     /* eqIndex indexes node.eqs (Barak, 13.09: equations live in their own
        array, separate from the title). No index (Alt+=, the Σ rail button)
@@ -4303,7 +4321,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     if (eqs.length) node.eqs = eqs; else delete node.eqs;
     closeEquation();
     save(); render();
-    toast('המשוואה נמחקה — equation deleted');
+    toast('המשוואה נמחקה');
   }
 
   /* ── the WaffleStack formula keyboard ──────────────────────────────── */
@@ -4421,13 +4439,22 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   function renderEqSuggest() {
     var box = document.getElementById('eqSuggest');
     if (!box) return;
-    if (!EQSUG.results.length) { box.hidden = true; box.innerHTML = ''; return; }
-    box.hidden = false;
-    box.innerHTML = EQSUG.results.map(function (f, i) {
-      var short = ML ? markup(f.shortLabel || f.latex) : esc(f.shortLabel || f.latex);
-      return '<div class="gm-eq-suggest-row' + (i === EQSUG.idx ? ' active' : '') + '" role="option" data-eqsug="' + i + '">' +
-        '<span class="lbl gm-bidi">' + esc(f.label || f.id) + '</span><span class="shortmf">' + short + '</span></div>';
-    }).join('');
+    if (!EQSUG.results.length) { box.hidden = true; box.innerHTML = ''; }
+    else {
+      box.hidden = false;
+      box.innerHTML = EQSUG.results.map(function (f, i) {
+        var short = ML ? markup(f.shortLabel || f.latex) : esc(f.shortLabel || f.latex);
+        return '<div class="gm-eq-suggest-row' + (i === EQSUG.idx ? ' active' : '') + '" role="option" data-eqsug="' + i + '">' +
+          '<span class="lbl gm-bidi">' + esc(f.label || f.id) + '</span><span class="shortmf">' + short + '</span></div>';
+      }).join('');
+      var activeRow = box.querySelector('.gm-eq-suggest-row.active');
+      if (activeRow && activeRow.scrollIntoView) activeRow.scrollIntoView({ block: 'nearest' });
+    }
+    /* The list just grew/shrank the panel (it's normal flow now, not an
+       absolutely-positioned overlay) — re-run place() so the panel re-clamps
+       against the current viewport, or flips above the node, instead of
+       running its new, taller self past the bottom of the screen. */
+    if (!panel.hidden && EQ.node) place(EQ.node);
   }
   function runEqSearch(q) {
     loadFormulaFlat().then(function (list) {
@@ -4579,9 +4606,9 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   copyDialog.setAttribute('dir', 'rtl');
   copyDialog.hidden = true;
   copyDialog.innerHTML =
-    '<h2 class="gm-bidi">העתק ידנית — copy manually (Ctrl/Cmd+C)</h2>' +
+    '<h2 class="gm-bidi" title="Copy manually">העתק ידנית: <kbd dir="ltr">Ctrl</kbd>/<kbd dir="ltr">Cmd</kbd>+<kbd dir="ltr">C</kbd></h2>' +
     '<textarea id="copyDialogTa" dir="ltr" readonly></textarea>' +
-    '<div class="gm-copy-actions"><button class="gm-btn on" id="copyDialogClose">' + ic('<path d="M18 6 6 18M6 6l12 12"/>') + '<span>סגור — Close</span></button></div>';
+    '<div class="gm-copy-actions"><button class="gm-btn on" id="copyDialogClose" title="Close" aria-label="Close">' + ic('<path d="M18 6 6 18M6 6l12 12"/>') + '<span>סגור</span></button></div>';
   document.body.appendChild(copyDialog);
   function openCopyDialog(text) {
     var ta = copyDialog.querySelector('#copyDialogTa');
@@ -4614,11 +4641,11 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   pasteDialog.setAttribute('dir', 'rtl');
   pasteDialog.hidden = true;
   pasteDialog.innerHTML =
-    '<h2 class="gm-bidi">הדבק תשובות — paste Claude’s reply</h2>' +
+    '<h2 class="gm-bidi" title="Paste Claude’s reply">הדבק תשובות</h2>' +
     '<textarea id="pasteAnswersTa" dir="auto" placeholder="## Q1. ...\nתשובה…"></textarea>' +
     '<div class="gm-copy-actions">' +
-      '<button class="gm-btn" id="pasteCancelBtn">' + ic('<path d="M18 6 6 18M6 6l12 12"/>') + '<span>ביטול — Cancel</span></button>' +
-      '<button class="gm-btn on" id="pasteApplyBtn">' + ic('<path d="M20 6 9 17l-5-5"/>') + '<span>החל — Apply</span></button>' +
+      '<button class="gm-btn" id="pasteCancelBtn" title="Cancel" aria-label="Cancel">' + ic('<path d="M18 6 6 18M6 6l12 12"/>') + '<span>ביטול</span></button>' +
+      '<button class="gm-btn on" id="pasteApplyBtn" title="Apply" aria-label="Apply">' + ic('<path d="M20 6 9 17l-5-5"/>') + '<span>החל</span></button>' +
     '</div>';
   document.body.appendChild(pasteDialog);
   function openPasteAnswersDialog() {
@@ -4702,7 +4729,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     if (cb) includeNotes = !!cb.checked;
     var groups = collectOpenQuestionsGrouped();
     var total = 0; groups.forEach(function (g) { total += g.questions.length; });
-    if (!total) { toast('אין שאלות פתוחות — no open questions'); return; }
+    if (!total) { toast('אין שאלות פתוחות'); return; }
     var header = "I'm studying the HUJI AI Engineers course. These are my open questions from my study map \"" + S.title + "\".\n" +
       "For each question, use its path, my notes and the nearby concepts as context. Where it helps, bridge to SPSS or\n" +
       "psychology statistics and say where the analogy breaks. Answer each under its own heading.";
@@ -4716,7 +4743,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       }
     });
     writeClipboardOrDialog(header + '\n\n' + sections.join('\n\n'));
-    toast('הועתקו ' + total + ' שאלות — copied ' + total + ' question(s)');
+    toast('הועתקו <bdi>' + total + '</bdi> שאלות', { html: true });
   }
   window.copyOpenQuestionsToClaude = copyOpenQuestionsToClaude;
 
@@ -4735,10 +4762,10 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       var v = parsed[idx + 1];
       if (v != null) { q.answer = v; count++; }
     });
-    if (!count) { toast('לא נמצאו תשובות תואמות — no matching answers found'); return; }
+    if (!count) { toast('לא נמצאו תשובות תואמות'); return; }
     save();     /* one save() = one undo step, reverting every answer at once */
     render();
-    toast('עודכנו ' + count + ' תשובות — updated ' + count + ' answer(s) — Ctrl+Z לביטול הכל');
+    toast('עודכנו <bdi>' + count + '</bdi> תשובות — <kbd dir="ltr">Ctrl+Z</kbd> לביטול הכל', { html: true });
   }
   function applyPastedAnswersFromDialog() {
     var ta = document.getElementById('pasteAnswersTa');
@@ -4751,7 +4778,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   /* ── "העתק ענף עם הקשר" — copy any branch as an indented outline ───────── */
   function copyBranchWithContext() {
     var id = UI.sel;
-    if (!id) { toast('בחר ענף להעתקה — select a branch first'); return; }
+    if (!id) { toast('בחר ענף להעתקה'); return; }
     var node = N(id);
     var lines = [];
     (function walk(n, depth) {
@@ -4761,7 +4788,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       childrenOf(n.id).forEach(function (c) { walk(c, depth + 1); });
     })(node, 0);
     writeClipboardOrDialog(lines.join('\n'));
-    toast('הענף הועתק — branch copied');
+    toast('הענף הועתק');
   }
   window.copyBranchWithContext = copyBranchWithContext;
   window.orderedOpenQuestions = orderedOpenQuestions;
@@ -4872,23 +4899,23 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       var dataUrl = downscaleToJPEG(img);
       var bytes = dataUrlBytes(dataUrl);
       if (bytes > MAX_IMG_BYTES) {
-        toast('התמונה גדולה מדי גם אחרי כיווץ (מעל 150KB) — image is too large even after downscaling (over 150KB)');
+        toast('התמונה גדולה מדי גם אחרי כיווץ (מעל 150KB)');
         return;
       }
       if (opts.attach) {
         var node = UI.sel && N(UI.sel);
-        if (!node) { toast('בחר נושא קודם כדי לצרף תמונה — select a node first to attach an image'); return; }
+        if (!node) { toast('בחר נושא קודם כדי לצרף תמונה'); return; }
         if (!node.img && countImages() >= MAX_IMAGES) {
-          toast('הגיעה למגבלת 40 תמונות במפה — reached the 40-image limit for this map');
+          toast('הגיעה למגבלת 40 תמונות במפה');
           return;
         }
         node.img = dataUrl;
         save(); render();
-        toast('התמונה צורפה לנושא — image attached to the node');
+        toast('התמונה צורפה לנושא');
         return;
       }
       if (countImages() >= MAX_IMAGES) {
-        toast('הגיעה למגבלת 40 תמונות במפה — reached the 40-image limit for this map');
+        toast('הגיעה למגבלת 40 תמונות במפה');
         return;
       }
       var pid = placementParent(opts);
@@ -4899,9 +4926,9 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       save(); render();
       var n = el('.gm-node[data-node="' + id + '"]');
       if (n) ensureVisible(n);
-      toast('נוספה תמונה — image added');
+      toast('נוספה תמונה');
     }, function () {
-      toast('לא ניתן היה לטעון את התמונה — could not load that image');
+      toast('לא ניתן היה לטעון את התמונה');
     });
   }
 
@@ -5068,7 +5095,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       var src = srcField.value.trim();
       if (!src) { previewEl.innerHTML = ''; return; }
       renderMermaidTo(previewEl, src).catch(function () {
-        previewEl.innerHTML = '<span class="gm-eq-loading">שגיאה בתרשים — diagram error</span>';
+        previewEl.innerHTML = '<span class="gm-eq-loading">שגיאה בתרשים</span>';
       });
     }, 250);
   }
@@ -5117,7 +5144,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       if (n) ensureVisible(n);
     }
     closeDiagramEditor();
-    toast('הדיאגרמה נוספה — diagram added');
+    toast('הדיאגרמה נוספה');
   }
 
   /* ── wiring ────────────────────────────────────────────────────────── */
@@ -5161,7 +5188,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       var node = N(host.dataset.diagramNode);
       if (!node || !node.diagram) return;
       renderMermaidTo(host, node.diagram).then(function () { settleMap(); }, function () {
-        host.innerHTML = '<span class="gm-diagram-loading">שגיאה בתרשים — diagram error</span>';
+        host.innerHTML = '<span class="gm-diagram-loading">שגיאה בתרשים</span>';
       });
     });
   });
