@@ -6457,7 +6457,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
      the panel — see the click router's `renderLayersFlyout()` calls. */
   function renderLayersFlyout() {
     layersFlyout.innerHTML =
-      switchRow('layersFlyoutLinks', S.layer === 'cards', 'הקשרים שלי', 'הקשרים שלי — show or hide your own relations') +
+      switchRow('layersFlyoutLinks', S.layer !== 'cards', 'הקשרים שלי', 'הקשרים שלי — show or hide your own relations') +
       switchRow('layersFlyoutQuestions', !!UI.questionsLayer, 'שאלות פתוחות', 'שאלות פתוחות — brighten open questions and their path') +
       switchRow('layersFlyoutKnown', !!UI.knownLayer, 'מה שאני יודע', 'מה שאני יודע — brighten known topics and their path');
   }
