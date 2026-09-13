@@ -941,8 +941,21 @@ function descendantsOf(id, depth) {
   childrenOf(id).forEach(function (c) { out.push(c); out = out.concat(descendantsOf(c.id, depth + 1)); });
   return out;
 }
+/* Coordinator fix (13.09, large-map layout): a COLLAPSED node's hidden
+   subtree must never inflate the width allocated to it — spread() (which
+   is what calls this, to size an automatic sibling's column span) already
+   never EMITS a collapsed node's children onto the plane at all (see its
+   own `if (pnode.collapsed) return;` guard), but this leaf count used to
+   ignore collapse entirely and count every hidden descendant anyway,
+   reserving a huge, empty horizontal span for a folded branch — measured:
+   a real 686-node import with 405 collapsed nodes fit to a screen-wide
+   sliver of unreadable specks because of exactly this. A collapsed node
+   is exactly one card wide, full stop; only its VISIBLE (i.e. not hidden
+   under some collapsed ancestor) descendants ever count towards width. */
 function leafCount(id, depth) {
   depth = depth || 0;
+  var self = N(id);
+  if (self && self.collapsed) return 1;
   if (depth > 16) return 1;
   var k = childrenOf(id);
   if (!k.length) return 1;
@@ -1045,6 +1058,12 @@ function normalise(x) {
     if (typeof n.body !== 'string') n.body = '';
     n.collapsed = !!n.collapsed;
     if (!isFinite(n.mx) || !isFinite(n.my)) { delete n.mx; delete n.my; } else { n.pinned = true; }
+    /* ax/ay: the AUTOMATIC anchor Tab/Enter seeds a fresh node at (Barak,
+       13.09 follow-up) — deliberately validated the same way mx/my are,
+       EXCEPT it never sets `pinned`: an ax/ay node is still automatic
+       (rank 0 in settleMap, cleared by Alt+R along with mx/my), just no
+       longer dependent on a session-only cache to know where it landed. */
+    if (!isFinite(n.ax) || !isFinite(n.ay)) { delete n.ax; delete n.ay; }
     if (n.parent != null && (n.parent === n.id || !ids[n.parent])) n.parent = null; /* only the true root may have null */
     /* A4 / A5: validate kind + bridge on the way in (hand-edited JSON, an
        older save, a foreign import) — 'concept' is never stored (see KINDS
@@ -1432,21 +1451,30 @@ function wedges(angs) {
    child sits on the RIGHT and each new one continues further left — a
    mirror of the old left-right version's "first child topmost, subsequent
    ones stack below it", just swapped onto the other axis.
-   Hand-placed nodes (mx/my) still win, exactly as before. New here:
-   AUTO_SEED (below) — a session-only, never-persisted position hint for a
-   just-grown automatic node, so Tab/Enter can drop it in a sensible spot
-   relative to whatever is already there (including hand-placed siblings)
-   without ever setting mx/my on it — it stays a fully automatic node,
-   free to be swept into the tidy layout the next time spread() has no
-   hint to honour (a reload, or after Alt+R clears AUTO_SEED too). */
+   Hand-placed nodes (mx/my + pinned:true) still win, exactly as before.
+   New here: node.ax/node.ay — an AUTOMATIC anchor, persisted in S like any
+   other field, set once by seedChildPosition()/seedSiblingPosition() the
+   moment Tab/Enter grows the node and never touched again except by
+   settleMap()'s own anti-overlap nudge (same as mx/my get, but this node
+   stays rank 0 — automatic, still push-able, never "pinned").
+   Coordinator fix (13.09, "AUTO_SEED is session-only"): this used to be a
+   plain in-memory object, forgotten on every reload — a real map opened
+   fresh in Obsidian re-ran the tidy-layout fallback for every automatic
+   node, ignoring where its pinned parent/siblings actually sat, and a
+   fresh Tab press on a heavily hand-placed map had nothing to anchor
+   against either. Writing the seed straight onto the node (ax/ay, never
+   mx/my, never pinned) makes it exactly as durable as the rest of the
+   node's data — reproducible from the saved map alone, no session state
+   involved — while Alt+R still clears it right along with mx/my/pinned for
+   a full top-down re-layout. */
 var ROW_GAP_1 = 150;   /* root → depth-1 row (the root card is tallest) */
 var ROW_GAP_N = 120;   /* every row after that */
 var COL_W_1 = 240;      /* one depth-1 leaf's horizontal slot */
 var COL_W_N = 200;      /* one leaf's horizontal slot at any deeper depth */
-var AUTO_SEED = {};     /* id -> {x,y}; session-only, never in S, never saved */
 function rowGapFor(depth) { return depth === 1 ? ROW_GAP_1 : ROW_GAP_N; }
 function colWFor(depth) { return depth === 1 ? COL_W_1 : COL_W_N; }
 function hasMxMy(k) { return typeof k.mx === 'number' && typeof k.my === 'number'; }
+function hasAxAy(k) { return typeof k.ax === 'number' && typeof k.ay === 'number'; }
 /* An image/diagram card renders much taller than a plain text card (a
    thumbnail up to 220px, a diagram up to ~320px, plus the title above it) —
    give it extra COLUMNS of width too, so it (and its own children, one row
@@ -1464,13 +1492,13 @@ function spread(pId, px, py, center, span, depth, emit) {
   var kids = childrenOf(pId);
   if (!kids.length) return;
   var rowGap = rowGapFor(depth), colW = colWFor(depth);
-  /* Anything already known — hand-placed (mx/my) or session-seeded
-     (AUTO_SEED, set by growChild/growSibling right when they create the
-     node) — keeps that exact position; only nodes with neither get the
-     generic tidy-tree placement below. */
+  /* Anything already known — hand-placed (mx/my) or automatically anchored
+     (ax/ay, set by growChild/growSibling right when they create the node,
+     persisted from then on) — keeps that exact position; only nodes with
+     neither get the generic tidy-tree placement below. */
   var resolved = {}, known = [];
   kids.forEach(function (k) {
-    var p = hasMxMy(k) ? { x: k.mx, y: k.my } : AUTO_SEED[k.id];
+    var p = hasMxMy(k) ? { x: k.mx, y: k.my } : (hasAxAy(k) ? { x: k.ax, y: k.ay } : null);
     if (p) { resolved[k.id] = p; known.push(p); }
   });
   /* Row: the lowest existing row (children already there, hand-placed or
@@ -1500,15 +1528,18 @@ function spread(pId, px, py, center, span, depth, emit) {
     spread(k.id, p.x, p.y, 0, 0, depth + 1, emit);
   });
 }
-/* ── session seeding for Tab/Enter — see AUTO_SEED above ─────────────────
+/* ── seeding for Tab/Enter — see the ax/ay comment above spread() ────────
    Read a sibling/reference's CURRENT position: its own mx/my if hand-placed,
-   else its own live seed, else whatever the last render actually measured
-   for it (the DOM dataset — accurate immediately after a render, which is
-   always the state growChild/growSibling run in). */
+   else its own persisted automatic anchor, else whatever the last render
+   actually measured for it (the DOM dataset — accurate immediately after a
+   render, which is always the state growChild/growSibling run in; this last
+   fallback only ever matters for a node that predates ax/ay, e.g. one an
+   older engine created — a normal automatic node always has ax/ay by the
+   time anything asks for its position). */
 function knownPos(id) {
   var n = N(id); if (!n) return null;
   if (hasMxMy(n)) return { x: n.mx, y: n.my };
-  if (AUTO_SEED[id]) return AUTO_SEED[id];
+  if (hasAxAy(n)) return { x: n.ax, y: n.ay };
   var dom = document.querySelector('.gm-node[data-node="' + id + '"]');
   if (dom) return { x: +dom.dataset.x || 0, y: +dom.dataset.y || 0 };
   return null;
@@ -1527,14 +1558,34 @@ function nodeDepth(id) {
    walk every other node that shares this row and keep stepping the
    candidate x further in `dir` until nothing there still collides with a
    realistic (blank-card-sized) footprint. */
-function avoidRowCollision(x, y, dir) {
-  var THRESH = 130, STEP = 150, guard = 0, moved = true;
+function avoidRowCollision(x, y, dir, depth) {
+  /* Coordinator fix (13.09): this used to use a flat 130/150 threshold/step
+     regardless of depth or actual card size — measurably narrower than what
+     settleMap() actually enforces for a depth-1 node (root/depth-1 cards
+     reserve extra width there for their own lod-far font counter-scale,
+     LOD_GROW = 2.2 in settleMap()), so a seed this judged collision-free
+     still got an unplanned SECOND shove from settleMap's own relax pass
+     moments later (measured: a blank depth-1 sibling landed 39px further
+     than this function alone predicted, on Barak's real map). Mirror
+     settleMap's own pairwise formula exactly instead of guessing a
+     constant: same LOD_GROW factor, same +14 pad, and the OTHER node's
+     REAL measured width where one is already on screen (a fresh node has
+     no card yet, so it starts at the CSS min-width, the smallest anything
+     ever renders at). */
+  var grow = (depth || 1) <= 1 ? 2.2 : 1;
+  var MIN_W = 120;
+  var myW = MIN_W * grow;
+  var guard = 0, moved = true;
   while (moved && guard++ < 80) {
     moved = false;
     S.nodes.forEach(function (n) {
       var p = knownPos(n.id); if (!p) return;
       if (Math.abs(p.y - y) > 40) return;             /* not this row */
-      if (Math.abs(p.x - x) < THRESH) { x += dir * STEP; moved = true; }
+      var dom = document.querySelector('.gm-node[data-node="' + n.id + '"]');
+      var otherW = (dom ? dom.offsetWidth : MIN_W) * grow;
+      var need = (myW + otherW) / 2 + 14;
+      var dist = Math.abs(p.x - x);
+      if (dist < need) { x += dir * (need - dist + 1); moved = true; }
     });
   }
   return x;
@@ -1553,8 +1604,8 @@ function seedChildPosition(pid, newId) {
   });
   var y = ys.length ? Math.max.apply(null, ys) : (pPos.y + rowGap);
   var x = xs.length ? (Math.min.apply(null, xs) - colW) : pPos.x;
-  x = avoidRowCollision(x, y, -1);
-  AUTO_SEED[newId] = { x: x, y: y };
+  x = avoidRowCollision(x, y, -1, depth);
+  var node = N(newId); if (node) { node.ax = x; node.ay = y; }
 }
 /* Enter / Shift+Enter: the new sibling goes on the SAME row as the node it
    was created from, immediately to its left (Enter) or right (Shift+Enter,
@@ -1565,8 +1616,8 @@ function seedSiblingPosition(refId, newId, before) {
   var colW = colWFor(depth);
   var ref = knownPos(refId) || { x: 0, y: 0 };
   var dir = before ? 1 : -1;
-  var x = avoidRowCollision(ref.x + dir * colW, ref.y, dir);
-  AUTO_SEED[newId] = { x: x, y: ref.y };
+  var x = avoidRowCollision(ref.x + dir * colW, ref.y, dir, depth);
+  var node = N(newId); if (node) { node.ax = x; node.ay = ref.y; }
 }
 
 /* ── settling ────────────────────────────────────────────────────────────
@@ -1854,7 +1905,9 @@ function mapWorld() {
              a plain link label, no visible brackets. */
           '<a class="gm-wlink gm-note-title" dir="auto" data-note="' + esc(node.note.path) + '" title="' + esc(node.note.title || node.title) + '">' + esc(node.note.title || node.title) + '</a>' :
           (typeof window.titleHTML === 'function' ? window.titleHTML(node.title) : esc(node.title))) + '</span>' +
-      (isLinkedNote ? '<div class="gm-note-excerpt gm-bidi" dir="auto">' + esc((node.note.excerpt || '').slice(0, 300)) + '</div>' : '') +
+      (isLinkedNote ? '<div class="gm-note-excerpt gm-bidi" dir="auto">' +
+        (typeof window.wrapLatinRuns === 'function' ? window.wrapLatinRuns((node.note.excerpt || '').slice(0, 300)) : esc((node.note.excerpt || '').slice(0, 300))) +
+        '</div>' : '') +
       (node.eqs && node.eqs.length ? '<div class="gm-eqs">' + node.eqs.map(function (latex, eqi) {
         return '<div class="gm-eqline" dir="ltr" data-eq-node="' + node.id + '" data-eq-idx="' + eqi + '" title="לחיצה לעריכה — click to edit">' +
           (typeof window.eqLineHTML === 'function' ? window.eqLineHTML(latex) : esc(latex)) + '</div>';
@@ -2213,7 +2266,7 @@ function duplicateNode(id) {
        whole cloned subtree exactly on top of the original. Strip it from
        every clone, not just the top one; each falls back to the tidy
        automatic layout under its (also freshly cloned) parent. */
-    delete c.mx; delete c.my; delete c.pinned;
+    delete c.mx; delete c.my; delete c.pinned; delete c.ax; delete c.ay;
     clones.push(c);
     childrenOf(n.id).forEach(function (k) { cloneRec(k, c.id); });
     return c;
@@ -2599,8 +2652,8 @@ function toggleLayer() {
   persistSoft(); render();
 }
 /* Alt+R — "סידור מלמעלה למטה": re-lay the WHOLE map out top-down from
-   scratch, one undo step. Clears every node's hand-placed mx/my/pinned (the
-   root has none to clear) and the session's AUTO_SEED hints, so spread()'s
+   scratch, one undo step. Clears every node's hand-placed mx/my/pinned AND
+   its automatic ax/ay anchor (the root has none to clear), so spread()'s
    generic tidy top-down formula places everything fresh; a single Ctrl+Z
    restores every previous position exactly, because this is one save()
    call wrapping the whole mutation, same as any other multi-node edit
@@ -2611,10 +2664,9 @@ function resetLayoutTopDown() {
   var moved = 0;
   S.nodes.forEach(function (n) {
     if (n === root) return;
-    if (typeof n.mx === 'number' || typeof n.my === 'number' || n.pinned) moved++;
-    delete n.mx; delete n.my; delete n.pinned;
+    if (typeof n.mx === 'number' || typeof n.my === 'number' || n.pinned || typeof n.ax === 'number' || typeof n.ay === 'number') moved++;
+    delete n.mx; delete n.my; delete n.pinned; delete n.ax; delete n.ay;
   });
-  AUTO_SEED = {};
   save();
   render();
   fitMap(420);
@@ -4182,7 +4234,29 @@ function cycleTheme() {
 /* ── postMessage bridge (mirrors mindmap.html conventions) ──────────────── */
 window.addEventListener('message', function (ev) {
   if (window.parent === window) return;                 /* nothing embedding this page */
-  if (ev.origin !== location.origin && ev.origin !== 'null') return;   /* same-origin only; 'null' = file:// / sandboxed srcdoc */
+  /* Coordinator fix (13.09, CRITICAL): inside Obsidian this page runs in a
+     srcdoc iframe — location.origin is the literal string "null" there,
+     but window.origin (and the host's own ev.origin, seen on every message
+     it posts) is "app://obsidian.md". The old check compared ev.origin
+     against location.origin/'null' only, which matches a same-origin http
+     host or a bare sandboxed/file:// frame, but NOT this shape — every
+     gm:load / ws-theme / gm:add-note-node / gm:note-updated /
+     gm:note-renamed message from the real Obsidian host was silently
+     dropped, so dropping a note onto the map (and everything else the
+     bridge does) never worked there at all. The actual trust boundary that
+     matters is "did THIS message come from OUR OWN parent frame" — check
+     that directly via ev.source, which no other window can spoof (an
+     unrelated sibling frame that happens to share the parent's origin —
+     verified with a headless srcdoc harness — must still be rejected, so
+     the origin string can only ever be a FALLBACK for the rare case
+     ev.source itself is unavailable — e.g. the sender's window has since
+     been closed — never an alternative path that a same-origin sibling
+     could also satisfy). */
+  var trusted = ev.source
+    ? (ev.source === window.parent)
+    : (ev.origin === location.origin || ev.origin === 'null' ||
+       (typeof window.origin === 'string' && ev.origin === window.origin));
+  if (!trusted) return;
   var d = ev.data;
   if (!d || typeof d !== 'object') return;
   if (d.type === 'ws-theme' && typeof d.dark === 'boolean') { HOST_DARK = d.dark; applyTheme(); render(); return; }
@@ -4543,12 +4617,51 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   /* [[Note]] and [[Note|alias]] become links. Inside Obsidian a click opens
      the note: the map posts {type:'gm:open-note', target} to its host. */
   var WL_RE = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
-  function txt(x) {
-    return esc(x).replace(WL_RE, function (_, target, alias) {
-      var t = target.trim();
-      return '<a class="gm-wlink" dir="auto" data-note="' + t + '" title="' + t + '">' + (alias || target).trim() + '</a>';
-    });
+  /* Barak, 13.09 follow-up: mixed Hebrew/English titles like
+     "איבר הקנס (Penalty Term)" were breaking mid-run — the browser's own
+     bidi algorithm, with no isolation hint, could flip a parenthesised
+     English phrase's bracket order or split it across a wrap point ("...
+     Penalty)" / "(Term" on the next line). Wrap every run of Latin
+     letters/digits and their joining punctuation — plus a single
+     immediately-surrounding pair of parentheses, if there is one — in its
+     own <bdi dir="ltr">, so it always reads and wraps as one unit
+     regardless of the Hebrew running the other way around it. */
+  var LATIN_RUN_RE = /[A-Za-z0-9](?:[A-Za-z0-9 .,;:'"/_+=<>!?@#$%^&*~-]*[A-Za-z0-9%])?/g;
+  function wrapLatinRuns(s) {
+    s = String(s == null ? '' : s);
+    var out = '', last = 0, m;
+    LATIN_RUN_RE.lastIndex = 0;
+    while ((m = LATIN_RUN_RE.exec(s))) {
+      var start = m.index, end = start + m[0].length;
+      if (start > 0 && s[start - 1] === '(' && end < s.length && s[end] === ')') { start -= 1; end += 1; }
+      if (start < last) continue;   /* a paren already absorbed by an earlier run */
+      out += esc(s.slice(last, start));
+      out += '<bdi dir="ltr">' + esc(s.slice(start, end)) + '</bdi>';
+      last = end;
+    }
+    out += esc(s.slice(last));
+    return out;
   }
+  /* wikilinks are pulled out into a sentinel first (a private-use-area
+     character no real title ever contains, so wrapLatinRuns() can never
+     mistake it — or the digits of some index encoded into it — for a
+     Latin run) — the rest of the string is bdi-wrapped, then each link's
+     own already-built <a> markup (its VISIBLE alias/target text gets the
+     exact same wrapLatinRuns() treatment) is spliced back in. */
+  var WLINK_SENTINEL = '';
+  function txt(x) {
+    var s = String(x == null ? '' : x);
+    var links = [];
+    s = s.replace(WL_RE, function (_, target, alias) {
+      var t = target.trim();
+      var display = (alias || target).trim();
+      links.push('<a class="gm-wlink" dir="auto" data-note="' + esc(t) + '" title="' + esc(t) + '">' + wrapLatinRuns(display) + '</a>');
+      return '';
+    });
+    var i = 0;
+    return wrapLatinRuns(s).replace(//g, function () { return links[i++]; });
+  }
+  window.wrapLatinRuns = wrapLatinRuns;
   function markup(latex) {
     try { return ML.convertLatexToMarkup(latex); } catch (_) { return esc('$' + latex + '$'); }
   }
