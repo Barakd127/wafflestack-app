@@ -58,16 +58,21 @@
   var POOLS = {
     root: [GC + 'modular/building-sample-tower-a.glb', GC + 'modular/building-sample-tower-b.glb',
       GC + 'modular/building-sample-tower-c.glb', GC + 'modular/building-sample-tower-d.glb'],
+    /* landmark (depth 1) is deliberately low/mid-rise — no skyscrapers here;
+       the root tower is the only "tall" thing on the whole plateau. */
     landmark: [GC + 'commercial/building-a.glb', GC + 'commercial/building-b.glb', GC + 'commercial/building-c.glb',
-      GC + 'commercial/building-d.glb', GC + 'commercial/building-e.glb',
-      GC + 'commercial/building-skyscraper-a.glb', GC + 'commercial/building-skyscraper-b.glb', GC + 'commercial/building-skyscraper-c.glb'],
+      GC + 'commercial/building-d.glb', GC + 'commercial/building-e.glb'],
     house: [GC + 'suburban/building-type-a.glb', GC + 'suburban/building-type-b.glb', GC + 'suburban/building-type-c.glb',
       GC + 'suburban/building-type-d.glb', GC + 'suburban/building-type-e.glb', GC + 'suburban/building-type-f.glb',
       GC + 'suburban/building-type-g.glb', GC + 'suburban/building-type-h.glb'],
     gap: [GC + 'commercial/low-detail-building-a.glb', GC + 'commercial/low-detail-building-b.glb', GC + 'commercial/low-detail-building-c.glb'],
     question: [GC + 'industrial/building-a.glb', GC + 'industrial/building-b.glb', GC + 'industrial/building-c.glb', GC + 'industrial/building-d.glb'],
-    decor: [GC + 'suburban/building-type-a.glb', GC + 'suburban/building-type-c.glb', GC + 'suburban/building-type-e.glb',
-      GC + 'suburban/building-type-g.glb', GC + 'commercial/low-detail-building-a.glb', GC + 'commercial/low-detail-building-b.glb'],
+    /* filler is mostly warm/cream suburban houses — a plain low-detail
+       block only occasionally — so the plateau reads as an old-town of
+       low houses, not a field of grey commercial blocks. */
+    decor: [GC + 'suburban/building-type-a.glb', GC + 'suburban/building-type-b.glb', GC + 'suburban/building-type-c.glb',
+      GC + 'suburban/building-type-d.glb', GC + 'suburban/building-type-e.glb', GC + 'suburban/building-type-f.glb',
+      GC + 'suburban/building-type-g.glb', GC + 'suburban/building-type-h.glb', GC + 'commercial/low-detail-building-a.glb'],
     tree: [GC + 'trees/tree-crooked.glb', GC + 'trees/tree-high-crooked.glb'],
     car: [GC + 'cars/sedan.glb', GC + 'cars/hatchback-sports.glb', GC + 'cars/taxi.glb']
   };
@@ -184,6 +189,35 @@
       camera.lookAt(target.x + parallax.x, target.y, target.z + parallax.y);
       camera.near = 0.1; camera.far = camDist * 4;
       camera.updateProjectionMatrix();
+    }
+
+    /* Frame the WHOLE built scene (tallest tower's tip down to the rock's
+       bottom, edge to edge) with margin — not just a horizontal footprint
+       guess. Projects all 8 box corners onto the camera's own right/up
+       axes for this iso direction, so nothing (a tall root tower, the deep
+       rock underside) is ever cropped regardless of the mix of heights. */
+    function fitCameraToGroup(group, margin) {
+      var box = new THREE.Box3().setFromObject(group);
+      if (box.isEmpty()) { target.set(0, 0, 0); return 8; }
+      var center = box.getCenter(new THREE.Vector3());
+      var forward = ISO_DIR.clone().normalize();
+      var worldUp = new THREE.Vector3(0, 1, 0);
+      var right = new THREE.Vector3().crossVectors(worldUp, forward).normalize();
+      var up = new THREE.Vector3().crossVectors(forward, right).normalize();
+      var min = box.min, max = box.max, maxRight = 0, maxUp = 0;
+      for (var i = 0; i < 8; i++) {
+        var corner = new THREE.Vector3(
+          (i & 1) ? max.x : min.x, (i & 2) ? max.y : min.y, (i & 4) ? max.z : min.z
+        ).sub(center);
+        maxRight = Math.max(maxRight, Math.abs(corner.dot(right)));
+        maxUp = Math.max(maxUp, Math.abs(corner.dot(up)));
+      }
+      target.copy(center);
+      var sz = sizeRenderer();
+      var aspect = sz.w / sz.h;
+      var neededForHeight = maxUp * margin;
+      var neededForWidth = (maxRight * margin) / Math.max(aspect, 0.0001);
+      return Math.max(neededForHeight, neededForWidth, 4);
     }
 
     /* ── render-on-demand: one coalesced rAF per burst of triggers, never
@@ -395,9 +429,26 @@
       districtData.forEach(function (d, di) {
         var mine = districtCount > 1 ? cellList.filter(function (c) { return !used[key(c.gx, c.gz)] && sectorOf(c.a, di); }) : cellList.filter(function (c) { return !used[key(c.gx, c.gz)]; });
         var overflow = cellList.filter(function (c) { return !used[key(c.gx, c.gz)]; });   /* fallback if a wedge runs out */
-        var cursor = 0, overflowCursor = 0;
-        d.bfsOrder.forEach(function (entry) {
-          var cell = mine[cursor++];
+        var overflowCursor = 0;
+        var n = d.bfsOrder.length;
+        /* Spread this wedge's nodes across its FULL radius range (near the
+           centre out to the rim) instead of packing them all into the
+           smallest-radius cells first — that piled every district into one
+           lump around the plaza. The district's own root still anchors the
+           innermost cell (index 0); everything else is picked at evenly
+           spaced positions through the rest of `mine`, skipping cells
+           another node in this same pass already claimed. */
+        var takenIdx = {};
+        function pickAt(idx) {
+          while (idx < mine.length && takenIdx[idx]) idx++;
+          if (idx >= mine.length) { for (var j = 0; j < mine.length; j++) if (!takenIdx[j]) { idx = j; break; } }
+          if (idx >= mine.length || takenIdx[idx]) return null;
+          takenIdx[idx] = 1;
+          return mine[idx];
+        }
+        d.bfsOrder.forEach(function (entry, i) {
+          var idx = (i === 0) ? 0 : Math.round((i / Math.max(1, n - 1)) * (mine.length - 1));
+          var cell = pickAt(idx);
           if (!cell) { while (overflow[overflowCursor] && used[key(overflow[overflowCursor].gx, overflow[overflowCursor].gz)]) overflowCursor++; cell = overflow[overflowCursor++]; }
           if (!cell) return;   /* plateau is completely full — extremely unlikely given the sizing margin */
           used[key(cell.gx, cell.gz)] = 1;
@@ -431,9 +482,9 @@
       };
     }
 
-    var NODE_SCALE = 1.15;    /* real node buildings — kept a touch bigger than filler so they stay identifiable */
-    var ROOT_SCALE = 2.1;     /* the centre tower stands well above everything else */
-    var LANDMARK_SCALE = 1.5;
+    var NODE_SCALE = 1.1;     /* real node buildings — kept a touch bigger than filler so they stay identifiable */
+    var ROOT_SCALE = 1.5;     /* the ONE landmark tower — everything else stays low/mid-rise */
+    var LANDMARK_SCALE = 1.22;
     var DECOR_SCALE = 0.85;   /* smaller than a real node building, on purpose */
 
     /* A thin ribbon (plain BoxGeometry, guaranteed continuous regardless of
@@ -518,15 +569,25 @@
         }).catch(function () {});
       });
 
-      /* rocky, tapered underside + a soft-shadowed water surface below it. */
-      var rockHeight = plateauR * 0.85;
+      /* rocky, tapered underside — at least a third of the plateau's
+         DIAMETER tall (diameter/3 = plateauR*0.67); this comfortably clears
+         that with margin — + a modest water ring around its base, not a
+         giant disc. */
+      var rockHeight = plateauR * 0.74;   /* diameter/3 = plateauR*0.667 — this clears it with room to spare */
       var rock = buildRock(rimR, rockHeight, theme);
       rock.position.set(0, -0.3 - rockHeight / 2, 0);
       group.add(rock);
       var waterColor = theme === 'dark' ? 0x0d3a44 : 0x2fb0ad;
-      var water = ownMesh(new THREE.CircleGeometry(rimR * 1.3, 32), new THREE.MeshLambertMaterial({ color: waterColor, transparent: true, opacity: 0.88 }), 0, -0.3 - rockHeight - 1.4, 0);
+      var waterY = -0.3 - rockHeight - 0.6;
+      var water = ownMesh(new THREE.CircleGeometry(rimR * 1.05, 32), new THREE.MeshLambertMaterial({ color: waterColor, transparent: true, opacity: 0.85 }), 0, waterY, 0);
       water.rotation.x = -Math.PI / 2; water.receiveShadow = true;
       group.add(water);
+      /* a soft, larger, fainter halo further out so the water fades into
+         the background rather than ending on a hard edge — not a giant
+         solid disc dominating the frame. */
+      var waterFade = ownMesh(new THREE.RingGeometry(rimR * 1.05, rimR * 1.55, 32), new THREE.MeshBasicMaterial({ color: waterColor, transparent: true, opacity: 0.22, side: THREE.DoubleSide }), 0, waterY - 0.02, 0);
+      waterFade.rotation.x = -Math.PI / 2;
+      group.add(waterFade);
 
       /* dusk: a few cheap warm point lights stand in for "window glow"
          without touching any material. */
@@ -578,7 +639,10 @@
       window.__glassCity.buildingCount = placedCount;
       window.__glassCity.rebuilds = (window.__glassCity.rebuilds || 0) + 1;
       window.__glassCity.footprint = rimR;
-      var halfExtent = Math.max(rimR * 1.12, 6.5);   /* island fills the reference's ~40-50% of the frame, water visible around it */
+      /* fit the camera to the ACTUAL built scene (tower tip to rock
+         bottom, edge to edge) with a 12% margin — the old horizontal-only
+         guess was why v2's tallest towers got cut off at the frame's top. */
+      var halfExtent = fitCameraToGroup(group, 1.07);
       fitShadowFrustum(halfExtent + 4);
       placeCamera(halfExtent);
       /* debug/measurement hook only — not used by the render path itself */
