@@ -361,6 +361,22 @@ input,textarea{background:none;border:0;outline:none;}
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .gm-bridge{color:#3a2f06;} }
 :root[data-theme="dark"] .gm-bridge{color:#3a2f06;}
 
+/* ── H3: an Obsidian note node — file-text swatch + [[wikilink]] title + a
+   live excerpt clamped to two lines. ─────────────────────────────────────── */
+.gm-note-swatch{width:14px;height:14px;color:var(--sh-text-med);}
+.gm-note-swatch svg{width:100%;height:100%;}
+a.gm-note-title{font-weight:600;}
+.gm-note-excerpt{margin-top:4px;font-size:11.5px;line-height:1.35;color:var(--sh-text-med);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.mapwrap.lod-far .gm-note-excerpt,.mapwrap.lod-mid .gm-note-excerpt{display:none;}
+
+/* ── H2: the sketch thumbnail on a card — click reopens the Excalidraw modal.
+   Capped at 320px wide per the contract; the SVG itself carries its own
+   viewBox/aspect ratio so height follows naturally. ───────────────────────── */
+.gm-sketch-thumb{margin-top:6px;max-width:320px;width:100%;border-radius:10px;overflow:hidden;
+  cursor:pointer;background:rgba(255,255,255,.35);box-shadow:0 2px 8px rgba(31,41,55,.18);}
+.gm-sketch-thumb svg{display:block;width:100%;height:auto;max-height:220px;}
+
 /* ── A7 hub halo — a node with ≥2 cross-links, links layer only ──────────
    A ::after glow rather than another box-shadow layer, so it never has to
    be combined with .sel/.marked's own box-shadow in the CSS cascade. */
@@ -755,6 +771,14 @@ input,textarea{background:none;border:0;outline:none;}
   .gm-legend{bottom:56px!important;max-width:calc(100% - 60px)!important;}
   .gm-toast{max-width:calc(100% - 60px)!important;}
   .gm-app:has(#bodySheet.open) .mapctl{right:12px!important;}   /* the sheet is full-width on phone (D4) — nothing to dodge */
+  /* H1: the rail picked up one more button (bubbleBtn); at 32px-a-button
+     phone sizing the column was already this file's tallest floating
+     element by a wide margin, and one more button pushed its top edge
+     into the header at short phone heights (~667px). Tighten the phone
+     rail's own gap/padding back down — same rail, same buttons, just a
+     few px less air between them — rather than touch the header or the
+     button count. */
+  .mapctl{gap:2px!important;padding:4px!important;}
 }
 </style>
 
@@ -915,6 +939,7 @@ function seed(id, title) {
     layer: 'links', theme: 'auto',
     nodes: [{ id: rid, parent: null, title: 'נושא מרכזי — Central topic', body: '' }],
     links: [],
+    inbox: [],
     view: { x: 0, y: 0, z: 1, fit: false, touched: false },
     edits: 0, updatedAt: Date.now()
   };
@@ -957,6 +982,16 @@ function normalise(x) {
   x.layer = (x.layer === 'cards') ? 'cards' : 'links';
   x.theme = (x.theme === 'light' || x.theme === 'dark') ? x.theme : 'auto';
   x.links = Array.isArray(x.links) ? x.links : [];
+  /* Addendum H1: floating thought bubbles, preserved like every other field —
+     never placed on the map plane, so they carry no x/y. Malformed entries
+     are repaired (a fresh id/timestamp) rather than dropped, per the sacred
+     "never lose data" rule; only a non-object entry is discarded outright. */
+  x.inbox = Array.isArray(x.inbox) ? x.inbox.filter(function (b) { return b && typeof b === 'object'; }).map(function (b) {
+    if (typeof b.id !== 'string' || !b.id) b.id = uid('t');
+    if (typeof b.text !== 'string') b.text = '';
+    if (typeof b.created !== 'string') b.created = new Date().toISOString();
+    return b;
+  }) : [];
   x.edits = +x.edits || 0;
   x.updatedAt = +x.updatedAt || Date.now();
   if (!x.view || typeof x.view !== 'object') x.view = { x: 0, y: 0, z: 1, fit: false, touched: false };
@@ -998,6 +1033,22 @@ function normalise(x) {
        that has never heard of them (Barak, 13.09: "unknown fields survive"). */
     if (n.img != null && typeof n.img !== 'string') delete n.img;
     if (n.diagram != null && typeof n.diagram !== 'string') delete n.diagram;
+    /* Addendum H3: a note node's link to its Obsidian file — {path,title,excerpt}.
+       Only type-checked, never rebuilt (same "unknown fields survive" rule);
+       a map opened by an older engine that has never heard of H3 still keeps
+       this object untouched round-trip. */
+    if (n.note != null) {
+      if (typeof n.note !== 'object' || typeof n.note.path !== 'string' || !n.note.path) delete n.note;
+      else {
+        n.note.title = typeof n.note.title === 'string' ? n.note.title : n.note.path;
+        n.note.excerpt = typeof n.note.excerpt === 'string' ? n.note.excerpt : '';
+      }
+    }
+    /* Addendum H2: a node's Excalidraw sketch pop-up — node.sketch is the
+       lossless scene (elements/appState), node.sketchSvg the rendered
+       thumbnail. Type-checked only, never regenerated here. */
+    if (n.sketch != null && (typeof n.sketch !== 'object' || !Array.isArray(n.sketch.elements))) delete n.sketch;
+    if (n.sketchSvg != null && typeof n.sketchSvg !== 'string') delete n.sketchSvg;
     /* Equations: node.eqs is an array of LaTeX strings, separate from the
        title (Barak, 13.09: "make the name of a node and an equation
        separable"). Older $...$-in-title equations are untouched by this —
@@ -1336,7 +1387,9 @@ var ROW_H = 54;        /* one leaf's vertical slot, card + breathing room */
    already has the room (contract: "spread()'s row height must account for
    tall cards"). */
 var TALL_CARD_ROWS = 5;    /* 5 * ROW_H ≈ 270px — a generous first guess */
-function nodeRowSpan(node) { return (node && (node.img || node.diagram)) ? TALL_CARD_ROWS : 1; }
+function nodeRowSpan(node) {
+  return (node && (node.img || node.diagram || node.sketchSvg || (node.kind === 'note' && node.note))) ? TALL_CARD_ROWS : 1;
+}
 function spread(pId, px, py, center, span, depth, emit) {
   if (depth > 14) return;
   var pnode = N(pId);
@@ -1585,27 +1638,41 @@ function mapWorld() {
     var bridgeEditing = UI.editingBridge === node.id;
     var hint = 'לחיצה לבחירה · לחיצה כפולה לעריכה — click to select, double-click to rename' +
       (node.bridge ? ' — 🪙 ' + node.bridge : '');                          /* A5: tooltip works at any zoom */
+    /* H3: a note node dropped from Obsidian's file explorer — {path,title,excerpt}.
+       Rendered very differently from a plain quick note (Addendum G's kind:'note'
+       with no .note object): a file-text swatch, the title as a clickable
+       [[wikilink]] (reuses the existing .gm-wlink click routing — H3's "click
+       opens the note, double-click opens it beside"), and a live excerpt. */
+    var isLinkedNote = node.kind === 'note' && node.note && node.note.path;
+    var noteHint = isLinkedNote ? 'לחיצה לפתיחה · לחיצה כפולה לפתיחה בצד — click to open, double-click to open beside' : '';
     nodes += '<div class="gm-node gm-glass' + (isRoot ? ' root' : '') + (isSel(node.id) ? ' sel' : '') +
       (marked ? ' marked' : '') + (haze ? ' hazed' : '') + (UI.relFrom === node.id ? ' relsrc' : '') +
       (kind ? ' gm-kind-' + kind : '') + (hub ? ' hub' : '') +
-      (node.kind === 'note' ? ' gm-kind-note' : '') +
+      (node.kind === 'note' ? ' gm-kind-note' : '') + (isLinkedNote ? ' gm-linked-note' : '') +
+      (node.sketchSvg ? ' gm-has-sketch' : '') +
       (qOpen ? ' gm-q-open' : '') + (qAnswered ? ' gm-q-answered' : '') + '"' +
       ' data-node="' + node.id + '" data-x="' + x.toFixed(1) + '" data-y="' + y.toFixed(1) + '"' +
       ' data-depth="' + depth + '" data-par="' + esc(parId || '') + '" data-col="var(' + accent + ')"' +
       ' data-pinned="' + (isRoot ? 2 : (pinned ? 1 : 0)) + '"' +
       (node.collapsed ? ' data-collapsed="1"' : '') +
       ' style="left:' + x.toFixed(1) + 'px;top:' + y.toFixed(1) + 'px' + (accent ? ';--acc:var(' + accent + ')' : '') + '"' +
-      ' role="button" tabindex="0" title="' + esc(hint) + '">' +
+      ' role="button" tabindex="0" title="' + esc(isLinkedNote ? noteHint : hint) + '">' +
       (accent ? '<span class="gm-stripe" aria-hidden="true"></span>' : '') +
       '<span class="gm-ttl gm-bidi" dir="auto">' +
-        (glyph ? '<span class="gm-glyph gm-swatch gm-swatch-' + glyphSwatch + '" aria-hidden="true">' + glyph + '</span>' : '') +
-        (typeof window.titleHTML === 'function' ? window.titleHTML(node.title) : esc(node.title)) + '</span>' +
+        (isLinkedNote ? '<span class="gm-glyph gm-note-swatch" aria-hidden="true">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span>' :
+          (glyph ? '<span class="gm-glyph gm-swatch gm-swatch-' + glyphSwatch + '" aria-hidden="true">' + glyph + '</span>' : '')) +
+        (isLinkedNote ?
+          '<a class="gm-wlink gm-note-title" dir="auto" data-note="' + esc(node.note.path) + '" title="' + esc(node.note.title || node.title) + '">[[' + esc(node.note.title || node.title) + ']]</a>' :
+          (typeof window.titleHTML === 'function' ? window.titleHTML(node.title) : esc(node.title))) + '</span>' +
+      (isLinkedNote ? '<div class="gm-note-excerpt gm-bidi" dir="auto">' + esc((node.note.excerpt || '').slice(0, 300)) + '</div>' : '') +
       (node.eqs && node.eqs.length ? '<div class="gm-eqs">' + node.eqs.map(function (latex, eqi) {
         return '<div class="gm-eqline" dir="ltr" data-eq-node="' + node.id + '" data-eq-idx="' + eqi + '" title="לחיצה לעריכה — click to edit">' +
           (typeof window.eqLineHTML === 'function' ? window.eqLineHTML(latex) : esc(latex)) + '</div>';
       }).join('') + '</div>' : '') +
       (node.img ? '<img class="gm-thumb" data-gm-thumb src="' + esc(node.img) + '" alt="" title="לחיצה להגדלה — click to enlarge">' : '') +
       (node.diagram ? '<div class="gm-diagram" data-diagram-node="' + node.id + '" title="לחיצה לעריכה — click to edit"><span class="gm-diagram-loading">…</span></div>' : '') +
+      (node.sketchSvg ? '<div class="gm-sketch-thumb" data-sketch-node="' + node.id + '" title="לחיצה לעריכת השרטוט — click to edit the sketch">' + node.sketchSvg + '</div>' : '') +
       (node.bridge != null ? '<div class="gm-bridge gm-bidi' + (bridgeEditing ? ' force' : '') + '" data-bridge="' + node.id + '">' +
         '<span aria-hidden="true">🪙</span><span class="gm-bridge-txt" dir="auto">' + esc(node.bridge) + '</span></div>' : '') +
       '<div class="gm-meta">' +
@@ -1659,6 +1726,13 @@ function renderMapctl() {
       ' title="קשר בין נושאים (Shift+L) — relate two nodes" aria-label="Relate two nodes"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><path d="M8 12h8"/></svg></button>' +
     '<button class="gm-btn icon" id="eqBtn" title="משוואה (Alt+=) — equation" aria-label="Insert an equation"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 7V4H6l6 8-6 8h12v-3"/></svg></button>' +
     '<button class="gm-btn icon" id="diagramBtn" title="דיאגרמה מהירה (Alt+M) — quick diagram" aria-label="Insert a quick diagram"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></svg></button>' +
+    /* H1 rail button: capture a floating thought (lucide message-square-dashed).
+       H2 deliberately does NOT get a permanent rail slot too — the rail is
+       already 16 buttons deep (contract D4's "mapctl rail only" corner has a
+       real ceiling at this viewport height); Alt+S plus the sketch thumbnail's
+       own click-to-reopen already satisfy "Alt+S or a node action" without
+       growing the rail further. */
+    '<button class="gm-btn icon" id="bubbleBtn" title="תפוס מחשבה (Alt+T) — capture a thought" aria-label="Capture a floating thought"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21c-4.4 0-8-2.7-8-6s3.6-6 8-6 8 2.7 8 6c0 1-.3 1.9-.9 2.7"/><path d="M17 17c0 1.7 1.3 3 3 3"/><path d="M9 10h.01M13 10h.01"/></svg></button>' +
     /* Addendum G rail buttons: add question (Shift+/), add note (N), copy
        open questions for Claude, paste back answers, copy a branch with
        context — lucide stroke icons, matching the rest of the rail. */
@@ -1822,6 +1896,23 @@ function selNode(id, opts) {
 function editSelected(onCancel) {
   var node = UI.sel && N(UI.sel), n = selDom(), t = selText(n);
   if (!node || !t) return;
+  /* H3 sacred rule: a note node's title is never renamed directly — the map
+     asks the host (which asks the user) and only updates once gm:note-renamed
+     confirms it. The card's title span holds the swatch + "[[title]]"
+     markup, not plain text, so seed a clean value before handing it to
+     inlineEdit (whose `old`/commit both read node.textContent verbatim). */
+  if (node.kind === 'note' && node.note && node.note.path) {
+    t.textContent = node.note.title || node.title || '';
+    inlineEdit(t, function (v) {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'gm:rename-note-request', path: node.note.path, newTitle: v }, '*');
+      } else {
+        toast('שינוי שם לפתק אפשרי רק מתוך Obsidian');
+      }
+      render();   /* revert the on-screen title to the note's own, until gm:note-renamed arrives */
+    }, { grow: false, onCancel: onCancel });
+    return;
+  }
   inlineEdit(t, function (v) { node.title = v; save(); render(); }, { grow: true, onCancel: onCancel });
 }
 /* Open the body sheet for the selected node's notes (key `E`). */
@@ -2138,7 +2229,11 @@ function inField() {
   var a = document.activeElement;
   return a && (a.isContentEditable || a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' ||
     a.tagName === 'MATH-FIELD' || !!(a.closest && a.closest('#eqPanel')) ||
-    !!(a.closest && a.closest('#diagramPanel')));
+    !!(a.closest && a.closest('#diagramPanel')) ||
+    /* H2: "while open, the modal owns the keyboard: map shortcuts are off" —
+       Excalidraw renders its own canvas/toolbar (not an INPUT/TEXTAREA), so
+       it needs its own closest() check like the equation/diagram panels. */
+    !!(a.closest && a.closest('#sketchModal')));
 }
 function mapKeys(ev) {
   if (inField()) return;
@@ -2158,12 +2253,22 @@ function mapKeys(ev) {
   /* Addendum G, key change: help moved off '?' onto F1, so while the help
      overlay is open only F1 (toggle it back off) and Escape get through. */
   if (el('#helpOverlay').classList.contains('open') && ev.key !== 'F1' && ev.key !== 'Escape') return;
+  /* H2: the sketch modal owns the keyboard while open — checked here too
+     (not just inField()'s focus-based guard) so a stray click that moves
+     focus outside the modal can never leak a map shortcut through it. */
+  var sketchEl = document.getElementById('sketchModal');
+  if (sketchEl && !sketchEl.hidden && ev.key !== 'Escape') return;
 
   /* A3 jump history: Alt+← / Alt+→, ahead of everything else so no other
      binding can shadow it (there is no unmodified use of these arrows). */
   if (ev.altKey && !ev.ctrlKey && !ev.metaKey) {
     if (ev.key === '=' || ev.code === 'Equal') { ev.preventDefault(); if (typeof window.openEquation === 'function') window.openEquation(); return; }
     if (ev.key === 'm' || ev.key === 'M' || ev.code === 'KeyM') { ev.preventDefault(); if (typeof window.openDiagramEditor === 'function') window.openDiagramEditor(); return; }
+    /* H1 / H2: Alt+T opens the thought-capture bubble input, Alt+S opens the
+       sketch modal for the selected node — both use the code fallback so a
+       Hebrew-layout keyboard still triggers them (same convention as Alt+M). */
+    if (ev.key === 't' || ev.key === 'T' || ev.code === 'KeyT') { ev.preventDefault(); if (typeof window.openThoughtCapture === 'function') window.openThoughtCapture(); return; }
+    if (ev.key === 's' || ev.key === 'S' || ev.code === 'KeyS') { ev.preventDefault(); if (typeof window.openSketchModal === 'function') window.openSketchModal(); return; }
     if (ev.key === 'ArrowLeft') { ev.preventDefault(); historyBack(); return; }
     if (ev.key === 'ArrowRight') { ev.preventDefault(); historyForward(); return; }
     return;
@@ -2302,6 +2407,12 @@ function chromeSafeRect() {
   if (crumb) out.top = Math.max(out.top, crumb.bottom + gap);
   var ctl = visibleRect('#mapctl');
   if (ctl) out.right = Math.min(out.right, ctl.left - gap);
+  /* H1: the thought tray floats top-right, above where fitMap() would
+     otherwise happily park a node — same "reserve its whole band" treatment
+     as the breadcrumb above (it only occupies the right portion, but a
+     node sitting just left of it under the header reads just as cramped). */
+  var tray = visibleRect('#thoughtTray');
+  if (tray) out.top = Math.max(out.top, tray.bottom + gap);
   var hint = visibleRect('#gmHint'), legend = visibleRect('#legendBar');
   var bandTop = Infinity;
   if (hint) bandTop = Math.min(bandTop, hint.top);
@@ -2792,8 +2903,27 @@ function mountMap() {
     }
     if (e.target.closest('.addkid,[data-zoom]')) return;
     var n = e.target.closest('.gm-node');
-    if (n) { selNode(n.dataset.node, { quiet: true }); editSelected(); return; }
+    if (n) {
+      /* H3: double-click on a linked note node opens the note BESIDE the map
+         instead of the normal "edit title" gesture. */
+      var nn = N(n.dataset.node);
+      if (nn && nn.kind === 'note' && nn.note && nn.note.path) {
+        selNode(nn.id, { quiet: true });
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'gm:open-note-beside', path: nn.note.path }, '*');
+        } else {
+          toast('קישור לפתק ' + bdi(nn.note.title || nn.note.path) + ' — נפתח מתוך Obsidian', { html: true });
+        }
+        return;
+      }
+      selNode(n.dataset.node, { quiet: true }); editSelected(); return;
+    }
     if (e.target.closest('button,input,a')) return;
+    /* H1: double-click on the empty board opens the thought-capture input
+       instead of fitting the map (the contract's older "double-click bare
+       board = fit" gesture is superseded here — Ctrl+0 / the fit rail button
+       still fit on demand). */
+    if (typeof window.openThoughtCapture === 'function') { window.openThoughtCapture(e.clientX, e.clientY); return; }
     fitMap(460);
   });
 
@@ -3503,6 +3633,8 @@ var SHORTCUTS = [
   ['Shift+L', 'התחל קשר מהבחירה', 'Start a relation from the selection'],
   ['Alt+=', 'עורך משוואות לנושא הנבחר, כמו ב-Word', 'Equation editor for the selected node, like Word'],
   ['Alt+M', 'דיאגרמת Mermaid מהירה לנושא הנבחר', 'Quick Mermaid diagram for the selected node'],
+  ['Alt+T', 'תפוס מחשבה — פתח בועת קלט צפה', 'Capture a floating thought bubble'],
+  ['Alt+S', 'שרטוט לנושא הנבחר (Excalidraw בחלון קופץ)', 'Sketch for the selected node (Excalidraw pop-up)'],
   ['Ctrl+V', 'הדבק תמונה מהלוח כתת-נושא (או גרירה לתוך המפה)', 'Paste an image from the clipboard as a child node (or drop one onto the map)'],
   ['Shift+Ctrl+V', 'צרף תמונה לנושא הנבחר עצמו, בלי ליצור תת-נושא', 'Attach an image to the selected node itself, instead of a new child'],
   ['L', 'החלף שכבה: קשרים / כרטיסים', 'Toggle layer: links / cards'],
@@ -3600,6 +3732,9 @@ function doExportJSON() {
    deeper than the bullet so it reads as that bullet's own content. */
 function pushNodeExtras(lines, node, indent) {
   if (node.img) lines.push(indent + '  <!-- image: ' + (node.title || 'תמונה — image') + ' -->');
+  /* H2: the sketch itself is a pop-up, never part of the outline — a
+     placeholder line only, same spirit as the image placeholder above. */
+  if (node.sketch || node.sketchSvg) lines.push(indent + '  <!-- sketch: ' + (node.title || 'שרטוט — sketch') + ' -->');
   if (node.diagram) {
     lines.push(indent + '  ```mermaid');
     String(node.diagram).split('\n').forEach(function (dl) { lines.push(indent + '  ' + dl); });
@@ -3632,6 +3767,12 @@ function buildMarkdownOutline() {
       var a = N(l.from), b = N(l.to);
       lines.push('[[' + (a ? a.title : '?') + ']] \u2192 [[' + (b ? b.title : '?') + ']]' + (l.label ? ': ' + l.label : ''));
     });
+  }
+  /* H1: unlinked thought bubbles — never on the map plane, so they get their
+     own section instead of a place in the tree. */
+  if (S.inbox && S.inbox.length) {
+    lines.push('', '## מחשבות לא מקושרות');
+    S.inbox.forEach(function (b) { lines.push('- ' + (b.text || '').replace(/\s+/g, ' ')); });
   }
   return lines.join('\n');
 }
@@ -3722,6 +3863,19 @@ window.addEventListener('message', function (ev) {
     if (next) replaceState(next, 'המפה נטענה — map loaded');
     return;
   }
+  /* H3: host -> map bridge messages (see glassBridge.ts / glassmapView.ts). */
+  if (d.type === 'gm:add-note-node' && Array.isArray(d.notes)) {
+    if (typeof window.addNoteNodesFromHost === 'function') window.addNoteNodesFromHost(d.notes, d.at);
+    return;
+  }
+  if (d.type === 'gm:note-updated' && typeof d.path === 'string') {
+    if (typeof window.applyNoteUpdate === 'function') window.applyNoteUpdate(d.path, d.title, d.excerpt);
+    return;
+  }
+  if (d.type === 'gm:note-renamed' && typeof d.oldPath === 'string' && typeof d.newPath === 'string') {
+    if (typeof window.applyNoteRename === 'function') window.applyNoteRename(d.oldPath, d.newPath, d.title);
+    return;
+  }
 });
 
 /* ── click routing for the chrome around the map (header, sheets,
@@ -3754,6 +3908,8 @@ document.addEventListener('click', function (ev) {
   if (ev.target.closest('#relBtn')) { if (UI.relFrom) cancelRelation(); else startRelation(); render(); return; }
   if (ev.target.closest('#eqBtn')) { if (typeof window.openEquation === 'function') window.openEquation(); return; }
   if (ev.target.closest('#diagramBtn')) { if (typeof window.openDiagramEditor === 'function') window.openDiagramEditor(); return; }
+  if (ev.target.closest('#bubbleBtn')) { if (typeof window.openThoughtCapture === 'function') window.openThoughtCapture(); return; }
+  if (ev.target.closest('#sketchBtn')) { if (typeof window.openSketchModal === 'function') window.openSketchModal(); return; }
   if (ev.target.closest('#helpBtn')) { toggleHelp(); return; }
   if (ev.target.closest('[data-close-help]') || ev.target.closest('#helpOverlay') === el('#helpOverlay') && ev.target.id === 'helpOverlay') { toggleHelp(); return; }
   /* Addendum G: header question pill + its rail twins. */
@@ -3804,6 +3960,14 @@ document.addEventListener('click', function (ev) {
   /* A click on a card's image thumbnail opens the glass lightbox. */
   if ((n = ev.target.closest('.gm-node .gm-thumb'))) {
     if (typeof window.openLightbox === 'function') window.openLightbox(n.getAttribute('src'));
+    return;
+  }
+  /* H2: a click on a card's sketch thumbnail reopens the Excalidraw modal. */
+  if ((n = ev.target.closest('.gm-node .gm-sketch-thumb'))) {
+    if (typeof window.openSketchModal === 'function') {
+      selNode(n.dataset.sketchNode, { quiet: true });
+      window.openSketchModal(n.dataset.sketchNode);
+    }
     return;
   }
   /* A click on a card's diagram reopens it in the Mermaid editor with its
@@ -4729,7 +4893,8 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     if (cb) includeNotes = !!cb.checked;
     var groups = collectOpenQuestionsGrouped();
     var total = 0; groups.forEach(function (g) { total += g.questions.length; });
-    if (!total) { toast('אין שאלות פתוחות'); return; }
+    var unlinked = (S.inbox || []).slice();
+    if (!total && !unlinked.length) { toast('אין שאלות פתוחות'); return; }
     var header = "I'm studying the HUJI AI Engineers course. These are my open questions from my study map \"" + S.title + "\".\n" +
       "For each question, use its path, my notes and the nearby concepts as context. Where it helps, bridge to SPSS or\n" +
       "psychology statistics and say where the analogy breaks. Answer each under its own heading.";
@@ -4742,8 +4907,14 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
         });
       }
     });
+    /* H1: unlinked thought bubbles get a final section of their own, English
+       heading (same framing as the "## Qn." headings) since the rest of the
+       block is written so any assistant parses it. */
+    if (unlinked.length) {
+      sections.push('## Unlinked thoughts\n' + unlinked.map(function (b) { return '- ' + (b.text || ''); }).join('\n'));
+    }
     writeClipboardOrDialog(header + '\n\n' + sections.join('\n\n'));
-    toast('הועתקו <bdi>' + total + '</bdi> שאלות', { html: true });
+    toast('הועתקו <bdi>' + total + '</bdi> שאלות' + (unlinked.length ? ' + <bdi>' + unlinked.length + '</bdi> מחשבות' : ''), { html: true });
   }
   window.copyOpenQuestionsToClaude = copyOpenQuestionsToClaude;
 
@@ -5198,5 +5369,514 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   if ((S.nodes || []).some(function (n) { return !!n.diagram; })) loadMermaid().catch(function () {});
 })();
 </script>
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   GlassMap — Addendum H1 (floating thought bubbles) + H3 (Obsidian notes as
+   nodes, map side) + H4 (compact mode for the glass graph sidebar).
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  /* ── styles ──────────────────────────────────────────────────────────── */
+  var css = document.createElement('style');
+  css.textContent =
+    /* H1 tray: start side (right, physically — the map's chrome is
+       LTR-positioned per contract D4), pinned under the header, clear of
+       every other floating element (crumb/find/mapctl/legend/hint). */
+    /* The mapctl rail is a vertical column of icon buttons anchored
+       bottom-right; at 16+ buttons it already reaches most of the way up a
+       720px-tall viewport (a pre-existing ceiling this file has been bumping
+       into addendum after addendum). Rather than depend on the rail's
+       height staying short, the tray clears it HORIZONTALLY — offset far
+       enough left of right:12px that the two columns can never intersect
+       regardless of how tall the rail grows (its own width is fixed: 36px
+       button + 12px padding at desktop, 32px + padding on phone). */
+    '#thoughtTray{position:absolute;top:12px;right:70px;z-index:9;display:flex;flex-direction:column;' +
+      'align-items:flex-end;gap:6px;max-width:min(260px,calc(100% - 190px));}' +
+    '#thoughtTray[hidden]{display:none!important;}' +
+    '.gm-tray-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;}' +
+    '.gm-tray-panel{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:14px;width:100%;' +
+      'max-height:calc(100vh - 140px);overflow:hidden;box-sizing:border-box;}' +
+    '.gm-tray-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11.5px;font-weight:600;}' +
+    '.gm-tray-list{display:flex;flex-direction:column;gap:6px;overflow-y:auto;max-height:calc(100vh - 190px);}' +
+    '.gm-bubble{display:flex;align-items:flex-start;gap:6px;padding:7px 9px;border-radius:12px;' +
+      'background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.5);cursor:grab;font-size:12px;}' +
+    ':root[data-theme="dark"] .gm-bubble{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);}' +
+    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gm-bubble{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);}}' +
+    '.gm-bubble.dragging{opacity:.4;}' +
+    '.gm-bubble-txt{flex:1;min-width:0;white-space:pre-wrap;word-break:break-word;max-height:4.2em;overflow:hidden;}' +
+    '.gm-bubble-link{flex:none;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;' +
+      'border-radius:999px;opacity:.75;}' +
+    '.gm-bubble-link:hover{opacity:1;}' +
+    /* H1 capture input */
+    '#thoughtCapture{position:fixed;z-index:71;width:min(280px,calc(100vw - 24px));padding:10px;border-radius:14px;box-sizing:border-box;}' +
+    '#thoughtCapture[hidden]{display:none!important;}' +
+    '#thoughtCapture textarea{width:100%;min-height:64px;resize:vertical;font-size:13px;line-height:1.4;box-sizing:border-box;}' +
+    '#thoughtCapture .gm-tc-hint{margin-top:4px;font-size:10.5px;color:var(--sh-text-tip);}' +
+    /* select-and-pulse feedback (H3: dropping a note already on the map) */
+    '@keyframes gm-pulse-kf{0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,.65);}50%{box-shadow:0 0 0 9px rgba(212,175,55,0);}}' +
+    '.gm-node.gm-pulse{animation:gm-pulse-kf .9s ease-out 2;}' +
+    /* H4 compact mode */
+    '.gm-compact #gmHint,.gm-compact #legendBar,.gm-compact .gm-headtools{display:none!important;}' +
+    '.gm-compact .mapctl{padding:3px!important;gap:2px!important;}' +
+    '.gm-compact .mapctl .gm-btn.icon{width:28px!important;height:28px!important;}' +
+    '.gm-compact .mapctl .gm-i{width:14px!important;height:14px!important;}';
+  document.head.appendChild(css);
+
+  /* ── H1: the floating tray ─────────────────────────────────────────────── */
+  var tray = document.createElement('div');
+  tray.className = 'gm-glass';
+  tray.id = 'thoughtTray';
+  tray.setAttribute('data-float', 'tray');
+  tray.setAttribute('data-chrome', '1');
+  tray.hidden = true;
+  document.querySelector('.mapwrap').appendChild(tray);
+
+  function ic(p, w) {
+    w = w || 16;
+    return '<svg class="gm-i" width="' + w + '" height="' + w + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+  }
+  var BUBBLE_ICON = '<path d="M12 21c-4.4 0-8-2.7-8-6s3.6-6 8-6 8 2.7 8 6c0 1-.3 1.9-.9 2.7"/><path d="M17 17c0 1.7 1.3 3 3 3"/>';
+  var LINK_ICON = '<path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><path d="M8 12h8"/>';
+  var CHEVRON_ICON = '<path d="m18 15-6-6-6 6"/>';
+
+  function trayFoldKey() { return 'glassmap:trayFolded:' + (S.id || 'default'); }
+  function isTrayFolded() { try { return localStorage.getItem(trayFoldKey()) === '1'; } catch (e) { return false; } }
+  function setTrayFolded(v) { try { localStorage.setItem(trayFoldKey(), v ? '1' : '0'); } catch (e) {} renderTray(); }
+
+  function renderTray() {
+    var list = S.inbox || [];
+    if (!list.length) { tray.hidden = true; return; }
+    tray.hidden = false;
+    var folded = isTrayFolded();
+    tray.classList.toggle('folded', folded);
+    if (folded) {
+      tray.innerHTML = '<button class="gm-btn gm-tray-pill" id="trayFoldBtn" aria-pressed="true" ' +
+        'title="הצג מחשבות — show thoughts" aria-label="Show thoughts">' + ic(BUBBLE_ICON) +
+        '<span class="gm-bidi">מחשבות: <bdi>' + list.length + '</bdi></span></button>';
+      return;
+    }
+    tray.innerHTML =
+      '<div class="gm-tray-panel gm-glass">' +
+        '<div class="gm-tray-head"><span class="gm-bidi">מחשבות: <bdi>' + list.length + '</bdi></span>' +
+          '<button class="gm-btn icon" id="trayFoldBtn" aria-pressed="false" title="קפל — fold" aria-label="Fold">' + ic(CHEVRON_ICON, 14) + '</button></div>' +
+        '<div class="gm-tray-list">' + list.map(function (b) {
+          return '<div class="gm-bubble" draggable="true" data-bubble="' + esc(b.id) + '">' +
+            '<span class="gm-bubble-txt gm-bidi" dir="auto">' + esc(b.text) + '</span>' +
+            '<button class="gm-bubble-link" data-bubble-link="' + esc(b.id) + '" ' +
+              'title="קשר לנושא הנבחר — link to the selected node" aria-label="Link to the selected node">' + ic(LINK_ICON, 14) + '</button>' +
+          '</div>';
+        }).join('') + '</div>' +
+      '</div>';
+  }
+  RENDER_HOOKS.push(renderTray);
+  renderTray();   /* this script runs after boot's own first render(), so paint the initial state once here too */
+
+  /* ── H1: capture input — Alt+T, the rail button, or a double-click on the
+     empty board (wired in mountMap()'s dblclick handler). ───────────────── */
+  var capture = document.createElement('div');
+  capture.className = 'gm-glass';
+  capture.id = 'thoughtCapture';
+  capture.setAttribute('data-float', 'thought-capture');
+  capture.setAttribute('data-chrome', '1');
+  capture.hidden = true;
+  capture.innerHTML =
+    '<textarea class="gm-bidi" dir="auto" placeholder="מה עולה לך?" aria-label="Capture a thought"></textarea>' +
+    '<div class="gm-tc-hint gm-bidi"><kbd dir="ltr">Enter</kbd> שמירה · <kbd dir="ltr">Shift+Enter</kbd> שורה · <kbd dir="ltr">Esc</kbd> ביטול</div>';
+  document.body.appendChild(capture);
+  var captureTa = capture.querySelector('textarea');
+
+  function closeThoughtCapture() {
+    if (capture.hidden) return;
+    capture.hidden = true;
+    var mw = el('#mapwrap'); if (mw) mw.focus();
+  }
+  function commitThoughtCapture() {
+    var text = captureTa.value.trim();
+    closeThoughtCapture();
+    if (!text) return;
+    S.inbox = S.inbox || [];
+    S.inbox.push({ id: uid('t'), text: text, created: new Date().toISOString() });
+    save(); render();
+    toast('נשמרה מחשבה');
+  }
+  function openThoughtCapture(x, y) {
+    capture.hidden = false;
+    if (typeof x === 'number' && typeof y === 'number') {
+      var w = capture.offsetWidth || 280, h = capture.offsetHeight || 110;
+      var left = Math.max(12, Math.min(x - w / 2, innerWidth - w - 12));
+      var top = Math.max(64, Math.min(y - h / 2, innerHeight - h - 12));
+      capture.style.left = left + 'px'; capture.style.top = top + 'px';
+    } else {
+      var tr = tray.getBoundingClientRect();
+      capture.style.left = Math.max(12, tr.left - 290) + 'px';
+      capture.style.top = Math.max(64, tr.top) + 'px';
+    }
+    captureTa.value = '';
+    requestAnimationFrame(function () { captureTa.focus(); resetPageScroll(); });
+  }
+  captureTa.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); e.stopPropagation(); commitThoughtCapture(); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeThoughtCapture(); }
+  });
+  document.addEventListener('pointerdown', function (e) {
+    if (capture.hidden) return;
+    if (e.target.closest && e.target.closest('#thoughtCapture')) return;
+    commitThoughtCapture();   /* clicking away commits, same spirit as a blur */
+  }, true);
+  window.openThoughtCapture = openThoughtCapture;
+
+  /* ── H1: link a bubble to a node — drag-drop (default: child; Shift-drop:
+     append to body) or the bubble's own link button (target = selection).
+     One save() = one undo step that restores the bubble to the inbox
+     exactly, per the contract's "one undo step restores it". ───────────── */
+  function linkBubbleToNode(bubbleId, nodeId, appendToBody) {
+    var idx = -1;
+    (S.inbox || []).forEach(function (b, i) { if (b.id === bubbleId) idx = i; });
+    var node = nodeId && N(nodeId);
+    if (idx < 0 || !node) return;
+    var b = S.inbox[idx];
+    S.inbox = S.inbox.slice(0, idx).concat(S.inbox.slice(idx + 1));
+    if (appendToBody) {
+      node.body = node.body ? (node.body + '\n' + b.text) : b.text;
+    } else {
+      S.nodes.push({ id: uid('n'), parent: nodeId, title: b.text, body: '', accent: accentFor(nodeId) });
+    }
+    save(); render();
+    requestAnimationFrame(function () { settleMap(); });
+    toast('המחשבה קושרה — <kbd dir="ltr">Ctrl+Z</kbd> לביטול', { html: true });
+  }
+  document.addEventListener('dragstart', function (e) {
+    var b = e.target.closest && e.target.closest('[data-bubble]');
+    if (!b || !e.dataTransfer) return;
+    e.dataTransfer.setData('text/gm-bubble', b.dataset.bubble);
+    e.dataTransfer.effectAllowed = 'move';
+    b.classList.add('dragging');
+  });
+  document.addEventListener('dragend', function (e) {
+    var b = e.target.closest && e.target.closest('[data-bubble]');
+    if (b) b.classList.remove('dragging');
+  });
+  document.addEventListener('dragover', function (e) {
+    if (!e.dataTransfer) return;
+    var types = e.dataTransfer.types;
+    var has = types && (types.indexOf ? types.indexOf('text/gm-bubble') >= 0 : Array.prototype.indexOf.call(types, 'text/gm-bubble') >= 0);
+    if (!has) return;
+    var host = e.target.closest && e.target.closest('.gm-node[data-node]');
+    if (host) e.preventDefault();
+  });
+  document.addEventListener('drop', function (e) {
+    if (!e.dataTransfer) return;
+    var bid = e.dataTransfer.getData('text/gm-bubble');
+    if (!bid) return;
+    var host = e.target.closest && e.target.closest('.gm-node[data-node]');
+    if (!host) return;
+    e.preventDefault();
+    linkBubbleToNode(bid, host.dataset.node, e.shiftKey);
+  });
+  document.addEventListener('click', function (e) {
+    var foldBtn = e.target.closest && e.target.closest('#trayFoldBtn');
+    if (foldBtn) { setTrayFolded(!isTrayFolded()); return; }
+    var linkBtn = e.target.closest && e.target.closest('[data-bubble-link]');
+    if (linkBtn) {
+      if (!UI.sel || !N(UI.sel)) { toast('בחר נושא קודם'); return; }
+      linkBubbleToNode(linkBtn.dataset.bubbleLink, UI.sel, false);
+      return;
+    }
+  });
+
+  /* ── H3: host -> map bridge (see glassBridge.ts / glassmapView.ts) ──────── */
+  function pulseSelect(id) {
+    UI.sel = id;
+    render();
+    var n = el('.gm-node[data-node="' + id + '"]');
+    if (n) {
+      ensureVisible(n);
+      n.classList.add('gm-pulse');
+      setTimeout(function () { n.classList.remove('gm-pulse'); }, 900);
+    }
+  }
+  window.addNoteNodesFromHost = function (notes, at) {
+    if (!Array.isArray(notes) || !notes.length) return;
+    var parentId = null;
+    if (at && typeof at.x === 'number' && typeof at.y === 'number') {
+      try {
+        var hit = document.elementFromPoint(at.x, at.y);
+        var hostNode = hit && hit.closest && hit.closest('.gm-node[data-node]');
+        if (hostNode) parentId = hostNode.dataset.node;
+      } catch (e) {}
+    }
+    if (!parentId && UI.sel && N(UI.sel)) parentId = UI.sel;
+    if (!parentId) parentId = rootNode().id;
+    var addedAny = false, lastId = null, dupe = null;
+    notes.forEach(function (nt) {
+      if (!nt || typeof nt.path !== 'string' || !nt.path) return;
+      var existing = S.nodes.filter(function (n) { return n.kind === 'note' && n.note && n.note.path === nt.path; })[0];
+      if (existing) { dupe = existing.id; return; }
+      var id = uid('n');
+      S.nodes.push({
+        id: id, parent: parentId, title: nt.title || nt.path, body: '', accent: accentFor(parentId),
+        kind: 'note', note: { path: nt.path, title: nt.title || nt.path, excerpt: nt.excerpt || '' }
+      });
+      addedAny = true; lastId = id;
+    });
+    if (addedAny) {
+      UI.sel = lastId; mapView().touched = true; save(); render();
+      requestAnimationFrame(function () { settleMap(); });
+    }
+    if (dupe && !addedAny) pulseSelect(dupe);
+  };
+  /* Not an undo step, not a user edit (contract): persistSoft() writes
+     localStorage + a debounced gm:save, but never touches UNDO/REDO. */
+  window.applyNoteUpdate = function (path, title, excerpt) {
+    var touched = false;
+    S.nodes.forEach(function (n) {
+      if (n.kind === 'note' && n.note && n.note.path === path) {
+        n.note.title = typeof title === 'string' && title ? title : n.note.title;
+        n.note.excerpt = typeof excerpt === 'string' ? excerpt : n.note.excerpt;
+        touched = true;
+      }
+    });
+    if (touched) { persistSoft(); render(); }
+  };
+  window.applyNoteRename = function (oldPath, newPath, title) {
+    var touched = false;
+    S.nodes.forEach(function (n) {
+      if (n.kind === 'note' && n.note && n.note.path === oldPath) {
+        n.note.path = newPath;
+        n.note.title = typeof title === 'string' && title ? title : n.note.title;
+        touched = true;
+      }
+    });
+    if (touched) { persistSoft(); render(); }
+  };
+
+  /* ── H4: compact mode — the plugin's glass graph sidebar. GM_COMPACT is set
+     by the plugin BEFORE this script runs (a srcdoc page has no query string
+     of its own); ?compact=1 covers the web/standalone case. ──────────────── */
+  var compactOn = window.GM_COMPACT === true;
+  if (!compactOn) {
+    try { compactOn = new URLSearchParams(location.search).get('compact') === '1'; } catch (e) {}
+  }
+  if (compactOn) {
+    document.documentElement.classList.add('gm-compact');
+    var doFit = function () { fitMap(0); };
+    setTimeout(doFit, 260);
+    setTimeout(doFit, 900);
+  }
+})();
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   GlassMap — Addendum H2: a sketch inside a node, Excalidraw as a POP-UP
+   only (never the map canvas). Lazy-loads React + ReactDOM + the Excalidraw
+   UMD bundle from a pinned CDN version on first open; every CDN URL is
+   verified to return 200 before the map ever relies on it. Saving stores
+   node.sketch (elements + appState.viewBackgroundColor + the files map, so
+   an embedded image round-trips) and node.sketchSvg (a static thumbnail
+   from exportToSvg) — refused above 200KB combined, with a Hebrew toast.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  var EXCA_VERSION = '0.17.6';
+  var REACT_VERSION = '18.3.1';
+  var REACT_URL = 'https://cdn.jsdelivr.net/npm/react@' + REACT_VERSION + '/umd/react.production.min.js';
+  var REACT_DOM_URL = 'https://cdn.jsdelivr.net/npm/react-dom@' + REACT_VERSION + '/umd/react-dom.production.min.js';
+  var EXCA_BASE = 'https://cdn.jsdelivr.net/npm/@excalidraw/excalidraw@' + EXCA_VERSION + '/dist/';
+  var EXCA_URL = EXCA_BASE + 'excalidraw.production.min.js';
+  var MAX_BYTES = 200 * 1024;
+
+  var css = document.createElement('style');
+  css.textContent =
+    '#sketchModal{position:fixed;inset:0;z-index:72;display:grid;place-items:center;' +
+      'background:rgba(15,25,50,.45);opacity:0;pointer-events:none;transition:opacity .18s ease;}' +
+    '#sketchModal.open{opacity:1;pointer-events:auto;}' +
+    '#sketchModal[hidden]{display:none!important;}' +
+    '.gm-sketch-card{width:min(960px,94vw);height:min(680px,88vh);border-radius:18px;' +
+      'display:flex;flex-direction:column;overflow:hidden;padding:0;}' +
+    '.gm-sketch-head{flex:none;display:flex;align-items:center;justify-content:space-between;' +
+      'padding:10px 14px;border-bottom:1px solid var(--sh-line);}' +
+    '.gm-sketch-title{font-size:13.5px;font-weight:600;}' +
+    '.gm-sketch-actions{display:flex;gap:6px;}' +
+    '.gm-sketch-mount{flex:1 1 auto;min-height:0;position:relative;background:#fff;}' +
+    '.gm-sketch-mount .excalidraw{height:100%;}' +
+    '.gm-sketch-loading{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;' +
+      'color:var(--sh-text-med);background:rgba(255,255,255,.85);}' +
+    ':root[data-theme="dark"] .gm-sketch-loading{background:rgba(10,15,30,.85);}';
+  document.head.appendChild(css);
+
+  function ic(p) {
+    return '<svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+  }
+  var modal = document.createElement('div');
+  modal.id = 'sketchModal';
+  modal.setAttribute('data-float', 'sketch');
+  modal.setAttribute('data-chrome', '1');
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-label', 'עורך שרטוטים');
+  modal.hidden = true;
+  modal.innerHTML =
+    '<div class="gm-sketch-card gm-glass">' +
+      '<div class="gm-sketch-head"><span class="gm-sketch-title gm-bidi">שרטוט לנושא</span>' +
+        '<div class="gm-sketch-actions">' +
+          '<button class="gm-btn" id="sketchCancel" title="ביטול (Esc) — cancel">' + ic('<path d="M18 6 6 18M6 6l12 12"/>') + '<span>ביטול</span></button>' +
+          '<button class="gm-btn on" id="sketchSave" title="שמור — save">' + ic('<path d="M20 6 9 17l-5-5"/>') + '<span>שמור</span></button>' +
+        '</div></div>' +
+      '<div class="gm-sketch-mount" id="sketchMount"><div class="gm-sketch-loading">טוען עורך שרטוטים…</div></div>' +
+    '</div>';
+  document.body.appendChild(modal);
+  var mount = modal.querySelector('#sketchMount');
+
+  var SK = { nodeId: null, root: null, api: null, ready: false };
+
+  /* ── CDN health check — H2: "check every CDN URL returns 200 before
+     relying on it". A HEAD request is enough; jsdelivr serves CORS on all
+     of these. ─────────────────────────────────────────────────────────── */
+  function checkUrl(url) {
+    return fetch(url, { method: 'HEAD' }).then(function (r) { return !!r.ok; }).catch(function () { return false; });
+  }
+  var cdnOkPromise = null;
+  function cdnHealthy() {
+    if (!cdnOkPromise) {
+      cdnOkPromise = Promise.all([checkUrl(REACT_URL), checkUrl(REACT_DOM_URL), checkUrl(EXCA_URL)])
+        .then(function (r) { return r.every(Boolean); });
+    }
+    return cdnOkPromise;
+  }
+
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = src; s.async = true;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('load failed: ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+  var excaLoading = null;
+  function loadExcalidraw() {
+    if (window.ExcalidrawLib && window.React && window.ReactDOM) return Promise.resolve();
+    if (excaLoading) return excaLoading;
+    excaLoading = cdnHealthy().then(function (ok) {
+      if (!ok) throw new Error('cdn unreachable');
+      window.EXCALIDRAW_ASSET_PATH = EXCA_BASE;
+      var p = window.React ? Promise.resolve() : loadScript(REACT_URL);
+      return p.then(function () { return window.ReactDOM ? Promise.resolve() : loadScript(REACT_DOM_URL); })
+        .then(function () { return window.ExcalidrawLib ? Promise.resolve() : loadScript(EXCA_URL); });
+    }, function () { throw new Error('cdn unreachable'); }).catch(function (err) {
+      excaLoading = null;
+      throw err;
+    });
+    return excaLoading;
+  }
+
+  function byteLength(str) {
+    try { return new Blob([str]).size; } catch (e) { return str.length; }
+  }
+
+  function mountEditor(node) {
+    mount.innerHTML = '';
+    var host = document.createElement('div');
+    host.style.height = '100%';
+    mount.appendChild(host);
+    var initialData = (node.sketch && Array.isArray(node.sketch.elements)) ? {
+      elements: window.ExcalidrawLib.restoreElements(node.sketch.elements, null),
+      appState: { viewBackgroundColor: (node.sketch.appState && node.sketch.appState.viewBackgroundColor) || '#ffffff' },
+      files: node.sketch.files || {}
+    } : { appState: { viewBackgroundColor: '#ffffff' } };
+    var el0 = window.React.createElement(window.ExcalidrawLib.Excalidraw, {
+      initialData: initialData,
+      excalidrawAPI: function (api) { SK.api = api; }
+    });
+    SK.root = window.ReactDOM.createRoot(host);
+    SK.root.render(el0);
+  }
+
+  function openSketchModal(nodeId) {
+    var id = nodeId || UI.sel;
+    var node = id && N(id);
+    if (!node) { toast('בחר נושא קודם'); return; }
+    SK.nodeId = id;
+    modal.hidden = false;
+    requestAnimationFrame(function () { modal.classList.add('open'); });
+    mount.innerHTML = '<div class="gm-sketch-loading">טוען עורך שרטוטים…</div>';
+    loadExcalidraw().then(function () {
+      if (modal.hidden || SK.nodeId !== id) return;   /* closed again before the CDN answered */
+      mountEditor(node);
+    }, function () {
+      mount.innerHTML = '<div class="gm-sketch-loading">עורך השרטוטים לא נטען — צריך חיבור לאינטרנט</div>';
+    });
+  }
+  function closeSketchModal() {
+    if (modal.hidden) return;
+    modal.classList.remove('open');
+    setTimeout(function () {
+      modal.hidden = true;
+      if (SK.root) { try { SK.root.unmount(); } catch (e) {} SK.root = null; }
+      SK.api = null; SK.nodeId = null;
+      var wrap = el('#mapwrap'); if (wrap) wrap.focus();
+    }, 180);
+  }
+  function saveSketch() {
+    var node = SK.nodeId && N(SK.nodeId);
+    if (!node || !SK.api) { closeSketchModal(); return; }
+    var elements = SK.api.getSceneElements();
+    var appState = SK.api.getAppState();
+    var files = SK.api.getFiles ? SK.api.getFiles() : {};
+    var sketch = { elements: elements, appState: { viewBackgroundColor: appState.viewBackgroundColor || '#ffffff' }, files: files };
+    var svg = '';
+    /* exportToSvg() derives the font asset URL differently from the live
+       canvas (it appends "/dist/excalidraw-assets/…" to EXCALIDRAW_ASSET_PATH
+       itself, where the canvas's own webpack runtime already expects that
+       path to END in "/dist/") — verified by hand against jsdelivr: the
+       canvas needs EXCA_BASE, exportToSvg needs the package root with no
+       trailing slash, or the font request 404s/400s. Swap it only for the
+       duration of this call. */
+    var prevAssetPath = window.EXCALIDRAW_ASSET_PATH;
+    window.EXCALIDRAW_ASSET_PATH = 'https://cdn.jsdelivr.net/npm/@excalidraw/excalidraw@' + EXCA_VERSION;
+    window.ExcalidrawLib.exportToSvg({ elements: elements, appState: sketch.appState, files: files })
+      .then(function (svgEl) {
+        window.EXCALIDRAW_ASSET_PATH = prevAssetPath;
+        svg = svgEl.outerHTML;
+        var totalBytes = byteLength(JSON.stringify(sketch)) + byteLength(svg);
+        if (totalBytes > MAX_BYTES) {
+          toast('השרטוט גדול מדי (מעל 200KB) — לא נשמר');
+          return;
+        }
+        node.sketch = sketch;
+        node.sketchSvg = svg;
+        save(); render();
+        closeSketchModal();
+        toast('השרטוט נשמר');
+      }, function () {
+        window.EXCALIDRAW_ASSET_PATH = prevAssetPath;
+        toast('שגיאה בשמירת השרטוט');
+      });
+  }
+
+  modal.addEventListener('click', function (e) {
+    if (e.target.closest('#sketchSave')) { saveSketch(); return; }
+    if (e.target.closest('#sketchCancel')) { closeSketchModal(); return; }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!modal.hidden && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeSketchModal(); }
+  }, true);
+
+  window.openSketchModal = openSketchModal;
+  window.closeSketchModal = closeSketchModal;
+  /* dogfood/test hook (same convention as window.GM) — lets the verification
+     harness force the save path (e.g. to test the 200KB refusal without
+     drawing an enormous scene by hand) and read the live Excalidraw API. */
+  window.GM_SKETCH = {
+    save: saveSketch,
+    api: function () { return SK.api; },
+    setMaxBytes: function (n) { MAX_BYTES = n; }
+  };
+})();
+</script>
+
 <!-- 3D Kenney city behind the frost; fails safe to the static picture -->
 <script type="module" src="glasscity.js"></script>
