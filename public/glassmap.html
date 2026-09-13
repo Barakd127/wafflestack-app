@@ -177,6 +177,11 @@ input,textarea{background:none;border:0;outline:none;}
 /* (tree lines are always visible now, so the cards-layer ghost is gone) */
 
 .gm-node{position:absolute;transform:translate(-50%,-50%);min-width:120px;max-width:260px;
+  /* big maps (13.09): size to content up to max-width WHEREVER the card sits.
+     Without this an absolutely positioned card shrink-wraps against the
+     world's remaining width, so the same card measured narrower the further
+     right it was — and settleMap measures a card, then moves it. */
+  width:max-content;
   padding:10px 14px;border-radius:16px;cursor:default;
   transition:opacity .18s ease,box-shadow .14s ease;}
 /* Colour correction (Barak, 13.09 follow-up): the node card is its own
@@ -194,6 +199,10 @@ input,textarea{background:none;border:0;outline:none;}
 .gm-node.grabbed{z-index:6;cursor:grabbing;}
 .gm-node .gm-ttl{font-size:14px;line-height:1.3;color:var(--sh-text-dark);font-weight:500;
   overflow-wrap:break-word;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}
+/* big maps (13.09): a blank title (a node Tab/Enter just created) still takes
+   one line, so the card is measured — and its row's tops aligned — at the
+   height it has while being typed into, not one line shorter. */
+.gm-node .gm-ttl:empty{min-height:1.3em;}
 .gm-node .gm-ttl[contenteditable="true"]{outline:2px solid var(--gm-gold);outline-offset:3px;border-radius:4px;
   -webkit-line-clamp:unset;overflow:visible;cursor:text;}
 /* the 4px accent stripe on the card's start edge (contract: cards layer, but
@@ -247,7 +256,7 @@ input,textarea{background:none;border:0;outline:none;}
    three thresholds. */
 .gm-node,.gm-ttl,.gm-note-mark,.gm-depthdots,.gm-rellabel{transition:opacity .18s ease,transform .18s ease,box-shadow .14s ease;}
 .mapwrap.lod-far .gm-node.root{max-width:min(44vw,520px);}
-.mapwrap.lod-far .gm-node[data-depth="1"]{max-width:min(26vw,340px);}
+.mapwrap.lod-far .gm-node[data-depth="1"]{max-width:min(26vw,260px);}   /* FAR_D1_MAX in settleMap's reservation — keep in sync */
 .mapwrap.lod-far .gm-node.root .gm-ttl{
   font-size:calc(18px * min(2.6, calc(1 / var(--gm-z, 1))));
 }
@@ -415,6 +424,11 @@ a.gm-note-title{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellips
    narrower than a plain sibling card at lod-far — bumped from 140 to
    170px (world-space, pre-scale) so it stays wider at every zoom. */
 .gm-node.gm-linked-note{min-width:170px;}
+/* big maps (13.09): cards now size to their content wherever they sit, so a
+   depth-1 subtopic at lod-far can reach the full far max-width — give a
+   depth-1 note card that same width there, so a note is never the thinner
+   card in its row (settleMap reserves exactly this width for depth 1). */
+.mapwrap.lod-far .gm-node.gm-linked-note[data-depth="1"]{min-width:min(26vw,260px);}
 .gm-note-excerpt{margin-top:4px;font-size:11.5px;line-height:1.35;color:var(--sh-text-med);
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .mapwrap.lod-far .gm-note-excerpt,.mapwrap.lod-mid .gm-note-excerpt{display:none;}
@@ -954,10 +968,10 @@ function descendantsOf(id, depth) {
    under some collapsed ancestor) descendants ever count towards width. */
 function leafCount(id, depth) {
   depth = depth || 0;
-  var self = N(id);
+  var ix = layoutIndex(), self = ix.byId[id];   /* index: see buildLayoutIndex() */
   if (self && self.collapsed) return 1;
   if (depth > 16) return 1;
-  var k = childrenOf(id);
+  var k = ix.kids[id] || [];
   if (!k.length) return 1;
   var n = 0;
   k.forEach(function (c) { n += leafCount(c.id, depth + 1); });
@@ -1203,10 +1217,17 @@ function readLocal() {
    we last synced that we don't already have, and toast if a save can't be
    written at all. */
 var LAST_SYNCED_UPDATED_AT = 0, QUOTA_WARN_AT = 0, CONFLICT_WARN_AT = 0;
-function writeLocal() {
+/* big maps (13.09): the stored copy of a real XMind import is 4.6MB (inline
+   images). writeLocal() used to JSON.parse that whole string on every save
+   just to read its updatedAt, then stringify S a second time right after
+   save() already had. Skip the parse when storage still holds exactly what
+   this tab last wrote (no other tab can have touched it), and reuse save()'s
+   string unless a merge from another tab changed S. */
+var LAST_WRITTEN_JSON = null;
+function writeLocal(pre) {
   try {
     var raw = localStorage.getItem(LS_KEY);
-    if (raw) {
+    if (raw && raw !== LAST_WRITTEN_JSON) {
       var other = null;
       try { other = JSON.parse(raw); } catch (e2) {}
       if (other && typeof other.updatedAt === 'number' && other.updatedAt > LAST_SYNCED_UPDATED_AT) {
@@ -1215,13 +1236,16 @@ function writeLocal() {
         (other.nodes || []).forEach(function (n) { if (n && n.id != null && !mineN[n.id]) { S.nodes.push(n); addedN++; } });
         var mineL = {}; S.links.forEach(function (l) { mineL[l.id] = 1; });
         (other.links || []).forEach(function (l) { if (l && l.id != null && !mineL[l.id]) S.links.push(l); });
+        pre = null;                                   /* S may have changed: stringify afresh */
         if (addedN && Date.now() - CONFLICT_WARN_AT > 4000) {
           CONFLICT_WARN_AT = Date.now();
           toast('מפה זו נשמרה גם בכרטיסייה אחרת, מוזג: <bdi>' + addedN + '</bdi>');
         }
       }
     }
-    localStorage.setItem(LS_KEY, JSON.stringify(S));
+    var json = (typeof pre === 'string') ? pre : JSON.stringify(S);
+    localStorage.setItem(LS_KEY, json);
+    LAST_WRITTEN_JSON = json;
     LAST_SYNCED_UPDATED_AT = S.updatedAt;
   } catch (e) {
     if (Date.now() - QUOTA_WARN_AT > 4000) {
@@ -1301,7 +1325,7 @@ function save(opts) {
   S.edits = (+S.edits || 0) + 1;
   S.updatedAt = now;
   snapPrev = JSON.stringify(S);
-  writeLocal();
+  writeLocal(snapPrev);
   postToHost('gm:save', S);
 }
 var persistTimer = null;
@@ -1485,26 +1509,48 @@ var TALL_CARD_COLS = 3;
 function nodeColSpan(node) {
   return (node && (node.img || node.diagram || node.sketchSvg || (node.kind === 'note' && node.note))) ? TALL_CARD_COLS : 1;
 }
-function spread(pId, px, py, center, span, depth, emit) {
-  if (depth > 14) return;
-  var pnode = N(pId);
-  if (pnode && pnode.collapsed) return;
-  var kids = childrenOf(pId);
-  if (!kids.length) return;
+/* ── layout index (big maps, 13.09) ──────────────────────────────────────
+   N() and childrenOf() are linear scans — fine for a 20-node map, but the
+   layout used to call them per node per level (and descendantsOf() per
+   collapsed card), which on a 686-node import is most of the frame. One
+   id → node and parent → children index, rebuilt from scratch at the top of
+   every mapWorld()/settleMap() (O(n), never trusted across a mutation),
+   with children kept in S.nodes order exactly like childrenOf(). */
+var LX = null;
+function buildLayoutIndex() {
+  var arr = S.nodes, byId = {}, kids = {};
+  for (var i = 0; i < arr.length; i++) byId[arr[i].id] = arr[i];
+  for (var j = 0; j < arr.length; j++) {
+    var n = arr[j];
+    if (n.parent != null && byId[n.parent]) (kids[n.parent] || (kids[n.parent] = [])).push(n);
+  }
+  LX = { byId: byId, kids: kids, arr: arr, len: arr.length };
+  return LX;
+}
+function layoutIndex() {
+  if (!LX || LX.arr !== S.nodes || LX.len !== S.nodes.length) buildLayoutIndex();
+  return LX;
+}
+function kidsOf(id) { return layoutIndex().kids[id] || []; }
+function descCount(id) {
+  var ix = layoutIndex(), n = 0, stack = (ix.kids[id] || []).slice(), guard = 0;
+  while (stack.length && guard++ < 100000) {
+    var k = stack.pop(); n++;
+    var kk = ix.kids[k.id]; if (kk) for (var i = 0; i < kk.length; i++) stack.push(kk[i]);
+  }
+  return n;
+}
+/* The original known-position row formula, verbatim (it used to live
+   inline in spread()). Still the ONLY rule for a sibling group that holds
+   an automatic anchor (ax/ay, written by a Tab/Enter on a hand-placed map),
+   so Barak's hand-placed map lays out exactly as it did. */
+function legacyGroupPositions(kids, px, py, depth) {
   var rowGap = rowGapFor(depth), colW = colWFor(depth);
-  /* Anything already known — hand-placed (mx/my) or automatically anchored
-     (ax/ay, set by growChild/growSibling right when they create the node,
-     persisted from then on) — keeps that exact position; only nodes with
-     neither get the generic tidy-tree placement below. */
   var resolved = {}, known = [];
   kids.forEach(function (k) {
     var p = hasMxMy(k) ? { x: k.mx, y: k.my } : (hasAxAy(k) ? { x: k.ax, y: k.ay } : null);
     if (p) { resolved[k.id] = p; known.push(p); }
   });
-  /* Row: the lowest existing row (children already there, hand-placed or
-     seeded) if any, else one row below the parent. Left edge: the current
-     leftmost of those, so anything still unresolved continues the row
-     further left, past everything already on it. */
   var rowY = known.length ? Math.max.apply(null, known.map(function (p) { return p.y; })) : (py + rowGap);
   var leftEdge = known.length ? Math.min.apply(null, known.map(function (p) { return p.x; })) : px;
   var unresolved = kids.filter(function (k) { return !resolved[k.id]; });
@@ -1518,10 +1564,22 @@ function spread(pId, px, py, center, span, depth, emit) {
   }
   unresolved.forEach(function (k, i) {
     var w = cols[i] * colW;
-    var cx = cursor - w / 2;
+    resolved[k.id] = { x: cursor - w / 2, y: rowY };
     cursor -= w;
-    resolved[k.id] = { x: cx, y: rowY };
   });
+  return resolved;
+}
+/* spread() now only emits a PROVISIONAL position for each visible card (the
+   markup needs a left/top before anything can be measured); settleMap()
+   replaces every automatic position a moment later with the measured,
+   compact top-down layout below. */
+function spread(pId, px, py, center, span, depth, emit) {
+  if (depth > 30) return;   /* was 14: a depth-15 card was never emitted, so Tab on a depth-14 node (the XMind import goes that deep) made an invisible child */
+  var ix = layoutIndex(), pnode = ix.byId[pId];
+  if (pnode && pnode.collapsed) return;
+  var kids = ix.kids[pId] || [];
+  if (!kids.length) return;
+  var resolved = legacyGroupPositions(kids, px, py, depth);
   kids.forEach(function (k) {
     var p = resolved[k.id];
     emit(k, p.x, p.y, depth, pId);
@@ -1531,11 +1589,7 @@ function spread(pId, px, py, center, span, depth, emit) {
 /* ── seeding for Tab/Enter — see the ax/ay comment above spread() ────────
    Read a sibling/reference's CURRENT position: its own mx/my if hand-placed,
    else its own persisted automatic anchor, else whatever the last render
-   actually measured for it (the DOM dataset — accurate immediately after a
-   render, which is always the state growChild/growSibling run in; this last
-   fallback only ever matters for a node that predates ax/ay, e.g. one an
-   older engine created — a normal automatic node always has ax/ay by the
-   time anything asks for its position). */
+   actually measured for it (the DOM dataset). */
 function knownPos(id) {
   var n = N(id); if (!n) return null;
   if (hasMxMy(n)) return { x: n.mx, y: n.my };
@@ -1549,51 +1603,55 @@ function nodeDepth(id) {
   while (n && n.parent != null && hops++ < 40) { d++; n = N(n.parent); }
   return d;
 }
+/* Big maps (13.09): an ax/ay seed only makes sense where something around
+   the new node is placed by hand — a hand-placed (or anchored) parent, or a
+   sibling with mx/my or ax/ay. In a fully automatic group the measured
+   top-down layout already puts a new child at the end of its parent's row
+   or column deterministically from the saved map alone, so writing an
+   anchor there would only freeze it at a spot the layout would later move
+   everything else away from. The root never counts: it is always (0,0). */
+function anchoredContext(pid, exceptId) {
+  var p = N(pid); if (!p) return false;
+  if (p.parent != null && (hasMxMy(p) || hasAxAy(p))) return true;
+  return childrenOf(pid).some(function (k) { return k.id !== exceptId && (hasMxMy(k) || hasAxAy(k)); });
+}
 /* Anti-overlap must never push a fresh child/sibling into another row
-   (Barak, 13.09 follow-up) — a hand-placed map's existing siblings can sit
-   much closer together than an automatic colW slot, and settleMap()'s own
-   generic relax pass resolves whichever axis overlaps least, which for a
-   same-row collision can just as easily shove the new node down into the
-   NEXT row as sideways. Clear the row ourselves before settleMap ever runs:
-   walk every other node that shares this row and keep stepping the
-   candidate x further in `dir` until nothing there still collides with a
-   realistic (blank-card-sized) footprint. */
+   (Barak, 13.09 follow-up): walk every card on the same row and step the
+   candidate x further in `dir` until nothing there collides with a
+   blank-card-sized footprint. Same threshold formula as before (LOD_GROW
+   for depth ≤ 1, +14 pad, the other card's real measured width); it now
+   reads the ON-SCREEN cards once instead of every node in S (a hidden card
+   under a collapsed branch can't collide with anything) with a DOM query
+   per node per round — that alone was O(n²·rounds) on a 686-node import. */
 function avoidRowCollision(x, y, dir, depth) {
-  /* Coordinator fix (13.09): this used to use a flat 130/150 threshold/step
-     regardless of depth or actual card size — measurably narrower than what
-     settleMap() actually enforces for a depth-1 node (root/depth-1 cards
-     reserve extra width there for their own lod-far font counter-scale,
-     LOD_GROW = 2.2 in settleMap()), so a seed this judged collision-free
-     still got an unplanned SECOND shove from settleMap's own relax pass
-     moments later (measured: a blank depth-1 sibling landed 39px further
-     than this function alone predicted, on Barak's real map). Mirror
-     settleMap's own pairwise formula exactly instead of guessing a
-     constant: same LOD_GROW factor, same +14 pad, and the OTHER node's
-     REAL measured width where one is already on screen (a fresh node has
-     no card yet, so it starts at the CSS min-width, the smallest anything
-     ever renders at). */
   var grow = (depth || 1) <= 1 ? 2.2 : 1;
   var MIN_W = 120;
   var myW = MIN_W * grow;
+  var ix = buildLayoutIndex();
+  var others = els('.gm-node[data-node]').map(function (dom) {
+    var n = ix.byId[dom.dataset.node];
+    var p = n && hasMxMy(n) ? { x: n.mx, y: n.my } : (n && hasAxAy(n) ? { x: n.ax, y: n.ay } : { x: +dom.dataset.x || 0, y: +dom.dataset.y || 0 });
+    return { x: p.x, y: p.y, w: dom.offsetWidth };
+  });
   var guard = 0, moved = true;
   while (moved && guard++ < 80) {
     moved = false;
-    S.nodes.forEach(function (n) {
-      var p = knownPos(n.id); if (!p) return;
-      if (Math.abs(p.y - y) > 40) return;             /* not this row */
-      var dom = document.querySelector('.gm-node[data-node="' + n.id + '"]');
-      var otherW = (dom ? dom.offsetWidth : MIN_W) * grow;
-      var need = (myW + otherW) / 2 + 14;
-      var dist = Math.abs(p.x - x);
+    for (var i = 0; i < others.length; i++) {
+      var o = others[i];
+      if (Math.abs(o.y - y) > 40) continue;             /* not this row */
+      var need = (myW + o.w * grow) / 2 + 14;
+      var dist = Math.abs(o.x - x);
       if (dist < need) { x += dir * (need - dist + 1); moved = true; }
-    });
+    }
   }
   return x;
 }
 /* Tab: the new child joins its parent's existing children row (or starts
    one row below the parent if it's the first child), at the LEFT end of
-   that row — continuing the RTL "first child rightmost" sequence. */
+   that row — continuing the RTL "first child rightmost" sequence. Only in an
+   anchored (hand-placed) context; see anchoredContext(). */
 function seedChildPosition(pid, newId) {
+  if (!anchoredContext(pid, newId)) return;
   var depth = nodeDepth(newId) || 1;
   var rowGap = rowGapFor(depth), colW = colWFor(depth);
   var pPos = knownPos(pid) || { x: 0, y: 0 };
@@ -1608,10 +1666,11 @@ function seedChildPosition(pid, newId) {
   var node = N(newId); if (node) { node.ax = x; node.ay = y; }
 }
 /* Enter / Shift+Enter: the new sibling goes on the SAME row as the node it
-   was created from, immediately to its left (Enter) or right (Shift+Enter,
-   `before` — "before" in RTL reading order is the side towards the first
-   child, i.e. the right). */
+   was created from, immediately to its left (Enter) or right (Shift+Enter).
+   Again only in an anchored context. */
 function seedSiblingPosition(refId, newId, before) {
+  var ref0 = N(refId);
+  if (!ref0 || ref0.parent == null || !anchoredContext(ref0.parent, newId)) return;
   var depth = nodeDepth(newId) || 1;
   var colW = colWFor(depth);
   var ref = knownPos(refId) || { x: 0, y: 0 };
@@ -1620,86 +1679,305 @@ function seedSiblingPosition(refId, newId, before) {
   var node = N(newId); if (node) { node.ax = x; node.ay = ref.y; }
 }
 
-/* ── settling ────────────────────────────────────────────────────────────
-   Nudge overlapping nodes apart along whichever axis they overlap least,
-   using the sizes the browser actually laid out. Anything hand-placed is
-   pinned and never shoved. */
-function settleMap(skipRelax) {
-  var world = el('#world'); if (!world) return;
-  /* D10 fix (part 2): settleMap() only ever measures each node's CURRENT
-     offsetWidth/offsetHeight — i.e. its size at whatever LOD tier the view
-     happens to be in the moment render() runs. But root and depth-1 titles
-     counter-scale their font UP TO 2.2x at lod-far (A1, "so root/depth-1
-     titles stay legible" — see the .mapwrap.lod-far CSS above), and that is
-     a real font-size change, not a transform, so it genuinely grows the
-     node's world-space box. A 200-node map settles at lod-near/mid sizing
-     (that's what's on screen when render() runs), then Ctrl+0 zooms out to
-     fit everything, crossing into lod-far — at which point sibling
-     root-children's titles balloon up to 2.2x AFTER settling already
-     decided they had just enough room apart at their small size, so they
-     end up overlapping with no further settle pass ever re-checking it.
-     Reserve room for that worst case up front for exactly the two levels
-     that ever counter-scale (root = depth 0, and depth 1), so the very
-     first settle already leaves enough of a gap that ballooning into it
-     later at lod-far can never reopen an overlap. */
-  var LOD_GROW = 2.2;
-  var list = els('.gm-node', world).map(function (n) {
+/* ── settling: measured compact top-down layout (big maps, 13.09) ─────────
+   Barak: "Sub-topics should be top down - not in all directions!!". The old
+   pairwise relax pass pushed automatic cards along whichever axis overlapped
+   least — for a same-row pair that is often Y, and `A.y <= B.y ? up : down`
+   sent one sibling ABOVE the root and the next below it, 400 passes deep:
+   the starburst. And one-row-per-depth made a broad tree one endless strip.
+
+   Now every automatic card is placed by a bottom-up subtree-box layout from
+   the cards' MEASURED sizes, and a child's top is always below its parent's
+   (reserved) bottom by construction:
+   - ROW: child subtrees side by side, first child rightmost (RTL), the block
+     centred under the parent — or right-aligned under it when the parent
+     itself hangs in a column.
+   - COLUMN (XMind "tree"/org-chart column): children stacked top to bottom,
+     first child on top, each child's right edge INDENT px inside the
+     parent's right edge (RTL), each one starting below the previous child's
+     whole subtree. Wires run down a spine near the parent's right edge.
+   - RULE (layoutMode): the root always uses a row. Any other parent stacks
+     its visible children as a column when that row would be wider than
+     ROW_MAX world px, or when more than BRANCHY_MAX of those children have
+     visible children of their own. Inside a column, a row is only kept while
+     it stays narrower than max(parent width + 40, COL_ROW_MAX).
+   Hand-placed cards (mx/my, rank 1) and the root (rank 2) never move.
+   Sibling groups holding an ax/ay anchor keep the original known-position
+   row formula (legacyGroupPositions) so hand-placed maps are unchanged.
+   The anti-overlap pass that follows only ever moves an AUTOMATIC card
+   sideways within its row (dragging its automatic subtree along), or — as a
+   last resort after repeated sideways pushes — DOWN; never up. Collision
+   candidates come from a spatial grid (O(n) per pass), not all pairs.
+
+   D10 (still true): root and depth-1 titles counter-scale their font at
+   lod-far, which genuinely grows the card, so layout reserves that growth
+   up front (LOD_GROW, width capped at the lod-far max-width) from the
+   card's lod-near size, cached per node so crossing an LOD threshold never
+   moves anything. */
+var LAYOUT = {
+  V_GAP: 44,        /* parent bottom → row children's top */
+  H_GAP: 22,        /* between neighbouring subtree boxes in a row */
+  COL_VGAP: 16,     /* parent bottom → first column child's top */
+  COL_GAP: 12,      /* previous column child's subtree bottom → next child's top */
+  INDENT: 30,       /* column children's right edge sits this far inside the parent's right edge */
+  SPINE_IN: 14,     /* the column spine runs this far inside the parent's right edge */
+  ROW_MAX: 760,
+  COL_ROW_MAX: 360,
+  BRANCHY_MAX: 4
+};
+var LOD_GROW = 2.2;
+var FAR_D1_MAX = 260;   /* must match .mapwrap.lod-far .gm-node[data-depth="1"] max-width */
+var FAR_ROOT_MAX = 520; /* must match .mapwrap.lod-far .gm-node.root max-width */
+var SIZE_CACHE = {};
+function farWidthCap(depth) {
+  var vw = window.innerWidth || 1280;
+  return depth === 0 ? Math.min(vw * 0.44, FAR_ROOT_MAX) : Math.min(vw * 0.26, FAR_D1_MAX);
+}
+function measureCards(world) {
+  var wrap = el('#mapwrap');
+  var far = !!(wrap && wrap.classList.contains('lod-far'));
+  var z = mapView().z || 1;
+  return els('.gm-node[data-node]', world).map(function (n) {
     var depth = n.dataset.depth != null ? +n.dataset.depth : 1;
-    var grow = (depth === 0 || depth === 1) ? LOD_GROW : 1;
+    var id = n.dataset.node;
+    var rw = n.offsetWidth, rh = n.offsetHeight;
+    var bw = rw, bh = rh, w = rw, h = rh;
+    if (depth <= 1) {
+      var t = n.querySelector('.gm-ttl');
+      var sig = (t ? t.textContent : '') + '|' + n.querySelectorAll('.gm-eqline').length + '|' + (n.querySelector('.gm-thumb,.gm-diagram,.gm-sketch-thumb') ? 1 : 0);
+      if (!far) SIZE_CACHE[id] = { w: rw, h: rh, sig: sig };
+      else {
+        var c = SIZE_CACHE[id];
+        if (c && c.sig === sig) { bw = c.w; bh = c.h; }
+        else {
+          var g = Math.max(1, Math.min(depth === 0 ? 2.6 : LOD_GROW, 1 / z));
+          bw = Math.max(120, Math.min(depth === 0 ? 250 : 260, rw / g)); bh = rh / g;
+        }
+      }
+      w = Math.max(rw, bw, Math.min(bw * (depth === 0 ? 2.6 : LOD_GROW), farWidthCap(depth)));
+      h = Math.max(rh, bh * LOD_GROW);
+    }
+    var nh = depth <= 1 ? bh : rh;      /* lod-near height: what a row aligns its tops by */
     return {
-      el: n,
+      el: n, id: id, depth: depth,
       x: n.dataset.x != null ? +n.dataset.x : 0,
       y: n.dataset.y != null ? +n.dataset.y : 0,
-      w: n.offsetWidth * grow, h: n.offsetHeight * grow,
-      /* Coordinator fix (13.09, wires): w/h above are deliberately INFLATED
-         for root/depth-1 (LOD_GROW, see the comment above) so the anti-
-         overlap pass and fit-bounds reserve room for their lod-far font
-         growth — but a tree wire must end at the card's ACTUAL rendered
-         edge at whatever LOD is live right now, not that reserved worst
-         case, or it visibly stops short of the card (measured ~22px short
-         after Alt+R). Keep the real, un-inflated height just for that. */
-      realH: n.offsetHeight,
-      id: n.dataset.node,
+      w: w, h: h,        /* reserved (collision/fit) size */
+      bw: bw,            /* lod-near width, what a column aligns to */
+      nh: nh,
+      realW: rw, realH: rh,
       par: n.dataset.par || '',
       col: n.dataset.col || 'var(--gm-teal)',
-      rank: +n.dataset.pinned || 0     /* 2 = root (immovable), 1 = hand-placed, 0 = automatic */
+      rank: +n.dataset.pinned || 0,     /* 2 = root (immovable), 1 = hand-placed, 0 = automatic */
+      colChild: n.dataset.colc === '1',
+      colPrev: n.dataset.colprev || null
     };
   });
-
-  if (!skipRelax) {
-    var PAD = 14;
-    /* D10 fix (part 1): 60 passes settles a typical few-dozen-node map fine,
-       but a dense 200-node stress map needs more rounds for a pairwise
-       relaxation to propagate all the way through — scale the cap with node
-       count (cheap: O(n^2) per pass, still trivial at this size) instead of
-       a fixed constant that only covers small maps. (Part 2, below, is the
-       actual root cause of the residual overlaps a bigger cap alone didn't
-       fix — the LOD_GROW reservation above.) */
-    var ITER_CAP = Math.max(60, Math.min(400, list.length * 3));
-    for (var it = 0; it < ITER_CAP; it++) {
-      var moved = false;
-      for (var i = 0; i < list.length; i++) {
-        for (var j = i + 1; j < list.length; j++) {
-          var A = list[i], B = list[j];
-          if (A.rank && B.rank && A.rank === B.rank) continue;
+}
+function layoutCards(list) {
+  var ix = buildLayoutIndex();
+  var C = {}, root = null, L = LAYOUT;
+  list.forEach(function (c) {
+    C[c.id] = c; c.node = ix.byId[c.id] || null; c.colChild = false; c.colPrev = null;
+    if (c.rank === 2) root = c;
+  });
+  if (!root) return C;
+  function vkids(id) {
+    var ks = ix.kids[id] || [], out = [];
+    for (var i = 0; i < ks.length; i++) if (C[ks[i].id]) out.push(C[ks[i].id]);
+    return out;
+  }
+  function isFree(k) { return !!k.node && !hasMxMy(k.node) && !hasAxAy(k.node); }
+  function isLegacy(kids) {
+    for (var i = 0; i < kids.length; i++) { var n = kids[i].node; if (n && !hasMxMy(n) && hasAxAy(n)) return true; }
+    return false;
+  }
+  var memo = {};
+  function shape(c, inCol, guard) {
+    var key = c.id + (inCol ? '|c' : '|r');
+    if (memo[key]) return memo[key];
+    var hw = c.w / 2, hh = c.h / 2;
+    var res = { l: -hw, r: hw, b: hh, mode: 'none', place: [] };
+    memo[key] = res;
+    var kids = vkids(c.id);
+    if (!kids.length || guard > 40 || isLegacy(kids)) return res;
+    var free = kids.filter(isFree);
+    if (!free.length) return res;
+    var sub = free.map(function (k) { return shape(k, inCol, guard + 1); });
+    var rowW = 0;
+    sub.forEach(function (s, i) { rowW += (s.r - s.l) + (i ? L.H_GAP : 0); });
+    var branchy = 0;
+    free.forEach(function (k) { if (vkids(k.id).length) branchy++; });
+    var column = false;
+    if (c !== root) {
+      if (inCol) column = rowW > Math.max(c.bw + 40, L.COL_ROW_MAX);
+      else column = rowW > L.ROW_MAX || branchy > L.BRANCHY_MAX;
+    }
+    var place = [];
+    if (column) {
+      if (!inCol) sub = free.map(function (k) { return shape(k, true, guard + 1); });
+      var anchorR = c.bw / 2 - L.INDENT;
+      var y = hh + L.COL_VGAP, l = -hw, prev = null, bottom = hh;
+      free.forEach(function (k, i) {
+        var s = sub[i];
+        var dx = anchorR - s.r;                      /* s.r === k.w/2 for an in-column shape */
+        var dy = y + k.h / 2;
+        place.push({ c: k, dx: dx, dy: dy, col: true, prev: prev, inCol: true });
+        l = Math.min(l, dx + s.l);
+        bottom = dy + s.b;
+        y = bottom + L.COL_GAP;
+        prev = k;
+      });
+      res.l = l; res.r = Math.max(hw, anchorR); res.b = bottom; res.mode = 'column';
+    } else {
+      var cursor = inCol ? hw : rowW / 2;
+      var top = hh + L.V_GAP, l2 = -hw, r2 = hw, b2 = hh;
+      /* never tighter than the original centre-to-centre row pitch (150 under
+         the root, 120 below): small cards then sit exactly where they always
+         did (an automatic chain under a hand-placed card lands on the same y
+         as before, clear of hand-placed neighbours' rows); taller cards push
+         their row down further, tops still aligned. */
+      /* Siblings share one REAL top edge (lod-near height nh). A depth-1 card
+         reserves extra height for its lod-far growth symmetrically around its
+         centre (h > nh), so aligning the reserved boxes instead would drop a
+         two-line title's top below a one-line neighbour's; `top` is chosen so
+         every reserved box still starts V_GAP below the parent's. */
+      var pitch = rowGapFor(c.depth + 1);
+      free.forEach(function (k) {
+        top = Math.max(top, hh + L.V_GAP + (k.h - k.nh) / 2, pitch - k.nh / 2);
+      });
+      free.forEach(function (k, i) {
+        var s = sub[i];
+        var dx = cursor - s.r;
+        var dy = top + k.nh / 2;
+        place.push({ c: k, dx: dx, dy: dy, col: false, prev: null, inCol: inCol });
+        l2 = Math.min(l2, dx + s.l); r2 = Math.max(r2, dx + s.r); b2 = Math.max(b2, dy + s.b);
+        cursor -= (s.r - s.l) + L.H_GAP;
+      });
+      res.l = l2; res.r = r2; res.b = b2; res.mode = 'row';
+    }
+    res.place = place;
+    return res;
+  }
+  function placeCard(c, x, y, inCol, guard) {
+    c.x = x; c.y = y;
+    if (guard > 60) return;
+    var kids = vkids(c.id);
+    if (!kids.length) return;
+    if (isLegacy(kids)) {
+      var pos = legacyGroupPositions(kids.map(function (k) { return k.node; }), x, y, c.depth + 1);
+      kids.forEach(function (k) { var p = pos[k.id]; if (p) placeCard(k, p.x, p.y, false, guard + 1); });
+      return;
+    }
+    kids.forEach(function (k) { if (!isFree(k) && k.node) placeCard(k, k.node.mx, k.node.my, false, guard + 1); });
+    var s = shape(c, inCol, 0);
+    s.place.forEach(function (p) {
+      p.c.colChild = p.col; p.c.colPrev = p.prev ? p.prev.id : null;
+      placeCard(p.c, x + p.dx, y + p.dy, p.inCol, guard + 1);
+    });
+  }
+  placeCard(root, 0, 0, false, 0);
+  LAYOUT_MODES = {};
+  Object.keys(memo).forEach(function (k) { if (memo[k].mode !== 'none') LAYOUT_MODES[k.split('|')[0]] = memo[k].mode; });
+  return C;
+}
+var LAYOUT_MODES = {};
+function resolveOverlaps(list, C) {
+  /* PAD must stay below the smallest gap the layout itself leaves (COL_GAP
+     12): a larger pad reads two correctly stacked column children as
+     overlapping and shoves one of them sideways out of its column. */
+  var PAD = 8, CELL = 260, PASSES = 40;
+  var movable = list.filter(function (c) { return c.rank === 0; });
+  if (!movable.length) return;
+  list.forEach(function (c, i) { c.ord = i; c.pushes = 0; });
+  function isAncestor(a, b) {                     /* is a an ancestor of b? */
+    var p = C[b.par], hops = 0;
+    while (p && hops++ < 60) { if (p === a) return true; p = C[p.par]; }
+    return false;
+  }
+  function subtreeAuto(c) {                       /* c plus its automatic visible descendants */
+    var out = [c], stack = [c], hops = 0;
+    var ix = layoutIndex();
+    while (stack.length && hops++ < 5000) {
+      var cur = stack.pop(), ks = ix.kids[cur.id] || [];
+      for (var i = 0; i < ks.length; i++) {
+        var k = C[ks[i].id];
+        if (k && k.rank === 0) { out.push(k); stack.push(k); }
+      }
+    }
+    return out;
+  }
+  for (var pass = 0; pass < PASSES; pass++) {
+    var grid = {};
+    list.forEach(function (c) {
+      var x0 = Math.floor((c.x - c.w / 2 - PAD) / CELL), x1 = Math.floor((c.x + c.w / 2 + PAD) / CELL);
+      var y0 = Math.floor((c.y - c.h / 2 - PAD) / CELL), y1 = Math.floor((c.y + c.h / 2 + PAD) / CELL);
+      for (var gx = x0; gx <= x1; gx++) for (var gy = y0; gy <= y1; gy++) {
+        var key = gx + ',' + gy; (grid[key] || (grid[key] = [])).push(c);
+      }
+    });
+    var moved = false;
+    for (var i = 0; i < movable.length; i++) {
+      var A = movable[i], seen = {}, done = false;
+      var ax0 = Math.floor((A.x - A.w / 2 - PAD) / CELL), ax1 = Math.floor((A.x + A.w / 2 + PAD) / CELL);
+      var ay0 = Math.floor((A.y - A.h / 2 - PAD) / CELL), ay1 = Math.floor((A.y + A.h / 2 + PAD) / CELL);
+      for (var gx2 = ax0; gx2 <= ax1 && !done; gx2++) for (var gy2 = ay0; gy2 <= ay1 && !done; gy2++) {
+        var cell = grid[gx2 + ',' + gy2]; if (!cell) continue;
+        for (var j = 0; j < cell.length && !done; j++) {
+          var B = cell[j];
+          if (B === A || seen[B.id]) continue;
+          seen[B.id] = 1;
           var ox = (A.w + B.w) / 2 + PAD - Math.abs(A.x - B.x);
           var oy = (A.h + B.h) / 2 + PAD - Math.abs(A.y - B.y);
           if (ox <= 0 || oy <= 0) continue;
-          moved = true;
-          var moveA = A.rank <= B.rank, moveB = B.rank <= A.rank;
-          if (ox < oy) {
-            var dx = (A.x <= B.x ? -1 : 1) * (ox / 2 + 0.5);
-            if (moveA && moveB) { A.x += dx; B.x -= dx; }
-            else if (moveA) A.x += dx * 2; else B.x -= dx * 2;
+          if (isAncestor(A, B)) continue;         /* B is inside A's own subtree — B moves instead */
+          var aMoves = B.rank > 0 || isAncestor(B, A) || A.x < B.x || (A.x === B.x && A.ord > B.ord);
+          if (!aMoves) continue;
+          A.pushes++;
+          var group = subtreeAuto(A);
+          /* A hand-placed card from the row ABOVE that only grazes A's top edge
+             (vertical overlap under a quarter of the shorter card) is cleared
+             by nudging A down those few px, not by shoving A a whole card
+             width sideways — that is what the old relax pass did for such a
+             graze too, so a hand-placed map keeps its look. Still never up. */
+          var graze = B.rank > 0 && B.y < A.y && oy <= Math.min(A.h, B.h) * 0.25;
+          if (A.pushes > 16 || graze) {
+            var dy = oy + 0.5;                    /* last resort: down, never up */
+            group.forEach(function (g) { g.y += dy; });
           } else {
-            var dy = (A.y <= B.y ? -1 : 1) * (oy / 2 + 0.5);
-            if (moveA && moveB) { A.y += dy; B.y -= dy; }
-            else if (moveA) A.y += dy * 2; else B.y -= dy * 2;
+            var dir = A.x > B.x ? 1 : -1;         /* away from B; a tie goes left (RTL continues left) */
+            var dx = dir * (ox + 0.5);
+            group.forEach(function (g) { g.x += dx; });
           }
+          moved = true; done = true;
         }
       }
-      if (!moved) break;
     }
+    if (!moved) break;
+  }
+}
+function spinePath(sx, y0, ex, ey) {
+  var R = Math.max(0, Math.min(10, (sx - ex) / 2, (ey - y0) / 2));
+  return 'M' + sx.toFixed(1) + ',' + y0.toFixed(1) +
+    ' L' + sx.toFixed(1) + ',' + (ey - R).toFixed(1) +
+    ' Q' + sx.toFixed(1) + ',' + ey.toFixed(1) + ' ' + (sx - R).toFixed(1) + ',' + ey.toFixed(1) +
+    ' L' + ex.toFixed(1) + ',' + ey.toFixed(1);
+}
+/* settleMap(true) = remeasure + redraw only (an LOD class change: nothing
+   may move); settleMap() = full layout + anti-overlap; scheduleSettle() =
+   one full settle on the next frame, however many images/diagrams finish
+   loading before it runs. */
+var SETTLE_RAF = 0;
+function scheduleSettle() {
+  if (SETTLE_RAF) return;
+  SETTLE_RAF = requestAnimationFrame(function () { SETTLE_RAF = 0; settleMap(); });
+}
+function settleMap(remeasureOnly) {
+  var world = el('#world'); if (!world) return;
+  var list = measureCards(world);
+  if (!remeasureOnly) {
+    var C = layoutCards(list);
+    resolveOverlaps(list, C);
   }
 
   var at = {}, pts = [];
@@ -1708,6 +1986,8 @@ function settleMap(skipRelax) {
     n.el.style.top = n.y.toFixed(1) + 'px';
     n.el.dataset.x = n.x.toFixed(1);
     n.el.dataset.y = n.y.toFixed(1);
+    if (n.colChild) { n.el.dataset.colc = '1'; if (n.colPrev) n.el.dataset.colprev = n.colPrev; else delete n.el.dataset.colprev; }
+    else { delete n.el.dataset.colc; delete n.el.dataset.colprev; }
     at[n.id] = n;
     pts.push([n.x, n.y, n.w / 2 + 10, n.h / 2 + 10]);
   });
@@ -1725,12 +2005,23 @@ function settleMap(skipRelax) {
          (contract: "in cards layer the radar draws the selected node's
          wires as ghosts") — no separate code path needed. */
       var radarPeek = UI.radar && (n.id === UI.sel || n.par === UI.sel);
-      /* Top-down (Barak, 13.09): parent's BOTTOM centre to child's TOP
-         centre, using each card's own REAL measured height — NOT p.h/n.h,
-         which are inflated for root/depth-1 collision math above and would
-         leave the wire stopping visibly short of the actual card edge. */
+      /* Row child: parent's BOTTOM centre to child's TOP centre (real, un-
+         inflated heights). Column child: down the spine just inside the
+         parent's right edge — from the previous column sibling's tick, so
+         the spine is drawn once, not stacked — then a tick into the child's
+         right edge. */
+      var geom;
       var py1 = p.y + p.realH / 2, cy1 = n.y - n.realH / 2;
-      return '<path class="tree' + (radarPeek ? ' gm-peek' : '') + '" data-id="' + n.id + '" data-par="' + n.par + '" d="' + wire(p.x, py1, n.x, cy1, n.id) +
+      if (n.colChild) {
+        var sx = p.x + Math.max(0, p.realW / 2 - LAYOUT.SPINE_IN);
+        var ex = n.x + n.realW / 2;
+        var prev = n.colPrev && at[n.colPrev];
+        var y0 = prev ? prev.y : py1;
+        geom = (ex < sx - 4 && n.y > y0 + 4) ? spinePath(sx, y0, ex, n.y) : wire(p.x, py1, n.x, cy1, n.id);
+      } else {
+        geom = wire(p.x, py1, n.x, cy1, n.id);
+      }
+      return '<path class="tree' + (radarPeek ? ' gm-peek' : '') + (n.colChild ? ' col' : '') + '" data-id="' + n.id + '" data-par="' + n.par + '" d="' + geom +
         '" stroke="' + n.col + '" stroke-width="' + Math.max(1.2, 3 - d * 0.4) + '" opacity="' +
         ((0.32 + Math.max(0, 0.5 - d * 0.08)) * dim).toFixed(2) + '"' +
         (d > 2 ? ' stroke-dasharray="1 6"' : '') + '/>';
@@ -1844,6 +2135,7 @@ function isHazed(sets, id) {
 
 /* ── the plane's contents ────────────────────────────────────────────── */
 function mapWorld() {
+  buildLayoutIndex();
   var HAZE = hazeSets();
   var nodes = '';
   var root = rootNode();
@@ -1855,12 +2147,12 @@ function mapWorld() {
   }
   function nodeHTML(node, x, y, depth, parId, accentVar) {
     var isRoot = !node.parent;
-    var kids = childrenOf(node.id);
+    var kids = kidsOf(node.id);
     var haze = isHazed(HAZE, node.id);
     var marked = !!UI.marks[node.id];
     var pinned = (typeof node.mx === 'number' && typeof node.my === 'number');
     var accent = isRoot ? '' : (node.accent || accentVar || ACCENTS[0]);
-    var collapsedCount = node.collapsed ? descendantsOf(node.id).length : 0;
+    var collapsedCount = node.collapsed ? descCount(node.id) : 0;
     var kind = node.kind && KINDS.indexOf(node.kind) > 0 ? node.kind : '';  /* A4: 'concept' (index 0) never gets a class */
     /* Addendum G: an OPEN question gets a soft purple ring (the normal '?'
        swatch already carries the purple tint); an ANSWERED one swaps its
@@ -2205,6 +2497,13 @@ function editSelectedBody() {
    real title in one shot, or rolling the in-memory mutation back to
    nothing if the edit is cancelled. */
 function newChildOf(pid) {
+  /* Big maps (13.09): Tab on a FOLDED node used to add the child underneath
+     the fold — invisible, so there was no card to type into and nothing on
+     screen changed (on the XMind import, where 405 nodes are folded, that
+     read as "Tab hangs"). Unfold first, like XMind does. growAndEdit()'s
+     cancel path restores the pre-Tab S.nodes snapshot, fold state included. */
+  var pnode = N(pid);
+  if (pnode && pnode.collapsed) pnode.collapsed = false;
   var n = { id: uid('n'), parent: pid, title: '', body: '', accent: accentFor(pid) };
   S.nodes.push(n);
   seedChildPosition(pid, n.id);      /* top-down (Barak, 13.09): below the parent, left end of its row */
@@ -2385,6 +2684,24 @@ function stepSel(dir, extend) {
     return true;
   }
   var ax = dir[0], ay = dir[1], pick = null, best = Infinity;
+  /* Big maps (13.09): with columns, the geometric cone alone let Left/Right
+     from a branch card land on the first card of its OWN column (just below
+     and a little to the side) instead of the neighbouring branch. Prefer the
+     nearest card in the same visual band first — overlapping vertically for
+     Left/Right (the same row), overlapping horizontally for Up/Down (the same
+     column, so Down steps into a column and Up steps back out) — and fall
+     back to the original cone scoring only when that band is empty. */
+  var fw = from.el.offsetWidth || 120, fh = from.el.offsetHeight || 40, bandBest = Infinity, bandPick = null;
+  list.forEach(function (n) {
+    if (n === from) return;
+    var dx = n.x - from.x, dy = n.y - from.y;
+    var along = dx * ax + dy * ay;
+    if (along <= 6) return;
+    var inBand = ax ? Math.abs(dy) < ((n.el.offsetHeight || 40) + fh) / 2 - 2
+                    : Math.abs(dx) < ((n.el.offsetWidth || 120) + fw) / 2 - 2;
+    if (inBand && along < bandBest) { bandBest = along; bandPick = n; }
+  });
+  if (bandPick) { landOn(bandPick, from, extend); return true; }
   list.forEach(function (n) {
     if (n === from) return;
     var dx = n.x - from.x, dy = n.y - from.y;
@@ -3241,7 +3558,14 @@ function mountMap() {
   mountMap.resettle = resettle;
   if (!mountMap.settled) {
     mountMap.settled = true;
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(resettle);
+    /* big maps (13.09): layout now uses MEASURED card sizes, and the first
+       settle can run before the web fonts arrive — re-lay out once they have
+       (not just re-fit), or a map would keep fallback-font positions until
+       its next render and land a few px differently after a reload. */
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
+      if (el('#world')) settleMap();
+      resettle();
+    });
     setTimeout(resettle, 250);
     setTimeout(resettle, 1200);
     if (window.ResizeObserver) {
@@ -3482,7 +3806,7 @@ function mountMap() {
       d.raf = 0;
       var w = el('#world'); if (!w) return;
       w.innerHTML = mapWorld();
-      settleMap(true);
+      settleMap();          /* fresh markup = provisional positions: needs the full layout, not a remeasure */
       var nn = el('.gm-node[data-node="' + d.id + '"]');
       if (nn) { nn.classList.add('grabbed'); if (d.blocked) nn.classList.add('blocked'); }
     });
@@ -5624,8 +5948,12 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     els('.gm-thumb[data-gm-thumb]').forEach(function (img) {
       if (img.dataset.gmBound) return;
       img.dataset.gmBound = '1';
-      if (img.complete && img.naturalWidth) { settleMap(); return; }
-      img.addEventListener('load', function () { settleMap(); }, { once: true });
+      /* big maps (13.09): an already-decoded thumbnail is measured by the
+         settle mountMap() runs right after these hooks — settling here too
+         forced a full layout per image (261ms of a 321ms render on a 158-card
+         import). A late load coalesces into one settle per frame. */
+      if (img.complete && img.naturalWidth) return;
+      img.addEventListener('load', scheduleSettle, { once: true });
     });
   });
 })();
@@ -5835,7 +6163,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     els('.gm-diagram[data-diagram-node]').forEach(function (host) {
       var node = N(host.dataset.diagramNode);
       if (!node || !node.diagram) return;
-      renderMermaidTo(host, node.diagram).then(function () { settleMap(); }, function () {
+      renderMermaidTo(host, node.diagram).then(function () { scheduleSettle(); }, function () {
         host.innerHTML = '<span class="gm-diagram-loading">שגיאה בתרשים</span>';
       });
     });
