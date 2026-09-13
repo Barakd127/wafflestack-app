@@ -271,6 +271,20 @@ input,textarea{background:none;border:0;outline:none;}
 .mapwrap.lod-far .gm-node:not(.root):not([data-depth="1"]) .gm-eqs{
   opacity:0;pointer-events:none;
 }
+/* the Σ chip: hidden everywhere except lod-far on a depth-≥2 dot, where it
+   replaces the (now-hidden) full equation lines above. Counter-scaled by
+   the inverse of the dot's own scale(.14) (~7.14×) so it reads at a fixed,
+   legible size no matter how tiny the card itself has shrunk to — same
+   trick the root/depth-1 title font-size counter-scale uses above, just
+   via transform since this sits on an already-scaled dot, not a title. */
+.gm-eq-chip{display:none;position:absolute;left:50%;top:50%;z-index:2;
+  align-items:center;gap:3px;padding:2px 7px;border-radius:99px;
+  font-size:11px;font-weight:700;line-height:1;white-space:nowrap;cursor:pointer;
+  background:rgba(212,175,55,.28);color:var(--sh-text-dark);
+  box-shadow:0 0 0 1px rgba(212,175,55,.4);}
+.mapwrap.lod-far .gm-node:not(.root):not([data-depth="1"]) .gm-eq-chip{
+  display:flex;transform:translate(-50%,-50%) scale(7.14);pointer-events:auto;
+}
 .mapwrap.lod-far .gm-rellabel{opacity:0;pointer-events:none;}      /* far: relation LINES stay (SVG), labels hide */
 .mapwrap.lod-mid .gm-node .gm-note-mark{opacity:0;pointer-events:none;}  /* mid: titles only, no ✎ body marker */
 .mapwrap.lod-near .gm-depthdots{display:flex;}                     /* near: "everything" — depth dots even in links layer */
@@ -805,7 +819,7 @@ a.gm-note-title{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellips
       <span class="gm-doctitle gm-bidi" id="docTitle" tabindex="0" title="Click to rename the map"></span>
     </div>
     <div class="gm-headtools">
-      <div class="gm-frostseg" id="frostSeg" data-float="frost" data-chrome="1" role="group" aria-label="שקיפות הזכוכית"><button class="gm-seg" data-frost=".85" aria-pressed="true" title="זכוכית חלבית — לכתיבה"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg><span>מיקוד</span></button><button class="gm-seg" data-frost=".4" aria-pressed="false" title="חצי שקוף — להדגמה על העיר"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg><span>הדגמה</span></button><button class="gm-seg" data-frost="0" aria-pressed="false" title="זכוכית שקופה — רואים את העיר"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M10 21V11h6v10"/><path d="M16 21v-7l3 1v6"/></svg><span>עיר</span></button></div><div class="gm-qpill" id="qPill" data-float="qpill" data-chrome="1" hidden><button class="gm-btn" id="qLayerToggle" aria-pressed="false" title="שכבת שאלות — questions layer: brighten open questions and their path"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg><span id="qCountTxt" class="tnum gm-bidi">שאלות פתוחות: <bdi>0</bdi></span></button><button class="gm-btn icon" id="qCopyBtn" title="העתק שאלות פתוחות ל-Claude — copy open questions for Claude" aria-label="Copy open questions for Claude"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button><label class="gm-q-notes-toggle gm-bidi" title="כלול פתקים מהאותו ענף בהעתקה"><input type="checkbox" id="qIncludeNotes"><span>כולל פתקים</span></label></div><button class="gm-btn icon" id="exportBtn" title="ייצוא / ייבוא — Export / Import" aria-label="Export or import"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></button>
+      <div class="gm-frostseg" id="frostSeg" data-float="frost" data-chrome="1" role="group" aria-label="שקיפות הזכוכית"><button class="gm-seg" data-frost=".85" aria-pressed="true" title="זכוכית חלבית — לכתיבה"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg><span>מיקוד</span></button><button class="gm-seg" data-frost=".4" aria-pressed="false" title="חצי שקוף — להדגמה על העיר"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg><span>הדגמה</span></button><button class="gm-seg" data-frost="0" aria-pressed="false" title="זכוכית שקופה — רואים את העיר"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M10 21V11h6v10"/><path d="M16 21v-7l3 1v6"/></svg><span>עיר</span></button></div><div class="gm-qpill" id="qPill" data-float="qpill" data-chrome="1" hidden><button class="gm-btn" id="qLayerToggle" aria-pressed="false" title="שכבת שאלות — questions layer: brighten open questions and their path"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg><span id="qCountTxt" class="tnum gm-bidi">שאלות פתוחות: <bdi>0</bdi></span></button><button class="gm-btn icon" id="qCopyBtn" title="העתק שאלות פתוחות ל-Claude — copy open questions for Claude" aria-label="Copy open questions for Claude"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button><label class="gm-q-notes-toggle gm-bidi" title="כלול פתקים מהאותו ענף בהעתקה"><input type="checkbox" id="qIncludeNotes"><span>כולל פתקים</span></label></div><div class="gm-qpill" id="knownPill" data-float="knownpill" data-chrome="1" hidden><span id="knownCountTxt" class="tnum gm-bidi">ידוע: <bdi>0</bdi></span></div><button class="gm-btn icon" id="exportBtn" title="ייצוא / ייבוא — Export / Import" aria-label="Export or import"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></button>
       <div class="gm-menu gm-glass" id="exportMenu" data-chrome="1" hidden>
         <button data-act="exp-json" title="Export JSON" aria-label="Export JSON"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M9 13v4M15 13v4"/></svg> ייצוא <bdi>JSON</bdi></button>
         <button data-act="exp-md" title="Export Markdown" aria-label="Export Markdown"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M8 13h8M8 17h5"/></svg> ייצוא <bdi>Markdown</bdi></button>
@@ -1211,7 +1225,8 @@ var UI = {
   radar: false,          /* A6: link radar toggle (R) */
   radarExpanded: [],     /* A6: collapsed ancestors radar force-opened, restored on off */
   soloBranch: null,      /* A9: top-level branch id currently soloed (legend / 1-9) */
-  questionsLayer: false, /* Addendum G: dim everything but open questions + their path */
+  questionsLayer: !!(S.lenses && S.lenses.questions), /* Addendum G: dim everything but open questions + their path — persisted in S.lenses.questions */
+  knownLayer: !!(S.lenses && S.lenses.known),         /* known layer (Barak, 13.09): dim everything but 'known' nodes + their path — persisted in S.lenses.known */
   editingBridge: null,   /* A5: node id whose anchor chip is mid-edit (forces it visible off lod-near) */
   switcher: null,        /* A10: {q, idx, results} while the quick switcher is open, else null */
   legendExpanded: false  /* D4 phone rule: legend collapses to one pill "n ענפים" that expands on tap */
@@ -1283,6 +1298,12 @@ function applyState(json) {
   snapPrev = json;
   if (UI.sel && !N(UI.sel)) UI.sel = null;
   Object.keys(UI.marks).forEach(function (id) { if (!N(id)) delete UI.marks[id]; });
+  /* S just got swapped wholesale (undo/redo, or a host gm:load) — the
+     layers/lenses toggles live in S.lenses so they persist across reload;
+     resync the live UI booleans against whatever THIS snapshot says, same
+     spirit as the radar-expansion resync just below. */
+  UI.questionsLayer = !!(S.lenses && S.lenses.questions);
+  UI.knownLayer = !!(S.lenses && S.lenses.known);
   /* E5: an undo/redo just replaced S wholesale — a node radar is holding
      open (in UI.radarExpanded) may have had its OWN collapsed flag restored
      to false by the very edit being undone, independent of radar. Radar's
@@ -1319,6 +1340,8 @@ function replaceState(next, msg) {
   S.updatedAt = Date.now();
   if (UI.sel && !N(UI.sel)) UI.sel = null;
   UI.marks = {}; UI.relFrom = null;
+  UI.questionsLayer = !!(S.lenses && S.lenses.questions);
+  UI.knownLayer = !!(S.lenses && S.lenses.known);
   snapPrev = JSON.stringify(S);
   writeLocal();
   render();
@@ -1577,6 +1600,14 @@ function settleMap(skipRelax) {
       x: n.dataset.x != null ? +n.dataset.x : 0,
       y: n.dataset.y != null ? +n.dataset.y : 0,
       w: n.offsetWidth * grow, h: n.offsetHeight * grow,
+      /* Coordinator fix (13.09, wires): w/h above are deliberately INFLATED
+         for root/depth-1 (LOD_GROW, see the comment above) so the anti-
+         overlap pass and fit-bounds reserve room for their lod-far font
+         growth — but a tree wire must end at the card's ACTUAL rendered
+         edge at whatever LOD is live right now, not that reserved worst
+         case, or it visibly stops short of the card (measured ~22px short
+         after Alt+R). Keep the real, un-inflated height just for that. */
+      realH: n.offsetHeight,
       id: n.dataset.node,
       par: n.dataset.par || '',
       col: n.dataset.col || 'var(--gm-teal)',
@@ -1644,9 +1675,10 @@ function settleMap(skipRelax) {
          wires as ghosts") — no separate code path needed. */
       var radarPeek = UI.radar && (n.id === UI.sel || n.par === UI.sel);
       /* Top-down (Barak, 13.09): parent's BOTTOM centre to child's TOP
-         centre, using each card's own measured height (already on hand from
-         settleMap()'s own DOM pass, same `at[]` entries fitMap() etc. use). */
-      var py1 = p.y + p.h / 2, cy1 = n.y - n.h / 2;
+         centre, using each card's own REAL measured height — NOT p.h/n.h,
+         which are inflated for root/depth-1 collision math above and would
+         leave the wire stopping visibly short of the actual card edge. */
+      var py1 = p.y + p.realH / 2, cy1 = n.y - n.realH / 2;
       return '<path class="tree' + (radarPeek ? ' gm-peek' : '') + '" data-id="' + n.id + '" data-par="' + n.par + '" d="' + wire(p.x, py1, n.x, cy1, n.id) +
         '" stroke="' + n.col + '" stroke-width="' + Math.max(1.2, 3 - d * 0.4) + '" opacity="' +
         ((0.32 + Math.max(0, 0.5 - d * 0.08)) * dim).toFixed(2) + '"' +
@@ -1736,14 +1768,27 @@ function soloSet() {
   descendantsOf(UI.soloBranch).forEach(function (d) { keep[d.id] = 1; });
   return keep;
 }
-/* Combine lens/radar/solo: a node must pass every currently-active filter
-   to stay sharp — hazed if ANY active filter excludes it. Each of the three
-   *Set() functions above already returns null when its own toggle is off,
-   so an inactive filter never contributes a haze. */
-function hazeSets() { return { lens: lensSet(), radar: radarSet(), solo: soloSet(), questions: questionsLayerSet() }; }
+/* Barak, 13.09: the questions layer and the known layer are each their own
+   independent switch, but they share ONE haze budget — "with both lenses on,
+   the kept set is the union" (a node stays sharp if EITHER keeps it), not
+   the AND every other filter category uses below. Combine them into one
+   `topics` set before folding it into the overall per-category AND. */
+function topicLensSet() {
+  var q = questionsLayerSet(), k = knownLayerSet();
+  if (!q && !k) return null;
+  var keep = {};
+  if (q) Object.keys(q).forEach(function (id) { keep[id] = 1; });
+  if (k) Object.keys(k).forEach(function (id) { keep[id] = 1; });
+  return keep;
+}
+/* Combine lens/radar/solo/topics: a node must pass every currently-active
+   filter CATEGORY to stay sharp — hazed if ANY active category excludes it.
+   Each *Set() function above already returns null when its own toggle(s)
+   are off, so an inactive category never contributes a haze. */
+function hazeSets() { return { lens: lensSet(), radar: radarSet(), solo: soloSet(), topics: topicLensSet() }; }
 function isHazed(sets, id) {
   return (sets.lens && !sets.lens[id]) || (sets.radar && !sets.radar[id]) || (sets.solo && !sets.solo[id]) ||
-    (sets.questions && !sets.questions[id]);
+    (sets.topics && !sets.topics[id]);
 }
 
 /* ── the plane's contents ────────────────────────────────────────────── */
@@ -1814,6 +1859,18 @@ function mapWorld() {
         return '<div class="gm-eqline" dir="ltr" data-eq-node="' + node.id + '" data-eq-idx="' + eqi + '" title="לחיצה לעריכה — click to edit">' +
           (typeof window.eqLineHTML === 'function' ? window.eqLineHTML(latex) : esc(latex)) + '</div>';
       }).join('') + '</div>' : '') +
+      /* Barak, 13.09: equations must never fully vanish. At lod-far a depth
+         ≥2 node collapses to a tiny dot (.gm-eqs above hides with the rest
+         of its body) — this compact chip replaces it there instead, counter-
+         scaled so it stays a legible fixed size despite the dot's own
+         scale(.14), and its own click zooms straight to the node. Depth 0/1
+         never collapse to a dot in the first place, so they keep the full
+         .gm-eqs lines at every zoom and never show this chip (contract:
+         "keep equations visible at mid and near"; this only ever matters at
+         lod-far, and only for depth ≥ 2). */
+      (node.eqs && node.eqs.length ? '<div class="gm-eq-chip" data-eq-chip="' + node.id + '" title="לחיצה להתקרבות — click to zoom in" role="button" tabindex="-1">' +
+        '<svg class="gm-i" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 7V4H6l6 8-6 8h12v-3"/></svg>' +
+        '<bdi>' + node.eqs.length + '</bdi></div>' : '') +
       (node.img ? '<img class="gm-thumb" data-gm-thumb src="' + esc(node.img) + '" alt="" title="לחיצה להגדלה — click to enlarge">' : '') +
       (node.diagram ? '<div class="gm-diagram" data-diagram-node="' + node.id + '" title="לחיצה לעריכה — click to edit"><span class="gm-diagram-loading">…</span></div>' : '') +
       (node.sketchSvg ? '<div class="gm-sketch-thumb" data-sketch-node="' + node.id + '" title="לחיצה לעריכת השרטוט — click to edit the sketch">' + node.sketchSvg + '</div>' : '') +
@@ -1862,8 +1919,9 @@ function renderMapctl() {
     '<button class="gm-btn icon" data-zoom="1" title="התקרב — Zoom in" aria-label="Zoom in"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button>' +
     '<button class="gm-btn icon" data-zoom="-1" title="התרחק — Zoom out" aria-label="Zoom out"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>' +
     '<button class="gm-btn icon" data-zoom="0" title="התאם הכל (Ctrl+0) — fit" aria-label="Fit the map"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>' +
-    '<button class="gm-btn icon' + (S.layer === 'cards' ? ' on' : '') + '" id="layerBtn"' +
-      ' title="הקשרים שלי: הצג או הסתר (L) — show or hide your own relations" aria-label="Show or hide your relations"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.18-9.17 4.17a2 2 0 0 1-1.66 0L2 12.18"/><path d="m22 17.18-9.17 4.17a2 2 0 0 1-1.66 0L2 17.18"/></svg></button>' +
+    '<button class="gm-btn icon' + ((S.layer === 'cards' || UI.questionsLayer || UI.knownLayer) ? ' on' : '') + '" id="layerBtn"' +
+      ' aria-haspopup="true" aria-expanded="false"' +
+      ' title="שכבות — layers: הקשרים שלי / שאלות פתוחות / מה שאני יודע" aria-label="Layers"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.18-9.17 4.17a2 2 0 0 1-1.66 0L2 12.18"/><path d="m22 17.18-9.17 4.17a2 2 0 0 1-1.66 0L2 17.18"/></svg></button>' +
     '<button class="gm-btn icon' + (UI.lens ? ' on' : '') + '" id="lensBtn" aria-pressed="' + !!UI.lens + '"' +
       ' title="עדשת מיקוד — focus lens" aria-label="Toggle the focus lens"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg></button>' +
     /* Coordinator review (round 2): the rail was 16 buttons deep and had
@@ -1919,6 +1977,17 @@ function applyMap() {
       wrap.classList.remove('lod-far', 'lod-mid', 'lod-near');
       wrap.classList.add(cls);
       wrap.dataset.lod = cls;
+      /* Coordinator fix (13.09, wires): crossing an LOD threshold can
+         genuinely resize a card (root/depth-1 titles counter-scale their
+         font at lod-far — a real layout change, not just a transform), but
+         a camera move alone never used to re-measure anything — only a full
+         render() does. Left alone, the tree wires (drawn from whatever
+         sizes were current at the LAST render()) would drift away from the
+         card edges the moment a zoom/fit crosses that threshold, exactly
+         the "wires stop short of the cards" bug. Re-settle (no relax, just
+         remeasure + redraw) whenever the LOD class actually changes, so
+         every wire still ends exactly on the card edge at every zoom. */
+      settleMap(true);
     }
   }
   updateBars();
@@ -2477,7 +2546,7 @@ function mapKeys(ev) {
   if (ev.key === 'L' && ev.shiftKey) { ev.preventDefault(); if (UI.relFrom) cancelRelation(); else startRelation(); return; }
   if (ev.key === 'l' || ev.key === 'L') { ev.preventDefault(); toggleLayer(); return; }
   if (ev.key === 'k') { ev.preventDefault(); cycleKind(1); return; }                       /* A4 */
-  if (ev.key === 'K') { ev.preventDefault(); cycleKind(-1); return; }                       /* A4 Shift+K */
+  if (ev.key === 'K') { ev.preventDefault(); toggleKnownKind(); return; }                  /* Barak, 13.09: Shift+K = known/concept toggle */
   if (ev.key === 'b' || ev.key === 'B') { ev.preventDefault(); editBridge(); return; }      /* A5 */
   if (ev.key === 'r' || ev.key === 'R') { ev.preventDefault(); toggleRadar(); return; }     /* A6 */
   if (/^[1-9]$/.test(ev.key)) { ev.preventDefault(); soloByDigit(+ev.key); return; }         /* A9 */
@@ -2921,7 +2990,59 @@ function questionsLayerSet() {
   });
   return keep;
 }
-function toggleQuestionsLayer() { UI.questionsLayer = !UI.questionsLayer; render(); }
+function toggleQuestionsLayer() {
+  UI.questionsLayer = !UI.questionsLayer;
+  if (!S.lenses || typeof S.lenses !== 'object') S.lenses = {};
+  S.lenses.questions = UI.questionsLayer;
+  persistSoft(); render();
+}
+/* ── the known layer — "מה שאני יודע" (Barak, 13.09) ─────────────────────
+   Same shape as the questions layer just above: brighten every 'known'
+   node AND its path back to the root, dim the rest; combines with the
+   questions layer as a UNION (topicLensSet(), above), not an AND, and with
+   lens/radar/solo exactly like every other filter category (isHazed()). */
+function isKnownNode(n) { return !!n && n.kind === 'known'; }
+function knownCountAll() { return S.nodes.filter(isKnownNode).length; }
+function knownLayerSet() {
+  if (!UI.knownLayer) return null;
+  var keep = {};
+  S.nodes.forEach(function (n) {
+    if (!isKnownNode(n)) return;
+    var t = n, hops = 0;
+    while (t && hops++ < 24) { keep[t.id] = 1; t = t.parent != null ? N(t.parent) : null; }
+  });
+  return keep;
+}
+function toggleKnownLayer() {
+  UI.knownLayer = !UI.knownLayer;
+  if (!S.lenses || typeof S.lenses !== 'object') S.lenses = {};
+  S.lenses.known = UI.knownLayer;
+  persistSoft(); render();
+}
+/* Shift+K (KeyK physical fallback, same convention as every other letter
+   shortcut on a Hebrew keyboard): toggle the marked set (or just the
+   selection) between 'known' and 'concept' — one undo step, whatever mix
+   of kinds they started at. Replaces the old "cycle backward" binding;
+   plain K still cycles concept→known→bridge→gap→question forward. */
+function toggleKnownKind() {
+  var ids = markedIds();
+  if (!ids.length) {
+    if (!UI.sel) { toast('בחר נושא קודם'); return; }
+    ids = [UI.sel];
+  }
+  ids.forEach(function (id) {
+    var n = N(id); if (!n) return;
+    if (n.kind === 'known') delete n.kind; else n.kind = 'known';
+  });
+  save(); render();
+}
+function renderKnownPill() {
+  var pill = el('#knownPill'); if (!pill) return;
+  pill.hidden = !UI.knownLayer;
+  if (!UI.knownLayer) return;
+  var txt = el('#knownCountTxt');
+  if (txt) txt.innerHTML = 'ידוע: <bdi>' + knownCountAll() + '</bdi>';
+}
 function renderQPill() {
   var pill = el('#qPill'); if (!pill) return;
   var total = questionCountAll();
@@ -3568,6 +3689,7 @@ function render() {
   renderCrumbs();
   renderLegend();
   renderQPill();
+  renderKnownPill();
   /* E2 fix: render() replaces #world's whole subtree every time, which
      silently drops DOM focus off whatever node held it — so a keyboard
      user who moves selection with the arrow keys (stepSel/selNode, both of
@@ -3854,7 +3976,7 @@ var SHORTCUTS = [
   ['Alt+← / Alt+→', 'אחורה / קדימה בהיסטוריית הקפיצות', 'Back / forward through the jump history'],
   ['Home', 'גלישה לשורש בזום בינוני', 'Glide to the root at a mid-altitude zoom'],
   ['K', 'החלף את סוג הנושא הנבחר קדימה', "Cycle the selected node's kind forward"],
-  ['Shift+K', 'החלף את סוג הנושא הנבחר אחורה', "Cycle the selected node's kind backward"],
+  ['Shift+K', 'סמן/בטל את הנבחר(ים) כ"ידוע"', "Toggle the selected/marked node(s) between known and concept"],
   ['B', 'ערוך תווית עוגן — "בעולם שלי זה…"', 'Edit the anchor chip — "in your world this is…"'],
   ['R', 'רדאר קשרים — הצג רק את המסלול המקושר לבחירה', 'Link radar — show only the path connected to the selection'],
   ['1–9', 'התמקד בענף לפי מספרו מהמקרא', 'Solo a branch by its number from the legend'],
@@ -4109,7 +4231,10 @@ document.addEventListener('click', function (ev) {
     if (z === '0') fitMap(460); else zoomAtCentre(z === '1' ? 1.25 : 1 / 1.25);
     return;
   }
-  if (ev.target.closest('#layerBtn')) { toggleLayer(); return; }
+  if (ev.target.closest('#layerBtn')) { if (typeof window.toggleLayersFlyout === 'function') window.toggleLayersFlyout(); return; }
+  if (ev.target.closest('#layersFlyoutLinks')) { toggleLayer(); if (typeof window.renderLayersFlyout === 'function') window.renderLayersFlyout(); return; }
+  if (ev.target.closest('#layersFlyoutQuestions')) { toggleQuestionsLayer(); if (typeof window.renderLayersFlyout === 'function') window.renderLayersFlyout(); return; }
+  if (ev.target.closest('#layersFlyoutKnown')) { toggleKnownLayer(); if (typeof window.renderLayersFlyout === 'function') window.renderLayersFlyout(); return; }
   if (ev.target.closest('#lensBtn')) { UI.lens = !UI.lens; render(); return; }
   if (ev.target.closest('#relBtn')) { if (UI.relFrom) cancelRelation(); else startRelation(); render(); return; }
   if (ev.target.closest('#eqBtn')) { if (typeof window.openEquation === 'function') window.openEquation(); return; }
@@ -4152,6 +4277,14 @@ document.addEventListener('click', function (ev) {
   if ((n = ev.target.closest('.gm-node .gm-eq'))) {
     var eqHost = n.closest('.gm-node[data-node]');
     if (eqHost) selNode(eqHost.dataset.node, { quiet: true });
+    return;
+  }
+  /* The lod-far Σ chip (a depth-≥2 dot's equation-count badge): zoom straight
+     to the node instead of opening the editor — at that altitude you can't
+     even read the title yet, so "show me this" comes before "edit this". */
+  if ((n = ev.target.closest('.gm-eq-chip'))) {
+    var chipId = n.dataset.eqChip;
+    if (chipId) { selNode(chipId, { quiet: true }); zoomToBranch(chipId, 420); }
     return;
   }
   /* A click on one of a card's own node.eqs lines reopens it in the editor,
@@ -4966,7 +5099,11 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       'padding:10px 12px;border-radius:10px;border:1px solid var(--sh-line);background:rgba(255,255,255,.5);' +
       'font:12.5px/1.5 ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;direction:ltr;resize:vertical;}' +
     '.gm-copy-actions{display:flex;justify-content:flex-end;gap:8px;}' +
-    '.gm-q-notes-toggle{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--sh-text-med);}';
+    /* Colour fix (13.09, header contrast): this label sits bare on the
+       header's own background (no pill under it, unlike its siblings in
+       #qPill) — it must follow the theme like the doctitle does, or it
+       renders navy-on-navy on the dark header. */
+    '.gm-q-notes-toggle{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--gm-doctitle-ink,var(--sh-text-med));}';
   document.head.appendChild(css);
 
   /* ── the fallback copy dialog (clipboard API unavailable/denied) ──────── */
@@ -6179,7 +6316,16 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
        hides, and the flyouts can never be opened while compact anyway
        since their trigger buttons are gone. */
     '.gm-compact #undoBtn,.gm-compact #layerBtn,.gm-compact #lensBtn,' +
-      '.gm-compact #addFlyoutBtn,.gm-compact #claudeFlyoutBtn,.gm-compact #helpBtn{display:none!important;}';
+      '.gm-compact #addFlyoutBtn,.gm-compact #claudeFlyoutBtn,.gm-compact #helpBtn{display:none!important;}' +
+    /* the layers flyout's three switches (Barak, 13.09): a small dot that
+       fills gold when the lens is on, instead of the whole row turning
+       gold like a one-shot action button — reads as a toggle, not a click. */
+    '.gm-flyout button.gm-switch-row{justify-content:space-between;}' +
+    '.gm-flyout button.gm-switch-row .gm-switch-label{display:flex;align-items:center;gap:10px;}' +
+    '.gm-switch-dot{flex:none;width:9px;height:9px;border-radius:50%;background:rgba(31,62,108,.22);}' +
+    ':root[data-theme="dark"] .gm-switch-dot{background:rgba(255,255,255,.28);}' +
+    '.gm-flyout button.gm-switch-row.on .gm-switch-dot{background:var(--gm-gold);}' +
+    '#layerBtn[aria-expanded="true"]{background:#122460!important;border-color:#122460!important;color:#fff!important;}';
   document.head.appendChild(css);
 
   function ic(p, w) {
@@ -6213,6 +6359,21 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   claudeFlyout.setAttribute('role', 'menu');
   claudeFlyout.hidden = true;
   document.body.appendChild(claudeFlyout);
+
+  /* Barak, 13.09: #layerBtn no longer toggles the links/cards switch
+     directly — it opens this third flyout, holding all three independent
+     layer switches (הקשרים שלי / שאלות פתוחות / מה שאני יודע). Same glass
+     material and open/close mechanics as add/claude above, but its own
+     items do NOT close it on click (a switch panel, not a one-shot menu —
+     you toggle more than one without reopening each time). */
+  var layersFlyout = document.createElement('div');
+  layersFlyout.className = 'gm-flyout gm-glass';
+  layersFlyout.id = 'layersFlyout';
+  layersFlyout.setAttribute('data-float', 'layers-flyout');
+  layersFlyout.setAttribute('data-chrome', '1');
+  layersFlyout.setAttribute('role', 'menu');
+  layersFlyout.hidden = true;
+  document.body.appendChild(layersFlyout);
 
   /* Re-rendered on every renderMapctl() call (renderMapctl calls this at
      its own end) so state-dependent buttons (relBtn's "on" while a
@@ -6251,10 +6412,26 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       '<button class="gm-btn" id="qBranchCopyBtn" title="העתק ענף עם הקשר — copy branch with context" aria-label="Copy branch with context">' +
         ic('<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>') +
         '<span>העתק ענף עם הקשר</span></button>';
+    renderLayersFlyout();
   }
-  var OPEN = null;   /* 'add' | 'claude' | null */
-  function flyoutEl(name) { return name === 'add' ? addFlyout : claudeFlyout; }
-  function triggerEl(name) { return document.getElementById(name === 'add' ? 'addFlyoutBtn' : 'claudeFlyoutBtn'); }
+  function switchRow(id, on, label, title) {
+    return '<button class="gm-btn gm-switch-row' + (on ? ' on' : '') + '" id="' + id + '" role="menuitemcheckbox" ' +
+      'aria-checked="' + !!on + '" title="' + title + '"><span class="gm-switch-label">' + label + '</span>' +
+      '<span class="gm-switch-dot" aria-hidden="true"></span></button>';
+  }
+  /* Re-rendered on its own (not just at renderMapctl() time) so clicking one
+     switch updates the other two's checked state in place without closing
+     the panel — see the click router's `renderLayersFlyout()` calls. */
+  function renderLayersFlyout() {
+    layersFlyout.innerHTML =
+      switchRow('layersFlyoutLinks', S.layer === 'cards', 'הקשרים שלי', 'הקשרים שלי — show or hide your own relations') +
+      switchRow('layersFlyoutQuestions', !!UI.questionsLayer, 'שאלות פתוחות', 'שאלות פתוחות — brighten open questions and their path') +
+      switchRow('layersFlyoutKnown', !!UI.knownLayer, 'מה שאני יודע', 'מה שאני יודע — brighten known topics and their path');
+  }
+  window.renderLayersFlyout = renderLayersFlyout;
+  var OPEN = null;   /* 'add' | 'claude' | 'layers' | null */
+  function flyoutEl(name) { return name === 'add' ? addFlyout : (name === 'claude' ? claudeFlyout : layersFlyout); }
+  function triggerEl(name) { return document.getElementById(name === 'add' ? 'addFlyoutBtn' : (name === 'claude' ? 'claudeFlyoutBtn' : 'layerBtn')); }
 
   /* The flyout's OPEN position, computed beside its own trigger button. */
   function positionFlyout(name) {
@@ -6272,10 +6449,12 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
 
   function closeFlyouts() {
     if (!OPEN) return;
-    [addFlyout, claudeFlyout].forEach(function (f) { f.classList.remove('open'); f.hidden = true; });
-    var addBtn = document.getElementById('addFlyoutBtn'), claudeBtn = document.getElementById('claudeFlyoutBtn');
+    [addFlyout, claudeFlyout, layersFlyout].forEach(function (f) { f.classList.remove('open'); f.hidden = true; });
+    var addBtn = document.getElementById('addFlyoutBtn'), claudeBtn = document.getElementById('claudeFlyoutBtn'),
+        layerBtn = document.getElementById('layerBtn');
     if (addBtn) addBtn.setAttribute('aria-expanded', 'false');
     if (claudeBtn) claudeBtn.setAttribute('aria-expanded', 'false');
+    if (layerBtn) layerBtn.setAttribute('aria-expanded', 'false');
     OPEN = null;
     document.documentElement.classList.remove('gm-flyout-open');
   }
@@ -6299,13 +6478,35 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   }
   addEventListener('resize', function () { if (OPEN) positionFlyout(OPEN); });
   window.closeGmFlyouts = closeFlyouts;
+  window.toggleLayersFlyout = function () { openFlyout('layers'); };
 
   document.addEventListener('click', function (e) {
     if (e.target.closest('#addFlyoutBtn')) { openFlyout('add'); return; }
     if (e.target.closest('#claudeFlyoutBtn')) { openFlyout('claude'); return; }
+    /* #layerBtn's own toggle-open is wired through the main click-router
+       (it needs to run there, alongside the other rail buttons) — this
+       listener must leave it alone entirely, or the very same click that
+       just opened the layers flyout falls through to the generic
+       "clicked outside, close everything" branch below and shuts it again
+       in the same event. */
+    if (e.target.closest('#layerBtn')) return;
     if (!OPEN) return;
-    /* an item inside the open flyout: let the existing id-based click
-       router (registered earlier, on document too) act on it first —
+    /* the layers flyout is a switch panel, not a one-shot menu — clicking
+       one of its own rows (routed by id in the main click-router above,
+       which calls toggleKnownLayer()/toggleQuestionsLayer()/toggleLayer(),
+       each of which runs a full render() — rebuilding this very flyout's
+       innerHTML to refresh its three rows' checked state) must NOT close
+       it, so more than one switch can be flipped without reopening. Since
+       that rebuild happens SYNCHRONOUSLY inside the main router (attached
+       earlier, so it runs before this listener does), the click's own
+       e.target element is already detached by the time we get here —
+       e.target.closest() would find nothing and fall through to "close".
+       composedPath() is captured at dispatch time, before any handler had
+       a chance to mutate the DOM, so it still names the ORIGINAL ancestor
+       chain regardless of what render() just did. */
+    if (e.composedPath && e.composedPath().indexOf(layersFlyout) !== -1) return;
+    /* an item inside the open add/claude flyout: let the existing id-based
+       click router (registered earlier, on document too) act on it first —
        microtask-close so that handler still sees the click's target
        attached to the DOM. Clicking anywhere else closes it. */
     if (e.target.closest('#addFlyout, #claudeFlyout')) {
