@@ -4606,7 +4606,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   copyDialog.setAttribute('dir', 'rtl');
   copyDialog.hidden = true;
   copyDialog.innerHTML =
-    '<h2 class="gm-bidi" title="Copy manually">העתק ידנית: <kbd dir="ltr">Ctrl</kbd>/<kbd dir="ltr">Cmd</kbd>+<kbd dir="ltr">C</kbd></h2>' +
+    '<h2 class="gm-bidi" title="Copy manually">העתק ידנית: <kbd dir="ltr">Ctrl/Cmd+C</kbd></h2>' +
     '<textarea id="copyDialogTa" dir="ltr" readonly></textarea>' +
     '<div class="gm-copy-actions"><button class="gm-btn on" id="copyDialogClose" title="Close" aria-label="Close">' + ic('<path d="M18 6 6 18M6 6l12 12"/>') + '<span>סגור</span></button></div>';
   document.body.appendChild(copyDialog);
@@ -5198,3 +5198,5 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
   if ((S.nodes || []).some(function (n) { return !!n.diagram; })) loadMermaid().catch(function () {});
 })();
 </script>
+<!-- 3D Kenney city behind the frost; fails safe to the static picture -->
+<script type="module" src="glasscity.js"></script>
