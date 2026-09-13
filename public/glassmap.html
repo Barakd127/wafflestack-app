@@ -30,6 +30,11 @@
   --gm-teal:#0E9AA7; --gm-purple:#9B5DE5; --gm-green:#2E9E6B; --gm-coral:#E76F51;
   --gm-gold:#D4AF37; --gm-navy:#1F3E6C;
   --gm-danger:#C0392B;
+  /* Addendum F: light mode borrows the app's own top-bar + focus accents —
+     royal-blue, not gold, in light mode (dark keeps gold, set below). */
+  --sh-topbar-bg: linear-gradient(135deg, rgba(255,255,255,.82) 0%, rgba(228,238,255,.78) 60%, rgba(255,245,210,.60) 100%);
+  --sh-topbar-border: rgba(212,175,55,.40);
+  --gm-focus: #3351CA;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -45,6 +50,7 @@
     --sh-panel-bg: rgba(15,15,30,0.55);
     --sh-panel-border: rgba(255,255,255,0.12);
     --sh-line: rgba(255,255,255,0.14);
+    --gm-focus: var(--gm-gold);
   }
 }
 :root[data-theme="dark"]{
@@ -60,6 +66,7 @@
   --sh-panel-bg: rgba(15,15,30,0.55);
   --sh-panel-border: rgba(255,255,255,0.12);
   --sh-line: rgba(255,255,255,0.14);
+  --gm-focus: var(--gm-gold);
 }
 
 *{box-sizing:border-box;}
@@ -76,7 +83,7 @@ button,input,textarea{font:inherit;color:inherit;}
 button{background:none;border:0;padding:0;cursor:pointer;}
 input,textarea{background:none;border:0;outline:none;}
 ::placeholder{color:var(--sh-text-light);}
-:focus-visible{outline:2px solid var(--gm-gold);outline-offset:2px;border-radius:4px;}
+:focus-visible{outline:2px solid var(--gm-focus,var(--gm-gold));outline-offset:2px;border-radius:4px;}
 *{scrollbar-width:thin;scrollbar-color:rgba(37,74,159,.35) transparent;}
 ::-webkit-scrollbar{width:6px;height:6px;}
 ::-webkit-scrollbar-thumb{background:rgba(37,74,159,.35);border-radius:4px;}
@@ -113,7 +120,7 @@ input,textarea{background:none;border:0;outline:none;}
 }
 
 /* ── shell ───────────────────────────────────────────────────────────────── */
-.gm-app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+.gm-app{display:flex;flex-direction:column;height:100vh;height:100dvh;height:var(--gm-vvh,100dvh);overflow:hidden;}
 .gm-head{flex:none;z-index:30;display:flex;align-items:center;gap:10px;padding:8px 14px;
   border-radius:0 0 14px 14px;}
 .gm-head[hidden]{display:none;}
@@ -361,6 +368,12 @@ input,textarea{background:none;border:0;outline:none;}
   box-shadow:0 0 0 4px rgba(212,175,55,.18),0 0 24px rgba(212,175,55,.28);}
 .mapwrap[data-layer="cards"] .gm-node.hub::after{display:none;}
 
+/* ── Addendum G: an open question gets a soft purple ring (a separate
+   pseudo-element from .hub's ::after and .sel/.marked's box-shadow, so all
+   three can combine without one clobbering another). ──────────────────── */
+.gm-node.gm-q-open::before{content:"";position:absolute;inset:-3px;border-radius:inherit;pointer-events:none;
+  box-shadow:0 0 0 2px rgba(155,93,229,.42);}
+
 /* ── A9 branch legend + solo ──────────────────────────────────────────────
    Bottom-start glass strip, one chip per top-level branch (contract
    Addendum A9); draggable (JS sets left/top and clears the default
@@ -526,6 +539,25 @@ input,textarea{background:none;border:0;outline:none;}
   if (mode) r.setAttribute('data-theme', mode);
 })();
 </script>
+<script>
+/* Small fix (f): some headless/embedded runtimes miscompute `100dvh` (it can
+   momentarily resolve to a stale/short value, leaving a visible seam under
+   .gm-app where the glass world layers stop). Track the real viewport height
+   in JS and let it win over dvh via var(--gm-vvh, 100dvh) — a live custom
+   property always overrides a static one, so this is a no-op the moment dvh
+   itself is correct, and a hard fix the moment it isn't. */
+(function () {
+  var r = document.documentElement;
+  function setVVH() {
+    var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    if (h) r.style.setProperty('--gm-vvh', h + 'px');
+  }
+  setVVH();
+  addEventListener('resize', setVVH);
+  addEventListener('orientationchange', setVVH);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', setVVH);
+})();
+</script>
 
 
 <style id="gm-restyle">
@@ -542,7 +574,9 @@ input,textarea{background:none;border:0;outline:none;}
   --gm-pill-sh:0 8px 22px rgba(11,27,62,.2);
   --gm-ink:#1F3E6C;
   --gm-city-filter:brightness(1.04) saturate(.7) contrast(.92);
-  --gm-frost-grad:linear-gradient(155deg,rgba(223,234,255,.74),rgba(198,218,250,.68) 60%,rgba(216,231,250,.72));
+  /* Addendum F: the shell's own white milk over the city — no blue tint,
+     the deep blur below (34px at מיקוד) is unchanged. */
+  --gm-frost-grad:linear-gradient(155deg,rgba(255,255,255,.5),rgba(214,230,255,.3) 60%,rgba(255,255,255,.4));
   --gm-sheen-grad:linear-gradient(215deg,rgba(255,255,255,.34),rgba(255,255,255,0) 60%);
 }
 :root[data-theme="dark"], :root:not([data-theme="light"]){ --gm-dark-ready:1; }
@@ -631,14 +665,20 @@ input,textarea{background:none;border:0;outline:none;}
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .15s,background .15s,border-color .15s;}
 .gm-btn:hover,.gm-seg:hover{transform:translateY(-1px);}
 .gm-btn.icon{width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;}
-/* active = a warm hint, not a highlighter. Bright #FFD700 on navy was the
-   loudest thing on the screen; this is the gold at a whisper. */
+/* Addendum F: in light mode the active segment / pressed toggle is a solid
+   navy pill with white text — the shell's own "lit" segment — not a gold
+   whisper (that stays for dark, unchanged below). */
 .gm-btn[aria-pressed="true"],.gm-btn.on,.gm-seg[aria-pressed="true"],.gm-legend-chip.on{
-  background:rgba(212,175,55,.16)!important;border-color:rgba(212,175,55,.40)!important;
-  color:#C9A227!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.25);}
+  background:#122460!important;border-color:#122460!important;
+  color:#ffffff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.25);}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .gm-btn[aria-pressed="true"],
+:root:not([data-theme="light"]) .gm-btn.on,
+:root:not([data-theme="light"]) .gm-seg[aria-pressed="true"],
+:root:not([data-theme="light"]) .gm-legend-chip.on{
+  color:#E3C877!important;background:rgba(212,175,55,.14)!important;border-color:rgba(212,175,55,.40)!important;} }
 :root[data-theme="dark"] .gm-btn[aria-pressed="true"],:root[data-theme="dark"] .gm-btn.on,
 :root[data-theme="dark"] .gm-seg[aria-pressed="true"],:root[data-theme="dark"] .gm-legend-chip.on{
-  color:#E3C877!important;background:rgba(212,175,55,.14)!important;}
+  color:#E3C877!important;background:rgba(212,175,55,.14)!important;border-color:rgba(212,175,55,.40)!important;}
 .gm-i{flex:none;}
 /* themeBtn: two permanent SVGs, swapped by class — render() used to set
    textContent to a moon/sun emoji every frame, which silently deleted the
@@ -649,7 +689,17 @@ input,textarea{background:none;border:0;outline:none;}
 #themeBtn.is-dark .i-moon{display:inline-flex;}
 .mapctl{gap:4px!important;padding:6px!important;background:transparent!important;
   border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
-.gm-head{background:transparent!important;border:0!important;box-shadow:none!important;
+/* Addendum F: light mode gets the app's real top-bar back — the gradient +
+   gold bottom line — instead of the flat transparent strip; dark mode is
+   explicitly kept exactly as it was (transparent). */
+.gm-head{background:var(--sh-topbar-bg)!important;border:0!important;
+  border-bottom:1px solid var(--sh-topbar-border)!important;
+  box-shadow:0 4px 18px rgba(31,62,108,.10)!important;
+  backdrop-filter:blur(16px) saturate(150%)!important;-webkit-backdrop-filter:blur(16px) saturate(150%)!important;}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .gm-head{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;} }
+:root[data-theme="dark"] .gm-head{background:transparent!important;border:0!important;box-shadow:none!important;
   backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
 .gm-menu button{border-radius:10px;}
 .gm-menu button .gm-i{opacity:.75;}
@@ -663,6 +713,14 @@ input,textarea{background:none;border:0;outline:none;}
 .gm-seg[aria-pressed="true"]::after{content:'';position:absolute;left:11px;right:11px;bottom:2px;height:2px;
   border-radius:2px;background:var(--gm-gold);}
 @media (max-width:900px){ .gm-seg span{display:none;} .gm-seg{padding:0 8px;} }
+
+/* Addendum G: the header's question count pill + its copy-for-Claude button.
+   Same pill material as everything else in the header (.gm-btn already
+   carries it), just grouped in one flex row with no extra gap. */
+.gm-qpill{display:inline-flex;align-items:center;gap:4px;}
+.gm-qpill[hidden]{display:none;}
+.gm-qpill #qLayerToggle{gap:6px;}
+@media (max-width:900px){ .gm-qpill #qCountTxt{max-width:80px;overflow:hidden;text-overflow:ellipsis;} }
 
 /* ── D4 no-overlap: one bottom-left column, rail alone bottom-right ──────── */
 .gm-hint{left:14px!important;bottom:12px!important;
@@ -707,7 +765,7 @@ input,textarea{background:none;border:0;outline:none;}
       <span class="gm-doctitle gm-bidi" id="docTitle" tabindex="0" title="Click to rename the map"></span>
     </div>
     <div class="gm-headtools">
-      <div class="gm-frostseg" id="frostSeg" data-float="frost" data-chrome="1" role="group" aria-label="שקיפות הזכוכית"><button class="gm-seg" data-frost=".85" aria-pressed="true" title="זכוכית חלבית — לכתיבה"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg><span>מיקוד</span></button><button class="gm-seg" data-frost=".4" aria-pressed="false" title="חצי שקוף — להדגמה על העיר"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg><span>הדגמה</span></button><button class="gm-seg" data-frost="0" aria-pressed="false" title="זכוכית שקופה — רואים את העיר"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M10 21V11h6v10"/><path d="M16 21v-7l3 1v6"/></svg><span>עיר</span></button></div><button class="gm-btn icon" id="exportBtn" title="ייצוא / ייבוא — Export / Import" aria-label="Export or import"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></button>
+      <div class="gm-frostseg" id="frostSeg" data-float="frost" data-chrome="1" role="group" aria-label="שקיפות הזכוכית"><button class="gm-seg" data-frost=".85" aria-pressed="true" title="זכוכית חלבית — לכתיבה"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg><span>מיקוד</span></button><button class="gm-seg" data-frost=".4" aria-pressed="false" title="חצי שקוף — להדגמה על העיר"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg><span>הדגמה</span></button><button class="gm-seg" data-frost="0" aria-pressed="false" title="זכוכית שקופה — רואים את העיר"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l5-3v16"/><path d="M10 21V11h6v10"/><path d="M16 21v-7l3 1v6"/></svg><span>עיר</span></button></div><div class="gm-qpill" id="qPill" data-float="qpill" data-chrome="1" hidden><button class="gm-btn" id="qLayerToggle" aria-pressed="false" title="שכבת שאלות — questions layer: brighten open questions and their path"><svg class="gm-i" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg><span id="qCountTxt" class="tnum gm-bidi">שאלות פתוחות: <bdi>0</bdi></span></button><button class="gm-btn icon" id="qCopyBtn" title="העתק שאלות פתוחות ל-Claude — copy open questions for Claude" aria-label="Copy open questions for Claude"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button><label class="gm-q-notes-toggle gm-bidi" title="כלול פתקים מהאותו ענף בהעתקה"><input type="checkbox" id="qIncludeNotes"><span>כולל פתקים</span></label></div><button class="gm-btn icon" id="exportBtn" title="ייצוא / ייבוא — Export / Import" aria-label="Export or import"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></button>
       <div class="gm-menu gm-glass" id="exportMenu" data-chrome="1" hidden>
         <button data-act="exp-json"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M9 13v4M15 13v4"/></svg> ייצוא JSON — Export JSON</button>
         <button data-act="exp-md"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/><path d="M8 13h8M8 17h5"/></svg> ייצוא Markdown — Export Markdown</button>
@@ -746,7 +804,7 @@ input,textarea{background:none;border:0;outline:none;}
     <input type="text" id="switcherInput" placeholder="חיפוש מהיר… — quick search…" aria-label="Quick switcher">
     <div class="gm-switcher-list" id="switcherList"></div>
   </div>
-  <div class="gm-toast gm-glass" id="toast" data-float="toast" role="status" aria-live="polite"></div>
+  <div class="gm-toast gm-glass" id="toast" dir="rtl" data-float="toast" role="status" aria-live="polite"></div>
 </div>
 
 <script>
@@ -795,6 +853,25 @@ function esc(s) {
 }
 function el(sel, root) { return (root || document).querySelector(sel); }
 function els(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+/* Small fix (d): secondary chrome surfaces (legend/crumbs/switcher/peek) —
+   window.chromeTitleText/chromeTitlePlain are defined later, once the
+   equations script block has loaded (they need EQ_RE/WL_RE/ML); these two
+   wrappers fall back to plain esc() before that (never actually hit in
+   practice, since render() only runs after every script block has parsed). */
+function chromeTxt(x) { return typeof window.chromeTitleText === 'function' ? window.chromeTitleText(x) : esc(x); }
+function chromeTxtPlain(x) { return typeof window.chromeTitlePlain === 'function' ? window.chromeTitlePlain(x) : String(x == null ? '' : x); }
+/* Small fix (b): the Alt+= and Alt+M editors must never shift the page when
+   they open. Every focus() call they make already passes {preventScroll:
+   true}, but that alone doesn't cover every browser/host combination (an
+   Obsidian srcdoc iframe in particular) — belt-and-suspenders, zero the
+   scroll offset on every ancestor that could conceivably have picked one up
+   right after each focus() call. */
+function resetPageScroll() {
+  try { document.documentElement.scrollTop = 0; document.documentElement.scrollLeft = 0; } catch (e) {}
+  try { document.body.scrollTop = 0; document.body.scrollLeft = 0; } catch (e) {}
+  var app = document.querySelector('.gm-app'); if (app) { app.scrollTop = 0; app.scrollLeft = 0; }
+  var mw = document.querySelector('.mapwrap'); if (mw) { mw.scrollTop = 0; mw.scrollLeft = 0; }
+}
 
 /* ── the tree ────────────────────────────────────────────────────────────
    A node with parent === null is the root (there is always exactly one).
@@ -896,9 +973,24 @@ function normalise(x) {
     /* A4 / A5: validate kind + bridge on the way in (hand-edited JSON, an
        older save, a foreign import) — 'concept' is never stored (see KINDS
        comment above), anything unrecognised is dropped rather than kept as
-       a dead string the UI can't cycle back to. */
-    if (n.kind != null && (KINDS.indexOf(n.kind) < 0 || n.kind === 'concept')) delete n.kind;
+       a dead string the UI can't cycle back to. Addendum G adds a sixth
+       kind, 'note' (a quick note, N), that lives OUTSIDE the K/Shift+K cycle
+       (KINDS is that cycle's order and stays five long) so it needs its own
+       allowance here. */
+    if (n.kind != null && n.kind !== 'note' && (KINDS.indexOf(n.kind) < 0 || n.kind === 'concept')) delete n.kind;
     if (n.bridge != null && typeof n.bridge !== 'string') delete n.bridge;
+    /* Addendum G: a question node's status/timestamps + its answer text.
+       Malformed shapes are repaired rather than dropped outright — the
+       question itself (kind==='question') is the thing that must survive. */
+    if (n.q != null) {
+      if (typeof n.q !== 'object') delete n.q;
+      else {
+        if (n.q.status !== 'open' && n.q.status !== 'answered') n.q.status = 'open';
+        if (typeof n.q.asked !== 'string') n.q.asked = new Date().toISOString();
+        if (n.q.answered != null && typeof n.q.answered !== 'string') n.q.answered = null;
+      }
+    }
+    if (n.answer != null && typeof n.answer !== 'string') delete n.answer;
     /* images/diagrams: type-check only. Every node here is mutated in
        place (never rebuilt as a fresh object), so any field this engine
        doesn't know about yet — a future engine's own addition — rides
@@ -1041,6 +1133,7 @@ var UI = {
   radar: false,          /* A6: link radar toggle (R) */
   radarExpanded: [],     /* A6: collapsed ancestors radar force-opened, restored on off */
   soloBranch: null,      /* A9: top-level branch id currently soloed (legend / 1-9) */
+  questionsLayer: false, /* Addendum G: dim everything but open questions + their path */
   editingBridge: null,   /* A5: node id whose anchor chip is mid-edit (forces it visible off lod-near) */
   switcher: null,        /* A10: {q, idx, results} while the quick switcher is open, else null */
   legendExpanded: false  /* D4 phone rule: legend collapses to one pill "n ענפים" that expands on tap */
@@ -1446,9 +1539,10 @@ function soloSet() {
    to stay sharp — hazed if ANY active filter excludes it. Each of the three
    *Set() functions above already returns null when its own toggle is off,
    so an inactive filter never contributes a haze. */
-function hazeSets() { return { lens: lensSet(), radar: radarSet(), solo: soloSet() }; }
+function hazeSets() { return { lens: lensSet(), radar: radarSet(), solo: soloSet(), questions: questionsLayerSet() }; }
 function isHazed(sets, id) {
-  return (sets.lens && !sets.lens[id]) || (sets.radar && !sets.radar[id]) || (sets.solo && !sets.solo[id]);
+  return (sets.lens && !sets.lens[id]) || (sets.radar && !sets.radar[id]) || (sets.solo && !sets.solo[id]) ||
+    (sets.questions && !sets.questions[id]);
 }
 
 /* ── the plane's contents ────────────────────────────────────────────── */
@@ -1471,14 +1565,23 @@ function mapWorld() {
     var accent = isRoot ? '' : (node.accent || accentVar || ACCENTS[0]);
     var collapsedCount = node.collapsed ? descendantsOf(node.id).length : 0;
     var kind = node.kind && KINDS.indexOf(node.kind) > 0 ? node.kind : '';  /* A4: 'concept' (index 0) never gets a class */
-    var glyph = kind ? KIND_GLYPH[kind] : '';
+    /* Addendum G: an OPEN question gets a soft purple ring (the normal '?'
+       swatch already carries the purple tint); an ANSWERED one swaps its
+       glyph/swatch for the same check mark 'known' already uses, so it
+       reads as "settled" at a glance without inventing a seventh swatch. */
+    var qOpen = node.kind === 'question' && (!node.q || node.q.status !== 'answered');
+    var qAnswered = node.kind === 'question' && node.q && node.q.status === 'answered';
+    var glyph = qAnswered ? KIND_GLYPH.known : (kind ? KIND_GLYPH[kind] : '');
+    var glyphSwatch = qAnswered ? 'known' : kind;
     var hub = linksOf(node.id).length >= 2;                                /* A7 */
     var bridgeEditing = UI.editingBridge === node.id;
     var hint = 'לחיצה לבחירה · לחיצה כפולה לעריכה — click to select, double-click to rename' +
       (node.bridge ? ' — 🪙 ' + node.bridge : '');                          /* A5: tooltip works at any zoom */
     nodes += '<div class="gm-node gm-glass' + (isRoot ? ' root' : '') + (isSel(node.id) ? ' sel' : '') +
       (marked ? ' marked' : '') + (haze ? ' hazed' : '') + (UI.relFrom === node.id ? ' relsrc' : '') +
-      (kind ? ' gm-kind-' + kind : '') + (hub ? ' hub' : '') + '"' +
+      (kind ? ' gm-kind-' + kind : '') + (hub ? ' hub' : '') +
+      (node.kind === 'note' ? ' gm-kind-note' : '') +
+      (qOpen ? ' gm-q-open' : '') + (qAnswered ? ' gm-q-answered' : '') + '"' +
       ' data-node="' + node.id + '" data-x="' + x.toFixed(1) + '" data-y="' + y.toFixed(1) + '"' +
       ' data-depth="' + depth + '" data-par="' + esc(parId || '') + '" data-col="var(' + accent + ')"' +
       ' data-pinned="' + (isRoot ? 2 : (pinned ? 1 : 0)) + '"' +
@@ -1487,7 +1590,7 @@ function mapWorld() {
       ' role="button" tabindex="0" title="' + esc(hint) + '">' +
       (accent ? '<span class="gm-stripe" aria-hidden="true"></span>' : '') +
       '<span class="gm-ttl gm-bidi" dir="auto">' +
-        (glyph ? '<span class="gm-glyph gm-swatch gm-swatch-' + kind + '" aria-hidden="true">' + glyph + '</span>' : '') +
+        (glyph ? '<span class="gm-glyph gm-swatch gm-swatch-' + glyphSwatch + '" aria-hidden="true">' + glyph + '</span>' : '') +
         (typeof window.titleHTML === 'function' ? window.titleHTML(node.title) : esc(node.title)) + '</span>' +
       (node.eqs && node.eqs.length ? '<div class="gm-eqs">' + node.eqs.map(function (latex, eqi) {
         return '<div class="gm-eqline" dir="ltr" data-eq-node="' + node.id + '" data-eq-idx="' + eqi + '" title="לחיצה לעריכה — click to edit">' +
@@ -1526,7 +1629,7 @@ function renderMap() {
   el('#gmHint').innerHTML = findOn ? '' :
     '<span dir="rtl"><kbd dir="ltr">Tab</kbd> תת-נושא · <kbd dir="ltr">Enter</kbd> נושא אח · ' +
     '<kbd dir="ltr">Shift+L</kbd> קשר · <kbd dir="ltr">Alt+=</kbd> משוואה · <kbd dir="ltr">Alt+M</kbd> דיאגרמה · <kbd dir="ltr">Ctrl+/</kbd> קיפול · ' +
-    '<kbd dir="ltr">?</kbd> עזרה</span>';
+    '<kbd dir="ltr">Shift+/</kbd> שאלה · <kbd dir="ltr">N</kbd> פתק · <kbd dir="ltr">F1</kbd> עזרה</span>';
   el('#mapwrap').dataset.layer = S.layer;
   renderMapctl();
   /* Images/Diagrams: wire thumbnail-load listeners + kick off Mermaid
@@ -1548,7 +1651,15 @@ function renderMapctl() {
       ' title="קשר בין נושאים (Shift+L) — relate two nodes" aria-label="Relate two nodes"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><path d="M8 12h8"/></svg></button>' +
     '<button class="gm-btn icon" id="eqBtn" title="משוואה (Alt+=) — equation" aria-label="Insert an equation"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 7V4H6l6 8-6 8h12v-3"/></svg></button>' +
     '<button class="gm-btn icon" id="diagramBtn" title="דיאגרמה מהירה (Alt+M) — quick diagram" aria-label="Insert a quick diagram"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></svg></button>' +
-    '<button class="gm-btn icon" id="helpBtn" title="עזרה (?) — shortcuts" aria-label="Shortcuts help"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>';
+    /* Addendum G rail buttons: add question (Shift+/), add note (N), copy
+       open questions for Claude, paste back answers, copy a branch with
+       context — lucide stroke icons, matching the rest of the rail. */
+    '<button class="gm-btn icon" id="qAddBtn" title="שאלה פתוחה (Shift+/) — open question" aria-label="Add an open question"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>' +
+    '<button class="gm-btn icon" id="qNoteBtn" title="פתק מהיר (N) — quick note" aria-label="Add a quick note"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11l5-5V5a2 2 0 0 0-2-2Z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/></svg></button>' +
+    '<button class="gm-btn icon" id="qCopyRailBtn" title="העתק שאלות פתוחות ל-Claude — copy open questions for Claude" aria-label="Copy open questions for Claude"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button>' +
+    '<button class="gm-btn icon" id="qPasteBtn" title="הדבק תשובות — paste back Claude’s answers" aria-label="Paste back answers"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></button>' +
+    '<button class="gm-btn icon" id="qBranchCopyBtn" title="העתק ענף עם הקשר — copy branch with context" aria-label="Copy branch with context"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button>' +
+    '<button class="gm-btn icon" id="helpBtn" title="עזרה (F1) — shortcuts" aria-label="Shortcuts help"><svg class="gm-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>';
 }
 </script>
 
@@ -2036,7 +2147,9 @@ function mapKeys(ev) {
     phys = ev.shiftKey ? '?' : '/';
   }
   if (phys) { try { Object.defineProperty(ev, 'key', { value: phys }); } catch (_) {} }
-  if (el('#helpOverlay').classList.contains('open') && ev.key !== '?' && ev.key !== 'Escape') return;
+  /* Addendum G, key change: help moved off '?' onto F1, so while the help
+     overlay is open only F1 (toggle it back off) and Escape get through. */
+  if (el('#helpOverlay').classList.contains('open') && ev.key !== 'F1' && ev.key !== 'Escape') return;
 
   /* A3 jump history: Alt+← / Alt+→, ahead of everything else so no other
      binding can shadow it (there is no unmodified use of these arrows). */
@@ -2075,8 +2188,14 @@ function mapKeys(ev) {
     if (k === 'k') { ev.preventDefault(); openSwitcher(); return; }                       /* A10 */
     return;
   }
-  if (ev.key === '/') { ev.preventDefault(); openFind(); return; }
-  if (ev.key === '?') { ev.preventDefault(); toggleHelp(); return; }
+  /* Addendum G, key change: Shift+/ (the '?' key; on a Hebrew layout the
+     same physical Slash+Shift via the phys fallback above) now adds an open
+     question child of the selection instead of opening help — plain '/'
+     does nothing at all any more (Ctrl+F is the only way to search), and
+     help itself moved to F1 (still on its rail button too). */
+  if (ev.key === '?') { ev.preventDefault(); addQuestionChild(); return; }
+  if (ev.key === 'F1') { ev.preventDefault(); toggleHelp(); return; }
+  if (ev.key === 'n' || ev.key === 'N') { ev.preventDefault(); addNoteChild(); return; }    /* Addendum G: quick note */
   if (ev.key === 'z' || ev.key === 'Z') { ev.preventDefault(); onKeyZ(); return; }         /* A2 */
   if (ev.key === 'Home') { ev.preventDefault(); goHome(); return; }                        /* A1 preset */
   /* Shift+L starts a relation. Ctrl+L, the original binding, is the browser's
@@ -2147,9 +2266,47 @@ function toggleHelp() {
 }
 
 /* ── fit / zoom / initial placement ─────────────────────────────────────── */
+/* Small fix (e): a fit that just centres on the FULL #mapwrap rect can land
+   the root (or any node) right under the floating chrome — a screenshot
+   caught the root card sitting under the legend chips and the hint bar.
+   Measure the actual, currently-visible floating elements that live in
+   fixed screen corners (bottom-left hint+legend column, the bottom-right
+   mapctl rail, the top-left breadcrumb) and shrink the box every fit/
+   zoom-to-branch centres within, instead of the raw viewport. Each margin
+   is reserved for its FULL band (not just the element's own width) since
+   that's still a rectangle a simple fit can subtract cleanly, and erring
+   generous is always safe — it just leaves a bit more breathing room. */
+function chromeSafeRect() {
+  var wrap = el('#mapwrap');
+  var r = wrap.getBoundingClientRect();
+  var out = { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height };
+  function visibleRect(sel) {
+    var e = el(sel);
+    if (!e || e.hidden) return null;
+    var cs = getComputedStyle(e);
+    if (cs.display === 'none' || cs.visibility === 'hidden') return null;
+    var b = e.getBoundingClientRect();
+    if (b.width <= 0 || b.height <= 0) return null;
+    return b;
+  }
+  var gap = 10;
+  var crumb = visibleRect('#crumbBar');
+  if (crumb) out.top = Math.max(out.top, crumb.bottom + gap);
+  var ctl = visibleRect('#mapctl');
+  if (ctl) out.right = Math.min(out.right, ctl.left - gap);
+  var hint = visibleRect('#gmHint'), legend = visibleRect('#legendBar');
+  var bandTop = Infinity;
+  if (hint) bandTop = Math.min(bandTop, hint.top);
+  if (legend) bandTop = Math.min(bandTop, legend.top);
+  if (bandTop !== Infinity) out.bottom = Math.min(out.bottom, bandTop - gap);
+  out.width = Math.max(80, out.right - out.left);
+  out.height = Math.max(80, out.bottom - out.top);
+  return out;
+}
 function fitMap(ms) {
   var wrap = el('#mapwrap'); if (!wrap) return;
-  var r = wrap.getBoundingClientRect();
+  var wr = wrap.getBoundingClientRect();
+  var safe = chromeSafeRect();
   var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
   MAP_BOUNDS.forEach(function (b) {
     minX = Math.min(minX, b[0] - b[2]); maxX = Math.max(maxX, b[0] + b[2]);
@@ -2158,9 +2315,12 @@ function fitMap(ms) {
   if (minX > maxX) { minX = minY = -320; maxX = maxY = 320; }
   var pad = 46, bw = (maxX - minX) + pad * 2, bh = (maxY - minY) + pad * 2;
   var v = mapView();
-  var z = Math.max(0.22, Math.min(1.1, Math.min(r.width / bw, r.height / bh)));
+  var z = Math.max(0.22, Math.min(1.1, Math.min(safe.width / bw, safe.height / bh)));
   v.fit = true;
-  animateMap(r.width / 2 - ((minX + maxX) / 2) * z, r.height / 2 - ((minY + maxY) / 2) * z, z, ms);
+  /* Centre of the SAFE box, expressed in #mapwrap-local coordinates (the
+     camera's x/y are relative to the wrap, not the viewport). */
+  var cx = (safe.left + safe.right) / 2 - wr.left, cy = (safe.top + safe.bottom) / 2 - wr.top;
+  animateMap(cx - ((minX + maxX) / 2) * z, cy - ((minY + maxY) / 2) * z, z, ms);
 }
 /* ── A2 zoom-to-branch (Z) ────────────────────────────────────────────────
    Fit the viewport to the bounding box of a node's VISIBLE subtree (itself
@@ -2193,12 +2353,14 @@ function zoomToBranch(id, ms) {
   if (!id || !N(id)) { fitMap(ms); return; }         /* "with no selection = fit all" */
   var box = subtreeWorldBox(visibleSubtreeIds(id));
   var wrap = el('#mapwrap'); if (!wrap || !box) return;
-  var r = wrap.getBoundingClientRect();
+  var wr = wrap.getBoundingClientRect();
+  var safe = chromeSafeRect();
   var pad = 80, bw = (box.maxX - box.minX) + pad * 2, bh = (box.maxY - box.minY) + pad * 2;
   var v = mapView();
-  var z = Math.max(0.22, Math.min(1.4, Math.min(r.width / bw, r.height / bh)));
+  var z = Math.max(0.22, Math.min(1.4, Math.min(safe.width / bw, safe.height / bh)));
   v.fit = true;
-  animateMap(r.width / 2 - ((box.minX + box.maxX) / 2) * z, r.height / 2 - ((box.minY + box.maxY) / 2) * z, z, ms == null ? 460 : ms);
+  var cx = (safe.left + safe.right) / 2 - wr.left, cy = (safe.top + safe.bottom) / 2 - wr.top;
+  animateMap(cx - ((box.minX + box.maxX) / 2) * z, cy - ((box.minY + box.maxY) / 2) * z, z, ms == null ? 460 : ms);
 }
 /* Z zoomed once already inside 400ms → this second press dives instead
    (contract A2: "double-tap Z (within 400ms) = dive one level (A3)"). */
@@ -2389,6 +2551,76 @@ function editBridge() {
       }
     });
   }, 30);
+}
+
+/* ── Addendum G: the questions layer + quick notes ────────────────────────
+   Shift+/ adds an OPEN QUESTION child of the selection (root if none) and
+   opens its title for typing; N adds a plain quick NOTE child the same way.
+   Both reuse growAndEdit()'s existing "one undo step, roll back to nothing
+   if the title edit is cancelled" behaviour — nothing new to get wrong. */
+function isQuestionNode(n) { return !!n && n.kind === 'question'; }
+function isOpenQuestion(n) { return isQuestionNode(n) && (!n.q || n.q.status !== 'answered'); }
+function questionCountOpen() { return S.nodes.filter(isOpenQuestion).length; }
+function questionCountAll() { return S.nodes.filter(isQuestionNode).length; }
+function growQuestionChild() {
+  var pid = (UI.sel && N(UI.sel)) ? UI.sel : rootNode().id;
+  var id = newChildOf(pid);
+  var n = N(id);
+  n.kind = 'question';
+  n.q = { status: 'open', asked: new Date().toISOString(), answered: null };
+  return id;
+}
+function growNoteChild() {
+  var pid = (UI.sel && N(UI.sel)) ? UI.sel : rootNode().id;
+  var id = newChildOf(pid);
+  N(id).kind = 'note';
+  return id;
+}
+function addQuestionChild() { growAndEdit(growQuestionChild, true); }
+function addNoteChild() { growAndEdit(growNoteChild, true); }
+function markQuestionAnswered(id) {
+  var n = id && N(id);
+  if (!n || n.kind !== 'question') return;
+  if (!n.q) n.q = { status: 'open', asked: new Date().toISOString(), answered: null };
+  n.q.status = 'answered';
+  n.q.answered = new Date().toISOString();
+  save(); render();
+  if (el('#bodySheet.open')) openBodySheet(id);  /* refresh the open sheet in place */
+  toast('סומן כנענה — marked answered');
+}
+/* The questions layer: brighten every open question AND its full path back
+   to the root, dim everything else — combines with lens/radar/solo exactly
+   like they combine with each other (a node must survive every active
+   filter, see isHazed()). */
+function questionsLayerSet() {
+  if (!UI.questionsLayer) return null;
+  var keep = {};
+  S.nodes.forEach(function (n) {
+    if (!isOpenQuestion(n)) return;
+    var t = n, hops = 0;
+    while (t && hops++ < 24) { keep[t.id] = 1; t = t.parent != null ? N(t.parent) : null; }
+  });
+  return keep;
+}
+function toggleQuestionsLayer() { UI.questionsLayer = !UI.questionsLayer; render(); }
+function renderQPill() {
+  var pill = el('#qPill'); if (!pill) return;
+  var total = questionCountAll();
+  pill.hidden = total === 0;
+  if (!total) return;
+  var open = questionCountOpen();
+  /* Hebrew-only label, never starting with a digit — the count itself is
+     wrapped in <bdi> so it can't drag the Hebrew text out of RTL order.
+     The English gloss lives only in the title tooltip, not in the visible
+     label (Barak, 13.09: "no English duplicate"). */
+  var txt = el('#qCountTxt');
+  if (txt) txt.innerHTML = 'שאלות פתוחות: <bdi>' + open + '</bdi>';
+  var tgl = el('#qLayerToggle');
+  if (tgl) {
+    tgl.setAttribute('aria-pressed', String(!!UI.questionsLayer));
+    tgl.title = 'שכבת שאלות — questions layer: brighten open questions and their path (' +
+      open + ' open question' + (open === 1 ? '' : 's') + ')';
+  }
 }
 
 /* ── A6 link radar — R ────────────────────────────────────────────────────
@@ -2782,7 +3014,14 @@ function mountMap() {
         if (UI.relFrom && UI.relFrom !== d.id) { completeRelation(d.id); return; }
         if (d.shift) { markBranch(d.id); UI.sel = d.id; render(); }
         else if (d.ctrl) { toggleMark(d.id); UI.sel = d.id; render(); }
-        else { clearMarks(); selNode(d.id); }
+        else {
+          clearMarks(); selNode(d.id);
+          /* Addendum G: "a click on a question opens its side sheet with an
+             answer field" — a plain click (not a drag, not a mark/relation
+             gesture) on a question node goes straight to answering it. */
+          var clickedQ = N(d.id);
+          if (clickedQ && clickedQ.kind === 'question') openBodySheet(d.id);
+        }
       }, 40);
     }
   }
@@ -2858,14 +3097,14 @@ function renderCrumbs() {
   var html = cells.map(function (c, i) {
     var sep = i > 0 ? '<span class="gm-crumb-sep" aria-hidden="true">' + sepGlyph + '</span>' : '';
     if (c.ellipsis) {
-      var list = c.ellipsis.map(function (n) { return '<div class="gm-bidi">' + esc(n.title || '···') + '</div>'; }).join('');
+      var list = c.ellipsis.map(function (n) { return '<div class="gm-bidi">' + chromeTxt(n.title || '···') + '</div>'; }).join('');
       return sep + '<span class="gm-crumb-more" tabindex="0"><span class="gm-crumb">&hellip;</span>' +
         '<div class="gm-crumb-morelist">' + list + '</div></span>';
     }
     var isSelf = c.node.id === UI.sel;
     return sep + '<span class="gm-crumb gm-bidi' + (isSelf ? ' sel' : '') + '"' +
       (isSelf ? '' : ' data-crumb="' + c.node.id + '" role="button" tabindex="0"') +
-      '>' + esc(c.node.title || '···') + '</span>';
+      '>' + chromeTxt(c.node.title || '···') + '</span>';
   }).join('');
   bar.hidden = false;
   bar.dir = rtl ? 'rtl' : 'ltr';
@@ -2894,8 +3133,8 @@ function renderLegend() {
   bar.innerHTML = show.map(function (b, i) {
     var acc = b.accent || ACCENTS[i % ACCENTS.length];
     var on = UI.soloBranch === b.id;
-    return '<button class="gm-legend-chip' + (on ? ' on' : '') + '" data-branch="' + b.id + '" title="' + esc(b.title || '') + '">' +
-      '<i aria-hidden="true" style="background:var(' + acc + ')"></i><span class="gm-bidi">' + esc(b.title || '···') + '</span></button>';
+    return '<button class="gm-legend-chip' + (on ? ' on' : '') + '" data-branch="' + b.id + '" title="' + esc(chromeTxtPlain(b.title || '')) + '">' +
+      '<i aria-hidden="true" style="background:var(' + acc + ')"></i><span class="gm-bidi">' + chromeTxt(b.title || '···') + '</span></button>';
   }).join('') + (extra > 0 ? '<span class="gm-legend-more">+' + extra + '</span>' : '');
   bar.hidden = false;
   var pos = S.legendPos;
@@ -2941,7 +3180,7 @@ function showPeek(nodeEl) {
   var kids = childrenOf(id); if (!kids.length) return;
   var tip = el('#peekTip'); if (!tip) return;
   tip.innerHTML = kids.slice(0, 6).map(function (k) {
-    return '<div class="gm-bidi">' + esc(k.title || '···') + '</div>';
+    return '<div class="gm-bidi">' + chromeTxt(k.title || '···') + '</div>';
   }).join('') + (kids.length > 6 ? '<div class="more">+' + (kids.length - 6) + '</div>' : '');
   var r = nodeEl.getBoundingClientRect();
   tip.style.left = (r.left + r.width / 2) + 'px';
@@ -2985,6 +3224,7 @@ function render() {
   if (UI.find) applyFindHaze();
   renderCrumbs();
   renderLegend();
+  renderQPill();
   /* E2 fix: render() replaces #world's whole subtree every time, which
      silently drops DOM focus off whatever node held it — so a keyboard
      user who moves selection with the arrow keys (stepSel/selNode, both of
@@ -3080,40 +3320,58 @@ function inlineEdit(node, commit, opts) {
 
 /* ── toast ───────────────────────────────────────────────────────────── */
 var toastTimer = null;
-function toast(msg) {
+/* Small fix (a): the toast is dir="rtl" (set on the element itself); any
+   dynamic NAME spliced into a Hebrew sentence must be wrapped in <bdi> so it
+   can't scramble the surrounding text (a wikilink toast did exactly that).
+   Plain messages keep using textContent (safe, no HTML injection); pass
+   {html:true} only for a message that already carries a <bdi> wrapper. */
+function toast(msg, opts) {
   var n = el('#toast');
-  n.textContent = msg;
+  if (opts && opts.html) n.innerHTML = msg; else n.textContent = msg;
   n.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function () { n.classList.remove('show'); }, 2600);
 }
+function bdi(x) { return '<bdi>' + esc(x) + '</bdi>'; }
 
-/* ── body sheet (E) ─────────────────────────────────────────────────────── */
+/* ── body sheet (E) — Addendum G extends it for question nodes ──────────── */
 function openBodySheet(id) {
   var node = N(id); if (!node) return;
   UI.sheetNode = id;
   var sheet = el('#bodySheet'), scrim = el('#scrim');
-  sheet.innerHTML =
-    '<header><h2 id="bodySheetTitle" class="gm-bidi">' + esc(node.title || 'ללא כותרת') + '</h2>' +
-      '<button class="x" data-close-sheet aria-label="Close" title="סגור — Close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></header>' +
-    '<div class="pad">' +
-      '<textarea class="gm-body-ta gm-bidi" id="bodyTa" dir="auto" placeholder="הערות על הנושא הזה… — notes on this topic…">' + esc(node.body) + '</textarea>' +
-    '</div>';
+  var isQ = node.kind === 'question';
+  var closeBtn = '<button class="x" data-close-sheet aria-label="Close" title="סגור — Close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>';
+  if (isQ) {
+    var answered = node.q && node.q.status === 'answered';
+    sheet.innerHTML =
+      '<header><h2 id="bodySheetTitle" class="gm-bidi">' + esc(node.title || 'שאלה — Question') + '</h2>' + closeBtn + '</header>' +
+      '<div class="pad">' +
+        '<textarea class="gm-body-ta gm-bidi" id="qAnswerTa" dir="auto" placeholder="כתוב תשובה… — write an answer…">' + esc(node.answer || '') + '</textarea>' +
+        '<button class="gm-btn on" id="qMarkAnswered"><svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>סמן כנענה — mark answered</span></button>' +
+        (answered ? '<div class="gm-bidi" style="font-size:11px;color:var(--sh-text-med)">נענה — answered ' + esc(new Date(node.q.answered).toLocaleString()) + '</div>' : '') +
+      '</div>';
+  } else {
+    sheet.innerHTML =
+      '<header><h2 id="bodySheetTitle" class="gm-bidi">' + esc(node.title || 'ללא כותרת') + '</h2>' + closeBtn + '</header>' +
+      '<div class="pad">' +
+        '<textarea class="gm-body-ta gm-bidi" id="bodyTa" dir="auto" placeholder="הערות על הנושא הזה… — notes on this topic…">' + esc(node.body) + '</textarea>' +
+      '</div>';
+  }
   sheet.hidden = false;
   requestAnimationFrame(function () { sheet.classList.add('open'); scrim.classList.add('open'); });
-  var ta = el('#bodyTa');
-  var commit = function () {
-    if (!node) return;
-    var v = ta.value;
-    if (v !== node.body) { node.body = v; save({ coalesce: true }); }
-  };
-  ta.addEventListener('input', commit);
   /* D5 fix: the global mapKeys dispatcher bails out immediately whenever a
      field has focus (`if (inField()) return;`), and this textarea is a
      field — so Escape used to do nothing here at all, unlike every other
      editable surface in the file (inline title/relation-label edit, find
      bar), which all cancel/close on Escape. Handle it locally instead of
      touching that global early-exit. */
+  var ta = el(isQ ? '#qAnswerTa' : '#bodyTa');
+  var commit = function () {
+    if (!node) return;
+    if (isQ) { if (ta.value !== node.answer) { node.answer = ta.value; save({ coalesce: true }); } }
+    else { if (ta.value !== node.body) { node.body = ta.value; save({ coalesce: true }); } }
+  };
+  ta.addEventListener('input', commit);
   ta.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeBodySheet(); }
   });
@@ -3171,7 +3429,7 @@ function renderSwitcher() {
   if (UI.switcher.idx >= results.length) UI.switcher.idx = Math.max(0, results.length - 1);
   el('#switcherList').innerHTML = results.length ? results.map(function (r, i) {
     return '<div class="gm-switch-row gm-bidi' + (i === UI.switcher.idx ? ' active' : '') + '" data-swidx="' + i + '">' +
-      '<div>' + esc(r.text) + '</div><div class="sub gm-bidi">' + esc(r.crumb) + '</div></div>';
+      '<div>' + chromeTxt(r.text) + '</div><div class="sub gm-bidi">' + chromeTxt(r.crumb) + '</div></div>';
   }).join('') : '<div class="gm-switch-row" style="opacity:.6">אין תוצאות — no matches</div>';
 }
 function openSwitcher() {
@@ -3255,10 +3513,12 @@ var SHORTCUTS = [
   ['R', 'רדאר קשרים — הצג רק את המסלול המקושר לבחירה', 'Link radar — show only the path connected to the selection'],
   ['1–9', 'התמקד בענף לפי מספרו מהמקרא', 'Solo a branch by its number from the legend'],
   ['Ctrl+K', 'מחליף מהיר — קפיצה לפי חיפוש', 'Quick switcher — jump to anything by search'],
-  ['/ או Ctrl+F', 'חיפוש', 'Find'],
+  ['Ctrl+F', 'חיפוש', 'Find'],
   ['Ctrl+E', 'ייצוא Markdown', 'Export Markdown outline'],
   ['E', 'פתח הערות לבחירה', 'Open notes for the selection'],
-  ['?', 'המסך הזה', 'This screen'],
+  ['Shift+/', 'הוסף שאלה פתוחה לבחירה', 'Add an open question under the selection'],
+  ['N', 'הוסף פתק מהיר לבחירה', 'Add a quick note under the selection'],
+  ['F1', 'המסך הזה', 'This screen'],
   ['Esc', 'בטל קשר ← כבה רדאר ← בטל התמקדות ← נקה סימון ← בטל בחירה', 'Cancel relation ← radar off ← clear solo ← clear marks ← deselect']
 ];
 /* A4: the five node kinds, explained for the '?' overlay (contract: "Legend
@@ -3322,7 +3582,7 @@ function downloadText(filename, text, mime) {
 function doExportJSON() {
   var name = safeFileName(S.title) + '.glassmap.json';
   downloadText(name, JSON.stringify(S, null, 2), 'application/json');
-  toast('נשמר ' + name + ' — Saved ' + name);
+  toast('נשמר ' + bdi(name) + ' — Saved ' + bdi(name), { html: true });
 }
 /* Images/diagrams inside the outline: an image is never inlined as data —
    a placeholder HTML comment only (contract: "writes an image line only as
@@ -3370,7 +3630,7 @@ function buildMarkdownOutline() {
 function doExportMarkdown() {
   var name = safeFileName(S.title) + '.md';
   downloadText(name, buildMarkdownOutline(), 'text/markdown');
-  toast('נשמר ' + name + ' — Saved ' + name);
+  toast('נשמר ' + bdi(name) + ' — Saved ' + bdi(name), { html: true });
 }
 /* Import: this file's own JSON, or a WaffleTask/WaffleNotes export
    (`projects` → depth-1 nodes under root, `tasks` with `parent` → tree). */
@@ -3488,6 +3748,17 @@ document.addEventListener('click', function (ev) {
   if (ev.target.closest('#diagramBtn')) { if (typeof window.openDiagramEditor === 'function') window.openDiagramEditor(); return; }
   if (ev.target.closest('#helpBtn')) { toggleHelp(); return; }
   if (ev.target.closest('[data-close-help]') || ev.target.closest('#helpOverlay') === el('#helpOverlay') && ev.target.id === 'helpOverlay') { toggleHelp(); return; }
+  /* Addendum G: header question pill + its rail twins. */
+  if (ev.target.closest('#qLayerToggle')) { toggleQuestionsLayer(); return; }
+  if (ev.target.closest('#qCopyBtn') || ev.target.closest('#qCopyRailBtn')) { copyOpenQuestionsToClaude(); return; }
+  if (ev.target.closest('#qAddBtn')) { addQuestionChild(); return; }
+  if (ev.target.closest('#qNoteBtn')) { addNoteChild(); return; }
+  if (ev.target.closest('#qPasteBtn')) { openPasteAnswersDialog(); return; }
+  if (ev.target.closest('#qBranchCopyBtn')) { copyBranchWithContext(); return; }
+  if (ev.target.closest('#qMarkAnswered')) { markQuestionAnswered(UI.sheetNode); return; }
+  if (ev.target.closest('#copyDialogClose') || ev.target.closest('#copyDialog .scrim-like')) { closeCopyDialog(); return; }
+  if (ev.target.closest('#pasteApplyBtn')) { applyPastedAnswersFromDialog(); return; }
+  if (ev.target.closest('#pasteCancelBtn')) { closePasteAnswersDialog(); return; }
   /* The +N badge on a folded node is a button: a click folds / unfolds that
      node (Ctrl+/ does the same from the keyboard). Handled before any other
      node click so it never turns into a rename or a drag. */
@@ -3498,7 +3769,7 @@ document.addEventListener('click', function (ev) {
     if (window.parent && window.parent !== window) {
       window.parent.postMessage({ type: 'gm:open-note', target: n.dataset.note }, '*');
     } else {
-      toast('קישור לפתק ' + n.dataset.note + ' — נפתח מתוך Obsidian');
+      toast('קישור לפתק ' + bdi(n.dataset.note) + ' — נפתח מתוך Obsidian', { html: true });
     }
     return;
   }
@@ -3776,6 +4047,37 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     }
     return out + txt(t.slice(last));
   };
+  /* Small fix (d): the legend chips, breadcrumb, quick switcher and peek
+     tooltip are all secondary, non-editable surfaces - a [[wikilink]] there
+     should read as plain text (its alias, or the note title), never as a
+     clickable link with visible brackets, and a $...$ equation should render
+     as math (once MathLive has loaded) rather than showing the raw dollar
+     signs. Unlike titleHTML() above, nothing here is interactive. Equations
+     are pulled out into placeholders first (their markup is already-safe
+     HTML), the rest is stripped of [[...]] syntax and escaped as plain text,
+     then the markup is spliced back in - so the two never get tangled by a
+     naive replace-then-escape order. */
+  window.chromeTitleText = function (title) {
+    var t = String(title == null ? '' : title);
+    var eqs = [];
+    t = t.replace(EQ_RE, function (_, latex) {
+      eqs.push(ML ? markup(latex) : esc(latex));
+      return ' EQ' + (eqs.length - 1) + ' ';
+    });
+    t = t.replace(WL_RE, function (_, target, alias) { return (alias || target).trim(); });
+    t = esc(t);
+    t = t.replace(/ EQ(\d+) /g, function (_, i) { return eqs[+i]; });
+    return t;
+  };
+  /* Same idea for a plain-text attribute context (a native `title=""`
+     tooltip can't hold markup at all) — strip the wikilink/equation syntax
+     down to plain characters, no HTML. */
+  window.chromeTitlePlain = function (title) {
+    var t = String(title == null ? '' : title);
+    t = t.replace(EQ_RE, function (_, latex) { return latex; });
+    t = t.replace(WL_RE, function (_, target, alias) { return (alias || target).trim(); });
+    return t;
+  };
   function eqAt(title, index) {
     var m, i = 0; EQ_RE.lastIndex = 0;
     while ((m = EQ_RE.exec(title))) { if (i++ === index) return m[1]; }
@@ -3801,6 +4103,22 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       'border-radius:12px;background:rgba(255,255,255,.94);border:1px solid rgba(31,62,108,.18);color:#1F3E6C;}' +
     '.gm-eq-field math-field:focus-within{outline:2px solid var(--gm-gold);outline-offset:1px;}' +
     '.gm-eq-loading{display:block;padding:14px;font-size:12px;color:var(--sh-text-med);}' +
+    /* the "חיפוש נוסחה" autocomplete, just above the math field */
+    '.gm-eq-search-wrap{position:relative;}' +
+    '.gm-eq-search{width:100%;box-sizing:border-box;padding:8px 10px;border-radius:10px;' +
+      'background:rgba(255,255,255,.9);border:1px solid rgba(31,62,108,.18);color:#1F3E6C;font-size:13px;}' +
+    '.gm-eq-search:focus{outline:2px solid var(--gm-gold);outline-offset:1px;}' +
+    ':root[data-theme="dark"] .gm-eq-search{background:rgba(10,15,30,.55);color:#e2e8f0;border-color:rgba(255,255,255,.16);}' +
+    '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gm-eq-search{background:rgba(10,15,30,.55);color:#e2e8f0;border-color:rgba(255,255,255,.16);}}' +
+    '.gm-eq-suggest{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;max-height:240px;overflow-y:auto;' +
+      'border-radius:12px;padding:4px;background:var(--sh-glass-card);backdrop-filter:blur(20px) saturate(160%);' +
+      '-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:var(--sh-card-shadow);}' +
+    '.gm-eq-suggest[hidden]{display:none;}' +
+    '.gm-eq-suggest-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;' +
+      'border-radius:8px;cursor:pointer;font-size:12.5px;color:var(--sh-text-dark);}' +
+    '.gm-eq-suggest-row.active,.gm-eq-suggest-row:hover{background:rgba(212,175,55,.2);}' +
+    '.gm-eq-suggest-row .lbl{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}' +
+    '.gm-eq-suggest-row .shortmf{flex:none;direction:ltr;font-size:14px;}' +
     '.gm-eq-actions{display:flex;align-items:center;gap:6px;}' +
     '.gm-eq-spacer{flex:1 1 auto;}' +
     '.gm-eq-open .gm-legend,.gm-eq-open .gm-hint{visibility:hidden;}' +
@@ -3873,6 +4191,11 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     '<div class="gm-eq-head"><span class="gm-eq-title">משוואה</span>' +
     '<span class="gm-eq-sub" dir="rtl">מקלידים כמו ב־<bdi>Word</bdi>: <kbd dir="ltr">/</kbd> שבר · ' +
     '<kbd dir="ltr">^</kbd> חזקה · <kbd dir="ltr">_</kbd> אינדקס · <kbd dir="ltr">sqrt</kbd> שורש</span></div>' +
+    '<div class="gm-eq-search-wrap">' +
+      '<input type="text" id="eqSearchInput" class="gm-eq-search" dir="auto" autocomplete="off" ' +
+        'placeholder="חיפוש נוסחה — search formulas" aria-label="חיפוש נוסחה">' +
+      '<div class="gm-eq-suggest" id="eqSuggest" role="listbox" hidden></div>' +
+    '</div>' +
     '<div class="gm-eq-field" id="eqFieldWrap"><span class="gm-eq-loading">טוען את עורך המשוואות…</span></div>' +
     '<div class="gm-eq-actions">' +
       '<button class="gm-btn icon" id="eqKbd" title="מקלדת הנוסחאות של וופלסטאק — formula keyboard" aria-label="Formula keyboard">' +
@@ -3912,6 +4235,9 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     var existing = (EQ.index >= 0 && node.eqs) ? (node.eqs[EQ.index] || '') : '';
     var delBtn = document.getElementById('eqDelete');
     if (delBtn) delBtn.hidden = EQ.index < 0;
+    var searchInput = document.getElementById('eqSearchInput');
+    if (searchInput) searchInput.value = '';
+    EQSUG.results = []; EQSUG.idx = -1; renderEqSuggest();
     panel.hidden = false;
     document.querySelector('.gm-app') && document.querySelector('.gm-app').classList.add('gm-eq-open');
     place(id);
@@ -3935,7 +4261,8 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       mf.value = existing;
       registerKeyboard();
       place(id);
-      mf.focus();
+      mf.focus({ preventScroll: true });
+      resetPageScroll();
     }, function () {
       document.getElementById('eqFieldWrap').innerHTML =
         '<span class="gm-eq-loading">עורך המשוואות לא נטען — צריך חיבור לאינטרנט</span>';
@@ -3948,6 +4275,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     document.querySelector('.gm-app') && document.querySelector('.gm-app').classList.remove('gm-eq-open');
     try { if (window.mathVirtualKeyboard && window.mathVirtualKeyboard.visible) window.mathVirtualKeyboard.hide(); } catch (_) {}
     EQ.node = null; EQ.index = -1;
+    EQSUG.results = []; EQSUG.idx = -1;
     var wrap = document.getElementById('mapwrap');
     if (wrap) wrap.focus();
   }
@@ -4040,6 +4368,84 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
       .then(function () { kbLoading = false; }, function () { kbLoading = false; });
   }
 
+  /* ── formula autocomplete ("חיפוש נוסחה") ─────────────────────────────
+     Same source the keyboard uses above: the live formula-library.json when
+     it can be fetched, else the embedded FORMULA_INLINE — flattened once
+     into a single searchable list (id/label/desc/shortLabel/latex/full
+     latex-as-tokens), cached across opens of the editor. */
+  var FORMULA_FLAT = null, flatLoading = null;
+  function flattenFormulaCats(cats) {
+    var out = [];
+    (cats || []).forEach(function (c) {
+      (c.formulas || []).forEach(function (f) {
+        if (!f || !f.latex) return;
+        var eq = f.latex.indexOf('=');
+        var shortLabel = f.shortLabel || (eq === -1 ? f.latex : f.latex.slice(0, eq).trim());
+        out.push({ id: f.id || '', label: f.label || '', desc: f.desc || '', shortLabel: shortLabel, latex: f.latex });
+      });
+    });
+    return out;
+  }
+  function loadFormulaFlat() {
+    if (FORMULA_FLAT) return Promise.resolve(FORMULA_FLAT);
+    if (flatLoading) return flatLoading;
+    flatLoading = fetch('formula-library.json')
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (cats) { FORMULA_FLAT = flattenFormulaCats(cats); return FORMULA_FLAT; },
+            function () { FORMULA_FLAT = flattenFormulaCats(FORMULA_INLINE); return FORMULA_FLAT; });
+    return flatLoading;
+  }
+  /* Case-insensitive, ignoring Hebrew punctuation (geresh/gershayim, the two
+     marks Hebrew abbreviations and loanwords use — ׳ ״ — plus their ASCII
+     stand-ins ' "), so "מקדם r" and "מקדם r'" both find the same formula. */
+  function normEqQuery(s) {
+    return String(s == null ? '' : s).toLowerCase().replace(/[׳״'"`]/g, '').replace(/\s+/g, ' ').trim();
+  }
+  function searchFormulas(list, q) {
+    var nq = normEqQuery(q);
+    if (!nq) return [];
+    var scored = [];
+    list.forEach(function (f) {
+      var fields = [[f.label, 4], [f.shortLabel, 3], [f.id, 2], [f.desc, 2], [f.latex, 1]];
+      var best = -1;
+      fields.forEach(function (pair) {
+        var nv = normEqQuery(pair[0]);
+        if (nv && nv.indexOf(nq) >= 0) best = Math.max(best, pair[1]);
+      });
+      if (best >= 0) scored.push({ f: f, score: best });
+    });
+    scored.sort(function (a, b) { return b.score - a.score; });
+    return scored.slice(0, 8).map(function (x) { return x.f; });
+  }
+  var EQSUG = { results: [], idx: -1 };
+  function renderEqSuggest() {
+    var box = document.getElementById('eqSuggest');
+    if (!box) return;
+    if (!EQSUG.results.length) { box.hidden = true; box.innerHTML = ''; return; }
+    box.hidden = false;
+    box.innerHTML = EQSUG.results.map(function (f, i) {
+      var short = ML ? markup(f.shortLabel || f.latex) : esc(f.shortLabel || f.latex);
+      return '<div class="gm-eq-suggest-row' + (i === EQSUG.idx ? ' active' : '') + '" role="option" data-eqsug="' + i + '">' +
+        '<span class="lbl gm-bidi">' + esc(f.label || f.id) + '</span><span class="shortmf">' + short + '</span></div>';
+    }).join('');
+  }
+  function runEqSearch(q) {
+    loadFormulaFlat().then(function (list) {
+      EQSUG.results = searchFormulas(list, q);
+      EQSUG.idx = EQSUG.results.length ? 0 : -1;
+      renderEqSuggest();
+    });
+  }
+  function insertFormulaAt(i) {
+    var f = EQSUG.results[i]; var mf = field();
+    if (!f || !mf) return;
+    mf.insert(f.latex);
+    EQSUG.results = []; EQSUG.idx = -1; renderEqSuggest();
+    var input = document.getElementById('eqSearchInput'); if (input) input.value = '';
+    mf.focus({ preventScroll: true });
+    resetPageScroll();
+  }
+
   /* When the keyboard slides up, lift the editor above it. */
   function avoidKeyboard() {
     var kb = window.mathVirtualKeyboard;
@@ -4054,27 +4460,55 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
 
   /* ── wiring ────────────────────────────────────────────────────────── */
   panel.addEventListener('click', function (e) {
+    var sug = e.target.closest('[data-eqsug]');
+    if (sug) { insertFormulaAt(+sug.dataset.eqsug); return; }
     if (e.target.closest('#eqInsert')) { insertEquation(); return; }
     if (e.target.closest('#eqCancel')) { closeEquation(); return; }
     if (e.target.closest('#eqDelete')) { deleteEquation(); return; }
     if (e.target.closest('#eqKbd')) {
       var kb = window.mathVirtualKeyboard, mf = field();
       if (!kb || !mf) return;
-      mf.focus();
+      mf.focus({ preventScroll: true });
+      resetPageScroll();
       if (kb.visible) kb.hide(); else kb.show();
       setTimeout(avoidKeyboard, 350);
     }
   });
   document.addEventListener('keydown', function (e) {
-    if (!panel.hidden && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeEquation(); }
+    if (panel.hidden || e.key !== 'Escape') return;
+    /* Esc closes the suggestions dropdown first, the editor only on the
+       NEXT Esc (contract: "Esc closes the suggestions first, then the
+       editor"). */
+    if (EQSUG.results.length) { e.preventDefault(); e.stopPropagation(); EQSUG.results = []; EQSUG.idx = -1; renderEqSuggest(); return; }
+    e.preventDefault(); e.stopPropagation(); closeEquation();
   }, true);
   document.addEventListener('pointerdown', function (e) {
     if (panel.hidden) return;
     if (e.target.closest && e.target.closest('#eqPanel, .ML__keyboard, .gm-eq')) return;
     closeEquation();
   }, true);
+  /* ── autocomplete wiring ───────────────────────────────────────────── */
+  panel.addEventListener('input', function (e) {
+    if (e.target.id === 'eqSearchInput') runEqSearch(e.target.value);
+  });
+  panel.addEventListener('keydown', function (e) {
+    if (e.target.id !== 'eqSearchInput') return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (EQSUG.results.length) { EQSUG.idx = Math.min(EQSUG.results.length - 1, EQSUG.idx + 1); renderEqSuggest(); }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (EQSUG.results.length) { EQSUG.idx = Math.max(0, EQSUG.idx - 1); renderEqSuggest(); }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (EQSUG.idx >= 0) insertFormulaAt(EQSUG.idx);
+    }
+    /* Escape is handled by the document-level capture listener above (it
+       needs to beat MathLive/editor-wide Escape handling the same way). */
+  });
 
   window.openEquation = openEquation;
+  window.__eqAutocomplete = { get results() { return EQSUG.results; }, get idx() { return EQSUG.idx; } };  /* test hook */
   window.closeEquation = closeEquation;
 
   /* A map that already holds equations loads MathLive straight away and
@@ -4098,6 +4532,240 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     }, function () {});
     return origOpen(a, b);
   };
+})();
+</script>
+
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════
+   Addendum G — batch copy of open questions to Claude, paste-back of
+   answers, and "copy a branch with context".
+
+   The Markdown block's shape is the contract's own literal template
+   (English framing so any assistant parses it, Hebrew content as written),
+   grouped by top-level branch, in tree order. Paste-back re-derives the SAME
+   ordered list of open questions at apply-time (rather than trusting a
+   stale mapping from whenever the copy happened) and matches by position,
+   which is exactly the order the copy itself was just built in.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
+  function ic(p) {
+    return '<svg class="gm-i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+  }
+
+  /* ── styles ──────────────────────────────────────────────────────────── */
+  var css = document.createElement('style');
+  css.textContent =
+    '.gm-copy-dialog,.gm-paste-dialog{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:70;' +
+      'width:min(560px,calc(100vw - 24px));max-height:80vh;display:flex;flex-direction:column;gap:10px;' +
+      'padding:16px;border-radius:16px;box-sizing:border-box;}' +
+    '.gm-copy-dialog[hidden],.gm-paste-dialog[hidden]{display:none;}' +
+    '.gm-copy-dialog h2,.gm-paste-dialog h2{margin:0;font-size:15px;color:var(--sh-text-dark);}' +
+    '.gm-copy-dialog textarea,.gm-paste-dialog textarea{width:100%;min-height:260px;max-height:50vh;box-sizing:border-box;' +
+      'padding:10px 12px;border-radius:10px;border:1px solid var(--sh-line);background:rgba(255,255,255,.5);' +
+      'font:12.5px/1.5 ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;direction:ltr;resize:vertical;}' +
+    '.gm-copy-actions{display:flex;justify-content:flex-end;gap:8px;}' +
+    '.gm-q-notes-toggle{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--sh-text-med);}';
+  document.head.appendChild(css);
+
+  /* ── the fallback copy dialog (clipboard API unavailable/denied) ──────── */
+  var copyDialog = document.createElement('div');
+  copyDialog.id = 'copyDialog';
+  copyDialog.className = 'gm-copy-dialog gm-glass';
+  copyDialog.setAttribute('data-float', 'copydialog');
+  copyDialog.setAttribute('data-chrome', '1');
+  copyDialog.setAttribute('role', 'dialog');
+  copyDialog.setAttribute('dir', 'rtl');
+  copyDialog.hidden = true;
+  copyDialog.innerHTML =
+    '<h2 class="gm-bidi">העתק ידנית — copy manually (Ctrl/Cmd+C)</h2>' +
+    '<textarea id="copyDialogTa" dir="ltr" readonly></textarea>' +
+    '<div class="gm-copy-actions"><button class="gm-btn on" id="copyDialogClose">' + ic('<path d="M18 6 6 18M6 6l12 12"/>') + '<span>סגור — Close</span></button></div>';
+  document.body.appendChild(copyDialog);
+  function openCopyDialog(text) {
+    var ta = copyDialog.querySelector('#copyDialogTa');
+    ta.value = text;
+    copyDialog.hidden = false;
+    requestAnimationFrame(function () { ta.focus({ preventScroll: true }); ta.select(); resetPageScroll(); });
+  }
+  function closeCopyDialog() { copyDialog.hidden = true; var mw = el('#mapwrap'); if (mw) mw.focus(); }
+  window.closeCopyDialog = closeCopyDialog;
+  document.addEventListener('keydown', function (e) {
+    if (!copyDialog.hidden && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeCopyDialog(); }
+  }, true);
+
+  function writeClipboardOrDialog(text) {
+    function fallback() { openCopyDialog(text); }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(fallback);
+      else fallback();
+    } catch (e) { fallback(); }
+  }
+  window.writeClipboardOrDialog = writeClipboardOrDialog;
+
+  /* ── the paste-back dialog ("הדבק תשובות") ─────────────────────────────── */
+  var pasteDialog = document.createElement('div');
+  pasteDialog.id = 'pasteDialog';
+  pasteDialog.className = 'gm-paste-dialog gm-glass';
+  pasteDialog.setAttribute('data-float', 'pastedialog');
+  pasteDialog.setAttribute('data-chrome', '1');
+  pasteDialog.setAttribute('role', 'dialog');
+  pasteDialog.setAttribute('dir', 'rtl');
+  pasteDialog.hidden = true;
+  pasteDialog.innerHTML =
+    '<h2 class="gm-bidi">הדבק תשובות — paste Claude’s reply</h2>' +
+    '<textarea id="pasteAnswersTa" dir="auto" placeholder="## Q1. ...\nתשובה…"></textarea>' +
+    '<div class="gm-copy-actions">' +
+      '<button class="gm-btn" id="pasteCancelBtn">' + ic('<path d="M18 6 6 18M6 6l12 12"/>') + '<span>ביטול — Cancel</span></button>' +
+      '<button class="gm-btn on" id="pasteApplyBtn">' + ic('<path d="M20 6 9 17l-5-5"/>') + '<span>החל — Apply</span></button>' +
+    '</div>';
+  document.body.appendChild(pasteDialog);
+  function openPasteAnswersDialog() {
+    pasteDialog.hidden = false;
+    var ta = pasteDialog.querySelector('#pasteAnswersTa');
+    ta.value = '';
+    requestAnimationFrame(function () { ta.focus({ preventScroll: true }); resetPageScroll(); });
+  }
+  function closePasteAnswersDialog() { pasteDialog.hidden = true; var mw = el('#mapwrap'); if (mw) mw.focus(); }
+  window.openPasteAnswersDialog = openPasteAnswersDialog;
+  window.closePasteAnswersDialog = closePasteAnswersDialog;
+  document.addEventListener('keydown', function (e) {
+    if (!pasteDialog.hidden && e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closePasteAnswersDialog(); }
+  }, true);
+
+  /* ── grouping: top-level branch → open questions, tree order ──────────── */
+  function collectOpenQuestionsGrouped() {
+    var root = rootNode();
+    var groups = [];
+    childrenOf(root.id).forEach(function (b) {
+      var qs = [];
+      (function walk(id) {
+        var n = N(id);
+        if (isOpenQuestion(n)) qs.push(n);
+        childrenOf(id).forEach(function (c) { walk(c.id); });
+      })(b.id);
+      if (qs.length) groups.push({ branch: b, questions: qs });
+    });
+    return groups;
+  }
+  function orderedOpenQuestions() {
+    var out = [];
+    collectOpenQuestionsGrouped().forEach(function (g) { g.questions.forEach(function (q) { out.push(q); }); });
+    return out;
+  }
+  function notesUnder(branchId) {
+    var out = [];
+    (function walk(id) {
+      var n = N(id);
+      if (n.kind === 'note') out.push(n);
+      childrenOf(id).forEach(function (c) { walk(c.id); });
+    })(branchId);
+    return out;
+  }
+  function wikilinksIn(text) {
+    var out = [], re = /\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g, m;
+    while ((m = re.exec(text || ''))) out.push(m[1]);
+    return out;
+  }
+  function buildQuestionSection(node, qi) {
+    var chain = ancestorChain(node.id);            /* root … parent, node (inclusive) */
+    var parent = node.parent != null ? N(node.parent) : null;
+    var siblings = parent ? childrenOf(parent.id).filter(function (s) { return s.id !== node.id; }).slice(0, 6) : [];
+    var links = linksOf(node.id).map(function (l) {
+      var otherId = l.from === node.id ? l.to : l.from, other = N(otherId);
+      return (other ? (other.title || '···') : '?') + (l.label ? ' (' + l.label + ')' : '');
+    });
+    var eqs = [];
+    if (node.eqs && node.eqs.length) eqs = eqs.concat(node.eqs);
+    if (parent && parent.eqs && parent.eqs.length) eqs = eqs.concat(parent.eqs);
+    var linkedNotes = [];
+    chain.forEach(function (n) { linkedNotes = linkedNotes.concat(wikilinksIn(n.title)).concat(wikilinksIn(n.body)); });
+    var lines = [];
+    lines.push('## Q' + qi + '. ' + (node.title || '···'));
+    lines.push('- Path: ' + chain.map(function (n) { return n.title || '···'; }).join(' › '));
+    if (parent) {
+      var trimmed = (parent.body || '').trim();
+      if (trimmed.length > 400) trimmed = trimmed.slice(0, 400) + '…';
+      lines.push('- Parent concept: ' + (parent.title || '···') + '. My notes on it: ' + trimmed);
+    }
+    if (siblings.length) lines.push('- Siblings: ' + siblings.map(function (s) { return s.title || '···'; }).join(', '));
+    if (links.length) lines.push('- My links: ' + links.join(', '));
+    if (eqs.length) lines.push('- Equations: ' + eqs.map(function (e) { return '$$' + e + '$$'; }).join(', '));
+    if (linkedNotes.length) lines.push('- Linked notes: ' + linkedNotes.map(function (t) { return '[[' + t + ']]'; }).join(', '));
+    lines.push('- Asked: ' + (node.q && node.q.asked ? new Date(node.q.asked).toLocaleDateString() : ''));
+    return lines.join('\n');
+  }
+  function copyOpenQuestionsToClaude() {
+    var includeNotes = false;
+    var cb = document.getElementById('qIncludeNotes');
+    if (cb) includeNotes = !!cb.checked;
+    var groups = collectOpenQuestionsGrouped();
+    var total = 0; groups.forEach(function (g) { total += g.questions.length; });
+    if (!total) { toast('אין שאלות פתוחות — no open questions'); return; }
+    var header = "I'm studying the HUJI AI Engineers course. These are my open questions from my study map \"" + S.title + "\".\n" +
+      "For each question, use its path, my notes and the nearby concepts as context. Where it helps, bridge to SPSS or\n" +
+      "psychology statistics and say where the analogy breaks. Answer each under its own heading.";
+    var sections = [], qi = 1;
+    groups.forEach(function (g) {
+      g.questions.forEach(function (q) { sections.push(buildQuestionSection(q, qi++)); });
+      if (includeNotes) {
+        notesUnder(g.branch.id).forEach(function (nt) {
+          sections.push('### הערה — ' + (nt.title || '') + (nt.body ? '\n' + nt.body : ''));
+        });
+      }
+    });
+    writeClipboardOrDialog(header + '\n\n' + sections.join('\n\n'));
+    toast('הועתקו ' + total + ' שאלות — copied ' + total + ' question(s)');
+  }
+  window.copyOpenQuestionsToClaude = copyOpenQuestionsToClaude;
+
+  /* ── paste-back: split on "## Q<n>" headings, one undo step for all ────── */
+  function parseAnswersByQ(text) {
+    var re = /##\s*Q(\d+)\b[^\n]*\n([\s\S]*?)(?=\n##\s*Q\d+\b|$)/gi;
+    var out = {}, m;
+    while ((m = re.exec(text))) out[+m[1]] = m[2].trim();
+    return out;
+  }
+  function applyPastedAnswers(text) {
+    var ordered = orderedOpenQuestions();
+    var parsed = parseAnswersByQ(text);
+    var count = 0;
+    ordered.forEach(function (q, idx) {
+      var v = parsed[idx + 1];
+      if (v != null) { q.answer = v; count++; }
+    });
+    if (!count) { toast('לא נמצאו תשובות תואמות — no matching answers found'); return; }
+    save();     /* one save() = one undo step, reverting every answer at once */
+    render();
+    toast('עודכנו ' + count + ' תשובות — updated ' + count + ' answer(s) — Ctrl+Z לביטול הכל');
+  }
+  function applyPastedAnswersFromDialog() {
+    var ta = document.getElementById('pasteAnswersTa');
+    var text = ta ? ta.value : '';
+    closePasteAnswersDialog();
+    applyPastedAnswers(text);
+  }
+  window.applyPastedAnswersFromDialog = applyPastedAnswersFromDialog;
+
+  /* ── "העתק ענף עם הקשר" — copy any branch as an indented outline ───────── */
+  function copyBranchWithContext() {
+    var id = UI.sel;
+    if (!id) { toast('בחר ענף להעתקה — select a branch first'); return; }
+    var node = N(id);
+    var lines = [];
+    (function walk(n, depth) {
+      lines.push('  '.repeat(depth) + '- ' + (n.title || '···'));
+      if (n.body) lines.push('  '.repeat(depth + 1) + n.body.trim());
+      (n.eqs || []).forEach(function (e) { lines.push('  '.repeat(depth + 1) + '$$' + e + '$$'); });
+      childrenOf(n.id).forEach(function (c) { walk(c, depth + 1); });
+    })(node, 0);
+    writeClipboardOrDialog(lines.join('\n'));
+    toast('הענף הועתק — branch copied');
+  }
+  window.copyBranchWithContext = copyBranchWithContext;
+  window.orderedOpenQuestions = orderedOpenQuestions;
+  window.collectOpenQuestionsGrouped = collectOpenQuestionsGrouped;
 })();
 </script>
 
@@ -4418,7 +5086,11 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     }
     panel.hidden = false;
     place(existingNodeId || DG.parentId);
-    requestAnimationFrame(function () { srcField.focus(); place(existingNodeId || DG.parentId); });
+    requestAnimationFrame(function () {
+      srcField.focus({ preventScroll: true });
+      resetPageScroll();
+      place(existingNodeId || DG.parentId);
+    });
     if (srcField.value.trim()) schedulePreview();
   }
   function closeDiagramEditor() {
@@ -4455,7 +5127,7 @@ var CITY_WEBP="data:image/webp;base64,UklGRh7lAABXRUJQVlA4WAoAAAAQAAAAdwUAWwMAQU
     var chip = e.target.closest('[data-dg-chip]');
     if (chip) {
       var found = DIAGRAM_CHIPS.filter(function (c) { return c.key === chip.dataset.dgChip; })[0];
-      if (found) { srcField.value = found.src; schedulePreview(); srcField.focus(); }
+      if (found) { srcField.value = found.src; schedulePreview(); srcField.focus({ preventScroll: true }); resetPageScroll(); }
     }
   });
   srcField.addEventListener('input', schedulePreview);
