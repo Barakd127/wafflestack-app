@@ -4298,6 +4298,33 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             topicId={selectedTopic || undefined}
             progress={{ done: answeredCount, total }}
             revealOnProgress
+            /* Ask a human — an icon on the line above the frost slider, at the
+               board's left edge. It used to be a dashed gold pill sitting
+               between the answers and the footer, in the middle of the one
+               place the reader is trying to think. */
+            dockTopSlot={!isDone && !helpStatus ? (
+              <button
+                type="button"
+                onClick={handleAskHuman}
+                aria-label="שאל בן אדם — נשלח לברק בקשת עזרה על השאלה הזו"
+                title="שאל בן אדם — נשלח לברק בקשת עזרה על השאלה הזו"
+                style={{
+                  width: 40, height: 40, borderRadius: 14, padding: 0, cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'rgba(255,255,255,0.72)',
+                  border: '1px solid rgba(255,255,255,0.62)',
+                  boxShadow: '0 8px 22px rgba(11,27,62,0.2)',
+                  color: '#254A9F',
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M20 14.5a2.5 2.5 0 0 1-2.5 2.5H8l-4 3.5v-14A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5z" />
+                  <path d="M10.2 9.2a2 2 0 1 1 2.6 1.9c-.5.2-.8.6-.8 1.1v.3" />
+                  <circle cx="12" cy="14.8" r=".6" fill="currentColor" />
+                </svg>
+              </button>
+            ) : undefined}
             /* The frame controls, on the board they frame — the same corner the
                theory board gives הוספה למפה / למחברת. */
             topLeftSlot={!isDone && !isMobile ? (
@@ -4641,23 +4668,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
 
               {/* ── 🙋 שאל בן אדם — escalate a stuck question to Barak ── */}
               <div className="ws-quiz-ask" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }} dir="rtl">
-                {(!helpStatus) && (
-                  <button
-                    type="button"
-                    onClick={handleAskHuman}
-                    title="נשלח לברק בקשת עזרה על השאלה הזו"
-                    style={{
-                      alignSelf: 'flex-start',
-                      display: 'inline-flex', alignItems: 'center', gap: 8,
-                      background: 'rgba(212,175,55,0.12)', color: '#9A7B1A',
-                      border: '1.5px dashed rgba(212,175,55,0.6)', borderRadius: 20,
-                      padding: '8px 18px', cursor: 'pointer',
-                      fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
-                    }}
-                  >
-                    🙋 שאל בן אדם
-                  </button>
-                )}
+                {/* The ask button itself is on the board — see dockTopSlot.
+                    Only its states are reported here. */}
                 {helpStatus === 'sending' && (
                   <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>שולח…</div>
                 )}

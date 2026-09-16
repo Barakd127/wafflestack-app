@@ -189,6 +189,7 @@ export default function GlassBoardShell({
   topRightSlot,
   topLeftSlot,
   dockRightSlot,
+  dockTopSlot,
   topicId,
   progress,
   onMastered,
@@ -219,6 +220,30 @@ export default function GlassBoardShell({
   const [autoReveal, setAutoReveal] = useState<number | null>(null)
 
   const trackRef = useRef<HTMLSpanElement | null>(null)
+
+  /* The dock can be dragged. Pointer events, so pen and touch move it too; a
+     press that starts on a control inside it is that control's, not a drag.
+     The offset is per mount rather than persisted — where you pushed it out of
+     the way of one question should not decide where it opens on the next. */
+  const [dockShift, setDockShift] = useState({ x: 0, y: 0 })
+  const [dockDragging, setDockDragging] = useState(false)
+  const dragFrom = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null)
+  const onDockDown = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('button, [role="slider"]')) return
+    dragFrom.current = { x: e.clientX, y: e.clientY, ox: dockShift.x, oy: dockShift.y }
+    setDockDragging(true)
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }, [dockShift.x, dockShift.y])
+  const onDockMove = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    const from = dragFrom.current
+    if (!from) return
+    setDockShift({ x: from.ox + (e.clientX - from.x), y: from.oy + (e.clientY - from.y) })
+  }, [])
+  const onDockUp = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    dragFrom.current = null
+    setDockDragging(false)
+    try { e.currentTarget.releasePointerCapture(e.pointerId) } catch { /* already released */ }
+  }, [])
 
   /* Which end of the ink column still has content past the edge. Only that end
      gets a lip, so a slide that fits shows no veil at all. */
@@ -653,42 +678,40 @@ export default function GlassBoardShell({
           three stops on a slider that is right there. The slider still sets any
           value, and defaultMode still picks where the board opens. */}
 
-      {/* The board's other corner. The frost slider owns the bottom-left; a
-          screen with its own tools puts them here, on the same line, so both
-          read as controls OF the board rather than furniture around it. */}
-      {dockRightSlot && (
-        <div
-          dir="rtl"
-          style={{
-            position: 'absolute',
-            right: 28,
-            bottom: 28,   // one inset for both layouts — the dock sits ON the board
-            zIndex: 12,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-          }}
-        >
-          {dockRightSlot}
-        </div>
-      )}
-
-      {/* Dock — in the ledge below the sheet (tray) / bottom-left over the glass
-          (plain). Just the frost slider now, seated on the same 24px inset as
-          its bottom edge; the 96 was clearance for a hold-to-look pill that is
-          no longer there, and the tutor FAB sits bottom-RIGHT. */}
+      {/* Dock — the board's bottom-left corner, and everything the screen puts
+          on the board: whatever it asks for on the line above, then the tools
+          and the frost slider on one line. Per Shirli the tools belong beside
+          the slider rather than in the opposite corner, and the cluster can be
+          dragged off whatever it is covering. */}
       <div
         dir="rtl"
+        onPointerDown={onDockDown}
+        onPointerMove={onDockMove}
+        onPointerUp={onDockUp}
+        onPointerCancel={onDockUp}
+        title="אפשר לגרור"
         style={{
           position: 'absolute',
           left: 28,
           bottom: 28,   // one inset for both layouts — the dock sits ON the board
           zIndex: 12,
           display: 'flex',
-          alignItems: 'center',
-          gap: 10,
+          flexDirection: 'column',
+          // flex-end, because the dock is dir=rtl: it is what puts the line
+          // above the slider on the LEFT edge, as Shirli asked.
+          alignItems: 'flex-end',
+          gap: 8,
+          transform: `translate(${dockShift.x}px, ${dockShift.y}px)`,
+          cursor: dockDragging ? 'grabbing' : 'grab',
+          touchAction: 'none',
         }}
       >
+        {/* the line above — an icon, usually */}
+        {dockTopSlot}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {/* the tools FIRST, so under RTL they land to the slider's right */}
+        {dockRightSlot}
         {/* Frost slider — the manual override; dragging it leaves the mode unlit */}
         <div
           style={{
@@ -770,6 +793,7 @@ export default function GlassBoardShell({
 
         {/* Hold-to-look removed per Shirli. The frost slider does the same
             job and stays put, where the pill needed a press held down. */}
+        </div>
       </div>
     </div>
   )
