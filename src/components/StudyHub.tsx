@@ -4298,18 +4298,19 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             topicId={selectedTopic || undefined}
             progress={{ done: answeredCount, total }}
             revealOnProgress
-            /* Ask a human — an icon on the line above the frost slider, at the
-               board's left edge. It used to be a dashed gold pill sitting
-               between the answers and the footer, in the middle of the one
-               place the reader is trying to think. */
-            dockTopSlot={!isDone && !helpStatus ? (
+            /* Ask a human — the icon that closes the dock's row. On its own
+               line above the slider it read as an orphan: a rounded square
+               floating over two pills, in a different shape and a different
+               weight from either. In the row it is one more control in the
+               cluster, which is what it is. */
+            dockEndSlot={!isDone && !helpStatus ? (
               <button
                 type="button"
                 onClick={handleAskHuman}
                 aria-label="שאל בן אדם — נשלח לברק בקשת עזרה על השאלה הזו"
                 title="שאל בן אדם — נשלח לברק בקשת עזרה על השאלה הזו"
                 style={{
-                  width: 40, height: 40, borderRadius: 14, padding: 0, cursor: 'pointer',
+                  width: 44, height: 44, borderRadius: 999, padding: 0, cursor: 'pointer',
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   background: 'rgba(255,255,255,0.72)',
                   border: '1px solid rgba(255,255,255,0.62)',

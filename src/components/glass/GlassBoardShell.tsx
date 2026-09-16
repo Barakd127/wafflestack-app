@@ -189,7 +189,7 @@ export default function GlassBoardShell({
   topRightSlot,
   topLeftSlot,
   dockRightSlot,
-  dockTopSlot,
+  dockEndSlot,
   topicId,
   progress,
   onMastered,
@@ -706,9 +706,6 @@ export default function GlassBoardShell({
           touchAction: 'none',
         }}
       >
-        {/* the line above — an icon, usually */}
-        {dockTopSlot}
-
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         {/* the tools FIRST, so under RTL they land to the slider's right */}
         {dockRightSlot}
@@ -790,6 +787,8 @@ export default function GlassBoardShell({
             {pct}%
           </span>
         </div>
+        {/* and whatever closes the row — under RTL, its left end */}
+        {dockEndSlot}
 
         {/* Hold-to-look removed per Shirli. The frost slider does the same
             job and stays put, where the pill needed a press held down. */}

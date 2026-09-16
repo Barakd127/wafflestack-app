@@ -23,8 +23,8 @@ export interface WhiteboardShellProps {
   topLeftSlot?: ReactNode
   /** Beside the frost slider, on its right. */
   dockRightSlot?: ReactNode
-  /** On the line above the frost slider, left-aligned. */
-  dockTopSlot?: ReactNode
+  /** Closing the dock's row — under RTL, its left end. */
+  dockEndSlot?: ReactNode
 }
 
 export default function WhiteboardShell({ children, style, topRightSlot }: WhiteboardShellProps) {
