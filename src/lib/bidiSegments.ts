@@ -110,3 +110,31 @@ export function bidiSegments(line: string): BidiSeg[] {
   }
   return segs
 }
+
+
+/**
+ * Split prose into sentences — never inside a `$…$` math span.
+ *
+ * Factorial "!", an ellipsis, and any "." inside LaTeX must not count as a
+ * boundary: splitting there leaves the `$` unbalanced and KaTeX renders the
+ * raw source. A boundary is [.!?] followed by whitespace, seen while an even
+ * number of `$` precede it — i.e. while we are outside math.
+ *
+ * Lived inside LessonScreen as a closure; the quiz stem needs the same rule,
+ * and one of these is enough.
+ */
+export function splitSentences(s: string): string[] {
+  const out: string[] = []
+  let last = 0, dollars = 0
+  for (let i = 0; i < s.length; i++) {
+    if (s[i] === '$') dollars++
+    if (dollars % 2 === 0 && /[.!?]/.test(s[i]) && i + 1 < s.length && /s/.test(s[i + 1])) {
+      let j = i + 1
+      while (j < s.length && /s/.test(s[j])) j++
+      out.push(s.slice(last, i + 1))
+      last = j; i = j - 1
+    }
+  }
+  if (last < s.length) out.push(s.slice(last))
+  return out
+}

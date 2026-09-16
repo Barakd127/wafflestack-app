@@ -4,7 +4,7 @@ import { TOPIC_VISUALS } from './LessonVisuals'
 import ArsenalCapture from './ArsenalCapture'
 import { quickAddToMindmap } from '../lib/mindmapWriter'
 import { MathLineBlock } from '../lib/mathRender'
-import { parseLeadingEnumMarker } from '../lib/bidiSegments'
+import { parseLeadingEnumMarker, splitSentences } from '../lib/bidiSegments'
 import BoardShell from './BoardShell'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import PresentationOverlay, { type PresenterTool } from './PresentationOverlay'
@@ -554,21 +554,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           // not break the pair (else the `$` go unbalanced and KaTeX can't render,
           // leaking raw "\cdot"/"$"). A boundary is a [.!?] + whitespace seen while
           // an even number of `$` precede it (i.e. we are outside math).
-          const splitSentences = (s: string): string[] => {
-            const out: string[] = []
-            let last = 0, dollars = 0
-            for (let i = 0; i < s.length; i++) {
-              if (s[i] === '$') dollars++
-              if (dollars % 2 === 0 && /[.!?]/.test(s[i]) && i + 1 < s.length && /\s/.test(s[i + 1])) {
-                let j = i + 1
-                while (j < s.length && /\s/.test(s[j])) j++
-                out.push(s.slice(last, i + 1))
-                last = j; i = j - 1
-              }
-            }
-            if (last < s.length) out.push(s.slice(last))
-            return out
-          }
+          // splitSentences moved to lib/bidiSegments — the quiz stem needs the same
+          // rule, and one copy of it is enough.
           // Break a sentence before any INLINE enumeration marker ("… 1) foo")
           // so each numbered item becomes its own bullet instead of trailing on
           // the intro sentence ("מאפשרת: 1) …"). A marker at position 0 is left

@@ -465,6 +465,7 @@ import { LESSON_CONTENT_ANOVA } from '../data/lesson-content-anova'
 import { HEBREW_LABELS } from '../data/topicLabels'
 import { TOPIC_ORDER } from '../lib/generatePlan'
 import { MathText } from '../lib/mathRender'
+import { splitSentences } from '../lib/bidiSegments'
 import { MeanVisual } from './LessonVisuals'
 import SamplingDistribution from './SamplingDistribution'
 import ArsenalScreen, { normalizeMathGlyphs } from './ArsenalScreen'
@@ -4512,8 +4513,24 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   math must stay math, and it stays LTR-isolated. */}
               {/* Gveret Levin sits smaller on the line than a print face, so
                   the hand sizes run ~3px larger than the sans equivalents. */}
-              <div className="ws-quiz-stem" style={{ fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 25 : 19, color: 'var(--sh-q-text-color)', lineHeight: 1.7, whiteSpace: 'pre-line', textAlign: 'right', marginBottom: bigBoard ? 20 : 16, width: '100%' }}>
-                <MathText text={q.text} />
+              {/* One sentence per line. A stem that runs three sentences into
+                  one paragraph makes the reader find where each one starts;
+                  a full stop is already the author saying "new thought", so
+                  it gets a new line. Math is never split — see splitSentences. */}
+              <div className="ws-quiz-stem" style={{
+                fontFamily: "'Assistant', sans-serif",
+                fontSize: bigBoard ? 25 : 19,
+                color: 'var(--sh-q-text-color)',
+                lineHeight: 1.65,
+                textAlign: 'right',
+                // the options need air: 20 was the stem sitting on top of them
+                marginBottom: bigBoard ? 36 : 26,
+                width: '100%',
+                display: 'flex', flexDirection: 'column', gap: bigBoard ? 8 : 6,
+              }}>
+                {splitSentences(String(q.text ?? '')).map((line, i) => (
+                  <div key={i} style={{ textAlign: 'right' }}><MathText text={line} /></div>
+                ))}
               </div>
 
               {((q as any).format === 'mc' && Array.isArray((q as any).options)) ? (
@@ -4522,7 +4539,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                      2026-05-24: max-width + auto margins to center the grid
                      so answers don't push right of the question text. ── */
                 <>
-                <div className="ws-quiz-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: bigBoard ? 16 : 10, marginBottom: 14, maxWidth: bigBoard ? 1180 : 640, marginInline: 'auto', placeItems: 'stretch', justifyItems: 'stretch' }} dir="rtl">
+                <div className="ws-quiz-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: bigBoard ? 18 : 12, marginBottom: 18, maxWidth: bigBoard ? 1180 : 640, marginInline: 'auto', placeItems: 'stretch', justifyItems: 'stretch' }} dir="rtl">
                   {((q as any).options as string[]).map((opt: string, idx: number) => {
                     const correctIdx: number = (q as any).correctIndex
                     const isChosen = mcSelected === idx
