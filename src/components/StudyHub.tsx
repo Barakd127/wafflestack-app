@@ -3670,7 +3670,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           viewport. The floating "הצג כלי לימוד" chip above restores it. */}
       {!fullscreen && (
       <div className="ws-quiz-topbar" style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', borderBottom: '1px solid rgba(127,155,217,0.30)', boxShadow: '0 2px 6px rgba(18,36,96,0.15)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12, zIndex: 10 }}>
-        <img src={`${import.meta.env.BASE_URL}high-tech.png`} alt="" style={{ width: 34, height: 26, objectFit: 'cover', borderRadius: 5 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+        {/* The stock photograph that used to sit here is gone: a 34×26 crop of
+            an unrelated image, at the head of a bar whose job is to say how far
+            through the session the reader is. */}
         <div style={{ flex: 1 }}>
           <div style={{ height: 6, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
             <div style={{ width: `${isDone ? 100 : ((currentQ)/total)*100}%`, height: '100%', background: '#FF854C', borderRadius: 10, transition: 'width 0.4s' }} />
@@ -4677,18 +4679,22 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 aria-label="שאלה קודמת"
                 title={isFirstQ ? 'זו השאלה הראשונה' : 'הקודם'}
                 style={{
-                  background: 'transparent',
-                  color: isFirstQ ? 'rgba(31,62,108,0.30)' : 'var(--sh-text-dark)',
-                  border: `2px solid ${isFirstQ ? 'rgba(31,62,108,0.15)' : 'rgba(31,62,108,0.35)'}`,
-                  borderRadius: 22,
-                  padding: bigBoard ? '9px 22px' : '8px 16px',
+                  background: 'none', border: 'none',
+                  color: isFirstQ ? 'rgba(31,62,108,0.30)' : 'var(--sh-text-med)',
+                  borderRadius: 12,
+                  padding: '11px 16px',
                   cursor: isFirstQ ? 'default' : 'pointer',
                   fontFamily: "'Assistant', sans-serif",
-                  fontSize: bigBoard ? 15 : 14, fontWeight: 700,
+                  fontSize: bigBoard ? 15 : 14, fontWeight: 600,
                   minHeight: 44,
+                  display: 'flex', alignItems: 'center', gap: 7,
                 }}
               >
-                → הקודם
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M5 12h14" /><polyline points="12,5 19,12 12,19" />
+                </svg>
+                הקודם
               </button>
 
               <button
@@ -4696,20 +4702,16 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 onClick={navNext}
                 aria-label={isLastQ ? 'סיים את הסשן' : 'שאלה הבאה'}
                 title={isLastQ ? 'סיום' : 'הבא — בלי לענות ובלי להיחשב טעות'}
-                style={{
-                  background: '#D4AF37',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 22,
-                  padding: bigBoard ? '10px 30px' : '9px 22px',
-                  cursor: 'pointer',
-                  fontFamily: "'Assistant', sans-serif",
-                  fontSize: bigBoard ? 15 : 14, fontWeight: 700,
-                  minHeight: 44,
-                  boxShadow: '0 2px 10px rgba(212,175,55,0.40)',
-                }}
+                className="ws-cta"
+                /* no inline background: an inline style outranks every class
+                   selector and would kill .ws-cta's hover and active */
+                style={{ padding: bigBoard ? '11px 28px' : '10px 22px', fontSize: bigBoard ? 15 : 14, minHeight: 44 }}
               >
-                {isLastQ ? 'סיום 🏆' : 'הבא ←'}
+                {isLastQ ? 'סיום' : 'הבא'}
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M19 12H5" /><polyline points="12,19 5,12 12,5" />
+                </svg>
               </button>
             </div>
           )}
@@ -4746,38 +4748,51 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             zIndex: 80,
             background: (tab !== 'none') ? 'linear-gradient(180deg, rgba(13,22,40,0) 0%, rgba(13,22,40,0.82) 60%, rgba(13,22,40,0.95) 100%)' : 'transparent',
           }}>
+            <div style={{
+              display: 'flex', gap: 2, padding: 3, borderRadius: 999,
+              background: (tab !== 'none') ? 'rgba(255,255,255,0.14)' : 'rgba(127,155,217,0.14)',
+            }}>
             {([
-              ['none',       '🚫 ללא',         'התמקדו רק בשאלה'],
-              ['mindmap',    '🧠 מפת חשיבה',   'הוסיפו תובנות למפה תוך כדי'],
-              ['arsenal',    '🎯 הארסנל שלי',   'תפסו רגעי אהה וטריקים'],
-              ['canvas',     '✏️ קנבס',         'ציירו, רשמו, פתרו ויזואלית'],
-              ['excalidraw', '🎨 לוח ציור',     'לוח ציור Excalidraw מלא'],
+              ['none',       'ללא',          'התמקדו רק בשאלה'],
+              ['mindmap',    'מפת חשיבה',    'הוסיפו תובנות למפה תוך כדי'],
+              ['arsenal',    'הארסנל שלי',   'תפסו רגעי אהה וטריקים'],
+              ['canvas',     'קנבס',         'ציירו, רשמו, פתרו ויזואלית'],
+              ['excalidraw', 'לוח ציור',     'לוח ציור Excalidraw מלא'],
             ] as const).map(([key, label, hint]) => {
               const active = tab === key
               const onTool = tab !== 'none'
               const locked = toolLocked(key as typeof tab)
+              const ink = onTool ? 'rgba(255,255,255,0.86)' : TEXT_MED
               return (
                 <button
                   key={key}
                   onClick={() => { if (locked) return; handleSetTab(key as typeof tab) }}
                   title={locked ? toolLockTip(key as typeof tab) : hint}
                   aria-disabled={locked || undefined}
+                  aria-pressed={active}
                   style={{
-                    background: active ? BUTTON_COLOR : (onTool ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.5)'),
-                    color: active ? '#fff' : TEXT_DARK,
-                    border: `1.5px solid ${active ? BUTTON_COLOR : (onTool ? 'rgba(127,155,217,0.55)' : 'rgba(127,155,217,0.35)')}`,
-                    borderRadius: 22, padding: '8px 18px',
-                    fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600,
-                    cursor: locked ? 'not-allowed' : 'pointer', transition: 'all 0.18s ease',
-                    boxShadow: active ? '0 4px 14px rgba(51,81,202,0.30)' : (onTool ? '0 2px 8px rgba(0,0,0,0.25)' : 'none'),
-                    transform: active ? 'translateY(-1px)' : 'translateY(0)',
-                    opacity: locked ? 0.55 : 1, filter: locked ? 'grayscale(0.8)' : 'none',
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    background: active ? (onTool ? '#fff' : TEXT_MED) : 'transparent',
+                    color: active ? (onTool ? '#1F3E6C' : '#fff') : ink,
+                    border: 'none', borderRadius: 999, padding: '7px 15px',
+                    fontFamily: "'Assistant', sans-serif", fontSize: 13.5, fontWeight: 600,
+                    cursor: locked ? 'not-allowed' : 'pointer',
+                    transition: 'background .15s, color .15s',
+                    opacity: locked ? 0.5 : 1,
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  {locked ? '🔒 ' : ''}{label}
+                  {label}
+                  {locked && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                    </svg>
+                  )}
                 </button>
               )
             })}
+            </div>
           </div>
         )}
 
