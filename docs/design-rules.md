@@ -36,7 +36,8 @@ One hue at 222°. Coral is the only non-blue, and it has exactly one job.
 
 Three faces, one job each. A fourth face is a bug.
 
-- **Tel Aviv Modernist** (`var(--ws-display)`) — headings only
+- **Tel Aviv Modernist** (`var(--ws-display)`) — headings only. Licensed for the
+  site; see `docs/font-licence.md` before moving to a custom domain
 - **Assistant** — everything running: prose, buttons, labels, menus
 - **Gveret Levin** (`var(--ws-hand)`) — lesson content on the glass board, nowhere else
 
