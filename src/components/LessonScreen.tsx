@@ -18,6 +18,37 @@ const TEXT_DARK   = 'var(--sh-text-dark)'
 const TEXT_MED    = 'var(--sh-text-med)'
 const TEXT_LIGHT  = 'var(--sh-text-light)'
 
+/**
+ * The screen's icons, drawn rather than typed. An emoji cannot take the
+ * colour or the size of the control it sits in and renders differently on
+ * every OS; these inherit both through `currentColor` and `size`.
+ */
+const Ico = ({ d, size = 17, w = 1.8 }: { d: string; size?: number; w?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       strokeWidth={w} strokeLinecap="round" strokeLinejoin="round" aria-hidden
+       style={{ flexShrink: 0 }}
+       dangerouslySetInnerHTML={{ __html: d }} />
+)
+const I = {
+  book: '<path d="M9.5 3.1A3 3 0 0 0 6.5 6.1v11.8a3 3 0 0 0 3 3"/><rect x="9.5" y="3.1" width="10.4" height="17.8" rx="2.6"/><path d="M9.5 16.7h10.4"/>',
+  mind: '<circle cx="12" cy="6" r="2.6"/><circle cx="5.5" cy="17" r="2.6"/><circle cx="18.5" cy="17" r="2.6"/><path d="M10.4 7.6 7 14.6"/><path d="M13.6 7.6 17 14.6"/>',
+  check: '<polyline points="20,6 9,17 4,12"/>',
+  plus: '<path d="M12 5v14"/><path d="M5 12h14"/>',
+  close: '<path d="M6 6l12 12"/><path d="M18 6 6 18"/>',
+  present: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4"/><path d="M8.5 20h7"/>',
+  play: '<polygon points="7,4 20,12 7,20"/>',
+  pause: '<rect x="7" y="5" width="3.6" height="14" rx="1"/><rect x="13.4" y="5" width="3.6" height="14" rx="1"/>',
+  point: '<path d="M8.5 11V5.4a1.7 1.7 0 0 1 3.4 0V11"/><path d="M11.9 11V9.6a1.6 1.6 0 0 1 3.2 0V11"/><path d="M15.1 11.2a1.6 1.6 0 0 1 3.2 0v3.6a5.6 5.6 0 0 1-5.6 5.6h-1a4.6 4.6 0 0 1-3.6-1.8L5 14.6a1.6 1.6 0 0 1 2.5-2l1 1.2"/>',
+  laser: '<circle cx="12" cy="12" r="2.4"/><path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/><path d="m5.6 5.6 2.1 2.1"/><path d="m16.3 16.3 2.1 2.1"/><path d="m18.4 5.6-2.1 2.1"/><path d="m7.7 16.3-2.1 2.1"/>',
+  pen: '<path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  underline: '<path d="M7 4v6a5 5 0 0 0 10 0V4"/><path d="M5 20h14"/>',
+  target: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/>',
+  link: '<path d="M10.5 13.5a4 4 0 0 0 5.7 0l2.6-2.6a4 4 0 0 0-5.7-5.7l-1.4 1.4"/><path d="M13.5 10.5a4 4 0 0 0-5.7 0l-2.6 2.6a4 4 0 0 0 5.7 5.7l1.4-1.4"/>',
+  float: '<circle cx="12" cy="12" r="7" stroke-dasharray="3 3"/><path d="M12 9.5v5"/><path d="M9.5 12h5"/>',
+  notebook: '<path d="M7.5 3.2A2.4 2.4 0 0 0 5.1 5.6v12.8a2.4 2.4 0 0 0 2.4 2.4"/><rect x="7.5" y="3.2" width="11.4" height="17.6" rx="2.4"/><path d="M10.6 8h5.2"/><path d="M10.6 12h5.2"/>',
+  back: '<path d="M5 12h14"/><polyline points="12,5 19,12 12,19"/>',
+}
+
 interface LessonScreenProps {
   topicId: string
   onStartQuiz: () => void
@@ -285,16 +316,16 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   if (!lesson || total === 0) {
     return (
       <div data-tour="theory-screen" dir="rtl" style={{ flex: 1, overflow: 'auto', padding: '32px 40px', fontFamily: "'Assistant', 'Assistant', sans-serif" }}>
-        <button onClick={onBack} style={backLinkStyle}>→ חזרה לבחירת נושא</button>
+        <button onClick={onBack} style={backLinkStyle}><Ico d={I.back} size={16} />חזרה לנושאים</button>
         <div style={{ ...glassCardStyle, padding: 40, marginTop: 24, textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>📖</div>
+          <div style={{ marginBottom: 16, color: TEXT_LIGHT, display: 'flex', justifyContent: 'center' }}><Ico d={I.book} size={48} w={1.3} /></div>
           <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 12 }}>
             תוכן לימוד עבור נושא זה עדיין בהכנה
           </div>
           <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_LIGHT, marginBottom: 24 }}>
             ניתן לעבור ישירות לתרגול ולחזור מאוחר יותר.
           </div>
-          <button onClick={onStartQuiz} style={primaryBtnStyle}>📝 המשך לתרגול</button>
+          <button onClick={onStartQuiz} style={primaryBtnStyle}>המשך לתרגול</button>
         </div>
       </div>
     )
@@ -325,7 +356,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
 
       {/* Header bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, gap: 8, flexWrap: 'wrap' }}>
-        <button onClick={onBack} style={backLinkStyle}>→ חזרה לבחירת נושא</button>
+        <button onClick={onBack} style={backLinkStyle}><Ico d={I.back} size={16} />חזרה לנושאים</button>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button
             onClick={() => {
@@ -346,14 +377,16 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               whiteSpace: 'nowrap',
             }}
           >
-            {presenting ? '✖ סיום הצגה' : '🎯 מצב הצגה'}
+            <Ico d={presenting ? I.close : I.present} size={15} />
+            {presenting ? 'סיום הצגה' : 'מצב הצגה'}
           </button>
           <button
             onClick={() => setMindmapOpen(v => !v)}
             title={mindmapOpen ? 'הסתר מפת מושגים' : 'הצג מפת מושגים'}
             style={mindmapToggleStyle(mindmapOpen)}
           >
-            🧠 {mindmapOpen ? 'הסתר מפה' : 'הצג מפה'}
+            <Ico d={I.mind} size={15} />
+            {mindmapOpen ? 'הסתר מפה' : 'הצג מפה'}
           </button>
           <button onClick={() => handleStartQuiz(false)} style={skipLinkStyle}>דלג לתרגול ←</button>
         </div>
@@ -370,7 +403,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             title="הוסף את כותרת השקופית למפת המושגים"
             style={copyChipStyle(copied === 'title')}
           >
-            {copied === 'title' ? '✓ נוסף' : '🧠+ הוסף למפה'}
+            <Ico d={copied === 'title' ? I.check : I.mind} size={15} />
+            {copied === 'title' ? 'נוסף' : 'הוספה למפה'}
           </button>
         )}
       </div>
@@ -394,10 +428,11 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               fontFamily: "'Assistant', sans-serif", cursor: 'pointer', whiteSpace: 'nowrap',
             }}
           >
-            {presAuto ? '⏸ עצור הדגמה' : '▶ הדגמה אוטומטית'}
+            <Ico d={presAuto ? I.pause : I.play} size={14} />
+            {presAuto ? 'עצור הדגמה' : 'הדגמה אוטומטית'}
           </button>
           <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 700, color: BUTTON_COLOR }}>כלי הצבעה:</span>
-          {([['point', '👆 הצבעה'], ['laser', '🔦 לייזר'], ['draw', '✏️ ציור חופשי'], ['underline', '➖ קו תחתון']] as Array<[PresenterTool, string]>).map(([id, label]) => (
+          {([['point', 'הצבעה', I.point], ['laser', 'לייזר', I.laser], ['draw', 'ציור חופשי', I.pen], ['underline', 'קו תחתון', I.underline]] as Array<[PresenterTool, string, string]>).map(([id, label, glyph]) => (
             <button
               key={id}
               onClick={() => { setPresAuto(false); setPresTool(id) }}
@@ -409,13 +444,15 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 borderRadius: 10, padding: '6px 13px', fontSize: 13, fontWeight: 700,
                 fontFamily: "'Assistant', sans-serif", cursor: 'pointer', whiteSpace: 'nowrap',
                 transition: 'all 0.15s',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
               }}
             >
+              <Ico d={glyph} size={14} />
               {label}
             </button>
           ))}
           <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, marginInlineStart: 'auto' }}>
-            {presAuto ? 'ההדגמה רצה — לחצו ⏸ כדי לשלוט ביד' : 'הזיזו את העכבר על הלוח — היד עוקבת. לחיצה מפעילה את הכלי.'}
+            {presAuto ? 'ההדגמה רצה — לחצו ״עצור הדגמה״ כדי לשלוט ביד' : 'הזיזו את העכבר על הלוח — היד עוקבת. לחיצה מפעילה את הכלי.'}
           </span>
         </div>
       )}
@@ -688,7 +725,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               title="הוסף את הנוסחה למפה שלי"
               style={formulaCopyBtnStyle(copied === 'formula')}
             >
-              {copied === 'formula' ? '✓' : '➕'}
+              <Ico d={copied === 'formula' ? I.check : I.plus} size={15} />
               <span className="cm-label">{copied === 'formula' ? 'נוסף' : 'הוסף למפה'}</span>
             </button>
           </div>
@@ -721,7 +758,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             borderBottom: '1px solid rgba(212,175,55,0.25)',
           }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--sh-text-dark)', fontFamily: "'Assistant', sans-serif" }}>
-              📊 {effectiveGraphs[graphIdx].title}
+              {effectiveGraphs[graphIdx].title}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <button
@@ -872,8 +909,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           in the compact strip above the slide card, the footer dots below, and
           arrow keys. The strip is non-sticky so it never obscures the board;
           'הקודם' / 'הבא' labels make the function unambiguous. */}
-      {/* Formula copy button. Label is ALWAYS visible (was hover-only → showed a
-          bare purple ➕ that users found cryptic). Per user 2026-06-07. */}
+      {/* Formula copy button. The label is ALWAYS visible — it used to appear on
+          hover only, leaving a bare glyph that readers could not interpret. */}
       <style>{`
         .ws-formula-copy { transition: all 0.2s ease; }
         .ws-formula-copy:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(99,102,241,0.4) !important; }
@@ -962,7 +999,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-              <span style={{ fontSize: 28 }}>🧠</span>
+              <span style={{ color: BUTTON_COLOR, display: 'inline-flex' }}><Ico d={I.mind} size={24} /></span>
               <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: TEXT_DARK }}>
                 איך להוסיף למפת חשיבה?
               </h3>
@@ -985,7 +1022,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                   textAlign: 'right',
                 }}
               >
-                <span style={{ fontSize: 18 }}>🎯</span>
+                <Ico d={I.target} size={18} />
                 <span style={{ flex: 1, textAlign: 'right' }}>הוסף לנושא המרכזי</span>
               </button>
               <button
@@ -999,7 +1036,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                   textAlign: 'right',
                 }}
               >
-                <span style={{ fontSize: 18 }}>🔗</span>
+                <Ico d={I.link} size={18} />
                 <span style={{ flex: 1, textAlign: 'right' }}>הוסף לנושא הנוכחי</span>
               </button>
               <button
@@ -1013,7 +1050,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                   textAlign: 'right',
                 }}
               >
-                <span style={{ fontSize: 18 }}>✨</span>
+                <Ico d={I.float} size={18} />
                 <span style={{ flex: 1, textAlign: 'right' }}>הוסף נושא צף (אחבר אחר כך)</span>
               </button>
               <button
@@ -1049,7 +1086,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             pointerEvents: 'none',
           }}
         >
-          <span style={{ fontSize: 18 }}>🧠</span>
+          <Ico d={I.mind} size={18} />
           <span>{mapToast}</span>
         </div>
       )}

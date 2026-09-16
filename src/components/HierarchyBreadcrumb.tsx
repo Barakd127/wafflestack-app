@@ -94,8 +94,12 @@ export default function HierarchyBreadcrumb({ topicId }: { topicId: string }) {
             </span>
           ))}
 
-          {/* root marker */}
-          <span aria-hidden="true" style={{ fontSize: 12, opacity: 0.65, marginInlineStart: 2 }}>🏠</span>
+          {/* root marker — drawn, so it takes the trail's own ink and size */}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden
+               style={{ opacity: 0.65, marginInlineStart: 2, flexShrink: 0 }}>
+            <path d="M3 11.5L12 4l9 7.5" /><path d="M5 10v10h14V10" /><path d="M10 20v-6h4v6" />
+          </svg>
         </>
       )}
     </div>
