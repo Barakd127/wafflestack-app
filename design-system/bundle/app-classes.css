@@ -1,0 +1,422 @@
+/* [ds-extract] VERBATIM from src/index.css (class components, keyframes, media rules) @ c1a3ad12 (master). Do not edit by hand —
+   regenerate with design-system/scripts/extract-master.mjs. */
+
+
+/* App-wide reduced-motion respect — mirror landing rule so users with
+   vestibular sensitivity don't get app-shell motion either. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Arsenal הקאצ'ים — animations for ArsenalScreen / ArsenalCapture / ArsenalCard.
+   Scoped via `arsenal-*` classes so they don't bleed into other components. */
+@keyframes arsenalCardIn {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.96); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0)    scale(1.00); }
+}
+@keyframes arsenalCardOut {
+  0%   { opacity: 1; transform: translateX(0)    scale(1.00); }
+  100% { opacity: 0; transform: translateX(30px) scale(0.95); }
+}
+@keyframes arsenalChipIn {
+  0%   { opacity: 0; transform: translateY(4px) scale(0.92); }
+  100% { opacity: 1; transform: translateY(0)   scale(1.00); }
+}
+@keyframes wsFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.arsenal-card-in  { animation: arsenalCardIn  0.32s cubic-bezier(.22,1.36,.36,1) backwards; }
+.arsenal-card-out { animation: arsenalCardOut 0.22s ease-in forwards; pointer-events: none; }
+
+/* === KaTeX RTL isolation (applies at every viewport) ============================
+   Math is direction-neutral. Inside Hebrew `dir="rtl"` containers the KaTeX
+   root spans inherit RTL, which flips subscripts/superscripts, mis-orders
+   operators (a - b → b - a visually), and breaks fractions. Force LTR +
+   bidi isolation on every KaTeX root so they always render left-to-right
+   regardless of the surrounding Hebrew layout. */
+.katex,
+.katex-display,
+.katex-html,
+.katex-mathml {
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  text-align: initial;
+}
+
+/* === Mobile-friendly base styles (Android phones, 360–430px portrait) === */
+@media (max-width: 768px) {
+  html, body {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
+  }
+  body {
+    /* Allow vertical scroll on mobile pages even though desktop hides overflow.
+       overflow-x stays hidden to prevent accidental horizontal scroll on RTL layouts. */
+    overflow-y: auto;
+  }
+  #root {
+    min-height: 100vh;
+    height: auto;
+  }
+
+  /* Hide split-screen trigger buttons on mobile — split layouts don't make
+     sense on a 400px-wide screen. The dark-mode toggle (no .ws-split-btn class)
+     stays visible. */
+  .ws-split-btn {
+    display: none !important;
+  }
+
+  /* Touch-friendly minimum tap target for buttons inside the app.
+     Scoped to skip icon-only / explicitly-sized controls so 22x22 close (✕)
+     buttons, drag handles and inline pills aren't stretched to 44px tall.
+     Opt out per-element with `data-icon-btn` or `data-no-touch-target`. */
+  button:not([data-icon-btn]):not([data-no-touch-target]):not([aria-label*="סגור"]):not([aria-label*="close" i]),
+  [role="button"]:not([data-icon-btn]):not([data-no-touch-target]) {
+    min-height: 44px;
+  }
+
+  /* Iframes (mindmap.html, godot/index.html) — never overflow horizontally */
+  iframe {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Reduce heavy paddings on mobile — desktop uses 32–48px which eats the
+     viewport on a 360px-wide screen. */
+  main {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* KaTeX formula blocks: allow horizontal scroll when an equation is wider
+     than the viewport, instead of overflowing the page and breaking layout. */
+  .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+  }
+  .katex-display > .katex {
+    white-space: nowrap;
+  }
+
+
+  /* Lesson and quiz cards: full-bleed on mobile */
+  [data-mobile-fullbleed],
+  .ws-card-fullbleed {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* === MOBILE ADDITIONS — Step 1 === */
+  /* Godot iframe iOS dvh fix */
+  @supports (height: 100dvh) {
+    .ws-godot-shell { height: 100dvh !important; min-height: 100dvh !important; }
+  }
+
+  /* Godot loading emoji — smaller on mobile */
+  .ws-godot-emoji { font-size: 48px !important; }
+
+  /* Spacing tokens */
+  .ws-screen-pad { padding: 16px 12px !important; }
+  .ws-card-pad   { padding: 16px !important; }
+  .ws-card-pad-lg { padding: 20px 16px !important; }
+  .ws-h2 { font-size: 20px !important; }
+  .ws-h3 { font-size: 18px !important; }
+
+  /* TopBar */
+  .ws-topbar { height: auto !important; padding: 8px 12px !important; flex-wrap: wrap !important; gap: 8px !important; }
+  .ws-topbar h1 { font-size: 18px !important; }
+  .ws-topbar .ws-topbar-actions { flex-wrap: wrap; gap: 6px !important; }
+  .ws-topbar-actions > span { font-size: 12px !important; }
+  .ws-topbar-actions button { padding: 4px 8px !important; }
+
+  /* Home screen grid */
+  .ws-home-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 14px !important; }
+  .ws-home-grid > div { padding: 18px !important; }
+
+  /* Topic cards */
+  .ws-topic-card { padding: 16px !important; }
+  .ws-topic-card h3 { font-size: 17px !important; }
+
+  /* Lesson screen */
+  .ws-lesson-rightpane { padding: 14px 12px !important; }
+  .ws-lesson-card { padding: 20px 16px !important; min-height: 0 !important; }
+  .ws-lesson-card h3 { font-size: 22px !important; }
+  .ws-lesson-bullet { padding: 10px 12px !important; gap: 10px !important; }
+  .ws-lesson-bullet > div:first-child { width: 28px !important; height: 28px !important; font-size: 13px !important; }
+  .ws-lesson-bullet > div:last-child { font-size: 16px !important; line-height: 1.7 !important; }
+  .ws-lesson-formula { padding: 14px 12px !important; font-size: 18px !important; }
+
+  /* Quiz TopBar */
+  .ws-quiz-topbar { padding: 0 10px !important; gap: 8px !important; }
+  .ws-quiz-topbar .ws-quiz-topic { display: none; }
+
+  /* QuizIntroCard */
+  .ws-quiz-intro { padding: 20px !important; }
+  .ws-quiz-intro h2 { font-size: 20px !important; }
+
+  /* StatChallenge */
+  .stat-progress-bar { max-width: min(280px, 100%) !important; }
+
+  /* Touch feedback */
+  :where(button):active { transform: scale(0.97); }
+
+  /* Safe area bottom padding for absolute-positioned bottom buttons */
+  .ws-safe-bottom { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+
+  /* Godot city overlay buttons — mobile-only sizing/positioning.
+     Desktop uses Tailwind/inline-style coordinates; mobile bumps the tap
+     target to 44px, increases padding, locks safe-area inset, and prevents
+     the back button + mindmap button from overlapping the iframe HUD. */
+  .ws-godot-back-btn {
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    left: 12px !important;
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    border-radius: 14px !important;
+  }
+  .ws-godot-controls {
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    right: 12px !important;
+    gap: 8px !important;
+  }
+  .ws-godot-mindmap-btn {
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* ── Button overlap guards ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Hamburger now hugs the top-right corner (right:12, 44px wide). Reserve the
+     title's inline-start (right edge in RTL) so the heading never runs under it. */
+  .ws-topbar h1 { padding-inline-start: 64px !important; }
+  .ws-lesson-mindmap-pane { display: none !important; }
+}
+
+@media (max-width: 600px) and (orientation: landscape) {
+  .ws-godot-controls { flex-direction: column-reverse !important; bottom: 8px !important; }
+}
+
+.ws-topbar > * { flex-shrink: 0; }
+.ws-topbar h1 { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Ribbon ──────────────────────────────────────────────────────────────── */
+.ws-ribbon { display: flex; flex-direction: column; gap: 2px; }
+.ws-ribbon-label { font-size: 10px; opacity: 0.55; letter-spacing: 0.3px; text-align: center; color: inherit; }
+.ws-ribbon-divider { width: 1px; height: 32px; background: rgba(31,62,108,0.18); align-self: center; flex-shrink: 0; }
+@media (max-width: 768px) {
+  .ws-ribbon-label { display: none; }
+  .ws-ribbon-divider { display: none; }
+  .ws-ribbon:not(:first-child) { display: none; }
+}
+
+/* ── Tooltip ─────────────────────────────────────────────────────────────── */
+.ws-tooltip {
+  position: fixed;
+  z-index: 9500;
+  background: rgba(15,18,32,0.96);
+  border: 1px solid rgba(127,155,217,0.35);
+  color: #e5edff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.45);
+  backdrop-filter: blur(6px);
+  max-width: 240px;
+  pointer-events: none;
+  animation: wsTooltipFadeIn 60ms ease-out;
+}
+.ws-tooltip-desc { color: #9aa4c7; font-size: 11px; margin-top: 2px; }
+@keyframes wsTooltipFadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+
+/* ── Liquid Glass — Hybrid Button System ────────────────────────────────── */
+/*
+ * Hybrid pattern (Apple-accurate):
+ *   - Glass cards   → ws-glass-card  (course cards, topic cards)
+ *   - Solid pill buttons → ws-solid-pill (sidebar nav active state — keep solid, add sheen)
+ *   - Icon chips    → ws-icon-chip   (sidebar icon badges)
+ * Specular highlight via ::before pseudo — no JS needed.
+ * backdrop-filter degrades gracefully: no blur = still readable.
+ */
+
+/* ── Glass Card (course cards, topic cards) ── */
+/* Liquid-glass CTA — frosted #9EB1E7 tint (matches the 3D-world UI), readable
+   navy text. !important overrides the inline navy background/white text on the
+   existing CTAs so they only need the class added. Pairs with .ws-cta-btn for
+   the specular sheen. */
+.ws-glass-btn {
+  background: rgba(158, 177, 231, 0.30) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(158, 177, 231, 0.55) !important;
+  color: #1F3E6C !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 18px rgba(110, 140, 210, 0.28) !important;
+}
+.ws-glass-btn:hover { background: rgba(158, 177, 231, 0.44) !important; }
+
+.ws-glass-card {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  background: var(--sh-glass-card) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.18) !important;
+  border-right-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow:
+    0 8px 32px rgba(31, 62, 108, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(31, 62, 108, 0.06) !important;
+  transition: transform 0.18s cubic-bezier(.22,1,.36,1), box-shadow 0.18s, border-color 0.18s !important;
+}
+/* Specular highlight streak */
+.ws-glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,0.28) 0%,
+    rgba(255,255,255,0.08) 40%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+/* All card children sit above pseudo */
+.ws-glass-card > * { position: relative; z-index: 1; }
+
+.ws-glass-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow:
+    0 16px 40px rgba(31, 62, 108, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(31, 62, 108, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+}
+.ws-glass-card:active {
+  transform: scale(0.98) translateY(0) !important;
+  box-shadow:
+    0 4px 16px rgba(31, 62, 108, 0.14),
+    inset 0 2px 4px rgba(31, 62, 108, 0.08) !important;
+}
+
+/* Dark mode glass card */
+html.dark .ws-glass-card {
+  border-color: rgba(255,255,255,0.14) !important;
+  border-bottom-color: rgba(0,0,0,0.2) !important;
+  border-right-color: rgba(0,0,0,0.2) !important;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 -1px 0 rgba(0,0,0,0.2) !important;
+}
+html.dark .ws-glass-card::before {
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,0.10) 0%,
+    rgba(255,255,255,0.03) 40%,
+    transparent 60%
+  );
+}
+html.dark .ws-glass-card:hover {
+  border-color: rgba(255,255,255,0.22) !important;
+  box-shadow:
+    0 16px 40px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+
+/* ── Icon Chip (sidebar icon badges) ── */
+.ws-icon-chip {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.15s, background 0.15s, border-color 0.15s;
+}
+.ws-icon-chip::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 5%; right: 5%;
+  height: 45%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+  border-radius: 10px 10px 50% 50%;
+  pointer-events: none;
+}
+.ws-icon-chip--active {
+  background: rgba(255,215,0,0.15) !important;
+  border-color: rgba(255,215,0,0.45) !important;
+  box-shadow: 0 2px 10px rgba(255,215,0,0.2), inset 0 1px 0 rgba(255,215,0,0.3) !important;
+}
+.ws-icon-chip--inactive {
+  background: rgba(255,255,255,0.10) !important;
+  border-color: rgba(255,255,255,0.18) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2) !important;
+}
+
+/* ── Solid CTA Button with glass sheen (hybrid: solid color + specular) ── */
+/*
+ * Apple hybrid pattern: pill buttons stay SOLID colored (readable, tappable)
+ * but get a specular highlight streak on the top half = premium feel without
+ * losing contrast or legibility.
+ */
+.ws-cta-btn {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(.22,1,.36,1), box-shadow 0.15s, filter 0.15s;
+}
+.ws-cta-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 48%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.30), transparent);
+  border-radius: 999px 999px 50% 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.ws-cta-btn > * { position: relative; z-index: 1; }
+.ws-cta-btn:hover  { transform: translateY(-1px); filter: brightness(1.08); }
+.ws-cta-btn:active { transform: scale(0.97); filter: brightness(0.96); }
+
+/* ── Reduced motion — kill specular + heavy blur ── */
+@media (prefers-reduced-motion: reduce) {
+  .ws-glass-card, .ws-glass-card:hover, .ws-glass-card:active {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition: none !important;
+  }
+  .ws-glass-card::before { display: none; }
+}
+

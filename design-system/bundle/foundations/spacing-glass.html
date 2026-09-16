@@ -1,0 +1,44 @@
+<!-- @dsCard group="Spacing" viewport="700x240" name="Glass & elevation recipes" subtitle=".ws-glass-card / .ws-glass-btn / .ws-cta-btn — the real liquid-glass classes" -->
+<!doctype html>
+<html lang="he" dir="rtl">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; background: var(--sh-page-bg); font-family: 'Heebo', Inter, system-ui, sans-serif; padding: 14px 16px; overflow: auto; }
+  h2 { font-family: 'Rubik', sans-serif; font-size: 13px; font-weight: 600; color: var(--sh-text-dark); margin: 0 0 8px; }
+  .row { display: flex; gap: 14px; align-items: stretch; }
+  .demo-card { border-radius: 24px; padding: 14px 16px; flex: 1.4; color: var(--sh-text-dark); }
+  .demo-card .t { font-family: 'Rubik', sans-serif; font-weight: 600; font-size: 14px; }
+  .demo-card .d { font-size: 11px; color: var(--sh-text-med); margin-top: 4px; }
+  .btncol { flex: 1; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+  .btn-base { border-radius: 999px; padding: 10px 20px; font-family: 'Rubik', sans-serif; font-weight: 600; font-size: 13px; text-align: center; }
+  .cta-navy { background: #122460; color: #fff; }
+  .cls { font-size: 9.5px; direction: ltr; text-align: left; font-family: 'Inter', monospace; color: var(--sh-text-tip); margin-top: 2px; }
+  .shadow-note { margin-top: 12px; font-size: 10.5px; direction: ltr; text-align: left; font-family: 'Inter', monospace;
+    color: var(--sh-text-med); background: rgba(255,255,255,0.55); border-radius: 10px; padding: 7px 10px; }
+  .toggle { position: fixed; bottom: 8px; left: 8px; width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--sh-answer-border); background: var(--sh-answer-bg); cursor: pointer; font-size: 13px; z-index: 9; }
+</style>
+</head>
+<body>
+<h2>מתכוני זכוכית והגבהה — הקלאס עושה את העבודה</h2>
+<div class="row">
+  <div class="ws-glass-card demo-card">
+    <div class="t">כרטיס קורס מזכוכית</div>
+    <div class="d">רקע var(--sh-glass-card) · blur(20px) saturate(160%) · פס תאורה ספקולרי ב-::before · ריחוף מרים ב-3px</div>
+    <div class="cls">.ws-glass-card · border-radius 24</div>
+  </div>
+  <div class="btncol">
+    <div>
+      <button class="ws-glass-btn ws-cta-btn btn-base" style="width: 100%;">כפתור זכוכית</button>
+      <div class="cls">.ws-glass-btn · rgba(158,177,231,0.30) + blur(14px)</div>
+    </div>
+    <div>
+      <button class="ws-cta-btn btn-base cta-navy" style="width: 100%;">התחילו ללמוד</button>
+      <div class="cls">.ws-cta-btn · solid #122460 pill + specular sheen</div>
+    </div>
+  </div>
+</div>
+<div class="shadow-note">--sh-card-shadow: 0px 15px 30px rgba(31,41,55,0.25) &nbsp;·&nbsp; dark: 0px 15px 30px rgba(0,0,0,0.5)</div>
+<button class="toggle" aria-label="Toggle dark mode" onclick="document.documentElement.classList.toggle('dark')">◐</button>
+</body></html>

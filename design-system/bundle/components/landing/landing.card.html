@@ -1,0 +1,87 @@
+<!-- @dsCard group="Components" viewport="700x520" name="Landing patterns" subtitle="Glass cards, CTAs, hero type + stats row from src/landing/landing.css" -->
+<!doctype html>
+<html lang="he" dir="rtl">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  /* card-local layout only */
+  html, body { margin: 0; }
+  body { background: var(--sh-page-bg); }
+  .demo-root { padding: 24px 28px 20px; min-height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; }
+  .demo-hero { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .demo-hero .ls-h1 { font-size: 34px; }
+  .demo-cta-row { display: flex; gap: 12px; align-items: center; }
+  .demo-glass-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .demo-glass-row .ls-glass { padding: 16px 18px; }
+  .demo-glass-row .ls-h3 { font-size: 17px; margin: 0 0 4px; }
+  .demo-glass-row .ls-body { font-size: 13px; line-height: 1.55; margin: 0; }
+  .demo-stats.ls-stats-grid .ls-stats-cell { padding: 16px 12px; }
+  .demo-stat-num { font-size: 24px; font-weight: 800; color: var(--ls-blue-darker); font-family: 'Heebo', 'Inter', sans-serif; }
+  .demo-stat-label { font-size: 12px; color: var(--ls-text-dim); margin-top: 2px; }
+  .demo-tag { font-size: 10px; font-family: 'Inter', monospace; direction: ltr; color: var(--sh-text-tip); letter-spacing: 0.02em; }
+  .demo-dark-toggle {
+    position: fixed; bottom: 8px; left: 8px; width: 28px; height: 28px;
+    border-radius: 50%; border: 1px solid var(--ls-glass-border);
+    background: var(--ls-glass-bg-strong); cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; z-index: 10;
+  }
+</style>
+</head>
+<body>
+<div class="landing-root">
+  <div class="demo-root">
+
+    <!-- Hero type: eyebrow + h1 with gold-gradient treatment -->
+    <div class="demo-hero">
+      <span class="demo-tag">.ls-eyebrow · .ls-h1 · .ls-gold-gradient</span>
+      <span class="ls-eyebrow">✦ פלטפורמת הלימוד של WaffleStack</span>
+      <h1 class="ls-h1">סטטיסטיקה <span class="ls-gold-gradient">כמשחק</span></h1>
+      <p class="ls-body" style="margin:0;">כל פרק בקורס הופך לשלבים, נקודות והישגים — לומדים בלי להרגיש.</p>
+    </div>
+
+    <!-- CTAs: primary (blue) + ghost -->
+    <div>
+      <span class="demo-tag">.ls-cta-gold · .ls-cta-ghost</span>
+      <div class="demo-cta-row" style="margin-top:6px;">
+        <button class="ls-cta-gold">התחילו ללמוד חינם</button>
+        <button class="ls-cta-ghost">צפו בהדגמה</button>
+      </div>
+    </div>
+
+    <!-- Glass cards: base vs strong -->
+    <div class="demo-glass-row">
+      <div class="ls-glass">
+        <span class="demo-tag">.ls-glass</span>
+        <h3 class="ls-h3">תרגול חכם</h3>
+        <p class="ls-body">שאלות שמתאימות את עצמן לרמה שלכם, עם הסבר מלא לכל תשובה.</p>
+      </div>
+      <div class="ls-glass ls-glass--strong">
+        <span class="demo-tag">.ls-glass--strong</span>
+        <h3 class="ls-h3">מעקב התקדמות</h3>
+        <p class="ls-body">רואים בדיוק איפה אתם חזקים ומה עוד דורש חיזוק לפני המבחן.</p>
+      </div>
+    </div>
+
+    <!-- Stats / trust bar -->
+    <div>
+      <span class="demo-tag">.ls-stats-grid · .ls-stats-cell (in .ls-glass)</span>
+      <div class="ls-glass demo-stats ls-stats-grid" style="margin-top:6px;">
+        <div class="ls-stats-cell">
+          <div class="demo-stat-num">12,000+</div>
+          <div class="demo-stat-label">שאלות תרגול</div>
+        </div>
+        <div class="ls-stats-cell">
+          <div class="demo-stat-num">94%</div>
+          <div class="demo-stat-label">שיפור בציונים</div>
+        </div>
+        <div class="ls-stats-cell">
+          <div class="demo-stat-num">8</div>
+          <div class="demo-stat-label">פרקי קורס</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<button class="demo-dark-toggle" aria-label="Toggle dark mode" onclick="document.documentElement.classList.toggle('dark')">◐</button>
+</body></html>

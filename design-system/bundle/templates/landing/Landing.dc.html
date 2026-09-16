@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="WaffleStack Landing" description="RTL landing — real ls-* classes, hero + features + stats sections, 3D hero as poster" -->
+<helmet>
+<script src="./ds-base.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700&family=Rubik:wght@300;400;600;700&family=Assistant:wght@300;400;600;700&family=Inter:wght@400;500;600;700;800&family=Playpen+Sans+Hebrew:wght@400;500;600;700&display=swap" rel="stylesheet">
+</helmet>
+<!-- [ds-extract] Mirrors src/landing/LandingPage.tsx composition: ScrollProgressBar → Hero → Features → Stats → CTAFooter
+     (HowItWorks omitted from this template). All classes/copy verbatim from the section sources; framer-motion
+     entrances and lucide-react icons are static here (icons inlined as lucide SVG paths, size/color/strokeWidth kept). -->
+<div dir="rtl" class="landing-root">
+
+  <!-- ScrollProgressBar.tsx — runtime scroll-driven scaleX; static full-width here -->
+  <div class="ls-progress-bar" style="transform:scaleX(1)"></div>
+
+  <!-- ============ HeroSection.tsx ============ -->
+  <section class="ls-section" style="padding-top:96px;padding-bottom:64px">
+    <div class="ls-container">
+      <div class="ls-hero-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
+
+        <!-- RIGHT (in RTL) / first column: copy -->
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <div><span class="ls-eyebrow">✦ סטטיסטיקה כמשחק</span></div>
+
+          <h1 class="ls-h1">אם כבר סטטיסטיקה…<br>הפכו את הלמידה<br><span class="ls-gold-gradient">לבניית עיר שלמה!</span></h1>
+
+          <p class="ls-body" style="max-width:480px">
+            <span dir="ltr" style="display:inline-block">WaffleStack</span> הופך סטטיסטיקה לבונה ערים. שלוט במושגים, צבור בניינים, וראה את קו הרקיע שלך גדל — שיטה מוכחת מחקרית שפותחה ע״י פסיכולוג ומורה פרטי.
+          </p>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <a href="#study" class="ls-cta-gold" aria-label="התחל עכשיו — מעבר לדף הראשי של האפליקציה">
+              <span>התחל עכשיו</span>
+              <span aria-hidden="true">←</span>
+            </a>
+            <a href="#study" class="ls-cta-ghost" aria-label="גלה עוד על האפליקציה">גלה עוד</a>
+          </div>
+
+          <!-- Social proof microcopy -->
+          <div style="display:flex;align-items:center;gap:12px;color:var(--ls-text-dim);font-size:13px;flex-wrap:wrap">
+            <span style="display:inline-flex;align-items:center;gap:6px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+              מושגים בסטטיסטיקה
+            </span>
+            <span>·</span>
+            <span style="display:inline-flex;align-items:center;gap:6px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+              מבוסס מחקר
+            </span>
+            <span>·</span>
+            <span style="display:inline-flex;align-items:center;gap:6px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg>
+              גיימיפיקציה מוכחת
+            </span>
+          </div>
+        </div>
+
+        <!-- 3D scene column -->
+        <!-- [ds-extract] R3F HeroScene replaced by poster — poster captured from the live site (assets/landing-hero-poster.png), gradient fallback -->
+        <div class="ls-hero-3d" style="background:url(../../assets/landing-hero-poster.png) center/cover no-repeat, linear-gradient(160deg,#122460,#3351CA 60%,#83B2F8);border-radius:24px">
+          <div style="position:absolute;width:280px;height:280px;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle, rgba(51,81,202,0.18) 0%, transparent 70%);filter:blur(60px);pointer-events:none"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FeaturesSection.tsx ============ -->
+  <section class="ls-section">
+    <div class="ls-container">
+      <div style="text-align:center;margin-bottom:56px">
+        <span class="ls-eyebrow">מה יש פה</span>
+        <h2 class="ls-h2" style="margin-top:16px">
+          כל מה שצריך <span class="ls-gold-gradient">לשלוט בסטטיסטיקה</span>
+        </h2>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:28px">
+
+        <!-- Feature 1 — עיר תלת-ממד (#3351CA) -->
+        <div class="ls-features-row" style="display:flex;gap:28px;align-items:center;flex-direction:row">
+          <div class="ls-glass ls-features-icon" style="flex:0 0 180px;height:180px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, #3351CA22, #3351CA0a);border-color:#3351CA44">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#3351CA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+          </div>
+          <div class="ls-glass ls-glass--card" style="flex:1;min-width:0">
+            <span class="ls-eyebrow" style="color:#3351CA;border-color:#3351CA55;background:#3351CA14;margin-bottom:14px;display:inline-flex">עיר תלת-ממד</span>
+            <h3 class="ls-h3" style="font-size:24px;margin-bottom:12px">עיר סטטיסטיקה תלת-ממדית</h3>
+            <p class="ls-body">עיר 3D בנויה מנכסי Kenney. כל בניין מייצג מושג סטטיסטי. ככל שתשלוט יותר — העיר שלך תגדל ותאיר.</p>
+          </div>
+        </div>
+
+        <!-- Feature 2 — מפות חשיבה (#254A9F, reversed) -->
+        <div class="ls-features-row" style="display:flex;gap:28px;align-items:center;flex-direction:row-reverse">
+          <div class="ls-glass ls-features-icon" style="flex:0 0 180px;height:180px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, #254A9F22, #254A9F0a);border-color:#254A9F44">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#254A9F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg>
+          </div>
+          <div class="ls-glass ls-glass--card" style="flex:1;min-width:0">
+            <span class="ls-eyebrow" style="color:#254A9F;border-color:#254A9F55;background:#254A9F14;margin-bottom:14px;display:inline-flex">מפות חשיבה</span>
+            <h3 class="ls-h3" style="font-size:24px;margin-bottom:12px">מפות חשיבה אינטראקטיביות</h3>
+            <p class="ls-body">קנבס מלא לרישום, קישור מושגים, ונוסחאות. פתוח לצד החידון ומסתנכרן עם הלמידה.</p>
+          </div>
+        </div>
+
+        <!-- Feature 3 — שיעורים אדפטיביים (#3351CA) -->
+        <div class="ls-features-row" style="display:flex;gap:28px;align-items:center;flex-direction:row">
+          <div class="ls-glass ls-features-icon" style="flex:0 0 180px;height:180px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, #3351CA22, #3351CA0a);border-color:#3351CA44">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#3351CA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          </div>
+          <div class="ls-glass ls-glass--card" style="flex:1;min-width:0">
+            <span class="ls-eyebrow" style="color:#3351CA;border-color:#3351CA55;background:#3351CA14;margin-bottom:14px;display:inline-flex">שיעורים אדפטיביים</span>
+            <h3 class="ls-h3" style="font-size:24px;margin-bottom:12px">שיעורים אדפטיביים</h3>
+            <p class="ls-body">כל נושא מגיע עם שקופיות, הסברים, ונוסחאות מסודרות. הקצב שלך, הסדר שלך.</p>
+          </div>
+        </div>
+
+        <!-- Feature 4 — גיימיפיקציה (#B8960C, reversed) -->
+        <div class="ls-features-row" style="display:flex;gap:28px;align-items:center;flex-direction:row-reverse">
+          <div class="ls-glass ls-features-icon" style="flex:0 0 180px;height:180px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, #B8960C22, #B8960C0a);border-color:#B8960C44">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#B8960C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          </div>
+          <div class="ls-glass ls-glass--card" style="flex:1;min-width:0">
+            <span class="ls-eyebrow" style="color:#B8960C;border-color:#B8960C55;background:#B8960C14;margin-bottom:14px;display:inline-flex">גיימיפיקציה</span>
+            <h3 class="ls-h3" style="font-size:24px;margin-bottom:12px">XP, רמות, ושליטה</h3>
+            <p class="ls-body">מערכת ניקוד שעוקבת אחר ההתקדמות שלך. כל שאלה נכונה — XP. כל נושא שתשלוט — בניין. כל בניין — צעד קדימה.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ StatsSection.tsx — trust bar ============ -->
+  <section class="ls-section" style="padding-top:0">
+    <div class="ls-container">
+      <div class="ls-glass ls-glass--strong ls-stats-grid">
+
+        <div class="ls-stats-cell">
+          <div style="display:flex;justify-content:center;margin-bottom:12px">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3351CA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>
+          </div>
+          <div style="font-size:clamp(14px, 2vw, 16px);font-weight:700;color:var(--ls-blue-darker);line-height:1.35;margin-bottom:8px;text-wrap:balance">גיימיפיקציה מוכחת מחקרית</div>
+          <div style="color:var(--ls-text-muted);font-size:13px;line-height:1.6;text-wrap:pretty">שיטות משחוק מבוססות פסיכולוגיה חינוכית — משפרות מוטיבציה ושימור ידע.</div>
+        </div>
+
+        <div class="ls-stats-cell">
+          <div style="display:flex;justify-content:center;margin-bottom:12px">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3351CA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
+          </div>
+          <div style="font-size:clamp(14px, 2vw, 16px);font-weight:700;color:var(--ls-blue-darker);line-height:1.35;margin-bottom:8px;text-wrap:balance">פותח ע״י פסיכולוג מחקרי ומורה פרטי</div>
+          <div style="color:var(--ls-text-muted);font-size:13px;line-height:1.6;text-wrap:pretty">שילוב של ידע אקדמי ומיומנות הוראה אמיתית — שמה שנלמד כאן עובד.</div>
+        </div>
+
+        <div class="ls-stats-cell">
+          <div style="display:flex;justify-content:center;margin-bottom:12px">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3351CA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+          </div>
+          <div style="font-size:clamp(14px, 2vw, 16px);font-weight:700;color:var(--ls-blue-darker);line-height:1.35;margin-bottom:8px;text-wrap:balance">תוכן שגדל כל הזמן</div>
+          <div style="color:var(--ls-text-muted);font-size:13px;line-height:1.6;text-wrap:pretty">עשרות מושגים בסטטיסטיקה ועוד בדרך — מהבסיס ועד לרמה המתקדמת.</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTAFooterSection.tsx ============ -->
+  <section class="ls-section" style="padding-bottom:96px">
+    <div class="ls-container" style="text-align:center">
+      <div class="ls-glass ls-glass--card ls-glass--gold" style="max-width:680px;margin:0 auto;padding:clamp(32px, 6vw, 64px) clamp(20px, 5vw, 48px)">
+        <div style="display:flex;justify-content:center;margin-bottom:16px">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--ls-gold-bright)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+        </div>
+        <h2 class="ls-h2" style="margin-bottom:16px">מוכן לשלוט בסטטיסטיקה — ולבנות עיר תוך כדי?</h2>
+        <p class="ls-body" style="margin-bottom:32px;max-width:440px;margin-left:auto;margin-right:auto">
+          הצטרף ל־<span dir="ltr" style="display:inline-block">WaffleStack</span>, פלטפורמה מבוססת מחקר מפסיכולוגיה חינוכית, שהופכת את הסטטיסטיקה למשחק שבאמת עובד.
+        </p>
+        <a href="#study" class="ls-cta-gold" style="font-size:17px;padding:16px 36px">התחל בחינם ←</a>
+      </div>
+
+      <!-- Footer links -->
+      <div style="margin-top:48px;color:var(--ls-text-dim);font-size:13px;display:flex;gap:24px;justify-content:center;flex-wrap:wrap">
+        <span><span dir="ltr" style="display:inline-block">WaffleStack</span> © 2025</span>
+        <a href="#study" style="color:inherit;text-decoration:none">כניסה לאפליקציה</a>
+        <span>נבנה בעברית</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+</body>
+</html>

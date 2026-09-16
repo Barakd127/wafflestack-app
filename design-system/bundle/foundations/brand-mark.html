@@ -1,0 +1,33 @@
+<!-- @dsCard group="Brand" viewport="700x200" name="Waffle mark & honey" subtitle="Stacked-plate mark · honey radial gradient · ink outline" -->
+<!doctype html>
+<html lang="en" dir="ltr">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;padding:24px;background:#fff;font-family:'Inter',system-ui,sans-serif;display:flex;gap:26px;align-items:center}
+  .mark{width:120px;height:120px;background:#0B1B3E;border-radius:20px;display:flex;align-items:center;justify-content:center}
+  .mark img{width:82px;height:82px}
+  .honey{width:120px;height:120px;border-radius:20px;background:radial-gradient(circle at 35% 30%, #FFE3A8 0%, #F2A93E 55%, #C97C18 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 6px 18px rgba(201,124,24,.35)}
+  .col{display:flex;flex-direction:column;gap:6px}
+  .swrow{display:flex;gap:8px}
+  .sw{width:52px;height:38px;border-radius:8px;display:flex;align-items:flex-end;padding:4px;box-sizing:border-box;font-size:9px;font-weight:700;color:#3a2400}
+  .lbl{font-size:12px;font-weight:700;color:var(--sh-text-dark)}
+  .sub{font-size:11px;color:var(--sh-text-tip);max-width:230px;line-height:1.5}
+  .dm{position:fixed;bottom:8px;left:8px;width:28px;height:28px;border-radius:8px;border:1px solid rgba(51,81,202,0.18);background:rgba(255,255,255,0.82);cursor:pointer;font-size:14px;line-height:1;padding:0}
+</style>
+</head>
+<body>
+  <div class="mark"><img src="../assets/waffle-mark.svg" alt="waffle mark"></div>
+  <div class="honey"></div>
+  <div class="col">
+    <span class="lbl">Honey gradient</span>
+    <div class="swrow">
+      <div class="sw" style="background:#FFE3A8">#FFE3A8</div>
+      <div class="sw" style="background:#F2A93E">#F2A93E</div>
+      <div class="sw" style="background:#C97C18;color:#fff">#C97C18</div>
+      <div class="sw" style="background:#1A1A2E;color:#fff">ink</div>
+    </div>
+    <span class="sub">Three stacked waffle plates — basic → confident → mastery — outlined in ink #1A1A2E.</span>
+  </div>
+  <button class="dm" aria-label="Toggle dark mode" onclick="document.documentElement.classList.toggle('dark')">◐</button>
+</body></html>

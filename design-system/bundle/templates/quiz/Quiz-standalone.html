@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WaffleStack Quiz — standalone</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700&family=Rubik:wght@300;400;600;700&family=Assistant:wght@300;400;600;700&family=Inter:wght@400;500;600;700;800&family=Playpen+Sans+Hebrew:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  html, body { margin: 0; height: 100%; }
+  #shell { height: 100vh; }
+  /* Hover surface for an un-revealed MC option (StudyHub.tsx onMouseEnter → #EAF1FF). */
+  .ws-quiz-option:hover { background: #EAF1FF !important; }
+</style>
+</head>
+<body>
+
+<!--
+  Quiz answering state — mirrors StudyHub.tsx QuizScreen in calm mode
+  (tab='none' → boardFullBleed + bigBoard): ws-quiz-topbar (line 3578),
+  gold progress bar, full-bleed WhiteboardShell board with the question
+  stem drawn on the board and the 2×2 MC option grid (lines 4207-4304),
+  dots nav + דלג (4390-4419), chalk footer nav (4554-4610).
+  ConceptCard is NOT rendered on the real quiz screen (StudyHub.tsx never
+  imports it) — so no side ConceptCard here. MC option surfaces are the
+  real ones (solid #FFFFFF + 2.5px navy border, hover #EAF1FF);
+  --sh-answer-bg/--sh-answer-border is the typed-answer surface of the
+  review phase (line 4452), --sh-q-card-bg themes the quiz's interactive
+  graph cards (graphTheme: var(--sh-q-card-bg, #FCFDFF)).
+-->
+<div id="shell" dir="rtl" style="display:flex;flex-direction:row;overflow:hidden;background:var(--sh-page-bg)">
+
+  <!-- Sidebar mount — first flex child in RTL, so it sits on the RIGHT (247px fixed) -->
+  <div id="sidebar-root" style="flex-shrink:0;height:100%;display:flex"></div>
+
+  <!-- Main column: TopBar header + quiz screen (calm mode — no companion tool) -->
+  <main style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0">
+    <header id="topbar-root"></header>
+
+    <!-- ── Quiz screen column ─────────────────────────────────────────── -->
+    <div dir="rtl" style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0">
+
+      <!-- ws-quiz-topbar — glass strip: progress (gold fill) + topic + difficulty + XP chip + frame toggles -->
+      <div class="ws-quiz-topbar" style="background:rgba(255,255,255,0.06);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-bottom:1px solid rgba(127,155,217,0.30);box-shadow:0 2px 6px rgba(18,36,96,0.15);height:56px;display:flex;align-items:center;padding:0 20px;flex-shrink:0;gap:12px;z-index:10">
+        <!-- App logo img (high-tech.png) omitted — the app hides it onError, so the strip is valid without it -->
+        <div style="flex:1">
+          <!-- stat-progress-bar — 6px track, gold fill = currentQ/total (question 3 of 10 → 20%) -->
+          <div class="stat-progress-bar" style="height:6px;background:#E4E4E4;border-radius:10px;overflow:hidden">
+            <div style="width:20%;height:100%;background:rgba(212,175,55,0.75);border-radius:10px;transition:width 0.4s"></div>
+          </div>
+          <div style="font-family:'Assistant',sans-serif;font-size:11px;color:var(--sh-text-light);margin-top:2px">2 / 10 · 2 ✓<span style="color:#FF7A1A;font-weight:800"> · 🔥2</span></div>
+        </div>
+        <div class="ws-quiz-topic" style="font-family:'Assistant',sans-serif;font-size:14px;color:var(--sh-text-dark)"><span style="font-weight:700">סטטיסטיקה</span> | התפלגות נורמלית</div>
+        <!-- QuizDifficultyBadge tone="light" showXp=false (medium) -->
+        <span style="margin-inline-start:8px;background:rgba(245,158,11,0.14);color:#8A5A00;border:1px solid rgba(245,158,11,0.45);border-radius:10px;padding:2px 8px;font-size:12px;font-weight:700;letter-spacing:0.3px;display:inline-flex;align-items:center;gap:6px;font-family:'Rubik',sans-serif"><span>בינוני</span></span>
+        <!-- XP-per-question chip -->
+        <div style="background:rgba(212,175,55,0.16);border:1px solid rgba(212,175,55,0.5);color:#7A5C00;border-radius:12px;padding:4px 10px;font-family:'Rubik',sans-serif;font-size:12px;font-weight:700">+15 XP ⭐</div>
+        <!-- Float-to-window toggle -->
+        <button aria-label="נתק לחלון צף" title="נתק לחלון צף נגרר" style="background:rgba(127,155,217,0.10);border:1px solid rgba(127,155,217,0.30);color:var(--sh-text-dark);border-radius:8px;padding:6px 10px;cursor:pointer;font-family:'Rubik',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px">⤢ צף</button>
+        <!-- Fullscreen toggle -->
+        <button aria-label="מסך מלא — ללא הסחות דעת" title="מסך מלא" style="background:rgba(127,155,217,0.10);border:1px solid rgba(127,155,217,0.30);color:var(--sh-text-dark);border-radius:8px;padding:6px 10px;cursor:pointer;font-family:'Rubik',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px">⛶ מסך מלא</button>
+      </div>
+
+      <!-- Content row — calm mode: the board owns all remaining height -->
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;background:var(--sh-page-bg);position:relative">
+        <div style="flex:1;min-height:0;padding:4px 20px 10px;display:flex;justify-content:center;position:relative;z-index:2">
+          <!-- Full-bleed card shell — no white box/border/shadow in calm mode -->
+          <div style="width:100%;max-width:1600px;height:100%;min-height:0;background:transparent;border:none;box-shadow:none;border-radius:0;overflow:hidden;display:flex;flex-direction:column">
+            <div style="padding:0;flex:1;min-height:0;overflow:hidden;display:flex">
+
+              <!-- WhiteboardShell — aluminium-framed dry-erase board (#FCFDFF) -->
+              <div dir="rtl" class="ws-whiteboard" style="position:relative;width:100%;flex:1;min-height:320px;background:#FCFDFF;border-radius:18px;overflow:hidden">
+
+                <!-- Brushed-aluminium board frame -->
+                <div aria-hidden="true" style="position:absolute;inset:5px;pointer-events:none;z-index:60;border:16px solid transparent;border-image:linear-gradient(135deg,#f6f7f9,#cbd0d7 22%,#eef0f3 45%,#b2b7c0 68%,#e3e6eb) 16 stretch;box-shadow:0 12px 30px rgba(15,23,42,.30), 0 0 0 6px #FCFDFF"></div>
+
+                <!-- Corner brackets + marker tray -->
+                <div aria-hidden="true" style="position:absolute;inset:5px;pointer-events:none;z-index:61">
+                  <span style="position:absolute;top:0;left:0;width:36px;height:36px;background:linear-gradient(135deg,#a4aab2,#ccd0d6 48%,#868c95);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 1px 3px rgba(0,0,0,.32);border-radius:18px 3px 15px 3px"></span>
+                  <span style="position:absolute;top:0;right:0;width:36px;height:36px;background:linear-gradient(135deg,#a4aab2,#ccd0d6 48%,#868c95);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 1px 3px rgba(0,0,0,.32);border-radius:3px 18px 3px 15px"></span>
+                  <span style="position:absolute;bottom:0;left:0;width:36px;height:36px;background:linear-gradient(135deg,#a4aab2,#ccd0d6 48%,#868c95);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 1px 3px rgba(0,0,0,.32);border-radius:15px 3px 18px 3px"></span>
+                  <span style="position:absolute;bottom:0;right:0;width:36px;height:36px;background:linear-gradient(135deg,#a4aab2,#ccd0d6 48%,#868c95);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 1px 3px rgba(0,0,0,.32);border-radius:3px 15px 3px 18px"></span>
+                  <div style="position:absolute;left:56px;bottom:2px;display:flex;align-items:flex-end;gap:7px">
+                    <span style="width:58px;height:11px;border-radius:6px;background:linear-gradient(180deg,#404040,#141414);box-shadow:0 1px 2px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.45)"></span>
+                    <span style="width:58px;height:11px;border-radius:6px;background:linear-gradient(180deg,#3b82f6,#1d4ed8);box-shadow:0 1px 2px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.45)"></span>
+                    <span style="width:58px;height:11px;border-radius:6px;background:linear-gradient(180deg,#ef4444,#b91c1c);box-shadow:0 1px 2px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.45)"></span>
+                    <span style="width:58px;height:11px;border-radius:6px;background:linear-gradient(180deg,#22c55e,#15803d);box-shadow:0 1px 2px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.45)"></span>
+                    <span style="width:50px;height:22px;border-radius:4px;margin-left:9px;align-self:flex-end;background:linear-gradient(180deg,#2b3340 0 56%,#eef1f5 56% 100%);box-shadow:0 2px 5px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.25)"></span>
+                  </div>
+                </div>
+
+                <!-- Content column, inset from the aluminium frame -->
+                <div style="position:absolute;inset:28px;display:flex;flex-direction:column;z-index:10">
+
+                  <!-- Board header band — breadcrumb + question counter (written on the board itself) -->
+                  <div style="flex-shrink:0;display:flex;justify-content:flex-start;margin-bottom:10px;min-height:22px">
+                    <div style="display:flex;align-items:center;gap:10px;width:100%;padding-inline:22px">
+                      <div dir="rtl" title="התפלגות נורמלית ‹ התפלגויות ‹ הסתברות" aria-label="מיקום בחומר: התפלגות נורמלית ‹ התפלגויות ‹ הסתברות" style="display:inline-flex;align-items:center;gap:6px;max-width:100%;font-family:'Rubik','Assistant',sans-serif;user-select:none;background:rgba(255,255,255,0.65);border:1px solid rgba(31,62,108,0.10);border-radius:999px;padding:3px 10px 3px 8px;box-shadow:0 1px 3px rgba(31,62,108,0.08);white-space:nowrap">
+                        <span style="display:inline-flex;align-items:center;gap:5px">
+                          <span style="width:12px;height:12px;border-radius:50%;background:#C97C18;box-shadow:0 0 0 3px rgba(201,124,24,0.18);flex-shrink:0"></span>
+                          <span style="font-weight:700;font-size:13px;color:#1F3E6C">התפלגות נורמלית</span>
+                        </span>
+                        <svg width="24" height="12" viewBox="0 0 24 12" aria-hidden="true" style="flex-shrink:0"><path d="M1,6 C6,3 11,9 16,6 21,4 23,6 23,6" fill="none" stroke="#C97C18" stroke-opacity="0.5" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                        <span title="התפלגויות" style="width:9px;height:9px;border-radius:50%;background:#64748B;opacity:0.75;flex-shrink:0"></span>
+                        <span title="הסתברות" style="width:9px;height:9px;border-radius:50%;background:#64748B;opacity:0.63;flex-shrink:0"></span>
+                      </div>
+                      <span style="margin-inline-start:auto;font-family:'Rubik',sans-serif;font-size:16px;font-weight:700;color:var(--sh-text-dark);opacity:0.85;white-space:nowrap">שאלה 3 / 10</span>
+                    </div>
+                  </div>
+
+                  <!-- Board scroller -->
+                  <div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden">
+                    <div style="display:flex;flex-direction:column;min-height:100%">
+
+                      <!-- Question stem — drawn on the board (Assistant, --sh-q-text-color) -->
+                      <div style="font-family:'Assistant',sans-serif;font-size:25px;color:var(--sh-q-text-color);line-height:1.7;white-space:pre-line;text-align:right;margin-bottom:20px;width:100%">בהתפלגות נורמלית, בטווח <span dir="ltr" style="direction:ltr;unicode-bidi:isolate">μ ± 2σ</span> מצויים כ:</div>
+
+                      <!-- MC options — 2×2 grid, real answer surfaces: solid #FFFFFF + 2.5px navy border, gold letter pill. Option ב shows the hover surface (#EAF1FF). -->
+                      <div dir="rtl" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;max-width:1180px;width:100%;margin-inline:auto;place-items:stretch;justify-items:stretch">
+                        <button class="ws-quiz-option" style="display:flex;align-items:center;justify-content:center;gap:12px;min-height:76px;padding:16px 22px;background:#FFFFFF;border:2.5px solid rgba(31,62,108,0.45);border-radius:14px;color:var(--sh-text-dark);font-family:'Assistant',sans-serif;font-size:19px;font-weight:500;cursor:pointer;text-align:center;direction:rtl;transition:all 0.18s;box-shadow:0 2px 6px rgba(31,62,108,0.12)">
+                          <span style="display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;border-radius:20px;background:#D4AF37;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:18px;flex-shrink:0">A</span>
+                          <span style="line-height:1.5;text-align:center">50% מהנתונים</span>
+                        </button>
+                        <!-- Hover state (onMouseEnter → #EAF1FF) shown statically on option B -->
+                        <button class="ws-quiz-option" style="display:flex;align-items:center;justify-content:center;gap:12px;min-height:76px;padding:16px 22px;background:#EAF1FF;border:2.5px solid rgba(31,62,108,0.45);border-radius:14px;color:var(--sh-text-dark);font-family:'Assistant',sans-serif;font-size:19px;font-weight:500;cursor:pointer;text-align:center;direction:rtl;transition:all 0.18s;box-shadow:0 2px 6px rgba(31,62,108,0.12)">
+                          <span style="display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;border-radius:20px;background:#D4AF37;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:18px;flex-shrink:0">B</span>
+                          <span style="line-height:1.5;text-align:center">68% מהנתונים</span>
+                        </button>
+                        <button class="ws-quiz-option" style="display:flex;align-items:center;justify-content:center;gap:12px;min-height:76px;padding:16px 22px;background:#FFFFFF;border:2.5px solid rgba(31,62,108,0.45);border-radius:14px;color:var(--sh-text-dark);font-family:'Assistant',sans-serif;font-size:19px;font-weight:500;cursor:pointer;text-align:center;direction:rtl;transition:all 0.18s;box-shadow:0 2px 6px rgba(31,62,108,0.12)">
+                          <span style="display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;border-radius:20px;background:#D4AF37;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:18px;flex-shrink:0">C</span>
+                          <span style="line-height:1.5;text-align:center">95% מהנתונים</span>
+                        </button>
+                        <button class="ws-quiz-option" style="display:flex;align-items:center;justify-content:center;gap:12px;min-height:76px;padding:16px 22px;background:#FFFFFF;border:2.5px solid rgba(31,62,108,0.45);border-radius:14px;color:var(--sh-text-dark);font-family:'Assistant',sans-serif;font-size:19px;font-weight:500;cursor:pointer;text-align:center;direction:rtl;transition:all 0.18s;box-shadow:0 2px 6px rgba(31,62,108,0.12)">
+                          <span style="display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;border-radius:20px;background:#D4AF37;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:18px;flex-shrink:0">D</span>
+                          <span style="line-height:1.5;text-align:center">99.7% מהנתונים</span>
+                        </button>
+                      </div>
+
+                      <!-- Keyboard hint — shown while no option is selected -->
+                      <div dir="rtl" style="text-align:center;font-size:12px;color:rgba(31,62,108,0.55);margin-bottom:10px;font-family:'Assistant',sans-serif">💡 אפשר גם במקלדת — לחצו A–D או 1–4</div>
+
+                      <!-- 🙋 שאל בן אדם — escalate a stuck question -->
+                      <div dir="rtl" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+                        <button type="button" title="נשלח לברק בקשת עזרה על השאלה הזו" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;background:rgba(212,175,55,0.12);color:#9A7B1A;border:1.5px dashed rgba(212,175,55,0.6);border-radius:20px;padding:8px 18px;cursor:pointer;font-family:'Rubik',sans-serif;font-size:14px;font-weight:600">🙋 שאל בן אדם</button>
+                      </div>
+
+                      <!-- דלג + clickable dot navigation (2 correct, current, 7 pending) + MC spacer -->
+                      <div style="display:flex;align-items:center;justify-content:space-between">
+                        <span style="font-family:'Assistant',sans-serif;font-size:16px;color:var(--sh-text-light);cursor:pointer;text-decoration:underline">דלג</span>
+                        <div style="display:flex;gap:6px;align-items:center">
+                          <div title="Question 1 ✓" style="width:12px;height:12px;border-radius:50%;background:#34A853;display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:700;cursor:pointer">✓</div>
+                          <div title="Question 2 ✓" style="width:12px;height:12px;border-radius:50%;background:#34A853;display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:700;cursor:pointer">✓</div>
+                          <div title="Question 3" style="width:16px;height:16px;border-radius:50%;background:var(--sh-btn-color);display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:700;cursor:pointer;box-shadow:0 0 0 2px rgba(51,81,202,0.3)"></div>
+                          <div style="width:9px;height:9px;border-radius:50%;background:#D8E0F0;opacity:0.45"></div>
+                          <div style="width:9px;height:9px;border-radius:50%;background:#D8E0F0;opacity:0.45"></div>
+                          <div style="width:9px;height:9px;border-radius:50%;background:#D8E0F0;opacity:0.45"></div>
+                          <div style="width:9px;height:9px;border-radius:50%;background:#D8E0F0;opacity:0.45"></div>
+                          <div style="width:9px;height:9px;border-radius:50%;background:#D8E0F0;opacity:0.45"></div>
+                          <div style="width:9px;height:9px;border-radius:50%;background:#D8E0F0;opacity:0.45"></div>
+                          <div style="width:9px;height:9px;border-radius:50%;background:#D8E0F0;opacity:0.45"></div>
+                        </div>
+                        <!-- MC mode: clicking an option commits — spacer instead of a reveal button -->
+                        <div style="width:120px"></div>
+                      </div>
+
+                      <!-- Board footer nav — chalk-ish prev + gold next, stuck to the board's bottom edge -->
+                      <div style="margin-top:auto;position:sticky;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:14px;padding-inline:22px;background:linear-gradient(180deg, rgba(252,253,255,0) 0%, #FCFDFF 45%)">
+                        <button aria-label="שאלה קודמת" title="הקודם" style="background:transparent;color:var(--sh-text-dark);border:2px solid rgba(31,62,108,0.35);border-radius:22px;padding:9px 22px;cursor:pointer;font-family:'Rubik',sans-serif;font-size:15px;font-weight:700;min-height:44px">→ הקודם</button>
+                        <button aria-label="שאלה הבאה" title="הבא — בלי לענות ובלי להיחשב טעות" style="background:#D4AF37;color:#fff;border:none;border-radius:22px;padding:10px 30px;cursor:pointer;font-family:'Rubik',sans-serif;font-size:15px;font-weight:700;min-height:44px;box-shadow:0 2px 10px rgba(212,175,55,0.40)">הבא ←</button>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+  const { Sidebar, TopBar } = window.WaffleStackDesignSystem_a43b54;
+
+  ReactDOM.createRoot(document.getElementById('sidebar-root')).render(
+    <Sidebar activeItem="courses" onNavigate={() => {}} />
+  );
+  ReactDOM.createRoot(document.getElementById('topbar-root')).render(
+    <TopBar title="אזור למידה" userName="ברק" xp={1240} onLogout={() => {}} />
+  );
+</script>
+</body>
+</html>

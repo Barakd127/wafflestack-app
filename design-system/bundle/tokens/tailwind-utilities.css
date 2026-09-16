@@ -1,0 +1,37 @@
+/* [ds-extract] Tailwind utility subset — copied VERBATIM from the app's
+   production build (index-dHXhtt7m.css) @ 8580a64a. Only classes used by bundle
+   markup are included. Regenerate with subset-css.mjs. */
+.excalidraw .command-palette-dialog .commands .command-item .name{display:flex;align-items:center;gap:.25rem}
+.excalidraw .sidebar{display:flex;flex-direction:column;position:absolute;top:0;bottom:0;right:0;z-index:5;margin:0;padding:0;box-sizing:border-box;background-color:var(--sidebar-bg-color);box-shadow:var(--sidebar-shadow);pointer-events:var(--ui-pointerEvents);overflow:hidden;border-radius:0;width:calc(var(--right-sidebar-width) - var(--space-factor) * 2);border-left:1px solid var(--sidebar-border-color)}
+:root[dir=rtl] .excalidraw .sidebar{left:0;right:auto}
+:root[dir=rtl] .excalidraw .sidebar{border-right:1px solid var(--sidebar-border-color);border-left:0}
+.grid{display:grid}
+.hidden{display:none}
+.ws-topbar>*{flex-shrink:0}
+.ws-topbar h1{flex-shrink:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ws-ribbon{display:flex;flex-direction:column;gap:2px}
+.ws-ribbon-label{font-size:10px;opacity:.55;letter-spacing:.3px;text-align:center;color:inherit}
+.ws-ribbon-divider{width:1px;height:32px;background:#1f3e6c2e;align-self:center;flex-shrink:0}
+.ws-tooltip{position:fixed;z-index:9500;background:#0f1220f5;border:1px solid rgba(127,155,217,.35);color:#e5edff;border-radius:10px;padding:8px 12px;font-size:12px;line-height:1.4;box-shadow:0 8px 22px #00000073;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);max-width:240px;pointer-events:none;animation:wsTooltipFadeIn 60ms ease-out}
+.ws-tooltip-desc{color:#9aa4c7;font-size:11px;margin-top:2px}
+.ws-glass-btn{background:#9eb1e74d!important;backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border:1px solid rgba(158,177,231,.55)!important;color:#1f3e6c!important;box-shadow:inset 0 1px #fff9,0 6px 18px #6e8cd247!important}
+.ws-glass-btn:hover{background:#9eb1e770!important}
+.ws-glass-card{position:relative;overflow:hidden;backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);background:var(--sh-glass-card)!important;border:1px solid rgba(255,255,255,.55)!important;border-bottom-color:#ffffff2e!important;border-right-color:#ffffff2e!important;box-shadow:0 8px 32px #1f3e6c2e,inset 0 1px #ffffff8c,inset 0 -1px #1f3e6c0f!important;transition:transform .18s cubic-bezier(.22,1,.36,1),box-shadow .18s,border-color .18s!important}
+.ws-glass-card:before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;border-radius:inherit;background:linear-gradient(160deg,rgba(255,255,255,.28) 0%,rgba(255,255,255,.08) 40%,transparent 60%);pointer-events:none;z-index:0}
+.ws-glass-card>*{position:relative;z-index:1}
+.ws-glass-card:hover{transform:translateY(-3px)!important;box-shadow:0 16px 40px #1f3e6c3d,inset 0 1px #ffffffa6,inset 0 -1px #1f3e6c14!important;border-color:#ffffffb3!important}
+.ws-glass-card:active{transform:scale(.98) translateY(0)!important;box-shadow:0 4px 16px #1f3e6c24,inset 0 2px 4px #1f3e6c14!important}
+html.dark .ws-glass-card{border-color:#ffffff24!important;border-bottom-color:#0003!important;border-right-color:#0003!important;box-shadow:0 8px 32px #00000059,inset 0 1px #ffffff1f,inset 0 -1px #0003!important}
+html.dark .ws-glass-card:before{background:linear-gradient(160deg,rgba(255,255,255,.1) 0%,rgba(255,255,255,.03) 40%,transparent 60%)}
+html.dark .ws-glass-card:hover{border-color:#ffffff38!important;box-shadow:0 16px 40px #00000080,inset 0 1px #ffffff2e!important}
+.ws-icon-chip{position:relative;overflow:hidden;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .15s,background .15s,border-color .15s}
+.ws-icon-chip:before{content:"";position:absolute;top:0;left:5%;right:5%;height:45%;background:linear-gradient(to bottom,rgba(255,255,255,.3),transparent);border-radius:10px 10px 50% 50%;pointer-events:none}
+.ws-cta-btn{position:relative;overflow:hidden;border:none;cursor:pointer;transition:transform .15s cubic-bezier(.22,1,.36,1),box-shadow .15s,filter .15s}
+.ws-cta-btn:before{content:"";position:absolute;top:0;left:8%;right:8%;height:48%;background:linear-gradient(to bottom,rgba(255,255,255,.3),transparent);border-radius:999px 999px 50% 50%;pointer-events:none;z-index:0}
+.ws-cta-btn>*{position:relative;z-index:1}
+.ws-cta-btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+.ws-cta-btn:active{transform:scale(.97);filter:brightness(.96)}
+@keyframes wsTooltipFadeIn{0%{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (max-width: 768px){.ws-screen-pad{padding:16px 12px!important}.ws-h2{font-size:20px!important}.ws-topbar{height:auto!important;padding:8px 12px!important;flex-wrap:wrap!important;gap:8px!important}.ws-topbar h1{font-size:18px!important}.ws-topbar .ws-topbar-actions{flex-wrap:wrap;gap:6px!important}.ws-topbar-actions>span{font-size:12px!important}.ws-topbar-actions button{padding:4px 8px!important}.ws-home-grid{display:grid!important;grid-template-columns:1fr!important;gap:14px!important}.ws-home-grid>div{padding:18px!important}.ws-topic-card{padding:16px!important}.ws-topic-card h3{font-size:17px!important}.ws-lesson-rightpane{padding:14px 12px!important}.ws-lesson-card{padding:20px 16px!important;min-height:0!important}.ws-lesson-card h3{font-size:22px!important}.ws-lesson-bullet{padding:10px 12px!important;gap:10px!important}.ws-lesson-bullet>div:first-child{width:28px!important;height:28px!important;font-size:13px!important}.ws-lesson-bullet>div:last-child{font-size:16px!important;line-height:1.7!important}.ws-lesson-formula{padding:14px 12px!important;font-size:18px!important}.ws-quiz-topbar{padding:0 10px!important;gap:8px!important}.ws-quiz-topbar .ws-quiz-topic{display:none}.ws-quiz-intro{padding:20px!important}.ws-quiz-intro h2{font-size:20px!important}.stat-progress-bar{max-width:min(280px,100%)!important}.ws-topbar h1{padding-inline-start:64px!important}.ws-ribbon-label,.ws-ribbon-divider{display:none}.ws-ribbon:not(:first-child){display:none}}
+@media (prefers-reduced-motion: reduce){.ws-glass-card,.ws-glass-card:hover,.ws-glass-card:active{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;transition:none!important}.ws-glass-card:before{display:none}}
+@media (min-width: 768px){.md\:inline{display:inline}}

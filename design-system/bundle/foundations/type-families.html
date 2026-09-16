@@ -1,0 +1,40 @@
+<!-- @dsCard group="Type" viewport="700x300" name="Font families" subtitle="The five real families loaded by tokens/fonts.css and their roles" -->
+<!doctype html>
+<html lang="he" dir="rtl">
+<head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; background: var(--sh-page-bg); font-family: 'Heebo', Inter, system-ui, sans-serif; padding: 14px 16px; overflow: auto; }
+  .fam { background: rgba(255,255,255,0.6); border-radius: 12px; padding: 8px 12px; margin-bottom: 8px; display: flex; align-items: baseline; gap: 12px; }
+  .fam .meta { min-width: 210px; flex: none; }
+  .fam .name { font-family: 'Inter', sans-serif; direction: ltr; text-align: left; font-size: 12px; font-weight: 700; color: var(--sh-text-dark); }
+  .fam .role { font-size: 10.5px; color: var(--sh-text-tip); }
+  .fam .sample { font-size: 17px; color: var(--sh-text-med); }
+  .fam .latin { direction: ltr; unicode-bidi: isolate; }
+  .toggle { position: fixed; bottom: 8px; left: 8px; width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--sh-answer-border); background: var(--sh-answer-bg); cursor: pointer; font-size: 13px; z-index: 9; }
+</style>
+</head>
+<body>
+<div class="fam">
+  <div class="meta"><div class="name">Heebo</div><div class="role">גופן הגוף — ברירת המחדל של האפליקציה (‎:root font-family)</div></div>
+  <div class="sample" style="font-family: 'Heebo', sans-serif;">לומדים סטטיסטיקה בכיף · <span class="latin">Heebo 0123 Aa</span></div>
+</div>
+<div class="fam">
+  <div class="meta"><div class="name">Rubik</div><div class="role">כותרות ורכיבי ממשק — כרטיסי קורס וניווט</div></div>
+  <div class="sample" style="font-family: 'Rubik', sans-serif; font-weight: 600;">רווח בר-סמך של 95% · <span class="latin">Rubik 0123 Aa</span></div>
+</div>
+<div class="fam">
+  <div class="meta"><div class="name">Assistant</div><div class="role">‎--ws-hand‎ — טוקן "כתב יד" חונה; אף רכיב לא קורא אותו עד שייבחר גופן טוש</div></div>
+  <div class="sample" style="font-family: var(--ws-hand);">הערה על הלוח הלבן · <span class="latin">Assistant 0123 Aa</span></div>
+</div>
+<div class="fam">
+  <div class="meta"><div class="name">Inter</div><div class="role">גופן לטיני — נוסחאות, קוד וטוקנים</div></div>
+  <div class="sample" style="font-family: 'Inter', sans-serif;">אנגלית משובצת: <span class="latin">Inter — p-value = 0.05</span></div>
+</div>
+<div class="fam">
+  <div class="meta"><div class="name">Playpen Sans Hebrew</div><div class="role">נדחה ללוח — העברית שלו היא דפוס מעוגל, לא כתב יד (הערת app.css)</div></div>
+  <div class="sample" style="font-family: 'Playpen Sans Hebrew', sans-serif;">ניסיון כתב יד שנפסל · <span class="latin">Playpen 0123 Aa</span></div>
+</div>
+<button class="toggle" aria-label="Toggle dark mode" onclick="document.documentElement.classList.toggle('dark')">◐</button>
+</body></html>

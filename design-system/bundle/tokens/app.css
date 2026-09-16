@@ -1,0 +1,107 @@
+/* [ds-extract] VERBATIM from src/index.css (token + base blocks) @ c1a3ad12 (master). Do not edit by hand —
+   regenerate with design-system/scripts/extract-master.mjs. */
+
+
+:root {
+  font-family: 'Heebo', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* PARKED — no handwriting face is applied to the board right now.
+     Two attempts were rejected: Playpen Sans Hebrew (its Hebrew is rounded
+     PRINT, not handwriting) and Gveret Levin (real handwriting, but thin and
+     slanted — not the thick upright whiteboard-marker look that was wanted).
+     The token stays so the next attempt is a one-line change; nothing reads it
+     until a marker face is chosen. */
+  --ws-hand: 'Assistant', sans-serif;
+
+  /* Bottom-left FAB slot tokens — shared between TutorFAB (fixed) and the
+     sidebar's PomodoroTimer (absolute). Keep these in sync if you move one. */
+  --ws-bottom-fab-inset: 20px;          /* matches Tailwind `bottom-5 left-5` */
+  --ws-bottom-fab-size: 56px;           /* TutorFAB 14*4 = 56 */
+  --ws-bottom-fab-gap:  12px;
+  /* Sidebar Pomodoro pill sits just to the right of the TutorFAB column.
+     Tutor sits at left:20 + 56 wide = consumes 0..76; pill starts at 90px. */
+  --ws-pomodoro-left: 90px;
+
+  /* Mind map canvas CSS variables (light mode) */
+  --mm-canvas-bg-start: #f5f7fa;
+  --mm-canvas-bg-end: #c3cfe2;
+  --mm-glass-bg: rgba(255, 255, 255, 0.9);
+  --mm-glass-border: rgba(255, 255, 255, 0.5);
+  --mm-text-primary: #1f2937;
+  --mm-text-secondary: #4b5563;
+  --mm-divider: #e5e7eb;
+
+  /* StudyHub theme tokens (light mode) */
+  --sh-page-bg: linear-gradient(35.22deg, #FFFFFF -9.85%, #D8E7FA 49.05%, #3351CA 136%);
+  --sh-sidebar-bg: linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%);
+  --sh-sidebar-active: #254A9F;
+  --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.45) 54.33%, rgba(255,255,255,0.15) 100%);
+  --sh-glass-card-sm: linear-gradient(180deg, rgba(255,255,255,0.30) 54.33%, rgba(255,255,255,0.10) 100%);
+  --sh-card-shadow: 0px 15px 30px rgba(31,41,55,0.25);
+  --sh-btn-color: #122460;
+  --sh-text-dark: #1F3E6C;
+  --sh-text-med: #254A9F;
+  --sh-text-light: #7F9BD9;
+  --sh-text-tip: #465CA5;
+  --sh-topbar-bg: linear-gradient(135deg, rgba(255,255,255,0.82) 0%, rgba(228,238,255,0.78) 60%, rgba(255,245,210,0.60) 100%);
+  --sh-topbar-border: rgba(212,175,55,0.40);
+  --sh-q-card-bg: linear-gradient(178.82deg, rgba(255,255,255,0.82) 17.91%, rgba(192,216,255,0.77) 199.73%);
+  --sh-answer-bg: rgba(255,255,255,0.7);
+  --sh-answer-border: rgba(51,81,202,0.2);
+  --sh-q-text-color: #111;
+}
+
+html.dark {
+  /* Mind map canvas CSS variables (dark mode) */
+  --mm-canvas-bg-start: #0f0f14;
+  --mm-canvas-bg-end: #1a1a2e;
+  --mm-glass-bg: rgba(15, 15, 30, 0.95);
+  --mm-glass-border: rgba(255, 255, 255, 0.1);
+  --mm-text-primary: #e2e8f0;
+  --mm-text-secondary: #94a3b8;
+  --mm-divider: rgba(255, 255, 255, 0.1);
+
+  /* StudyHub theme tokens (dark mode) */
+  --sh-page-bg: linear-gradient(35.22deg, #0a0a16 -9.85%, #111128 49.05%, #181840 136%);
+  --sh-sidebar-bg: linear-gradient(265.4deg, #1a2080 -108.21%, #0f1245 169.33%);
+  --sh-sidebar-active: #2a3aaa;
+  --sh-glass-card: linear-gradient(180deg, rgba(255,255,255,0.07) 54.33%, rgba(255,255,255,0.03) 100%);
+  --sh-glass-card-sm: linear-gradient(180deg, rgba(255,255,255,0.05) 54.33%, rgba(255,255,255,0.02) 100%);
+  --sh-card-shadow: 0px 15px 30px rgba(0,0,0,0.5);
+  --sh-btn-color: #4ECDC4;
+  --sh-text-dark: #e2e8f0;
+  --sh-text-med: #a5b4fc;
+  --sh-text-light: #94a3b8;
+  --sh-text-tip: #64748b;
+  --sh-topbar-bg: linear-gradient(135deg, rgba(15,22,60,0.92) 0%, rgba(20,30,80,0.90) 70%, rgba(100,80,0,0.12) 100%);
+  --sh-topbar-border: rgba(212,175,55,0.20);
+  --sh-q-card-bg: linear-gradient(178.82deg, rgba(20,20,60,0.9) 17.91%, rgba(15,20,55,0.85) 199.73%);
+  --sh-answer-bg: rgba(20,20,50,0.8);
+  --sh-answer-border: rgba(78,205,196,0.25);
+  --sh-q-text-color: #e2e8f0;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  /* App base color, NOT black. Body shows only at scroll edges / overscroll /
+     layout gaps; pure #000 there read as jarring "black areas" (user
+     2026-05-31). Use the light app tint in light mode, deep navy in dark. */
+  background: #EAF2FF;
+}
+html.dark body { background: #0B1B3E; }
+
+/* A11y: high-contrast gold focus ring on any keyboard-focused interactive element.
+   Uses :focus-visible so mouse clicks don't trigger the ring (only Tab/keyboard).
+   Gold #C9A227 matches landing CTAs — single token across the app
+   (skill ux: Focus States HIGH; WCAG 2.4.7). */
+:focus-visible {
+  outline: 3px solid #C9A227;
+  outline-offset: 3px;
+  border-radius: inherit;
+}
+html.dark :focus-visible {
+  outline-color: #E8C547;
+}
