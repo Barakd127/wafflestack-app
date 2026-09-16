@@ -4232,12 +4232,17 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               there was no way back at all. ───────────────────────────────── */}
           {boardFullBleed && !isDone && (
             <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              gap: 16, flexShrink: 0, marginBottom: 12, paddingInline: 4,
+              /* 1fr auto 1fr, so the trail sits on the row's true centre
+                 whatever the back link's length — the theory row gets there
+                 with space-between because both its ends carry content. */
+              display: 'grid', gridTemplateColumns: '1fr auto 1fr',
+              alignItems: 'center', gap: 16,
+              flexShrink: 0, marginBottom: 16,
             }}>
               <button
                 onClick={() => { try { onBack() } catch (_) {} }}
                 style={{
+                  justifySelf: 'start',
                   background: 'none', border: 'none', cursor: 'pointer',
                   fontFamily: "'Assistant', sans-serif", fontSize: 15, fontWeight: 600,
                   color: TEXT_MED, padding: 0,
@@ -4251,31 +4256,17 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 חזרה לנושאים
               </button>
 
-              <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+              <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                 <HierarchyBreadcrumb topicId={selectedTopic || ''} />
                 {(q as any).difficulty && (
                   <QuizDifficultyBadge level={(q as any).difficulty} xp={q.xp} tone="light" showXp={false} />
                 )}
               </div>
 
-              {!isMobile && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                  <button
-                    onClick={() => setFloatMode(true)}
-                    aria-label="נתק לחלון צף"
-                    title="נתק לחלון צף נגרר"
-                    className="ws-cta-outline ws-cta-xs"
-                  >⤢ צף</button>
-                  {onToggleFullscreen && (
-                    <button
-                      onClick={onToggleFullscreen}
-                      aria-label={fullscreen ? 'יציאה ממסך מלא' : 'מסך מלא — ללא הסחות דעת'}
-                      title={fullscreen ? 'יציאה ממסך מלא (Esc)' : 'מסך מלא'}
-                      className="ws-cta-outline ws-cta-xs"
-                    >{fullscreen ? '↘ צא ממסך מלא' : '⛶ מסך מלא'}</button>
-                  )}
-                </div>
-              )}
+              {/* צף and מסך מלא are on the board — see topLeftSlot. They act on
+                  the board, so they live on it. This column stays empty so the
+                  trail keeps the row's true centre. */}
+              <span aria-hidden />
             </div>
           )}
 
@@ -4284,6 +4275,26 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             topicId={selectedTopic || undefined}
             progress={{ done: answeredCount, total }}
             revealOnProgress
+            /* The frame controls, on the board they frame — the same corner the
+               theory board gives הוספה למפה / למחברת. */
+            topLeftSlot={!isDone && !isMobile ? (
+              <>
+                <button
+                  onClick={() => setFloatMode(true)}
+                  aria-label="נתק לחלון צף"
+                  title="נתק לחלון צף נגרר"
+                  className="ws-cta-outline ws-cta-xs"
+                >⤢ צף</button>
+                {onToggleFullscreen && (
+                  <button
+                    onClick={onToggleFullscreen}
+                    aria-label={fullscreen ? 'יציאה ממסך מלא' : 'מסך מלא — ללא הסחות דעת'}
+                    title={fullscreen ? 'יציאה ממסך מלא (Esc)' : 'מסך מלא'}
+                    className="ws-cta-outline ws-cta-xs"
+                  >{fullscreen ? '↘ צא ממסך מלא' : '⛶ מסך מלא'}</button>
+                )}
+              </>
+            ) : undefined}
             /* The board's other corner. The frost slider owns bottom-left; the
                tools take bottom-right, on the same ledge — so both read as
                controls OF the board rather than a band above the question. */
