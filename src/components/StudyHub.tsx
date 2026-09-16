@@ -3395,11 +3395,30 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     // 'הבא ←' in the header is the only thing that moves the session forward.
   }
 
-  // Keyboard answering for MCQ: press A–D or 1–4 to choose (matches the letter
-  // pill on each card). Speeds up practice; ignored while typing in a field.
+  /* Keyboard answering for MCQ — A–D or 1–4 picks an option.
+   *
+   * It is OFF-able now, and remembered. Per Shirli: reaching for a media key
+   * answered the question. A keyboard shortcut that commits an answer with no
+   * confirmation is a shortcut that can only be wrong once, so the reader gets
+   * to decide whether it is armed at all.
+   *
+   * Two narrowings on top of the switch, because the old guard was far too
+   * wide: it mapped ANY letter a–z to an index, and it accepted named keys.
+   * Now only a printable single character counts, only up to the number of
+   * options the question actually has, and a held key does not fire twice. */
+  const KBD_KEY = 'ws-quiz-kbd-answers'
+  const [kbdAnswers, setKbdAnswers] = useState(() => {
+    try { return localStorage.getItem(KBD_KEY) !== '0' } catch { return true }
+  })
   useEffect(() => {
+    try { localStorage.setItem(KBD_KEY, kbdAnswers ? '1' : '0') } catch { /* private mode */ }
+  }, [kbdAnswers])
+
+  useEffect(() => {
+    if (!kbdAnswers) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey) return
+      if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return
+      if (e.key.length !== 1) return          // AudioVolumeDown, F5, Escape…
       const ae = document.activeElement as HTMLElement | null
       const tag = ae?.tagName
       if (tag === 'TEXTAREA' || tag === 'INPUT' || ae?.isContentEditable) return
@@ -3408,12 +3427,16 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       const opts = (q as any).options as string[]
       let idx = -1
       if (e.key >= '1' && e.key <= '9') idx = parseInt(e.key, 10) - 1
-      else { const k = e.key.toLowerCase(); if (k >= 'a' && k <= 'z') idx = k.charCodeAt(0) - 97 }
+      else {
+        const k = e.key.toLowerCase()
+        // only the letters this question actually offers — a..(a+n-1)
+        if (k >= 'a' && k.charCodeAt(0) < 97 + opts.length) idx = k.charCodeAt(0) - 97
+      }
       if (idx >= 0 && idx < opts.length) { e.preventDefault(); handleMcChoose(idx) }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [q, mcSelected])
+  }, [q, mcSelected, kbdAnswers])
 
   const isDone = phase === 'done'
 
@@ -4551,7 +4574,35 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   })}
                 </div>
                 {mcSelected === null && (
-                  <div className="ws-quiz-hint" style={{ textAlign: 'center', fontSize: 12, color: 'rgba(31,62,108,0.55)', marginBottom: 10, fontFamily: "'Assistant', sans-serif" }} dir="rtl">💡 אפשר גם במקלדת — לחצו A–D או 1–4</div>
+                  /* The line that explains the shortcut is the switch that
+                     turns it off — the only place a reader would look for it. */
+                  <div className="ws-quiz-hint" style={{ textAlign: 'center', marginBottom: 10 }} dir="rtl">
+                    <button
+                      type="button"
+                      onClick={() => setKbdAnswers(v => !v)}
+                      aria-pressed={kbdAnswers}
+                      title={kbdAnswers ? 'כבה מענה מהמקלדת' : 'הפעל מענה מהמקלדת'}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 8,
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        fontFamily: "'Assistant', sans-serif", fontSize: 12,
+                        color: 'rgba(31,62,108,0.55)', padding: '4px 8px', borderRadius: 999,
+                      }}
+                    >
+                      <span style={{
+                        width: 26, height: 15, borderRadius: 999, flexShrink: 0, position: 'relative',
+                        background: kbdAnswers ? '#254A9F' : 'rgba(31,62,108,0.22)',
+                        transition: 'background .18s',
+                      }}>
+                        <span style={{
+                          position: 'absolute', top: 2, insetInlineStart: kbdAnswers ? 13 : 2,
+                          width: 11, height: 11, borderRadius: '50%', background: '#fff',
+                          transition: 'inset-inline-start .18s',
+                        }} />
+                      </span>
+                      {kbdAnswers ? 'מענה מהמקלדת פעיל — A–D או 1–4' : 'מענה מהמקלדת כבוי'}
+                    </button>
+                  </div>
                 )}
                 {/* Reinforcement on a CORRECT answer — show the explanation.
                     Was missing: correct answers auto-skipped with zero learning,
