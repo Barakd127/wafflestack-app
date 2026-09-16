@@ -19,6 +19,8 @@ export interface WhiteboardShellProps {
   style?: CSSProperties
   /** Pinned in the board's top-right inner corner (e.g. hierarchy breadcrumb). */
   topRightSlot?: ReactNode
+  /** Pinned opposite it, in the board's top-left inner corner. */
+  topLeftSlot?: ReactNode
 }
 
 export default function WhiteboardShell({ children, style, topRightSlot }: WhiteboardShellProps) {

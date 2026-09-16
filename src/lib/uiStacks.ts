@@ -18,7 +18,10 @@ import { useState, useEffect } from 'react'
 
 /** 'br-content' is bottom-right of the CONTENT, not of the window. The rail
  *  owns the right edge and is user-resizable, so anything anchored there has to
- *  track it — hence --ws-rail-w, published by the layout on every resize. */
+ *  track it — hence --ws-rail-w, published by the layout on every resize.
+ *  --ws-bottombar-h is published by a screen that owns a bar along the bottom
+ *  of its content (the lesson's slide bar): the FABs ride above it instead of
+ *  sitting on top of its buttons. */
 export type Corner = 'bl' | 'br' | 'tl' | 'tr' | 'br-content'
 
 const STACK_STEP = 72   // px between FAB centres in the same corner stack
@@ -50,7 +53,10 @@ export function getStackOffset(
     case 'br': return { bottom: offset, right: BASE }
     case 'tl': return { top: offset, left: BASE }
     case 'tr': return { top: offset, right: BASE }
-    case 'br-content': return { bottom: offset, right: `calc(var(--ws-rail-w, 0px) + ${BASE}px)` }
+    case 'br-content': return {
+      bottom: `calc(var(--ws-bottombar-h, 0px) + ${offset}px)` as unknown as number,
+      right: `calc(var(--ws-rail-w, 0px) + ${BASE}px)`,
+    }
   }
 }
 

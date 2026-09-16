@@ -187,6 +187,7 @@ export default function GlassBoardShell({
   children,
   style,
   topRightSlot,
+  topLeftSlot,
   topicId,
   progress,
   onMastered,
@@ -583,14 +584,17 @@ export default function GlassBoardShell({
           transition: tray ? trayTransition : undefined,
         }}
       >
-        {topRightSlot && (
-          // paddingInlineEnd clears the mode control (left:30, ~250px wide) so a
-          // slot item pushed to inline-end (the quiz's 'שאלה N / M' counter) is
-          // not drawn under it. In 'tray' layout the mode control has moved
-          // down into the city band (it must not overlap the sheet), so the
-          // slot no longer needs the clearance.
-          <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'flex-start', marginBottom: 10, minHeight: 22, paddingInlineEnd: tray ? 0 : 260 }}>
-            {topRightSlot}
+        {(topRightSlot || topLeftSlot) && (
+          // One row across the head of the ink column: the trail on the right,
+          // the slide's own actions on the left. The old paddingInlineEnd:260
+          // is gone with the mode control it was clearing — it was squeezing
+          // the breadcrumb for a button that no longer exists.
+          <div style={{
+            flexShrink: 0, display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', gap: 12, marginBottom: 10, minHeight: 22,
+          }}>
+            <div style={{ minWidth: 0 }}>{topRightSlot}</div>
+            {topLeftSlot && <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>{topLeftSlot}</div>}
           </div>
         )}
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
@@ -640,8 +644,8 @@ export default function GlassBoardShell({
         dir="rtl"
         style={{
           position: 'absolute',
-          left: 24,
-          bottom: tray ? TRAY_DOCK_BOTTOM : 24,
+          left: 28,
+          bottom: tray ? TRAY_DOCK_BOTTOM : 28,
           zIndex: 12,
           display: 'flex',
           alignItems: 'center',

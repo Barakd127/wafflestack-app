@@ -250,6 +250,58 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
     setPendingInsert({ text: formula, kind: 'equation', sourceLabel: 'formula' })
   }
 
+  /* The tutor and the pomodoro are fixed to the viewport; the slide bar is in
+     the document's flow. So publishing the bar's HEIGHT is not enough — the
+     bar can sit anywhere in the scroll, and a 60px lift only clears it when it
+     happens to be flush with the bottom of the window.
+
+     What the FABs actually need is the distance from the bottom of the window
+     up to the top of the bar. That changes as the page scrolls, so it is
+     measured on scroll and resize (rAF-coalesced) and clamped: below the fold
+     the bar needs no clearance at all, and once it has scrolled well up the
+     lift stops growing rather than throwing the FABs off the top. */
+  const slideBarRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const root = document.documentElement
+    let frame = 0
+    const publish = () => {
+      frame = 0
+      const el = slideBarRef.current
+      if (!el) { root.style.removeProperty('--ws-bottombar-h'); return }
+      const top = el.getBoundingClientRect().top
+      const lift = Math.min(Math.max(0, Math.round(window.innerHeight - top + 12)), 240)
+      root.style.setProperty('--ws-bottombar-h', `${lift}px`)
+    }
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(publish) }
+    publish()
+    const ro = new ResizeObserver(schedule)
+    if (slideBarRef.current) ro.observe(slideBarRef.current)
+    window.addEventListener('resize', schedule)
+    window.addEventListener('scroll', schedule, true)   // capture: inner scrollers too
+    return () => {
+      if (frame) cancelAnimationFrame(frame)
+      ro.disconnect()
+      window.removeEventListener('resize', schedule)
+      window.removeEventListener('scroll', schedule, true)
+      root.style.removeProperty('--ws-bottombar-h')
+    }
+  }, [currentSlide])
+
+  const addSlideTo = (toMap: boolean) => {
+    const ok = quickAddToMindmap({
+      text: slide?.title ?? '',
+      body: typeof slide?.content === 'string' ? slide.content : '',
+      // the map wants the live iframe so the node lands in the open pane;
+      // the notebook is the same tree written straight to storage
+      iframeWindow: toMap ? (mindmapRef.current?.contentWindow ?? null) : undefined,
+      userId,
+    })
+    if (ok) {
+      setCopied(toMap ? 'title-mm' : 'title-nb')
+      setTimeout(() => setCopied(null), 1500)
+    }
+  }
+
   const handleCopyTitle = () => {
     const slide = slides[currentSlide]
     if (!slide) return
@@ -354,10 +406,16 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       {/* Floating "save to arsenal" chip listens at document level */}
       <ArsenalCapture />
 
-      {/* Header bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, gap: 8, flexWrap: 'wrap' }}>
-        <button onClick={onBack} style={backLinkStyle}><Ico d={I.back} size={16} />חזרה לנושאים</button>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+      {/* ── The row above the board: where I came from on the right, what I can
+          switch on this screen on the left. Same type, same colours and same
+          segmented pill as the row above the topic list.
+
+          The page heading that used to follow it is gone — the top bar already
+          carries "הקדמה לסטטיסטיקה · שיעור", and the board now starts where
+          that heading started. ───────────────────────────────────────────── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, gap: 12, flexWrap: 'wrap' }}>
+        <button onClick={onBack} style={backLinkStyle}><Ico d={I.back} size={17} />חזרה לנושאים</button>
+        <div style={{ display: 'flex', gap: 2, background: 'rgba(127,155,217,0.14)', padding: 3, borderRadius: 999 }}>
           <button
             onClick={() => {
               setPresenting(v => {
@@ -368,45 +426,22 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               })
             }}
             title={presenting ? 'סיום מצב הצגה' : 'היד מציגה את השקופית על הלוח'}
-            style={{
-              background: presenting ? '#b91c1c' : BUTTON_COLOR,
-              color: '#fff', border: 'none', borderRadius: 10,
-              padding: '7px 14px', fontSize: 13, fontWeight: 700,
-              fontFamily: "'Assistant', sans-serif", cursor: 'pointer',
-              boxShadow: '0 2px 10px rgba(31,62,108,0.25)', transition: 'all 0.18s',
-              whiteSpace: 'nowrap',
-            }}
+            aria-pressed={presenting}
+            style={toggleStyle(presenting)}
           >
-            <Ico d={presenting ? I.close : I.present} size={15} />
+            <Ico d={presenting ? I.close : I.present} size={18} />
             {presenting ? 'סיום הצגה' : 'מצב הצגה'}
           </button>
           <button
             onClick={() => setMindmapOpen(v => !v)}
             title={mindmapOpen ? 'הסתר מפת מושגים' : 'הצג מפת מושגים'}
-            style={mindmapToggleStyle(mindmapOpen)}
+            aria-pressed={mindmapOpen}
+            style={toggleStyle(mindmapOpen)}
           >
-            <Ico d={I.mind} size={15} />
+            <Ico d={I.mind} size={18} />
             {mindmapOpen ? 'הסתר מפה' : 'הצג מפה'}
           </button>
-          <button onClick={() => handleStartQuiz(false)} style={skipLinkStyle}>דלג לתרגול ←</button>
         </div>
-      </div>
-
-      {/* Title row with copy-to-mindmap action */}
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4, gap: 12 }}>
-        <h2 style={{ fontFamily: 'var(--ws-display)', fontSize: 26, fontWeight: 700, color: TEXT_DARK, margin: 0, textAlign: 'right' }}>
-          {lesson.hebrewName}
-        </h2>
-        {mindmapOpen && (
-          <button
-            onClick={handleCopyTitle}
-            title="הוסף את כותרת השקופית למפת המושגים"
-            style={copyChipStyle(copied === 'title')}
-          >
-            <Ico d={copied === 'title' ? I.check : I.mind} size={15} />
-            {copied === 'title' ? 'נוסף' : 'הוספה למפה'}
-          </button>
-        )}
       </div>
 
       {/* Presentation tool bar — visible only while presenting */}
@@ -466,8 +501,22 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           a tiny stub, not a whiteboard). Clamp gives a real board on any
           viewport; content that overflows still scrolls inside (see the
           flex:1 / overflowY:auto content column in WhiteboardShell). */}
-      <div style={{ position: 'relative', height: 'clamp(420px, 66vh, 640px)' }}>
-      <BoardShell topRightSlot={<HierarchyBreadcrumb topicId={topicId} />} topicId={topicId} progress={{ done: currentSlide + 1, total }}>
+      <div style={{ position: 'relative', height: 'clamp(420px, 66vh, 640px)', borderRadius: '18px 18px 0 0', overflow: 'hidden' }}>
+      <BoardShell
+        topRightSlot={<HierarchyBreadcrumb topicId={topicId} />}
+        topLeftSlot={<>
+          <button onClick={() => addSlideTo(true)} title="הוסף את הכותרת והתוכן למפת החשיבה" style={slideActionStyle(copied === 'title-mm')}>
+            <Ico d={copied === 'title-mm' ? I.check : I.mind} size={17} />
+            {copied === 'title-mm' ? 'נוסף' : 'הוספה למפה'}
+          </button>
+          <button onClick={() => addSlideTo(false)} title="הוסף כדף חדש במחברת" style={slideActionStyle(copied === 'title-nb')}>
+            <Ico d={copied === 'title-nb' ? I.check : I.notebook} size={17} />
+            {copied === 'title-nb' ? 'נוסף' : 'הוספה למחברת'}
+          </button>
+        </>}
+        topicId={topicId}
+        progress={{ done: currentSlide + 1, total }}
+      >
       {!isGraphSlide && (
       <>{/* Slide card — theory is the heart of the lesson, give it presence */}
       <div
@@ -493,80 +542,6 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           }}>
             {slide.title}
           </h3>
-          <div style={{ display: 'flex', gap: 10, flexShrink: 0, marginTop: 2 }}>
-            <button
-              onClick={() => {
-                const ok = quickAddToMindmap({
-                  text: slide.title,
-                  body: typeof slide.content === 'string' ? slide.content : '',
-                  iframeWindow: mindmapRef.current?.contentWindow ?? null,
-                  userId,
-                })
-                if (ok) { setCopied('title-mm'); setTimeout(() => setCopied(null), 1500) }
-              }}
-              title="הוסף את הכותרת והתוכן למפת החשיבה"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 7,
-                background: copied === 'title-mm' ? '#254A9F' : 'rgba(255,255,255,0.72)',
-                border: `1.5px solid ${copied === 'title-mm' ? '#254A9F' : 'rgba(127,155,217,0.35)'}`,
-                color: copied === 'title-mm' ? '#fff' : '#254A9F',
-                borderRadius: 12, padding: '9px 16px', fontSize: 14, fontWeight: 600,
-                fontFamily: "'Assistant', sans-serif", cursor: 'pointer',
-                whiteSpace: 'nowrap', transition: 'all 0.2s',
-              }}
-            >
-              {copied === 'title-mm' ? (
-                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <polyline points="20,6 9,17 4,12" /></svg> נוסף</>
-              ) : (
-                <>
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                       strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <circle cx="12" cy="6" r="2.6" /><circle cx="5.5" cy="17" r="2.6" />
-                    <circle cx="18.5" cy="17" r="2.6" /><path d="M10.4 7.6 7 14.6" /><path d="M13.6 7.6 17 14.6" />
-                  </svg>
-                  הוספה למפה
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => {
-                const ok = quickAddToMindmap({
-                  text: slide.title,
-                  body: typeof slide.content === 'string' ? slide.content : '',
-                  userId,
-                })
-                if (ok) { setCopied('title-nb'); setTimeout(() => setCopied(null), 1500) }
-              }}
-              title="הוסף כדף חדש במחברת (אותו עץ, תצוגת מחברת)"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 7,
-                background: copied === 'title-nb' ? '#254A9F' : 'rgba(255,255,255,0.72)',
-                border: `1.5px solid ${copied === 'title-nb' ? '#254A9F' : 'rgba(127,155,217,0.35)'}`,
-                color: copied === 'title-nb' ? '#fff' : '#254A9F',
-                borderRadius: 12, padding: '9px 16px', fontSize: 14, fontWeight: 600,
-                fontFamily: "'Assistant', sans-serif", cursor: 'pointer',
-                whiteSpace: 'nowrap', transition: 'all 0.2s',
-              }}
-            >
-              {copied === 'title-nb' ? (
-                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <polyline points="20,6 9,17 4,12" /></svg> נוסף</>
-              ) : (
-                <>
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                       strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M7.5 3.2A2.4 2.4 0 0 0 5.1 5.6v12.8a2.4 2.4 0 0 0 2.4 2.4" />
-                    <rect x="7.5" y="3.2" width="11.4" height="17.6" rx="2.4" />
-                    <path d="M10.6 8h5.2" /><path d="M10.6 12h5.2" />
-                  </svg>
-                  הוספה למחברת
-                </>
-              )}
-            </button>
-          </div>
         </div>
         {(() => {
           // Auto-split prose into numbered bullets so every slide reads
@@ -828,13 +803,14 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           what they counted. Joined per Shirli: back on the right (where the
           reader starts), the dots and the count in the middle, forward on the
           left. Arrow keys still work. ─────────────────────────────────────── */}
-      <div style={{
+      <div ref={slideBarRef} style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        gap: 16, marginTop: 22, padding: '10px 14px',
+        gap: 16, marginTop: 0, padding: '10px 16px',
         background: '#fff',
         border: '1px solid rgba(127,155,217,0.30)',
-        borderRadius: 16,
-        boxShadow: '0 2px 8px rgba(31,62,108,0.08)',
+        borderTop: '1px solid rgba(127,155,217,0.22)',
+        borderRadius: '0 0 18px 18px',
+        boxShadow: '0 8px 20px rgba(31,62,108,0.10)',
       }}>
         <button
           onClick={handlePrev}
@@ -890,6 +866,12 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           </div>
         </div>
 
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        {!isLast && (
+          <button onClick={() => handleStartQuiz(false)} style={skipLinkStyle}>
+            דלג לתרגול
+          </button>
+        )}
         <button
           onClick={handleNext}
           aria-label={isLast ? 'התחל תרגול' : 'שקופית הבאה'}
@@ -903,6 +885,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             <path d="M19 12H5" /><polyline points="12,19 5,12 12,5" />
           </svg>
         </button>
+        </div>
       </div>
 
       {/* Floating side-arrows removed — replaced by labeled prev/next buttons
@@ -1128,28 +1111,64 @@ const secondaryBtnStyle: React.CSSProperties = {
   fontFamily: "'Assistant', sans-serif",
 }
 
+/* Matched to the topic list's back link, one screen back, so the way out of a
+   screen looks the same wherever you are. */
 const backLinkStyle: React.CSSProperties = {
   background: 'none',
   border: 'none',
   cursor: 'pointer',
-  color: TEXT_DARK,
+  color: TEXT_MED,
   fontFamily: "'Assistant', sans-serif",
-  fontSize: 16,
+  fontSize: 15,
+  fontWeight: 600,
   padding: 0,
   display: 'flex',
   alignItems: 'center',
-  gap: 8,
+  gap: 7,
 }
 
+/* And to the list/map switch beside it: a pill that fills TEXT_MED when it is
+   on. Two toggles rather than two alternatives, so both may be lit at once. */
+function toggleStyle(on: boolean): React.CSSProperties {
+  return {
+    display: 'flex', alignItems: 'center', gap: 7,
+    border: 'none', borderRadius: 999, padding: '7px 15px',
+    cursor: 'pointer',
+    fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
+    background: on ? TEXT_MED : 'transparent',
+    color: on ? '#fff' : TEXT_MED,
+    whiteSpace: 'nowrap',
+    transition: 'background 0.15s, color 0.15s',
+  }
+}
+
+/* The slide's own two actions, in the board's top-left corner. */
+function slideActionStyle(done: boolean): React.CSSProperties {
+  return {
+    display: 'inline-flex', alignItems: 'center', gap: 7,
+    background: done ? '#254A9F' : 'rgba(255,255,255,0.72)',
+    border: `1.5px solid ${done ? '#254A9F' : 'rgba(127,155,217,0.35)'}`,
+    color: done ? '#fff' : '#254A9F',
+    borderRadius: 12, padding: '8px 14px', fontSize: 13.5, fontWeight: 600,
+    fontFamily: "'Assistant', sans-serif", cursor: 'pointer',
+    whiteSpace: 'nowrap', transition: 'all 0.2s',
+  }
+}
+
+/* The quiet way forward, beside the loud one. It was TEXT_LIGHT and
+   underlined at the end of a button row — the faintest thing on the screen,
+   and the only one that left it. */
 const skipLinkStyle: React.CSSProperties = {
   background: 'none',
   border: 'none',
   cursor: 'pointer',
-  color: TEXT_LIGHT,
+  color: TEXT_MED,
   fontFamily: "'Assistant', sans-serif",
   fontSize: 14,
-  padding: 0,
-  textDecoration: 'underline',
+  fontWeight: 600,
+  padding: '9px 14px',
+  borderRadius: 12,
+  whiteSpace: 'nowrap',
 }
 
 function mindmapToggleStyle(open: boolean): React.CSSProperties {
