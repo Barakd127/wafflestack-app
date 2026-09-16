@@ -4034,7 +4034,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             // Calm mode: the pane GROWS to fill everything under the tab chips
             // so the whiteboard gets the whole content area (was a 6px-padded
             // shrink-to-fit strip holding a 720px card).
-            ? { flex: 1, minHeight: 0, padding: bigBoard ? '4px 20px 0' : '4px 8px 0', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
+            ? { flex: 1, minHeight: 0, padding: bigBoard ? '24px 28px 0' : '14px 12px 0', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
             : isDone
             // Padding tightened per user 2026-05-24 — was 18px top / 12px bot
             // creating a big empty gap between the companion-tab chips above
@@ -4303,7 +4303,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                floating over two pills, in a different shape and a different
                weight from either. In the row it is one more control in the
                cluster, which is what it is. */
-            dockEndSlot={isDone ? undefined : helpStatus === 'pending' || helpStatus === 'sending' ? (
+            /* Waiting on a person — a message, not a control, so it sits on
+               the line ABOVE the dock's row rather than inside it. Per Shirli. */
+            dockTopSlot={!isDone && (helpStatus === 'pending' || helpStatus === 'sending') ? (
               <div className="ws-status ws-status--wait" title="נשלחה בקשת עזרה על השאלה הזו">
                 <span className="ws-status-mark">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -4311,9 +4313,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     <circle cx="12" cy="12" r="9" /><polyline points="12,7 12,12 15.5,14" />
                   </svg>
                 </span>
-                {helpStatus === 'sending' ? 'שולח…' : 'ממתין לתשובה'}
+                {helpStatus === 'sending' ? 'שולח…' : 'נשלח — ממתין לתשובה'}
               </div>
-            ) : !helpStatus ? (
+            ) : !isDone && !helpStatus ? (
               <button
                 type="button"
                 onClick={handleAskHuman}

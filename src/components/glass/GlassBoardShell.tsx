@@ -190,6 +190,7 @@ export default function GlassBoardShell({
   topLeftSlot,
   dockRightSlot,
   dockEndSlot,
+  dockTopSlot,
   topicId,
   progress,
   onMastered,
@@ -706,6 +707,11 @@ export default function GlassBoardShell({
           touchAction: 'none',
         }}
       >
+        {/* The line above the controls — a message rather than a control, so
+            it does not sit in the row with them. alignItems:'flex-end' on the
+            rtl column is what keeps it on the LEFT edge. */}
+        {dockTopSlot}
+
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         {/* the tools FIRST, so under RTL they land to the slider's right */}
         {dockRightSlot}

@@ -25,6 +25,8 @@ export interface WhiteboardShellProps {
   dockRightSlot?: ReactNode
   /** Closing the dock's row — under RTL, its left end. */
   dockEndSlot?: ReactNode
+  /** The line above the dock's controls, left-aligned. */
+  dockTopSlot?: ReactNode
 }
 
 export default function WhiteboardShell({ children, style, topRightSlot }: WhiteboardShellProps) {
