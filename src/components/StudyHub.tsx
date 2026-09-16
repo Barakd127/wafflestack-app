@@ -4303,7 +4303,17 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                floating over two pills, in a different shape and a different
                weight from either. In the row it is one more control in the
                cluster, which is what it is. */
-            dockEndSlot={!isDone && !helpStatus ? (
+            dockEndSlot={isDone ? undefined : helpStatus === 'pending' || helpStatus === 'sending' ? (
+              <div className="ws-status ws-status--wait" title="נשלחה בקשת עזרה על השאלה הזו">
+                <span className="ws-status-mark">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <circle cx="12" cy="12" r="9" /><polyline points="12,7 12,12 15.5,14" />
+                  </svg>
+                </span>
+                {helpStatus === 'sending' ? 'שולח…' : 'ממתין לתשובה'}
+              </div>
+            ) : !helpStatus ? (
               <button
                 type="button"
                 onClick={handleAskHuman}
@@ -4671,22 +4681,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               <div className="ws-quiz-ask" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }} dir="rtl">
                 {/* The ask button itself is on the board — see dockTopSlot.
                     Only its states are reported here. */}
-                {helpStatus === 'sending' && (
-                  <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>שולח…</div>
-                )}
-                {helpStatus === 'pending' && (
-                  /* Waiting on someone else — the one state the app used to
-                     draw in house blue, which said nothing about waiting. */
-                  <div className="ws-status ws-status--wait" style={{ alignSelf: 'flex-start' }}>
-                    <span className="ws-status-mark">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                           strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <circle cx="12" cy="12" r="9" /><polyline points="12,7 12,12 15.5,14" />
-                      </svg>
-                    </span>
-                    נשלח — ממתין לתשובה
-                  </div>
-                )}
+                {/* sending / waiting are reported on the board, beside the
+                    button that started them — see dockEndSlot. Only the answer
+                    itself is reading matter, so only it stays here. */}
                 {helpStatus === 'answered' && (
                   <div style={{
                     background: 'var(--ws-ok-bg)',
