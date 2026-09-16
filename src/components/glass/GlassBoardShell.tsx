@@ -616,7 +616,9 @@ export default function GlassBoardShell({
             flexShrink: 0, display: 'flex', alignItems: 'center',
             justifyContent: 'space-between', gap: 12, marginBottom: 10, minHeight: 22,
           }}>
-            <div style={{ minWidth: 0 }}>{topRightSlot}</div>
+            {/* flex:1 so a slot that centres its own content centres across
+                the board rather than inside its own width */}
+            <div style={{ flex: 1, minWidth: 0 }}>{topRightSlot}</div>
             {topLeftSlot && <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>{topLeftSlot}</div>}
           </div>
         )}

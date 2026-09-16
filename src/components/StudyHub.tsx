@@ -4025,7 +4025,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             // Calm mode: the pane GROWS to fill everything under the tab chips
             // so the whiteboard gets the whole content area (was a 6px-padded
             // shrink-to-fit strip holding a 720px card).
-            ? { flex: 1, minHeight: 0, padding: bigBoard ? '4px 20px 10px' : '4px 8px 8px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
+            ? { flex: 1, minHeight: 0, padding: bigBoard ? '4px 20px 0' : '4px 8px 0', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }
             : isDone
             // Padding tightened per user 2026-05-24 — was 18px top / 12px bot
             // creating a big empty gap between the companion-tab chips above
@@ -4317,26 +4317,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               </div>
             ) : undefined}
             topRightSlot={
-              // paddingInline clears the board's 36px corner brackets (they sit
-              // at inset 5 and paint at z-index 61, ON TOP of content — the
-              // counter was being cut in half by the top-left one).
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', paddingInline: boardFullBleed ? 22 : 0 }}>
+              /* Just the trail, centred — the position the theory screen gives
+                 it. The question counter used to sit at this row's far end; it
+                 is in the bar under the board now, beside the dots, and a screen
+                 does not need to say which question you are on twice. */
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', paddingInline: boardFullBleed ? 22 : 0 }}>
                 <HierarchyBreadcrumb topicId={selectedTopic || ''} />
-                {/* Question counter — lives on the board itself now that the
-                    navy strip is gone, written in the board's own hand. */}
-                {boardFullBleed && !isDone && (
-                  <span style={{
-                    marginInlineStart: 'auto',
-                    fontFamily: "'Assistant', sans-serif",
-                    fontSize: bigBoard ? 16 : 14,
-                    fontWeight: 700,
-                    color: 'var(--sh-text-dark)',
-                    opacity: 0.85,
-                    whiteSpace: 'nowrap',
-                  }}>
-                    שאלה {currentQ + 1} / {total}
-                  </span>
-                )}
               </div>
             }
             style={boardFullBleed
