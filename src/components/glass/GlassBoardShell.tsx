@@ -188,6 +188,7 @@ export default function GlassBoardShell({
   style,
   topRightSlot,
   topLeftSlot,
+  dockRightSlot,
   topicId,
   progress,
   onMastered,
@@ -649,6 +650,26 @@ export default function GlassBoardShell({
       {/* The מיקוד / הדגמה / עיר switch is gone per Shirli — three buttons for
           three stops on a slider that is right there. The slider still sets any
           value, and defaultMode still picks where the board opens. */}
+
+      {/* The board's other corner. The frost slider owns the bottom-left; a
+          screen with its own tools puts them here, on the same line, so both
+          read as controls OF the board rather than furniture around it. */}
+      {dockRightSlot && (
+        <div
+          dir="rtl"
+          style={{
+            position: 'absolute',
+            right: 28,
+            bottom: tray ? TRAY_DOCK_BOTTOM : 28,
+            zIndex: 12,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          {dockRightSlot}
+        </div>
+      )}
 
       {/* Dock — in the ledge below the sheet (tray) / bottom-left over the glass
           (plain). Just the frost slider now, seated on the same 24px inset as

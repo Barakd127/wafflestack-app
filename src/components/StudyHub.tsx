@@ -3666,84 +3666,6 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         </>
       )}
 
-      {/* Top bar — hidden in fullscreen so canvas + question get full
-          viewport. The floating "הצג כלי לימוד" chip above restores it. */}
-      {!fullscreen && (
-      <div className="ws-quiz-topbar" style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', borderBottom: '1px solid rgba(127,155,217,0.30)', boxShadow: '0 2px 6px rgba(18,36,96,0.15)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12, zIndex: 10 }}>
-        {/* The stock photograph that used to sit here is gone: a 34×26 crop of
-            an unrelated image, at the head of a bar whose job is to say how far
-            through the session the reader is. */}
-        <div style={{ flex: 1 }}>
-          <div style={{ height: 6, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
-            <div style={{ width: `${isDone ? 100 : ((currentQ)/total)*100}%`, height: '100%', background: '#FF854C', borderRadius: 10, transition: 'width 0.4s' }} />
-          </div>
-          <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT, marginTop: 2 }}>
-            {answeredCount} / {total} · {correctCount} ✓{streak >= 2 ? <span style={{ color: '#FF7A1A', fontWeight: 800 }}> · 🔥{streak}</span> : null}
-          </div>
-        </div>
-        <div className="ws-quiz-topic" style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: TEXT_DARK }}>
-          <span style={{ fontWeight: 700 }}>סטטיסטיקה</span>{!isDone && ` | ${q.topic}`}
-        </div>
-        {/* Difficulty chip — relocated here 2026-07-25 when the navy strip
-            over the board was removed. The top bar is the single source of
-            truth for question metadata, so difficulty joins the XP chip. */}
-        {!isDone && boardFullBleed && (q as any).difficulty && (
-          <QuizDifficultyBadge level={(q as any).difficulty} xp={q.xp} tone="light" showXp={false} />
-        )}
-        {/* XP-per-question chip (moved here from inside question card per
-            user request — keeps card lighter, header is the single source
-            of truth for question metadata) */}
-        {!isDone && (
-          <div style={{
-            background: 'rgba(255,133,76,0.16)',
-            border: '1px solid rgba(255,133,76,0.45)',
-            color: '#B4491C',
-            borderRadius: 999,
-            padding: '4px 11px',
-            fontFamily: "'Assistant', sans-serif",
-            fontSize: 12, fontWeight: 700,
-          }}>+{q.xp} XP</div>
-        )}
-        {/* Float toggle — also relocated out of the removed navy strip; it
-            sits next to the fullscreen toggle since both change the frame
-            the question is shown in. */}
-        {!isDone && !isMobile && boardFullBleed && (
-          <button
-            onClick={() => setFloatMode(true)}
-            aria-label="נתק לחלון צף"
-            title="נתק לחלון צף נגרר"
-            style={{
-              background: 'rgba(127,155,217,0.10)',
-              border: '1px solid rgba(127,155,217,0.30)',
-              color: TEXT_DARK,
-              borderRadius: 8, padding: '6px 10px',
-              cursor: 'pointer', fontFamily: "'Assistant', sans-serif",
-              fontSize: 12, fontWeight: 700,
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}
-          >⤢ צף</button>
-        )}
-        {/* Fullscreen toggle — distraction-free practice; parent hides sidebar+topbar */}
-        {onToggleFullscreen && !isMobile && (
-          <button
-            onClick={onToggleFullscreen}
-            aria-label={fullscreen ? 'יציאה ממסך מלא' : 'מסך מלא — ללא הסחות דעת'}
-            title={fullscreen ? 'יציאה ממסך מלא (Esc)' : 'מסך מלא'}
-            style={{
-              background: fullscreen ? 'rgba(212,175,55,0.18)' : 'rgba(127,155,217,0.10)',
-              border: '1px solid ' + (fullscreen ? 'rgba(212,175,55,0.55)' : 'rgba(127,155,217,0.30)'),
-              color: fullscreen ? '#7A5C00' : TEXT_DARK,
-              borderRadius: 8, padding: '6px 10px',
-              cursor: 'pointer', fontFamily: "'Assistant', sans-serif",
-              fontSize: 12, fontWeight: 700,
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}
-          >
-            {fullscreen ? '↘ צא ממסך מלא' : '⛶ מסך מלא'}
-          </button>
-        )}
-      </div>
-      )}{/* end !fullscreen topbar guard */}
 
       {/* ── Quick-switch (תרגיל ⇄ קנבס) ──────────────────────────────────────
           On MOBILE a side-by-side split is too cramped and was rendering blank,
@@ -3818,6 +3740,90 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           whiteboard itself fills the leftover height (the old dead-band worry
           is gone because the quiz pane, not a spacer, owns that space). */}
       <div ref={contentRowRef} style={{ flex: 1, display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end', overflow: 'hidden', minHeight: 0, background: 'var(--sh-page-bg)', position: 'relative' }}>
+        {/* The session bar sits UNDER the board, as the slide bar does on
+            the theory screen. It used to run across the top, so the two
+            halves of the learning area put the same kind of information in
+            opposite places — which is what made moving between them
+            confusing. borderTop rather than borderBottom: it is the board's
+            foot now, not the screen's head. */}
+      {/* Top bar — hidden in fullscreen so canvas + question get full
+          viewport. The floating "הצג כלי לימוד" chip above restores it. */}
+      {!fullscreen && (
+      <div className="ws-quiz-topbar" style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', borderTop: '1px solid rgba(127,155,217,0.30)', boxShadow: '0 -2px 6px rgba(18,36,96,0.10)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12, zIndex: 10 }}>
+        {/* The stock photograph that used to sit here is gone: a 34×26 crop of
+            an unrelated image, at the head of a bar whose job is to say how far
+            through the session the reader is. */}
+        <div style={{ flex: 1 }}>
+          <div style={{ height: 6, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
+            <div style={{ width: `${isDone ? 100 : ((currentQ)/total)*100}%`, height: '100%', background: '#FF854C', borderRadius: 10, transition: 'width 0.4s' }} />
+          </div>
+          <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT, marginTop: 2 }}>
+            {answeredCount} / {total} · {correctCount} ✓{streak >= 2 ? <span style={{ color: '#FF7A1A', fontWeight: 800 }}> · 🔥{streak}</span> : null}
+          </div>
+        </div>
+        <div className="ws-quiz-topic" style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: TEXT_DARK }}>
+          <span style={{ fontWeight: 700 }}>סטטיסטיקה</span>{!isDone && ` | ${q.topic}`}
+        </div>
+        {/* Difficulty chip — relocated here 2026-07-25 when the navy strip
+            over the board was removed. The top bar is the single source of
+            truth for question metadata, so difficulty joins the XP chip. */}
+        {!isDone && boardFullBleed && (q as any).difficulty && (
+          <QuizDifficultyBadge level={(q as any).difficulty} xp={q.xp} tone="light" showXp={false} />
+        )}
+        {/* XP-per-question chip (moved here from inside question card per
+            user request — keeps card lighter, header is the single source
+            of truth for question metadata) */}
+        {!isDone && (
+          <div style={{
+            background: 'rgba(255,133,76,0.16)',
+            border: '1px solid rgba(255,133,76,0.45)',
+            color: '#B4491C',
+            borderRadius: 999,
+            padding: '4px 11px',
+            fontFamily: "'Assistant', sans-serif",
+            fontSize: 12, fontWeight: 700,
+          }}>+{q.xp} XP</div>
+        )}
+        {/* Float toggle — also relocated out of the removed navy strip; it
+            sits next to the fullscreen toggle since both change the frame
+            the question is shown in. */}
+        {!isDone && !isMobile && boardFullBleed && (
+          <button
+            onClick={() => setFloatMode(true)}
+            aria-label="נתק לחלון צף"
+            title="נתק לחלון צף נגרר"
+            style={{
+              background: 'rgba(127,155,217,0.10)',
+              border: '1px solid rgba(127,155,217,0.30)',
+              color: TEXT_DARK,
+              borderRadius: 8, padding: '6px 10px',
+              cursor: 'pointer', fontFamily: "'Assistant', sans-serif",
+              fontSize: 12, fontWeight: 700,
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}
+          >⤢ צף</button>
+        )}
+        {/* Fullscreen toggle — distraction-free practice; parent hides sidebar+topbar */}
+        {onToggleFullscreen && !isMobile && (
+          <button
+            onClick={onToggleFullscreen}
+            aria-label={fullscreen ? 'יציאה ממסך מלא' : 'מסך מלא — ללא הסחות דעת'}
+            title={fullscreen ? 'יציאה ממסך מלא (Esc)' : 'מסך מלא'}
+            style={{
+              background: fullscreen ? 'rgba(212,175,55,0.18)' : 'rgba(127,155,217,0.10)',
+              border: '1px solid ' + (fullscreen ? 'rgba(212,175,55,0.55)' : 'rgba(127,155,217,0.30)'),
+              color: fullscreen ? '#7A5C00' : TEXT_DARK,
+              borderRadius: 8, padding: '6px 10px',
+              cursor: 'pointer', fontFamily: "'Assistant', sans-serif",
+              fontSize: 12, fontWeight: 700,
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}
+          >
+            {fullscreen ? '↘ צא ממסך מלא' : '⛶ מסך מלא'}
+          </button>
+        )}
+      </div>
+      )}{/* end !fullscreen topbar guard */}
 
         {/* ── Companion tool ── */}
         {!isDone && tab !== 'none' && (
@@ -4179,6 +4185,55 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             progress={{ done: answeredCount, total }}
             revealOnProgress
             layout="tray"
+            /* The board's other corner. The frost slider owns bottom-left; the
+               tools take bottom-right, on the same ledge — so both read as
+               controls OF the board rather than a band above the question. */
+            dockRightSlot={!isDone && !isMobile ? (
+              <div style={{
+                display: 'flex', gap: 2, padding: 3, borderRadius: 999,
+                background: 'rgba(255,255,255,0.72)',
+                border: '1px solid rgba(255,255,255,0.62)',
+                boxShadow: '0 8px 22px rgba(11,27,62,0.2)',
+              }}>
+                {([
+                  ['none',       'ללא',          'התמקדו רק בשאלה'],
+                  ['mindmap',    'מפת חשיבה',    'הוסיפו תובנות למפה תוך כדי'],
+                  ['arsenal',    'הארסנל שלי',   'תפסו רגעי אהה וטריקים'],
+                  ['canvas',     'קנבס',         'ציירו, רשמו, פתרו ויזואלית'],
+                  ['excalidraw', 'לוח ציור',     'לוח ציור Excalidraw מלא'],
+                ] as const).map(([key, label, hint]) => {
+                  const active = tab === key
+                  const locked = toolLocked(key as typeof tab)
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => { if (locked) return; handleSetTab(key as typeof tab) }}
+                      title={locked ? toolLockTip(key as typeof tab) : hint}
+                      aria-disabled={locked || undefined}
+                      aria-pressed={active}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 6,
+                        background: active ? TEXT_MED : 'transparent',
+                        color: active ? '#fff' : TEXT_MED,
+                        border: 'none', borderRadius: 999, padding: '7px 14px',
+                        fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600,
+                        cursor: locked ? 'not-allowed' : 'pointer',
+                        transition: 'background .15s, color .15s',
+                        opacity: locked ? 0.5 : 1, whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {label}
+                      {locked && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                        </svg>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            ) : undefined}
             topRightSlot={
               // paddingInline clears the board's 36px corner brackets (they sit
               // at inset 5 and paint at z-index 61, ON TOP of content — the
@@ -4494,10 +4549,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               </div>
 
               <div className="ws-quiz-controls-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span className="ws-quiz-skip" style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_LIGHT, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleSkip}>דלג</span>
-
                 {/* Dots — clickable navigation */}
-                <div className="ws-quiz-dots" style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <div className="ws-quiz-dots" style={{ display: 'none' }}>
                   {dotStates.map((state, i) => {
                     const bg = state === 'correct' ? '#34A853' : state === 'wrong' ? '#EA4335' : state === 'current' ? BUTTON_COLOR : '#D8E0F0'
                     const isClickable = state === 'correct' || state === 'wrong' || state === 'current'
@@ -4697,6 +4750,53 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 הקודם
               </button>
 
+              {/* where you are in the session — the dots and the count
+                  together, as on the theory board's slide bar */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+                <div style={{ display: 'flex', gap: 5, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  {dotStates.map((state, i) => {
+                    const done = state === 'correct' || state === 'wrong'
+                    const isCurrent = state === 'current'
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => navigateToQuestion(i)}
+                        aria-label={`שאלה ${i + 1}`}
+                        aria-current={isCurrent ? 'true' : undefined}
+                        style={{
+                          width: isCurrent ? 20 : 7, height: 7, borderRadius: 999, padding: 0, border: 'none',
+                          background: state === 'correct' ? '#34A853'
+                            : state === 'wrong' ? '#EA4335'
+                            : isCurrent ? BUTTON_COLOR : 'rgba(127,155,217,0.35)',
+                          cursor: done || isCurrent ? 'pointer' : 'default',
+                          transition: 'all .2s',
+                        }}
+                      />
+                    )
+                  })}
+                </div>
+                <span style={{
+                  fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600,
+                  color: TEXT_MED, whiteSpace: 'nowrap',
+                }}>
+                  שאלה {currentQ + 1} מתוך {total}
+                </span>
+              </div>
+
+              {/* the two ways forward: דלג first so it lands to the RIGHT of
+                  הבא under RTL — the order the theory board uses */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <button
+                onClick={handleSkip}
+                title="דלג — בלי לענות; זה שובר את הרצף"
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
+                  color: TEXT_MED, padding: '11px 14px', borderRadius: 12, whiteSpace: 'nowrap',
+                }}
+              >
+                דלג
+              </button>
               <button
                 data-tour="practice-btn"
                 onClick={navNext}
@@ -4713,6 +4813,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   <path d="M19 12H5" /><polyline points="12,19 5,12 12,5" />
                 </svg>
               </button>
+              </div>
             </div>
           )}
           </div>
@@ -4726,75 +4827,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         {/* No spacer in calm mode any more — the whiteboard pane itself is
             flex:1, so it (not an empty div) absorbs the leftover height. */}
 
-        {/* ── Tab row: tool launcher / switcher ──────────────────────────────
-             DESKTOP ONLY — on mobile the quick-switch pill (above) is the single
-             bottom switcher; this full row stays on desktop and the two no longer
-             collide at bottom-center. The ⋮ split-menu covers other surfaces on
-             mobile. */}
-        {!isDone && !isMobile && (
-          <div style={{
-            // Was 12/16 → 6/6 per user 2026-05-24 to remove the big empty band
-            // between the tab chips and the quiz card.
-            flexShrink: 0, padding: '6px 24px 6px',
-            display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap',
-            // When a companion tool is active, ALWAYS pin tabs to viewport
-            // bottom (was previously only mobile/floatMode). Otherwise tabs
-            // could fall below the canvas at 100% zoom + only show on
-            // zoom-out. Per user: keep them reachable always.
-            position: (tab !== 'none') ? 'fixed' : 'relative',
-            bottom: (tab !== 'none') ? 0 : undefined,
-            left: (tab !== 'none') ? 0 : undefined,
-            right: (tab !== 'none') ? 0 : undefined,
-            zIndex: 80,
-            background: (tab !== 'none') ? 'linear-gradient(180deg, rgba(13,22,40,0) 0%, rgba(13,22,40,0.82) 60%, rgba(13,22,40,0.95) 100%)' : 'transparent',
-          }}>
-            <div style={{
-              display: 'flex', gap: 2, padding: 3, borderRadius: 999,
-              background: (tab !== 'none') ? 'rgba(255,255,255,0.14)' : 'rgba(127,155,217,0.14)',
-            }}>
-            {([
-              ['none',       'ללא',          'התמקדו רק בשאלה'],
-              ['mindmap',    'מפת חשיבה',    'הוסיפו תובנות למפה תוך כדי'],
-              ['arsenal',    'הארסנל שלי',   'תפסו רגעי אהה וטריקים'],
-              ['canvas',     'קנבס',         'ציירו, רשמו, פתרו ויזואלית'],
-              ['excalidraw', 'לוח ציור',     'לוח ציור Excalidraw מלא'],
-            ] as const).map(([key, label, hint]) => {
-              const active = tab === key
-              const onTool = tab !== 'none'
-              const locked = toolLocked(key as typeof tab)
-              const ink = onTool ? 'rgba(255,255,255,0.86)' : TEXT_MED
-              return (
-                <button
-                  key={key}
-                  onClick={() => { if (locked) return; handleSetTab(key as typeof tab) }}
-                  title={locked ? toolLockTip(key as typeof tab) : hint}
-                  aria-disabled={locked || undefined}
-                  aria-pressed={active}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 6,
-                    background: active ? (onTool ? '#fff' : TEXT_MED) : 'transparent',
-                    color: active ? (onTool ? '#1F3E6C' : '#fff') : ink,
-                    border: 'none', borderRadius: 999, padding: '7px 15px',
-                    fontFamily: "'Assistant', sans-serif", fontSize: 13.5, fontWeight: 600,
-                    cursor: locked ? 'not-allowed' : 'pointer',
-                    transition: 'background .15s, color .15s',
-                    opacity: locked ? 0.5 : 1,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {label}
-                  {locked && (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
-                    </svg>
-                  )}
-                </button>
-              )
-            })}
-            </div>
-          </div>
-        )}
+        {/* The tool switcher lives on the board now — see dockRightSlot. */}
 
       </div>{/* end content wrap */}
 

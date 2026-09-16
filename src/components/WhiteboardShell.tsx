@@ -21,6 +21,8 @@ export interface WhiteboardShellProps {
   topRightSlot?: ReactNode
   /** Pinned opposite it, in the board's top-left inner corner. */
   topLeftSlot?: ReactNode
+  /** The board's bottom-right corner, opposite the frost dock. */
+  dockRightSlot?: ReactNode
 }
 
 export default function WhiteboardShell({ children, style, topRightSlot }: WhiteboardShellProps) {
