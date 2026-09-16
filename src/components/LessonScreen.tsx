@@ -502,12 +502,12 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       <BoardShell
         topLeftSlot={<>
           <button onClick={() => addSlideTo(true)} title="הוסף את הכותרת והתוכן למפת החשיבה"
-                  className={`ws-cta-outline ws-cta-sm${copied === 'title-mm' ? ' is-done' : ''}`}>
+                  className={`ws-cta-outline ws-cta-xs${copied === 'title-mm' ? ' is-done' : ''}`}>
             <Ico d={copied === 'title-mm' ? I.check : I.mind} size={16} />
             {copied === 'title-mm' ? 'נוסף' : 'הוספה למפה'}
           </button>
           <button onClick={() => addSlideTo(false)} title="הוסף כדף חדש במחברת"
-                  className={`ws-cta-outline ws-cta-sm${copied === 'title-nb' ? ' is-done' : ''}`}>
+                  className={`ws-cta-outline ws-cta-xs${copied === 'title-nb' ? ' is-done' : ''}`}>
             <Ico d={copied === 'title-nb' ? I.check : I.notebook} size={16} />
             {copied === 'title-nb' ? 'נוסף' : 'הוספה למחברת'}
           </button>
@@ -724,11 +724,15 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           {/* Zoom controls */}
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            gap: 12, marginBottom: 12, paddingBottom: 0,
+            gap: 12, marginBottom: 14, paddingBottom: 0, padding: '8px 6px 0',
           }}>
-            <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--sh-text-dark)', fontFamily: 'var(--ws-display)' }}>
+            <h3 style={{
+              fontFamily: 'var(--ws-display)', fontSize: 30, fontWeight: 700,
+              color: TEXT_DARK, margin: 0, textAlign: 'right',
+              lineHeight: 1.3, letterSpacing: '-0.01em',
+            }}>
               {effectiveGraphs[graphIdx].title}
-            </div>
+            </h3>
           </div>
           {/* Scaled graph container */}
           <div style={{ overflow: 'hidden', display: 'flex', justifyContent: 'center', flex: 1, minHeight: 0 }}>

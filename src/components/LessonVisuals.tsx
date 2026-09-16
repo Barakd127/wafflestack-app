@@ -21,8 +21,8 @@ const WRAP: React.CSSProperties = {
   /* Tightened so a visual fits the glass board without spilling — the board is
      a fixed height, and 20 above plus 18 inside was buying air the slide could
      not afford. Shared by every visual in this file. */
-  padding: '14px 18px',
-  marginTop: 10,
+  padding: '10px 16px',
+  marginTop: 8,
   fontFamily: "'Heebo','Assistant',sans-serif",
   direction: 'rtl',
   color: 'var(--sh-text-dark)',
@@ -43,7 +43,15 @@ const ROW: React.CSSProperties = { display: 'flex', gap: 16, flexWrap: 'wrap', a
 const LABEL_STYLE: React.CSSProperties = { fontSize: 14, color: 'var(--sh-text-dark)', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 500 }
 const SLIDER = (color = GOLD): React.CSSProperties => ({ width: 110, accentColor: color, marginInlineEnd: 6 } as React.CSSProperties)
 const CAPTION: React.CSSProperties = { fontSize: 12, color: 'var(--sh-text-dark)', fontWeight: 700, marginBottom: 6, opacity: 0.85 }
-const STORY: React.CSSProperties = { fontSize: 14, color: 'var(--sh-text-dark)', lineHeight: 1.6, marginBottom: 10, padding: '9px 13px', background: 'rgba(255,255,255,0.08)', borderRight: `3px solid ${GOLD}`, borderRadius: 8 }
+/* The description, as text.
+ *
+ * 17 is the size the graph slide's heading used to be — the line the reader
+ * actually reads was two steps below the title. And the panel it used to sit
+ * in is gone: a faint white wash, a rounded corner and a 3px gold rule down
+ * its right edge, which is the "thing to the right of the description" Shirli
+ * pointed at. Its 14px of side padding was also what stopped the description
+ * and the mode switch below it from sharing a right edge. */
+const STORY: React.CSSProperties = { fontSize: 17, color: 'var(--sh-text-dark)', lineHeight: 1.55, marginBottom: 14, padding: 0, textAlign: 'right' }
 
 // ── Math helpers ──────────────────────────────────────────────────────────────
 function normalPDF(x: number, mu: number, sigma: number) {
@@ -826,7 +834,7 @@ export function IntroVisual() {
   const [stage, setStage] = useState(0) // 0=raw, 1=sorted, 2=histogram
   const RAW = useMemo(() => [3, 8, 5, 7, 2, 9, 5, 6, 4, 7, 5, 8, 6, 3, 7, 5, 6, 4, 8, 5], [])
   const sorted = useMemo(() => [...RAW].sort((a, b) => a - b), [RAW])
-  const W = 360, H = 130
+  const W = 360, H = 112
   return (
     <div style={{ ...WRAP, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
       <div style={STORY}>
@@ -851,14 +859,14 @@ export function IntroVisual() {
           width on a 920px board scaled the 130-unit box to 332px tall and the
           slide spilled past the board. Per Shirli: it should fit, in all three
           states, rather than fade out at the bottom. */}
-      <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMinYMax meet"
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMax meet"
            style={{ flex: 1, minHeight: 150, display: 'block' }}>
         {stage < 2 ? (
           (stage === 0 ? RAW : sorted).map((v, i) => {
-            const cols = 10, x = 2 + (i % cols) * 32, y = 48 + Math.floor(i / cols) * 36
+            const cols = 10, x = 20 + (i % cols) * 32, y = 30 + Math.floor(i / cols) * 36
             return <g key={i}>
-              <rect x={x} y={y} width={28} height={28} fill="rgba(99,102,241,0.18)" stroke={ACCENT} rx={6} />
-              <text x={x + 14} y={y + 19} textAnchor="middle" fontSize={13} fontWeight={700} fill="#3730a3">{v}</text>
+              <rect x={x} y={y} width={28} height={28} fill="rgba(255,133,76,0.16)" stroke="#FF854C" rx={6} />
+              <text x={x + 14} y={y + 19} textAnchor="middle" fontSize={13} fontWeight={700} fill="#B4491C">{v}</text>
             </g>
           })
         ) : (() => {
@@ -866,22 +874,22 @@ export function IntroVisual() {
           RAW.forEach(v => { counts[v] = (counts[v] || 0) + 1 })
           const keys = Object.keys(counts).map(Number).sort((a, b) => a - b)
           const maxC = Math.max(...Object.values(counts))
-          const SPAN = 320             // the shared box: x2 → x322, as the grid
+          const SPAN = 320             // the shared box: x20 → x340, as the grid
           const barW = SPAN / keys.length - 6
           return keys.map((k, i) => {
-            const x = 2 + i * (SPAN / keys.length)
+            const x = 20 + i * (SPAN / keys.length)
             const bh = (counts[k] / maxC) * (H - 30)
             return <g key={k}>
-              <rect x={x} y={H - 18 - bh} width={barW} height={bh} fill={ACCENT} rx={3} />
+              <rect x={x} y={H - 18 - bh} width={barW} height={bh} fill="#FF854C" rx={4} />
               <text x={x + barW / 2} y={H - 4} textAnchor="middle" fontSize={10} fill="#374151">{k}</text>
               <text x={x + barW / 2} y={H - 22 - bh} textAnchor="middle" fontSize={9} fill="#6b7280">{counts[k]}</text>
             </g>
           })
         })()}
       </svg>
-      {/* the two readings sit at the foot of the slide, at its left end —
-          they are the result of the picture above, not a caption beside it */}
-      <div style={{ marginTop: 'auto', paddingTop: 10, display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+      {/* the two readings sit at the foot of the slide, centred under the
+          picture they describe */}
+      <div style={{ marginTop: 'auto', paddingTop: 8, display: 'flex', justifyContent: 'center', gap: 8 }}>
         <span style={BADGE()}>n = {RAW.length}</span>
         <span style={BADGE({ background: 'rgba(16,185,129,0.1)', color: '#065f46' })}>ממוצע = {(RAW.reduce((s, v) => s + v, 0) / RAW.length).toFixed(1)}</span>
       </div>

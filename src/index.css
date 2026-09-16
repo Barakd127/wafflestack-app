@@ -816,6 +816,28 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   transform: none;
 }
 
+/* The board's own two actions, quieter still than .ws-cta-sm: they sit under
+   the toolbar's toggles and must not out-weigh them. A hairline instead of
+   1.5px, the ink at 70%, and a height that comes in under the pill above. */
+.ws-cta-outline.ws-cta-xs {
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-width: 1px;
+  border-radius: 10px;
+  gap: 6px;
+  border-color: rgba(37,74,159,0.30);
+  color: rgba(37,74,159,0.78);
+  background: rgba(255,255,255,0.55);
+}
+.ws-cta-outline.ws-cta-xs:hover {
+  border-color: rgba(37,74,159,0.55);
+  color: #254A9F;
+  background: #DFE8FB;
+  transform: none;
+  box-shadow: none;
+}
+
 /* Confirmed — the quiet button filled with its own outline colour. Same
    family as .is-on: the state that says "done" is the darker one. */
 .ws-cta-outline.is-done,
