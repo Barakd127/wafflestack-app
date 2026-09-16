@@ -120,7 +120,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
     // Skip if user already added this Visual as an explicit graph entry
     const alreadyIncluded = base.some(g => g.Component === TopicVisual)
     if (alreadyIncluded) return base
-    return [...base, { Component: TopicVisual as React.ComponentType, title: 'ויזואליזציה' }]
+    return [...base, { Component: TopicVisual as React.ComponentType, title: 'ויזואליזציה — מסע סטטיסטי' }]
   }, [graphSlides, topicId])
 
   // Build merged sequence: lesson slide → optional graph(s) inserted after it.
@@ -715,44 +715,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             gap: 12, marginBottom: 10, paddingBottom: 9,
             borderBottom: '1px solid rgba(37,74,159,0.14)',
           }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--sh-text-dark)', fontFamily: "'Assistant', sans-serif" }}>
+            <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--sh-text-dark)', fontFamily: 'var(--ws-display)' }}>
               {effectiveGraphs[graphIdx].title}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <button
-                onClick={() => setGraphScale(s => Math.max(0.4, +(s - 0.1).toFixed(2)))}
-                aria-label="הקטן גרף"
-                title="הקטן"
-                style={{
-                  background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(37,74,159,0.25)',
-                  color: '#254A9F', borderRadius: 10, width: 30, height: 30,
-                  cursor: 'pointer', fontWeight: 700, fontSize: 16, lineHeight: 1,
-                }}
-              >−</button>
-              <span style={{ fontSize: 12, color: 'var(--sh-text-dark)', minWidth: 40, textAlign: 'center', fontFamily: "'Assistant', sans-serif" }}>
-                {Math.round(graphScale * 100)}%
-              </span>
-              <button
-                onClick={() => setGraphScale(s => Math.min(1.4, +(s + 0.1).toFixed(2)))}
-                aria-label="הגדל גרף"
-                title="הגדל"
-                style={{
-                  background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(37,74,159,0.25)',
-                  color: '#254A9F', borderRadius: 10, width: 30, height: 30,
-                  cursor: 'pointer', fontWeight: 700, fontSize: 16, lineHeight: 1,
-                }}
-              >+</button>
-              <button
-                onClick={() => setGraphScale(1.0)}
-                aria-label="ברירת מחדל"
-                title="גודל ברירת מחדל"
-                style={{
-                  background: 'transparent', border: '1px solid rgba(37,74,159,0.22)',
-                  color: '#254A9F', borderRadius: 10, padding: '5px 11px',
-                  cursor: 'pointer', fontSize: 11, fontFamily: "'Assistant', sans-serif",
-                  marginInlineStart: 4,
-                }}
-              >איפוס</button>
             </div>
           </div>
           {/* Scaled graph container */}

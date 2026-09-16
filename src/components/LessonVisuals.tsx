@@ -829,7 +829,6 @@ export function IntroVisual() {
   const W = 360, H = 130
   return (
     <div style={WRAP}>
-      <div style={CAPTION}>ויזואליזציה — מסע סטטיסטי</div>
       <div style={STORY}>
         <strong>20 תוצאות מבחן.</strong> בהתחלה זה רק ערימת מספרים. לחצו "מיין" ואז "ארגן" כדי לראות איך סטטיסטיקה מארגנת כאוס לסיפור — ההיסטוגרמה חושפת את הצורה.
       </div>
@@ -853,7 +852,7 @@ export function IntroVisual() {
           slide spilled past the board. Per Shirli: it should fit, in all three
           states, rather than fade out at the bottom. */}
       <svg width="100%" viewBox={`0 0 ${W} ${H}`}
-           style={{ maxHeight: 138, display: 'block', margin: '0 auto' }}>
+           style={{ maxHeight: 168, display: 'block', margin: '0 auto' }}>
         {stage < 2 ? (
           (stage === 0 ? RAW : sorted).map((v, i) => {
             const cols = 10, x = 20 + (i % cols) * 32, y = 20 + Math.floor(i / cols) * 36
