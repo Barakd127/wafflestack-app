@@ -805,6 +805,63 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   box-shadow: inset 0 2px 5px rgba(11,6,48,0.55);
   transform: translateY(1px);
 }
+/* ── Status ──────────────────────────────────────────────────────────────
+   Three states, one set of colours, per Shirli's reference: a saturated mark
+   on a pale ground of the same hue. They are deliberately outside the app's
+   222° scale — a state is not decoration, and it has to read as itself at a
+   glance rather than as one more shade of the house blue.
+
+     ok    — the answer was right, the thing was accepted
+     bad   — the answer was wrong, the thing was declined
+     wait  — sent, and waiting on someone else
+
+   Use the pair: --ws-<state> for the mark and the text, --ws-<state>-bg for
+   the ground behind them. Nothing that is not a state may use either. */
+:root {
+  --ws-ok:      #07B95A;
+  --ws-ok-bg:   #E9F9F0;
+  --ws-ok-ink:  #0A8F47;
+
+  --ws-bad:     #F4523C;
+  --ws-bad-bg:  #FDEDEA;
+  --ws-bad-ink: #D63A25;
+
+  /* 38.8° — amber, deliberately clear of the coral accent at 14.4°.
+     At 19.1° the two were sixteen degrees apart and read as one colour. */
+  --ws-wait:     #FFAE1A;
+  --ws-wait-bg:  #FFF6E6;
+  --ws-wait-ink: #B37400;
+}
+
+/* The pill shape from the reference: a filled round mark, then the word. */
+.ws-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border-radius: 999px;
+  padding: 7px 16px 7px 8px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ws-status > .ws-status-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.ws-status--ok   { background: var(--ws-ok-bg);   color: var(--ws-ok-ink) }
+.ws-status--ok   > .ws-status-mark { background: var(--ws-ok) }
+.ws-status--bad  { background: var(--ws-bad-bg);  color: var(--ws-bad-ink) }
+.ws-status--bad  > .ws-status-mark { background: var(--ws-bad) }
+.ws-status--wait { background: var(--ws-wait-bg); color: var(--ws-wait-ink) }
+.ws-status--wait > .ws-status-mark { background: var(--ws-wait) }
+
 /* A toggle that stays down. Same declaration as :active, because "on" and
    "being pressed" must not look like two different things — per Shirli, a
    pressed button is darker, everywhere. */

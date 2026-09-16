@@ -114,3 +114,31 @@ See `memory/icon-language.md` for the full account. In short:
    end of the text.
 4. **No widow.** `text-wrap: balance` on headings, `pretty` on prose, never a
    hard `<br>`.
+
+---
+
+## Status
+
+Three states, one set of colours. They are the only colours in the app
+allowed outside the 222° scale, because a state is not decoration: it has to
+read as itself at a glance rather than as one more shade of the house blue.
+
+| State | Mark | Ground | Ink |
+|---|---|---|---|
+| נכון / התקבל | `--ws-ok` `#07B95A` | `--ws-ok-bg` `#E9F9F0` | `--ws-ok-ink` `#0A8F47` |
+| שגוי / נדחה | `--ws-bad` `#F4523C` | `--ws-bad-bg` `#FDEDEA` | `--ws-bad-ink` `#D63A25` |
+| ממתין | `--ws-wait` `#FFAE1A` | `--ws-wait-bg` `#FFF6E6` | `--ws-wait-ink` `#B37400` |
+
+The shape is `.ws-status` + `.ws-status--{ok,bad,wait}`: a filled round mark,
+then the word, on a pale ground of the same hue.
+
+**Waiting is amber, not coral.** `--ws-wait` sits at 38.8° and the coral
+accent at 14.4°. They started sixteen degrees apart — two oranges at the same
+saturation and lightness, which the eye reads as one colour — so both moved:
+waiting toward gold, coral toward red. The coral was the one to move because
+it comes in small doses; a state colour has to be unmistakable where it is
+used, and coral only has to be recognisable.
+
+**Nothing that is not a state may use these.** A green that means "this is a
+chart series" or an amber that means "this is important" is how a status
+system stops meaning anything.

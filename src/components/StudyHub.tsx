@@ -1894,8 +1894,8 @@ function ActivityChart() {
         <title>{total > 0 ? `+${total.toLocaleString('he-IL')} XP בשבוע האחרון` : 'אין פעילות בשבוע האחרון'}</title>
         <defs>
           <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(255,133,76,0.42)" />
-            <stop offset="100%" stopColor="rgba(255,133,76,0.03)" />
+            <stop offset="0%" stopColor="rgba(255,116,72,0.42)" />
+            <stop offset="100%" stopColor="rgba(255,116,72,0.03)" />
           </linearGradient>
         </defs>
         {ticks.map(v => (
@@ -2745,7 +2745,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                       width: 35, height: 35,
                       background: 'linear-gradient(115.34deg, #FFA073 -8.31%, #ff854c 168.93%)',
                       borderRadius: 24,
-                      boxShadow: '0px 3px 5.8px rgba(255,133,76,0.45)',
+                      boxShadow: '0px 3px 5.8px rgba(255,116,72,0.45)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                       {/* Reached — the same check the completed stages carry */}
@@ -3824,8 +3824,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     aria-current={isCurrent ? 'true' : undefined}
                     style={{
                       width: isCurrent ? 20 : 7, height: 7, borderRadius: 999, padding: 0, border: 'none',
-                      background: state === 'correct' ? '#34A853'
-                        : state === 'wrong' ? '#EA4335'
+                      background: state === 'correct' ? 'var(--ws-ok)'
+                        : state === 'wrong' ? 'var(--ws-bad)'
                         : isCurrent ? BUTTON_COLOR : 'rgba(127,155,217,0.35)',
                       cursor: done || isCurrent ? 'pointer' : 'default',
                       transition: 'all .2s',
@@ -4502,14 +4502,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     let marker: string | null = null
                     if (revealed) {
                       if (isCorrect) {
-                        bg = 'rgba(52,168,83,0.18)'
-                        border = '#34A853'
-                        color = '#1E7E34'
+                        bg = 'var(--ws-ok-bg)'
+                        border = 'var(--ws-ok)'
+                        color = 'var(--ws-ok-ink)'
                         marker = '✓'
                       } else if (isChosen) {
-                        bg = 'rgba(234,67,53,0.18)'
-                        border = '#EA4335'
-                        color = '#B92E22'
+                        bg = 'var(--ws-bad-bg)'
+                        border = 'var(--ws-bad)'
+                        color = 'var(--ws-bad-ink)'
                         marker = '✗'
                       } else {
                         bg = 'rgba(255,255,255,0.55)'
@@ -4563,7 +4563,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         {marker && (
                           <span style={{
                             fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20,
-                            color: marker === '✓' ? '#34A853' : '#EA4335',
+                            color: marker === '✓' ? 'var(--ws-ok)' : 'var(--ws-bad)',
                             flexShrink: 0,
                           }}>
                             {marker}
@@ -4610,7 +4610,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 {mcSelected !== null && mcSelected === (q as any).correctIndex && (q as any).answer ? (
                   <div style={{ maxWidth: bigBoard ? 1180 : 640, margin: '0 auto 14px', background: 'linear-gradient(135deg, rgba(52,168,83,0.12), rgba(52,168,83,0.05))', border: '1.5px solid rgba(52,168,83,0.4)', borderRadius: 12, padding: bigBoard ? '16px 22px' : '12px 16px', textAlign: 'right', direction: 'rtl' }} dir="rtl">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <div style={{ fontFamily: "'Assistant', sans-serif", fontWeight: 700, fontSize: 14, color: '#1E7E34' }}>✓ נכון! הנה למה:</div>
+                      <div style={{ fontFamily: "'Assistant', sans-serif", fontWeight: 700, fontSize: 14, color: 'var(--ws-ok-ink)' }}>✓ נכון! הנה למה:</div>
                       <ArsenalQuizCaptureChip explanation={(q as any).answer} topicId={selectedTopic} />
                     </div>
                     <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: bigBoard ? 18 : 15, color: TEXT_DARK, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}><MathText text={(q as any).answer} /></div>
@@ -4662,25 +4662,32 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, color: TEXT_LIGHT }}>שולח…</div>
                 )}
                 {helpStatus === 'pending' && (
-                  <div style={{
-                    alignSelf: 'flex-start',
-                    display: 'inline-flex', alignItems: 'center', gap: 8,
-                    background: 'rgba(51,81,202,0.10)', color: BUTTON_COLOR,
-                    border: '1.5px solid rgba(51,81,202,0.3)', borderRadius: 20,
-                    padding: '8px 16px',
-                    fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600,
-                  }}>
-                    🙋 נשלח — ממתין לתשובה מבן אדם
+                  /* Waiting on someone else — the one state the app used to
+                     draw in house blue, which said nothing about waiting. */
+                  <div className="ws-status ws-status--wait" style={{ alignSelf: 'flex-start' }}>
+                    <span className="ws-status-mark">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <circle cx="12" cy="12" r="9" /><polyline points="12,7 12,12 15.5,14" />
+                      </svg>
+                    </span>
+                    נשלח — ממתין לתשובה
                   </div>
                 )}
                 {helpStatus === 'answered' && (
                   <div style={{
-                    background: 'linear-gradient(135deg, rgba(52,168,83,0.10), rgba(52,168,83,0.04))',
-                    border: '1.5px solid rgba(52,168,83,0.35)', borderRadius: 12,
+                    background: 'var(--ws-ok-bg)',
+                    border: '1.5px solid var(--ws-ok)', borderRadius: 12,
                     padding: '12px 16px', textAlign: 'right',
                   }}>
-                    <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 700, color: '#1E7E34', marginBottom: 6 }}>
-                      🙋 תשובה מבן אדם:
+                    <div className="ws-status ws-status--ok" style={{ marginBottom: 8 }}>
+                      <span className="ws-status-mark">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <polyline points="20,6 9,17 4,12" />
+                        </svg>
+                      </span>
+                      תשובה מבן אדם
                     </div>
                     <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_DARK, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
                       {helpAnswer[helpId]}

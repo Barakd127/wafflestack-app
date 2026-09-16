@@ -865,7 +865,7 @@ export function IntroVisual() {
           (stage === 0 ? RAW : sorted).map((v, i) => {
             const cols = 10, x = 20 + (i % cols) * 32, y = 30 + Math.floor(i / cols) * 36
             return <g key={i}>
-              <rect x={x} y={y} width={28} height={28} fill="rgba(255,133,76,0.16)" stroke="#FF854C" rx={6} />
+              <rect x={x} y={y} width={28} height={28} fill="rgba(255,116,72,0.16)" stroke="#FF7448" rx={6} />
               <text x={x + 14} y={y + 19} textAnchor="middle" fontSize={13} fontWeight={700} fill="#B4491C">{v}</text>
             </g>
           })
@@ -880,7 +880,7 @@ export function IntroVisual() {
             const x = 20 + i * (SPAN / keys.length)
             const bh = (counts[k] / maxC) * (H - 30)
             return <g key={k}>
-              <rect x={x} y={H - 18 - bh} width={barW} height={bh} fill="#FF854C" rx={4} />
+              <rect x={x} y={H - 18 - bh} width={barW} height={bh} fill="#FF7448" rx={4} />
               <text x={x + barW / 2} y={H - 4} textAnchor="middle" fontSize={10} fill="#374151">{k}</text>
               <text x={x + barW / 2} y={H - 22 - bh} textAnchor="middle" fontSize={9} fill="#6b7280">{counts[k]}</text>
             </g>

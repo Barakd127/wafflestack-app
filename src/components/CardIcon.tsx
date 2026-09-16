@@ -36,7 +36,7 @@ export const CARD_ICON_COLOR = '#2530A6'
 
 /** Coral stays out of icons. It means progress — charts, timelines,
  *  achievements — and an icon is none of those. */
-export const CARD_ICON_ACCENT = '#FF854C'
+export const CARD_ICON_ACCENT = '#FF7448'
 
 const PATHS: Record<CardIconName, JSX.Element> = {
   plan: (
