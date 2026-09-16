@@ -9,7 +9,7 @@ import BoardShell from './BoardShell'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import PresentationOverlay, { type PresenterTool } from './PresentationOverlay'
 import LessonComplete from './LessonComplete'
-import { buildingNameForTopic } from './glass/cityNames'
+import { buildingNameForTopic, buildingForTopic } from './glass/cityNames'
 import { useLearningStore } from '../store/learningStore'
 
 // Design tokens — keep in sync with StudyHub.tsx
@@ -857,6 +857,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           'הקודם' / 'הבא' labels make the function unambiguous. */}
       <LessonComplete
         open={doneOpen}
+        building={buildingForTopic(topicId)}
         buildingName={buildingNameForTopic(topicId)}
         xp={xpBefore}
         gain={lessonAlreadyDone ? 0 : 5}

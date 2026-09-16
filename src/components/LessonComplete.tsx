@@ -17,6 +17,7 @@
  * takes it, not before, which is why the meter has something to animate.
  */
 import { useEffect, useRef, useState } from 'react'
+import cityBlock from './glass/cityBlock.json'
 
 const XP_PER_LEVEL = 100
 const XP_FOR_LESSON = 5        // learningStore.completeLesson
@@ -24,9 +25,55 @@ const CORAL = '#FF854C'        // progress and achievement — the one place it 
 const INK = '#254A9F'
 const DEEP = '#18247E'
 
-export default function LessonComplete({ open, buildingName, xp, gain = XP_FOR_LESSON, onCollect, onPractise, onClose }: {
+/**
+ * The asset, cut out of the city render.
+ *
+ * cityBlock.json carries a percentage bbox per building inside the 1400×860
+ * city-block.webp — the same artwork the board draws behind the glass. So what
+ * the reader collects here is literally the building that appears in their
+ * city, at the angle they will see it, rather than an icon standing in for it.
+ * The crop is scaled to fit the box and centred in it; `maxWidth: none` because
+ * the app's reset caps images at 100% and this one has to be larger than its
+ * frame for the crop to work.
+ */
+function CityAsset({ building, size = 132 }: { building?: string; size?: number }) {
+  const box = building ? (cityBlock.buildings as Record<string, { left: number; top: number; right: number; bottom: number }>)[building] : undefined
+  if (!box) return null
+  const IW = cityBlock.width, IH = cityBlock.height
+  const cropW = (box.right - box.left) / 100 * IW
+  const cropH = (box.bottom - box.top) / 100 * IH
+  const pad = 10
+  const scale = Math.min((size - pad * 2) / cropW, (size - pad * 2) / cropH)
+  return (
+    <div style={{
+      width: size, height: size, margin: '0 auto 14px',
+      position: 'relative', overflow: 'hidden',
+      borderRadius: 26,
+      background: 'radial-gradient(120% 110% at 50% 20%, #EAF1FF 0%, #D6E4FB 60%, #C3D6F7 100%)',
+      boxShadow: '0 14px 30px rgba(51,81,202,0.26), inset 0 1px 0 rgba(255,255,255,0.8)',
+    }}>
+      <img
+        src={`${import.meta.env.BASE_URL}glass/city-block.webp`}
+        alt=""
+        aria-hidden
+        draggable={false}
+        style={{
+          position: 'absolute',
+          width: IW * scale, height: IH * scale, maxWidth: 'none',
+          left: -(box.left / 100 * IW * scale) + (size - cropW * scale) / 2,
+          top: -(box.top / 100 * IH * scale) + (size - cropH * scale) / 2,
+          imageRendering: 'auto',
+        }}
+      />
+    </div>
+  )
+}
+
+export default function LessonComplete({ open, building, buildingName, xp, gain = XP_FOR_LESSON, onCollect, onPractise, onClose }: {
   open: boolean
-  /** the city building this topic raised, e.g. "עיריה" */
+  /** the city building id this topic raised, e.g. "city-hall" */
+  building?: string
+  /** its Hebrew name, e.g. "עיריה" */
   buildingName?: string
   /** the reader's XP *before* the award */
   xp: number
@@ -142,24 +189,9 @@ export default function LessonComplete({ open, buildingName, xp, gain = XP_FOR_L
           animation: 'ws-done-card .42s cubic-bezier(.22,1,.36,1)',
         }}
       >
-        {/* the asset — the building this unit raised */}
-        <div
-          data-ws-done-asset
-          style={{
-            width: 96, height: 96, margin: '0 auto 16px',
-            borderRadius: 28,
-            background: 'linear-gradient(200deg, #6E9BF2, #3351CA)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 12px 28px rgba(51,81,202,0.38)',
-            animation: 'ws-done-asset .5s .1s cubic-bezier(.22,1,.36,1) both',
-          }}
-        >
-          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#fff"
-               strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M2.9 13.9 7.7 9.7V20.2H2.9z" />
-            <path d="M9.9 7.6 12 4.9 14.1 7.6V20.2H9.9z" />
-            <path d="M16.4 13.4a1.2 1.2 0 0 1 1.2-1.2h2.3a1.2 1.2 0 0 1 1.2 1.2V20.2h-4.7z" />
-          </svg>
+        {/* the asset itself, cut from the city — not a symbol for it */}
+        <div data-ws-done-asset style={{ animation: 'ws-done-asset .5s .1s cubic-bezier(.22,1,.36,1) both' }}>
+          <CityAsset building={building} />
         </div>
 
         <h2 style={{
@@ -225,7 +257,11 @@ export default function LessonComplete({ open, buildingName, xp, gain = XP_FOR_L
           <button
             onClick={onPractise}
             className="ws-cta"
-            style={{ flex: 1, justifyContent: 'center', background: collected ? undefined : '#C0D0F6' }}
+            /* No inline background. An inline style outranks every class
+               selector, so setting it here silently killed .ws-cta:hover and
+               :active — the button looked like the theory CTA and did not
+               behave like it. The class owns all four states. */
+            style={{ flex: 1, justifyContent: 'center' }}
           >
             התחל לתרגל
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
