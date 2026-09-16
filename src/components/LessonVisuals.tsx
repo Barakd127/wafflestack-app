@@ -828,7 +828,7 @@ export function IntroVisual() {
   const sorted = useMemo(() => [...RAW].sort((a, b) => a - b), [RAW])
   const W = 360, H = 130
   return (
-    <div style={WRAP}>
+    <div style={{ ...WRAP, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
       <div style={STORY}>
         <strong>20 תוצאות מבחן.</strong> בהתחלה זה רק ערימת מספרים. לחצו "מיין" ואז "ארגן" כדי לראות איך סטטיסטיקה מארגנת כאוס לסיפור — ההיסטוגרמה חושפת את הצורה.
       </div>
@@ -851,11 +851,11 @@ export function IntroVisual() {
           width on a 920px board scaled the 130-unit box to 332px tall and the
           slide spilled past the board. Per Shirli: it should fit, in all three
           states, rather than fade out at the bottom. */}
-      <svg width="100%" viewBox={`0 0 ${W} ${H}`}
-           style={{ maxHeight: 168, display: 'block', margin: '0 auto' }}>
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMinYMax meet"
+           style={{ flex: 1, minHeight: 150, display: 'block' }}>
         {stage < 2 ? (
           (stage === 0 ? RAW : sorted).map((v, i) => {
-            const cols = 10, x = 20 + (i % cols) * 32, y = 20 + Math.floor(i / cols) * 36
+            const cols = 10, x = 2 + (i % cols) * 32, y = 48 + Math.floor(i / cols) * 36
             return <g key={i}>
               <rect x={x} y={y} width={28} height={28} fill="rgba(99,102,241,0.18)" stroke={ACCENT} rx={6} />
               <text x={x + 14} y={y + 19} textAnchor="middle" fontSize={13} fontWeight={700} fill="#3730a3">{v}</text>
@@ -866,9 +866,10 @@ export function IntroVisual() {
           RAW.forEach(v => { counts[v] = (counts[v] || 0) + 1 })
           const keys = Object.keys(counts).map(Number).sort((a, b) => a - b)
           const maxC = Math.max(...Object.values(counts))
-          const barW = (W - 60) / keys.length - 6
+          const SPAN = 320             // the shared box: x2 → x322, as the grid
+          const barW = SPAN / keys.length - 6
           return keys.map((k, i) => {
-            const x = 30 + i * ((W - 60) / keys.length)
+            const x = 2 + i * (SPAN / keys.length)
             const bh = (counts[k] / maxC) * (H - 30)
             return <g key={k}>
               <rect x={x} y={H - 18 - bh} width={barW} height={bh} fill={ACCENT} rx={3} />
@@ -878,7 +879,9 @@ export function IntroVisual() {
           })
         })()}
       </svg>
-      <div style={{ marginTop: 4 }}>
+      {/* the two readings sit at the foot of the slide, at its left end —
+          they are the result of the picture above, not a caption beside it */}
+      <div style={{ marginTop: 'auto', paddingTop: 10, display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
         <span style={BADGE()}>n = {RAW.length}</span>
         <span style={BADGE({ background: 'rgba(16,185,129,0.1)', color: '#065f46' })}>ממוצע = {(RAW.reduce((s, v) => s + v, 0) / RAW.length).toFixed(1)}</span>
       </div>

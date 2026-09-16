@@ -8,6 +8,9 @@ import { parseLeadingEnumMarker } from '../lib/bidiSegments'
 import BoardShell from './BoardShell'
 import HierarchyBreadcrumb from './HierarchyBreadcrumb'
 import PresentationOverlay, { type PresenterTool } from './PresentationOverlay'
+import LessonComplete from './LessonComplete'
+import { buildingNameForTopic } from './glass/cityNames'
+import { useLearningStore } from '../store/learningStore'
 
 // Design tokens — keep in sync with StudyHub.tsx
 const GLASS_CARD  = 'var(--sh-glass-card)'
@@ -181,8 +184,15 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
     onStartQuiz()
   }
 
+  /* The last slide no longer walks straight out to the quiz. It stops and
+     shows what the unit earned — see LessonComplete. Both ways on from there
+     (collect, or practise) still run handleStartQuiz's completion, so nothing
+     can be earned twice and nothing can be skipped. */
+  const [doneOpen, setDoneOpen] = useState(false)
+  const xpBefore = useLearningStore(s => s.xp)
+  const lessonAlreadyDone = useLearningStore(s => s.completedLessons.includes(topicId))
   const handleNext = () => {
-    if (isLast) handleStartQuiz(true)
+    if (isLast) setDoneOpen(true)
     else setCurrentSlide(s => Math.min(total - 1, s + 1))
   }
   const handlePrev = () => setCurrentSlide(s => Math.max(0, s - 1))
@@ -708,24 +718,26 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           // No panel, no border, no shadow: the glass board is the screen, and
           // a graph is its content — not a second screen shown inside it.
           marginTop: 0,
+          // and it takes the height the board has left, on any screen
+          flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column',
         }}>
           {/* Zoom controls */}
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            gap: 12, marginBottom: 10, paddingBottom: 9,
-            borderBottom: '1px solid rgba(37,74,159,0.14)',
+            gap: 12, marginBottom: 12, paddingBottom: 0,
           }}>
             <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--sh-text-dark)', fontFamily: 'var(--ws-display)' }}>
               {effectiveGraphs[graphIdx].title}
             </div>
           </div>
           {/* Scaled graph container */}
-          <div style={{ overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ overflow: 'hidden', display: 'flex', justifyContent: 'center', flex: 1, minHeight: 0 }}>
             <div style={{
               transform: `scale(${graphScale})`,
               transformOrigin: 'top center',
               width: `${100 / graphScale}%`,
-              height: 'auto',
+              height: '100%',
+              display: 'flex', flexDirection: 'column', minHeight: 0,
             }}>
               <Suspense fallback={<div style={{ padding: 32, textAlign: 'center', color: 'rgba(127,155,217,0.7)' }}>טוען גרף אינטראקטיבי…</div>}>
                 {(() => { const G = effectiveGraphs[graphIdx].Component; return <G /> })()}
@@ -839,6 +851,16 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           in the compact strip above the slide card, the footer dots below, and
           arrow keys. The strip is non-sticky so it never obscures the board;
           'הקודם' / 'הבא' labels make the function unambiguous. */}
+      <LessonComplete
+        open={doneOpen}
+        buildingName={buildingNameForTopic(topicId)}
+        xp={xpBefore}
+        gain={lessonAlreadyDone ? 0 : 5}
+        onCollect={() => { if (!completedRef.current) { completedRef.current = true; onComplete(topicId) } }}
+        onPractise={() => { setDoneOpen(false); handleStartQuiz(true) }}
+        onClose={() => setDoneOpen(false)}
+      />
+
       {/* Formula copy button. The label is ALWAYS visible — it used to appear on
           hover only, leaving a bare glyph that readers could not interpret. */}
       <style>{`

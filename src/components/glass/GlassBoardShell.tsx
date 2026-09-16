@@ -624,7 +624,12 @@ export default function GlassBoardShell({
             ref={inkScrollRef}
             onScroll={measureInk}
             className="ws-ink-scroll"
-            style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
+            style={{
+              height: '100%', overflowY: 'auto', overflowX: 'hidden',
+              // a column, so a slide that can fill the board (the interactive
+              // ones) is able to; text slides keep their natural height
+              display: 'flex', flexDirection: 'column',
+            }}
           >
             {children}
           </div>
@@ -635,35 +640,11 @@ export default function GlassBoardShell({
         </div>
       </div>
 
-      {/* Mastery toast — top-centre, a sibling of the ink column (NOT inside the
-          aria-hidden world) so role="status" is actually announced. */}
-      {toastVisible && buildingNameHe && (
-        <div
-          role="status"
-          dir="rtl"
-          style={{
-            position: 'absolute',
-            top: 18,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 20,
-            padding: '10px 18px',
-            borderRadius: 24,
-            background: `linear-gradient(135deg, ${GOLD_LIGHT}, ${GOLD})`,
-            color: DEEP_NAVY,
-            fontFamily: "'Assistant', sans-serif",
-            fontSize: 13,
-            fontWeight: 700,
-            whiteSpace: 'nowrap',
-            pointerEvents: 'none',
-            boxShadow: '0 10px 26px rgba(11,27,62,0.28), inset 0 1px 0 rgba(255,255,255,0.55)',
-            animation: 'ws-glass-toast-in .35s ease-out',
-          }}
-        >
-          <style>{`@keyframes ws-glass-toast-in { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }`}</style>
-          {`${buildingNameHe} הושלם — העיר שלך גדלה`}
-        </div>
-      )}
+      {/* The mastery toast is gone. A gold pill that slid in over the slide,
+          said "<building> הושלם — העיר שלך גדלה", and took itself away before
+          the reader could act on it. The end of a unit is a moment now, not a
+          notice: see LessonComplete. The glass still clears for MASTERY_CLEAR_MS
+          so the city is what the reader sees behind the dialog. */}
 
       {/* The מיקוד / הדגמה / עיר switch is gone per Shirli — three buttons for
           three stops on a slider that is right there. The slider still sets any
