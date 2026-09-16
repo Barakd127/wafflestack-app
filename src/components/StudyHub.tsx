@@ -3827,26 +3827,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             number, in a second shape, is not more information. */}
         {/* The topic is in the app's own top bar already
             ("הקדמה לסטטיסטיקה · תרגול"); a navigation bar does not repeat it. */}
-        {/* Difficulty chip — relocated here 2026-07-25 when the navy strip
-            over the board was removed. The top bar is the single source of
-            truth for question metadata, so difficulty joins the XP chip. */}
-        {!isDone && boardFullBleed && (q as any).difficulty && (
-          <QuizDifficultyBadge level={(q as any).difficulty} xp={q.xp} tone="light" showXp={false} />
-        )}
-        {/* XP-per-question chip (moved here from inside question card per
-            user request — keeps card lighter, header is the single source
-            of truth for question metadata) */}
-        {!isDone && (
-          <div style={{
-            background: 'rgba(255,133,76,0.16)',
-            border: '1px solid rgba(255,133,76,0.45)',
-            color: '#B4491C',
-            borderRadius: 999,
-            padding: '4px 11px',
-            fontFamily: "'Assistant', sans-serif",
-            fontSize: 12, fontWeight: 700,
-          }}>+{q.xp} XP</div>
-        )}
+        {/* The level moved to the head of the board, beside the trail — see
+            topRightSlot. It answers "at what level am I practising", which is a
+            marker of where you are, not a control in a navigation bar. */}
+        {/* The XP chip is gone from here. What one question is worth is not a
+            thing the reader acts on mid-session; what they earned is a closing
+            number, and belongs in the summary. */}
         {/* forward: דלג first so it lands to the RIGHT of הבא under RTL */}
         {!isDone && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -4223,7 +4209,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               flex: 1,
               minHeight: 0,
               overflow: 'hidden',
+              // a column, so the row above the board stacks with it rather than
+              // sitting beside it
               display: 'flex',
+              flexDirection: 'column',
               paddingBottom: isMobile ? 'calc(56px + env(safe-area-inset-bottom))' : 0,
             } : {
               padding: '20px 22px 18px',
@@ -4236,40 +4225,71 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               minHeight: 0,
             }}>
 
-          {/* Question content is drawn directly on a whiteboard surface — the
-              hierarchy breadcrumb is pinned in the board's top-right corner.
-              (Same pattern as LessonScreen's theory slides.) */}
-          <BoardShell
-            topicId={selectedTopic || undefined}
-            progress={{ done: answeredCount, total }}
-            revealOnProgress
-            layout="tray"
-            /* The board's other corner. The frost slider owns bottom-left; the
-               tools take bottom-right, on the same ledge — so both read as
-               controls OF the board rather than a band above the question. */
-            /* The frame controls — the same corner the theory board gives
-               הוספה למפה / למחברת. Neither is navigation, and both change the
-               frame the question is shown in rather than the question. */
-            topLeftSlot={!isDone && !isMobile ? (
-              <>
-                {boardFullBleed && (
+          {/* ── The row above the board — the same row the theory screen has:
+              the way out on the right, where you are in the middle, what you
+              can switch on the left. The practice screen had none of it: the
+              trail sat inside the board, the frame controls sat on it, and
+              there was no way back at all. ───────────────────────────────── */}
+          {boardFullBleed && !isDone && (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              gap: 16, flexShrink: 0, marginBottom: 12, paddingInline: 4,
+            }}>
+              <button
+                onClick={() => { try { onBack() } catch (_) {} }}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontFamily: "'Assistant', sans-serif", fontSize: 15, fontWeight: 600,
+                  color: TEXT_MED, padding: 0,
+                  display: 'flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap',
+                }}
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M5 12h14" /><polyline points="12,5 19,12 12,19" />
+                </svg>
+                חזרה לנושאים
+              </button>
+
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                <HierarchyBreadcrumb topicId={selectedTopic || ''} />
+                {(q as any).difficulty && (
+                  <QuizDifficultyBadge level={(q as any).difficulty} xp={q.xp} tone="light" showXp={false} />
+                )}
+              </div>
+
+              {!isMobile && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                   <button
                     onClick={() => setFloatMode(true)}
                     aria-label="נתק לחלון צף"
                     title="נתק לחלון צף נגרר"
                     className="ws-cta-outline ws-cta-xs"
                   >⤢ צף</button>
-                )}
-                {onToggleFullscreen && (
-                  <button
-                    onClick={onToggleFullscreen}
-                    aria-label={fullscreen ? 'יציאה ממסך מלא' : 'מסך מלא — ללא הסחות דעת'}
-                    title={fullscreen ? 'יציאה ממסך מלא (Esc)' : 'מסך מלא'}
-                    className="ws-cta-outline ws-cta-xs"
-                  >{fullscreen ? '↘ צא ממסך מלא' : '⛶ מסך מלא'}</button>
-                )}
-              </>
-            ) : undefined}
+                  {onToggleFullscreen && (
+                    <button
+                      onClick={onToggleFullscreen}
+                      aria-label={fullscreen ? 'יציאה ממסך מלא' : 'מסך מלא — ללא הסחות דעת'}
+                      title={fullscreen ? 'יציאה ממסך מלא (Esc)' : 'מסך מלא'}
+                      className="ws-cta-outline ws-cta-xs"
+                    >{fullscreen ? '↘ צא ממסך מלא' : '⛶ מסך מלא'}</button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Question content is drawn directly on the board. */}
+          <BoardShell
+            topicId={selectedTopic || undefined}
+            progress={{ done: answeredCount, total }}
+            revealOnProgress
+            /* The board's other corner. The frost slider owns bottom-left; the
+               tools take bottom-right, on the same ledge — so both read as
+               controls OF the board rather than a band above the question. */
+            /* The frame controls — the same corner the theory board gives
+               הוספה למפה / למחברת. Neither is navigation, and both change the
+               frame the question is shown in rather than the question. */
             dockRightSlot={!isDone && !isMobile ? (
               <div style={{
                 display: 'flex', gap: 2, padding: 3, borderRadius: 999,
@@ -4316,15 +4336,6 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 })}
               </div>
             ) : undefined}
-            topRightSlot={
-              /* Just the trail, centred — the position the theory screen gives
-                 it. The question counter used to sit at this row's far end; it
-                 is in the bar under the board now, beside the dots, and a screen
-                 does not need to say which question you are on twice. */
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', paddingInline: boardFullBleed ? 22 : 0 }}>
-                <HierarchyBreadcrumb topicId={selectedTopic || ''} />
-              </div>
-            }
             style={boardFullBleed
               ? {
                   flex: 1,
