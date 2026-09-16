@@ -1075,7 +1075,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
             border: 'none', cursor: 'pointer',
             fontSize: 14, padding: '12px 16px', fontFamily: "'Assistant', sans-serif",
           }}>
-            → חזרה
+            חזרה לנושאים
           </button>
         </div>
       </div>
@@ -1594,7 +1594,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
                  strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="M5 12h14" /><polyline points="12,5 19,12 12,19" />
             </svg>
-            כל הקורסים
+            חזרה לכל הקורסים
           </button>
         <ViewSwitch viewMode={viewMode} onViewModeChange={onViewModeChange} />
       </div>
@@ -1624,7 +1624,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
         <iframe
           src={`${import.meta.env.BASE_URL}mindmap.html?v=mm19-20260708&scene=topics&course=${course}&admin=${_adminMode ? '1' : '0'}`}
           title="מפת הנושאים"
-          style={{ width: '100%', height: 'calc(100dvh - 192px)', border: 'none', borderRadius: 14, boxShadow: CARD_SHADOW, display: 'block' }}
+          style={{ width: '100%', height: 'max(calc(100dvh - 195px), 650px)', border: 'none', borderRadius: 14, boxShadow: CARD_SHADOW, display: 'block' }}
           allow="clipboard-read; clipboard-write"
         />
       )}
@@ -1993,7 +1993,7 @@ function CoursePlayer({ course, onClose }: {
             borderRadius: 10, padding: '6px 14px',
             fontFamily: 'inherit', fontWeight: 700, fontSize: 13, cursor: 'pointer',
           }}
-        >→ חזרה לקורסים</button>
+        >חזרה לכל הקורסים</button>
         <div style={{
           width: 40, height: 40, borderRadius: 10,
           background: 'var(--sh-sidebar-bg)',
@@ -4270,7 +4270,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   onBack()
                 }}
                   style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '12px 32px', fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}>
-                  חזור לדף הבית
+                  חזרה לנושאים
                 </button>
                 <button onClick={handleReset}
                   style={{ background: 'rgba(255,255,255,0.10)', color: BUTTON_COLOR, border: `2px solid ${BUTTON_COLOR}`, borderRadius: 24, padding: '12px 32px', fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', minHeight: 44, backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}>
@@ -4902,7 +4902,7 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
         onClick={() => setInternalView('topics')}
         style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
       >
-        → חזרה
+        חזרה לנושאים
       </button>
     ) : undefined
 
