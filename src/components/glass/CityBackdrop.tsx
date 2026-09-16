@@ -288,84 +288,13 @@ export default function CityBackdrop({ topicId, progress, frost, mastered: maste
           )}
         </div>
 
-        {/* leader (board space) */}
-        {building && leader && box.w > 0 && (
-          <svg width={box.w} height={box.h} viewBox={`0 0 ${box.w} ${box.h}`} style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', overflow: 'visible' }}>
-            <polyline points={leader.points} fill="none" stroke={GOLD} strokeWidth="1" strokeLinejoin="round" />
-            <circle cx={leader.end.x} cy={leader.end.y} r="2.5" fill={GOLD_LIGHT} stroke="#fff" strokeWidth="1" />
-          </svg>
-        )}
+      {/* The roof callout ("<building> · קומה N מתוך M") and the leader line
+          that pointed at it are gone — per Shirli, the board does not caption
+          its own backdrop. The leader went with it: a line drawn to a pill
+          that no longer exists points at nothing. */}
 
       </div>
 
-      {/* callout: glass pill in the lower-right, below the ink column's bottom
-          inset. Deliberately OUTSIDE the `world` div: the highlight, scaffold,
-          floors and leader are world content and stay behind the glass, but
-          the callout is UI — it renders above the frost/veil layers (which
-          are z-index:auto, painted in DOM order) and below the mode control /
-          dock / toast (z-index 12/12/20), so it reads at every frost level
-          without inheriting the frost's opacity or blur. Fixed bottom-right
-          in 'plain' layout (traySheetBottomPct undefined → pillBottom is a
-          constant 24, unchanged); in 'tray' layout it rides `pillBottom` so
-          the tall thinking-state sheet never covers it — its stacking layer
-          means it never overlaps the ink column, dock, or mode control either
-          way. */}
-      {building && nameHe && (
-        <div
-          ref={pillRef}
-          dir="rtl"
-          style={{
-            position: 'absolute',
-            right: 30,
-            bottom: pillBottom,
-            transition: traySheetTransition,
-            zIndex: 11,
-            height: 44,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            padding: '0 14px 0 10px',
-            borderRadius: 999,
-            background: 'rgba(255,255,255,0.72)',
-            border: '1px solid rgba(255,255,255,0.62)',
-            boxShadow: '0 8px 22px rgba(11,27,62,0.2)',
-            boxSizing: 'border-box',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <span style={{ position: 'relative', width: 28, height: 28, flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="28" height="28" viewBox="0 0 28 28" style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}>
-              <circle cx="14" cy="14" r="11" fill="none" stroke="rgba(31,62,108,0.16)" strokeWidth="3.5" />
-              <circle
-                cx="14"
-                cy="14"
-                r="11"
-                fill="none"
-                stroke={GOLD}
-                strokeWidth="3.5"
-                strokeLinecap="round"
-                strokeDasharray={`${ringDone.toFixed(2)} ${(circ - ringDone).toFixed(2)}`}
-                style={{ transition: 'stroke-dasharray .5s ease' }}
-              />
-            </svg>
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke={NAVY} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'relative' }}>
-              <path d="M3 17h14M4 8h12M10 3l7 5H3l7-5zM6 8v9M10 8v9M14 8v9" />
-            </svg>
-          </span>
-          <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12.5, fontWeight: 600, color: NAVY, lineHeight: 1 }}>
-            {nameHe}
-            {hasProgress && (
-              <>
-                {' · '}
-                {progress?.label || 'קומה'}{' '}
-                <span dir="ltr" style={numStyle}>{done}</span>
-                {' מתוך '}
-                <span dir="ltr" style={numStyle}>{total}</span>
-              </>
-            )}
-          </span>
-        </div>
-      )}
     </div>
   )
 }

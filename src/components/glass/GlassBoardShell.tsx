@@ -628,60 +628,19 @@ export default function GlassBoardShell({
         </div>
       )}
 
-      {/* Modes — segmented glass control, plain layout only: top-left, floating
-          on the glass (never touches the breadcrumb on the right). The tray
-          (quiz) layout does not render it — see TRAY_DOCK_BOTTOM: there the
-          glass opens on its own when the student answers, and the ledge holds
-          only the dock, so the quiz's own footer nav keeps its room. */}
-      {!tray && (
-      <div
-        role="group"
-        aria-label="מצב הזכוכית"
-        style={{ position: 'absolute', left: 30, top: 24, zIndex: 12, display: 'flex', alignItems: 'center', gap: 2, padding: 4, ...pillStyle }}
-      >
-        {MODES.map(m => {
-          const lit = active === m
-          const near = overriding && nearest === m && !lit
-          return (
-            <button
-              key={m}
-              type="button"
-              className="ws-glass-seg"
-              data-near={near ? 'true' : undefined}
-              aria-pressed={lit}
-              title={MODE_TITLE[m]}
-              onClick={pickMode(m)}
-              style={{
-                position: 'relative',
-                height: 36,
-                padding: '0 14px 0 12px',
-                border: 0,
-                borderRadius: 999,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 7,
-                ...labelFont,
-                background: lit ? NAVY : 'transparent',
-                color: lit ? '#fff' : INK,
-                transition: 'background 0.25s, color 0.25s',
-              }}
-            >
-              <ModeIcon mode={m} />
-              <span>{MODE_LABEL[m]}</span>
-            </button>
-          )
-        })}
-      </div>
-      )}
+      {/* The מיקוד / הדגמה / עיר switch is gone per Shirli — three buttons for
+          three stops on a slider that is right there. The slider still sets any
+          value, and defaultMode still picks where the board opens. */}
 
       {/* Dock — in the ledge below the sheet (tray) / bottom-left over the glass
-          (plain); left:96 clears the tutor FAB. Frost slider + hold-to-look. */}
+          (plain). Just the frost slider now, seated on the same 24px inset as
+          its bottom edge; the 96 was clearance for a hold-to-look pill that is
+          no longer there, and the tutor FAB sits bottom-RIGHT. */}
       <div
         dir="rtl"
         style={{
           position: 'absolute',
-          left: 96,
+          left: 24,
           bottom: tray ? TRAY_DOCK_BOTTOM : 24,
           zIndex: 12,
           display: 'flex',
@@ -768,54 +727,8 @@ export default function GlassBoardShell({
           </span>
         </div>
 
-        {/* Press-and-hold to look through (Space/Enter toggles for keyboard users) */}
-        <button
-          type="button"
-          aria-label="החזק כדי להביט דרך הזכוכית"
-          aria-pressed={peek}
-          onPointerDown={onPeekDown}
-          onPointerUp={onPeekRelease}
-          onPointerCancel={onPeekRelease}
-          onLostPointerCapture={onPeekRelease}
-          onKeyDown={onPeekKey}
-          onBlur={onPeekRelease}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            height: 44,
-            padding: '0 16px 0 10px',
-            cursor: 'pointer',
-            touchAction: 'none',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            ...labelFont,
-            ...pillStyle,
-            background: peek ? NAVY : pillStyle.background,
-            color: peek ? '#fff' : INK,
-            transition: 'background 0.2s, color 0.2s',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <span
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 999,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: peek ? 'rgba(255,255,255,0.16)' : 'rgba(51,81,202,0.12)',
-              transition: 'background 0.2s',
-            }}
-          >
-            <svg {...svgProps} width={20} height={20}>
-              <path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </span>
-          <span>{peek ? 'מביט בעיר…' : 'החזק כדי להביט'}</span>
-        </button>
+        {/* Hold-to-look removed per Shirli. The frost slider does the same
+            job and stays put, where the pill needed a press held down. */}
       </div>
     </div>
   )

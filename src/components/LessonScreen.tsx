@@ -362,7 +362,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       {/* Title row with copy-to-mindmap action */}
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4, gap: 12 }}>
         <h2 style={{ fontFamily: 'var(--ws-display)', fontSize: 26, fontWeight: 700, color: TEXT_DARK, margin: 0, textAlign: 'right' }}>
-          📚 {lesson.hebrewName}
+          {lesson.hebrewName}
         </h2>
         {mindmapOpen && (
           <button
@@ -373,64 +373,6 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             {copied === 'title' ? '✓ נוסף' : '🧠+ הוסף למפה'}
           </button>
         )}
-      </div>
-      {/* ── Slide navigation strip — compact, clearly labeled prev/next above
-          the card. Stays in normal flow (NOT sticky) so it never tracks down
-          over the whiteboard while scrolling. Navigation stays reachable via
-          the footer dots + arrow keys. RTL-aware: 'הקודם' on the right
-          (where the user reads from), 'הבא' on the left. ─────────────────── */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        gap: 6, marginBottom: 10, padding: '4px 8px',
-        background: '#fff',
-        border: '1px solid rgba(127,155,217,0.30)',
-        borderRadius: 10,
-        boxShadow: '0 2px 8px rgba(31,62,108,0.08)',
-      }}>
-        <button
-          onClick={handlePrev}
-          disabled={isFirst}
-          aria-label="שקופית קודמת"
-          title="הקודם (חץ ימני)"
-          style={{
-            background: isFirst ? 'rgba(127,155,217,0.12)' : 'rgba(127,155,217,0.20)',
-            color: isFirst ? TEXT_LIGHT : BUTTON_COLOR,
-            border: `1px solid ${isFirst ? 'rgba(127,155,217,0.25)' : 'rgba(127,155,217,0.45)'}`,
-            borderRadius: 8, padding: '4px 12px',
-            cursor: isFirst ? 'not-allowed' : 'pointer',
-            fontSize: 12.5, fontWeight: 700,
-            fontFamily: "'Assistant', sans-serif",
-            display: 'flex', alignItems: 'center', gap: 5,
-            opacity: isFirst ? 0.55 : 1,
-            transition: 'all 0.18s',
-          }}
-        >
-          → הקודם
-        </button>
-        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, fontWeight: 600, color: TEXT_DARK }}>
-          {isGraphSlide && effectiveGraphs
-            ? `📊 ${effectiveGraphs[graphIdx]?.title ?? 'גרף'}`
-            : `שקופית ${currentSlide + 1} מתוך ${total}`}
-        </div>
-        <button
-          onClick={handleNext}
-          aria-label={isLast ? 'התחל תרגול' : 'שקופית הבאה'}
-          title={isLast ? 'התחל תרגול' : 'הבא (חץ שמאלי)'}
-          style={{
-            background: isLast ? '#D4AF37' : BUTTON_COLOR,
-            color: '#fff',
-            border: 'none',
-            borderRadius: 8, padding: '4px 14px',
-            cursor: 'pointer',
-            fontSize: 12.5, fontWeight: 700,
-            fontFamily: "'Assistant', sans-serif",
-            display: 'flex', alignItems: 'center', gap: 5,
-            boxShadow: isLast ? '0 2px 10px rgba(212,175,55,0.40)' : '0 2px 10px rgba(31,62,108,0.25)',
-            transition: 'all 0.18s',
-          }}
-        >
-          {isLast ? 'התחל תרגול ✓' : 'הבא ←'}
-        </button>
       </div>
 
       {/* Presentation tool bar — visible only while presenting */}
@@ -514,7 +456,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           }}>
             {slide.title}
           </h3>
-          <div style={{ display: 'flex', gap: 6, flexShrink: 0, marginTop: 6 }}>
+          <div style={{ display: 'flex', gap: 10, flexShrink: 0, marginTop: 2 }}>
             <button
               onClick={() => {
                 const ok = quickAddToMindmap({
@@ -527,15 +469,29 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               }}
               title="הוסף את הכותרת והתוכן למפת החשיבה"
               style={{
-                background: copied === 'title-mm' ? 'rgba(52,168,83,0.18)' : 'rgba(99,102,241,0.10)',
-                border: `1.5px solid ${copied === 'title-mm' ? 'rgba(52,168,83,0.5)' : 'rgba(99,102,241,0.3)'}`,
-                color: copied === 'title-mm' ? '#34A853' : '#6366f1',
-                borderRadius: 10, padding: '6px 12px', fontSize: 12, fontWeight: 600,
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                background: copied === 'title-mm' ? '#254A9F' : 'rgba(255,255,255,0.72)',
+                border: `1.5px solid ${copied === 'title-mm' ? '#254A9F' : 'rgba(127,155,217,0.35)'}`,
+                color: copied === 'title-mm' ? '#fff' : '#254A9F',
+                borderRadius: 12, padding: '9px 16px', fontSize: 14, fontWeight: 600,
                 fontFamily: "'Assistant', sans-serif", cursor: 'pointer',
                 whiteSpace: 'nowrap', transition: 'all 0.2s',
               }}
             >
-              {copied === 'title-mm' ? '✓ נוסף' : '🧠+ למפה'}
+              {copied === 'title-mm' ? (
+                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <polyline points="20,6 9,17 4,12" /></svg> נוסף</>
+              ) : (
+                <>
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <circle cx="12" cy="6" r="2.6" /><circle cx="5.5" cy="17" r="2.6" />
+                    <circle cx="18.5" cy="17" r="2.6" /><path d="M10.4 7.6 7 14.6" /><path d="M13.6 7.6 17 14.6" />
+                  </svg>
+                  הוספה למפה
+                </>
+              )}
             </button>
             <button
               onClick={() => {
@@ -548,15 +504,30 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
               }}
               title="הוסף כדף חדש במחברת (אותו עץ, תצוגת מחברת)"
               style={{
-                background: copied === 'title-nb' ? 'rgba(52,168,83,0.18)' : 'rgba(245,158,11,0.10)',
-                border: `1.5px solid ${copied === 'title-nb' ? 'rgba(52,168,83,0.5)' : 'rgba(245,158,11,0.35)'}`,
-                color: copied === 'title-nb' ? '#34A853' : '#b45309',
-                borderRadius: 10, padding: '6px 12px', fontSize: 12, fontWeight: 600,
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                background: copied === 'title-nb' ? '#254A9F' : 'rgba(255,255,255,0.72)',
+                border: `1.5px solid ${copied === 'title-nb' ? '#254A9F' : 'rgba(127,155,217,0.35)'}`,
+                color: copied === 'title-nb' ? '#fff' : '#254A9F',
+                borderRadius: 12, padding: '9px 16px', fontSize: 14, fontWeight: 600,
                 fontFamily: "'Assistant', sans-serif", cursor: 'pointer',
                 whiteSpace: 'nowrap', transition: 'all 0.2s',
               }}
             >
-              {copied === 'title-nb' ? '✓ נוסף' : '📔+ למחברת'}
+              {copied === 'title-nb' ? (
+                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <polyline points="20,6 9,17 4,12" /></svg> נוסף</>
+              ) : (
+                <>
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M7.5 3.2A2.4 2.4 0 0 0 5.1 5.6v12.8a2.4 2.4 0 0 0 2.4 2.4" />
+                    <rect x="7.5" y="3.2" width="11.4" height="17.6" rx="2.4" />
+                    <path d="M10.6 8h5.2" /><path d="M10.6 12h5.2" />
+                  </svg>
+                  הוספה למחברת
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -814,27 +785,87 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       />
       </div>
 
-      {/* Footer controls — dots for ALL slides (lesson + graph) */}
-      <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
-        {Array.from({ length: total }).map((_, idx) => {
-          const isGraph = mergedSequence[idx]?.kind === 'graph'
-          return (
-            <button
-              key={idx}
-              onClick={() => setCurrentSlide(idx)}
-              aria-label={`עבור לשקופית ${idx + 1}`}
-              style={{
-                width: idx === currentSlide ? 14 : 10,
-                height: idx === currentSlide ? 14 : 10,
-                borderRadius: '50%',
-                background: idx === currentSlide
-                  ? (isGraph ? '#D4AF37' : BUTTON_COLOR)
-                  : (isGraph ? 'rgba(212,175,55,0.4)' : 'rgba(127,155,217,0.35)'),
-                border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.2s',
-              }}
-            />
-          )
-        })}
+      {/* ── Slide bar — one strip at the foot of the card. It used to be two
+          things in two places: a labelled prev/next strip ABOVE the card and a
+          bare row of dots far BELOW it, with nothing beside the dots to say
+          what they counted. Joined per Shirli: back on the right (where the
+          reader starts), the dots and the count in the middle, forward on the
+          left. Arrow keys still work. ─────────────────────────────────────── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        gap: 16, marginTop: 22, padding: '10px 14px',
+        background: '#fff',
+        border: '1px solid rgba(127,155,217,0.30)',
+        borderRadius: 16,
+        boxShadow: '0 2px 8px rgba(31,62,108,0.08)',
+      }}>
+        <button
+          onClick={handlePrev}
+          disabled={isFirst}
+          aria-label="שקופית קודמת"
+          title="הקודם (חץ ימני)"
+          style={{
+            background: 'transparent',
+            color: isFirst ? TEXT_LIGHT : BUTTON_COLOR,
+            border: 'none',
+            borderRadius: 12, padding: '8px 14px',
+            cursor: isFirst ? 'not-allowed' : 'pointer',
+            fontSize: 14, fontWeight: 600,
+            fontFamily: "'Assistant', sans-serif",
+            display: 'flex', alignItems: 'center', gap: 6,
+            opacity: isFirst ? 0.45 : 1,
+            transition: 'all 0.18s',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M5 12h14" /><polyline points="12,5 19,12 12,19" />
+          </svg>
+          הקודם
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap', justifyContent: 'center' }}>
+            {Array.from({ length: total }).map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                aria-label={`עבור לשקופית ${idx + 1}`}
+                aria-current={idx === currentSlide ? 'true' : undefined}
+                style={{
+                  width: idx === currentSlide ? 22 : 8,
+                  height: 8,
+                  borderRadius: 999,
+                  background: idx === currentSlide ? BUTTON_COLOR : 'rgba(127,155,217,0.35)',
+                  border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.2s',
+                }}
+              />
+            ))}
+          </div>
+          <div style={{
+            fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600,
+            color: TEXT_MED, whiteSpace: 'nowrap',
+          }}>
+            {isGraphSlide && effectiveGraphs
+              ? (effectiveGraphs[graphIdx]?.title ?? 'גרף')
+              : `שקופית ${currentSlide + 1} מתוך ${total}`}
+          </div>
+        </div>
+
+        <button
+          onClick={handleNext}
+          aria-label={isLast ? 'התחל תרגול' : 'שקופית הבאה'}
+          title={isLast ? 'התחל תרגול' : 'הבא (חץ שמאלי)'}
+          className="ws-cta"
+          style={{ padding: '9px 20px', fontSize: 14, whiteSpace: 'nowrap' }}
+        >
+          {isLast ? 'התחל תרגול' : 'הבא'}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M19 12H5" /><polyline points="12,19 5,12 12,5" />
+          </svg>
+        </button>
       </div>
 
       {/* Floating side-arrows removed — replaced by labeled prev/next buttons
