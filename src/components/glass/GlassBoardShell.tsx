@@ -660,7 +660,7 @@ export default function GlassBoardShell({
           style={{
             position: 'absolute',
             right: 28,
-            bottom: tray ? TRAY_DOCK_BOTTOM : 28,
+            bottom: 28,   // one inset for both layouts — the dock sits ON the board
             zIndex: 12,
             display: 'flex',
             alignItems: 'center',
@@ -680,7 +680,7 @@ export default function GlassBoardShell({
         style={{
           position: 'absolute',
           left: 28,
-          bottom: tray ? TRAY_DOCK_BOTTOM : 28,
+          bottom: 28,   // one inset for both layouts — the dock sits ON the board
           zIndex: 12,
           display: 'flex',
           alignItems: 'center',

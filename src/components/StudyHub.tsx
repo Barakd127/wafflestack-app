@@ -3749,21 +3749,84 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
       {/* Top bar — hidden in fullscreen so canvas + question get full
           viewport. The floating "הצג כלי לימוד" chip above restores it. */}
       {!fullscreen && (
-      <div className="ws-quiz-topbar" style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', borderTop: '1px solid rgba(127,155,217,0.30)', boxShadow: '0 -2px 6px rgba(18,36,96,0.10)', height: 56, display: 'flex', alignItems: 'center', padding: '0 20px', flexShrink: 0, gap: 12, zIndex: 10 }}>
+      <div className="ws-quiz-topbar" style={{
+        /* the theory board's slide bar, to the pixel: white, attached to the
+           board's foot, square on top and rounded below */
+        background: '#fff',
+        border: '1px solid rgba(127,155,217,0.30)',
+        borderTop: '1px solid rgba(127,155,217,0.22)',
+        borderRadius: '0 0 18px 18px',
+        boxShadow: '0 8px 20px rgba(31,62,108,0.10)',
+        margin: '0 20px',
+        minHeight: 56, display: 'flex', alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '8px 16px', flexShrink: 0, gap: 16, zIndex: 10,
+      }}>
+        {/* back — on the right, where the reader starts */}
+        {!isDone && (
+          <button
+            onClick={navPrev}
+            aria-disabled={isFirstQ || undefined}
+            aria-label="שאלה קודמת"
+            title={isFirstQ ? 'זו השאלה הראשונה' : 'הקודם'}
+            style={{
+              background: 'none', border: 'none',
+              color: isFirstQ ? 'rgba(31,62,108,0.30)' : 'var(--sh-text-med)',
+              borderRadius: 12, padding: '11px 16px', minHeight: 44,
+              cursor: isFirstQ ? 'default' : 'pointer',
+              fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
+              display: 'flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap',
+            }}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M5 12h14" /><polyline points="12,5 19,12 12,19" />
+            </svg>
+            הקודם
+          </button>
+        )}
+
+        {/* where you are — the dots and the count together */}
+        {!isDone && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+            <div style={{ display: 'flex', gap: 5, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+              {dotStates.map((state, i) => {
+                const done = state === 'correct' || state === 'wrong'
+                const isCurrent = state === 'current'
+                return (
+                  <button
+                    key={i}
+                    onClick={() => navigateToQuestion(i)}
+                    aria-label={`שאלה ${i + 1}`}
+                    aria-current={isCurrent ? 'true' : undefined}
+                    style={{
+                      width: isCurrent ? 20 : 7, height: 7, borderRadius: 999, padding: 0, border: 'none',
+                      background: state === 'correct' ? '#34A853'
+                        : state === 'wrong' ? '#EA4335'
+                        : isCurrent ? BUTTON_COLOR : 'rgba(127,155,217,0.35)',
+                      cursor: done || isCurrent ? 'pointer' : 'default',
+                      transition: 'all .2s',
+                    }}
+                  />
+                )
+              })}
+            </div>
+            <span style={{
+              fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600,
+              color: TEXT_MED, whiteSpace: 'nowrap',
+            }}>
+              שאלה {currentQ + 1} מתוך {total}
+            </span>
+          </div>
+        )}
         {/* The stock photograph that used to sit here is gone: a 34×26 crop of
             an unrelated image, at the head of a bar whose job is to say how far
             through the session the reader is. */}
-        <div style={{ flex: 1 }}>
-          <div style={{ height: 6, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
-            <div style={{ width: `${isDone ? 100 : ((currentQ)/total)*100}%`, height: '100%', background: '#FF854C', borderRadius: 10, transition: 'width 0.4s' }} />
-          </div>
-          <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT, marginTop: 2 }}>
-            {answeredCount} / {total} · {correctCount} ✓{streak >= 2 ? <span style={{ color: '#FF7A1A', fontWeight: 800 }}> · 🔥{streak}</span> : null}
-          </div>
-        </div>
-        <div className="ws-quiz-topic" style={{ fontFamily: "'Assistant', sans-serif", fontSize: 14, color: TEXT_DARK }}>
-          <span style={{ fontWeight: 700 }}>סטטיסטיקה</span>{!isDone && ` | ${q.topic}`}
-        </div>
+        {/* The meter is gone. The dots in this same bar count the same
+            questions and mark which were right — a second reading of one
+            number, in a second shape, is not more information. */}
+        {/* The topic is in the app's own top bar already
+            ("הקדמה לסטטיסטיקה · תרגול"); a navigation bar does not repeat it. */}
         {/* Difficulty chip — relocated here 2026-07-25 when the navy strip
             over the board was removed. The top bar is the single source of
             truth for question metadata, so difficulty joins the XP chip. */}
@@ -3784,44 +3847,40 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             fontSize: 12, fontWeight: 700,
           }}>+{q.xp} XP</div>
         )}
-        {/* Float toggle — also relocated out of the removed navy strip; it
-            sits next to the fullscreen toggle since both change the frame
-            the question is shown in. */}
-        {!isDone && !isMobile && boardFullBleed && (
-          <button
-            onClick={() => setFloatMode(true)}
-            aria-label="נתק לחלון צף"
-            title="נתק לחלון צף נגרר"
-            style={{
-              background: 'rgba(127,155,217,0.10)',
-              border: '1px solid rgba(127,155,217,0.30)',
-              color: TEXT_DARK,
-              borderRadius: 8, padding: '6px 10px',
-              cursor: 'pointer', fontFamily: "'Assistant', sans-serif",
-              fontSize: 12, fontWeight: 700,
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}
-          >⤢ צף</button>
+        {/* forward: דלג first so it lands to the RIGHT of הבא under RTL */}
+        {!isDone && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <button
+              onClick={handleSkip}
+              title="דלג — בלי לענות; זה שובר את הרצף"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
+                color: TEXT_MED, padding: '11px 14px', borderRadius: 12, whiteSpace: 'nowrap',
+              }}
+            >
+              דלג
+            </button>
+            <button
+              data-tour="practice-btn"
+              onClick={navNext}
+              aria-label={isLastQ ? 'סיים את הסשן' : 'שאלה הבאה'}
+              title={isLastQ ? 'סיום' : 'הבא — בלי לענות ובלי להיחשב טעות'}
+              className="ws-cta"
+              style={{ padding: '10px 22px', fontSize: 14, minHeight: 44 }}
+            >
+              {isLastQ ? 'סיום' : 'הבא'}
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M19 12H5" /><polyline points="12,19 5,12 12,5" />
+              </svg>
+            </button>
+          </div>
         )}
-        {/* Fullscreen toggle — distraction-free practice; parent hides sidebar+topbar */}
-        {onToggleFullscreen && !isMobile && (
-          <button
-            onClick={onToggleFullscreen}
-            aria-label={fullscreen ? 'יציאה ממסך מלא' : 'מסך מלא — ללא הסחות דעת'}
-            title={fullscreen ? 'יציאה ממסך מלא (Esc)' : 'מסך מלא'}
-            style={{
-              background: fullscreen ? 'rgba(212,175,55,0.18)' : 'rgba(127,155,217,0.10)',
-              border: '1px solid ' + (fullscreen ? 'rgba(212,175,55,0.55)' : 'rgba(127,155,217,0.30)'),
-              color: fullscreen ? '#7A5C00' : TEXT_DARK,
-              borderRadius: 8, padding: '6px 10px',
-              cursor: 'pointer', fontFamily: "'Assistant', sans-serif",
-              fontSize: 12, fontWeight: 700,
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}
-          >
-            {fullscreen ? '↘ צא ממסך מלא' : '⛶ מסך מלא'}
-          </button>
-        )}
+
+        {/* צף and מסך מלא are on the board's top-left corner now — see
+            topLeftSlot. They were here as well, so the screen carried two of
+            each: neither is navigation, and this is a navigation bar. */}
       </div>
       )}{/* end !fullscreen topbar guard */}
 
@@ -4188,6 +4247,29 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             /* The board's other corner. The frost slider owns bottom-left; the
                tools take bottom-right, on the same ledge — so both read as
                controls OF the board rather than a band above the question. */
+            /* The frame controls — the same corner the theory board gives
+               הוספה למפה / למחברת. Neither is navigation, and both change the
+               frame the question is shown in rather than the question. */
+            topLeftSlot={!isDone && !isMobile ? (
+              <>
+                {boardFullBleed && (
+                  <button
+                    onClick={() => setFloatMode(true)}
+                    aria-label="נתק לחלון צף"
+                    title="נתק לחלון צף נגרר"
+                    className="ws-cta-outline ws-cta-xs"
+                  >⤢ צף</button>
+                )}
+                {onToggleFullscreen && (
+                  <button
+                    onClick={onToggleFullscreen}
+                    aria-label={fullscreen ? 'יציאה ממסך מלא' : 'מסך מלא — ללא הסחות דעת'}
+                    title={fullscreen ? 'יציאה ממסך מלא (Esc)' : 'מסך מלא'}
+                    className="ws-cta-outline ws-cta-xs"
+                  >{fullscreen ? '↘ צא ממסך מלא' : '⛶ מסך מלא'}</button>
+                )}
+              </>
+            ) : undefined}
             dockRightSlot={!isDone && !isMobile ? (
               <div style={{
                 display: 'flex', gap: 2, padding: 3, borderRadius: 999,
@@ -4710,112 +4792,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                there when the question is short; sticky keeps it in view while a
                long stem scrolls). Chalk-ish buttons so it reads as part of the
                board, not as app chrome. ── */}
-          {boardFullBleed && !isDone && (
-            <div className="ws-quiz-footer" style={{
-              marginTop: 'auto',
-              position: 'sticky',
-              bottom: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              gap: 12,
-              paddingTop: 14,
-              // Same corner-bracket clearance as the header band — the bottom
-              // brackets and the marker tray paint over this row otherwise.
-              paddingInline: 22,
-              // Fade so scrolled text doesn't run into the buttons.
-              background: 'linear-gradient(180deg, rgba(252,253,255,0) 0%, #FCFDFF 45%)',
-            }}>
-              <button
-                onClick={navPrev}
-                /* aria-disabled (not HTML disabled) keeps it discoverable by
-                   keyboard/SR; navPrev already no-ops on the first question. */
-                aria-disabled={isFirstQ || undefined}
-                aria-label="שאלה קודמת"
-                title={isFirstQ ? 'זו השאלה הראשונה' : 'הקודם'}
-                style={{
-                  background: 'none', border: 'none',
-                  color: isFirstQ ? 'rgba(31,62,108,0.30)' : 'var(--sh-text-med)',
-                  borderRadius: 12,
-                  padding: '11px 16px',
-                  cursor: isFirstQ ? 'default' : 'pointer',
-                  fontFamily: "'Assistant', sans-serif",
-                  fontSize: bigBoard ? 15 : 14, fontWeight: 600,
-                  minHeight: 44,
-                  display: 'flex', alignItems: 'center', gap: 7,
-                }}
-              >
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M5 12h14" /><polyline points="12,5 19,12 12,19" />
-                </svg>
-                הקודם
-              </button>
-
-              {/* where you are in the session — the dots and the count
-                  together, as on the theory board's slide bar */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
-                <div style={{ display: 'flex', gap: 5, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-                  {dotStates.map((state, i) => {
-                    const done = state === 'correct' || state === 'wrong'
-                    const isCurrent = state === 'current'
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => navigateToQuestion(i)}
-                        aria-label={`שאלה ${i + 1}`}
-                        aria-current={isCurrent ? 'true' : undefined}
-                        style={{
-                          width: isCurrent ? 20 : 7, height: 7, borderRadius: 999, padding: 0, border: 'none',
-                          background: state === 'correct' ? '#34A853'
-                            : state === 'wrong' ? '#EA4335'
-                            : isCurrent ? BUTTON_COLOR : 'rgba(127,155,217,0.35)',
-                          cursor: done || isCurrent ? 'pointer' : 'default',
-                          transition: 'all .2s',
-                        }}
-                      />
-                    )
-                  })}
-                </div>
-                <span style={{
-                  fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600,
-                  color: TEXT_MED, whiteSpace: 'nowrap',
-                }}>
-                  שאלה {currentQ + 1} מתוך {total}
-                </span>
-              </div>
-
-              {/* the two ways forward: דלג first so it lands to the RIGHT of
-                  הבא under RTL — the order the theory board uses */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <button
-                onClick={handleSkip}
-                title="דלג — בלי לענות; זה שובר את הרצף"
-                style={{
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
-                  color: TEXT_MED, padding: '11px 14px', borderRadius: 12, whiteSpace: 'nowrap',
-                }}
-              >
-                דלג
-              </button>
-              <button
-                data-tour="practice-btn"
-                onClick={navNext}
-                aria-label={isLastQ ? 'סיים את הסשן' : 'שאלה הבאה'}
-                title={isLastQ ? 'סיום' : 'הבא — בלי לענות ובלי להיחשב טעות'}
-                className="ws-cta"
-                /* no inline background: an inline style outranks every class
-                   selector and would kill .ws-cta's hover and active */
-                style={{ padding: bigBoard ? '11px 28px' : '10px 22px', fontSize: bigBoard ? 15 : 14, minHeight: 44 }}
-              >
-                {isLastQ ? 'סיום' : 'הבא'}
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M19 12H5" /><polyline points="12,19 5,12 12,5" />
-                </svg>
-              </button>
-              </div>
-            </div>
-          )}
+          {/* The in-board footer is gone: back, the dots, the count, דלג and
+              הבא all live in the one bar under the board now — the shape the
+              theory screen uses. Two bars at the foot of one screen was the
+              thing that made the two halves feel unrelated. */}
           </div>
           </BoardShell>
 
