@@ -560,6 +560,83 @@ html.dark .ws-glass-card:hover {
   .ws-glass-card::before { display: none; }
 }
 
+/* ── The ink column's edges ───────────────────────────────────────────────
+   Content that runs past the board is not cut on a line — it goes soft and
+   sinks into the glass.
+
+   A single blurred pane with a white wash reads as a curtain drawn over the
+   text: the blur starts at full strength on its first pixel, and the wash
+   whitens everything under it evenly. So the lip is three panes instead,
+   each blurring harder than the one before and each masked to fade in where
+   the previous one fades out — the blur RAMPS rather than switching on. The
+   tint is the board's own light blue at a fraction of the old white, enough
+   to keep text legible as it dissolves and not enough to read as a colour.
+
+   Per Shirli: the glass board IS the theory/practice screen, so nothing
+   inside it may read as a window onto something else. */
+.ws-ink-lip {
+  position: absolute;
+  inset-inline: 0;
+  height: 64px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  z-index: 2;
+}
+.ws-ink-lip[data-on='true'] { opacity: 1; }
+
+/* the three panes: the element itself, then ::before and ::after */
+.ws-ink-lip,
+.ws-ink-lip::before,
+.ws-ink-lip::after {
+  content: '';
+}
+.ws-ink-lip::before,
+.ws-ink-lip::after {
+  position: absolute;
+  inset-inline: 0;
+  pointer-events: none;
+}
+
+/* bottom edge — softest at the very bottom */
+.ws-ink-lip-bottom { bottom: 0; -webkit-backdrop-filter: blur(1.5px); backdrop-filter: blur(1.5px);
+  -webkit-mask-image: linear-gradient(to top, #000 55%, transparent 100%);
+          mask-image: linear-gradient(to top, #000 55%, transparent 100%); }
+.ws-ink-lip-bottom::before { bottom: 0; height: 68%;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  -webkit-mask-image: linear-gradient(to top, #000 45%, transparent 100%);
+          mask-image: linear-gradient(to top, #000 45%, transparent 100%); }
+.ws-ink-lip-bottom::after { bottom: 0; height: 38%;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  background: linear-gradient(to top, rgba(226,237,255,0.42), rgba(226,237,255,0));
+  -webkit-mask-image: linear-gradient(to top, #000 35%, transparent 100%);
+          mask-image: linear-gradient(to top, #000 35%, transparent 100%); }
+
+/* top edge — the same ramp, mirrored */
+.ws-ink-lip-top { top: 0; -webkit-backdrop-filter: blur(1.5px); backdrop-filter: blur(1.5px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 55%, transparent 100%); }
+.ws-ink-lip-top::before { top: 0; height: 68%;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 45%, transparent 100%); }
+.ws-ink-lip-top::after { top: 0; height: 38%;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  background: linear-gradient(to bottom, rgba(226,237,255,0.42), rgba(226,237,255,0));
+  -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 35%, transparent 100%); }
+
+/* The bar beside it was the other half of the window effect. */
+.ws-ink-scroll { scrollbar-width: thin; scrollbar-color: rgba(37,74,159,0.16) transparent; }
+.ws-ink-scroll::-webkit-scrollbar { width: 6px; }
+.ws-ink-scroll::-webkit-scrollbar-track { background: transparent; }
+.ws-ink-scroll::-webkit-scrollbar-thumb { background: rgba(37,74,159,0.16); border-radius: 999px; }
+.ws-ink-scroll:hover::-webkit-scrollbar-thumb { background: rgba(37,74,159,0.28); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-ink-lip { transition: none; }
+}
+
 /* ── Glass board ─────────────────────────────────────────────────────────── */
 /* Legibility guard for the ink column when the glass is nearly clear:
    a radial white backplate behind the column + an etched white outline on

@@ -27,15 +27,18 @@ export const GC = {
 } as const
 
 /** Card container — matches the z-score frame exactly. */
+/* No card. A graph on the glass board is content on the board, not a panel
+   floating inside it — the board is already the screen. Spacing and width are
+   what a frame is for here; the fill, border and shadow drew a second one. */
 export const graphCardStyle: React.CSSProperties = {
-  background: 'var(--sh-q-card-bg, #FCFDFF)',
-  borderRadius: 16,
-  padding: 20,
-  margin: '24px auto',
+  background: 'transparent',
+  borderRadius: 0,
+  padding: '4px 0',
+  margin: '16px auto',
   maxWidth: 700,
   color: 'var(--sh-text-dark)',
-  border: '1px solid rgba(127,155,217,0.22)',
-  boxShadow: '0 6px 24px rgba(31,62,108,0.08)',
+  border: 'none',
+  boxShadow: 'none',
   fontFamily: GRAPH_FONT,
 }
 

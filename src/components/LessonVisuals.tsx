@@ -18,8 +18,11 @@ const WRAP: React.CSSProperties = {
   background: 'rgba(255,255,255,0.06)',
   border: '1px solid rgba(255,255,255,0.12)',
   borderRadius: 16,
-  padding: '18px 22px',
-  marginTop: 20,
+  /* Tightened so a visual fits the glass board without spilling — the board is
+     a fixed height, and 20 above plus 18 inside was buying air the slide could
+     not afford. Shared by every visual in this file. */
+  padding: '14px 18px',
+  marginTop: 10,
   fontFamily: "'Heebo','Assistant',sans-serif",
   direction: 'rtl',
   color: 'var(--sh-text-dark)',
@@ -40,7 +43,7 @@ const ROW: React.CSSProperties = { display: 'flex', gap: 16, flexWrap: 'wrap', a
 const LABEL_STYLE: React.CSSProperties = { fontSize: 14, color: 'var(--sh-text-dark)', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 500 }
 const SLIDER = (color = GOLD): React.CSSProperties => ({ width: 110, accentColor: color, marginInlineEnd: 6 } as React.CSSProperties)
 const CAPTION: React.CSSProperties = { fontSize: 12, color: 'var(--sh-text-dark)', fontWeight: 700, marginBottom: 6, opacity: 0.85 }
-const STORY: React.CSSProperties = { fontSize: 14, color: 'var(--sh-text-dark)', lineHeight: 1.65, marginBottom: 14, padding: '10px 14px', background: 'rgba(255,255,255,0.08)', borderRight: `3px solid ${GOLD}`, borderRadius: 8 }
+const STORY: React.CSSProperties = { fontSize: 14, color: 'var(--sh-text-dark)', lineHeight: 1.6, marginBottom: 10, padding: '9px 13px', background: 'rgba(255,255,255,0.08)', borderRight: `3px solid ${GOLD}`, borderRadius: 8 }
 
 // ── Math helpers ──────────────────────────────────────────────────────────────
 function normalPDF(x: number, mu: number, sigma: number) {
@@ -826,21 +829,31 @@ export function IntroVisual() {
   const W = 360, H = 130
   return (
     <div style={WRAP}>
-      <div style={CAPTION}>🎯 ויזואליזציה — מסע סטטיסטי</div>
+      <div style={CAPTION}>ויזואליזציה — מסע סטטיסטי</div>
       <div style={STORY}>
         <strong>20 תוצאות מבחן.</strong> בהתחלה זה רק ערימת מספרים. לחצו "מיין" ואז "ארגן" כדי לראות איך סטטיסטיקה מארגנת כאוס לסיפור — ההיסטוגרמה חושפת את הצורה.
       </div>
-      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-        {['🎲 גולמי', '↕ ממוין', '📊 היסטוגרמה'].map((label, i) => (
-          <button key={i} onClick={() => setStage(i)}
+      {/* Three views of the same twenty numbers — alternatives, so a segmented
+          control, and the lit side is the darker one. */}
+      <div style={{ display: 'flex', gap: 2, marginBottom: 12, background: 'rgba(31,62,108,0.10)', padding: 3, borderRadius: 999, alignSelf: 'flex-start', width: 'fit-content' }}>
+        {['גולמי', 'ממוין', 'היסטוגרמה'].map((label, i) => (
+          <button key={i} onClick={() => setStage(i)} aria-pressed={stage === i}
             style={{
-              background: stage === i ? ACCENT : 'rgba(99,102,241,0.1)', color: stage === i ? '#fff' : ACCENT,
-              border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '4px 10px',
-              cursor: 'pointer', fontSize: 12, fontWeight: 600,
+              background: stage === i ? ACCENT : 'transparent', color: stage === i ? '#fff' : ACCENT,
+              border: 'none', borderRadius: 999, padding: '6px 14px',
+              cursor: 'pointer', fontSize: 13, fontWeight: 600,
+              fontFamily: "'Assistant', sans-serif",
+              transition: 'background .15s, color .15s',
             }}>{label}</button>
         ))}
       </div>
-      <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
+      {/* The three stages share one viewBox, so nothing jumps when you switch
+          between them — and the box is height-capped. Without the cap a 100%
+          width on a 920px board scaled the 130-unit box to 332px tall and the
+          slide spilled past the board. Per Shirli: it should fit, in all three
+          states, rather than fade out at the bottom. */}
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`}
+           style={{ maxHeight: 138, display: 'block', margin: '0 auto' }}>
         {stage < 2 ? (
           (stage === 0 ? RAW : sorted).map((v, i) => {
             const cols = 10, x = 20 + (i % cols) * 32, y = 20 + Math.floor(i / cols) * 36

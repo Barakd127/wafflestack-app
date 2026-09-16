@@ -705,20 +705,15 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
       {/* Graph slide — rendered for graph entries in the merged sequence */}
       {isGraphSlide && effectiveGraphs && effectiveGraphs[graphIdx] && (
         <div style={{
-          // Issue 5: transparent-ish wrapper so graphs blend into lesson theme
-          // (navy on dark, cream on light). Keeps the gold border accent.
-          background: 'rgba(11,27,62,0.06)',
-          border: '1px solid rgba(212,175,55,0.4)',
-          borderRadius: 18,
-          padding: '20px 18px',
-          marginTop: 12,
-          boxShadow: '0 4px 18px rgba(31,62,108,0.10)',
+          // No panel, no border, no shadow: the glass board is the screen, and
+          // a graph is its content — not a second screen shown inside it.
+          marginTop: 0,
         }}>
           {/* Zoom controls */}
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            gap: 12, marginBottom: 10, paddingBottom: 10,
-            borderBottom: '1px solid rgba(212,175,55,0.25)',
+            gap: 12, marginBottom: 10, paddingBottom: 9,
+            borderBottom: '1px solid rgba(37,74,159,0.14)',
           }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--sh-text-dark)', fontFamily: "'Assistant', sans-serif" }}>
               {effectiveGraphs[graphIdx].title}
@@ -729,8 +724,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 aria-label="הקטן גרף"
                 title="הקטן"
                 style={{
-                  background: 'rgba(31,62,108,0.08)', border: '1px solid rgba(31,62,108,0.25)',
-                  color: 'var(--sh-text-dark)', borderRadius: 8, width: 30, height: 30,
+                  background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(37,74,159,0.25)',
+                  color: '#254A9F', borderRadius: 10, width: 30, height: 30,
                   cursor: 'pointer', fontWeight: 700, fontSize: 16, lineHeight: 1,
                 }}
               >−</button>
@@ -742,8 +737,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 aria-label="הגדל גרף"
                 title="הגדל"
                 style={{
-                  background: 'rgba(212,160,23,0.15)', border: '1px solid rgba(212,160,23,0.5)',
-                  color: 'var(--sh-text-dark)', borderRadius: 8, width: 30, height: 30,
+                  background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(37,74,159,0.25)',
+                  color: '#254A9F', borderRadius: 10, width: 30, height: 30,
                   cursor: 'pointer', fontWeight: 700, fontSize: 16, lineHeight: 1,
                 }}
               >+</button>
@@ -752,8 +747,8 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
                 aria-label="ברירת מחדל"
                 title="גודל ברירת מחדל"
                 style={{
-                  background: 'transparent', border: '1px solid rgba(212,175,55,0.45)',
-                  color: 'var(--sh-text-dark)', borderRadius: 8, padding: '4px 10px',
+                  background: 'transparent', border: '1px solid rgba(37,74,159,0.22)',
+                  color: '#254A9F', borderRadius: 10, padding: '5px 11px',
                   cursor: 'pointer', fontSize: 11, fontFamily: "'Assistant', sans-serif",
                   marginInlineStart: 4,
                 }}

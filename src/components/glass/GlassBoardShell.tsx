@@ -218,6 +218,28 @@ export default function GlassBoardShell({
   const [autoReveal, setAutoReveal] = useState<number | null>(null)
 
   const trackRef = useRef<HTMLSpanElement | null>(null)
+
+  /* Which end of the ink column still has content past the edge. Only that end
+     gets a lip, so a slide that fits shows no veil at all. */
+  const inkScrollRef = useRef<HTMLDivElement | null>(null)
+  const [inkEdges, setInkEdges] = useState({ top: false, bottom: false })
+  const measureInk = useCallback(() => {
+    const el = inkScrollRef.current
+    if (!el) return
+    const over = el.scrollHeight - el.clientHeight
+    const top = el.scrollTop > 4
+    const bottom = over > 4 && el.scrollTop < over - 4
+    setInkEdges(prev => (prev.top === top && prev.bottom === bottom ? prev : { top, bottom }))
+  }, [])
+  useEffect(() => {
+    measureInk()
+    const el = inkScrollRef.current
+    if (!el) return
+    const ro = new ResizeObserver(measureInk)
+    ro.observe(el)
+    for (const child of Array.from(el.children)) ro.observe(child)
+    return () => ro.disconnect()
+  }, [measureInk, children])
   const rootRef = useRef<HTMLDivElement | null>(null)
   // Board height in px (tray layout only) — lets the ink column reserve just
   // enough bottom padding to clear the FIXED-pixel dock/mode-control, which
@@ -597,8 +619,19 @@ export default function GlassBoardShell({
             {topLeftSlot && <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>{topLeftSlot}</div>}
           </div>
         )}
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
-          {children}
+        <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
+          <div
+            ref={inkScrollRef}
+            onScroll={measureInk}
+            className="ws-ink-scroll"
+            style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
+          >
+            {children}
+          </div>
+          {/* the lips: the board's own frost, masked so the blur fades out
+              rather than ending on a line of its own */}
+          <span aria-hidden className="ws-ink-lip ws-ink-lip-top" data-on={inkEdges.top ? 'true' : undefined} />
+          <span aria-hidden className="ws-ink-lip ws-ink-lip-bottom" data-on={inkEdges.bottom ? 'true' : undefined} />
         </div>
       </div>
 
