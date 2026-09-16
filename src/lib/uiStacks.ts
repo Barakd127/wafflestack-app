@@ -18,14 +18,22 @@ import { useState, useEffect } from 'react'
 
 /** 'br-content' is bottom-right of the CONTENT, not of the window. The rail
  *  owns the right edge and is user-resizable, so anything anchored there has to
- *  track it — hence --ws-rail-w, published by the layout on every resize.
- *  --ws-bottombar-h is published by a screen that owns a bar along the bottom
- *  of its content (the lesson's slide bar): the FABs ride above it instead of
- *  sitting on top of its buttons. */
+ *  track it — hence --ws-rail-w, published by the layout on every resize. Its
+ *  bottom offset is BR_CONTENT_BASE, a constant, so the FABs hold the same
+ *  place on every screen rather than jumping when a screen has a bottom bar. */
 export type Corner = 'bl' | 'br' | 'tl' | 'tr' | 'br-content'
 
 const STACK_STEP = 72   // px between FAB centres in the same corner stack
 const BASE = 20         // px from the viewport edge to the first FAB centre
+
+/* 'br-content' sits higher than the other corners, and by the same amount on
+ * every screen — per Shirli, the tutor and the timer should not move between
+ * pages. 96 clears what actually lives along the bottom of a content area:
+ * the admin chip in the rail (41px tall, 16 from the edge) and the lesson's
+ * slide bar (60px, flush with the board's foot). A constant is also the only
+ * way the pair can be in the same place on a screen that has a bar and one
+ * that does not. */
+const BR_CONTENT_BASE = 96
 
 const slots: Record<Corner, string[]> = {
   bl: ['restore-chrome'],
@@ -46,17 +54,15 @@ export function getStackOffset(
 ): { bottom?: number; top?: number; left?: number; right?: number | string } {
   const list = slots[corner] ?? []
   const idx = list.indexOf(name)
-  const offset = BASE + (idx < 0 ? 0 : idx) * STACK_STEP
+  const base = corner === 'br-content' ? BR_CONTENT_BASE : BASE
+  const offset = base + (idx < 0 ? 0 : idx) * STACK_STEP
 
   switch (corner) {
     case 'bl': return { bottom: offset, left: BASE }
     case 'br': return { bottom: offset, right: BASE }
     case 'tl': return { top: offset, left: BASE }
     case 'tr': return { top: offset, right: BASE }
-    case 'br-content': return {
-      bottom: `calc(var(--ws-bottombar-h, 0px) + ${offset}px)` as unknown as number,
-      right: `calc(var(--ws-rail-w, 0px) + ${BASE}px)`,
-    }
+    case 'br-content': return { bottom: offset, right: `calc(var(--ws-rail-w, 0px) + ${BASE}px)` }
   }
 }
 

@@ -1,12 +1,15 @@
 /**
  * HierarchyBreadcrumb — compact "where am I in the material" trail.
  *
- * Redesign 2026-07-08 (Barak): the previous text-chain version overlapped the
- * lesson title (collision) and ate ~60% width. Per the ui-anti-collision
- * convention it now (a) lives in WhiteboardShell's RESERVED header band (in
- * document flow, never absolutely over content), and (b) is a small ICON trail:
- * the current topic as a labeled gold node, a hand-drawn connector, then small
- * ancestor DOTS that reveal their name on hover — tiny footprint, no collision.
+ * It says two things: where you are, named, and the steps back to the root as
+ * dots on a hairline that give up their names on hover. Small on purpose — the
+ * top bar already carries the course and the mode, so this is the level below
+ * that, inside the material.
+ *
+ * Redesign 2026-09-16 (Shirli): it moved off the glass board and onto the
+ * screen's toolbar row, and lost the four decisions that were not ours —
+ * Playpen Sans Hebrew, a gold #C97C18 node, a hand-drawn gold squiggle for a
+ * connector, and slate #64748B dots. One typeface, one ink at three strengths.
  *
  * Reads the topic's ancestry (broad → specific) from topicHierarchy.
  * For 'mean': current = ממוצע; hover dots back through
@@ -14,11 +17,11 @@
  */
 import { useState } from 'react'
 import { ancestryOf } from '../data/topicHierarchy'
-import { GRAPH_FONT } from './graphs/graphTheme'
-
-const GOLD = '#C97C18'
-const NAVY = '#1F3E6C'
-const SLATE = '#64748B'
+/* One ink at three strengths: the name, the steps, the line between them.
+   Gold #C97C18 and slate #64748B are gone with the squiggle they drew. */
+const INK = '#254A9F'
+const FADE = 'rgba(37,74,159,0.42)'
+const LINE = 'rgba(37,74,159,0.22)'
 
 export default function HierarchyBreadcrumb({ topicId }: { topicId: string }) {
   const ancestry = ancestryOf(topicId)
@@ -27,7 +30,8 @@ export default function HierarchyBreadcrumb({ topicId }: { topicId: string }) {
 
   const chain = ancestry                     // broad → specific
   const current = chain[chain.length - 1]
-  // ancestors ordered specific → broad (so they trail leftward from the current node)
+  // ancestors ordered specific → broad, so under RTL they trail leftward from
+  // the current node toward the root — you are here, and that is the way back
   const ancestors = chain.slice(0, -1).reverse()
   const fullPath = [...chain].reverse().join(' ‹ ')
 
@@ -39,65 +43,67 @@ export default function HierarchyBreadcrumb({ topicId }: { topicId: string }) {
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 6,
+        gap: 9,
         maxWidth: '100%',
-        fontFamily: GRAPH_FONT,
+        fontFamily: "'Assistant', sans-serif",
         userSelect: 'none',
-        background: 'rgba(255,255,255,0.65)',
-        border: '1px solid rgba(31,62,108,0.10)',
-        borderRadius: 999,
-        padding: '3px 10px 3px 8px',
-        boxShadow: '0 1px 3px rgba(31,62,108,0.08)',
         whiteSpace: 'nowrap',
+        color: INK,
       }}
     >
-      {/* current topic — labeled gold node (always visible: you always know where you are) */}
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-        <span style={{ width: 12, height: 12, borderRadius: '50%', background: GOLD, boxShadow: '0 0 0 3px rgba(201,124,24,0.18)', flexShrink: 0 }} />
-        <span style={{ fontWeight: 700, fontSize: 13, color: NAVY }}>{current}</span>
+      {/* where you are — named, because it is the only part worth reading */}
+      <span style={{ fontWeight: 700, fontSize: 13.5, color: INK, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {current}
       </span>
 
       {ancestors.length > 0 && (
         <>
-          {/* hand-drawn connector — the "small visualization" linking the trail */}
-          <svg width="24" height="12" viewBox="0 0 24 12" aria-hidden="true" style={{ flexShrink: 0 }}>
-            <path d="M1,6 C6,3 11,9 16,6 21,4 23,6 23,6" fill="none" stroke={GOLD} strokeOpacity={0.5} strokeWidth={1.4} strokeLinecap="round" />
-          </svg>
-
-          {/* ancestor dots — hover reveals the name (compact; no text taking space) */}
-          {ancestors.map((label, i) => (
-            <span
-              key={i}
-              onMouseEnter={() => setHover(i)}
-              onMouseLeave={() => setHover(null)}
-              onFocus={() => setHover(i)}
-              onBlur={() => setHover(null)}
-              tabIndex={0}
-              title={label}
-              aria-label={label}
-              style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'default', outline: 'none' }}
-            >
-              <span style={{ width: 9, height: 9, borderRadius: '50%', background: hover === i ? GOLD : SLATE, opacity: hover === i ? 1 : Math.max(0.4, 0.75 - i * 0.12), transition: 'background .12s', flexShrink: 0 }} />
-              {i < ancestors.length - 1 && <span style={{ width: 8, height: 1, background: GOLD, opacity: 0.3 }} />}
-              {hover === i && (
+          {/* the way back — one hairline carrying a dot per step, no squiggle */}
+          <span style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
+            {ancestors.map((label, i) => (
+              <span
+                key={i}
+                onMouseEnter={() => setHover(i)}
+                onMouseLeave={() => setHover(null)}
+                onFocus={() => setHover(i)}
+                onBlur={() => setHover(null)}
+                tabIndex={0}
+                title={label}
+                aria-label={label}
+                style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', cursor: 'default', outline: 'none' }}
+              >
+                <span style={{ width: 10, height: 1, background: LINE, flexShrink: 0 }} />
                 <span
-                  role="tooltip"
                   style={{
-                    position: 'absolute', bottom: 'calc(100% + 6px)', right: '50%', transform: 'translateX(50%)',
-                    background: NAVY, color: '#fff', fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 7,
-                    boxShadow: '0 3px 8px rgba(15,23,42,0.28)', zIndex: 5,
+                    width: hover === i ? 8 : 6,
+                    height: hover === i ? 8 : 6,
+                    borderRadius: '50%',
+                    background: hover === i ? INK : FADE,
+                    transition: 'all .12s',
+                    flexShrink: 0,
                   }}
-                >
-                  {label}
-                </span>
-              )}
-            </span>
-          ))}
+                />
+                {hover === i && (
+                  <span
+                    role="tooltip"
+                    style={{
+                      position: 'absolute', bottom: 'calc(100% + 7px)', right: '50%', transform: 'translateX(50%)',
+                      background: INK, color: '#fff', fontSize: 11.5, fontWeight: 600, padding: '4px 9px',
+                      borderRadius: 8, boxShadow: '0 3px 8px rgba(31,62,108,0.28)', zIndex: 5, whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {label}
+                  </span>
+                )}
+              </span>
+            ))}
+            <span style={{ width: 10, height: 1, background: LINE, flexShrink: 0 }} />
+          </span>
 
-          {/* root marker — drawn, so it takes the trail's own ink and size */}
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          {/* the root */}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={FADE}
                strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden
-               style={{ opacity: 0.65, marginInlineStart: 2, flexShrink: 0 }}>
+               style={{ flexShrink: 0 }}>
             <path d="M3 11.5L12 4l9 7.5" /><path d="M5 10v10h14V10" /><path d="M10 20v-6h4v6" />
           </svg>
         </>

@@ -250,43 +250,6 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
     setPendingInsert({ text: formula, kind: 'equation', sourceLabel: 'formula' })
   }
 
-  /* The tutor and the pomodoro are fixed to the viewport; the slide bar is in
-     the document's flow. So publishing the bar's HEIGHT is not enough — the
-     bar can sit anywhere in the scroll, and a 60px lift only clears it when it
-     happens to be flush with the bottom of the window.
-
-     What the FABs actually need is the distance from the bottom of the window
-     up to the top of the bar. That changes as the page scrolls, so it is
-     measured on scroll and resize (rAF-coalesced) and clamped: below the fold
-     the bar needs no clearance at all, and once it has scrolled well up the
-     lift stops growing rather than throwing the FABs off the top. */
-  const slideBarRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const root = document.documentElement
-    let frame = 0
-    const publish = () => {
-      frame = 0
-      const el = slideBarRef.current
-      if (!el) { root.style.removeProperty('--ws-bottombar-h'); return }
-      const top = el.getBoundingClientRect().top
-      const lift = Math.min(Math.max(0, Math.round(window.innerHeight - top + 12)), 240)
-      root.style.setProperty('--ws-bottombar-h', `${lift}px`)
-    }
-    const schedule = () => { if (!frame) frame = requestAnimationFrame(publish) }
-    publish()
-    const ro = new ResizeObserver(schedule)
-    if (slideBarRef.current) ro.observe(slideBarRef.current)
-    window.addEventListener('resize', schedule)
-    window.addEventListener('scroll', schedule, true)   // capture: inner scrollers too
-    return () => {
-      if (frame) cancelAnimationFrame(frame)
-      ro.disconnect()
-      window.removeEventListener('resize', schedule)
-      window.removeEventListener('scroll', schedule, true)
-      root.style.removeProperty('--ws-bottombar-h')
-    }
-  }, [currentSlide])
-
   const addSlideTo = (toMap: boolean) => {
     const ok = quickAddToMindmap({
       text: slide?.title ?? '',
@@ -399,8 +362,13 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   useEffect(() => { rightPaneRef.current?.scrollTo({ top: 0 }) }, [currentSlide])
 
   const rightPane = (
+    /* A flex column rather than a block, so the board can take whatever height
+       is left instead of a fixed clamp. That is what puts the slide bar on the
+       same line as the admin chip in the rail, and it gives theory and practice
+       the full page — per Shirli. */
     <div ref={rightPaneRef} dir="rtl" className="ws-lesson-rightpane" style={{
-      flex: 1, overflow: 'auto', padding: '24px 28px',
+      flex: 1, overflow: 'auto', padding: '24px 28px 16px',
+      display: 'flex', flexDirection: 'column',
       fontFamily: "'Assistant', 'Assistant', sans-serif",
     }}>
       {/* Floating "save to arsenal" chip listens at document level */}
@@ -413,9 +381,23 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           The page heading that used to follow it is gone — the top bar already
           carries "הקדמה לסטטיסטיקה · שיעור", and the board now starts where
           that heading started. ───────────────────────────────────────────── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, gap: 12, flexWrap: 'wrap' }}>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        marginBottom: 16, gap: 16, flexWrap: 'wrap', flexShrink: 0,
+      }}>
         <button onClick={onBack} style={backLinkStyle}><Ico d={I.back} size={17} />חזרה לנושאים</button>
-        <div style={{ display: 'flex', gap: 2, background: 'rgba(127,155,217,0.14)', padding: 3, borderRadius: 999 }}>
+
+        {/* The trail joins the toolbar instead of floating on the board. It is
+            wayfinding, and this row is where this screen says where you are
+            and what you can do about it. */}
+        <div style={{ flex: '0 1 auto', minWidth: 0, display: 'flex', justifyContent: 'center' }}>
+          <HierarchyBreadcrumb topicId={topicId} />
+        </div>
+
+        {/* Two buttons, not a segmented control: they are independent, both can
+            be on, and neither is an alternative to the other. Styled as the
+            home screen's own CTA — light at rest, dark when down. */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button
             onClick={() => {
               setPresenting(v => {
@@ -427,18 +409,18 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             }}
             title={presenting ? 'סיום מצב הצגה' : 'היד מציגה את השקופית על הלוח'}
             aria-pressed={presenting}
-            style={toggleStyle(presenting)}
+            className={`ws-cta ws-cta-sm${presenting ? ' is-on' : ''}`}
           >
-            <Ico d={presenting ? I.close : I.present} size={18} />
+            <Ico d={presenting ? I.close : I.present} size={17} />
             {presenting ? 'סיום הצגה' : 'מצב הצגה'}
           </button>
           <button
             onClick={() => setMindmapOpen(v => !v)}
             title={mindmapOpen ? 'הסתר מפת מושגים' : 'הצג מפת מושגים'}
             aria-pressed={mindmapOpen}
-            style={toggleStyle(mindmapOpen)}
+            className={`ws-cta ws-cta-sm${mindmapOpen ? ' is-on' : ''}`}
           >
-            <Ico d={I.mind} size={18} />
+            <Ico d={I.mind} size={17} />
             {mindmapOpen ? 'הסתר מפה' : 'הצג מפה'}
           </button>
         </div>
@@ -501,16 +483,22 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           a tiny stub, not a whiteboard). Clamp gives a real board on any
           viewport; content that overflows still scrolls inside (see the
           flex:1 / overflowY:auto content column in WhiteboardShell). */}
-      <div style={{ position: 'relative', height: 'clamp(420px, 66vh, 640px)', borderRadius: '18px 18px 0 0', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', flex: 1, minHeight: 360, borderRadius: '18px 18px 0 0', overflow: 'hidden' }}>
+      {/* ── 3. The slide's two actions are the quiet level of the same button:
+          `.ws-cta-outline`, outlined in the card title's blue with no fill at
+          rest — the level below the toolbar's CTAs, which is what they are.
+          They keep the board's own inset so they line up with the frost
+          slider in the corner below. ─────────────────────────────────────── */}
       <BoardShell
-        topRightSlot={<HierarchyBreadcrumb topicId={topicId} />}
         topLeftSlot={<>
-          <button onClick={() => addSlideTo(true)} title="הוסף את הכותרת והתוכן למפת החשיבה" style={slideActionStyle(copied === 'title-mm')}>
-            <Ico d={copied === 'title-mm' ? I.check : I.mind} size={17} />
+          <button onClick={() => addSlideTo(true)} title="הוסף את הכותרת והתוכן למפת החשיבה"
+                  className={`ws-cta-outline ws-cta-sm${copied === 'title-mm' ? ' is-done' : ''}`}>
+            <Ico d={copied === 'title-mm' ? I.check : I.mind} size={16} />
             {copied === 'title-mm' ? 'נוסף' : 'הוספה למפה'}
           </button>
-          <button onClick={() => addSlideTo(false)} title="הוסף כדף חדש במחברת" style={slideActionStyle(copied === 'title-nb')}>
-            <Ico d={copied === 'title-nb' ? I.check : I.notebook} size={17} />
+          <button onClick={() => addSlideTo(false)} title="הוסף כדף חדש במחברת"
+                  className={`ws-cta-outline ws-cta-sm${copied === 'title-nb' ? ' is-done' : ''}`}>
+            <Ico d={copied === 'title-nb' ? I.check : I.notebook} size={16} />
             {copied === 'title-nb' ? 'נוסף' : 'הוספה למחברת'}
           </button>
         </>}
@@ -803,7 +791,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           what they counted. Joined per Shirli: back on the right (where the
           reader starts), the dots and the count in the middle, forward on the
           left. Arrow keys still work. ─────────────────────────────────────── */}
-      <div ref={slideBarRef} style={{
+      <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         gap: 16, marginTop: 0, padding: '10px 16px',
         background: '#fff',
