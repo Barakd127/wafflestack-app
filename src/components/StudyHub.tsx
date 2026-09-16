@@ -2147,6 +2147,9 @@ function Sidebar({ active, onNav, onGoWorld, onGoMindmap, onGoDrawing, onGoNoteb
       flexDirection: 'column',
       boxShadow: '-4px 0 24px rgba(51,81,202,0.25)',
       position: 'relative',
+      // above the stage's own z-10/z-12 layers: the fold handle hangs over the
+      // rail's edge and was being covered by whatever the screen drew there
+      zIndex: 40,
     }}>
       {/* Logo, and the control that folds the rail away.
           It lives ON the rail rather than in the top bar because it is the
@@ -3670,7 +3673,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
         <img src={`${import.meta.env.BASE_URL}high-tech.png`} alt="" style={{ width: 34, height: 26, objectFit: 'cover', borderRadius: 5 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
         <div style={{ flex: 1 }}>
           <div style={{ height: 6, background: '#E4E4E4', borderRadius: 10, overflow: 'hidden' }}>
-            <div style={{ width: `${isDone ? 100 : ((currentQ)/total)*100}%`, height: '100%', background: 'rgba(212,175,55,0.75)', borderRadius: 10, transition: 'width 0.4s' }} />
+            <div style={{ width: `${isDone ? 100 : ((currentQ)/total)*100}%`, height: '100%', background: '#FF854C', borderRadius: 10, transition: 'width 0.4s' }} />
           </div>
           <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT, marginTop: 2 }}>
             {answeredCount} / {total} · {correctCount} ✓{streak >= 2 ? <span style={{ color: '#FF7A1A', fontWeight: 800 }}> · 🔥{streak}</span> : null}
@@ -3690,14 +3693,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             of truth for question metadata) */}
         {!isDone && (
           <div style={{
-            background: 'rgba(212,175,55,0.16)',
-            border: '1px solid rgba(212,175,55,0.5)',
-            color: '#7A5C00',
-            borderRadius: 12,
-            padding: '4px 10px',
+            background: 'rgba(255,133,76,0.16)',
+            border: '1px solid rgba(255,133,76,0.45)',
+            color: '#B4491C',
+            borderRadius: 999,
+            padding: '4px 11px',
             fontFamily: "'Assistant', sans-serif",
             fontSize: 12, fontWeight: 700,
-          }}>+{q.xp} XP ⭐</div>
+          }}>+{q.xp} XP</div>
         )}
         {/* Float toggle — also relocated out of the removed navy strip; it
             sits next to the fullscreen toggle since both change the frame
@@ -4323,8 +4326,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     // options separate clearly from the light quiz background
                     // (was translucent white 0.08 → invisible on the pale shell).
                     // Per user 2026-05-28.
-                    let bg = '#FFFFFF'
-                    let border = 'rgba(31,62,108,0.45)'
+                    let bg = 'rgba(255,255,255,0.72)'
+                    let border = '#DCE5F8'
                     let color = 'var(--sh-text-dark)'
                     let marker: string | null = null
                     if (revealed) {
@@ -4355,8 +4358,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           minHeight: bigBoard ? 76 : 44,
                           padding: bigBoard ? '16px 22px' : '10px 16px',
                           background: bg,
-                          border: `2.5px solid ${border}`,
-                          borderRadius: bigBoard ? 14 : 10,
+                          border: `1.5px solid ${border}`,
+                          borderRadius: bigBoard ? 16 : 12,
                           color,
                           fontFamily: "'Assistant', sans-serif",
                           fontSize: bigBoard ? 19 : 15,
@@ -4365,17 +4368,23 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           textAlign: 'center',
                           direction: 'rtl',
                           transition: 'all 0.18s',
-                          boxShadow: revealed ? (isChosen ? '0 2px 8px rgba(0,0,0,0.12)' : 'none') : '0 2px 6px rgba(31,62,108,0.12)',
+                          boxShadow: revealed ? (isChosen ? '0 2px 8px rgba(0,0,0,0.12)' : 'none') : 'none',
                         }}
-                        onMouseEnter={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = '#EAF1FF' }}
-                        onMouseLeave={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = '#FFFFFF' }}
+                        /* hover and press match .ws-cta-outline: lighter on the
+                           way in, darker under the finger — pressed is darker,
+                           everywhere. */
+                        onMouseEnter={e => { if (!revealed) { const el = e.currentTarget as HTMLElement; el.style.background = '#DFE8FB'; el.style.borderColor = '#254A9F' } }}
+                        onMouseLeave={e => { if (!revealed) { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.72)'; el.style.borderColor = '#DCE5F8' } }}
+                        onMouseDown={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = '#C0D0F6' }}
+                        onMouseUp={e => { if (!revealed) (e.currentTarget as HTMLElement).style.background = '#DFE8FB' }}
                       >
                         {/* RTL primary corner = right side → letter pill comes FIRST in DOM */}
                         <span style={{
                           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          minWidth: bigBoard ? 40 : 32, height: bigBoard ? 40 : 32, borderRadius: 20,
-                          background: '#D4AF37', color: '#fff',
-                          fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: bigBoard ? 18 : 15,
+                          minWidth: bigBoard ? 36 : 30, height: bigBoard ? 36 : 30, borderRadius: 11,
+                          background: revealed ? 'rgba(31,62,108,0.10)' : 'rgba(31,62,108,0.08)',
+                          color: revealed ? 'rgba(31,62,108,0.5)' : '#254A9F',
+                          fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: bigBoard ? 16 : 14,
                           flexShrink: 0,
                         }}>
                           {letter}
