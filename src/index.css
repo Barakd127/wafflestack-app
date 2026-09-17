@@ -760,21 +760,29 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
    outrank any class selector, so a rest appearance set inline silently wins
    over :hover and :active and the states never fire.
 
-   Depth carries the three states; colour follows.
+   Depth and colour both carry the three states, and both only ever go down.
 
-     rest   raised            #4438A0 → #6354C6, 3px shadow
-     hover  rises further     #27187E → #5031CE, 6px shadow, -3px
-     press  sinks BELOW       #1B1060 → #3B22A4, inset shadow, +1px
+     rest   raised            #4769D5 → #3351CA, 3px shadow
+     hover  rises, darkens    #3E5CBB → #2D47B2, 5px shadow, -3px
+     press  sinks BELOW       #18247E → #313CCE, inset shadow, +1px
 
-   Rest is the LIGHTER end of the indigo ramp on purpose. A pressed button is
-   dark and flat, so a saturated flat fill reads as already-pressed and leaves
-   nowhere to travel; starting light gives the hover somewhere to go. The inset
-   on press is what makes it read as "it went in" rather than "the same button,
-   slightly darker".
+   Rest is the SIDEBAR's own colour — literally the dark half of
+   --sh-sidebar-bg, ending on the same #3351CA, at the same 265.4deg. A
+   primary action is the loudest thing on its card, so it starts dark and
+   present rather than waiting to be hovered; reading as a sibling of the
+   sidebar is the point, not a side effect. Measured luminance 0.134 · 0.102
+   · 0.053 — every step is a real darkening, and the inset on press is what
+   says "it went in" rather than "the same button, slightly darker".
 
-   Tried and rejected along the way: navy ink (sat in the same family as the
-   page blues), teal ink (stepped too far out), and #B0B8F9 with a dark label
-   (too quiet for a primary action). Per Shirli 2026-09-04. */
+   The stops are written out rather than pulled from --sh-sidebar-bg because
+   that token flips to near-black in dark mode, which would leave the pressed
+   state LIGHTER than rest and invert the whole ladder.
+
+   White on the lightest stop is 4.94:1, so the label holds AA at 16px.
+
+   Reverses the 2026-09-04 note that rest should be the lighter end. Per
+   Shirli 2026-09-17: "כהה יותר ובולט במצב דיפולט, אפילו אם יהיה דומה לצבע
+   של הסייד בר". */
 .ws-cta {
   display: inline-flex;
   align-items: center;
@@ -786,21 +794,21 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   font-family: 'Assistant', sans-serif;
   font-size: 16px;
   font-weight: 600;
-  color: #253865;
+  color: #fff;
   cursor: pointer;
-  background: #C0D0F6;
+  background: linear-gradient(265.4deg, #4769D5 0%, #3351CA 100%);
   box-shadow: 0 3px 8px rgba(39,24,126,0.20);
   transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
               background 0.18s ease, color 0.18s ease;
 }
 .ws-cta:hover {
-  background: linear-gradient(270deg, #3848A0 0%, #5463C6 100%);
+  background: linear-gradient(265.4deg, #3E5CBB 0%, #2D47B2 100%);
   color: #fff;
   box-shadow: 0 5px 10px rgba(39,24,126,0.24);
   transform: translateY(-3px);
 }
 .ws-cta:active {
-  background: linear-gradient(270deg, #18247E 0%, #313CCE 100%);
+  background: linear-gradient(265.4deg, #18247E 0%, #313CCE 100%);
   color: #fff;
   box-shadow: inset 0 2px 5px rgba(11,6,48,0.55);
   transform: translateY(1px);
@@ -867,7 +875,7 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
    pressed button is darker, everywhere. */
 .ws-cta.is-on,
 .ws-cta.is-on:hover {
-  background: linear-gradient(270deg, #18247E 0%, #313CCE 100%);
+  background: linear-gradient(265.4deg, #18247E 0%, #313CCE 100%);
   color: #fff;
   box-shadow: inset 0 2px 5px rgba(11,6,48,0.55);
   transform: none;
@@ -883,25 +891,27 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   border-width: 1px;
   border-radius: 10px;
   gap: 6px;
-  border-color: rgba(37,74,159,0.30);
-  color: rgba(37,74,159,0.78);
-  background: rgba(255,255,255,0.55);
+  border-color: rgba(37,74,159,0.42);
+  color: #254A9F;
+  background: transparent;
 }
 .ws-cta-outline.ws-cta-xs:hover {
-  border-color: rgba(37,74,159,0.55);
-  color: #254A9F;
-  background: #DFE8FB;
+  border-color: #1B3878;
+  color: #1B3878;
+  background: transparent;
   transform: none;
   box-shadow: none;
 }
 
-/* Confirmed — the quiet button filled with its own outline colour. Same
-   family as .is-on: the state that says "done" is the darker one. */
+/* Confirmed. A secondary button never takes a fill, so "done" is carried by
+   the ink going to full strength — every caller also swaps the label and
+   shows a check, which is what actually reports the state. Filling it used to
+   make a spent secondary darker than the live primary beside it. */
 .ws-cta-outline.is-done,
 .ws-cta-outline.is-done:hover {
-  background: #254A9F;
-  border-color: #254A9F;
-  color: #fff;
+  background: transparent;
+  border-color: #132A5C;
+  color: #132A5C;
   box-shadow: none;
   transform: none;
 }
@@ -944,14 +954,14 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
               background 0.18s ease, color 0.18s ease;
 }
 .ws-cta-outline:hover {
-  background: #DFE8FB;
-  color: #253865;
+  border-color: #1B3878;
+  color: #1B3878;
   box-shadow: 0 4px 9px rgba(39,24,126,0.18);
   transform: translateY(-3px);
 }
 .ws-cta-outline:active {
-  background: #C0D0F6;
-  color: #18247E;
+  border-color: #132A5C;
+  color: #132A5C;
   box-shadow: inset 0 2px 5px rgba(11,6,48,0.35);
   transform: translateY(1px);
 }

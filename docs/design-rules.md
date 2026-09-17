@@ -54,26 +54,72 @@ Three faces, one job each. A fourth face is a bug.
 
 ## 3. Buttons
 
-Two levels. That is the whole system.
+Two levels. That is the whole system, and they are told apart by **fill, not by
+size**: the primary is the only thing on the card that is filled.
 
-**Primary — `.ws-cta`.** Never re-implement it inline; inline styles outrank
-every class selector and silently kill `:hover` and `:active`.
+### Primary — `.ws-cta`
+
+Dark from the start. It carries the sidebar's own colour — literally the dark
+half of `--sh-sidebar-bg`, ending on the same `#3351CA` at the same 265.4deg —
+so the main action of a card reads as a sibling of the app's own chrome. The
+resemblance is the point, not a side effect.
 
 ```
-rest    #C0D0F6              ink #253865   0 3px 8px rgba(39,24,126,.20)
-hover   270deg #3848A0→#5463C6   #fff      0 5px 10px rgba(39,24,126,.24)  translateY(-3px)
-active  270deg #18247E→#313CCE   #fff      inset 0 2px 5px rgba(11,6,48,.55)  translateY(1px)
+rest    265.4deg #4769D5→#3351CA  ink #fff  0 3px 8px rgba(39,24,126,.20)
+hover   265.4deg #3E5CBB→#2D47B2      #fff  0 5px 10px rgba(39,24,126,.24)  translateY(-3px)
+active  265.4deg #18247E→#313CCE      #fff  inset 0 2px 5px rgba(11,6,48,.55)  translateY(1px)
         radius 16 · padding 11px 26px · gap 9 · arrow last, pointing left
 ```
 
-**Secondary — a text button.** Not a weak fill: an almost-there fill reads as
-something that failed to finish loading.
+Measured luminance 0.134 · 0.102 · 0.053 — every step is a real darkening, not
+a tint. White on the lightest stop is 4.94:1, so the label holds AA at 16px.
 
-Rules:
+The stops are written out rather than read from `--sh-sidebar-bg`, because that
+token flips to near-black in dark mode, which would leave the pressed state
+**lighter** than rest and invert the whole ladder.
+
+`.ws-cta.is-on` — a toggle that stays down — repeats the `:active` declaration
+exactly. "On" and "being pressed" must not look like two different things.
+
+### Secondary — `.ws-cta-outline`
+
+**A border and nothing else. No fill, in any state** — not on hover, not when
+pressed, not when done. A half-strength fill reads as something that failed to
+finish loading, and a filled secondary competes with the primary beside it.
+
+The states move the **ink and the border**, never a background:
+
+```
+rest    border+ink #254A9F   transparent
+hover   border+ink #1B3878   transparent   0 4px 9px rgba(39,24,126,.18)  translateY(-3px)
+active  border+ink #132A5C   transparent   inset 0 2px 5px rgba(11,6,48,.35)  translateY(1px)
+is-done border+ink #132A5C   transparent   no lift
+```
+
+All three inks sit at 221° — the house hue — at 7.29 · 9.90 · 12.32 : 1 against
+a card. The inset shadow on press is what says "it went in"; an inset is edge
+shading, not a fill.
+
+`.is-done` carries no fill either. Every caller already swaps the label and
+shows a check, which is what actually reports the state. Filling it used to make
+a spent secondary darker than the live primary next to it.
+
+`.ws-cta-xs` is the same button at board scale — a 1px border at 42 % and the
+ink at full strength, which is what replaced the white wash it used to sit on.
+
+### Rules
+
 1. One primary per card. Two buttons of equal weight say there is no main action.
 2. Pressed is always darker than hover, hover always darker than rest. This
    holds for every control in the app, including chips and bar icons.
-3. The arrow points left. In Hebrew, forward is leftward.
+3. Only the primary is filled. Everything below it is a border, or nothing.
+4. The arrow points left. In Hebrew, forward is leftward.
+5. Never re-implement either button inline. Inline styles outrank every class
+   selector and silently kill `:hover` and `:active` — the button then looks
+   right and does nothing.
+
+Per Shirli, 2026-09-17. This reverses the earlier rule that the primary should
+rest on the *lighter* end of the ramp.
 
 ## 4. Surfaces
 
