@@ -54,7 +54,7 @@ Three faces, one job each. A fourth face is a bug.
 
 ## 3. Buttons
 
-Two levels. That is the whole system, and they are told apart by **fill, not by
+Three levels. That is the whole system, and the first two are told apart by **fill, not by
 size**: the primary is the only thing on the card that is filled.
 
 ### Primary — `.ws-cta`
@@ -107,14 +107,46 @@ a spent secondary darker than the live primary next to it.
 `.ws-cta-xs` is the same button at board scale — a 1px border at 42 % and the
 ink at full strength, which is what replaced the white wash it used to sit on.
 
+### Navigation — `.ws-cta-nav`
+
+The third level, and a different job: a control that **leaves** the screen
+rather than acting on it. Today that is the back control, and nothing else.
+
+```
+rest    border rgba(51,65,85,.32)  ink --ws-ink-sub
+hover   border rgba(51,65,85,.55)  ink #22303F  0 3px 8px rgba(31,62,108,.14)  translateY(-2px)
+active  border rgba(51,65,85,.70)  ink #16202B  inset 0 2px 5px rgba(11,6,48,.28)  translateY(1px)
+        radius 999 · padding 7px 16px · 14px/600 · gap 7
+```
+
+Round, because a pill reads as "press to go" more plainly than a rectangle,
+and because **the primary is never round** — the two can never be confused.
+A hairline rather than 1.5px, and the description ink rather than the house
+blue, because it sits opposite the list/map switch and must not weigh the
+same: at 1.5px in `#254A9F` it weighed exactly as much and read as too loud.
+Luminance ladder 0.051 / 0.028 / 0.014.
+
+It still obeys the secondary law: a border and no fill, in every state.
+
+### The toggle — `.ws-cta.is-on`
+
+A control that stays down repeats the `:active` declaration **exactly** — same
+gradient, same inset, no lift. "On" and "being pressed" must never look like
+two different things; if they do, a reader cannot tell what a press did.
+
 ### Rules
 
 1. One primary per card. Two buttons of equal weight say there is no main action.
 2. Pressed is always darker than hover, hover always darker than rest. This
    holds for every control in the app, including chips and bar icons.
 3. Only the primary is filled. Everything below it is a border, or nothing.
-4. The arrow points left. In Hebrew, forward is leftward.
-5. Never re-implement either button inline. Inline styles outrank every class
+4. Three levels, and they answer three different questions: primary — what
+   should I do here; secondary — what else can I do here; navigation — how do
+   I leave. A control that leaves never wears the weight of one that acts.
+5. The arrow points left. In Hebrew, forward is leftward. The back control is
+   the exception that proves it: its arrow points the other way, because it is
+   the only one going backwards.
+6. Never re-implement any of them inline. Inline styles outrank every class
    selector and silently kill `:hover` and `:active` — the button then looks
    right and does nothing.
 
@@ -165,25 +197,59 @@ See `memory/icon-language.md` for the full account. In short:
 
 ## Status
 
-Three states, one set of colours. They are the only colours in the app
-allowed outside the 222° scale, because a state is not decoration: it has to
-read as itself at a glance rather than as one more shade of the house blue.
+Four states, one set of colours. They are the only colours in the app allowed
+outside the 222° scale, because a state is not decoration: it has to read as
+itself at a glance rather than as one more shade of the house blue.
 
 | State | Mark | Ground | Ink |
 |---|---|---|---|
 | נכון / התקבל | `--ws-ok` `#07B95A` | `--ws-ok-bg` `#E9F9F0` | `--ws-ok-ink` `#0A8F47` |
-| שגוי / נדחה | `--ws-bad` `#F4523C` | `--ws-bad-bg` `#FDEDEA` | `--ws-bad-ink` `#D63A25` |
+| שגוי / נדחה / התראה | `--ws-bad` `#FA0030` | `--ws-bad-bg` `#FFEBEF` | `--ws-bad-ink` `#D10028` |
 | ממתין | `--ws-wait` `#FFAE1A` | `--ws-wait-bg` `#FFF6E6` | `--ws-wait-ink` `#B37400` |
+| טרם התחיל | `--ws-idle` `#94A3B8` | `--ws-idle-bg` `#F1F5F9` | `--ws-idle-ink` `#64748B` |
 
 The shape is `.ws-status` + `.ws-status--{ok,bad,wait}`: a filled round mark,
 then the word, on a pale ground of the same hue.
 
-**Waiting is amber, not coral.** `--ws-wait` sits at 38.8° and the coral
-accent at 11.9°. They started sixteen degrees apart — two oranges at the same
+**Idle is the fourth because "nothing yet" is not "waiting".** Waiting means
+something is pending on someone. Idle means the reader has not arrived yet. It
+is desaturated and cooler than the house blue so it reads as absence rather
+than as a quiet member of the scale.
+
+**The red is a rose-red, not an orange-red.** It sat at 7.2° until it moved to
+`#FA0030` at 348.5°. At 7.2° it was 4.7° from the coral accent and the two
+read as one colour whenever they met; the gap is now 23.4°. One red serves
+every negative — a wrong answer, a rejected request, the dot on the bell.
+Never a second one.
+
+**Waiting is amber, not coral.** `--ws-wait` sits at 38.8° and the coral accent
+at 11.9°. They started sixteen degrees apart — two oranges at the same
 saturation and lightness, which the eye reads as one colour — so both moved:
 waiting toward gold, coral toward red. The coral was the one to move because
 it comes in small doses; a state colour has to be unmistakable where it is
 used, and coral only has to be recognisable.
+
+### A score is a state
+
+The best score on a topic card is these four applied to a number, and it is
+the pattern for any other measure with a "good" end:
+
+```
+0        טרם תורגל     --ws-idle-ink
+1-59     נמוך          --ws-bad-ink
+60-84    בינוני        --ws-wait-ink
+85-100   גבוה          --ws-ok-ink
+```
+
+The two numbers beside it carry no state at all. **שאלות** is how much content
+exists — a fixed `TEXT_MED`, because a count is not an achievement and its
+colour must never change. **סשנים** is idle grey at zero and `TEXT_DARK` above
+it, so "I work here, a lot" reads without a label.
+
+The `-ink` variants were calibrated against the pale status grounds, not
+against glass. On a card the mid tier lands at 3.88:1 — under AA for 16px,
+over the 3:1 large-text floor. Raising the number to 19px bold clears it;
+darkening the token would change every status pill in the app.
 
 **Nothing that is not a state may use these.** A green that means "this is a
 chart series" or an amber that means "this is important" is how a status

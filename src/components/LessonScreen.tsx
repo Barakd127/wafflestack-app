@@ -341,7 +341,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   if (!lesson || total === 0) {
     return (
       <div data-tour="theory-screen" dir="rtl" style={{ flex: 1, overflow: 'auto', padding: '32px 40px', fontFamily: "'Assistant', 'Assistant', sans-serif" }}>
-        <button onClick={onBack} style={backLinkStyle}><Ico d={I.back} size={16} />חזרה לנושאים</button>
+        <button onClick={onBack} className="ws-cta-nav"><Ico d={I.back} size={16} />חזרה לנושאים</button>
         <div style={{ ...glassCardStyle, padding: 40, marginTop: 24, textAlign: 'center' }}>
           <div style={{ marginBottom: 16, color: TEXT_LIGHT, display: 'flex', justifyContent: 'center' }}><Ico d={I.book} size={48} w={1.3} /></div>
           <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 22, color: TEXT_DARK, marginBottom: 12 }}>
@@ -395,7 +395,7 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         marginBottom: 16, gap: 16, flexWrap: 'wrap', flexShrink: 0,
       }}>
-        <button onClick={onBack} style={backLinkStyle}><Ico d={I.back} size={17} />חזרה לנושאים</button>
+        <button onClick={onBack} className="ws-cta-nav"><Ico d={I.back} size={17} />חזרה לנושאים</button>
 
         {/* The trail joins the toolbar instead of floating on the board. It is
             wayfinding, and this row is where this screen says where you are
@@ -1074,20 +1074,6 @@ const secondaryBtnStyle: React.CSSProperties = {
 
 /* Matched to the topic list's back link, one screen back, so the way out of a
    screen looks the same wherever you are. */
-const backLinkStyle: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  color: TEXT_MED,
-  fontFamily: "'Assistant', sans-serif",
-  fontSize: 15,
-  fontWeight: 600,
-  padding: 0,
-  display: 'flex',
-  alignItems: 'center',
-  gap: 7,
-}
-
 /* And to the list/map switch beside it: a pill that fills TEXT_MED when it is
    on. Two toggles rather than two alternatives, so both may be lit at once. */
 function toggleStyle(on: boolean): React.CSSProperties {

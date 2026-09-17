@@ -1587,12 +1587,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
       }}>
           <button
             onClick={onBack}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 7, background: 'none',
-              border: 'none', cursor: 'pointer', padding: 0,
-              fontFamily: "'Assistant', sans-serif", fontSize: 15, fontWeight: 600,
-              color: TEXT_MED,
-            }}
+            className="ws-cta-nav"
           >
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -1991,12 +1986,7 @@ function CoursePlayer({ course, onClose }: {
         <button
           onClick={onClose}
           aria-label="חזרה לרשימת הקורסים"
-          style={{
-            background: 'rgba(127,155,217,0.15)', color: '#0B1B3E',
-            border: `1px solid ${'rgba(127,155,217,0.4)'}`,
-            borderRadius: 10, padding: '6px 14px',
-            fontFamily: 'inherit', fontWeight: 700, fontSize: 13, cursor: 'pointer',
-          }}
+          className="ws-cta-nav"
         >חזרה לכל הקורסים</button>
         <div style={{
           width: 40, height: 40, borderRadius: 10,

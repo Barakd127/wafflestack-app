@@ -949,6 +949,51 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   transform: none;
 }
 
+/* ── Navigation ──────────────────────────────────────────────────────────
+   The third level: a control that LEAVES the screen rather than acting on it.
+   Back is the whole population today.
+
+   Round, because a pill reads as "press to go" more plainly than a rectangle,
+   and because the primary is never round — the two can never be confused. A
+   hairline rather than 1.5px, and the description ink rather than the house
+   blue, so it stays under the list/map switch it sits opposite. At 1.5px in
+   #254A9F it weighed exactly as much as that switch, which is what made it
+   read as too loud (Shirli, 2026-09-17).
+
+   Obeys the secondary law — a border and no fill, in every state — and the
+   house ladder: 0.051 / 0.028 / 0.014 in luminance. */
+.ws-cta-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border: 1px solid rgba(51,65,85,0.32);
+  border-radius: 999px;
+  background: transparent;
+  font-family: 'Assistant', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ws-ink-sub);
+  cursor: pointer;
+  transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
+              border-color 0.18s ease, color 0.18s ease;
+}
+.ws-cta-nav:hover {
+  border-color: rgba(51,65,85,0.55);
+  color: #22303F;
+  box-shadow: 0 3px 8px rgba(31,62,108,0.14);
+  transform: translateY(-2px);
+}
+.ws-cta-nav:active {
+  border-color: rgba(51,65,85,0.70);
+  color: #16202B;
+  box-shadow: inset 0 2px 5px rgba(11,6,48,0.28);
+  transform: translateY(1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ws-cta-nav:hover, .ws-cta-nav:active { transform: none; }
+}
+
 /* The same button at chrome scale — a toolbar is not a card footer. */
 .ws-cta.ws-cta-sm,
 .ws-cta-outline.ws-cta-sm {
