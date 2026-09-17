@@ -325,7 +325,7 @@ export default function TopBarAccount({ userName, onLogout, xp = 0 }: {
           style={{
             width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
             padding: 2.5, boxSizing: 'border-box',
-            background: `conic-gradient(#FF7448 ${pct}%, rgba(31,62,108,0.16) 0)`,
+            background: `conic-gradient(#FF7A59 ${pct}%, rgba(31,62,108,0.16) 0)`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
@@ -357,7 +357,7 @@ export default function TopBarAccount({ userName, onLogout, xp = 0 }: {
               <span>{inLevel}/{XP_PER_LEVEL} XP</span>
             </div>
             <div style={{ height: 6, borderRadius: 6, background: 'rgba(31,62,108,0.12)', overflow: 'hidden' }}>
-              <div style={{ width: `${pct}%`, height: '100%', background: '#FF7448', transition: 'width .4s' }} />
+              <div style={{ width: `${pct}%`, height: '100%', background: '#FF7A59', transition: 'width .4s' }} />
             </div>
           </div>
           <div style={{ height: 1, background: 'rgba(31,62,108,0.10)', margin: '6px 8px' }} />

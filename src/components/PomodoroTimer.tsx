@@ -118,7 +118,7 @@ export default function PomodoroTimer({ leftOffset: _leftOffset }: PomodoroTimer
   /* Coral, the same value the avatar's XP ring uses. Both measure progress,
    * so they cannot be different colours without claiming to be different
    * things. Mode is carried by the icon, the label and the dots instead. */
-  const accent = '#FF7448'
+  const accent = '#FF7A59'
   const R = 92
   const CIRC = 2 * Math.PI * R
 

@@ -23,8 +23,8 @@ One hue at 222°. Coral is the only non-blue, and it has exactly one job.
 | — | `#2530A6` | every icon; the midpoint of the CTA's pressed gradient |
 | — | `#C0D0F6` | CTA fill at rest |
 | `--sh-sidebar-bg` | `linear-gradient(265.4deg, #83B2F8 -108.21%, #3351CA 169.33%)` | the rail, the avatar |
-| — | `#FF854C` | coral — progress only |
-| — | `#FFBC9D` | light coral — progress tracks, thin lines |
+| — | `#FF7A59` | coral — progress only |
+| — | `#FFBCAC` | light coral — progress tracks, thin lines |
 
 **Banned: any colour outside the scale.** `#D4AF37` gold, `#34A853` green and
 `#8a6d1c` brown are all still running in the learning area and are all bugs.
@@ -133,7 +133,7 @@ The shape is `.ws-status` + `.ws-status--{ok,bad,wait}`: a filled round mark,
 then the word, on a pale ground of the same hue.
 
 **Waiting is amber, not coral.** `--ws-wait` sits at 38.8° and the coral
-accent at 14.4°. They started sixteen degrees apart — two oranges at the same
+accent at 11.9°. They started sixteen degrees apart — two oranges at the same
 saturation and lightness, which the eye reads as one colour — so both moved:
 waiting toward gold, coral toward red. The coral was the one to move because
 it comes in small doses; a state colour has to be unmistakable where it is

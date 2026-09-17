@@ -1895,8 +1895,8 @@ function ActivityChart() {
         <title>{total > 0 ? `+${total.toLocaleString('he-IL')} XP בשבוע האחרון` : 'אין פעילות בשבוע האחרון'}</title>
         <defs>
           <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(255,116,72,0.42)" />
-            <stop offset="100%" stopColor="rgba(255,116,72,0.03)" />
+            <stop offset="0%" stopColor="rgba(255,122,89,0.42)" />
+            <stop offset="100%" stopColor="rgba(255,122,89,0.03)" />
           </linearGradient>
         </defs>
         {ticks.map(v => (
@@ -2720,7 +2720,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             {/* Connector line — pulled in from 10% to 16% now that the strip
                 sits in the narrow column, so it starts and ends under the
                 nodes rather than running past them. */}
-            <div style={{ position: 'absolute', left: '16%', right: '16%', top: 17.5, height: 1.5, background: '#FFBC9D', borderRadius: 2, zIndex: 0 }} />
+            <div style={{ position: 'absolute', left: '16%', right: '16%', top: 17.5, height: 1.5, background: '#FFBCAC', borderRadius: 2, zIndex: 0 }} />
 
             {/* Stages — progress-driven slice centered on the current topic.
                 done = green check · current = gold gem · upcoming = small node. */}
@@ -2746,7 +2746,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
                       width: 35, height: 35,
                       background: 'linear-gradient(115.34deg, #FFA073 -8.31%, #ff854c 168.93%)',
                       borderRadius: 24,
-                      boxShadow: '0px 3px 5.8px rgba(255,116,72,0.45)',
+                      boxShadow: '0px 3px 5.8px rgba(255,122,89,0.45)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                       {/* Reached — the same check the completed stages carry */}

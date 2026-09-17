@@ -21,7 +21,7 @@ import cityBlock from './glass/cityBlock.json'
 
 const XP_PER_LEVEL = 100
 const XP_FOR_LESSON = 5        // learningStore.completeLesson
-const CORAL = '#FF7448'        // progress and achievement — the one place it lives
+const CORAL = '#FF7A59'        // progress and achievement — the one place it lives
 const INK = '#254A9F'
 const DEEP = '#18247E'
 
