@@ -4509,7 +4509,13 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                    half the questions. In em so it follows the board's own font
                    size, and a min only — a longer stem still grows. */
                 minHeight: bigBoard ? 'calc(3.3em + 8px)' : 'calc(3.3em + 6px)',
+                /* The same column as the options below: same width, same cap,
+                   same auto margins. The stem used to run 27px wider on each
+                   side, so the question it asks did not start where its own
+                   answers start. */
                 width: '100%',
+                maxWidth: bigBoard ? 1180 : 640,
+                marginInline: 'auto',
                 display: 'flex', flexDirection: 'column', gap: bigBoard ? 8 : 6,
               }}>
                 {splitSentences(String(q.text ?? '')).map((line, i) => (
@@ -4574,7 +4580,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         onClick={() => handleMcChoose(idx)}
                         disabled={revealed}
                         style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+                          /* flex-start, not center: under RTL that is the right
+                             edge, so every answer begins at its own letter and
+                             all four start on the same line as each other. */
+                          display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 12,
                           minHeight: bigBoard ? 76 : 44,
                           padding: bigBoard ? '16px 22px' : '10px 16px',
                           background: bg,
@@ -4585,7 +4594,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                           fontSize: bigBoard ? 19 : 15,
                           fontWeight: 500,
                           cursor: revealed ? 'default' : 'pointer',
-                          textAlign: 'center',
+                          textAlign: 'start',
                           direction: 'rtl',
                           transition: 'all 0.18s',
                           boxShadow: revealed ? (isChosen ? '0 2px 8px rgba(0,0,0,0.12)' : 'none') : 'none',
@@ -4609,7 +4618,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         }}>
                           {letter}
                         </span>
-                        <span style={{ lineHeight: 1.5, textAlign: 'center' }}><MathText text={opt} /></span>
+                        <span style={{ lineHeight: 1.5, textAlign: 'start', flex: 1, minWidth: 0 }}><MathText text={opt} /></span>
                         {marker && (
                           <span style={{
                             fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20,

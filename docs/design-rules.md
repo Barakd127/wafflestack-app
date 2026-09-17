@@ -246,6 +246,20 @@ Two traps this cost us on the practice board:
 Verified by measuring the same element across eight consecutive questions:
 left, top and width identical on all eight.
 
+**One column, top to bottom.** A question and its answers are one thing, so
+they share a column: same width, same cap, same margins. The stem used to run
+27px wider on each side than the grid beneath it, which meant the question did
+not begin where its own answers begin — small enough to pass unnoticed and
+exactly the kind of thing that makes a screen feel unconsidered.
+
+**RTL content starts at its marker.** An option’s letter badge is the start of
+the answer, not an ornament beside it: the words begin at the badge and run
+right to left. Centring the text inside whatever space the badge left over made
+a short answer float in the middle of its box while a long one filled it, so
+the four options never began on the same line as each other. In flex terms:
+`justify-content: flex-start` (the right edge under RTL), `text-align: start`,
+and `flex: 1` on the text so it takes the rest of the row.
+
 
 1. **The content column starts on the line of the rail's first row.** That is
    what makes the rail and the content read as one grid rather than two panels
