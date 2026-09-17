@@ -854,9 +854,18 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   --ws-ok-bg:   #E9F9F0;
   --ws-ok-ink:  #0A8F47;
 
-  --ws-bad:     #F4523C;
-  --ws-bad-bg:  #FDEDEA;
-  --ws-bad-ink: #D63A25;
+  /* 348.5° — a rose-red, Shirli’s pick. It used to sit at 7.2°, an
+     orange-red, which left it 4.7° from the coral accent: the two read as
+     one colour whenever they met. At 348.5° the gap is 23.4° and “wrong”
+     stops looking like a warm highlight.
+
+     The ink is the same hue carried down until it reads as text: 5.61:1 on
+     white and 4.98:1 on a card, up from 4.68 / 4.16. That also lifts the
+     low-score tier over AA at 16px, which it did not clear before.
+     Per Shirli 2026-09-17. */
+  --ws-bad:     #FA0030;
+  --ws-bad-bg:  #FFEBEF;
+  --ws-bad-ink: #D10028;
 
   /* 38.8° — amber, deliberately clear of the coral accent at 14.4°.
      At 19.1° the two were sixteen degrees apart and read as one colour. */
