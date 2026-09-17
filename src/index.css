@@ -833,6 +833,13 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
    Use the pair: --ws-<state> for the mark and the text, --ws-<state>-bg for
    the ground behind them. Nothing that is not a state may use either. */
 :root {
+  /* Nothing has happened yet — not good, not bad, not pending on anyone.
+     Desaturated and cooler than the house blue so it reads as absence rather
+     than as a quiet member of the scale. */
+  --ws-idle:     #94A3B8;
+  --ws-idle-bg:  #F1F5F9;
+  --ws-idle-ink: #64748B;
+
   --ws-ok:      #07B95A;
   --ws-ok-bg:   #E9F9F0;
   --ws-ok-ink:  #0A8F47;

@@ -1462,6 +1462,20 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
   const extraTopics = sortedTopics.filter(t => !groupedIds.has(t.id))
   if (extraTopics.length) groupedSections.push({ id: 'extra', labelHe: 'נוספים', emoji: '✨', topics: extraTopics })
 
+  /* The best score the reader has ever reached, as a colour. Four tiers, per
+     Shirli 2026-09-17, on the status tokens the app already owns rather than a
+     second set of reds and greens:
+
+       0        nothing yet          idle grey
+       1-59     needs another pass   the "wrong" red
+       60-84    on the way           the "pending" amber
+       85-100   mastered             the "right" green  */
+  const scoreInk = (score: number) =>
+    score === 0  ? 'var(--ws-idle-ink)'
+    : score < 60 ? 'var(--ws-bad-ink)'
+    : score < 85 ? 'var(--ws-wait-ink)'
+    :              'var(--ws-ok-ink)'
+
   const renderTopicCard = (topic: TopicItem) => {
     const progress = userProgress.topics[topic.id]
     const planHint = hintByTopic.get(topic.id)
@@ -1499,21 +1513,22 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 14, justifyContent: 'space-between' }}>
-          <div style={{ textAlign: 'start', flex: 1 }}>
-            <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: TEXT_MED }}>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
+          <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16,
+                          color: sessionsAttempted > 0 ? TEXT_DARK : 'var(--ws-idle-ink)' }}>
               {sessionsAttempted}
             </div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>סשנים</div>
           </div>
           <div style={{ textAlign: 'center', flex: 1 }}>
-            <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: bestScore > 85 ? '#34A853' : TEXT_MED }}>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: scoreInk(bestScore) }}>
               {bestScore}%
             </div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ציון הטוב</div>
           </div>
-          <div style={{ textAlign: 'end', flex: 1 }}>
-            <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: '#D4AF37' }}>
+          <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: TEXT_MED }}>
               {topic.questionCount}
             </div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>שאלות</div>
