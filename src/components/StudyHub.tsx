@@ -1286,7 +1286,7 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
             <div style={{ color: CARD_ICON_COLOR, marginBottom: 12, display: 'flex' }}>
               <CourseIcon id={c.id} size={26} />
             </div>
-            <div style={{ fontFamily: 'var(--ws-display)', fontSize: 19, fontWeight: 700, color: TEXT_DARK, marginBottom: 4 }}>{c.label}</div>
+            <div style={{ fontFamily: 'var(--ws-display)', fontSize: 19, fontWeight: 700, color: TEXT_MED, marginBottom: 4 }}>{c.label}</div>
             <div style={{ fontSize: 13, color: TEXT_SUB, lineHeight: 1.45 }}>{c.desc}</div>
             {!c.active && (
               // Pin moved from insetInlineStart (right edge in RTL — collided
@@ -1497,7 +1497,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
         }}
       >
         <div style={{ minHeight: 52, display: 'flex', alignItems: 'flex-start' }}>
-          <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 20, lineHeight: 1.3, color: TEXT_DARK, textAlign: 'right', textWrap: 'balance' }}>
+          <div style={{ fontFamily: 'var(--ws-display)', fontWeight: 700, fontSize: 20, lineHeight: 1.3, color: TEXT_MED, textAlign: 'right', textWrap: 'balance' }}>
             {topic.label}
           </div>
         </div>
@@ -1610,7 +1610,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
             return (
               <div key={section.id}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-                  <h3 style={{ fontFamily: 'var(--ws-display)', fontSize: 21, fontWeight: 800, color: TEXT_DARK, margin: 0 }}>{section.labelHe}</h3>
+                  <h3 style={{ fontFamily: 'var(--ws-display)', fontSize: 21, fontWeight: 800, color: TEXT_MED, margin: 0 }}>{section.labelHe}</h3>
                   <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_SUB, background: 'rgba(60,74,97,0.10)', borderRadius: 999, padding: '2px 10px' }}>
                     {masteredCount}/{section.topics.length} נושאים
                   </span>
