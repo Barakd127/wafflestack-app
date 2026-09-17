@@ -223,6 +223,30 @@ See `memory/icon-language.md` for the full account. In short:
 
 ## 6. Grid
 
+**A control the reader comes back to must not move.** When the same element
+appears on item after item — the answer options on every question, an action
+row on every card — its box is reserved, not derived. If the container is
+allowed to size itself to this item’s content, the reader has to find the
+control again every time, and the screen reads as unstable even though nothing
+is wrong with any single frame.
+
+Two traps this cost us on the practice board:
+
+- `margin-inline: auto` on a flex item **cancels the stretch** it would
+  otherwise get from its column, so a grid with `maxWidth` but no `width`
+  shrank to its content and centred that. Measured across six questions: the
+  option grid ran 410px to 1180px wide and its edge moved 385px. Set `width`
+  **and** `maxWidth`; the auto margins then only centre the cap.
+- Text above it moves everything below it. A one-line stem is 41px and a
+  two-line stem 87px, which pushed the options down 47px on about half the
+  questions. Reserve the common maximum with `min-height` in `em`, including
+  any gap between lines — a min, never a fixed height, so genuinely longer
+  content still grows instead of being clipped.
+
+Verified by measuring the same element across eight consecutive questions:
+left, top and width identical on all eight.
+
+
 1. **The content column starts on the line of the rail's first row.** That is
    what makes the rail and the content read as one grid rather than two panels
    that happen to be adjacent.

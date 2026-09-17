@@ -4504,6 +4504,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 textAlign: 'right',
                 // the options need air: 20 was the stem sitting on top of them
                 marginBottom: bigBoard ? 36 : 26,
+                /* Two lines held open. A one-line stem is 41px and a two-line
+                   stem 87px, which moved everything below it by 47px on about
+                   half the questions. In em so it follows the board's own font
+                   size, and a min only — a longer stem still grows. */
+                minHeight: bigBoard ? 'calc(3.3em + 8px)' : 'calc(3.3em + 6px)',
                 width: '100%',
                 display: 'flex', flexDirection: 'column', gap: bigBoard ? 8 : 6,
               }}>
@@ -4518,7 +4523,16 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                      2026-05-24: max-width + auto margins to center the grid
                      so answers don't push right of the question text. ── */
                 <>
-                <div className="ws-quiz-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: bigBoard ? 18 : 12, marginBottom: 18, maxWidth: bigBoard ? 1180 : 640, marginInline: 'auto', placeItems: 'stretch', justifyItems: 'stretch' }} dir="rtl">
+                <div className="ws-quiz-grid" style={{
+                  display: 'grid', gridTemplateColumns: '1fr 1fr',
+                  gap: bigBoard ? 18 : 12, marginBottom: 18,
+                  /* width AND maxWidth: margin-inline:auto cancels the stretch a
+                     flex item gets from its column, so without an explicit width
+                     the grid shrinks to whatever this question happens to say —
+                     measured 410px to 1180px across six questions. */
+                  width: '100%', maxWidth: bigBoard ? 1180 : 640, marginInline: 'auto',
+                  placeItems: 'stretch', justifyItems: 'stretch',
+                }} dir="rtl">
                   {((q as any).options as string[]).map((opt: string, idx: number) => {
                     const correctIdx: number = (q as any).correctIndex
                     const isChosen = mcSelected === idx
