@@ -4635,7 +4635,13 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 {mcSelected === null && (
                   /* The line that explains the shortcut is the switch that
                      turns it off — the only place a reader would look for it. */
-                  <div className="ws-quiz-hint" style={{ textAlign: 'center', marginBottom: 10 }} dir="rtl">
+                  /* Same column as the question and the answers, aligned to
+                     its start edge. Centred it belonged to nothing: it floated
+                     under the grid with no edge to answer to. */
+                  <div className="ws-quiz-hint" style={{
+                    textAlign: 'start', marginBottom: 10,
+                    width: '100%', maxWidth: bigBoard ? 1180 : 640, marginInline: 'auto',
+                  }} dir="rtl">
                     <button
                       type="button"
                       onClick={() => setKbdAnswers(v => !v)}
@@ -4645,7 +4651,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         display: 'inline-flex', alignItems: 'center', gap: 8,
                         background: 'none', border: 'none', cursor: 'pointer',
                         fontFamily: "'Assistant', sans-serif", fontSize: 12,
-                        color: 'rgba(31,62,108,0.55)', padding: '4px 8px', borderRadius: 999,
+                        color: 'rgba(31,62,108,0.55)', padding: '4px 0', borderRadius: 999,
                       }}
                     >
                       <span style={{
