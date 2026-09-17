@@ -2337,7 +2337,13 @@ function TopBar({ title, onLogout, darkMode, onToggleDark, contextControls }: { 
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 36px',
+      /* The start inset must match the screens below it: every .ws-screen-pad
+         uses 40 on the inline start, and at 36 the title overhung the content
+         column by 4px — visible as a heading that does not line up with the
+         cards under it, and worse once the sidebar is collapsed and the column
+         gets wider. The end side stays at 36; the screens disagree with each
+         other there (35 or 40) and the actions are fine where they are. */
+      padding: '0 40px 0 36px',
       flexShrink: 0,
     }} dir="rtl">
       {/* Title + context controls share the START side so nav controls (e.g.
