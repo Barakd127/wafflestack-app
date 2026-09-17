@@ -4998,25 +4998,15 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
     internalView === 'learning' ? withTopic('תרגול') :
     'אזור למידה'
 
-  // ── Topbar context controls ─────────────────────────────────────────────
-  // Nav controls that used to live INSIDE the content area (topics' מפה/רשימה
-  // toggle + back button; lesson/quiz's back button) now render in the topbar
-  // itself, next to the title, so the board/content pane below gets the full
-  // remaining height. See TopBar's contextControls prop.
-  /* The topics screen keeps nothing here. Its back and its view switch sit
-     above its own content — back is about this screen, not about the app, and
-     the view switch does not navigate at all: it changes how the same list is
-     drawn, so it belongs beside the list. Per Shirli, option ב. */
-  const topBarContextControls: React.ReactNode =
-    (internalView === 'lesson' || internalView === 'quiz-intro' || internalView === 'learning') ? (
-      <button
-        onClick={() => setInternalView('topics')}
-        className="ws-cta-nav"
-        style={{ whiteSpace: 'nowrap' }}
-      >
-        חזרה לנושאים
-      </button>
-    ) : undefined
+  // ── Topbar context controls ────────────────────────────────────
+  /* Empty, on every screen. Back belongs above the content it leaves, not in
+     the app's top bar — the rule the topics screen already followed, and the
+     other three were breaking. Theory, the quiz intro and the practice board
+     each carry their own back above their own board, so a second one in the
+     bar offered the same trip twice. Removed per Shirli 2026-09-17: it was a
+     mistake. If anything ever does belong here it has to be about the APP,
+     not about the screen. */
+  const topBarContextControls: React.ReactNode = undefined
 
   const handleSelectTopic = (topicId: string, mode: 'lesson' | 'quiz' = 'lesson') => {
     setSelectedTopic(topicId)
