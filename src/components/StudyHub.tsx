@@ -804,7 +804,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
               />
             </div>
             <div style={{ fontWeight: 800, fontSize: 26, color: '#1F3E6C' }}>WaffleStack</div>
-            <div style={{ fontSize: 13, color: '#7F9BD9', marginTop: 4 }}>פלטפורמת למידה לסטטיסטיקה</div>
+            <div style={{ fontSize: 13, color: '#4C62AA', marginTop: 4 }}>פלטפורמת למידה לסטטיסטיקה</div>
           </div>
 
           {/* Mode tabs — glass pill */}
@@ -830,21 +830,21 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {mode === 'register' && (
               <div>
-                <label style={{ fontSize: 12, color: '#7F9BD9', fontWeight: 600, display: 'block', marginBottom: 5 }}>שם מלא</label>
+                <label style={{ fontSize: 12, color: '#4C62AA', fontWeight: 600, display: 'block', marginBottom: 5 }}>שם מלא</label>
                 <input value={displayName} onChange={e => setDisplayName(e.target.value)}
                   placeholder="ישראל ישראלי"
                   style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(196,220,255,0.8)', borderRadius: 12, fontSize: 15, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', transition: 'border-color 0.15s' }} />
               </div>
             )}
             <div>
-              <label style={{ fontSize: 12, color: '#7F9BD9', fontWeight: 600, display: 'block', marginBottom: 5 }}>שם משתמש</label>
+              <label style={{ fontSize: 12, color: '#4C62AA', fontWeight: 600, display: 'block', marginBottom: 5 }}>שם משתמש</label>
               <input value={username} onChange={e => setUsername(e.target.value)} required
                 placeholder="username"
                 autoComplete="username"
                 style={{ width: '100%', padding: '12px 16px', border: '1.5px solid rgba(196,220,255,0.8)', borderRadius: 12, fontSize: 16, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', color: '#1F3E6C', direction: 'ltr', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', transition: 'border-color 0.15s' }} />
             </div>
             <div>
-              <label style={{ fontSize: 12, color: '#7F9BD9', fontWeight: 600, display: 'block', marginBottom: 5 }}>סיסמה</label>
+              <label style={{ fontSize: 12, color: '#4C62AA', fontWeight: 600, display: 'block', marginBottom: 5 }}>סיסמה</label>
               <input value={password} onChange={e => setPassword(e.target.value)} required
                 type="password" placeholder="••••••"
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
@@ -903,7 +903,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
             >
               כניסה כאורח — בלי חשבון
             </button>
-            <div style={{ marginTop: 6, fontSize: 11.5, color: '#7F9BD9', textAlign: 'center', fontFamily: "'Assistant', sans-serif" }}>
+            <div style={{ marginTop: 6, fontSize: 11.5, color: '#4C62AA', textAlign: 'center', fontFamily: "'Assistant', sans-serif" }}>
               ההתקדמות נשמרת בדפדפן הזה בלבד
             </div>
           </form>
@@ -934,7 +934,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600, fontSize: 13, color: '#1F3E6C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.displayName || u.username}</div>
-                    <div style={{ fontSize: 10, color: '#7F9BD9' }}>{u.role === 'teacher' ? '👩‍🏫 מורה' : '🎓 תלמיד'}</div>
+                    <div style={{ fontSize: 10, color: '#4C62AA' }}>{u.role === 'teacher' ? '👩‍🏫 מורה' : '🎓 תלמיד'}</div>
                   </div>
                 </button>
               ))}
@@ -1471,27 +1471,14 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
     return (
       <div
         key={topic.id}
-        className="ws-topic-card"
+        className={`ws-topic-card ws-glass-card${isMastered ? ' is-mastered' : ''}`}
         style={{
-          background: GLASS_CARD,
-          backdropFilter: 'blur(20px)',
-          border: `2px solid ${isMastered ? 'rgba(212,175,55,0.6)' : 'rgba(255,255,255,0.3)'}`,
           borderRadius: CARD_RADIUS,
           padding: 24,
           display: 'flex',
           flexDirection: 'column',
           gap: 16,
           textAlign: 'right',
-          transition: 'all 0.3s',
-          boxShadow: CARD_SHADOW,
-        }}
-        onMouseEnter={e => {
-          (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'
-          ;(e.currentTarget as HTMLElement).style.boxShadow = `0 12px 40px rgba(51,81,202,0.25)`
-        }}
-        onMouseLeave={e => {
-          (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-          ;(e.currentTarget as HTMLElement).style.boxShadow = CARD_SHADOW
         }}
       >
         <div style={{ minHeight: 52, display: 'flex', alignItems: 'flex-start' }}>
@@ -1601,7 +1588,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
       </div>
 
       {viewMode === 'list' ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 30, maxWidth: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 44, maxWidth: '100%' }}>
           {groupedSections.map(section => {
             const masteredCount = section.topics.filter(t => userProgress.topics[t.id]?.mastered).length
             return (

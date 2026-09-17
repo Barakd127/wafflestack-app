@@ -87,7 +87,7 @@
   --sh-btn-color: #122460;
   --sh-text-dark: #1F3E6C;
   --sh-text-med: #254A9F;
-  --sh-text-light: #7F9BD9;
+  --sh-text-light: #4C62AA;   /* 5.13:1 on a card — still the lightest of the four */
   --sh-text-tip: #465CA5;
   --sh-topbar-bg: transparent;
   --sh-topbar-border: #FFFFFF;
@@ -467,6 +467,13 @@ html.dark :focus-visible {
   box-shadow:
     0 4px 16px rgba(31, 62, 108, 0.14),
     inset 0 2px 4px rgba(31, 62, 108, 0.08) !important;
+}
+
+/* A mastered topic keeps its gold ring. .ws-glass-card sets its border with
+   !important, so the one card that differs has to answer in kind. */
+.ws-topic-card.is-mastered,
+.ws-topic-card.is-mastered:hover {
+  border-color: rgba(212, 175, 55, 0.6) !important;
 }
 
 /* Dark mode glass card */
