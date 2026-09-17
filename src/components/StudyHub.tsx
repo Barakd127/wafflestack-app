@@ -1499,8 +1499,8 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-          <div style={{ textAlign: 'center', flex: 1 }}>
+        <div style={{ display: 'flex', gap: 14, justifyContent: 'space-between' }}>
+          <div style={{ textAlign: 'start', flex: 1 }}>
             <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: TEXT_MED }}>
               {sessionsAttempted}
             </div>
@@ -1512,7 +1512,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
             </div>
             <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ציון הטוב</div>
           </div>
-          <div style={{ textAlign: 'center', flex: 1 }}>
+          <div style={{ textAlign: 'end', flex: 1 }}>
             <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: '#D4AF37' }}>
               {topic.questionCount}
             </div>
