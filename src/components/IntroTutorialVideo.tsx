@@ -30,7 +30,7 @@ export default function IntroTutorialVideo() {
         }}
       >
         <div style={cardHead}><CardIcon name="video" /><div style={cardTitle}>סרטון הדרכה</div></div>
-        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: '#5b6f93', marginTop: 6, lineHeight: 1.5 }}>
+        <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: 'var(--ws-ink-sub)', marginTop: 6, lineHeight: 1.5 }}>
           סיור קצר בפלטפורמה · פחות מ-3 דקות
         </div>
         {/* Flexible spacer with a floor — margin-top:auto alone collapses to zero

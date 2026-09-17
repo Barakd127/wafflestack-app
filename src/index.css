@@ -89,6 +89,10 @@
   --sh-text-med: #254A9F;
   --sh-text-light: #4C62AA;   /* 5.13:1 on a card — still the lightest of the four */
   --sh-text-tip: #465CA5;
+  /* The description under a card title. Dark and close to black, but grey
+     enough to sit back — a saturated blue this dark would fight the title
+     above it. Per Shirli 2026-09-17. */
+  --ws-ink-sub: #3C4A61;
   --sh-topbar-bg: transparent;
   --sh-topbar-border: #FFFFFF;
   --sh-topbar-seam: 0 1px 0 rgba(31,62,108,0.22);
@@ -120,6 +124,7 @@ html.dark {
   --sh-text-med: #a5b4fc;
   --sh-text-light: #94a3b8;
   --sh-text-tip: #64748b;
+  --ws-ink-sub: #9AA7BD;
   --sh-topbar-bg: transparent;
   --sh-topbar-border: rgba(255,255,255,0.16);
   --sh-topbar-seam: 0 1px 0 rgba(0,0,0,0.30);

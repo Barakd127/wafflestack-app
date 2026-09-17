@@ -721,6 +721,7 @@ const TEXT_DARK     = 'var(--sh-text-dark)'
 const TEXT_MED      = 'var(--sh-text-med)'
 const TEXT_LIGHT    = 'var(--sh-text-light)'
 const TEXT_TIP      = 'var(--sh-text-tip)'
+const TEXT_SUB      = 'var(--ws-ink-sub)'   // the line under a card title
 
 // ── Login / Register Screen ────────────────────────────────────────────────────
 function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
@@ -1286,7 +1287,7 @@ function CourseGate({ onSelectActive }: { onSelectActive: (courseId: 'stat-a' | 
               <CourseIcon id={c.id} size={26} />
             </div>
             <div style={{ fontFamily: 'var(--ws-display)', fontSize: 19, fontWeight: 700, color: TEXT_DARK, marginBottom: 4 }}>{c.label}</div>
-            <div style={{ fontSize: 13, color: TEXT_MED, lineHeight: 1.45 }}>{c.desc}</div>
+            <div style={{ fontSize: 13, color: TEXT_SUB, lineHeight: 1.45 }}>{c.desc}</div>
             {!c.active && (
               // Pin moved from insetInlineStart (right edge in RTL — collided
               // with the centered course icon) to insetInlineEnd (left edge
@@ -1519,19 +1520,19 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
                           color: sessionsAttempted > 0 ? TEXT_DARK : 'var(--ws-idle-ink)' }}>
               {sessionsAttempted}
             </div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_MED }}>סשנים</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_SUB }}>סשנים</div>
           </div>
           <div style={{ textAlign: 'center', flex: 1 }}>
             <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: scoreInk(bestScore) }}>
               {bestScore}%
             </div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_MED }}>ציון הטוב</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_SUB }}>ציון הטוב</div>
           </div>
           <div style={{ textAlign: 'center', flex: 1 }}>
             <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: TEXT_MED }}>
               {topic.questionCount}
             </div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_MED }}>שאלות</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_SUB }}>שאלות</div>
           </div>
         </div>
 
@@ -1610,7 +1611,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
               <div key={section.id}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
                   <h3 style={{ fontFamily: 'var(--ws-display)', fontSize: 21, fontWeight: 800, color: TEXT_DARK, margin: 0 }}>{section.labelHe}</h3>
-                  <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_MED, background: 'rgba(37,74,159,0.10)', borderRadius: 999, padding: '2px 10px' }}>
+                  <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_SUB, background: 'rgba(60,74,97,0.10)', borderRadius: 999, padding: '2px 10px' }}>
                     {masteredCount}/{section.topics.length} נושאים
                   </span>
                 </div>
@@ -2549,7 +2550,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             }}
           >
             <div style={{ ...cardHead }}><CardIcon name="plan" /><div style={cardTitle}>התאמת תכנית אישית</div></div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_MED, marginTop: 6, lineHeight: 1.5 }}>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 15, color: TEXT_SUB, marginTop: 6, lineHeight: 1.5 }}>
               שאלון של פחות מדקה — נסדר את הנושאים בדיוק לפי המטרה והזמן שלך
             </div>
             {/* Flexible spacer with a floor: margin-top:auto alone collapses to
@@ -2627,7 +2628,7 @@ function HomeScreen({ onGoLearning, onGoWorld, onGoMindmap, onSelectTopic, onSta
             animation: pulseCards ? 'ws-card-pulse 1.4s ease-out 3' : undefined,
           }}>
             <div style={{ ...cardHead, marginBottom: 6 }}><CardIcon name="practice" /><div style={cardTitle}>תרגול</div></div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_TIP, lineHeight: 1.6, marginBottom: 16 }}>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 16, color: TEXT_SUB, lineHeight: 1.6, marginBottom: 16 }}>
               {completedLessons.length === 0 ? (
                 <>מתחילים מהתחלה · {currentTopicName}</>
               ) : answeredInTopic > 0 && remainingInTopic > 0 ? (
