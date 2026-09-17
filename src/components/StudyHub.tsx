@@ -1519,19 +1519,19 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
                           color: sessionsAttempted > 0 ? TEXT_DARK : 'var(--ws-idle-ink)' }}>
               {sessionsAttempted}
             </div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>סשנים</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_MED }}>סשנים</div>
           </div>
           <div style={{ textAlign: 'center', flex: 1 }}>
             <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: scoreInk(bestScore) }}>
               {bestScore}%
             </div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>ציון הטוב</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_MED }}>ציון הטוב</div>
           </div>
           <div style={{ textAlign: 'center', flex: 1 }}>
             <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 16, color: TEXT_MED }}>
               {topic.questionCount}
             </div>
-            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_LIGHT }}>שאלות</div>
+            <div style={{ fontFamily: "'Assistant', sans-serif", fontSize: 11, color: TEXT_MED }}>שאלות</div>
           </div>
         </div>
 
@@ -1610,7 +1610,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
               <div key={section.id}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
                   <h3 style={{ fontFamily: 'var(--ws-display)', fontSize: 21, fontWeight: 800, color: TEXT_DARK, margin: 0 }}>{section.labelHe}</h3>
-                  <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_LIGHT, background: 'rgba(127,155,217,0.12)', borderRadius: 999, padding: '2px 10px' }}>
+                  <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_MED, background: 'rgba(37,74,159,0.10)', borderRadius: 999, padding: '2px 10px' }}>
                     {masteredCount}/{section.topics.length} נושאים
                   </span>
                 </div>
