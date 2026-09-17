@@ -3013,14 +3013,15 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
     }
     setTab(newTab)
     setChipExpanded(true)
-    if (newTab === 'none') {
-      setFloatMode(false)
-      // Tab cleared → restore chrome
-      if (fullscreen && onToggleFullscreen) onToggleFullscreen()
-    } else {
-      // Tab opened → auto-hide chrome if not already
-      if (!fullscreen && onToggleFullscreen) onToggleFullscreen()
-    }
+    if (newTab === 'none') setFloatMode(false)
+    /* Opening a tool used to switch fullscreen ON by itself — “auto-hide
+       chrome”. Chrome is not what it hid: the quiz bar lives behind the same
+       !fullscreen guard, so choosing מפת חשיבה silently took away דלג, the
+       progress dots and the bar itself, and a weaker substitute strip had to
+       be grown inside the card header to replace part of it. A reader who
+       asks for a mind map has not asked to lose their way through the
+       session. Fullscreen stays what its own button says it is: a deliberate
+       choice. Per Shirli 2026-09-17. */
   }, [fullscreen, onToggleFullscreen, _unlockedFeatures, _adminMode])
 
   // Register the in-practice 'switch-canvas' tour action so guided tours can
@@ -4125,7 +4126,10 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               {isMobile && tab !== 'none' && !isDone && (
                 <span style={{ position: 'absolute', top: 7, left: '50%', transform: 'translateX(-50%)', width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.4)' }} aria-hidden="true" />
               )}
-              {!isDone && (
+              {/* Only when the bar below is genuinely unavailable. Otherwise
+                  this repeated the bar's own controls at the other end of the
+                  screen. */}
+              {!isDone && (fullscreen || isMobile) && (
                 <button
                   onClick={navPrev}
                   disabled={isFirstQ}
@@ -4144,9 +4148,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   → הקודם
                 </button>
               )}
-              <span style={{ flex: 1, textAlign: 'center' }}>{isDone ? '🏆 סיום' : `שאלה ${currentQ + 1} / ${total}`}</span>
+              <span style={{ flex: 1, textAlign: 'center' }}>
+                {isDone ? '🏆 סיום' : (fullscreen || isMobile) ? `שאלה ${currentQ + 1} / ${total}` : ''}
+              </span>
               {!isDone && (q as any).difficulty && <QuizDifficultyBadge level={(q as any).difficulty} xp={q.xp} />}
-              {!isDone && (
+              {!isDone && (fullscreen || isMobile) && (
                 <button
                   data-tour="practice-btn"
                   onClick={navNext}
@@ -4478,14 +4484,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
               {/* Question title — full width, no XP chip here (moved into
                   outer ws-quiz-topbar). User asked for fewer competing chips
                   on the question card itself. */}
-              {/* Counter suppressed on the full-bleed board — the nav strip
-                  directly above already reads "שאלה X / Y"; two of them just
-                  ate ~44px of board height. */}
-              {!boardFullBleed && (
-                <div style={{ fontFamily: "'Inter', 'Assistant', sans-serif", fontWeight: 700, fontSize: 18, color: TEXT_DARK, marginBottom: 10, textAlign: 'right' }}>
-                  שאלה {currentQ + 1} / {total}
-                </div>
-              )}
+              {/* No counter on the card at all. The bar below reads
+                  “שאלה X מתוך Y” in every mode now, so a second one here was the
+                  same fact twice, in two different wordings, ~44px apart. */}
 
               {/* Handwritten stem on the board (Playpen Sans Hebrew, same hand
                   as the mind-map). KaTeX inside MathText keeps its own font —

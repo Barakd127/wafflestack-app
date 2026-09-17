@@ -252,6 +252,13 @@ they share a column: same width, same cap, same margins. The stem used to run
 not begin where its own answers begin — small enough to pass unnoticed and
 exactly the kind of thing that makes a screen feel unconsidered.
 
+**Shape is identity. It does not change with available space.** An answer
+option is a rounded rectangle at every size — full grid, compressed list, or
+letters only. What changes when room runs out is the layout and the height,
+never the shape. A control that changes shape mid-session makes the reader
+re-learn what they are looking at, which is the opposite of what compressing
+it was supposed to buy. Per Shirli 2026-09-17.
+
 **RTL content starts at its marker.** An option’s letter badge is the start of
 the answer, not an ornament beside it: the words begin at the badge and run
 right to left. Centring the text inside whatever space the badge left over made
