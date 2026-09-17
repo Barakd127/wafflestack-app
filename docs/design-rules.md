@@ -54,8 +54,28 @@ Three faces, one job each. A fourth face is a bug.
 
 ## 3. Buttons
 
-Three levels. That is the whole system, and the first two are told apart by **fill, not by
-size**: the primary is the only thing on the card that is filled.
+Three levels. **Shape says which, before a word is read.**
+
+| | Shape | Fill |
+|---|---|---|
+| Primary | rectangle, radius 16 | the only filled control in the app |
+| Secondary | round, radius 999 | never |
+| Navigation | round, radius 999 | never |
+| Tertiary | round, radius 999 | never — and no border either |
+| Toggle | round, radius 999 | only while it is on |
+
+The rectangle belongs to the primary and to nothing else. Everything that is
+not the main action of its surface is round — secondaries, the board’s own
+controls, every back control, every on/off switch. Fill alone never carried
+this: a border at a glance is mostly just “a box”, and the reader had to get
+close enough to read the label before knowing what kind of control it was.
+Per Shirli, 2026-09-17.
+
+**The one exception: a matched pair.** When a secondary sits beside the
+primary as its partner — same card, same moment, two ways to start — it takes
+the primary’s rectangle, through `.ws-cta-boxed`. תיאוריה / תרגול is the whole
+population today. They are one group of controls, not a button and a chip, and
+shape is what says so; fill still says which of the two leads.
 
 ### Primary — `.ws-cta`
 
@@ -128,6 +148,24 @@ Luminance ladder 0.051 / 0.028 / 0.014.
 
 It still obeys the secondary law: a border and no fill, in every state.
 
+### Tertiary — `.ws-cta-text`
+
+The fourth level: a text button. דלג, הקודם — controls that have to be on
+the screen and must not compete for it.
+
+```
+rest    ink --sh-text-tip #465CA5
+hover   ink #254A9F
+active  ink #18247E  translateY(1px)
+        radius 999 · padding 11px 14px · min-height 44 · 14px/600 · no border, no fill
+```
+
+No border and no fill, in any state — only the ink moves. It starts a step
+softer than the secondary’s so the control reads as available rather than as
+offered: 5.59 : 7.29 : 10.24 against a card, each step darker, the same law
+every other control obeys. Disabled is `aria-disabled="true"`, which the class
+styles — not a second set of inline colours.
+
 ### The toggle — `.ws-cta.is-on`
 
 A control that stays down repeats the `:active` declaration **exactly** — same
@@ -140,9 +178,10 @@ two different things; if they do, a reader cannot tell what a press did.
 2. Pressed is always darker than hover, hover always darker than rest. This
    holds for every control in the app, including chips and bar icons.
 3. Only the primary is filled. Everything below it is a border, or nothing.
-4. Three levels, and they answer three different questions: primary — what
+4. Four levels, and they answer four different questions: primary — what
    should I do here; secondary — what else can I do here; navigation — how do
-   I leave. A control that leaves never wears the weight of one that acts.
+   I leave; tertiary — what I can do without it mattering much. A control that
+   leaves never wears the weight of one that acts.
 5. The arrow points left. In Hebrew, forward is leftward. The back control is
    the exception that proves it: its arrow points the other way, because it is
    the only one going backwards.

@@ -809,12 +809,12 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
           </div>
 
           {/* Mode tabs — glass pill */}
-          <div style={{ display: 'flex', borderRadius: 14, background: 'rgba(31,62,108,0.07)', padding: 4, marginBottom: 24, gap: 4, backdropFilter: 'blur(8px)' }}>
+          <div style={{ display: 'flex', borderRadius: 999, background: 'rgba(31,62,108,0.07)', padding: 4, marginBottom: 24, gap: 4, backdropFilter: 'blur(8px)' }}>
             {(['login', 'register'] as const).map(m => (
               <button key={m} onClick={() => { setMode(m); setError('') }}
                 className={mode === m ? 'ws-cta-btn' : ''}
                 style={{
-                  flex: 1, padding: '10px 0', borderRadius: 10, cursor: 'pointer',
+                  flex: 1, padding: '10px 0', borderRadius: 999, cursor: 'pointer',
                   background: mode === m ? 'linear-gradient(135deg,#1F3E6C,#254A9F)' : 'transparent',
                   border: mode === m ? '1px solid rgba(255,255,255,0.2)' : '1px solid transparent',
                   color: mode === m ? '#fff' : '#1F3E6C',
@@ -1072,11 +1072,7 @@ function QuizIntroCard({ topicId, onStart, onBack, onReadLesson }: {
               📚 קרא תיאוריה
             </button>
           )}
-          <button onClick={onBack} style={{
-            background: 'transparent', color: TEXT_LIGHT,
-            border: 'none', cursor: 'pointer',
-            fontSize: 14, padding: '12px 16px', fontFamily: "'Assistant', sans-serif",
-          }}>
+          <button onClick={onBack} className="ws-cta-nav">
             חזרה לנושאים
           </button>
         </div>
@@ -1373,7 +1369,7 @@ function ViewSwitch({ viewMode, onViewModeChange }: {
     mindmap: <><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z" /><path d="M9 4v16" /><path d="M15 6v16" /></>,
   } as const
   return (
-    <div style={{ display: 'flex', gap: 2, background: 'rgba(127,155,217,0.14)', padding: 3, borderRadius: 999 }}>
+    <div style={{ display: 'flex', gap: 2, background: 'rgba(37,74,159,0.10)', padding: 3, borderRadius: 999 }}>
       {([['list', 'רשימה'], ['mindmap', 'מפה']] as const).map(([m, label]) => {
         const on = viewMode === m
         const locked = m === 'mindmap' && !mapUnlocked
@@ -1565,7 +1561,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
             תיאוריה<CtaArrow />
           </button>
           <button
-            className="ws-cta-outline"
+            className="ws-cta-outline ws-cta-boxed"
             onClick={() => onSelectTopic(topic.id, 'quiz')}
             style={{ flex: 1, padding: '9.5px 14px' }}
           >
@@ -3792,14 +3788,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             aria-disabled={isFirstQ || undefined}
             aria-label="שאלה קודמת"
             title={isFirstQ ? 'זו השאלה הראשונה' : 'הקודם'}
-            style={{
-              background: 'none', border: 'none',
-              color: isFirstQ ? 'rgba(31,62,108,0.30)' : 'var(--sh-text-med)',
-              borderRadius: 12, padding: '11px 16px', minHeight: 44,
-              cursor: isFirstQ ? 'default' : 'pointer',
-              fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
-              display: 'flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap',
-            }}
+            className="ws-cta-text"
           >
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -3862,11 +3851,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             <button
               onClick={handleSkip}
               title="דלג — בלי לענות; זה שובר את הרצף"
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                fontFamily: "'Assistant', sans-serif", fontSize: 14, fontWeight: 600,
-                color: TEXT_MED, padding: '11px 14px', borderRadius: 12, whiteSpace: 'nowrap',
-              }}
+              className="ws-cta-text"
             >
               דלג
             </button>
@@ -4264,13 +4249,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             }}>
               <button
                 onClick={() => { try { onBack() } catch (_) {} }}
-                style={{
-                  justifySelf: 'start',
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  fontFamily: "'Assistant', sans-serif", fontSize: 15, fontWeight: 600,
-                  color: TEXT_MED, padding: 0,
-                  display: 'flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap',
-                }}
+                className="ws-cta-nav"
+                style={{ justifySelf: 'start', whiteSpace: 'nowrap' }}
               >
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -4482,7 +4462,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                   handleQuizComplete()
                   onBack()
                 }}
-                  style={{ background: BUTTON_COLOR, color: '#fff', border: 'none', borderRadius: 24, padding: '12px 32px', fontFamily: "'Assistant', sans-serif", fontWeight: 600, fontSize: 16, cursor: 'pointer', boxShadow: '0px 2px 6px rgba(18,36,96,0.3)' }}>
+                  className="ws-cta">
                   חזרה לנושאים
                 </button>
                 <button onClick={handleReset}
@@ -5031,7 +5011,8 @@ const StudyHub = ({ onViewChange, darkMode, onToggleDarkMode, onLoggedIn, onLogg
     (internalView === 'lesson' || internalView === 'quiz-intro' || internalView === 'learning') ? (
       <button
         onClick={() => setInternalView('topics')}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: TEXT_DARK, fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
+        className="ws-cta-nav"
+        style={{ whiteSpace: 'nowrap' }}
       >
         חזרה לנושאים
       </button>

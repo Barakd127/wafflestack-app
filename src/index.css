@@ -917,12 +917,19 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
 /* The board's own two actions, quieter still than .ws-cta-sm: they sit under
    the toolbar's toggles and must not out-weigh them. A hairline instead of
    1.5px, the ink at 70%, and a height that comes in under the pill above. */
+/* A matched pair. When a secondary sits beside the primary as its partner —
+   the same card, the same moment, two ways to start — it takes the primary's
+   rectangle so the two read as one group of controls rather than as a button
+   and a chip. Fill still says which is which; shape says they belong together.
+   תיאוריה / תרגול is the whole population. Per Shirli 2026-09-17. */
+.ws-cta-outline.ws-cta-boxed { border-radius: 16px; }
+
 .ws-cta-outline.ws-cta-xs {
   padding: 5px 12px;
   font-size: 12.5px;
   font-weight: 600;
   border-width: 1px;
-  border-radius: 10px;
+  border-radius: 999px;
   gap: 6px;
   border-color: rgba(37,74,159,0.42);
   color: #254A9F;
@@ -947,6 +954,45 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   color: #132A5C;
   box-shadow: none;
   transform: none;
+}
+
+/* ── Tertiary ────────────────────────────────────────────────────────────
+   The fourth level: a text button. "דלג", "הקודם" — controls that have to be
+   on the screen and must not compete for it.
+
+   No border and no fill, in any state. Only the ink moves, and it starts a
+   step softer than the secondary's so the control reads as available rather
+   than as offered: 5.59 : 7.29 : 10.24 against a card, each step darker, which
+   is the same law every other control obeys.
+
+   Round, like everything that is not a primary. With no border the radius only
+   shows in the focus ring, which is exactly where it still has to be right. */
+.ws-cta-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 14px;
+  min-height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  font-family: 'Assistant', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sh-text-tip);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.18s ease, transform 0.16s cubic-bezier(.22,1,.36,1);
+}
+.ws-cta-text:hover  { color: #254A9F; }
+.ws-cta-text:active { color: #18247E; transform: translateY(1px); }
+.ws-cta-text[aria-disabled='true'] {
+  color: rgba(31,62,108,0.30);
+  cursor: default;
+}
+.ws-cta-text[aria-disabled='true']:hover { color: rgba(31,62,108,0.30); }
+@media (prefers-reduced-motion: reduce) {
+  .ws-cta-text:active { transform: none; }
 }
 
 /* ── Navigation ──────────────────────────────────────────────────────────
@@ -995,11 +1041,13 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
 }
 
 /* The same button at chrome scale — a toolbar is not a card footer. */
+/* Chrome scale. Round like everything that is not a primary — at this size
+   the population is toggles and small secondaries, and both are round. */
 .ws-cta.ws-cta-sm,
 .ws-cta-outline.ws-cta-sm {
   padding: 8px 16px;
   font-size: 14px;
-  border-radius: 12px;
+  border-radius: 999px;
   gap: 7px;
 }
 
@@ -1021,13 +1069,14 @@ html.dark .ws-glass-board .ws-glass-dots { opacity: 0.35 !important; }
   gap: 9px;
   padding: 9.5px 24px;
   border: 1.5px solid #254A9F;
-  border-radius: 16px;
+  border-radius: 999px;
   font-family: 'Assistant', sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: #254A9F;
   cursor: pointer;
   background: transparent;
+  /* Round: only the primary is a rectangle. Per Shirli 2026-09-17. */
   transition: transform 0.16s cubic-bezier(.22,1,.36,1), box-shadow 0.16s ease,
               background 0.18s ease, color 0.18s ease;
 }
