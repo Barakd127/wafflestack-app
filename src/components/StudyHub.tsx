@@ -1611,7 +1611,7 @@ function TopicSelector({ userProgress, onSelectTopic, onBack, darkMode, onToggle
               <div key={section.id}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
                   <h3 style={{ fontFamily: 'var(--ws-display)', fontSize: 21, fontWeight: 800, color: TEXT_MED, margin: 0 }}>{section.labelHe}</h3>
-                  <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_SUB, background: 'rgba(60,74,97,0.10)', borderRadius: 999, padding: '2px 10px' }}>
+                  <span style={{ fontFamily: "'Assistant', sans-serif", fontSize: 12, color: TEXT_SUB, background: 'rgba(51,65,85,0.10)', borderRadius: 999, padding: '2px 10px' }}>
                     {masteredCount}/{section.topics.length} נושאים
                   </span>
                 </div>
