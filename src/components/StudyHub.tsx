@@ -2924,6 +2924,57 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
   //                     chipExpanded toggles between a tiny pill and a full
   //                     compact card with answer field + dots.
   const [tab, setTab] = useState<'none' | 'mindmap' | 'arsenal' | 'canvas' | 'excalidraw'>('none')
+  /* How much of the column the board keeps when a tool is open, per tool.
+     Remembered because a mind map and the arsenal do not want the same share,
+     and re-dragging on every switch is the same complaint one level up. */
+  const SPLIT_KEY = 'ws-quiz-split'
+  const SPLIT_MIN = 25, SPLIT_MAX = 80, SPLIT_DEFAULT = 56
+  const [splitPct, setSplitPct] = useState<Record<string, number>>(() => {
+    try { return JSON.parse(localStorage.getItem(SPLIT_KEY) || '{}') } catch { return {} }
+  })
+  const boardPct = splitPct[tab] ?? SPLIT_DEFAULT
+  /* What the options actually have to live in.
+     Computed from the split the reader set and the viewport, NOT observed.
+     A ResizeObserver would have been the obvious tool and is the wrong one:
+     its callbacks ride the render loop, so any host that throttles frames
+     (a background tab, an embedded preview) leaves the layout frozen at
+     whatever it was when the page last painted. Arithmetic has no such
+     dependency. The ~110px is the app bar plus the quiz bar, which the card
+     never gets. */
+  const [viewportH, setViewportH] = useState(() => typeof window === 'undefined' ? 900 : window.innerHeight)
+  useEffect(() => {
+    const onResize = () => setViewportH(window.innerHeight)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  const quizCardH = Math.max(0, (viewportH - 110) * boardPct / 100)
+  const optTier: 'grid' | 'list' | 'tight' =
+    tab === 'none' || isMobile || quizCardH >= 400 ? 'grid'
+    : quizCardH >= 300 ? 'list'
+    : 'tight'
+  const onSplitDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const row = contentRowRef.current
+    if (!row) return
+    const el = e.currentTarget
+    el.setPointerCapture(e.pointerId)
+    const move = (ev: PointerEvent) => {
+      const r = row.getBoundingClientRect()
+      if (!r.height) return
+      const pct = ((ev.clientY - r.top) / r.height) * 100
+      setSplitPct(prev => {
+        const next = { ...prev, [tab]: Math.max(SPLIT_MIN, Math.min(SPLIT_MAX, pct)) }
+        try { localStorage.setItem(SPLIT_KEY, JSON.stringify(next)) } catch { /* private mode */ }
+        return next
+      })
+    }
+    const up = (ev: PointerEvent) => {
+      el.removeEventListener('pointermove', move)
+      el.removeEventListener('pointerup', up)
+      try { el.releasePointerCapture(ev.pointerId) } catch { /* already gone */ }
+    }
+    el.addEventListener('pointermove', move)
+    el.addEventListener('pointerup', up)
+  }, [tab])
   const [chipExpanded, setChipExpanded] = useState<boolean>(true)
   // "⊟ פיצול מסך" FAB → swap-pane dropdown. Lists the companion surfaces that
   // can fill the BOTTOM pane (תרגול is always locked on top). The currently
@@ -3998,6 +4049,36 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
           </button>
         )}
 
+        {/* The divider. In a column-reverse row this sits in source BETWEEN the
+             tool and the card, which puts it visually under the board. */}
+        {!isDone && tab !== 'none' && !isMobile && !floatMode && (
+          <div
+            onPointerDown={onSplitDown}
+            onDoubleClick={() => setSplitPct(prev => {
+              const next = { ...prev, [tab]: SPLIT_DEFAULT }
+              try { localStorage.setItem(SPLIT_KEY, JSON.stringify(next)) } catch { /* private mode */ }
+              return next
+            })}
+            role="separator"
+            aria-orientation="horizontal"
+            aria-valuenow={Math.round(boardPct)}
+            aria-valuemin={SPLIT_MIN}
+            aria-valuemax={SPLIT_MAX}
+            aria-label="גובה הלוח — גרור לשינוי, לחיצה כפולה לאיפוס"
+            title="גרור לשינוי גובה הלוח · לחיצה כפולה מאפסת"
+            style={{
+              flexShrink: 0, height: 14, zIndex: 3, cursor: 'row-resize',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              touchAction: 'none', background: 'transparent',
+            }}
+          >
+            <span style={{
+              width: 56, height: 4, borderRadius: 99,
+              background: 'rgba(31,62,108,0.30)',
+            }} aria-hidden="true" />
+          </div>
+        )}
+
         {/* ── Question card ──────────────────────────────────────────────────
              • tab='none'          → centered in the page (normal flow)
              • tab active, mobile  → bottom sheet (fixed, 50 vh, rounded top)
@@ -4015,7 +4096,8 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
             // Raised from 25vh because long stems + 4 MC options + KaTeX
             // were getting cropped (option D invisible). Internal scroll
             // on the inner card if needed.
-            ? { flexShrink: 0, zIndex: 2, display: 'flex', flexDirection: 'column', maxHeight: 'min(56vh, 520px)', overflow: 'hidden' }
+            ? { flexShrink: 0, zIndex: 2, display: 'flex', flexDirection: 'column',
+                height: `${boardPct}%`, maxHeight: `${boardPct}%`, overflow: 'hidden' }
             : boardFullBleed
             // Calm mode: the pane GROWS to fill everything under the tab chips
             // so the whiteboard gets the whole content area (was a 6px-padded
@@ -4281,6 +4363,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
 
           {/* Question content is drawn directly on the board. */}
           <BoardShell
+            /* The board stops insisting on 320px once the reader has given it
+               less than that. */
+            compact={optTier !== 'grid'}
             topicId={selectedTopic || undefined}
             progress={{ done: answeredCount, total }}
             revealOnProgress
@@ -4504,12 +4589,12 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                 lineHeight: 1.65,
                 textAlign: 'right',
                 // the options need air: 20 was the stem sitting on top of them
-                marginBottom: bigBoard ? 36 : 26,
+                marginBottom: optTier === 'tight' ? 10 : optTier === 'list' ? 18 : bigBoard ? 36 : 26,
                 /* Two lines held open. A one-line stem is 41px and a two-line
                    stem 87px, which moved everything below it by 47px on about
                    half the questions. In em so it follows the board's own font
                    size, and a min only — a longer stem still grows. */
-                minHeight: bigBoard ? 'calc(3.3em + 8px)' : 'calc(3.3em + 6px)',
+                minHeight: optTier === 'tight' ? 0 : bigBoard ? 'calc(3.3em + 8px)' : 'calc(3.3em + 6px)',
                 /* The same column as the options below: same width, same cap,
                    same auto margins. The stem used to run 27px wider on each
                    side, so the question it asks did not start where its own
@@ -4530,9 +4615,14 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                      2026-05-24: max-width + auto margins to center the grid
                      so answers don't push right of the question text. ── */
                 <>
-                <div className="ws-quiz-grid" style={{
-                  display: 'grid', gridTemplateColumns: '1fr 1fr',
-                  gap: bigBoard ? 18 : 12, marginBottom: 18,
+                <div className="ws-quiz-grid" data-opt-tier={optTier} style={{
+                  display: 'grid',
+                  gridTemplateColumns:
+                    optTier === 'grid' ? '1fr 1fr'
+                    : optTier === 'list' ? '1fr'
+                    : 'repeat(4, 1fr)',
+                  gap: optTier === 'tight' ? 6 : optTier === 'list' ? 8 : bigBoard ? 18 : 12,
+                  marginBottom: optTier === 'grid' ? 18 : 10,
                   /* width AND maxWidth: margin-inline:auto cancels the stretch a
                      flex item gets from its column, so without an explicit width
                      the grid shrinks to whatever this question happens to say —
@@ -4580,19 +4670,28 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         key={idx}
                         onClick={() => handleMcChoose(idx)}
                         disabled={revealed}
+                        /* The whole answer, for the tier that cannot show it */
+                        title={optTier === 'tight' ? opt : undefined}
                         style={{
                           /* flex-start, not center: under RTL that is the right
                              edge, so every answer begins at its own letter and
                              all four start on the same line as each other. */
-                          display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 12,
-                          minHeight: bigBoard ? 76 : 44,
-                          padding: bigBoard ? '16px 22px' : '10px 16px',
+                          display: 'flex', alignItems: 'center',
+                          justifyContent: optTier === 'tight' ? 'center' : 'flex-start',
+                          gap: optTier === 'tight' ? 0 : 12,
+                          /* Room, not identity: the box gets shorter and the
+                             text stops wrapping, but it stays the same rounded
+                             rectangle it is at full size. */
+                          minHeight: optTier === 'tight' ? 34 : optTier === 'list' ? 44 : bigBoard ? 76 : 44,
+                          padding: optTier === 'tight' ? '6px 12px'
+                            : optTier === 'list' ? '9px 16px'
+                            : bigBoard ? '16px 22px' : '10px 16px',
                           background: bg,
                           border: `1.5px solid ${border}`,
                           borderRadius: bigBoard ? 16 : 12,
                           color,
                           fontFamily: "'Assistant', sans-serif",
-                          fontSize: bigBoard ? 19 : 15,
+                          fontSize: optTier === 'tight' ? 14 : optTier === 'list' ? 16 : bigBoard ? 19 : 15,
                           fontWeight: 500,
                           cursor: revealed ? 'default' : 'pointer',
                           textAlign: 'start',
@@ -4611,7 +4710,9 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         {/* RTL primary corner = right side → letter pill comes FIRST in DOM */}
                         <span style={{
                           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          minWidth: bigBoard ? 36 : 30, height: bigBoard ? 36 : 30, borderRadius: 11,
+                          minWidth: optTier === 'tight' ? 22 : bigBoard ? 36 : 30,
+                          height: optTier === 'tight' ? 22 : bigBoard ? 36 : 30,
+                          borderRadius: optTier === 'tight' ? 7 : 11,
                           background: revealed ? 'rgba(31,62,108,0.10)' : 'rgba(31,62,108,0.08)',
                           color: revealed ? 'rgba(31,62,108,0.5)' : '#254A9F',
                           fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: bigBoard ? 16 : 14,
@@ -4619,7 +4720,11 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                         }}>
                           {letter}
                         </span>
-                        <span style={{ lineHeight: 1.5, textAlign: 'start', flex: 1, minWidth: 0 }}><MathText text={opt} /></span>
+                        {optTier !== 'tight' && (
+                          <span style={{ lineHeight: 1.5, textAlign: 'start', flex: 1, minWidth: 0 }}>
+                            <MathText text={opt} />
+                          </span>
+                        )}
                         {marker && (
                           <span style={{
                             fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 20,
@@ -4633,7 +4738,7 @@ function LearningScreen({ onBack, selectedTopic, difficultyFilter = 'all', userP
                     )
                   })}
                 </div>
-                {mcSelected === null && (
+                {mcSelected === null && optTier !== 'tight' && (
                   /* The line that explains the shortcut is the switch that
                      turns it off — the only place a reader would look for it. */
                   /* Same column as the question and the answers, aligned to

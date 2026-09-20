@@ -197,6 +197,7 @@ export default function GlassBoardShell({
   defaultMode = 'focus',
   revealOnProgress = false,
   layout = 'plain',
+  compact = false,
 }: GlassBoardShellProps) {
   const tray = layout === 'tray'
   // Initial frost: the session's last value (if any) wins over the default mode.
@@ -469,7 +470,10 @@ export default function GlassBoardShell({
         position: 'relative',
         width: '100%',
         height: '100%',
-        minHeight: 320,
+        /* The floor yields when the board is handed less than it. Without
+           this a board given 220px still laid itself out at 320 and the card
+           above clipped the difference — which is exactly the answers. */
+        minHeight: compact ? 0 : 320,
         borderRadius: 24,
         overflow: 'hidden',
         border: '1px solid rgba(255,255,255,0.5)',
@@ -622,10 +626,12 @@ export default function GlassBoardShell({
         className={inkClass}
         style={{
           position: 'absolute',
-          top: tray ? TRAY_INSET : 28,
-          left: tray ? TRAY_INSET : 28,
-          right: tray ? TRAY_INSET : 28,
-          bottom: tray ? `${trayBottomPct}%` : 108,
+          top: tray ? TRAY_INSET : compact ? 14 : 28,
+          left: tray ? TRAY_INSET : compact ? 18 : 28,
+          right: tray ? TRAY_INSET : compact ? 18 : 28,
+          /* 108 is the frost slider plus the tool row. At compact heights
+             that is half the board, so the ink column takes most of it back. */
+          bottom: tray ? `${trayBottomPct}%` : compact ? 46 : 108,
           padding: tray ? `28px 32px ${inkPadBottom}px` : undefined,
           display: 'flex',
           flexDirection: 'column',

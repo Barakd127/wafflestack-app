@@ -21,6 +21,9 @@ export interface WhiteboardShellProps {
   topRightSlot?: ReactNode
   /** Pinned opposite it, in the board's top-left inner corner. */
   topLeftSlot?: ReactNode
+  /** The board is being handed very little height. Drop its floors so it
+   *  fits what it was given instead of overflowing and being clipped. */
+  compact?: boolean
   /** Beside the frost slider, on its right. */
   dockRightSlot?: ReactNode
   /** Closing the dock's row — under RTL, its left end. */
