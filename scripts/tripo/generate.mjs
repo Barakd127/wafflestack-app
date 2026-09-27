@@ -111,8 +111,8 @@ async function downloadGLB(url, outPath) {
 }
 
 // ─── Per-building flow ───────────────────────────────────────────────────────
-async function generateBuilding(building, styleSuffix, force = false) {
-  const outFile = resolve(OUT_DIR, `${building.id}.glb`)
+async function generateBuilding(building, styleSuffix, force = false, outDir = OUT_DIR) {
+  const outFile = resolve(outDir, `${building.id}.glb`)
 
   if (!force) {
     try { await access(outFile); console.log(`  ✓ ${building.id} — exists, skipping`); return }
@@ -149,19 +149,27 @@ async function main() {
     process.exit(1)
   }
 
-  await mkdir(OUT_DIR, { recursive: true })
-  const config = JSON.parse(await readFile(PROMPTS, 'utf8'))
-  const styleSuffix = config._styleSuffix
-  let buildings = config.buildings
-
-  // CLI arg: regenerate only specific IDs (and force)
+  // CLI: [--force] [--prompts <file>] [--out <dir>] [id...]
+  // Defaults preserve the original behavior (buildings → models/tripo/raw).
   const args = process.argv.slice(2)
   const force = args.includes('--force')
-  const ids   = args.filter(a => !a.startsWith('--'))
-  if (ids.length) buildings = buildings.filter(b => ids.includes(b.id))
+  const flag = (name) => {
+    const i = args.indexOf(name)
+    return i >= 0 && args[i + 1] ? args[i + 1] : null
+  }
+  const promptsPath = flag('--prompts') ? resolve(REPO_ROOT, flag('--prompts')) : PROMPTS
+  const outDir      = flag('--out') ? resolve(REPO_ROOT, flag('--out')) : OUT_DIR
+  const consumed = new Set(['--force', '--prompts', '--out', flag('--prompts'), flag('--out')])
+  const ids = args.filter(a => !a.startsWith('--') && !consumed.has(a))
 
-  console.log(`Tripo: generating ${buildings.length} model(s) (concurrency=${CONCURRENCY})`)
-  await runWithConcurrency(buildings, CONCURRENCY, b => generateBuilding(b, styleSuffix, force))
+  await mkdir(outDir, { recursive: true })
+  const config = JSON.parse(await readFile(promptsPath, 'utf8'))
+  const styleSuffix = config._styleSuffix
+  let items = config.items ?? config.buildings
+  if (ids.length) items = items.filter(b => ids.includes(b.id))
+
+  console.log(`Tripo: generating ${items.length} model(s) → ${outDir} (concurrency=${CONCURRENCY})`)
+  await runWithConcurrency(items, CONCURRENCY, b => generateBuilding(b, styleSuffix, force, outDir))
   console.log('Done.')
 }
 

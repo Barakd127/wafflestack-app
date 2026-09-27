@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>תפוס את הפול! ☕ טייקון בית הקפה</title>
+  <meta name="description" content="משחק ניהול בית קפה מטורלל בהשראת Seize the Bean, בנוי עם נכסי Kenney (CC0) בסגנון MakeRoom." />
+  <meta name="theme-color" content="#f7b98a" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;900&family=Playpen+Sans+Hebrew:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.min.js" } }
+  </script>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <!-- speech bubbles / orders float here, projected from 3D -->
+  <div id="bubbles"></div>
+  <div id="tap-pointer" hidden aria-hidden="true">👇</div>
+
+  <header id="hud">
+    <div class="pill" id="coins">₪0</div>
+    <div class="pill" id="stars"></div>
+    <div class="pill" id="day-label">יום 1</div>
+    <div class="pill" title="אווירה" aria-label="אווירה">🛋️ <span id="amb">0</span></div>
+  </header>
+  <div id="corner-btns">
+    <button class="icon-btn" id="btn-mute" title="השתקה" aria-label="השתקה">🔊</button>
+    <button class="icon-btn" id="btn-reset" title="משחק חדש" aria-label="משחק חדש">🔄</button>
+  </div>
+  <div id="day-timer" aria-hidden="true"><i></i></div>
+
+  <div id="toasts"></div>
+
+  <!-- rush: the live order card with the prep mini-game -->
+  <section id="order-card" aria-live="polite"></section>
+
+  <!-- prep (between days): open-day button + shop -->
+  <footer id="prep-bar">
+    <button id="btn-shop">🛠️ החנות</button>
+    <button id="btn-open-day">☀️ פתחו את יום 1</button>
+  </footer>
+  <section id="shop" aria-label="חנות שדרוגים"></section>
+
+  <!-- end-of-day summary -->
+  <div id="summary">
+    <div class="summary-card">
+      <div id="summary-body"></div>
+      <button id="btn-next-day">☕ להכנות ליום הבא</button>
+    </div>
+  </div>
+
+  <div id="title" class="hidden">
+    <div class="title-card">
+      <div class="badge-row">☕ 🧇 🥐</div>
+      <h1>תפוס את הפול!</h1>
+      <p class="sub">טייקון בית־הקפה המטורלל של השכונה</p>
+      <div class="howto" aria-label="איך משחקים">
+        <div class="ht-step"><span>👆</span><small>בוחרים לקוח</small></div>
+        <span class="ht-arrow">←</span>
+        <div class="ht-step"><span>⚙️☕</span><small>מכינים לפי הסדר</small></div>
+        <span class="ht-arrow">←</span>
+        <div class="ht-step"><span>💰</span><small>מרוויחים</small></div>
+      </div>
+      <button id="btn-start">פתחו את הדלתות! ☕</button>
+      <p class="tiny">
+        משחק דמו · בהשראת <bdi dir="ltr">MakeRoom</bdi> ו־<bdi dir="ltr">Seize the Bean</bdi><br />
+        מודלים תלת־ממדיים: <bdi dir="ltr">Kenney.nl</bdi> (רישיון CC0) 🎨
+      </p>
+    </div>
+  </div>
+
+  <div id="loading">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+      <div class="load-cup">☕</div>
+      <div id="load-bar"><i></i></div>
+      <div style="font-weight:700;color:#6f4e37">טוחנים פולים טריים...</div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/game.js"></script>
+</body>
+</html>
