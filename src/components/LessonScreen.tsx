@@ -410,36 +410,9 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           <HierarchyBreadcrumb topicId={topicId} />
         </div>
 
-        {/* Two buttons, not a segmented control: they are independent, both can
-            be on, and neither is an alternative to the other. Styled as the
-            home screen's own CTA — light at rest, dark when down. */}
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button
-            onClick={() => {
-              setPresenting(v => {
-                const next = !v
-                setPresAuto(next) // entering starts the auto demo; exiting stops it
-                if (next) setPresTool('point')
-                return next
-              })
-            }}
-            title={presenting ? 'סיום מצב הצגה' : 'היד מציגה את השקופית על הלוח'}
-            aria-pressed={presenting}
-            className={`ws-cta ws-cta-sm${presenting ? ' is-on' : ''}`}
-          >
-            <Ico d={presenting ? I.close : I.present} size={17} />
-            {presenting ? 'סיום הצגה' : 'מצב הצגה'}
-          </button>
-          <button
-            onClick={() => setMindmapOpen(v => !v)}
-            title={mindmapOpen ? 'הסתר מפת מושגים' : 'הצג מפת מושגים'}
-            aria-pressed={mindmapOpen}
-            className={`ws-cta ws-cta-sm${mindmapOpen ? ' is-on' : ''}`}
-          >
-            <Ico d={I.mind} size={17} />
-            {mindmapOpen ? 'הסתר מפה' : 'הצג מפה'}
-          </button>
-        </div>
+        {/* Nothing else. This row says where you are; what you can DO sits on
+            the board, which is what practice has always done and what makes the
+            two screens read as one. */}
       </div>
 
       {/* Presentation tool bar — visible only while presenting */}
@@ -506,6 +479,63 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
           They keep the board's own inset so they line up with the frost
           slider in the corner below. ─────────────────────────────────────── */}
       <BoardShell
+        /* The companion picker — the practice screen's row, to the pixel. Two
+           entries today; theory will gain canvas and arsenal and the control
+           does not have to change when it does. */
+        dockRightSlot={!isMobile ? (
+          <div style={{
+            display: 'flex', gap: 2, padding: 3, borderRadius: 999,
+            background: 'rgba(255,255,255,0.72)',
+            border: '1px solid rgba(255,255,255,0.62)',
+            boxShadow: '0 8px 22px rgba(11,27,62,0.2)',
+          }}>
+            {([
+              [false, 'ללא',        'התמקדו רק בשקופית'],
+              [true,  'מפת חשיבה',  'המפה נפתחת מתחת ללוח'],
+            ] as const).map(([open, label, hint]) => {
+              const active = mindmapOpen === open
+              return (
+                <button
+                  key={label}
+                  onClick={() => setMindmapOpen(open)}
+                  title={hint}
+                  aria-pressed={active}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    background: active ? TEXT_MED : 'transparent',
+                    color: active ? '#fff' : TEXT_MED,
+                    border: 'none', borderRadius: 999, padding: '7px 14px',
+                    fontFamily: "'Assistant', sans-serif", fontSize: 13, fontWeight: 600,
+                    cursor: 'pointer', transition: 'background .15s, color .15s',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        ) : undefined}
+        /* Presentation mode acts on the board, so it lives on the board —
+           beside the frost slider, not in the row of places you can go. */
+        dockTopSlot={!isMobile ? (
+          <button
+            onClick={() => {
+              setPresenting(v => {
+                const next = !v
+                setPresAuto(next) // entering starts the auto demo; exiting stops it
+                if (next) setPresTool('point')
+                return next
+              })
+            }}
+            title={presenting ? 'סיום מצב הצגה' : 'היד מציגה את השקופית על הלוח'}
+            aria-pressed={presenting}
+            className={`ws-cta-outline ws-cta-xs${presenting ? ' is-done' : ''}`}
+          >
+            <Ico d={presenting ? I.close : I.present} size={16} />
+            {presenting ? 'סיום הצגה' : 'מצב הצגה'}
+          </button>
+        ) : undefined}
         topLeftSlot={<>
           <button onClick={() => addSlideTo(true)} title="הוסף את הכותרת והתוכן למפת החשיבה"
                   className={`ws-cta-outline ws-cta-xs${copied === 'title-mm' ? ' is-done' : ''}`}>
