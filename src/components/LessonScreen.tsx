@@ -71,7 +71,11 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   const [presenting, setPresenting] = useState(false)
   const [presAuto, setPresAuto] = useState(false)
   const [presTool, setPresTool] = useState<PresenterTool>('point')
-  const [splitPct, setSplitPct] = useState(45)  // mind map width %
+  /* The BOARD's height as a percentage, not the map's width — the pane moved
+     under the board. Same default and clamp as the practice screen, because
+     they are the same control doing the same job. */
+  const SPLIT_MIN = 25, SPLIT_MAX = 80
+  const [splitPct, setSplitPct] = useState(56)
   const [copied, setCopied] = useState<string | null>(null)
   // Transient toast shown after queuing/adding a node to the mind map. Gives
   // clear feedback even when the split is NOT open (per user 2026-05-30).
@@ -285,19 +289,21 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
   const onMouseDown = (e: React.MouseEvent) => {
     draggingRef.current = true
     e.preventDefault()
-    const updateFromClientX = (clientX: number) => {
+    const updateFromClientY = (clientY: number) => {
       if (!draggingRef.current || !containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
-      // RTL: the mind map is on the LEFT (visually) but in DOM order it's first child;
-      // because the wrapper is dir="ltr" the percentage maps directly to clientX.
-      const pct = ((clientX - rect.left) / rect.width) * 100
-      setSplitPct(Math.max(20, Math.min(70, pct)))
+      if (!rect.height) return
+      // The board is the first child and sits on top, so the pointer's distance
+      // from the container's top IS the board's share. No direction to reason
+      // about — which is the point of leaving the horizontal axis behind.
+      const pct = ((clientY - rect.top) / rect.height) * 100
+      setSplitPct(Math.max(SPLIT_MIN, Math.min(SPLIT_MAX, pct)))
     }
-    const onMove = (ev: MouseEvent) => updateFromClientX(ev.clientX)
+    const onMove = (ev: MouseEvent) => updateFromClientY(ev.clientY)
     const onTouchMove = (ev: TouchEvent) => {
       if (ev.touches.length < 1) return
       ev.preventDefault()
-      updateFromClientX(ev.touches[0].clientX)
+      updateFromClientY(ev.touches[0].clientY)
     }
     const onUp = () => {
       draggingRef.current = false
@@ -871,14 +877,44 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
     return rightPane
   }
 
-  // ── Split layout (mind map on the left in LTR DOM, RTL still works) ─────────
+  // ── Split layout: the board on top, the map under it ───────────────────────
+  // dir stays rtl now. The wrapper used to be forced to ltr so a left-to-right
+  // percentage would map straight onto clientX; on a vertical axis there is no
+  // such thing to work around.
   return (
-    <div ref={containerRef} data-tour="theory-screen" dir="ltr" style={{
-      flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0,
+    <div ref={containerRef} data-tour="theory-screen" dir="rtl" style={{
+      flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0,
       background: 'transparent',
     }}>
-      {/* Mind map iframe — left side (LTR-first child) */}
-      <div className="ws-lesson-mindmap-pane" style={{ width: `${splitPct}%`, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+      {/* Lesson content — the board, on top */}
+      <div style={{ height: `${splitPct}%`, display: 'flex', flexDirection: 'column', minHeight: 0, flexShrink: 0 }}>
+        {rightPane}
+      </div>
+
+      {/* The divider — same control as the practice screen's, to the pixel */}
+      <div
+        onMouseDown={onMouseDown}
+        onTouchStart={onTouchStart}
+        onDoubleClick={() => setSplitPct(56)}
+        role="separator"
+        aria-orientation="horizontal"
+        aria-valuenow={Math.round(splitPct)}
+        aria-valuemin={SPLIT_MIN}
+        aria-valuemax={SPLIT_MAX}
+        aria-label="גובה הלוח — גרור לשינוי, לחיצה כפולה לאיפוס"
+        title="גרור לשינוי גובה הלוח · לחיצה כפולה מאפסת"
+        style={{
+          flexShrink: 0, height: 14, cursor: 'row-resize',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          touchAction: 'none', background: 'transparent',
+        }}
+      >
+        <span style={{ width: 56, height: 4, borderRadius: 99, background: 'rgba(31,62,108,0.30)' }} aria-hidden="true" />
+      </div>
+
+      {/* Mind map iframe — under the board, full width. A fan needs width more
+          than anything else, and beside the board it only ever had half. */}
+      <div className="ws-lesson-mindmap-pane" style={{ flex: 1, minHeight: 0, position: 'relative', overflow: 'hidden' }}>
         <iframe
           ref={mindmapRef}
           src={`${import.meta.env.BASE_URL}mindmap.html?v=mm19-20260708&mode=mm&userId=${encodeURIComponent(userId)}&topic=${encodeURIComponent(topicId)}`}
@@ -889,32 +925,6 @@ export default function LessonScreen({ topicId, onStartQuiz, onBack, onComplete,
             because in RTL its top:right:12 anchor flipped to the LEFT visual
             edge and obscured the iframe's topbar buttons. Mind map is its
             own iframe, the user knows what they're looking at. */}
-      </div>
-
-      {/* Resize handle — mouse + touch */}
-      <div
-        onMouseDown={onMouseDown}
-        onTouchStart={onTouchStart}
-        role="separator"
-        aria-orientation="vertical"
-        aria-label="גרור לשינוי רוחב פאנל המפה"
-        title="גרור לשינוי הרוחב"
-        style={{
-          width: 5, flexShrink: 0,
-          background: 'rgba(99,102,241,0.18)',
-          cursor: 'col-resize',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'background 0.15s',
-        }}
-        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(99,102,241,0.5)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(99,102,241,0.18)' }}
-      >
-        <div style={{ width: 2, height: 36, borderRadius: 2, background: 'rgba(165,180,252,0.7)' }} />
-      </div>
-
-      {/* Lesson content — right side */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        {rightPane}
       </div>
 
       {/* ── Chooser modal: when adding to mindmap, ask whether to connect or
